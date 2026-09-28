@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>산업안전보건위원회 문서 작성기 | 안전duck</title>
+    <meta name="description" content="산업안전보건위원회 회의록·개최 공고·결과 보고서를 작성해 PDF로 저장하세요. 무료, 회원가입 없음.">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <!-- Tailwind: 빌드 때 미리 만든 CSS (런타임 CDN 사용 안 함) -->
+    <style>/*@TAILWIND@*/</style>
+    <!-- Vue 3 (버전 고정) -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.global.prod.js"></script>
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
+    <style>
+        [v-cloak] { display: none; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        /* Printable A4 dimensions & crisp typography */
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin: 0 auto;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .a4-container {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                min-height: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div id="app" class="min-h-screen flex flex-col" v-cloak>
+        <!-- Top Navigation Bar -->
+        <header class="bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center space-x-3">
+                    <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold mr-1">← 안전duck</a>
+                    <span class="bg-emerald-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-black">
+                        <i class="ph-bold ph-shield-check text-xl"></i>
+                    </span>
+                    <div>
+                        <h1 class="text-base font-bold tracking-tight">산업안전보건위원회 스마트 문서 작성기</h1>
+                        <p class="text-[11px] text-slate-400">산업안전보건법 제24조 준수 · 회의록 / 개최공고 / 결과보고서 자동화</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button @click="resetToDefault" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                        <i class="ph-bold ph-arrow-counter-clockwise"></i> 기본값 복원
+                    </button>
+                    <button @click="downloadPDF" :disabled="isGeneratingPDF" class="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
+                        <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
+                        <span>{{ isGeneratingPDF ? 'PDF 생성 중...' : 'PDF 문서 다운로드' }}</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Input Form Area (lg:col-span-5) -->
+            <div class="lg:col-span-5 space-y-5 no-print">
+                <!-- 1. 문서 종류 선택 -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <label class="block text-xs font-bold text-slate-600 mb-2">문서 종류 선택</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button 
+                            v-for="item in docTypes" 
+                            :key="item.value"
+                            type="button"
+                            @click="changeDocType(item.value)"
+                            :class="[
+                                'py-2 px-2.5 rounded-lg border text-xs font-bold flex flex-col items-center justify-center gap-1 transition',
+                                formData.docType === item.value 
+                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm' 
+                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                            ]"
+                        >
+                            <i :class="[item.icon, 'text-base']"></i>
+                            <span>{{ item.label }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. 기본 정보 입력 -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+                        <i class="ph-fill ph-info text-blue-500"></i> 1. 기본 회의 정보
+                    </h3>
+
+                    <div class="grid grid-cols-4 gap-2">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">연도</label>
+                            <input v-model.number="formData.year" type="number" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">분기</label>
+                            <select v-model="formData.quarter" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <option value="1">1분기</option>
+                                <option value="2">2분기</option>
+                                <option value="3">3분기</option>
+                                <option value="4">4분기</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">구분</label>
+                            <select v-model="formData.type" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <option value="정기">정기회의</option>
+                                <option value="임시">임시회의</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">회차</label>
+                            <input v-model.number="formData.round" type="number" min="1" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">사업장(회사)명</label>
+                        <input v-model="formData.company" type="text" placeholder="예: (주)한국산업안전" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">회의 일시</label>
+                            <input v-model="formData.datetime" type="datetime-local" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">회의 장소</label>
+                            <input v-model="formData.location" type="text" placeholder="예: 본관 2층 대회의실" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+
+                    <!-- 문서 형태별 맞춤 하단 명의 설정 -->
+                    <div v-if="formData.docType === 'notice'" class="pt-2 border-t border-slate-100">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">공고문 하단 발신 명의</label>
+                        <input v-model="formData.noticeFooter" type="text" placeholder="예: 산업안전보건위원회 위원장" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white outline-none">
+                    </div>
+
+                    <div v-if="formData.docType === 'report'" class="pt-2 border-t border-slate-100">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">결과보고서 하단 결재 명의</label>
+                        <input v-model="formData.reportFooter" type="text" placeholder="예: 안전보건관리책임자" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white outline-none">
+                    </div>
+                </div>
+
+                <!-- 3. 위원 명단 관리 (회의록에서는 서명 대상, 공고/보고에서는 참석자 수 집계용) -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="ph-fill ph-users-three text-emerald-600"></i> 2. 참석 위원 구성
+                        </h3>
+                        <span class="text-[11px] text-slate-400">총 {{ totalRepsCount }}명</span>
+                    </div>
+
+                    <!-- 사용자위원 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-blue-700">사용자위원 (사측)</span>
+                            <button type="button" @click="addRep('employer')" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
+                                <i class="ph-bold ph-plus-circle"></i> 추가
+                            </button>
+                        </div>
+                        <div v-for="(rep, idx) in employerReps" :key="'emp-' + idx" class="flex gap-2 items-center">
+                            <input v-model="rep.title" type="text" placeholder="직책 (예: 책임자)" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <input v-model="rep.name" type="text" placeholder="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <button v-if="employerReps.length > 1" type="button" @click="removeRep('employer', idx)" class="text-slate-400 hover:text-rose-500 p-1">
+                                <i class="ph-bold ph-x"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 근로자위원 -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-emerald-700">근로자위원 (노측)</span>
+                            <button type="button" @click="addRep('employee')" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold flex items-center gap-1">
+                                <i class="ph-bold ph-plus-circle"></i> 추가
+                            </button>
+                        </div>
+                        <div v-for="(rep, idx) in employeeReps" :key="'worker-' + idx" class="flex gap-2 items-center">
+                            <input v-model="rep.title" type="text" placeholder="직책 (예: 근로자대표)" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <input v-model="rep.name" type="text" placeholder="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <button v-if="employeeReps.length > 1" type="button" @click="removeRep('employee', idx)" class="text-slate-400 hover:text-rose-500 p-1">
+                                <i class="ph-bold ph-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. 회의 내용 및 AI 지원 도구 -->
+                <div class="bg-purple-50/60 p-4 rounded-xl border border-purple-200/80 space-y-4">
+                    <div class="flex justify-between items-center border-b border-purple-200 pb-2">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="ph-fill ph-sparkle text-purple-600"></i> {{ formData.docType === 'notice' ? '3. 공고 내용 및 안내사항' : '3. 회의 안건 및 의결사항' }}
+                        </h3>
+                        <button v-if="formData.docType !== 'notice'" type="button" @click="openAiModal" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                            <i class="ph-fill ph-magic-wand"></i> 예시 세트 불러오기
+                        </button>
+                    </div>
+
+                    <!-- 회의 안건 (공통 법정 8대 안건 기본) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-bold text-slate-700">주요 심의 및 의결 안건</label>
+                            <span class="text-[11px] text-purple-700 font-medium">법 제24조 제2항 심의·의결 사항</span>
+                        </div>
+                        <textarea v-model="formData.agenda" rows="8" placeholder="회의 안건을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed font-mono"></textarea>
+                    </div>
+
+                    <!-- [분기 1] 개최공고인 경우: 안내 및 협조사항 전용 에디터 -->
+                    <div v-if="formData.docType === 'notice'">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-bold text-slate-700">회의 진행 안내 및 협조사항</label>
+                            <button type="button" @click="resetNoticeInstructions" class="text-xs text-blue-700 hover:text-blue-900 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded font-medium transition flex items-center gap-1">
+                                <i class="ph-bold ph-arrow-counter-clockwise"></i> 표준 협조사항 채우기
+                            </button>
+                        </div>
+                        <textarea v-model="formData.noticeInstructions" rows="6" placeholder="참석 당부 및 협조사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed"></textarea>
+                    </div>
+
+                    <!-- [분기 2] 회의록 / 결과보고서인 경우: 의결사항 에디터 및 AI 의결 상세추천 -->
+                    <div v-else>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-bold text-slate-700">심의 및 의결사항</label>
+                            <button type="button" @click="openResolutionsModal" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1 px-2.5 rounded-md shadow-sm flex items-center gap-1 transition">
+                                <i class="ph-fill ph-lightbulb"></i> 의결사항 예시 보기
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-rose-600 mb-1">실제로 심의·의결한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
+                        <textarea v-model="formData.resolutions" rows="9" placeholder="의결 사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed font-mono"></textarea>
+                    </div>
+
+                    <!-- 기타 토의 및 향후 계획 -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">{{ formData.docType === 'report' ? '향후 추진 계획 및 건의사항' : '기타 사항' }}</label>
+                        <textarea v-model="formData.others" rows="3" placeholder="기타 토의 내용이나 안내사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed"></textarea>
+                    </div>
+                </div>
+
+                <!-- 5. 회의 현장 사진 첨부 (공고문 제외, 회의록 및 결과보고서에 적용) -->
+                <div v-if="formData.docType !== 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
+                        <i class="ph-fill ph-camera text-slate-600"></i> 4. 회의 현장 사진 첨부
+                    </h3>
+                    <div class="flex items-center gap-3">
+                        <input type="file" accept="image/*" @change="handleFileUpload" id="photo-input" class="hidden">
+                        <label for="photo-input" class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 px-3 rounded-lg border border-slate-300 transition flex items-center gap-1.5">
+                            <i class="ph-bold ph-upload-simple"></i> 사진 파일 선택
+                        </label>
+                        <span class="text-xs text-slate-500 truncate max-w-[180px]">
+                            {{ photoDataUrl ? '현장 사진 1장 첨부됨' : '선택된 사진 없음' }}
+                        </span>
+                        <button v-if="photoDataUrl" type="button" @click="removePhoto" class="text-xs text-rose-500 hover:underline font-bold ml-auto">
+                            삭제
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Document Preview Area (lg:col-span-7) -->
+            <div class="lg:col-span-7 flex flex-col items-center">
+                <div class="w-full flex justify-between items-center mb-3 no-print">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-xs font-bold text-slate-600">A4 실시간 미리보기</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400">PDF 출력 규격 최적화 (210mm × 297mm)</span>
+                </div>
+
+                <!-- Printable A4 Document Container -->
+                <div id="print-area" class="a4-container p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm">
+                    
+                    <!-- [DOC 1] 회의록 양식 (법정 서명란 포함) -->
+                    <div v-if="formData.docType === 'minutes'">
+                        <div class="text-center mb-6">
+                            <h2 class="text-2xl font-black tracking-wide border-b-2 border-slate-900 pb-3">
+                                {{ formData.year }}년 {{ formData.quarter }}분기 산업안전보건위원회 회의록
+                            </h2>
+                        </div>
+
+                        <!-- 기본 정보 표 -->
+                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">회 의 명</th>
+                                <td class="border border-slate-800 p-2 font-medium" colspan="3">
+                                    {{ formData.company || '(사업장명)' }} {{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 ({{ formData.type }}회의)
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">일 시</th>
+                                <td class="border border-slate-800 p-2 w-1/2">{{ formattedDatetime }}</td>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">장 소</th>
+                                <td class="border border-slate-800 p-2">{{ formData.location || '사내 회의실' }}</td>
+                            </tr>
+                        </table>
+
+                        <!-- 참석 위원 서명 날인란 (법정 필수) -->
+                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
+                            <thead>
+                                <tr class="bg-slate-100 text-center font-bold">
+                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">사용자위원 ({{ employerReps.length }}명)</th>
+                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">근로자위원 ({{ employeeReps.length }}명)</th>
+                                </tr>
+                                <tr class="bg-slate-50 text-center text-[11px] text-slate-600 font-semibold">
+                                    <th class="border border-slate-800 p-1 w-20">직책</th>
+                                    <th class="border border-slate-800 p-1">성명</th>
+                                    <th class="border border-slate-800 p-1 w-14">서명</th>
+                                    <th class="border border-slate-800 p-1 w-20">직책</th>
+                                    <th class="border border-slate-800 p-1">성명</th>
+                                    <th class="border border-slate-800 p-1 w-14">서명</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="idx in maxRepCount" :key="'rep-row-' + idx" class="text-center h-8">
+                                    <!-- 사용자위원 -->
+                                    <td class="border border-slate-800 p-1 text-[11px]">{{ employerReps[idx-1]?.title || '' }}</td>
+                                    <td class="border border-slate-800 p-1">{{ employerReps[idx-1]?.name || '' }}</td>
+                                    <td class="border border-slate-800 p-1 text-[10px] text-slate-300 font-serif">
+                                        {{ employerReps[idx-1] ? '(서명)' : '' }}
+                                    </td>
+                                    <!-- 근로자위원 -->
+                                    <td class="border border-slate-800 p-1 text-[11px]">{{ employeeReps[idx-1]?.title || '' }}</td>
+                                    <td class="border border-slate-800 p-1">{{ employeeReps[idx-1]?.name || '' }}</td>
+                                    <td class="border border-slate-800 p-1 text-[10px] text-slate-300 font-serif">
+                                        {{ employeeReps[idx-1] ? '(서명)' : '' }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- 회의 안건 및 의결사항 표 -->
+                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">회의 안건<br><span class="text-[10px] font-normal text-slate-500">(필수 심의사항)</span></th>
+                                <td class="border border-slate-800 p-2.5 align-top">
+                                    <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.agenda }}</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">심의 및<br>의결 사항</th>
+                                <td class="border border-slate-800 p-2.5 align-top">
+                                    <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.resolutions }}</div>
+                                </td>
+                            </tr>
+                            <tr v-if="formData.others">
+                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">기타 사항</th>
+                                <td class="border border-slate-800 p-2.5 align-top">
+                                    <div class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ formData.others }}</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- 첨부 사진 출력 -->
+                        <div v-if="photoDataUrl" class="border border-slate-800 p-3 mb-2 text-center bg-slate-50/50">
+                            <p class="text-[11px] font-bold text-slate-700 mb-2">[ 회의 진행 현장 사진 ]</p>
+                            <img :src="photoDataUrl" alt="회의 현장 사진" class="max-h-56 mx-auto rounded border border-slate-300 shadow-sm object-contain">
+                        </div>
+                    </div>
+
+                    <!-- [DOC 2] 개최 공고 양식 (서명란 없음, 사내 공문 서식) -->
+                    <div v-else-if="formData.docType === 'notice'" class="py-4 px-2">
+                        <div class="text-center mb-8 pb-4 border-b-2 border-slate-900">
+                            <p class="text-xs font-semibold text-slate-500 mb-1">{{ formData.company }} 공고 제 {{ formData.year }}-{{ formData.quarter }}호</p>
+                            <h2 class="text-2xl font-black tracking-wider text-slate-900">
+                                {{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 {{ formData.type }}회의 개최 공고
+                            </h2>
+                        </div>
+
+                        <div class="text-sm leading-relaxed space-y-6">
+                            <p class="text-slate-800 leading-loose">
+                                산업안전보건법 제24조 및 당사 안전보건관리규정에 따라 사업장 내 산업재해 예방 및 쾌적한 작업환경 조성을 위하여 
+                                <strong>{{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 {{ formData.type }}회의</strong>를 
+                                아래와 같이 소집하여 개최하오니, 각 위원께서는 한 분도 빠짐없이 참석하여 주시기 바랍니다.
+                            </p>
+
+                            <div class="bg-slate-50 p-5 rounded-lg border border-slate-300 space-y-3 text-xs">
+                                <p class="font-bold text-center text-sm tracking-widest text-slate-900 mb-3">- 아 래 -</p>
+                                
+                                <div class="grid grid-cols-12 gap-2">
+                                    <div class="col-span-3 font-bold text-slate-700">1. 일 시 :</div>
+                                    <div class="col-span-9 font-medium">{{ formattedDatetime }}</div>
+                                </div>
+
+                                <div class="grid grid-cols-12 gap-2">
+                                    <div class="col-span-3 font-bold text-slate-700">2. 장 소 :</div>
+                                    <div class="col-span-9 font-medium">{{ formData.location || '사내 회의실' }}</div>
+                                </div>
+
+                                <div class="grid grid-cols-12 gap-2">
+                                    <div class="col-span-3 font-bold text-slate-700">3. 참석 대상 :</div>
+                                    <div class="col-span-9">
+                                        <p class="font-medium">총 {{ totalRepsCount }}명 (사용자위원 {{ employerReps.length }}명, 근로자위원 {{ employeeReps.length }}명)</p>
+                                        <div class="text-[11px] text-slate-600 mt-1 pl-2 border-l-2 border-slate-300 space-y-0.5">
+                                            <p>• 사용자위원: {{ formattedEmployerReps }}</p>
+                                            <p>• 근로자위원: {{ formattedEmployeeReps }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-12 gap-2">
+                                    <div class="col-span-3 font-bold text-slate-700">4. 주요 심의 안건 :</div>
+                                    <div class="col-span-9">
+                                        <div class="whitespace-pre-wrap p-2.5 bg-white border border-slate-200 rounded leading-relaxed font-mono text-[11px]">{{ formData.agenda }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-12 gap-2">
+                                    <div class="col-span-3 font-bold text-slate-700">5. 안내 및 협조사항 :</div>
+                                    <div class="col-span-9">
+                                        <div class="whitespace-pre-wrap leading-relaxed text-[11px] text-slate-700">{{ formData.noticeInstructions }}</div>
+                                        <div v-if="formData.others" class="whitespace-pre-wrap mt-2 pt-2 border-t border-slate-200 leading-relaxed text-[11px] text-slate-600">
+                                            {{ formData.others }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 하단 발신 명의 -->
+                        <div class="mt-14 text-center space-y-3">
+                            <p class="text-sm font-medium text-slate-600">{{ formatJustDate }}</p>
+                            <p class="text-lg font-black tracking-wide text-slate-900">
+                                {{ formData.company || '(사업장명)' }} {{ formData.noticeFooter || '산업안전보건위원회 위원장' }} <span class="text-xs font-normal text-slate-500">(직인생략)</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- [DOC 3] 결과 보고서 양식 (서명란 없음, 결재/보고 문서) -->
+                    <div v-else-if="formData.docType === 'report'">
+                        <div class="text-center mb-6 pb-3 border-b-2 border-slate-900">
+                            <h2 class="text-2xl font-black tracking-wide">
+                                {{ formData.year }}년 {{ formData.quarter }}분기 산업안전보건위원회 회의 결과 보고
+                            </h2>
+                        </div>
+
+                        <!-- 1. 회의 개요 표 -->
+                        <div class="mb-5">
+                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 1. 회의 개요
+                            </h4>
+                            <table class="w-full border-collapse border border-slate-800 text-xs">
+                                <tr>
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">회 의 명</th>
+                                    <td class="border border-slate-800 p-2" colspan="3">
+                                        {{ formData.company || '(사업장명)' }} {{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 ({{ formData.type }}회의)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">일시 및 장소</th>
+                                    <td class="border border-slate-800 p-2" colspan="3">
+                                        {{ formattedDatetime }} / {{ formData.location || '사내 회의실' }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">참석 인원</th>
+                                    <td class="border border-slate-800 p-2" colspan="3">
+                                        총 {{ totalRepsCount }}명 (사용자위원 {{ employerReps.length }}명, 근로자위원 {{ employeeReps.length }}명)
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 2. 심의 및 의결 결과 표 -->
+                        <div class="mb-5">
+                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 2. 주요 심의 및 의결 사항
+                            </h4>
+                            <table class="w-full border-collapse border border-slate-800 text-xs">
+                                <tr>
+                                    <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">회의 안건</th>
+                                    <td class="border border-slate-800 p-2.5 align-top">
+                                        <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.agenda }}</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">의결 결과</th>
+                                    <td class="border border-slate-800 p-2.5 align-top">
+                                        <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.resolutions }}</div>
+                                    </td>
+                                </tr>
+                                <tr v-if="formData.others">
+                                    <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">향후 계획</th>
+                                    <td class="border border-slate-800 p-2.5 align-top">
+                                        <div class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ formData.others }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 3. 현장 사진 첨부 -->
+                        <div v-if="photoDataUrl" class="mb-6">
+                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 3. 회의 현장 사진
+                            </h4>
+                            <div class="border border-slate-800 p-3 text-center bg-slate-50/50">
+                                <img :src="photoDataUrl" alt="회의 현장 사진" class="max-h-56 mx-auto rounded border border-slate-300 shadow-sm object-contain">
+                            </div>
+                        </div>
+
+                        <!-- 하단 결재 명의 -->
+                        <div class="mt-12 text-center space-y-3">
+                            <p class="text-sm font-medium text-slate-600">위와 같이 산업안전보건위원회 회의 결과를 보고합니다.</p>
+                            <p class="text-xs text-slate-500">{{ formatJustDate }}</p>
+                            <p class="text-base font-black tracking-wide text-slate-900">
+                                {{ formData.company || '(사업장명)' }} {{ formData.reportFooter || '안전보건관리책임자' }} <span class="text-xs font-normal text-slate-500">(직인생략)</span>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <!-- AI 종합세트 모달 (안건 + 의결사항 패키지 추천 & 새로고침) -->
+        <div v-if="isAiModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print">
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 border border-slate-200">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="bg-purple-100 text-purple-700 p-1.5 rounded-lg">
+                            <i class="ph-bold ph-magic-wand text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900">안건·의결 예시 세트</h3>
+                            <p class="text-xs text-slate-500">예시 문안입니다. 적용한 뒤 실제 회의 내용으로 반드시 고쳐 쓰세요.</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="isAiModalOpen = false" class="text-slate-400 hover:text-slate-700 p-1">
+                        <i class="ph-bold ph-x text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <div 
+                        v-for="(opt, idx) in currentAiOptions" 
+                        :key="'ai-opt-' + idx"
+                        @click="selectAiOption(opt)"
+                        class="p-4 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/40 cursor-pointer transition space-y-2 group"
+                    >
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
+                            <span class="text-xs text-slate-400 group-hover:text-purple-600 font-bold flex items-center gap-1">
+                                적용하기 <i class="ph-bold ph-arrow-right"></i>
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800">{{ opt.title }}</h4>
+                        <p class="text-xs text-slate-500 line-clamp-2">{{ opt.description }}</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-5 pt-3 border-t border-slate-100">
+                    <button type="button" @click="refreshAiOptions" class="text-xs text-slate-600 hover:text-purple-700 font-bold flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-100 transition">
+                        <i class="ph-bold ph-arrows-clockwise text-sm"></i> 다른 예시 보기 (새로고침)
+                    </button>
+                    <button type="button" @click="isAiModalOpen = false" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold">
+                        닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI 의결사항 전용 모달 (상세 의결 내용 라이브러리 & 새로고침) -->
+        <div v-if="isResolutionsModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print">
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 border border-slate-200">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">
+                            <i class="ph-bold ph-lightbulb text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900">의결사항 예시</h3>
+                            <p class="text-xs text-slate-500">예시 문안입니다. 실제로 의결한 내용만 남기고 고쳐 쓰세요.</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="isResolutionsModalOpen = false" class="text-slate-400 hover:text-slate-700 p-1">
+                        <i class="ph-bold ph-x text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <div 
+                        v-for="(opt, idx) in currentResolutionsOptions" 
+                        :key="'res-opt-' + idx"
+                        @click="selectResolutionOption(opt)"
+                        class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/40 cursor-pointer transition space-y-2 group"
+                    >
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
+                            <span class="text-xs text-slate-400 group-hover:text-indigo-600 font-bold flex items-center gap-1">
+                                본문 적용 <i class="ph-bold ph-check"></i>
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800">{{ opt.title }}</h4>
+                        <div class="text-[11px] font-mono text-slate-600 bg-white p-2.5 rounded border border-slate-200 max-h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                            {{ opt.resolutions }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-5 pt-3 border-t border-slate-100">
+                    <button type="button" @click="refreshResolutionsOptions" class="text-xs text-slate-600 hover:text-indigo-700 font-bold flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-100 transition">
+                        <i class="ph-bold ph-arrows-clockwise text-sm"></i> 다른 실무 예시 보기 (새로고침)
+                    </button>
+                    <button type="button" @click="isResolutionsModalOpen = false" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold">
+                        닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification Box -->
+        <div v-if="toast.visible" class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-300" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'">
+            <i class="ph-fill ph-check-circle text-base"></i>
+            <span>{{ toast.message }}</span>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+        // 브라우저 현지 시각 기준 'YYYY-MM-DDTHH:mm' (toISOString은 UTC라 한국에서 9시간 어긋남)
+        function localNow() {
+            const d = new Date();
+            const p = (x) => String(x).padStart(2, '0');
+            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+
+        createApp({
+            setup() {
+                // Document type selections
+                const docTypes = [
+                    { label: '회의록 (서명 必)', value: 'minutes', icon: 'ph-bold ph-users' },
+                    { label: '개최 공고', value: 'notice', icon: 'ph-bold ph-megaphone' },
+                    { label: '결과 보고서', value: 'report', icon: 'ph-bold ph-file-text' }
+                ];
+
+                // Statutory 8 core agenda items
+                const baseAgendaText = `1) 산업재해 예방계획의 수립
+2) 안전보건관리규정의 작성 및 변경
+3) 안전보건교육
+4) 작업환경측정 등 작업환경의 점검 및 개선
+5) 근로자의 건강진단 등 건강관리
+6) 산업재해에 관한 통계의 기록 및 유지
+7) 중대재해의 원인 조사 및 재발 방지대책 수립
+8) 유해하거나 위험한 기계·기구·설비를 도입한 경우 안전·보건조치
+9) 그 밖에 근로자의 안전 및 보건을 유지·증진시키기 위하여 필요한 사항`;
+
+                // Standard initial resolutions matching the 8 items
+                const initialResolutions = `1) 예방계획:
+2) 관리규정:
+3) 안전교육:
+4) 작업환경:
+5) 건강관리:
+6) 재해통계:
+7) 중대재해:
+8) 설비조치:
+9) 기타: `;
+
+                // 표준 예시 (예전 기본값 — 예시 창에서만 사용)
+                const standardExample = `1) 예방계획: 분기별 안전보건 목표 및 실행과제 전원 만장일치 원안 승인함.
+2) 관리규정: 현행 사내 안전보건관리규정의 적합성을 검토하고 현행 유지하기로 의결함.
+3) 안전교육: 정기안전보건교육 이수율 100% 달성을 위해 온라인 및 현장 집체교육 병행 실시.
+4) 작업환경: 작업환경측정 결과 유해인자 노출기준 미만 확인 및 국소배기장치 정기점검 유지.
+5) 건강관리: 일반/특수건강진단 유소견자 사후관리 프로그램 지속 운영 및 보호구 추가 지급.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 최근 3개월 무재해 유지 확인, 경미한 아차사고 발굴 건에 대한 작업발판 개선 완료.
+8) 설비조치: 유해위험설비 신규 도입 계획 없음 확인 (차기 도입 시 사전 위험성평가 시행).
+9) 건강증진: 전 근로자 대상 스트레칭 및 쾌적한 휴게시설 위생관리를 지속하기로 가결함.`;
+
+                // Standard notice instructions
+                const defaultNoticeInstructions = `1. 각 위원님께서는 지각이나 결석 없이 정시에 참석하여 주시기 바랍니다.
+2. 부득이한 사정으로 참석이 어려운 위원께서는 사전에 간사(안전관리자)에게 통보하여 주시기 바랍니다.
+3. 회의 안건과 관련된 자료는 사전에 검토하여 주시기 바라며, 추가 안건이 있는 경우 회의 개최 3일 전까지 제출해 주시기 바랍니다.
+4. 본 회의는 산업안전보건법 제24조에 따른 법정 의무 회의이므로 전원 참석을 원칙으로 합니다.`;
+
+                // Main Reactive Form State
+                const formData = ref({
+                    docType: 'minutes',
+                    year: new Date().getFullYear(),
+                    quarter: String(Math.floor((new Date().getMonth() + 3) / 3)),
+                    type: '정기',
+                    round: Math.floor((new Date().getMonth() + 3) / 3),
+                    company: '',
+                    datetime: localNow(),
+                    location: '',
+                    noticeFooter: '산업안전보건위원회 위원장',
+                    reportFooter: '안전보건관리책임자',
+                    agenda: baseAgendaText,
+                    resolutions: initialResolutions,
+                    noticeInstructions: defaultNoticeInstructions,
+                    others: ''
+                });
+
+                // Representative Lists
+                const employerReps = ref([
+                    { title: '안전보건관리책임자', name: '' },
+                    { title: '안전관리자', name: '' },
+                    { title: '보건관리자', name: '' }
+                ]);
+
+                const employeeReps = ref([
+                    { title: '근로자대표', name: '' },
+                    { title: '근로자위원', name: '' },
+                    { title: '근로자위원', name: '' }
+                ]);
+
+                const photoDataUrl = ref(null);
+                const isGeneratingPDF = ref(false);
+
+                // Toast system
+                const toast = ref({ visible: false, message: '', type: 'success' });
+                const showToast = (message, type = 'success') => {
+                    toast.value = { visible: true, message, type };
+                    setTimeout(() => {
+                        toast.value.visible = false;
+                    }, 2600);
+                };
+
+                // Clean computed properties to eliminate parser bugs with parentheses in template literals
+                const formattedEmployerReps = computed(() => {
+                    return employerReps.value
+                        .map(r => r.name ? `${r.title}(${r.name})` : r.title)
+                        .filter(Boolean)
+                        .join(', ');
+                });
+
+                const formattedEmployeeReps = computed(() => {
+                    return employeeReps.value
+                        .map(r => r.name ? `${r.title}(${r.name})` : r.title)
+                        .filter(Boolean)
+                        .join(', ');
+                });
+
+                const totalRepsCount = computed(() => {
+                    return employerReps.value.length + employeeReps.value.length;
+                });
+
+                const maxRepCount = computed(() => {
+                    return Math.max(employerReps.value.length, employeeReps.value.length, 3);
+                });
+
+                const formattedDatetime = computed(() => {
+                    if (!formData.value.datetime) return '미정';
+                    const dt = new Date(formData.value.datetime);
+                    if (isNaN(dt.getTime())) return formData.value.datetime;
+                    const y = dt.getFullYear();
+                    const m = String(dt.getMonth() + 1).padStart(2, '0');
+                    const d = String(dt.getDate()).padStart(2, '0');
+                    const hh = String(dt.getHours()).padStart(2, '0');
+                    const mm = String(dt.getMinutes()).padStart(2, '0');
+                    return `${y}년 ${m}월 ${d}일 ${hh}시 ${mm}분`;
+                });
+
+                const formatJustDate = computed(() => {
+                    if (!formData.value.datetime) return '202X년 X월 X일';
+                    const dt = new Date(formData.value.datetime);
+                    if (isNaN(dt.getTime())) return '202X년 X월 X일';
+                    return `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
+                });
+
+                // Representative list helpers
+                const addRep = (type) => {
+                    if (type === 'employer') {
+                        employerReps.value.push({ title: '사용자위원', name: '' });
+                    } else {
+                        employeeReps.value.push({ title: '근로자위원', name: '' });
+                    }
+                };
+
+                const removeRep = (type, index) => {
+                    if (type === 'employer') {
+                        employerReps.value.splice(index, 1);
+                    } else {
+                        employeeReps.value.splice(index, 1);
+                    }
+                };
+
+                const changeDocType = (type) => {
+                    formData.value.docType = type;
+                    const label = docTypes.find(d => d.value === type)?.label;
+                    showToast(`${label} 양식으로 전환되었습니다.`);
+                };
+
+                // Photo handling
+                const handleFileUpload = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                        showToast('파일 크기는 5MB 이하여야 합니다.', 'error');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        photoDataUrl.value = event.target.result;
+                        showToast('회의 현장 사진이 첨부되었습니다.');
+                    };
+                    reader.readAsDataURL(file);
+                };
+
+                const removePhoto = () => {
+                    photoDataUrl.value = null;
+                    const el = document.getElementById('photo-input');
+                    if (el) el.value = '';
+                    showToast('첨부 사진이 제거되었습니다.');
+                };
+
+                // Reset helpers
+                const resetToDefault = () => {
+                    formData.value.agenda = baseAgendaText;
+                    formData.value.resolutions = initialResolutions;
+                    formData.value.noticeInstructions = defaultNoticeInstructions;
+                    formData.value.others = '';
+                    showToast('기본 데이터로 초기화되었습니다.');
+                };
+
+                const resetNoticeInstructions = () => {
+                    formData.value.noticeInstructions = defaultNoticeInstructions;
+                    showToast('표준 안내 및 협조사항이 입력되었습니다.');
+                };
+
+                // 1) Comprehensive AI Package Pool
+                const aiOptionsPool = [
+                    {
+                        badge: '기본 준수형',
+                        title: '표준 법정 의무 준수 및 정기점검 세트',
+                        description: '법 제24조 제2항 심의·의결 사항 9개를 모두 다루는 표준 예시입니다.',
+                        agenda: baseAgendaText,
+                        resolutions: standardExample,
+                        others: '차기 회의는 분기 말 점검 결과 집계 후 소집하기로 함.'
+                    },
+                    {
+                        badge: '위험성평가 특화',
+                        title: '상시 위험성평가 및 아차사고 발굴 중심 세트',
+                        description: '중대재해 감축 로드맵에 맞춘 자기규율 예방체계 구축 및 현장 위험요인 발굴 중심 세트입니다.',
+                        agenda: baseAgendaText,
+                        resolutions: `1) 예방계획: 반기별 정기 위험성평가 및 근로자 참여 상시 위험성평가 추진계획 승인.
+2) 관리규정: 아차사고 신고 포상제 도입에 따른 사내 안전규정 개정안 심의 의결.
+3) 안전교육: 작업 전 10분 TBM(Toolbox Meeting) 실효성 강화 교육 전 부서 시행.
+4) 작업환경: 분진 및 소음 발생 공정 특별점검 및 국소배기장치 후드 유속 점검.
+5) 건강진단: 특수건강진단 대상자 100% 수검 및 청력보존 프로그램 수립.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 동종업종 중대재해 사례 공유 및 당사 유사공정 수평전개 개선 조치.
+8) 설비조치: 생산라인 자동화 신규 장비 반입 전 안전인증 적합성 사전 심의.
+9) 건강증진: 교대근무자 뇌심혈관질환 예방을 위한 심리상담 및 휴게환경 개선.`,
+                        others: '근로자 상시 위험제안 창구를 사내 인트라넷에 개설하기로 함.'
+                    },
+                    {
+                        badge: '하절기 계절대응',
+                        title: '하절기 폭염·호우·온열질환 집중 예방 세트',
+                        description: '하절기 옥외작업 폭염 대응 3대 수칙 준수 및 풍수해 대비 점검 중심 세트입니다.',
+                        agenda: baseAgendaText,
+                        resolutions: `1) 예방계획: 하절기 폭염 대비 온열질환 예방 특별계획(물·그늘·휴식) 확정.
+2) 관리규정: 체감온도 35도 이상 시 옥외작업 중지 기준을 안전보건규정에 명문화.
+3) 안전교육: 열사병·열탈진 응급처치 요령 및 심폐소생술(CPR) 전사원 실습 교육.
+4) 작업환경: 고열 발생 보일러실 및 조리실 환기 상태 집중 점검 및 제빙기 확충.
+5) 건강진단: 고혈압·당뇨 등 온열질환 고위험군 근로자 1:1 보건상담 매주 시행.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 침수 우려 지하 피트 및 배전반 침수방지 차수판 설치 상태 점검 완료.
+8) 설비조치: 이동식 에어컨 및 이동형 차양막 현장 추가 배치 승인.
+9) 건강증진: 현장 식염포도당 비치 및 쿨토시·아이스조끼 등 개인 보랭장구 지급.`,
+                        others: '폭염경보 발령 시 오후 2시~5시 단축근무 지침을 준수하기로 함.'
+                    },
+                    {
+                        badge: '동절기 한파예방',
+                        title: '동절기 한파·빙판길 전도·화재 예방 세트',
+                        description: '동절기 한랭질환 예방, 결빙 미끄러짐 방지 및 난방기구 화재 안전대책 중심 세트입니다.',
+                        agenda: baseAgendaText,
+                        resolutions: `1) 예방계획: 동절기 화재·폭발 및 한랭질환 예방 종합대책 심의 승인.
+2) 관리규정: 동절기 옥외작업 안전수칙 및 난방기구 취급 기준 정립.
+3) 안전교육: 밀폐공간 갈탄/방동제 중독 예방 및 소화기 사용법 훈련 실시.
+4) 작업환경: 옥외 하역장 및 통로 결빙구간 친환경 제설제 비치 및 미끄럼방지 테이프 시공.
+5) 건강진단: 야외작업자 저체온증·동상 예방을 위한 건강상태 일일 모니터링.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 계단실 및 보행로 미끄러짐 위험구간 안전난간 보강 및 조명 개선.
+8) 설비조치: 동파 방지용 열선 피복 점검 및 누전차단기 정상작동 전수검사.
+9) 건강증진: 옥외 근로자용 방한복, 핫팩, 방한장갑 적기 지급 완료.`,
+                        others: '난방용 온열기구 무단 반입을 금지하고 정기 화재 순찰을 강화함.'
+                    },
+                    {
+                        badge: '물류·운반 특화',
+                        title: '지게차 충돌방지 및 중량물 운반 안전 세트',
+                        description: '지게차 스마트 안전장치 도입 및 근골격계 부담작업 예방에 특화된 세트입니다.',
+                        agenda: baseAgendaText,
+                        resolutions: `1) 예방계획: 하역운반기계 충돌 재해예방 특별계획 및 전용통로 구획 승인.
+2) 관리규정: 지게차 운전자 자격확인 및 작업계획서 사전 승인제도 의무화 규정화.
+3) 안전교육: 지게차 사각지대 위험성 및 신호수 지정에 관한 특별안전교육.
+4) 작업환경: 보행자 통로와 지게차 주행로의 완전 분리(방호울타리 시공).
+5) 건강진단: 중량물 다빈도 취급자 대상 근골격계 정밀검진 및 물리치료 연계.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 과거 물류창고 적재물 낙하 아차사고 구간 랙(Rack) 안전망 설치.
+8) 설비조치: 지게차 어라운드뷰(AI 카메라) 및 후방감지센서 전 차량 설치 승인.
+9) 건강증진: 상하차 작업 전 교대별 맞춤 스트레칭 프로그램 정례화.`,
+                        others: '물류동 내 지게차 제한속도(10km/h) 준수 계도를 매주 실시하기로 함.'
+                    }
+                ];
+
+                // 2) Detailed Resolutions Pool (8 distinct scenarios)
+                const resolutionsPool = [
+                    {
+                        badge: '표준 의무이행',
+                        title: '법정 심의사항 표준 예시',
+                        resolutions: standardExample
+                    },
+                    {
+                        badge: '위험기계·끼임예방',
+                        title: '제조업 회전체 끼임방지 및 안전방호 강화안',
+                        resolutions: `1) 예방계획: 프레스 및 컨베이어 방호장치 전수 개선계획 원안 승인함.
+2) 관리규정: 정비·보수 시 LOTO(잠금장치 및 표지부착) 절차 위반 시 제재 규정 신설.
+3) 안전교육: 기계 위험점(협착점, 물림점) 실습형 안전체험 교육 분기 내 이수.
+4) 작업환경: 소음 기준 초과 프레스 공정에 대한 방음벽 보강공사 추진.
+5) 건강진단: 소음성 난청 유소견자 방음보호구 1:1 맞춤 피팅 및 지급.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 설비 청소 중 센서 임의해제 방지를 위한 인터록 키 관리 체계 확립.
+8) 설비조치: 노후 컨베이어 비상정지풀코드 스위치 전 구간 추가 증설 승인.
+9) 건강증진: 장시간 입식 작업자 피로예방 매트 교체 및 하지정맥류 예방 스트레칭 도입.`
+                    },
+                    {
+                        badge: '하절기 폭염대책',
+                        title: '하절기 온열질환 및 풍수해 대응 가결안',
+                        resolutions: `1) 예방계획: 6~8월 온열질환 집중 예방기간 지정 및 예방물품 보급안 가결.
+2) 관리규정: 기상청 폭염특보 연계 단계별 휴식시간 부여(시간당 10~15분) 사규 반영.
+3) 안전교육: 전 직원 대상 온열질환 자가진단표 작성 및 이상 징후 발생 시 조치요령 교육.
+4) 작업환경: 옥외 하역장 그늘막 및 대형 냉풍기 4대 추가 설치 의결.
+5) 건강진단: 옥외근로자 혈압·맥박 매일 출근 시 체크 및 고위험군 작업 전환 배려.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 배수로 토사 준설 및 강풍 대비 가설물 결속 보강 작업 완료 확인.
+8) 설비조치: 우천 시 감전사고 예방을 위한 이동형 누전차단기 방수형 일괄 교체.
+9) 건강증진: 시원한 생수, 식염포도당 상시 비치 및 보냉 물병 전원 지급 완료.`
+                    },
+                    {
+                        badge: '화학물질·MSDS',
+                        title: '화학물질 취급안전 및 국소배기장치 성능개선안',
+                        resolutions: `1) 예방계획: 유해화학물질 취급구역 누출감지기 증설 및 비상대응훈련 계획 승인.
+2) 관리규정: 신규 화학물질 반입 전 MSDS(물질안전보건자료) 사전 검토 의무화.
+3) 안전교육: MSDS 경고표지 숙지 및 보호구 착용법 분기 2시간 집중 교육.
+4) 작업환경: 국소배기장치 제어풍속 법정기준 충족 여부 전수점검 및 필터 교체.
+5) 건강진단: 특정 화학물질 취급자 특수건강진단 조기 실시 및 유소견자 면담.
+6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
+7) 재발방지: 세척제 소분 용기 MSDS 경고표지 누락 방지를 위한 전용 용기 통일.
+8) 설비조치: 세안·세척설비 온수 공급장치 설치 및 방류턱 크랙 보수 공사 가결.
+9) 건강증진: 호흡기 보호를 위한 특급 방진·방독마스크 최신형 교체 지급.`
+                    }
+                ];
+
+                // Modal state
+                const isAiModalOpen = ref(false);
+                const isResolutionsModalOpen = ref(false);
+                const currentAiOptions = ref([]);
+                const currentResolutionsOptions = ref([]);
+
+                const shuffleArray = (arr, count) => {
+                    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+                    return shuffled.slice(0, count);
+                };
+
+                const refreshAiOptions = () => {
+                    currentAiOptions.value = shuffleArray(aiOptionsPool, 3);
+                };
+
+                const refreshResolutionsOptions = () => {
+                    currentResolutionsOptions.value = shuffleArray(resolutionsPool, 3);
+                };
+
+                const openAiModal = () => {
+                    refreshAiOptions();
+                    isAiModalOpen.value = true;
+                };
+
+                const openResolutionsModal = () => {
+                    refreshResolutionsOptions();
+                    isResolutionsModalOpen.value = true;
+                };
+
+                const selectAiOption = (opt) => {
+                    formData.value.agenda = opt.agenda;
+                    formData.value.resolutions = opt.resolutions;
+                    if (opt.others) formData.value.others = opt.others;
+                    isAiModalOpen.value = false;
+                    showToast(`[${opt.title}] 세트가 적용되었습니다.`);
+                };
+
+                const selectResolutionOption = (opt) => {
+                    formData.value.resolutions = opt.resolutions;
+                    isResolutionsModalOpen.value = false;
+                    showToast(`[${opt.title}] 의결사항이 적용되었습니다.`);
+                };
+
+                const downloadPDF = () => {
+                    const element = document.getElementById('print-area');
+                    if (!element) return;
+
+                    isGeneratingPDF.value = true;
+                    showToast('PDF 문서를 렌더링하고 있습니다...', 'info');
+
+                    const docNameMap = {
+                        minutes: '회의록',
+                        notice: '개최공고',
+                        report: '결과보고서'
+                    };
+                    const fileName = `${formData.value.company || '사업장'}_${formData.value.year}년_${formData.value.quarter}분기_${docNameMap[formData.value.docType] || '문서'}.pdf`;
+
+                    const opt = {
+                        margin: 0,
+                        filename: fileName,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        isGeneratingPDF.value = false;
+                        showToast('PDF 다운로드가 완료되었습니다.');
+                    }).catch(() => {
+                        isGeneratingPDF.value = false;
+                        showToast('PDF 생성 중 문제가 발생했습니다.', 'error');
+                    });
+                };
+
+                // Return reactive bindings
+                return {
+                    docTypes,
+                    formData,
+                    employerReps,
+                    employeeReps,
+                    photoDataUrl,
+                    isGeneratingPDF,
+                    toast,
+                    formattedEmployerReps,
+                    formattedEmployeeReps,
+                    totalRepsCount,
+                    maxRepCount,
+                    formattedDatetime,
+                    formatJustDate,
+                    addRep,
+                    removeRep,
+                    changeDocType,
+                    handleFileUpload,
+                    removePhoto,
+                    resetToDefault,
+                    resetNoticeInstructions,
+                    isAiModalOpen,
+                    isResolutionsModalOpen,
+                    currentAiOptions,
+                    currentResolutionsOptions,
+                    openAiModal,
+                    openResolutionsModal,
+                    refreshAiOptions,
+                    refreshResolutionsOptions,
+                    selectAiOption,
+                    selectResolutionOption,
+                    downloadPDF
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "name": "안전duck",
+  "tagline": "안전관리 서류 작성부터 채용·법령까지",
+  "description": "안전관리자·보건관리자 채용정보, 산업안전보건 법정 서식, 법령 개정 소식을 모았습니다. 서식은 국가법령정보센터 원본으로 연결됩니다.",
+  "base_url": "https://tjsrlfhzpt-ai.github.io/anjeonduck",
+  "contact_email": "",
+  "tools": [
+    {
+      "id": "duckhee",
+      "name": "SAFE 덕희 (PC)",
+      "desc": "위험성평가·TBM·CAPA·법정업무 이행관리까지. 설치 없이 브라우저에서 열리고 기록은 내 PC에만 저장됩니다.",
+      "url": "",
+      "deep_link_template": ""
+    }
+  ],
+  "_comment": "base_url, tools[].url 은 실제 배포 주소로 바꿔야 합니다. 비어 있으면 해당 버튼은 '준비 중'으로 표시됩니다. deep_link_template 예: https://.../safe-duckhee.html#/new/{kind} ({kind}는 자료의 app_kind 값으로 치환)",
+  "free_tools": [
+    {
+      "id": "tbm",
+      "name": "TBM 일지 작성기",
+      "short": "TBM 일지",
+      "desc": "공종을 고르면 위험요인·감소대책이 채워집니다. 서명란까지 A4 한 장으로 인쇄하세요.",
+      "src": "apps/tbm.html",
+      "inject": "hazards",
+      "tag": "매일"
+    },
+    {
+      "id": "risk",
+      "name": "위험성평가서 작성기",
+      "short": "위험성평가서",
+      "desc": "빈도×강도(5×4) 방식. 위험요인을 불러와 점수를 고르면 등급 색이 자동으로 표시됩니다.",
+      "src": "apps/risk.html",
+      "inject": "hazards",
+      "tag": "정기·수시"
+    },
+    {
+      "id": "committee",
+      "name": "산업안전보건위원회 문서 작성기",
+      "short": "산보위 회의록",
+      "desc": "회의록·개최 공고·결과 보고서 3종. 법 제24조 제2항 심의·의결 사항 9개가 기본으로 들어갑니다.",
+      "src": "apps/committee.html",
+      "inject": "tailwind",
+      "css": "apps/committee.tailwind.css",
+      "tag": "분기"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "official": [
+    {"name": "국가법령정보센터", "url": "https://www.law.go.kr/", "desc": "법령 본문, 시행일, 별표·서식 원본"},
+    {"name": "고용노동부", "url": "https://www.moel.go.kr/", "desc": "안전보건 정책, 보도자료, 지방관서 안내"},
+    {"name": "한국산업안전보건공단(KOSHA)", "url": "https://www.kosha.or.kr/", "desc": "KOSHA 가이드, 교육·기술 자료, 재해사례"},
+    {"name": "근로복지공단", "url": "https://www.comwel.or.kr/", "desc": "산재보험 신청·보상"},
+    {"name": "고용24", "url": "https://www.work24.go.kr/", "desc": "공공 채용정보, 고용보험"}
+  ],
+  "job_search": [
+    {"name": "고용24", "url": "https://www.work24.go.kr/"},
+    {"name": "사람인 · 안전관리자", "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"},
+    {"name": "잡코리아 · 안전관리자", "url": "https://www.jobkorea.co.kr/Search/?stext=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"},
+    {"name": "사람인 · 보건관리자", "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EB%B3%B4%EA%B1%B4%EA%B4%80%EB%A6%AC%EC%9E%90"}
+  ]
+}

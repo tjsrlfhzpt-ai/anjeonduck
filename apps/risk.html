@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>위험성평가서 작성기 | 안전duck</title>
+<meta name="description" content="빈도×강도(5×4) 방식 위험성평가서를 업종별 위험요인으로 빠르게 작성하고 A4로 인쇄하세요. 무료, 회원가입 없음.">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<style>
+  @page { size: A4; margin: 0; }
+  :root { --ink: #222; --line: #b9c2cc; --head: #263746; --blue: #3182ce; }
+  body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; margin: 0; padding: 0; background-color: #555; }
+
+  .sitebar { background:#fff; border-bottom:1px solid #d8dee8; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .sitebar a { color:#1F6FD1; text-decoration:none; font-weight:700; }
+  .sitebar span { color:#5b6b80; }
+
+  .control-panel {
+    background-color: #1b365d; color: white; padding: 12px; text-align: center;
+    position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #002244;
+    display: flex; justify-content: center; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+  .ctrl-note { width:100%; font-size:12px; color:#c9d6ea; margin:0; }
+  .btn { padding: 8px 16px; cursor: pointer; border-radius: 5px; font-weight: bold; border: none; font-size: 14px; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn-green { background: #27ae60; color: white; }
+  .btn-blue { background: #2980b9; color: white; }
+  .btn-red { background: #c0392b; color: white; }
+  .dept-select-wrap { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 5px; display: flex; align-items: center; gap: 10px; }
+  .dept-select-wrap select { padding: 6px; font-size: 14px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+  .page-container {
+    background-color: white; width: 210mm; min-height: 297mm;
+    margin: 10mm auto; padding: 12mm; box-sizing: border-box;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7); position: relative; color: var(--ink);
+  }
+  @media print {
+    body { background-color: white; }
+    .page-container { margin: 0; padding: 8mm 10mm; min-height: 0; box-shadow: none; border: none; }
+    .control-panel, .no-print, .sitebar { display: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .scoreSel select { border: 0 !important; appearance: none; -webkit-appearance: none; padding: 0 !important; width: 22px !important; }
+    #ra tr { break-inside: avoid; }
+    .ed:empty::before { content: none !important; }
+    .section-title { margin: 10px 0 5px; }
+    .sub-title { margin-bottom: 4px; }
+    #ra td { padding: 4px !important; }
+    .score-badge { margin-top: 1px; padding: 2px 4px; }
+    .people td { height: 22px; }
+    .people { margin-bottom: 0; }
+    .approval td { height: 30px; }
+  }
+
+  .doc-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; border-bottom: 3px double #1b365d; padding-bottom: 8px; margin-bottom: 8px; }
+  h1 { margin: 0; font-size: 26px; letter-spacing: 0.1em; color: #1b365d; }
+  .sub-title { color: #667085; font-size: 12px; margin: 0 0 10px; }
+  .approval { width: 62mm; margin: 0; }
+  .approval th { background:#eef2f6; color:#263746; font-size:10.5px; padding:3px; }
+  .approval td { height: 38px; }
+  .section-title { font-size: 15px; font-weight: 800; border-left: 4px solid #1b365d; padding-left: 8px; margin: 18px 0 8px; color: #1b365d; }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 10px; }
+  th, td { border: 1px solid var(--line); padding: 6px; vertical-align: middle; font-size: 11px; line-height: 1.4; word-break: keep-all; }
+  th { background: var(--head); color: #fff; text-align: center; font-weight: bold; }
+
+  .ed { min-height: 20px; outline: 0; padding: 3px; border-radius: 3px; text-align: center; }
+  .ed.left { text-align: left; }
+  .ed:focus { background: #fffde7; box-shadow: inset 0 0 0 1px var(--blue); }
+  .ed:empty::before { content: attr(data-ph); color: #a0aab6; }
+
+  .criteria-box { border: 2px solid var(--line); padding: 8px; border-radius: 4px; background: #fafbfc; margin-bottom: 10px; display: flex; gap: 10px; }
+  .matrix-table { width: 40%; margin: 0; }
+  .level-table { width: 60%; margin: 0; }
+  .matrix-table th, .level-table th { background: #aeb8c2; color: #111; font-size: 10px; padding: 4px; }
+  .matrix-table td, .level-table td { text-align: center; font-weight: bold; font-size: 10px; padding: 4px; }
+  .level-table td.desc { text-align: left; font-weight: normal; }
+
+  .risk20 { background: #d90000 !important; color: #fff !important; }
+  .risk15 { background: #d35a00 !important; color: #fff !important; }
+  .risk12, .risk10, .risk9 { background: #d49b00 !important; color: #fff !important; }
+  .risk8 { background: #d6db00 !important; color: #111 !important; }
+  .risk6, .risk5 { background: #a8b89c !important; color: #111 !important; }
+  .risk4 { background: #7eaa59 !important; color: #111 !important; }
+  .risk3, .risk2, .risk1 { background: #6ea340 !important; color: #fff !important; }
+  .risk0 { background: #eef1f5 !important; color: #8a96a6 !important; }
+
+  #ra th { background: linear-gradient(to bottom, #e8f4f8 0%, #d1e8f0 100%); color: #1b365d; border-color: #a0b8c8; font-size: 11.5px; }
+  #ra td { padding: 8px 4px; border-color: #a0b8c8; }
+  .scoreSel { display: flex; justify-content: center; gap: 3px; align-items: center; flex-wrap: wrap; }
+  .scoreSel select { width: 42px; padding: 3px; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center; font-weight: bold; font-size: 10.5px; cursor: pointer; background:#fff; }
+  .score-badge { display: inline-block; min-width: 50px; padding: 4px; border-radius: 4px; text-align: center; font-weight: 800; font-size: 11px; margin-top: 3px; }
+  .del-btn { cursor: pointer; color: #2980b9; font-weight: bold; text-decoration: underline; font-size: 10px; display: block; margin-top: 5px; background:none; border:0; width:100%; }
+  .del-btn:hover { color: #c0392b; }
+  .people td { height: 26px; }
+</style>
+</head>
+<body>
+
+<div class="sitebar no-print">
+  <a href="../../">← 안전duck</a>
+  <span>입력 내용은 이 브라우저 안에서만 처리되고 서버로 전송되지 않습니다.</span>
+</div>
+
+<div class="control-panel no-print">
+  <div class="dept-select-wrap">
+    <label for="globalWorkType">공종(부서)</label>
+    <select id="globalWorkType" onchange="applyAutoData()"></select>
+  </div>
+  <button class="btn btn-blue" onclick="applyAutoData()">🔄 기본 항목 다시 채우기</button>
+  <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
+  <button class="btn btn-red" onclick="resetForm()">↻ 초기화</button>
+  <p class="ctrl-note">현재 위험성은 기본 목록의 상·중·하로 미리 채운 <b>추천값</b>입니다. 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
+</div>
+
+<div class="page-container" id="page1">
+  <div class="doc-head">
+    <div>
+      <h1>위 험 성 평 가 서</h1>
+    </div>
+    <table class="approval">
+      <tr><th>작성</th><th>검토</th><th>승인</th></tr>
+      <tr><td></td><td></td><td></td></tr>
+    </table>
+  </div>
+  <p class="sub-title">작업별 유해·위험요인을 파악하고 위험성을 결정한 뒤 감소대책을 수립·이행하기 위한 기록</p>
+
+  <div class="section-title">1. 기본정보</div>
+  <table>
+    <colgroup><col style="width:12%"><col style="width:21%"><col style="width:12%"><col style="width:21%"><col style="width:12%"><col style="width:22%"></colgroup>
+    <tbody>
+      <tr>
+        <th>평가일자</th><td><div class="ed" id="evalDate" contenteditable></div></td>
+        <th>작성자</th><td><div class="ed" contenteditable data-ph="성명"></div></td>
+        <th>사업장명</th><td><div class="ed" contenteditable data-ph="사업장명"></div></td>
+      </tr>
+      <tr>
+        <th>평가대상(부서)</th><td><div id="dispDept" class="ed" contenteditable></div></td>
+        <th>평가구분</th>
+        <td colspan="3" style="text-align:center;">
+          <label><input type="radio" name="type"> 최초</label> &nbsp;
+          <label><input type="radio" name="type" checked> 정기</label> &nbsp;
+          <label><input type="radio" name="type"> 수시</label> &nbsp;
+          <label><input type="radio" name="type"> 상시</label>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">2. 위험성 평가기준 (가능성·빈도 5단계 × 중대성·강도 4단계)</div>
+  <div class="criteria-box">
+    <table class="matrix-table">
+      <thead><tr><th>빈도 ↓ \ 강도 →</th><th>④</th><th>③</th><th>②</th><th>①</th></tr></thead>
+      <tbody>
+        <tr><th>⑤</th><td class="risk20">20</td><td class="risk15">15</td><td class="risk10">10</td><td class="risk5">5</td></tr>
+        <tr><th>④</th><td class="risk20">16</td><td class="risk12">12</td><td class="risk8">8</td><td class="risk4">4</td></tr>
+        <tr><th>③</th><td class="risk12">12</td><td class="risk9">9</td><td class="risk6">6</td><td class="risk3">3</td></tr>
+        <tr><th>②</th><td class="risk8">8</td><td class="risk6">6</td><td class="risk4">4</td><td class="risk2">2</td></tr>
+        <tr><th>①</th><td class="risk4">4</td><td class="risk3">3</td><td class="risk2">2</td><td class="risk1">1</td></tr>
+      </tbody>
+    </table>
+    <table class="level-table">
+      <colgroup><col style="width:27%"><col style="width:18%"><col style="width:55%"></colgroup>
+      <thead><tr><th>위험성 수준</th><th>관리기준</th><th>내 용</th></tr></thead>
+      <tbody>
+        <tr><td class="risk20">16~20 (매우높음)</td><td class="risk20">즉시개선</td><td class="desc">긴급하게 대책 수립·시행이 필요한 상태</td></tr>
+        <tr><td class="risk15">15 (높음)</td><td class="risk15">즉시개선</td><td class="desc">긴급하게 대책 수립·시행이 필요한 상태</td></tr>
+        <tr><td class="risk9">8~12 (보통)</td><td class="risk9">개 선</td><td class="desc">안전보건대책을 수립하여 개선이 필요한 상태</td></tr>
+        <tr><td class="risk4">4~6 (낮음)</td><td class="risk4">현상유지</td><td class="desc">현재 안전보건대책의 유지 관리가 필요한 상태</td></tr>
+        <tr><td class="risk1">1~3 (매우낮음)</td><td class="risk1">현상유지</td><td class="desc">현재 안전보건대책의 유지 관리가 필요한 상태</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">3. 위험성평가 및 감소대책</div>
+  <table id="ra">
+    <colgroup><col style="width:6%"><col style="width:29%"><col style="width:16%"><col style="width:33%"><col style="width:16%"></colgroup>
+    <thead>
+      <tr><th>연번</th><th>유해·위험요인</th><th>현재 위험성<br>(빈도×강도)</th><th>위험성 감소대책</th><th>개선 후 위험성<br>(빈도×강도)</th></tr>
+    </thead>
+    <tbody id="ra-tbody"></tbody>
+  </table>
+  <div class="no-print" style="text-align:right;">
+    <button class="btn btn-blue" style="padding:4px 10px;font-size:12px;" onclick="addEmptyRow()">+ 빈 줄 추가</button>
+  </div>
+
+  <div class="section-title">4. 평가 참여자</div>
+  <table class="people">
+    <colgroup><col style="width:6%"><col style="width:17%"><col style="width:15%"><col style="width:12%"><col style="width:6%"><col style="width:17%"><col style="width:15%"><col style="width:12%"></colgroup>
+    <thead><tr><th>No</th><th>소속</th><th>성명</th><th>서명</th><th>No</th><th>소속</th><th>성명</th><th>서명</th></tr></thead>
+    <tbody id="people-tbody"></tbody>
+  </table>
+</div>
+
+<script>
+  var HAZARD_DB = /*@HAZARDS@*/null;
+  if (!HAZARD_DB) HAZARD_DB = { groups: ["공통"], items: [] };
+  var MARKS = ["①","②","③","④","⑤"];
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function levelInfo(score) {
+    if (!score) return { text: "미평가", cls: "risk0" };
+    if (score >= 16) return { text: "매우높음", cls: "risk20" };
+    if (score === 15) return { text: "높음", cls: "risk15" };
+    if (score >= 8) return { text: "보통", cls: "risk9" };
+    if (score >= 4) return { text: "낮음", cls: "risk4" };
+    return { text: "매우낮음", cls: "risk1" };
+  }
+  // 기본 목록의 상/중/하 → 현재 위험성 추천값(빈도, 강도)
+  function suggest(level) {
+    if (level === "상") return { p: 4, c: 3 };
+    if (level === "중") return { p: 3, c: 2 };
+    if (level === "하") return { p: 2, c: 1 };
+    return { p: 0, c: 0 };
+  }
+  function itemsFor(dept, n) {
+    var own = HAZARD_DB.items.filter(function (i) { return i.group === dept; });
+    var common = dept === "공통" ? [] : HAZARD_DB.items.filter(function (i) { return i.group === "공통"; });
+    var list = own.concat(common).slice(0, n);
+    while (list.length < n) list.push({ risk: "", level: "", measure: "" });
+    return list;
+  }
+  function sel(val, max) {
+    var h = '<select onchange="updateScore(this)" aria-label="' + (max === 5 ? "빈도" : "강도") + '"><option value="0"' + (val ? "" : " selected") + '>-</option>';
+    for (var i = 1; i <= max; i++) h += '<option value="' + i + '"' + (i === val ? " selected" : "") + '>' + MARKS[i - 1] + '</option>';
+    return h + '</select>';
+  }
+  function appendRow(tbody, no, hazard, p, c, measure) {
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td style="text-align:center;"><span class="row-num">' + no + '</span>' +
+        '<button type="button" class="del-btn no-print" onclick="this.closest(\'tr\').remove(); renumber();">삭제</button></td>' +
+      '<td><div class="ed left" contenteditable data-ph="유해·위험요인 입력">' + esc(hazard) + '</div></td>' +
+      '<td><div class="scoreSel">' + sel(p, 5) + ' × ' + sel(c, 4) + '<div class="score-badge"></div></div></td>' +
+      '<td><div class="ed left" contenteditable data-ph="감소대책 입력">' + esc(measure) + '</div></td>' +
+      '<td><div class="scoreSel">' + sel(0, 5) + ' × ' + sel(0, 4) + '<div class="score-badge"></div></div></td>';
+    tbody.appendChild(tr);
+  }
+  function applyAutoData() {
+    var dept = document.getElementById("globalWorkType").value;
+    document.getElementById("dispDept").innerText = dept;
+    var tbody = document.getElementById("ra-tbody");
+    tbody.innerHTML = "";
+    itemsFor(dept, 6).forEach(function (it, i) {
+      var s = suggest(it.level);
+      appendRow(tbody, i + 1, it.risk, s.p, s.c, it.measure);
+    });
+    updateAll();
+  }
+  function addEmptyRow() {
+    var tbody = document.getElementById("ra-tbody");
+    appendRow(tbody, tbody.children.length + 1, "", 0, 0, "");
+    updateAll();
+  }
+  function updateScore(el) {
+    var wrap = el.closest(".scoreSel");
+    var s = wrap.querySelectorAll("select");
+    var p = parseInt(s[0].value, 10), c = parseInt(s[1].value, 10);
+    var score = p && c ? p * c : 0;
+    var info = levelInfo(score);
+    var badge = wrap.querySelector(".score-badge");
+    badge.innerText = score ? score + " (" + info.text + ")" : info.text;
+    badge.className = "score-badge " + info.cls;
+  }
+  function updateAll() { document.querySelectorAll(".scoreSel").forEach(function (w) { updateScore(w.querySelector("select")); }); }
+  function renumber() { document.querySelectorAll("#ra-tbody tr").forEach(function (tr, i) { tr.querySelector(".row-num").innerText = i + 1; }); }
+  function peopleRows() {
+    var h = "";
+    for (var i = 1; i <= 3; i++) h += '<tr><td style="text-align:center">' + i + '</td><td><div class="ed" contenteditable></div></td><td><div class="ed" contenteditable></div></td><td></td>' +
+      '<td style="text-align:center">' + (i + 3) + '</td><td><div class="ed" contenteditable></div></td><td><div class="ed" contenteditable></div></td><td></td></tr>';
+    document.getElementById("people-tbody").innerHTML = h;
+  }
+  function resetForm() {
+    if (confirm("입력한 내용을 지우고 처음 상태로 되돌릴까요?")) {
+      document.querySelectorAll(".page-container .ed").forEach(function (e) { e.innerHTML = ""; });
+      document.getElementById("evalDate").innerText = today();
+      document.getElementById("globalWorkType").value = HAZARD_DB.groups[0];
+      applyAutoData();
+    }
+  }
+  (function init() {
+    var gs = document.getElementById("globalWorkType");
+    gs.innerHTML = HAZARD_DB.groups.map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join("");
+    document.getElementById("evalDate").innerText = today();
+    peopleRows();
+    applyAutoData();
+  })();
+</script>
+</body>
+</html>

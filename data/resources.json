@@ -1,0 +1,185 @@
+[
+  {
+    "id": "form-accident-report",
+    "category": "법정 서식",
+    "title": "산업재해조사표",
+    "law": "산업안전보건법 시행규칙",
+    "form_no": "별지 제30호서식",
+    "byl_no": "0030",
+    "byl_br": "00",
+    "summary": "사망자 또는 3일 이상 휴업이 필요한 부상·질병이 생기면 발생일부터 1개월 이내에 관할 지방고용노동관서에 제출하는 서식입니다(시행규칙 제73조).",
+    "tags": [
+      "산재",
+      "재해보고",
+      "제73조"
+    ],
+    "app_kind": "accident",
+    "verified": "2026-09-28",
+    "popular": true
+  },
+  {
+    "id": "form-appoint-report",
+    "category": "법정 서식",
+    "title": "안전관리자·보건관리자·산업보건의 선임 등 보고서",
+    "law": "산업안전보건법 시행규칙",
+    "form_no": "별지 제2호서식",
+    "byl_no": "0002",
+    "byl_br": "00",
+    "summary": "안전관리자·보건관리자·산업보건의를 선임하거나 업무를 위탁했을 때 보고하는 서식입니다.",
+    "tags": [
+      "선임",
+      "안전관리자",
+      "보건관리자"
+    ],
+    "app_kind": "appoint",
+    "verified": "",
+    "popular": true
+  },
+  {
+    "id": "form-appoint-report-construction",
+    "category": "법정 서식",
+    "title": "안전관리자·보건관리자·산업보건의 선임 등 보고서(건설업)",
+    "law": "산업안전보건법 시행규칙",
+    "form_no": "별지 제3호서식",
+    "byl_no": "0003",
+    "byl_br": "00",
+    "summary": "건설업 사업장의 선임 등 보고에 쓰는 서식입니다.",
+    "tags": [
+      "선임",
+      "건설업"
+    ],
+    "app_kind": "appoint",
+    "verified": "",
+    "popular": false
+  },
+  {
+    "id": "form-dismiss-report",
+    "category": "법정 서식",
+    "title": "안전관리자·보건관리자·산업보건의 해임 등 보고서",
+    "law": "산업안전보건법 시행규칙",
+    "form_no": "별지 제3호의2서식",
+    "byl_no": "0003",
+    "byl_br": "02",
+    "summary": "안전관리자·보건관리자·산업보건의를 해임하거나 위탁을 해지했을 때 보고하는 서식입니다.",
+    "tags": [
+      "해임",
+      "선임"
+    ],
+    "app_kind": "appoint",
+    "verified": "",
+    "popular": false
+  },
+  {
+    "id": "form-hazard-prevention-plan",
+    "category": "법정 서식",
+    "title": "제조업 등 유해위험방지계획서",
+    "law": "산업안전보건법 시행규칙",
+    "form_no": "별지 제16호서식",
+    "byl_no": "0016",
+    "byl_br": "00",
+    "summary": "대상 제조업 사업장이나 설비의 유해위험방지계획서를 안전보건공단에 제출할 때 쓰는 서식입니다.",
+    "tags": [
+      "유해위험방지계획서",
+      "제조업"
+    ],
+    "app_kind": "",
+    "verified": "",
+    "popular": false
+  },
+  {
+    "id": "guide-risk-assessment",
+    "category": "고시·지침",
+    "title": "사업장 위험성평가에 관한 지침",
+    "law": "",
+    "form_no": "고용노동부 고시",
+    "url": "https://www.law.go.kr/행정규칙/사업장 위험성평가에 관한 지침",
+    "summary": "위험성평가의 절차·시기·기록 보존 기준입니다. 위험성평가표는 법정 고정 서식이 없어서 이 지침을 기준으로 사업장이 서식을 정합니다.",
+    "tags": [
+      "위험성평가",
+      "고시"
+    ],
+    "app_kind": "risk",
+    "verified": "2026-09-28",
+    "popular": true
+  },
+  {
+    "id": "app-risk-assessment",
+    "category": "무료 작성 도구",
+    "title": "위험성평가서",
+    "summary": "빈도×강도(5×4) 방식 위험성평가서를 업종별 위험요인으로 채우고 A4로 인쇄합니다. 회원가입 없이 바로 씁니다.",
+    "tags": [
+      "위험성평가",
+      "엑셀"
+    ],
+    "app_kind": "risk",
+    "popular": true,
+    "free_tool": "risk"
+  },
+  {
+    "id": "app-tbm",
+    "category": "무료 작성 도구",
+    "title": "TBM(작업 전 안전점검 회의) 일지",
+    "summary": "공종을 고르면 위험요인·감소대책이 채워지고, 참석자 서명란까지 A4 한 장으로 인쇄됩니다.",
+    "tags": [
+      "TBM",
+      "일지"
+    ],
+    "app_kind": "tbm",
+    "popular": true,
+    "free_tool": "tbm"
+  },
+  {
+    "id": "app-committee",
+    "category": "무료 작성 도구",
+    "title": "산업안전보건위원회 회의록·개최 공고·결과 보고서",
+    "law": "산업안전보건법",
+    "form_no": "제24조",
+    "summary": "법 제24조 제2항 심의·의결 사항 9개를 기본 안건으로 넣은 회의 문서 3종을 만들고 PDF로 저장합니다.",
+    "tags": [
+      "산업안전보건위원회",
+      "산보위",
+      "회의록",
+      "분기"
+    ],
+    "app_kind": "",
+    "free_tool": "committee",
+    "popular": true
+  },
+  {
+    "id": "app-ptw",
+    "category": "SAFE 덕희 서식",
+    "title": "작업허가서(PTW)",
+    "summary": "화기·밀폐공간·고소 등 위험작업의 허가, 안전조치 확인, 종료 확인을 기록하고 인쇄합니다.",
+    "tags": [
+      "작업허가",
+      "화기작업",
+      "밀폐공간"
+    ],
+    "app_kind": "ptw",
+    "popular": false
+  },
+  {
+    "id": "app-patrol",
+    "category": "SAFE 덕희 서식",
+    "title": "순회점검 일지",
+    "summary": "항목별 적합·부적합을 체크하고, 부적합은 개선조치(CAPA)로 바로 넘깁니다.",
+    "tags": [
+      "순회점검",
+      "CAPA"
+    ],
+    "app_kind": "inspection",
+    "popular": false
+  },
+  {
+    "id": "app-accident",
+    "category": "SAFE 덕희 서식",
+    "title": "사고·아차사고 조사",
+    "summary": "현상 → 원인 → 대책 순서로 조사하고 개선조치와 사건번호로 연결합니다.",
+    "tags": [
+      "사고조사",
+      "아차사고"
+    ],
+    "app_kind": "accident",
+    "popular": false
+  }
+]

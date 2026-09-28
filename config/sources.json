@@ -1,0 +1,6 @@
+{
+  "_comment": "구글 스프레드시트 각 탭을 [파일 > 공유 > 웹에 게시 > CSV]로 게시한 주소를 넣으세요. 비워 두면 data/*.json 파일을 그대로 씁니다.",
+  "jobs_csv": "",
+  "law_updates_csv": "",
+  "resources_csv": ""
+}

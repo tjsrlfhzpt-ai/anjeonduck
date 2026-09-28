@@ -1,0 +1,2 @@
+id,title,company,company_type,industry,job,region,career,employment,deadline,posted,source_url,source_name,summary,duties,requirements
+sh-001,안전관리자 경력 채용,예시회사,중견기업,제조업,안전,경기 화성,경력 3년 이상,정규직,2026-10-15,2026-09-28,https://example.com/job/1,회사 채용 페이지,한 줄 요약,"주요 업무(줄바꿈은 | 로 구분)","자격 요건(| 로 구분)"

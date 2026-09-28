@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBM 일지 작성기 | 안전duck</title>
+<meta name="description" content="업종별 위험요인을 골라 TBM(작업 전 안전점검 회의) 일지를 만들고 A4로 인쇄하거나 PDF로 저장하세요. 무료, 회원가입 없음.">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<style>
+  @page { size: A4; margin: 0; }
+  body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Dotum', sans-serif; margin: 0; padding: 0; background-color: #555; }
+
+  .page-container {
+    background-color: white; width: 210mm; height: 297mm;
+    margin: 10mm auto; padding: 10mm; box-sizing: border-box;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    page-break-after: always; position: relative; overflow: hidden;
+  }
+  @media print {
+    body { background-color: white; margin: 0; padding: 0; }
+    .page-container { margin: 0; box-shadow: none; border: none; }
+    .control-panel, .modal-overlay, .no-print, .sitebar { display: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    ::placeholder { color: transparent !important; }
+    select { appearance: none; -webkit-appearance: none; }
+  }
+
+  /* 안전duck 상단 바 */
+  .sitebar { background:#fff; border-bottom:1px solid #d8dee8; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .sitebar a { color:#1F6FD1; text-decoration:none; font-weight:700; }
+  .sitebar span { color:#5b6b80; }
+
+  /* 컨트롤 패널 */
+  .control-panel {
+    background-color: #1b365d; color: white; padding: 10px; text-align: center;
+    position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #002244;
+    display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .ctrl-group { display:flex; align-items:center; gap:6px; }
+  .ctrl-note { width:100%; font-size:12px; color:#c9d6ea; }
+  .btn { padding: 6px 14px; cursor: pointer; border-radius: 4px; font-weight: bold; border: none; font-size: 13px; }
+  .btn-green { background: #27ae60; color: white; }
+  .btn-blue { background: #2980b9; color: white; }
+  .btn-red { background: #c0392b; color: white; }
+  .btn-circle { width: 25px; height: 25px; border-radius: 50%; background: #4a6984; color: white; border: none; cursor: pointer; font-weight: bold; }
+  .page-count-display { font-size: 18px; font-weight: bold; margin: 0 6px; }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 4px; }
+  .data-table { border: 2px solid #333; }
+  .data-table th, .data-table td {
+    border: 1px solid #000 !important; padding: 2px 3px; font-size: 8.5pt;
+    vertical-align: middle; text-align: center; word-break: keep-all;
+  }
+  th { font-weight: bold; color: #2c3e50; background: linear-gradient(to bottom, #fdfdfd 0%, #e0e0e0 100%); }
+  .th-blue { background: linear-gradient(to bottom, #e8f4f8 0%, #d1e8f0 100%) !important; color: #1b365d; }
+  .th-gold { background: linear-gradient(to bottom, #fffde7 0%, #fff59d 100%) !important; color: #5d4037; }
+  .th-grey { background: linear-gradient(to bottom, #f5f5f5 0%, #e0e0e0 100%) !important; }
+
+  input, textarea, select {
+    width: 100%; border: none; background: transparent;
+    font-family: inherit; font-size: inherit; text-align: center;
+    outline: none; resize: none; padding: 0; margin: 0; color: inherit;
+  }
+  input:focus, textarea:focus { background:#fffde7; }
+  select { cursor: pointer; font-weight: bold; color: #1b365d; }
+  textarea { text-align: left; padding-top: 1px; line-height: 1.3; overflow: hidden; }
+  .align-left { text-align: left !important; padding-left: 4px; }
+  .align-left input { text-align: left; }
+  .date-input { width:auto; display:inline-block; text-align:center; }
+
+  .page-header-info {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 5px; padding: 0 2px 3px; border-bottom: 2px solid #1b365d;
+  }
+  .company-name-input { font-size: 14px; font-weight: 900; width: 280px; color: #1b365d; text-align: left; }
+  .company-name-input::placeholder { color:#9aa8ba; font-weight:700; }
+  .company-name-input:hover { background-color: #f0f4f8; }
+  .contact-info { font-size: 9.5px; color: #7f8c8d; }
+
+  .refresh-btn { cursor: pointer; }
+  .refresh-btn:hover { background: #fff176 !important; color: #d35400; font-weight: bold; }
+  .tool-input { cursor: pointer; font-weight: bold; color: #1b365d; }
+  .tool-input:hover { background-color: rgba(41, 128, 185, 0.15); }
+
+  .th-label { width: 35mm !important; }
+  .layout-wrapper td { vertical-align: bottom; }
+  .approval-table th.sign-space { height: 50px !important; }
+  .approval-footer { font-size: 7.5pt; height: 16px !important; border-top: 1px double #000 !important; background: #fff !important; color: #c0392b; font-weight: bold; }
+  .info-table tr { height: 23px; }
+  .work-table td { height: 28px; }
+
+  .risk-table col.col-no { width: 4%; }
+  .risk-table col.col-tool { width: 12%; }
+  .risk-table col.col-risk { width: 34%; }
+  .risk-table col.col-type { width: 9%; }
+  .risk-table col.col-lvl { width: 6%; }
+  .risk-table col.col-plan { width: 35%; }
+  .risk-table th { height: 24px; border-bottom: 2px solid #aaa !important; }
+  .risk-table td { height: 32px; }
+
+  .worker-table col.w-no { width: 4%; }
+  .worker-table col.w-job { width: 11%; }
+  .worker-table col.w-name { width: 12%; }
+  .worker-table col.w-sign { width: 13%; }
+  .worker-table col.w-note { width: 10%; }
+  .worker-table th { height: 20px; font-size: 8pt; }
+  .worker-table td { height: 22px; font-size: 8.5pt; }
+  .worker-table .split { border-left: 2px solid #333 !important; }
+
+  .main-title {
+    font-size: 22pt; font-weight: 900; text-align: center;
+    border: 3px double #1b365d; border-radius: 4px;
+    padding: 4px; margin-bottom: 6px; letter-spacing: 6px; color: #1b365d;
+    background: linear-gradient(to bottom, #ffffff 0%, #f4f7f9 100%);
+  }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+  .modal-content { background: white; width: min(640px, 92vw); max-height: 85%; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid #1b365d; }
+  .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #1b365d; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2980b9; padding-bottom: 8px; }
+  .modal-close { cursor: pointer; font-size: 26px; font-weight: bold; color: #aaa; background:none; border:0; }
+  .modal-close:hover { color: #e74c3c; }
+  .modal-body { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .modal-group { font-size:12px; font-weight:bold; color:#5b6b80; margin-top:8px; }
+  .tool-btn { padding: 7px 10px; background: #f0f4f8; border: 1px solid #b0bec5; border-radius: 4px; cursor: pointer; font-size: 12.5px; color: #2c3e50; text-align:left; }
+  .tool-btn:hover { background: #1b365d; color: white; }
+  .tool-btn b { color:#c0392b; margin-right:6px; }
+  .tool-btn:hover b { color:#ffd27a; }
+
+  @media screen and (max-width: 820px) {
+    .page-container { transform-origin: top left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sitebar no-print">
+  <a href="../../">← 안전duck</a>
+  <span>입력 내용은 이 기기 브라우저에만 저장되고 서버로 전송되지 않습니다.</span>
+</div>
+
+<div class="control-panel">
+  <div class="ctrl-group">
+    <span>공종(부서):</span>
+    <select id="globalGroup" style="width:auto;background:#fff;color:#1b365d;padding:4px 6px;border-radius:4px;" onchange="applyGroupToAll(this.value)"></select>
+  </div>
+  <div class="ctrl-group">
+    <span>페이지 수:</span>
+    <button class="btn-circle" onclick="changeCount(-1)" aria-label="페이지 줄이기">－</button>
+    <span id="pageCount" class="page-count-display">1</span>
+    <button class="btn-circle" onclick="changeCount(1)" aria-label="페이지 늘리기">＋</button>
+  </div>
+  <button class="btn btn-blue" onclick="generatePages()">📄 일지 다시 만들기</button>
+  <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
+  <button class="btn btn-red" onclick="resetData()">↻ 초기화</button>
+  <p class="ctrl-note">위험요인은 선택한 공종의 기본 목록으로 채워집니다. 번호 칸을 누르면 다음 항목, 구분 칸을 누르면 목록에서 고를 수 있습니다. <b>오늘 작업에 맞는지 확인한 뒤 인쇄하세요.</b></p>
+</div>
+
+<div id="toolModal" class="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="toolModalTitle">
+    <div class="modal-header">
+      <span id="toolModalTitle">위험요인 선택</span>
+      <button class="modal-close" onclick="closeModal()" aria-label="닫기">×</button>
+    </div>
+    <div id="tool-list" class="modal-body"></div>
+  </div>
+</div>
+
+<div id="pages-wrapper"></div>
+
+<script>
+  // 위험요인 목록: 안전duck 빌드 때 data/hazards.json 이 들어간다
+  var HAZARD_DB = /*@HAZARDS@*/null;
+  if (!HAZARD_DB) HAZARD_DB = { groups: ["공통"], items: [] };
+  var GROUPS = HAZARD_DB.groups;
+  var ITEMS = HAZARD_DB.items;
+  var STORE_KEY = "anjeonduck.tbm.v1";
+  var EMPTY = { group: "", risk: "", type: "", level: "", measure: "" };
+  var WEEK = ["일","월","화","수","목","금","토"];
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function todayParts() {
+    var d = new Date();
+    return { year: String(d.getFullYear()), month: String(d.getMonth() + 1).padStart(2, "0"),
+             day: String(d.getDate()).padStart(2, "0"), weekday: WEEK[d.getDay()] };
+  }
+  function defaultState() {
+    var t = todayParts();
+    return { headerCompany: "", siteName: "", group: "공통",
+             year: t.year, month: t.month, day: t.day, weekday: t.weekday,
+             workArea: "", majorPoints: "개인보호구 착용, 위험성평가 항목 숙지, 이상 발견 시 즉시 작업중지·보고" };
+  }
+
+  var state = defaultState();
+  var count = 1;
+  var currentRow = null;
+
+  function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+  function loadState() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+      if (saved && typeof saved === "object") {
+        var t = todayParts(), d = defaultState();
+        Object.keys(d).forEach(function (k) { if (typeof saved[k] === "string") state[k] = saved[k]; });
+        // 날짜는 저장값이 아니라 항상 오늘로 시작
+        state.year = t.year; state.month = t.month; state.day = t.day; state.weekday = t.weekday;
+      }
+    } catch (e) { state = defaultState(); }
+    if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+  }
+  function resetData() {
+    if (confirm("입력한 내용을 모두 지우고 처음 상태로 되돌릴까요?")) {
+      state = defaultState(); saveState(); syncGroupSelect(); generatePages();
+    }
+  }
+  function changeCount(v) {
+    count = Math.max(1, Math.min(10, count + v));
+    document.getElementById("pageCount").innerText = count;
+  }
+  function updateGlobal(el, key) {
+    state[key] = el.value; saveState();
+    document.querySelectorAll('[data-global="' + key + '"]').forEach(function (i) { if (i !== el) i.value = el.value; });
+  }
+
+  // 선택한 공종 항목 먼저, 모자라면 공통 항목으로 채움 (무작위 아님)
+  function listFor(group) {
+    var own = ITEMS.filter(function (i) { return i.group === group; });
+    var common = group === "공통" ? [] : ITEMS.filter(function (i) { return i.group === "공통"; });
+    return own.concat(common);
+  }
+  function pick(group, n) {
+    var list = listFor(group).slice(0, n);
+    while (list.length < n) list.push(EMPTY);
+    return list;
+  }
+
+  function riskRowsHTML(items) {
+    return items.map(function (it, idx) {
+      return '<tr>' +
+        '<td class="refresh-btn" onclick="nextItem(this)" title="누르면 같은 공종의 다음 항목으로 바뀝니다">' + (idx + 1) + '</td>' +
+        '<td><input type="text" class="tool-input" data-type="group" value="' + esc(it.group) + '" onclick="openToolModal(this)" readonly title="눌러서 목록에서 선택"></td>' +
+        '<td class="align-left"><textarea data-type="risk" rows="2">' + esc(it.risk) + '</textarea></td>' +
+        '<td><input type="text" data-type="type" value="' + esc(it.type) + '"></td>' +
+        '<td><select data-type="level">' + ["상","중","하",""].map(function (l) {
+          return '<option' + (it.level === l ? " selected" : "") + '>' + l + '</option>'; }).join("") + '</select></td>' +
+        '<td class="align-left"><textarea data-type="measure" rows="2">' + esc(it.measure) + '</textarea></td>' +
+      '</tr>';
+    }).join("");
+  }
+  function setRow(row, it) {
+    row.querySelector('[data-type="group"]').value = it.group;
+    row.querySelector('[data-type="risk"]').value = it.risk;
+    row.querySelector('[data-type="type"]').value = it.type;
+    row.querySelector('[data-type="measure"]').value = it.measure;
+    row.querySelector('[data-type="level"]').value = ["상","중","하"].indexOf(it.level) >= 0 ? it.level : "";
+  }
+  function nextItem(cell) {
+    var page = cell.closest(".page-container");
+    var group = page.querySelector(".work-type-select").value;
+    var list = listFor(group);
+    if (!list.length) return;
+    var row = cell.parentElement;
+    var cur = row.querySelector('[data-type="risk"]').value;
+    var used = Array.prototype.map.call(page.querySelectorAll('.risk-table [data-type="risk"]'), function (t) { return t.value; });
+    var start = list.findIndex(function (i) { return i.risk === cur; });
+    for (var k = 1; k <= list.length; k++) {
+      var cand = list[(start + k + list.length) % list.length];
+      if (used.indexOf(cand.risk) < 0 || k === list.length) { setRow(row, cand); return; }
+    }
+  }
+  function changeWorkType(sel) {
+    state.group = sel.value; saveState(); syncGroupSelect();
+    var page = sel.closest(".page-container");
+    page.querySelector(".risk-table tbody").innerHTML = riskRowsHTML(pick(sel.value, 5));
+  }
+  function applyGroupToAll(g) {
+    state.group = g; saveState();
+    document.querySelectorAll(".work-type-select").forEach(function (s) { s.value = g; changeWorkType(s); });
+  }
+  function syncGroupSelect() {
+    var gs = document.getElementById("globalGroup");
+    if (gs) gs.value = state.group;
+  }
+
+  function openToolModal(input) {
+    currentRow = input.closest("tr");
+    var box = document.getElementById("tool-list");
+    box.innerHTML = "";
+    GROUPS.forEach(function (g) {
+      var items = ITEMS.filter(function (i) { return i.group === g; });
+      if (!items.length) return;
+      var h = document.createElement("div"); h.className = "modal-group"; h.textContent = g; box.appendChild(h);
+      items.forEach(function (it) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "tool-btn";
+        b.innerHTML = "<b>" + esc(it.level) + "</b>" + esc(it.risk);
+        b.onclick = function () { if (currentRow) setRow(currentRow, it); closeModal(); };
+        box.appendChild(b);
+      });
+    });
+    document.getElementById("toolModal").style.display = "flex";
+  }
+  function closeModal(ev) {
+    if (!ev || ev.target.id === "toolModal") document.getElementById("toolModal").style.display = "none";
+  }
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+  function groupOptions(selected) {
+    return GROUPS.map(function (g) { return '<option value="' + esc(g) + '"' + (g === selected ? " selected" : "") + '>' + esc(g) + '</option>'; }).join("");
+  }
+  function workerRows() {
+    var html = "";
+    for (var i = 1; i <= 15; i++) {
+      html += '<tr><td>' + i + '</td><td><input type="text"></td><td><input type="text"></td><td></td><td><input type="text"></td>' +
+              '<td class="split">' + (i + 15) + '</td><td><input type="text"></td><td><input type="text"></td><td></td><td><input type="text"></td></tr>';
+    }
+    return html;
+  }
+  function g(key, style) {
+    return '<input type="text" class="date-input" value="' + esc(state[key]) + '" style="' + style + '" data-global="' + key + '" oninput="updateGlobal(this, \'' + key + '\')">';
+  }
+
+  function generatePages() {
+    var wrap = document.getElementById("pages-wrapper");
+    var html = "";
+    for (var p = 0; p < count; p++) {
+      html += '<div class="page-container">' +
+        '<div class="page-header-info">' +
+          '<input type="text" class="company-name-input" placeholder="회사명 입력" value="' + esc(state.headerCompany) + '" data-global="headerCompany" oninput="updateGlobal(this, \'headerCompany\')">' +
+          '<span class="contact-info no-print">안전duck TBM 일지 작성기</span>' +
+        '</div>' +
+        '<div class="main-title">T B M &nbsp; 일 지</div>' +
+        '<table class="layout-wrapper"><colgroup><col style="width:73%"><col style="width:1%"><col style="width:26%"></colgroup><tr>' +
+          '<td><table class="data-table info-table"><col style="width:20%"><col style="width:80%">' +
+            '<tr><th colspan="2" class="th-blue">작 업 및 현 장 개 요</th></tr>' +
+            '<tr><th class="th-label th-blue">사업장/현장명</th><td class="align-left"><input type="text" placeholder="사업장 또는 현장명" value="' + esc(state.siteName) + '" data-global="siteName" oninput="updateGlobal(this, \'siteName\')"></td></tr>' +
+            '<tr><th class="th-label th-blue">공종(부서/팀)</th><td class="align-left"><select class="work-type-select" onchange="changeWorkType(this)">' + groupOptions(state.group) + '</select></td></tr>' +
+            '<tr><th class="th-label th-blue">일 자</th><td class="align-left">' + g("year", "width:38px") + '년 ' + g("month", "width:22px") + '월 ' + g("day", "width:22px") + '일 (' + g("weekday", "width:16px") + ')요일</td></tr>' +
+          '</table></td><td></td>' +
+          '<td><table class="data-table approval-table"><colgroup><col style="width:20%"><col style="width:40%"><col style="width:40%"></colgroup>' +
+            '<tr><th class="th-grey">구분</th><th class="th-grey">담당</th><th class="th-grey">총괄</th></tr>' +
+            '<tr><th class="th-grey sign-space">확인</th><td></td><td></td></tr>' +
+            '<tr><td colspan="3" class="approval-footer">* 당일 작업 시작 전 작성</td></tr>' +
+          '</table></td>' +
+        '</tr></table>' +
+        '<table class="data-table work-table">' +
+          '<tr><th class="th-label th-blue">금일 작업구간<br>및 주요내용</th><td class="align-left"><textarea style="height:30px;font-weight:bold;" placeholder="예) 2라인 컨베이어 벨트 교체, 오전 9시~12시" data-global="workArea" oninput="updateGlobal(this, \'workArea\')">' + esc(state.workArea) + '</textarea></td></tr>' +
+          '<tr><th class="th-label th-blue">주요 전파사항</th><td class="align-left"><textarea style="height:25px;" data-global="majorPoints" oninput="updateGlobal(this, \'majorPoints\')">' + esc(state.majorPoints) + '</textarea></td></tr>' +
+        '</table>' +
+        '<table class="data-table risk-table">' +
+          '<col class="col-no"><col class="col-tool"><col class="col-risk"><col class="col-type"><col class="col-lvl"><col class="col-plan">' +
+          '<thead><tr><th colspan="6" class="th-gold">당일 작업 위험성 평가 (유해·위험요인 및 감소대책)</th></tr>' +
+          '<tr><th class="th-gold">No.</th><th class="th-gold">구분</th><th class="th-gold">유해·위험요인 및 위험성</th><th class="th-gold">재해형태</th><th class="th-gold">상/중/하</th><th class="th-gold">위험성 감소대책</th></tr></thead>' +
+          '<tbody>' + riskRowsHTML(pick(state.group, 5)) + '</tbody>' +
+        '</table>' +
+        '<table class="data-table worker-table">' +
+          '<col class="w-no"><col class="w-job"><col class="w-name"><col class="w-sign"><col class="w-note"><col class="w-no"><col class="w-job"><col class="w-name"><col class="w-sign"><col class="w-note">' +
+          '<thead><tr><th colspan="10" class="th-grey" style="text-align:left;padding-left:10px;">* 근로자 의견청취 및 건의사항 : <input type="text" style="width:72%;border-bottom:1px solid #ccc;text-align:left;"></th></tr>' +
+          '<tr><th class="th-grey">NO</th><th class="th-grey">소속</th><th class="th-grey">성명</th><th class="th-grey">서명</th><th class="th-grey">비고</th><th class="th-grey split">NO</th><th class="th-grey">소속</th><th class="th-grey">성명</th><th class="th-grey">서명</th><th class="th-grey">비고</th></tr></thead>' +
+          '<tbody>' + workerRows() + '</tbody>' +
+        '</table>' +
+      '</div>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  (function init() {
+    var gs = document.getElementById("globalGroup");
+    gs.innerHTML = groupOptions("");
+    loadState(); syncGroupSelect(); generatePages();
+  })();
+</script>
+</body>
+</html>
