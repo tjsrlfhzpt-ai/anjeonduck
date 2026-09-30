@@ -1,0 +1,92 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>법정교육 시간 조회</p>
+  <h1>법정 안전보건교육 시간 조회</h1>
+  <p>근로자 구분을 고르면 받아야 할 교육과 시간이 나옵니다. 시행규칙 별표 4 원문을 그대로 옮겼고, 2분의 1 적용 사업장이면 줄어든 시간도 함께 보여 줍니다.</p>
+</div></section>
+<div class="wrap layout-detail layout-calc">
+  <section class="col-main stack">
+    <form class="calc" onsubmit="return false">
+      <div class="field"><span class="label">누구의 교육인가요?</span>
+        <div class="seg" role="radiogroup" aria-label="대상" data-seg="who">
+          <button type="button" data-v="office" aria-pressed="true">사무직</button>
+          <button type="button" data-v="sales" aria-pressed="false">판매 직접 종사</button>
+          <button type="button" data-v="other" aria-pressed="false">그 밖의 근로자</button>
+          <button type="button" data-v="day" aria-pressed="false">일용·1주 이하 기간제</button>
+          <button type="button" data-v="month" aria-pressed="false">1주 초과~1개월 기간제</button>
+          <button type="button" data-v="sup" aria-pressed="false">관리감독자</button>
+          <button type="button" data-v="duty" aria-pressed="false">책임자·안전·보건관리자 등</button>
+          <button type="button" data-v="stw" aria-pressed="false">특수형태근로종사자</button>
+        </div></div>
+      <label class="switch"><input type="checkbox" id="eHalf"><span>교육시간 2분의 1 적용 사업장</span></label>
+      <p class="hint">영 별표 1 제1호에 따른 사업, 상시근로자 50명 미만의 도매업·숙박 및 음식점업(별표 4 제1호 비고 3). 근로자·관리감독자 교육의 가~라목에만 적용됩니다.</p>
+    </form>
+    <div id="eOut" class="stack"></div>
+    <section class="stack" id="eAll"></section>
+  </section>
+  <aside class="col-side stack">
+    <div class="result-card">
+      <p class="apply-label">함께 쓰는 도구</p>
+      <ul class="bul">
+        <li><a href="../forms/edu-log/">교육일지·참석자 서명부 작성</a></li>
+        <li><a href="../forms/edu-ledger/">직무교육 이수 관리대장</a></li>
+        <li><a href="../schedule/">반기·연간 교육 일정 달력</a></li>
+      </ul>
+    </div>
+    <p class="src-line" id="eSrc"></p>
+  </aside>
+</div>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var sec = {}; D.sections.forEach(function (s) { sec[s.id] = s; });
+  // 누구 → 적용 행 (sections id, row index 목록)
+  var MAP = {
+    office: [["worker", [0, 5, 7, 10]]], sales: [["worker", [1, 5, 7, 10]]], other: [["worker", [2, 5, 7, 10]]],
+    day: [["worker", [3, 6, 8, 9, 11]]], month: [["worker", [4, 7, 10]]],
+    sup: [["supervisor", [0, 1, 2, 3]]], duty: [["duty", [0, 1, 2, 5]]], stw: [["special", [0, 1]]]
+  };
+  var NOTE = {
+    office: "정기교육은 반기마다 받아야 하고, 채용 시·작업내용 변경 시·특별교육은 해당 사유가 생길 때 받습니다.",
+    day: "일용근로자가 채용 시(나목) 또는 특별교육(라목)을 받은 날 이후 1주일 동안 같은 사업장에서 같은 업무의 일용근로자로 다시 종사하면 이미 받은 교육을 면제합니다(비고 2). 건설 일용근로자는 기초안전·보건교육 4시간도 해당합니다.",
+    month: "정기교육은 사무직·판매·그 밖의 근로자 구분을 따릅니다.",
+    duty: "신규교육: 선임 후 3개월(의사인 보건관리자 1년) 이내 / 보수교육: 신규교육 이수 후 매 2년이 되는 날 기준 전후 6개월 사이(시행규칙 제29조제1항). 목록 외 대상(전문기관 종사자 등)은 아래 전체 표를 보세요."
+  };
+  function halfText(h) {
+    if ((h.match(/\d+시간/g) || []).length !== 1) return "각 시간의 2분의 1 이상";
+    return h.replace(/(\d+)시간/g, function (m, n) { n = +n; return n % 2 ? (n > 1 ? Math.floor(n / 2) + "시간 30분" : "30분") : (n / 2) + "시간"; });
+  }
+  var halfable = { worker: true, supervisor: true };
+  function hoursCell(s, r) {
+    var h = r.hours;
+    var canHalf = document.getElementById("eHalf").checked && halfable[s.id] && !/^마\./.test(r.course || "");
+    return '<td class="txt">' + esc(h).replace(/\n/g, "<br>") + (canHalf ? '<span class="half">2분의 1 적용: ' + esc(halfText(h)).replace(/\n/g, "<br>") + "</span>" : "") + "</td>";
+  }
+  function table(s, idx) {
+    var rows = (idx || s.rows.map(function (_, i) { return i; })).map(function (i) { return s.rows[i]; });
+    if (s.id === "duty") return '<div class="table-wrap"><table class="dtable etable"><thead><tr><th>교육대상</th><th>신규교육</th><th>보수교육</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td class="txt">' + esc(r.target) + "</td><td>" + esc(r.new) + "</td><td>" + esc(r.re) + "</td></tr>"; }).join("") + "</tbody></table></div>";
+    return '<div class="table-wrap"><table class="dtable etable"><thead><tr><th>교육과정</th><th>교육대상</th><th>교육시간</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td class="txt nowrap">' + esc(r.course) + '</td><td class="txt">' + esc(r.target) + "</td>" + hoursCell(s, r) + "</tr>"; }).join("") + "</tbody></table></div>";
+  }
+  var who = "office";
+  function render() {
+    var parts = MAP[who].map(function (x) { var s = sec[x[0]]; return '<section class="lawbox"><h3>' + esc(s.title) + ' <span class="muted" style="font-weight:500;font-size:13px">' + esc(s.basis) + "</span></h3>" + table(s, x[1]) + "</section>"; }).join("");
+    var n = NOTE[who] || NOTE.office;
+    document.getElementById("eOut").innerHTML = parts + '<div class="note"><p>' + esc(n) + "</p></div>";
+    document.getElementById("eAll").innerHTML = '<h2 class="h-sm" style="margin-top:8px">별표 4 전체</h2>' + D.sections.map(function (s) {
+      return '<details class="lawbox"><summary><strong>' + esc(s.title) + "</strong></summary>" + table(s) + (s.notes.length ? '<ul class="bul hint" style="margin-top:8px">' + s.notes.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") + "</details>";
+    }).join("");
+  }
+  document.querySelector('[data-seg="who"]').addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    this.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    who = b.dataset.v; render();
+  });
+  document.getElementById("eHalf").addEventListener("change", render);
+  document.getElementById("eSrc").textContent = D.source + " · 원문 확인 " + D.checked;
+  render();
+})();
+</script>

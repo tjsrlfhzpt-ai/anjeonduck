@@ -1,0 +1,739 @@
+{
+ "source": {
+  "org": "안전보건공단",
+  "year": "2025",
+  "title": "안전보건표지 40종(19개국 언어 + 한국어)",
+  "kogl": "공공누리 제4유형(출처표시·상업적 이용금지·변경금지)",
+  "url": "https://portal.kosha.or.kr/archive/cent-archive/master-arch",
+  "checked": "2026-09-29"
+ },
+ "mirror": {
+  "ko": "assets/files/kosha_safety_signs_40_ko_web.pdf",
+  "en": "assets/files/kosha_safety_signs_40_en_web.pdf"
+ },
+ "law": "산업안전보건법 제37조 · 시행규칙 제38조~제40조, 별표 6(종류와 형태)·별표 7(용도·설치장소)·별표 8(색도기준)·별표 9(기본모형)",
+ "items": [
+  {
+   "no": "101",
+   "ko": "출입금지",
+   "en": "No entry",
+   "page": 3,
+   "cat": "금지표지"
+  },
+  {
+   "no": "102",
+   "ko": "보행금지",
+   "en": "No pedestrians",
+   "page": 4,
+   "cat": "금지표지"
+  },
+  {
+   "no": "103",
+   "ko": "차량통행금지",
+   "en": "No access for forklift trucks and other industrial vehicles",
+   "page": 5,
+   "cat": "금지표지"
+  },
+  {
+   "no": "104",
+   "ko": "사용금지",
+   "en": "Do not use",
+   "page": 6,
+   "cat": "금지표지"
+  },
+  {
+   "no": "105",
+   "ko": "탑승금지",
+   "en": "No riding",
+   "page": 7,
+   "cat": "금지표지"
+  },
+  {
+   "no": "106",
+   "ko": "금연",
+   "en": "No smoking",
+   "page": 8,
+   "cat": "금지표지"
+  },
+  {
+   "no": "107",
+   "ko": "화기금지",
+   "en": "No open flame",
+   "page": 9,
+   "cat": "금지표지"
+  },
+  {
+   "no": "108",
+   "ko": "물체이동금지",
+   "en": "Do not move items",
+   "page": 10,
+   "cat": "금지표지"
+  },
+  {
+   "no": "201",
+   "ko": "인화성물질 경고",
+   "en": "Warning: Flammable material",
+   "page": 12,
+   "cat": "경고표지"
+  },
+  {
+   "no": "202",
+   "ko": "산화성물질 경고",
+   "en": "Warning: Oxidizing substance",
+   "page": 13,
+   "cat": "경고표지"
+  },
+  {
+   "no": "203",
+   "ko": "폭발성물질 경고",
+   "en": "Warning: Explosive material",
+   "page": 14,
+   "cat": "경고표지"
+  },
+  {
+   "no": "204",
+   "ko": "급성독성물질 경고",
+   "en": "Warning: Toxic material",
+   "page": 15,
+   "cat": "경고표지"
+  },
+  {
+   "no": "205",
+   "ko": "부식성물질 경고",
+   "en": "Warning: Corrosive substances",
+   "page": 16,
+   "cat": "경고표지"
+  },
+  {
+   "no": "206",
+   "ko": "방사성물질 경고",
+   "en": "Warning: Radioactive material",
+   "page": 17,
+   "cat": "경고표지"
+  },
+  {
+   "no": "207",
+   "ko": "고압전기 경고",
+   "en": "Warning: High voltage",
+   "page": 18,
+   "cat": "경고표지"
+  },
+  {
+   "no": "208",
+   "ko": "매달린 물체 경고",
+   "en": "Warning: Overhead load",
+   "page": 19,
+   "cat": "경고표지"
+  },
+  {
+   "no": "209",
+   "ko": "낙하물 경고",
+   "en": "Warning: Falling objects",
+   "page": 20,
+   "cat": "경고표지"
+  },
+  {
+   "no": "210",
+   "ko": "고온 경고",
+   "en": "Warning: High temperature",
+   "page": 21,
+   "cat": "경고표지"
+  },
+  {
+   "no": "211",
+   "ko": "저온 경고",
+   "en": "Warning: Low temperature",
+   "page": 22,
+   "cat": "경고표지"
+  },
+  {
+   "no": "212",
+   "ko": "몸균형 상실 경고",
+   "en": "Warning: Slippery surface",
+   "page": 23,
+   "cat": "경고표지"
+  },
+  {
+   "no": "213",
+   "ko": "레이저광선 경고",
+   "en": "Warning: Laser beam",
+   "page": 24,
+   "cat": "경고표지"
+  },
+  {
+   "no": "214",
+   "ko": "발암성·변이원성·생식독성·전신독성·호흡기 과민성 물질 경고",
+   "en": "Warning: Carcinogens, Mutagens, Reproductive toxins, Systemic toxins, Respiratory irritants",
+   "page": 25,
+   "cat": "경고표지"
+  },
+  {
+   "no": "215",
+   "ko": "위험장소 경고",
+   "en": "Warning: Hazardous site",
+   "page": 26,
+   "cat": "경고표지"
+  },
+  {
+   "no": "301",
+   "ko": "보안경 착용",
+   "en": "Wear eye protection",
+   "page": 28,
+   "cat": "지시표지"
+  },
+  {
+   "no": "302",
+   "ko": "방독마스크 착용",
+   "en": "Wear respiratory protection",
+   "page": 29,
+   "cat": "지시표지"
+  },
+  {
+   "no": "303",
+   "ko": "방진마스크 착용",
+   "en": "Wear dust mask",
+   "page": 30,
+   "cat": "지시표지"
+  },
+  {
+   "no": "304",
+   "ko": "보안면 착용",
+   "en": "Wear face shield",
+   "page": 31,
+   "cat": "지시표지"
+  },
+  {
+   "no": "305",
+   "ko": "안전모 착용",
+   "en": "Wear head protection",
+   "page": 32,
+   "cat": "지시표지"
+  },
+  {
+   "no": "306",
+   "ko": "귀마개 착용",
+   "en": "Wear ear protection",
+   "page": 33,
+   "cat": "지시표지"
+  },
+  {
+   "no": "307",
+   "ko": "안전화 착용",
+   "en": "Wear safety footwear",
+   "page": 34,
+   "cat": "지시표지"
+  },
+  {
+   "no": "308",
+   "ko": "안전장갑 착용",
+   "en": "Wear protective gloves",
+   "page": 35,
+   "cat": "지시표지"
+  },
+  {
+   "no": "309",
+   "ko": "안전복 착용",
+   "en": "Wear protective clothing",
+   "page": 36,
+   "cat": "지시표지"
+  },
+  {
+   "no": "401",
+   "ko": "녹십자표지",
+   "en": "Green cross sign",
+   "page": 38,
+   "cat": "안내표지"
+  },
+  {
+   "no": "402",
+   "ko": "응급구호표지",
+   "en": "First aid",
+   "page": 39,
+   "cat": "안내표지"
+  },
+  {
+   "no": "403",
+   "ko": "들것",
+   "en": "Stretcher",
+   "page": 40,
+   "cat": "안내표지"
+  },
+  {
+   "no": "404",
+   "ko": "세안장치",
+   "en": "Eyewash station",
+   "page": 41,
+   "cat": "안내표지"
+  },
+  {
+   "no": "405",
+   "ko": "비상용기구",
+   "en": "Emergency equipment",
+   "page": 42,
+   "cat": "안내표지"
+  },
+  {
+   "no": "406",
+   "ko": "비상구",
+   "en": "Emergency exit",
+   "page": 43,
+   "cat": "안내표지"
+  },
+  {
+   "no": "407",
+   "ko": "좌측비상구",
+   "en": "Emergency exit (left hand)",
+   "page": 44,
+   "cat": "안내표지"
+  },
+  {
+   "no": "408",
+   "ko": "우측비상구",
+   "en": "Emergency exit (right hand)",
+   "page": 45,
+   "cat": "안내표지"
+  }
+ ],
+ "langs": [
+  {
+   "lang": "한국어",
+   "no": "2025-외국인전담팀-1390",
+   "files": {
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214543887041166&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 153275
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214543887041166&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 592582
+    },
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214543887041166&atcflSeq=5&isDirect=N&taskSeCd=",
+     "size": 74899
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214543887041166&atcflSeq=6&isDirect=N&taskSeCd=",
+     "size": 121075
+    }
+   }
+  },
+  {
+   "lang": "영어",
+   "no": "2025-외국인전담팀-1397",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414075080149688&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 142122
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414075080149688&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 151227
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414075080149688&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 171078
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414075080149688&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 574093
+    }
+   }
+  },
+  {
+   "lang": "중국",
+   "no": "2025-외국인전담팀-1396",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210333414442711&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 136346
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210333414442711&atcflSeq=5&isDirect=N&taskSeCd=",
+     "size": 238389
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210333414442711&atcflSeq=6&isDirect=N&taskSeCd=",
+     "size": 168029
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210333414442711&atcflSeq=7&isDirect=N&taskSeCd=",
+     "size": 692640
+    }
+   }
+  },
+  {
+   "lang": "베트남",
+   "no": "2025-외국인전담팀-1399",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414051322459401&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 127436
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414051322459401&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 169457
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414051322459401&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 170994
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414051322459401&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 614902
+    }
+   }
+  },
+  {
+   "lang": "태국",
+   "no": "2025-외국인전담팀-1393",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214594828104803&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 109218
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214594828104803&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 149219
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214594828104803&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 142005
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214594828104803&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 577521
+    }
+   }
+  },
+  {
+   "lang": "캄보디아",
+   "no": "2025-외국인전담팀-1395",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210322794869220&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 79667
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210322794869220&atcflSeq=5&isDirect=N&taskSeCd=",
+     "size": 201821
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210322794869220&atcflSeq=6&isDirect=N&taskSeCd=",
+     "size": 121105
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210322794869220&atcflSeq=7&isDirect=N&taskSeCd=",
+     "size": 241343
+    }
+   }
+  },
+  {
+   "lang": "인도네시아",
+   "no": "2025-외국인전담팀-1386",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214210953955975&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 142414
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214210953955975&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 158711
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214210953955975&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 171075
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214210953955975&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 670894
+    }
+   }
+  },
+  {
+   "lang": "필리핀",
+   "no": "2025-외국인전담팀-1391",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214560140864221&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 142190
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214560140864221&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 158415
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214560140864221&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 171724
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214560140864221&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 620414
+    }
+   }
+  },
+  {
+   "lang": "미얀마",
+   "no": "2025-외국인전담팀-1389",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214443032391822&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 89358
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214443032391822&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 186644
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214443032391822&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 170874
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214443032391822&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 246690
+    }
+   }
+  },
+  {
+   "lang": "몽골",
+   "no": "2025-외국인전담팀-1398",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214533024565442&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 128084
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214533024565442&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 170799
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214533024565442&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 155229
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214533024565442&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 648886
+    }
+   }
+  },
+  {
+   "lang": "우즈베키스탄",
+   "no": "2025-외국인전담팀-1388",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214230892544849&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 142138
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214230892544849&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 171806
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214230892544849&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 171358
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111214230892544849&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 698441
+    }
+   }
+  },
+  {
+   "lang": "네팔",
+   "no": "2025-외국인전담팀-1400",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210284695548084&atcflSeq=5&isDirect=N&taskSeCd=",
+     "size": 133614
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210284695548084&atcflSeq=6&isDirect=N&taskSeCd=",
+     "size": 189835
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210284695548084&atcflSeq=7&isDirect=N&taskSeCd=",
+     "size": 122632
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210284695548084&atcflSeq=8&isDirect=N&taskSeCd=",
+     "size": 239208
+    }
+   }
+  },
+  {
+   "lang": "스리랑카",
+   "no": "2025-외국인전담팀-1403",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414065198233003&atcflSeq=5&isDirect=N&taskSeCd=",
+     "size": 116299
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414065198233003&atcflSeq=6&isDirect=N&taskSeCd=",
+     "size": 223387
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414065198233003&atcflSeq=7&isDirect=N&taskSeCd=",
+     "size": 152788
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414065198233003&atcflSeq=8&isDirect=N&taskSeCd=",
+     "size": 270910
+    }
+   }
+  },
+  {
+   "lang": "방글라데시",
+   "no": "2025-외국인전담팀-1402",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414041365976520&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 113003
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414041365976520&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 223746
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414041365976520&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 127528
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414041365976520&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 244706
+    }
+   }
+  },
+  {
+   "lang": "파키스탄",
+   "no": "2025-외국인전담팀-1404",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210301941883051&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 114491
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210301941883051&atcflSeq=5&isDirect=N&taskSeCd=",
+     "size": 214188
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210301941883051&atcflSeq=6&isDirect=N&taskSeCd=",
+     "size": 155407
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111210301941883051&atcflSeq=7&isDirect=N&taskSeCd=",
+     "size": 271537
+    }
+   }
+  },
+  {
+   "lang": "키르기스스탄",
+   "no": "2025-외국인전담팀-1394",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414104714137610&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 127930
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414104714137610&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 170287
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414104714137610&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 154506
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111414104714137610&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 710434
+    }
+   }
+  },
+  {
+   "lang": "타지키스탄",
+   "no": "2025-외국인전담팀-1387",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111213430882364045&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 127858
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111213430882364045&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 170712
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111213430882364045&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 154753
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111213430882364045&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 693539
+    }
+   }
+  },
+  {
+   "lang": "러시아",
+   "no": "2025-외국인전담팀-1385",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413562681173297&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 83969
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413562681173297&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 159406
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413562681173297&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 158907
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413562681173297&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 597868
+    }
+   }
+  },
+  {
+   "lang": "라오스",
+   "no": "2025-외국인전담팀-1401",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413370552318965&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 110186
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413370552318965&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 153620
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413370552318965&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 143234
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413370552318965&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 599179
+    }
+   }
+  },
+  {
+   "lang": "동티모르",
+   "no": "2025-외국인전담팀-1384",
+   "files": {
+    "1p_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413352067011979&atcflSeq=1&isDirect=N&taskSeCd=",
+     "size": 142107
+    },
+    "40_web": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413352067011979&atcflSeq=2&isDirect=N&taskSeCd=",
+     "size": 156927
+    },
+    "1p_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413352067011979&atcflSeq=3&isDirect=N&taskSeCd=",
+     "size": 150085
+    },
+    "40_print": {
+     "url": "https://portal.kosha.or.kr/api/portal24/bizA/p/files/downloadAtchFile?atcflNo=HTR2025111413352067011979&atcflSeq=4&isDirect=N&taskSeCd=",
+     "size": 642921
+    }
+   }
+  }
+ ]
+}

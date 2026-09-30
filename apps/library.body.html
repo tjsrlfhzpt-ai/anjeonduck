@@ -1,0 +1,220 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">서식·자료</a><span>/</span>안전보건 자료실</p>
+  <h1>안전보건 자료실</h1>
+  <p>안전보건공단이 공공누리로 개방한 OPS·포스터·책자·교안·동영상 <strong id="kmTotal">—</strong>건을 한 곳에서 찾습니다. 자료를 누르면 공단 산업안전포털의 원본 화면이 열리고, 거기서 내려받습니다.</p>
+</div></section>
+<div class="wrap stack" style="padding-top:8px;padding-bottom:48px">
+
+  <section class="stack" id="kmSeason" hidden>
+    <div class="sec-head"><div><h2 id="kmSeasonT">이달의 안전 자료</h2><p id="kmSeasonS">계절·시기에 맞는 자료를 최신순으로 골랐습니다.</p></div></div>
+    <div id="kmSeasonRows" class="stack"></div>
+  </section>
+
+  <section class="stack" id="kmAll">
+    <div class="sec-head"><div><h2>전체 자료</h2><p id="kmMeta"></p></div></div>
+    <div class="km-bar">
+      <div class="search-inline km-q"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="kmQ" placeholder="예: 지게차, 밀폐공간, 폭염, 외국인, TBM" aria-label="자료 검색"></div>
+      <select class="sort" id="kmSort" aria-label="정렬"><option value="dt">최신순</option><option value="h">많이 본 순</option></select>
+    </div>
+    <div class="km-filters">
+      <div class="fgroup"><p class="fgroup-label">용도</p><div class="chips" id="kmUses" role="group" aria-label="용도"></div></div>
+      <div class="fgroup"><p class="fgroup-label">자료 형태</p><div class="chips" id="kmShapes" role="group" aria-label="자료 형태"></div></div>
+      <div class="fgroup"><p class="fgroup-label">주제</p><div class="chips" id="kmTopics" role="group" aria-label="주제"></div></div>
+      <div class="km-toggles">
+        <label class="switch"><input type="checkbox" id="kmForeign"><span>외국어 자료만</span></label>
+        <label class="switch"><input type="checkbox" id="kmEdit"><span>고쳐 쓸 수 있는 자료만(제1·2유형)</span></label>
+        <button type="button" class="btn btn-sm btn-ghost" id="kmReset">필터 초기화</button>
+      </div>
+    </div>
+    <p class="count" aria-live="polite">자료 <strong id="kmCount">0</strong>건</p>
+    <ul class="km-grid" id="kmGrid"><li class="km-loading">목록을 불러오는 중…</li></ul>
+    <nav class="km-pager" id="kmPager" aria-label="페이지"></nav>
+  </section>
+
+  <section class="stack">
+    <div class="sec-head"><div><h2>공공누리 유형별 이용 조건</h2><p>카드에 붙은 유형 표시를 확인하고 조건 안에서 쓰세요. 원본 화면의 표시가 우선합니다.</p></div></div>
+    <div class="table-wrap"><table class="dtable km-kogl"><thead><tr><th>유형</th><th>출처 표시</th><th>상업적 이용</th><th>내용 변경</th><th>사업장에서 할 수 있는 일</th></tr></thead><tbody>
+      <tr><th>제1유형</th><td>필요</td><td>가능</td><td>가능</td><td>그대로 또는 고쳐서 게시·교육·배포</td></tr>
+      <tr><th>제2유형</th><td>필요</td><td>불가</td><td>가능</td><td>고쳐서 사내 교육·게시(판매 불가)</td></tr>
+      <tr><th>제3유형</th><td>필요</td><td>가능</td><td>불가</td><td>원본 그대로 게시·배포</td></tr>
+      <tr><th>제4유형</th><td>필요</td><td>불가</td><td>불가</td><td>원본 그대로 사내 게시·교육(판매·수정 불가)</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="stack">
+    <div class="sec-head"><div><h2>다른 자료실</h2></div></div>
+    <ul class="llist" id="lbOfficial"></ul>
+  </section>
+
+  <section class="note">
+    <h2 class="h-sm">출처와 운영 원칙</h2>
+    <ul class="bul hint">
+      <li id="kmSrc"></li>
+      <li>안전duck은 자료 파일을 옮겨 두지 않고 제목·형태·공공누리 유형만 모아 원본으로 연결합니다. 썸네일은 공단 서버의 이미지를 그대로 보여 줍니다.</li>
+      <li>공공누리 표시가 없는 자료는 목록에 싣지 않습니다. 민간 단체·협회·기업 자료는 제목도 옮기지 않습니다.</li>
+      <li>주제 분류와 '이달의 자료'는 제목·키워드를 기준으로 안전duck이 자동으로 나눈 것이라 일부 맞지 않을 수 있습니다.</li>
+    </ul>
+  </section>
+</div>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  var ROOT = "../../";
+  var PORTAL = "https://portal.kosha.or.kr";
+  var PER = 24;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var $ = function (id) { return document.getElementById(id); };
+  if (D && D.official) {
+    $("lbOfficial").innerHTML = D.official.map(function (o) { return '<li><a href="' + esc(o.url) + '" target="_blank" rel="noopener"><strong>' + esc(o.name) + '</strong><span class="muted" style="margin-left:8px;font-size:13px">' + esc(o.desc) + '</span><span class="arr" aria-hidden="true">↗</span></a></li>'; }).join("");
+  }
+  var SEASONS = [
+    { m: [12, 1, 2], t: "한파·한랭질환 대비", k: ["한파", "한랭", "동절기", "겨울철"] },
+    { m: [2, 3, 4], t: "해빙기 붕괴·무너짐 예방", k: ["해빙"] },
+    { m: [10, 11, 12, 1, 2], t: "화재·폭발 예방", k: ["화재"] },
+    { m: [5, 6, 7, 8], t: "밀폐공간 질식 예방", k: ["질식", "밀폐"] },
+    { m: [6, 7, 8, 9], t: "폭염·온열질환 예방", k: ["폭염", "온열"] },
+    { m: [6, 7, 8], t: "장마·집중호우 대비", k: ["장마", "집중호우", "호우", "침수"] },
+    { m: [8, 9, 10], t: "태풍·강풍 대비", k: ["태풍", "강풍"] },
+    { m: [8, 9, 10], t: "벌목·예초 작업", k: ["예초", "벌초", "벌목"] }
+  ];
+  var KOGL = { 1: "제1유형", 2: "제2유형", 3: "제3유형", 4: "제4유형" };
+  var KOGL_TIP = { 1: "출처표시", 2: "출처표시·상업적 이용금지", 3: "출처표시·변경금지", 4: "출처표시·상업적 이용금지·변경금지" };
+  var USES = [
+    { t: "현장 게시·안전디자인", f: ["포스터", "스티커", "현수막", "달력", "광고", "홍보용품"] },
+    { t: "교육자료", f: ["교안(PPT)", "동영상", "애니메이션", "VR", "만화"] },
+    { t: "OPS(한 장 안내)", f: ["OPS"] },
+    { t: "가이드·책자", f: ["책자", "리플릿", "팸플릿", "전자출판", "전자프로그램", "기타"] }
+  ];
+  var useOf = [];
+  var C, N, shapes, topics, st = { q: "", use: -1, shape: -1, topic: -1, foreign: false, edit: false, sort: "dt", page: 1 };
+  try {
+    var sp = new URLSearchParams(location.search);
+    st.q = sp.get("q") || ""; if (st.q) $("kmQ").value = st.q;
+  } catch (e) {}
+
+  function card(i) {
+    var th = C.th[i] ? PORTAL + "/api/portal24/bizV/p/VCPDG01007/viewThumbnail?atcflNo=" + encodeURIComponent(C.th[i]) + ",1" : "";
+    var dt = C.dt[i] ? C.dt[i].slice(0, 4) + "." + C.dt[i].slice(4, 6) + "." + C.dt[i].slice(6, 8) : "";
+    var la = C.la[i] >= 0 ? D2.langs[C.la[i]] : "";
+    var laShort = la ? (la.split(",").length > 2 ? "다국어 " + la.split(",").length + "개" : la.replace(/\([^)]*\)/g, "")) : "";
+    return '<li class="km-card"><a href="' + PORTAL + '/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=' + C.s[i] + '" target="_blank" rel="noopener">' +
+      '<span class="km-th">' + (th ? '<img src="' + esc(th) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : "") + '<span class="km-shape">' + esc(shapes[C.f[i]]) + "</span></span>" +
+      '<span class="km-body"><strong class="km-t">' + esc(C.n[i]) + "</strong>" +
+      '<span class="km-m"><span class="km-kogl k' + C.g[i] + '" title="' + esc(KOGL_TIP[C.g[i]]) + '">' + KOGL[C.g[i]] + "</span>" + (laShort ? '<span class="km-la">' + esc(laShort) + "</span>" : "") + "</span>" +
+      '<span class="km-d">' + esc(dt) + " · 조회 " + (C.h[i] || 0).toLocaleString("ko-KR") + "</span></span></a></li>";
+  }
+
+  function match(i, terms) {
+    if (st.use >= 0 && useOf[C.f[i]] !== st.use) return false;
+    if (st.shape >= 0 && C.f[i] !== st.shape) return false;
+    if (st.topic >= 0 && C.t[i].indexOf(st.topic) < 0) return false;
+    if (st.foreign && C.la[i] < 0) return false;
+    if (st.edit && !(C.g[i] === 1 || C.g[i] === 2)) return false;
+    if (terms.length) {
+      var hay = (C.n[i] + " " + C.k[i] + " " + (C.la[i] >= 0 ? D2.langs[C.la[i]] : "") + " " + shapes[C.f[i]]).toLowerCase();
+      for (var j = 0; j < terms.length; j++) if (hay.indexOf(terms[j]) < 0) return false;
+    }
+    return true;
+  }
+
+  function render() {
+    var terms = st.q.toLowerCase().split(/\s+/).filter(Boolean), idx = [];
+    for (var i = 0; i < N; i++) if (match(i, terms)) idx.push(i);
+    var key = st.sort;
+    idx.sort(function (a, b) { return key === "h" ? (C.h[b] - C.h[a]) : (C.dt[b] < C.dt[a] ? -1 : C.dt[b] > C.dt[a] ? 1 : C.s[b] - C.s[a]); });
+    var pages = Math.max(1, Math.ceil(idx.length / PER));
+    if (st.page > pages) st.page = pages;
+    $("kmCount").textContent = idx.length.toLocaleString("ko-KR");
+    var slice = idx.slice((st.page - 1) * PER, st.page * PER);
+    $("kmGrid").innerHTML = slice.map(card).join("") || '<li class="empty"><p>조건에 맞는 자료가 없습니다. 검색어나 필터를 줄여 보세요.</p></li>';
+    var p = st.page, btns = [];
+    function b(n, label, cur) { return '<button type="button" class="km-pg' + (cur ? " on" : "") + '" data-p="' + n + '"' + (cur ? ' aria-current="page"' : "") + ">" + label + "</button>"; }
+    if (pages > 1) {
+      if (p > 1) btns.push(b(p - 1, "‹ 이전"));
+      var lo = Math.max(1, p - 2), hi = Math.min(pages, lo + 4); lo = Math.max(1, hi - 4);
+      if (lo > 1) btns.push(b(1, "1"), '<span class="km-gap">…</span>');
+      for (var k = lo; k <= hi; k++) btns.push(b(k, String(k), k === p));
+      if (hi < pages) btns.push('<span class="km-gap">…</span>', b(pages, String(pages)));
+      if (p < pages) btns.push(b(p + 1, "다음 ›"));
+    }
+    $("kmPager").innerHTML = btns.join("");
+  }
+
+  function chips(el, list, key, counts) {
+    el.innerHTML = '<button type="button" class="chip" data-v="-1" aria-pressed="true">전체</button>' +
+      list.map(function (x, i) { return counts[i] ? '<button type="button" class="chip" data-v="' + i + '" aria-pressed="false">' + esc(x) + ' <span class="n">' + counts[i].toLocaleString("ko-KR") + "</span></button>" : ""; }).join("");
+    el.addEventListener("click", function (ev) {
+      var c = ev.target.closest(".chip"); if (!c) return;
+      el.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === c ? "true" : "false"); });
+      st[key] = +c.dataset.v; st.page = 1; render();
+    });
+  }
+
+  function season() {
+    var m = new Date().getMonth() + 1, rows = [];
+    SEASONS.filter(function (s) { return s.m.indexOf(m) >= 0; }).forEach(function (s) {
+      var hit = [];
+      for (var i = 0; i < N; i++) {
+        var hay = C.n[i] + " " + C.k[i];
+        if (s.k.some(function (k) { return hay.indexOf(k) >= 0; })) hit.push(i);
+      }
+      if (hit.length < 3) return;
+      hit.sort(function (a, b) { return C.dt[b] < C.dt[a] ? -1 : C.dt[b] > C.dt[a] ? 1 : 0; });
+      rows.push('<div class="km-row"><div class="km-row-h"><h3>' + esc(s.t) + '</h3><button type="button" class="linkbtn" data-sq="' + esc(s.k[0]) + '">' + hit.length.toLocaleString("ko-KR") + "건 모두 보기 →</button></div>" +
+        '<ul class="km-grid km-strip">' + hit.slice(0, 6).map(card).join("") + "</ul></div>");
+    });
+    if (rows.length) {
+      $("kmSeasonT").textContent = m + "월의 안전 자료";
+      $("kmSeasonRows").innerHTML = rows.join("");
+      $("kmSeason").hidden = false;
+    }
+  }
+
+  var D2;
+  function start(data) {
+    D2 = data; C = data.cols; N = C.s.length; shapes = data.shapes; topics = data.topics;
+    $("kmTotal").textContent = N.toLocaleString("ko-KR");
+    $("kmMeta").textContent = "공단 자료실 전체 " + data.total_all.toLocaleString("ko-KR") + "건 중 공공누리 표시가 있는 " + N.toLocaleString("ko-KR") + "건 · 목록 확인일 " + data.checked;
+    $("kmSrc").textContent = "출처: 안전보건공단 산업안전포털 안전보건 자료실. 각 자료의 저작권은 안전보건공단에 있으며, 자료마다 표시된 공공누리 유형 조건에 따라 이용할 수 있습니다.";
+    useOf = shapes.map(function (nm) { for (var u = 0; u < USES.length; u++) if (USES[u].f.indexOf(nm) >= 0) return u; return 3; });
+    var sc = shapes.map(function () { return 0; }), tc = topics.map(function () { return 0; });
+    for (var i = 0; i < N; i++) { sc[C.f[i]]++; C.t[i].forEach(function (t) { tc[t]++; }); }
+    var order = shapes.map(function (_, i) { return i; }).sort(function (a, b) { return sc[b] - sc[a]; });
+    var sList = order.map(function (i) { return shapes[i]; }), sCnt = order.map(function (i) { return sc[i]; });
+    chips($("kmShapes"), sList, "shapeIdx", sCnt);
+    $("kmShapes").addEventListener("click", function (ev) { var c = ev.target.closest(".chip"); if (!c) return; st.shape = +c.dataset.v < 0 ? -1 : order[+c.dataset.v]; st.page = 1; render(); });
+    chips($("kmTopics"), topics, "topic", tc);
+    var uc = USES.map(function () { return 0; });
+    for (var q = 0; q < N; q++) uc[useOf[C.f[q]]]++;
+    chips($("kmUses"), USES.map(function (u) { return u.t; }), "use", uc);
+    season(); render();
+  }
+
+  $("kmQ").addEventListener("input", function () { st.q = this.value.trim(); st.page = 1; render(); });
+  $("kmSort").addEventListener("change", function () { st.sort = this.value; st.page = 1; render(); });
+  $("kmForeign").addEventListener("change", function () { st.foreign = this.checked; st.page = 1; render(); });
+  $("kmEdit").addEventListener("change", function () { st.edit = this.checked; st.page = 1; render(); });
+  $("kmReset").addEventListener("click", function () {
+    st = { q: "", use: -1, shape: -1, topic: -1, foreign: false, edit: false, sort: st.sort, page: 1 };
+    $("kmQ").value = ""; $("kmForeign").checked = false; $("kmEdit").checked = false;
+    document.querySelectorAll("#kmUses .chip, #kmShapes .chip, #kmTopics .chip").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.v === "-1" ? "true" : "false"); });
+    render();
+  });
+  $("kmPager").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-p]"); if (!b) return;
+    st.page = +b.dataset.p; render(); $("kmAll").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-sq]"); if (!b) return;
+    st.q = b.dataset.sq; $("kmQ").value = st.q; st.page = 1; render(); $("kmAll").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  var sc = document.createElement("script");
+  sc.src = ROOT + "assets/data/kosha.js";
+  sc.onload = function () { if (window.ANJEONDUCK_KOSHA) start(window.ANJEONDUCK_KOSHA); else sc.onerror(); };
+  sc.onerror = function () { $("kmGrid").innerHTML = '<li class="empty"><p>자료 목록을 불러오지 못했습니다. 잠시 뒤 새로고침하거나 <a href="' + PORTAL + '/archive/cent-archive/master-arch" target="_blank" rel="noopener">산업안전포털 자료실 ↗</a>에서 찾으세요.</p></li>'; };
+  document.body.appendChild(sc);
+})();
+</script>

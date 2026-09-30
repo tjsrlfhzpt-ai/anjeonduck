@@ -1,0 +1,330 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">무료 도구</a><span>/</span><a href="../">서식 작성기</a><span>/</span><span id="fCrumb"></span></p>
+  <h1 id="fTitle"></h1>
+  <p id="fDesc"></p>
+</div></section>
+<div class="wrap form-wrap">
+  <div class="form-bar no-print" role="toolbar" aria-label="서식 도구">
+    <button type="button" class="btn" id="fPrint">인쇄 · PDF 저장</button>
+    <button type="button" class="btn btn-ghost" id="fSample" hidden>예시로 채우기</button>
+    <button type="button" class="btn btn-ghost" id="fProfileBtn" aria-expanded="false" aria-controls="fProfile">사업장 정보</button>
+    <button type="button" class="btn btn-ghost" id="fClear">모두 비우기</button>
+    <span class="form-save" id="fSaved" aria-live="polite"></span>
+  </div>
+  <section class="fprof no-print" id="fProfile" hidden>
+    <h2 class="h-sm">사업장 정보 <span class="muted">— 한 번 넣으면 모든 서식의 해당 칸에 자동으로 들어갑니다(이 브라우저에만 저장)</span></h2>
+    <div class="fprof-grid" id="fProfFields"></div>
+  </section>
+  <section class="fauto no-print" id="fAuto" hidden></section>
+  <p class="hint no-print" id="fBasis"></p>
+  <article class="paper" id="paper" aria-label="서식 본문"></article>
+  <section class="note no-print" style="margin-top:20px">
+    <h2 class="h-sm">사용 안내</h2>
+    <ul class="bul">
+      <li>회색 칸은 모두 고칠 수 있습니다 — 결재란 이름, 점검 항목 문구, 표의 기본 문구까지. 행·점검 항목도 추가할 수 있습니다.</li>
+      <li>입력 내용은 이 브라우저에만 자동 저장되고 서버로 보내지 않습니다. "모두 비우기"를 누르면 원래 서식으로 돌아갑니다.</li>
+      <li>인쇄 창에서 대상을 "PDF로 저장"으로 바꾸면 파일로 남길 수 있습니다. 여백은 "기본", 배율은 100%를 권장합니다.</li>
+      <li>법정 서식이 따로 정해진 서류가 아니라, 법령이 요구하는 기재 사항을 빠짐없이 담도록 만든 참고 서식입니다. 사업장 상황에 맞게 고쳐 쓰세요.</li>
+    </ul>
+    <p class="muted" style="margin-top:10px" id="fSrc"></p>
+  </section>
+</div>
+<script>
+(function () {
+  "use strict";
+  var F = /*@DATA@*/null;
+  if (!F) return;
+  var KEY = "anjeonduck.form." + F.id, CO = "anjeonduck.company";
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+  var company = "";
+  try { company = localStorage.getItem(CO) || ""; } catch (e) {}
+  var A = F.auto || {}, PK = "anjeonduck.profile", profile = {};
+  try { profile = JSON.parse(localStorage.getItem(PK) || "{}") || {}; } catch (e) { profile = {}; }
+  if (!profile.company && company) profile.company = company;
+  var PROF = [["company", "사업장(회사·현장)명"], ["ceo", "대표자(경영책임자)"], ["resp", "안전보건관리책임자"], ["manager", "안전관리자"], ["health", "보건관리자"], ["sup", "관리감독자"]];
+  function pad(n) { return ("0" + n).slice(-2); }
+  function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function parseD(v) { var m = String(v || "").match(/(\d{4})[.\-\/ ]\s*(\d{1,2})[.\-\/ ]\s*(\d{1,2})/); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+  function addM(d, m) { var r = new Date(d); var day = r.getDate(); r.setDate(1); r.setMonth(r.getMonth() + m); r.setDate(Math.min(day, new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate())); return r; }
+  function autoDefault(k) {
+    if (A.profile && A.profile[k]) return profile[A.profile[k]] || "";
+    if (A.today && A.today.indexOf(k) >= 0) return ymd(new Date());
+    return null;
+  }
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function val(k, d) {
+    if (Object.prototype.hasOwnProperty.call(state, k)) return state[k];
+    var a = autoDefault(k);
+    return a != null && a !== "" ? a : (d == null ? "" : d);
+  }
+  function ed(k, d, cls, ph) {
+    return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="true" role="textbox" aria-multiline="true" data-k="' + esc(k) + '"' + (ph ? ' data-ph="' + esc(ph) + '"' : "") + ">" + esc(val(k, d)) + "</div>";
+  }
+  function inp(f, k) {
+    var v = val(k, f.default);
+    if (f.type === "select") return '<select class="fi" data-k="' + esc(k) + '">' + ['<option value=""></option>'].concat(f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; })).join("") + "</select>";
+    if (f.type === "date") return '<input class="fi" type="date" data-k="' + esc(k) + '" value="' + esc(v) + '"' + (v ? "" : " data-empty") + ">";
+    if (f.type === "radio") return '<span class="radios">' + f.options.map(function (o) { return '<label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (o === v ? " checked" : "") + ">" + esc(o) + "</label>"; }).join("") + "</span>";
+    return ed(k, f.default, f.multi ? "multi" : "", f.ph);
+  }
+
+  function approval(list) {
+    if (!list || !list.length) return "";
+    return '<table class="appr"><tr><th rowspan="2" class="appr-h">결<br>재</th>' + list.map(function (a, i) { return "<th>" + ed("ap." + i, a, "ap") + "</th>"; }).join("") + "</tr><tr>" + list.map(function () { return '<td class="appr-sign"></td>'; }).join("") + "</tr></table>";
+  }
+
+  function secFields(s, si) {
+    var cols = s.cols || 2, cells = [], row = [], used = 0;
+    s.fields.forEach(function (f) {
+      var span = Math.min(f.span || 1, cols);
+      if (used + span > cols) { cells.push(row); row = []; used = 0; }
+      row.push({ f: f, span: span }); used += span;
+    });
+    if (row.length) cells.push(row);
+    return '<table class="ftab"><colgroup>' + new Array(cols + 1).join('<col class="c-l"><col>') + "</colgroup>" + cells.map(function (r) {
+      var left = cols - r.reduce(function (a, c) { return a + c.span; }, 0);
+      return "<tr>" + r.map(function (c, i) {
+        var extra = i === r.length - 1 ? left : 0;
+        return '<th scope="row">' + esc(c.f.label) + "</th><td colspan=\"" + (c.span * 2 - 1 + extra * 2) + '">' + inp(c.f, "f." + c.f.k) + "</td>";
+      }).join("") + "</tr>";
+    }).join("") + "</table>";
+  }
+
+  function tableRows(s) {
+    var n = +val("n." + s.k, s.rows || 5);
+    return Math.max(n, (s.defaults || []).length, 1);
+  }
+  function secTable(s) {
+    var n = tableRows(s);
+    var head = "<thead><tr>" + s.cols.map(function (c) { return '<th style="' + (c.w ? "width:" + c.w + "%" : "") + '">' + esc(c.label) + "</th>"; }).join("") + "</tr></thead>";
+    var body = "";
+    for (var r = 0; r < n; r++) {
+      body += "<tr>" + s.cols.map(function (c, ci) {
+        if (c.auto) return '<td class="num">' + (r + 1) + "</td>";
+        if (c.sign) return '<td class="sign"></td>';
+        var d = s.defaults && s.defaults[r] ? s.defaults[r][ci] : "";
+        if (c.options) return "<td>" + inp({ type: "select", options: c.options, default: d }, "t." + s.k + "." + r + "." + ci) + "</td>";
+        return "<td>" + ed("t." + s.k + "." + r + "." + ci, d, c.multi ? "multi" : "") + "</td>";
+      }).join("") + "</tr>";
+    }
+    return '<table class="gtab">' + head + "<tbody>" + body + "</tbody></table>" +
+      (s.fixed ? "" : '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-add="' + esc(s.k) + '">행 추가</button> <button type="button" class="btn btn-sm btn-ghost" data-del="' + esc(s.k) + '">마지막 행 삭제</button></p>');
+  }
+  function secCheck(s) {
+    var opts = s.opts || ["적합", "부적합", "해당없음"];
+    var over = null; try { over = state["cx." + s.k] ? JSON.parse(state["cx." + s.k]) : null; } catch (e) { over = null; }
+    var extra = +val("cn." + s.k, 0), items = (over || s.items).slice();
+    for (var x = 0; x < extra; x++) items.push("");
+    var rows = items.map(function (it, i) {
+      var k = "c." + s.k + "." + i;
+      if (typeof it === "object" && it.group) return '<tr class="grp"><th colspan="' + (3 + opts.length) + '">' + esc(it.group) + "</th></tr>";
+      return '<tr><td class="num">' + (i + 1 - items.slice(0, i).filter(function (x) { return typeof x === "object"; }).length) + '</td><td class="item">' + ed("ci." + s.k + "." + i, it, "multi", "점검 항목 입력") + "</td>" +
+        opts.map(function (o) { var on = val(k) === o; return '<td class="opt"><label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (on ? " checked" : "") + '><span class="sr">' + esc(o) + "</span></label></td>"; }).join("") +
+        "<td>" + ed(k + ".r", "") + "</td></tr>";
+    }).join("");
+    return '<table class="gtab ctab"><thead><tr><th style="width:6%">번호</th><th>' + esc(s.item_label || "점검 항목") + "</th>" + opts.map(function (o) { return '<th style="width:9%">' + esc(o) + "</th>"; }).join("") + '<th style="width:22%">' + esc(s.remark_label || "비고·조치") + "</th></tr></thead><tbody>" + rows + "</tbody></table>" +
+      '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-addc="' + esc(s.k) + '">점검 항목 추가</button>' + (extra ? ' <button type="button" class="btn btn-sm btn-ghost" data-delc="' + esc(s.k) + '">추가한 항목 삭제</button>' : "") + "</p>";
+  }
+  function secSigns(s) {
+    return '<table class="gtab"><thead><tr>' + s.cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody><tr>" + s.cols.map(function (c, i) { return i === s.cols.length - 1 && s.sign_last !== false ? '<td class="sign"></td>' : "<td>" + ed("s." + s.k + "." + i, "") + "</td>"; }).join("") + "</tr></tbody></table>";
+  }
+
+  function render() {
+    var h = '<header class="paper-h"><div class="paper-co">' + '<div class="ed co" contenteditable="true" role="textbox" data-co="1" data-ph="회사·현장명">' + esc(company) + "</div></div>" +
+      '<h2 class="paper-t">' + esc(F.doc_title || F.title) + "</h2>" + approval(F.approval) + "</header>";
+    F.sections.forEach(function (s, si) {
+      var t = s.title ? '<h3 class="sec-t">' + esc(s.title) + "</h3>" : "";
+      if (s.type === "fields") h += t + secFields(s, si);
+      else if (s.type === "text") h += t + ed("x." + s.k, s.default, "multi box" + (s.tall ? " tall" : ""), s.ph);
+      else if (s.type === "table") h += t + secTable(s);
+      else if (s.type === "check") h += t + secCheck(s);
+      else if (s.type === "signs") h += t + secSigns(s);
+      else if (s.type === "note") h += '<p class="paper-note">' + esc(s.text) + "</p>";
+      else if (s.type === "list") h += t + '<ol class="paper-list">' + s.items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol>";
+    });
+    (A.next || []).forEach(function (n, i) { h += '<p class="paper-next" id="fNext' + i + '"></p>'; });
+    if (F.footer !== false) h += '<p class="paper-foot">' + esc(F.law ? "근거: " + F.law : "") + "</p>";
+    document.getElementById("paper").innerHTML = h;
+    runCalc();
+  }
+
+  // ---------- 자동 계산: 인원 집계, 예산 합계·집행률, 보수교육 기한, 다음 예정일
+  function num(v) { var x = String(v || "").replace(/[,\s원천만]/g, ""); return x && !isNaN(+x) ? +x : null; }
+  function putAuto(k, v) {
+    var cur = state[k], last = state["_a." + k];
+    if (cur !== undefined && cur !== "" && cur !== last) return;  // 사용자가 직접 고친 값은 건드리지 않음
+    state[k] = v; state["_a." + k] = v;
+    var el = document.querySelector('[data-k="' + k.replace(/"/g, "") + '"]');
+    if (el && el !== document.activeElement) { if (el.isContentEditable) el.textContent = v; else el.value = v; }
+  }
+  function cell(t, r, c) { return String(val("t." + t + "." + r + "." + c, "") || "").trim(); }
+  function runCalc() {
+    (A.calc || []).forEach(function (c) {
+      var s = F.sections.filter(function (x) { return x.k === c.table; })[0]; if (!s) return;
+      var n = tableRows(s);
+      if (c.type === "count") {
+        var cnt = 0; for (var r = 0; r < n; r++) if (cell(c.table, r, c.col)) cnt++;
+        putAuto(c.target, cnt ? cnt + "명" : "");
+      } else if (c.type === "budget") {
+        var tp = 0, te = 0;
+        for (var r2 = 0; r2 < n; r2++) {
+          var p = num(cell(c.table, r2, c.plan)), x = num(cell(c.table, r2, c.exec));
+          if (p) tp += p; if (x) te += x;
+          putAuto("t." + c.table + "." + r2 + "." + c.rate, p && x != null ? (Math.round(x / p * 1000) / 10) + "%" : "");
+        }
+        var el = document.getElementById("fSum"), sec = document.querySelector('[data-add="' + c.table + '"]');
+        var line = "합계 — 편성 " + tp.toLocaleString("ko-KR") + " · 집행 " + te.toLocaleString("ko-KR") + " · 집행률 " + (tp ? Math.round(te / tp * 1000) / 10 + "%" : "—");
+        if (!el && sec) { el = document.createElement("p"); el.id = "fSum"; el.className = "paper-sum"; sec.parentNode.parentNode.insertBefore(el, sec.parentNode); }
+        if (el) el.textContent = line;
+      } else if (c.type === "due") {
+        var today = new Date(); today.setHours(0, 0, 0, 0);
+        for (var r3 = 0; r3 < n; r3++) {
+          var first = parseD(cell(c.table, r3, c.from)), last = parseD(cell(c.table, r3, c.from + 1)), appt = parseD(cell(c.table, r3, c.base_fallback)), txt = "";
+          if (first) {
+            // 신규교육 이수일 기준 매 2년 되는 날 ±6개월. 마지막 보수교육이 들어간 주기 다음 차례를 계산
+            var k = 1;
+            if (last) while (addM(first, 24 * k - 6) <= last) k++;
+            var base = addM(first, 24 * k), end = addM(base, 6);
+            txt = (end < today ? "기한 경과 " : "") + ymd(base) + " (" + ymd(addM(base, -6)) + "~" + ymd(end) + ")";
+          } else if (appt) {
+            var due3 = addM(appt, 3);
+            txt = (due3 < today ? "기한 경과 " : "") + "신규교육 기한 " + ymd(due3);
+          }
+          putAuto("t." + c.table + "." + r3 + "." + c.target, txt);
+        }
+      }
+    });
+    (A.next || []).forEach(function (nx, i) {
+      var el = document.getElementById("fNext" + i); if (!el) return;
+      var d = parseD(val(nx.from, "")), add = null;
+      if (nx.by) { var sel = val(nx.by, ""); Object.keys(nx.map).forEach(function (key) { if (sel.indexOf(key) >= 0) add = nx.map[key]; }); }
+      else add = { months: nx.months || 0, days: nx.days || 0 };
+      if (!d || !add) { el.textContent = ""; return; }
+      var due = add.months ? addM(d, add.months) : new Date(d.getFullYear(), d.getMonth(), d.getDate() + (add.days || 0));
+      el.textContent = nx.label + ": " + ymd(due) + "까지  (" + nx.basis + ")";
+    });
+  }
+
+  var tm = null;
+  function flush() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(CO, company); profile.company = company; localStorage.setItem(PK, JSON.stringify(profile)); } catch (e) {}
+  }
+  window.addEventListener("pagehide", function () { if (tm) { clearTimeout(tm); flush(); } });
+  function save() {
+    clearTimeout(tm);
+    tm = setTimeout(function () {
+      tm = null;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(CO, company); profile.company = company; localStorage.setItem(PK, JSON.stringify(profile)); document.getElementById("fSaved").textContent = "이 브라우저에 저장됨"; }
+      catch (e) { document.getElementById("fSaved").textContent = "저장할 수 없는 환경입니다(인쇄는 가능)"; }
+    }, 300);
+  }
+  var paper = document.getElementById("paper");
+  paper.addEventListener("input", function (ev) {
+    var t = ev.target;
+    if (t.dataset.co) { company = t.innerText.trim(); save(); return; }
+    var k = t.dataset.k; if (!k) return;
+    state[k] = t.isContentEditable ? t.innerText.replace(/\n$/, "") : t.value;
+    runCalc(); save();
+  });
+  paper.addEventListener("change", function (ev) { var t = ev.target; if (t.dataset.k && !t.isContentEditable) { state[t.dataset.k] = t.value; if (t.type === "date") t.toggleAttribute("data-empty", !t.value); runCalc(); save(); } });
+  paper.addEventListener("paste", function (ev) {
+    var t = ev.target.closest && ev.target.closest("[contenteditable]"); if (!t) return;
+    ev.preventDefault();
+    var text = (ev.clipboardData || window.clipboardData).getData("text");
+    if (!t.classList.contains("multi")) text = text.replace(/\s*\n\s*/g, " ");
+    document.execCommand("insertText", false, text);
+  });
+  paper.addEventListener("keydown", function (ev) {
+    var t = ev.target; if (ev.key === "Enter" && t.isContentEditable && !t.classList.contains("multi")) ev.preventDefault();
+  });
+  paper.addEventListener("click", function (ev) {
+    var c = ev.target.closest("[data-addc],[data-delc]");
+    if (c) {
+      var ck = c.dataset.addc || c.dataset.delc, cs = F.sections.filter(function (x) { return x.k === ck; })[0], n0 = +val("cn." + ck, 0);
+      var baseN = (function () { try { return state["cx." + ck] ? JSON.parse(state["cx." + ck]).length : cs.items.length; } catch (e) { return cs.items.length; } })();
+      if (c.dataset.addc) n0++; else if (n0 > 0) { n0--; var ix = baseN + n0; delete state["c." + ck + "." + ix]; delete state["ci." + ck + "." + ix]; delete state["c." + ck + "." + ix + ".r"]; }
+      state["cn." + ck] = n0; save(); render(); return;
+    }
+    var a = ev.target.closest("[data-add],[data-del]"); if (!a) return;
+    var k = a.dataset.add || a.dataset.del, s = F.sections.filter(function (x) { return x.k === k; })[0];
+    var n = tableRows(s);
+    if (a.dataset.add) n++; else if (n > 1) { n--; s.cols.forEach(function (c, ci) { delete state["t." + k + "." + n + "." + ci]; }); }
+    state["n." + k] = n; save(); render();
+  });
+  document.getElementById("fPrint").addEventListener("click", function () { window.print(); });
+  document.getElementById("fClear").addEventListener("click", function () {
+    if (!window.confirm("이 서식에 입력한 내용을 모두 지울까요? (회사명은 남습니다)")) return;
+    state = {}; try { localStorage.removeItem(KEY); } catch (e) {}
+    render(); document.getElementById("fSaved").textContent = "비웠습니다";
+  });
+  if (F.sample) {
+    var sb = document.getElementById("fSample"); sb.hidden = false;
+    sb.addEventListener("click", function () { Object.keys(F.sample).forEach(function (k) { state[k] = F.sample[k]; }); save(); render(); });
+  }
+  // ---------- 사업장 정보
+  var pb = document.getElementById("fProfileBtn"), pp = document.getElementById("fProfile");
+  document.getElementById("fProfFields").innerHTML = PROF.map(function (p) {
+    return '<label class="field"><span class="label">' + esc(p[1]) + '</span><input type="text" data-pf="' + p[0] + '" value="' + esc(p[0] === "company" ? company || profile.company || "" : profile[p[0]] || "") + '"></label>';
+  }).join("");
+  pb.addEventListener("click", function () { pp.hidden = !pp.hidden; pb.setAttribute("aria-expanded", String(!pp.hidden)); });
+  pp.addEventListener("input", function (ev) {
+    var k = ev.target.dataset.pf; if (!k) return;
+    profile[k] = ev.target.value.trim(); if (k === "company") company = profile[k];
+    save(); render();
+  });
+
+  // ---------- 자동 채우기(법령 기준 프리셋)
+  function applyOption(pk, o) {
+    var set = o.set || null;
+    if (o.variants) { var ctx = pk.depends ? val(pk.depends, "") : ""; set = o.variants[ctx] || o.variants["*"]; }
+    var changes = {}, touched = [];
+    Object.keys(set || {}).forEach(function (k) { changes[k] = set[k]; });
+    if (pk.target && !o.variants) changes[pk.target] = o.label;
+    Object.keys(o.rows || {}).forEach(function (tk) {
+      var rows = o.rows[tk], sec = F.sections.filter(function (x) { return x.k === tk; })[0];
+      changes["n." + tk] = Math.max(rows.length, sec && sec.defaults ? sec.defaults.length : 0);
+      rows.forEach(function (row, r) { row.forEach(function (v, c) { if (v !== "" && v != null) changes["t." + tk + "." + r + "." + c] = v; }); });
+    });
+    Object.keys(o.checks || {}).forEach(function (ck) {
+      var items = o.checks[ck];
+      Object.keys(state).forEach(function (k) { if (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) delete state[k]; });
+      delete state["cn." + ck];
+      if (items.length) changes["cx." + ck] = JSON.stringify(items); else delete state["cx." + ck];
+    });
+    Object.keys(changes).forEach(function (k) { if (k.charAt(0) !== "n" && state[k] && state[k] !== changes[k] && String(state[k]).trim()) touched.push(k); });
+    if (touched.length && !window.confirm("이미 입력한 내용 일부가 법령 기준 문구로 바뀝니다. 계속할까요?")) return;
+    Object.keys(changes).forEach(function (k) { state[k] = changes[k]; });
+    save(); render();
+    document.getElementById("fSaved").textContent = "'" + o.label + "' 기준으로 채웠습니다 — 현장에 맞게 고쳐 쓰세요";
+  }
+  if (A.pickers && A.pickers.length) {
+    var box = document.getElementById("fAuto");
+    box.hidden = false;
+    box.innerHTML = '<h2 class="h-sm">자동 채우기 <span class="muted">— 법령 원문 기준 문구가 들어갑니다</span></h2>' + A.pickers.map(function (pk, i) {
+      var single = pk.options.length === 1;
+      return '<div class="fauto-row"><label class="field"><span class="label">' + esc(pk.label) + "</span>" +
+        (single ? '<span class="fauto-one">' + esc(pk.options[0].label) + "</span>" :
+          '<select class="sort" data-pick="' + i + '"><option value="">선택하세요</option>' + pk.options.map(function (o, j) { return '<option value="' + j + '">' + esc(o.label) + "</option>"; }).join("") + "</select>") +
+        '</label><button type="button" class="btn btn-sm" data-apply="' + i + '">' + esc(pk.button || "채우기") + "</button>" +
+        (pk.hint ? '<p class="hint">' + esc(pk.hint) + "</p>" : "") + "</div>";
+    }).join("") + (A.source ? '<p class="src-line">기준: ' + esc(A.source) + (A.checked ? " · 확인 " + esc(A.checked) : "") + "</p>" : "");
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest("[data-apply]"); if (!b) return;
+      var pk = A.pickers[+b.dataset.apply], sel = box.querySelector('[data-pick="' + b.dataset.apply + '"]');
+      var o = pk.options.length === 1 ? pk.options[0] : (sel && sel.value !== "" ? pk.options[+sel.value] : null);
+      if (!o) { if (sel) sel.focus(); document.getElementById("fSaved").textContent = "먼저 " + pk.label + "을(를) 고르세요"; return; }
+      applyOption(pk, o);
+    });
+  }
+
+  document.getElementById("fTitle").textContent = F.title;
+  document.getElementById("fCrumb").textContent = F.short || F.title;
+  document.getElementById("fDesc").textContent = F.desc || "";
+  document.getElementById("fBasis").textContent = F.law ? "근거: " + F.law + (F.checked ? " · 원문 확인 " + F.checked : "") : "";
+  var src = document.getElementById("fSrc");
+  if (F.source_url) src.innerHTML = '법령 원문: <a href="' + esc(F.source_url) + '" target="_blank" rel="noopener">국가법령정보센터 ↗</a>';
+  render();
+})();
+</script>

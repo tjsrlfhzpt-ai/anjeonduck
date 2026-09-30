@@ -1,0 +1,69 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">서식·자료</a><span>/</span>안전보건표지</p>
+  <h1>안전보건표지 40종</h1>
+  <p id="sgLaw"></p>
+</div></section>
+<div class="wrap stack" style="padding-top:8px;padding-bottom:48px">
+  <div class="listbar sg-bar">
+    <div class="chips" role="group" aria-label="종류" id="sgCats"></div>
+    <div class="search-inline">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="sgQ" placeholder="예: 안전모, 비상구, 105, helmet" aria-label="표지 검색"></div>
+  </div>
+  <p class="count" aria-live="polite">표지 <strong id="sgCount">0</strong>종 · 카드를 누르면 그 표지 한 장(A4)이 열립니다. 열린 화면에서 인쇄하세요.</p>
+  <ul class="sg-grid" id="sgGrid"></ul>
+
+  <section class="stack" style="margin-top:28px">
+    <div class="sec-head"><div><h2>20개 언어 전체 파일</h2><p>외국인 근로자가 있는 사업장용. 안전보건공단이 만든 원본 파일을 그대로 내려받습니다(40종 묶음·1쪽 요약, 웹용·인쇄용).</p></div></div>
+    <div class="table-wrap"><table class="dtable sg-lang"><thead><tr><th>언어</th><th>40종 (웹용)</th><th>40종 (인쇄용)</th><th>1쪽 요약 (웹용)</th><th>1쪽 요약 (인쇄용)</th></tr></thead><tbody id="sgLang"></tbody></table></div>
+  </section>
+
+  <section class="note">
+    <h2 class="h-sm">출처 및 이용 조건</h2>
+    <p id="sgSrc"></p>
+    <ul class="bul hint" style="margin-top:8px">
+      <li>원본 파일을 바꾸지 않고 그대로 제공합니다. 표지 이미지는 목록에서 찾기 쉽도록 원본을 작게 보여 주는 미리보기입니다.</li>
+      <li>상업적으로 이용(판매용 표지판 제작 등)할 수 없습니다. 사업장 게시·교육용으로 쓰세요.</li>
+      <li>표지의 종류·용도·설치장소·색채 기준은 법령 원문이 우선합니다. <a href="https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95%EC%8B%9C%ED%96%89%EA%B7%9C%EC%B9%99" target="_blank" rel="noopener">시행규칙 원문 ↗</a></li>
+    </ul>
+  </section>
+</div>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var ROOT = "../../";
+  var CATS = ["금지표지", "경고표지", "지시표지", "안내표지"];
+  var cat = "";
+  document.getElementById("sgLaw").textContent = "근거: " + D.law + ". 사업장에 표지를 설치·부착할 때 쓰세요.";
+  var cn = document.getElementById("sgCats");
+  cn.innerHTML = '<button type="button" class="chip" data-v="" aria-pressed="true">전체 <span class="n">' + D.items.length + "</span></button>" +
+    CATS.map(function (c) { return '<button type="button" class="chip" data-v="' + c + '" aria-pressed="false">' + c + ' <span class="n">' + D.items.filter(function (i) { return i.cat === c; }).length + "</span></button>"; }).join("");
+  function render() {
+    var q = document.getElementById("sgQ").value.trim().toLowerCase();
+    var list = D.items.filter(function (i) { return (!cat || i.cat === cat) && (!q || (i.no + " " + i.ko + " " + i.en + " " + i.cat).toLowerCase().indexOf(q) >= 0); });
+    document.getElementById("sgCount").textContent = list.length;
+    document.getElementById("sgGrid").innerHTML = list.map(function (i) {
+      return '<li class="sg-card"><a class="sg-img" href="' + ROOT + D.mirror.ko + "#page=" + i.page + '" target="_blank" rel="noopener" aria-label="' + esc(i.no + " " + i.ko) + ' A4 열기"><img src="' + ROOT + "assets/signs/" + i.no + '.webp" alt="" width="240" height="240" loading="lazy"></a>' +
+        '<div class="sg-meta"><span class="sg-no">' + esc(i.no) + '</span><span class="badge badge-line">' + esc(i.cat) + '</span></div><strong class="sg-ko">' + esc(i.ko) + '</strong><span class="sg-en">' + esc(i.en) + "</span>" +
+        '<span class="sg-links"><a href="' + ROOT + D.mirror.ko + "#page=" + i.page + '" target="_blank" rel="noopener">한국어 A4</a><a href="' + ROOT + D.mirror.en + "#page=" + i.page + '" target="_blank" rel="noopener">English A4</a></span></li>';
+    }).join("") || '<li class="empty"><p>검색 결과가 없습니다.</p></li>';
+  }
+  cn.addEventListener("click", function (ev) {
+    var b = ev.target.closest(".chip"); if (!b) return;
+    cn.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    cat = b.dataset.v; render();
+  });
+  document.getElementById("sgQ").addEventListener("input", render);
+  function kb(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + "MB" : Math.round(n / 1024) + "KB"; }
+  document.getElementById("sgLang").innerHTML = D.langs.map(function (l) {
+    return "<tr><th>" + esc(l.lang) + "</th>" + ["40_web", "40_print", "1p_web", "1p_print"].map(function (k) { var f = l.files[k]; return f ? '<td><a href="' + esc(f.url) + '" rel="noopener">내려받기</a> <span class="muted">' + kb(f.size) + "</span></td>" : "<td>—</td>"; }).join("") + "</tr>";
+  }).join("");
+  var s = D.source;
+  document.getElementById("sgSrc").innerHTML = "본 저작물은 '" + esc(s.org) + "'에서 '" + esc(s.year) + "년' 작성하여 " + esc(s.kogl) + "으로 개방한 '" + esc(s.title) + "'을 이용하였으며, 해당 저작물은 '" + esc(s.org) + ', <a href="' + esc(s.url) + '" target="_blank" rel="noopener">산업안전포털</a>\'에서 무료로 다운받으실 수 있습니다. (확인일 ' + esc(s.checked) + ")";
+  try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) document.getElementById("sgQ").value = q0; } catch (e) {}
+  render();
+})();
+</script>

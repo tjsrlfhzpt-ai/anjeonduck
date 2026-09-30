@@ -1,0 +1,136 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>직무·책임 조회</p>
+  <h1>안전보건 관계자 직무·책임 조회</h1>
+  <p>안전보건관리책임자부터 경영책임자까지, 누가 무엇을 해야 하는지 법령 원문 그대로 보여 줍니다. 필요한 직무를 골라 직무분장표로 인쇄할 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail layout-calc">
+  <section class="col-main stack">
+    <div class="calc" style="gap:12px">
+      <div class="field"><span class="label">직무 선택</span>
+        <div class="seg" role="radiogroup" aria-label="직무" id="dRoles"></div></div>
+      <div class="field"><span class="label">본문 검색</span>
+        <input type="text" id="dq" placeholder="예: 위험성평가, 순회점검, 보호구" aria-label="본문 검색"></div>
+    </div>
+    <div id="dSummary"></div>
+    <div id="dBody" class="stack"></div>
+    <div id="dByl" class="stack" hidden></div>
+  </section>
+  <aside class="col-side">
+    <div class="result-card">
+      <p class="apply-label">직무분장표 만들기</p>
+      <p class="hint">담당자 이름을 넣고 인쇄하면 직무별 법정 업무가 채워진 A4 직무분장표가 나옵니다. 입력 내용은 이 브라우저에만 저장됩니다.</p>
+      <div class="pick" id="dPick"></div>
+      <button type="button" class="btn btn-block" id="dPrint">직무분장표 인쇄 · PDF</button>
+    </div>
+    <p class="src-line" id="dSrc" style="margin-top:12px"></p>
+  </aside>
+</div>
+<article class="paper print-only" id="dPaper" aria-hidden="true"></article>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  var ROLES = [
+    { id: "cso", name: "안전보건관리책임자", sum: "사업장을 실질적으로 총괄 관리하는 사람. 안전관리자·보건관리자를 지휘·감독합니다.", arts: [["act", "제15조(안전보건관리책임자)"], ["dec", "제14조(안전보건관리책임자의 선임 등)"]], duty: ["act", "제15조(안전보건관리책임자)"] },
+    { id: "sup", name: "관리감독자", sum: "생산 업무와 소속 직원을 직접 지휘·감독하는 사람(부서장·직장·조장·반장 등). 작업별 유해·위험 방지 업무(별표 2)와 작업시작 전 점검(별표 3)도 맡습니다.", arts: [["act", "제16조(관리감독자)"], ["dec", "제15조(관리감독자의 업무 등)"], ["krule", "제35조(관리감독자의 유해ㆍ위험 방지 업무 등)"]], duty: ["dec", "제15조(관리감독자의 업무 등)"], byl2: true },
+    { id: "sm", name: "안전관리자", sum: "안전에 관한 기술적 사항을 사업주·안전보건관리책임자에게 보좌하고 관리감독자에게 지도·조언합니다.", arts: [["act", "제17조(안전관리자)"], ["dec", "제16조(안전관리자의 선임 등)"], ["dec", "제18조(안전관리자의 업무 등)"]], duty: ["dec", "제18조(안전관리자의 업무 등)"] },
+    { id: "hm", name: "보건관리자", sum: "보건에 관한 기술적 사항을 보좌하고 지도·조언합니다. 의사·간호사인 경우 일부 의료행위도 합니다.", arts: [["act", "제18조(보건관리자)"], ["dec", "제20조(보건관리자의 선임 등)"], ["dec", "제22조(보건관리자의 업무 등)"]], duty: ["dec", "제22조(보건관리자의 업무 등)"] },
+    { id: "shm", name: "안전보건관리담당자", sum: "안전관리자·보건관리자를 두지 않는 소규모 사업장에서 안전·보건 업무를 보좌합니다.", arts: [["act", "제19조(안전보건관리담당자)"], ["dec", "제25조(안전보건관리담당자의 업무)"]], duty: ["dec", "제25조(안전보건관리담당자의 업무)"] },
+    { id: "doc", name: "산업보건의", sum: "근로자 건강관리와 보건관리자 업무 지도를 맡는 의사입니다.", arts: [["act", "제22조(산업보건의)"], ["dec", "제31조(산업보건의의 직무 등)"]], duty: ["dec", "제31조(산업보건의의 직무 등)"] },
+    { id: "gm", name: "안전보건총괄책임자", sum: "관계수급인 근로자가 도급인 사업장에서 작업할 때 도급인이 지정합니다. 보통 안전보건관리책임자가 겸합니다.", arts: [["act", "제62조(안전보건총괄책임자)"], ["dec", "제52조(안전보건총괄책임자 지정 대상사업)"], ["dec", "제53조(안전보건총괄책임자의 직무 등)"]], duty: ["dec", "제53조(안전보건총괄책임자의 직무 등)"] },
+    { id: "osh", name: "산업안전보건위원회", sum: "근로자위원과 사용자위원이 같은 수로 구성해 안전보건 중요 사항을 심의·의결합니다. 정기회의는 분기마다 엽니다.", arts: [["act", "제24조(산업안전보건위원회)"], ["dec", "제34조(산업안전보건위원회 구성 대상)"], ["dec", "제35조(산업안전보건위원회의 구성)"], ["dec", "제37조(산업안전보건위원회의 회의 등)"]], duty: ["act", "제24조(산업안전보건위원회)"], nopick: true },
+    { id: "sub", name: "도급인 의무", sum: "관계수급인 근로자가 도급인 사업장에서 일할 때 도급인이 이행할 사항: 협의체(매월), 순회점검(2일 또는 1주), 합동점검(2개월 또는 분기) 등.", arts: [["act", "제64조(도급에 따른 산업재해 예방조치)"], ["rule", "제79조(협의체의 구성 및 운영)"], ["rule", "제80조(도급사업 시의 안전ㆍ보건조치 등)"], ["rule", "제82조(도급사업의 합동 안전ㆍ보건점검)"]], duty: ["act", "제64조(도급에 따른 산업재해 예방조치)"], nopick: true },
+    { id: "ceo", name: "경영책임자 (중대재해처벌법)", sum: "안전보건관리체계 구축·이행(시행령 제4조 9개 항목)과 안전·보건 관계 법령에 따른 의무이행 관리(제5조).", arts: [["sapa_dec", "제4조(안전보건관리체계의 구축 및 이행 조치)"], ["sapa_dec", "제5조(안전ㆍ보건 관계 법령에 따른 의무이행에 필요한 관리상의 조치)"]], duty: ["sapa_dec", "제4조(안전보건관리체계의 구축 및 이행 조치)"] },
+    { id: "edu", name: "직무교육", sum: "안전보건관리책임자·안전관리자·보건관리자·안전보건관리담당자 등은 선임 후 신규교육과 2년마다 보수교육을 받아야 합니다.", arts: [["rule", "제29조(안전보건관리책임자 등에 대한 직무교육)"]], nopick: true }
+  ];
+  var KEY = "anjeonduck.duties";
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function art(ref) { var L = D.laws[ref[0]]; return L && L.articles[ref[1]] ? { law: L, text: L.articles[ref[1]], title: ref[1] } : null; }
+  function hl(text, q) {
+    var h = esc(text);
+    q.forEach(function (w) { if (w) h = h.split(esc(w)).join('<mark class="hit">' + esc(w) + "</mark>"); });
+    return h;
+  }
+  // 첫 항(①)의 호·목만 뽑아 업무 목록으로 (② 이후는 선임·지원 규정)
+  function dutyItems(ref) {
+    var a = art(ref); if (!a) return [];
+    var lines = a.text.replace(/\(이하 [^()]*(\([^()]*\)[^()]*)*\)/g, "").split("\n").slice(1), out = [];
+    for (var i = 0; i < lines.length; i++) {
+      var l = lines[i].trim();
+      if (/^②/.test(l)) break;
+      if (/^\d+\.\s*/.test(l)) out.push(l);
+      else if (/^[가-하]\.\s*/.test(l) && out.length) out[out.length - 1] += "\n   " + l;
+    }
+    return out;
+  }
+
+  var roleBox = document.getElementById("dRoles");
+  roleBox.innerHTML = ROLES.map(function (r, i) { return '<button type="button" data-v="' + r.id + '" aria-pressed="' + (i === 0) + '">' + esc(r.name) + "</button>"; }).join("");
+  function cur() { var b = roleBox.querySelector('[aria-pressed="true"]'); return ROLES.filter(function (r) { return r.id === b.dataset.v; })[0]; }
+
+  function render() {
+    var r = cur(), q = document.getElementById("dq").value.trim().split(/\s+/).filter(Boolean);
+    document.getElementById("dSummary").innerHTML = '<div class="note"><h2 class="h-sm">' + esc(r.name) + "</h2><p>" + esc(r.sum) + "</p></div>";
+    document.getElementById("dBody").innerHTML = r.arts.map(function (ref) {
+      var a = art(ref); if (!a) return "";
+      var body = a.text.slice(a.title.length).trim();
+      return '<section class="lawbox"><h3>' + esc(a.law.law) + " " + esc(a.title) + '</h3><div class="lawtext">' + hl(body, q) + '</div><p class="src-line">' + esc(a.law.version) + ' · <a href="' + esc(a.law.url) + '" target="_blank" rel="noopener">원문 ↗</a></p></section>';
+    }).join("");
+    var by = document.getElementById("dByl");
+    by.hidden = !r.byl2;
+    if (r.byl2) {
+      var b2 = D.byl2, b3 = D.byl3;
+      by.innerHTML = '<section class="lawbox"><h3>' + esc(b2.law) + " " + esc(b2.title) + '</h3><p class="hint">작업을 고르면 그 작업의 관리감독자 직무수행 내용이 보입니다. 작업시작 전 점검표는 <a href="../forms/#pre">점검표 작성기</a>에서 바로 인쇄할 수 있습니다.</p>' +
+        '<select class="sort" id="dWork" style="width:100%">' + b2.items.map(function (it, i) { return '<option value="' + i + '">' + esc(it.work) + "</option>"; }).join("") + '</select><div id="dWorkOut" class="lawtext"></div></section>';
+      var sel = document.getElementById("dWork");
+      var show = function () { var it = b2.items[+sel.value]; document.getElementById("dWorkOut").innerHTML = hl(it.duties.join("\n"), q); };
+      sel.addEventListener("change", show); show();
+    }
+  }
+  roleBox.addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    roleBox.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    render();
+  });
+  document.getElementById("dq").addEventListener("input", render);
+
+  // 직무분장표
+  var pick = document.getElementById("dPick");
+  pick.innerHTML = ROLES.filter(function (r) { return !r.nopick; }).map(function (r) {
+    var s = saved[r.id] || {};
+    return '<label><input type="checkbox" data-r="' + r.id + '"' + (s.on ? " checked" : "") + '><span style="flex:1;display:flex;flex-direction:column;gap:4px"><strong>' + esc(r.name) + '</strong><input type="text" class="pick-name" data-n="' + r.id + '" placeholder="성명·직위" value="' + esc(s.name || "") + '" style="height:32px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font:inherit;font-size:13.5px;background:var(--surface);color:var(--text)"></span></label>';
+  }).join("");
+  function store() {
+    pick.querySelectorAll("[data-r]").forEach(function (c) { var id = c.dataset.r; saved[id] = { on: c.checked, name: pick.querySelector('[data-n="' + id + '"]').value }; });
+    try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+  }
+  pick.addEventListener("input", function (ev) {
+    if (ev.target.dataset.n) { var c = pick.querySelector('[data-r="' + ev.target.dataset.n + '"]'); if (ev.target.value && !c.checked) c.checked = true; }
+    store();
+  });
+  pick.addEventListener("change", store);
+  document.getElementById("dPrint").addEventListener("click", function () {
+    store();
+    var on = ROLES.filter(function (r) { return saved[r.id] && saved[r.id].on; });
+    if (!on.length) { pick.querySelector("input").focus(); document.getElementById("dPrint").textContent = "직무를 하나 이상 고르세요"; setTimeout(function () { document.getElementById("dPrint").textContent = "직무분장표 인쇄 · PDF"; }, 1800); return; }
+    var co = ""; try { co = localStorage.getItem("anjeonduck.company") || ""; } catch (e) {}
+    var rows = on.map(function (r) {
+      var items = dutyItems(r.duty), a = art(r.duty);
+      return "<tr><th>" + esc(r.name) + "</th><td>" + esc(saved[r.id].name) + '</td><td class="duty">' + esc(items.join("\n")) + '</td><td class="basis">' + esc(a.law.law.replace("산업안전보건법", "산안법").replace("중대재해 처벌 등에 관한 법률", "중처법") + " " + r.duty[1].replace(/\(.*$/, "")) + "</td></tr>";
+    }).join("");
+    document.getElementById("dPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">안전보건 직무분장표</h2><table class="appr"><tr><th rowspan="2" class="appr-h">결<br>재</th><th>작성</th><th>검토</th><th>승인</th></tr><tr><td class="appr-sign"></td><td class="appr-sign"></td><td class="appr-sign"></td></tr></table></header>' +
+      '<table class="gtab dutytab"><thead><tr><th style="width:15%">직무</th><th style="width:13%">담당자</th><th>법정 업무</th><th style="width:12%">근거</th></tr></thead><tbody>' + rows + "</tbody></table>" +
+      '<p class="paper-note">법정 업무는 ' + esc(D.checked) + " 국가법령정보센터 현행 원문 기준입니다. 사내 추가 업무는 별도로 적어 넣으세요.</p>";
+    document.body.classList.add("printing-duty");
+    window.print();
+    setTimeout(function () { document.body.classList.remove("printing-duty"); }, 500);
+  });
+  var fp = document.getElementById("dSrc");
+  fp.textContent = "법령 원문 확인일 " + D.checked + " · 국가법령정보센터";
+  try { var r0 = new URLSearchParams(location.search).get("role"); if (r0) { var b0 = roleBox.querySelector('[data-v="' + r0 + '"]'); if (b0) b0.click(); } } catch (e) {}
+  render();
+})();
+</script>

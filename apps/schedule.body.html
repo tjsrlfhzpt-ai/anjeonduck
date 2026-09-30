@@ -1,0 +1,390 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>법정 주기업무 달력</p>
+  <h1>법정 주기업무 달력</h1>
+  <p>매일·주간·월간·분기·반기·연간 안전보건 업무를 한 달력에 모았습니다. 우리 사업장에 맞게 켜고 끄고, 날짜와 이름을 바꾸고, 직접 업무를 더할 수 있습니다. 모든 설정은 이 브라우저에만 저장됩니다.</p>
+</div></section>
+<div class="wrap layout-detail layout-calc sched">
+  <section class="col-main stack">
+    <div class="calc" style="gap:14px">
+      <div class="field"><span class="label">보기</span>
+        <div class="seg" role="radiogroup" aria-label="보기" data-seg="view">
+          <button type="button" data-v="list" aria-pressed="true">주기별 목록</button>
+          <button type="button" data-v="month" aria-pressed="false">월 달력</button>
+          <button type="button" data-v="year" aria-pressed="false">연간 일정표</button>
+        </div></div>
+      <div class="field" data-for="list"><span class="label">주기</span>
+        <div class="seg" role="radiogroup" aria-label="주기" data-seg="freq">
+          <button type="button" data-v="" aria-pressed="true">전체</button>
+          <button type="button" data-v="d" aria-pressed="false">매일·격일</button>
+          <button type="button" data-v="weekly" aria-pressed="false">주간</button>
+          <button type="button" data-v="m" aria-pressed="false">월간</button>
+          <button type="button" data-v="quarterly" aria-pressed="false">분기</button>
+          <button type="button" data-v="semiannual" aria-pressed="false">반기</button>
+          <button type="button" data-v="yearly" aria-pressed="false">연간</button>
+        </div></div>
+      <div class="toolbar sched-bar">
+        <label class="switch"><input type="checkbox" id="sOnlyOn" checked><span>켠 업무만 보기</span></label>
+        <select class="sort" id="sStatus" aria-label="근거 상태">
+          <option value="">근거 상태 전체</option><option value="verified">원문 확인</option><option value="check">확인 필요</option><option value="practice">권장(법정 주기 아님)</option><option value="custom">직접 추가</option>
+        </select>
+        <span class="grow"></span>
+        <button type="button" class="btn btn-sm" id="sAdd">+ 업무 추가</button>
+      </div>
+    </div>
+    <div id="sMonthNav" class="month-nav" hidden>
+      <button type="button" class="btn btn-sm btn-ghost" id="sPrev" aria-label="이전 달">‹</button>
+      <strong id="sMonthLabel"></strong>
+      <button type="button" class="btn btn-sm btn-ghost" id="sNext" aria-label="다음 달">›</button>
+      <button type="button" class="btn btn-sm btn-ghost" id="sToday">이번 달</button>
+    </div>
+    <div id="sOut"></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="result-card" aria-live="polite">
+      <p class="apply-label">다가오는 업무</p>
+      <p class="result-big" id="sDueN">—</p>
+      <dl class="result-dl" id="sDue"></dl>
+    </div>
+    <div class="side-box">
+      <h2 class="h-sm">내보내기</h2>
+      <p class="hint">켠 업무를 반복 일정으로 내려받아 구글·아웃룩·휴대폰 캘린더에 가져올 수 있습니다.</p>
+      <div class="btns" style="margin-top:10px">
+        <button type="button" class="btn btn-sm" id="sIcs">캘린더 파일(.ics)</button>
+        <button type="button" class="btn btn-sm btn-ghost" id="sPrint">연간 일정표 인쇄</button>
+      </div>
+      <div class="btns" style="margin-top:8px">
+        <button type="button" class="btn btn-sm btn-ghost" id="sExport">설정 백업(.json)</button>
+        <label class="btn btn-sm btn-ghost" style="cursor:pointer">설정 불러오기<input type="file" id="sImport" accept="application/json,.json" hidden></label>
+      </div>
+      <p class="hint" style="margin-top:8px"><button type="button" class="linkbtn" id="sReset">기본값으로 되돌리기</button></p>
+    </div>
+    <div class="side-box">
+      <h2 class="h-sm">근거 표시</h2>
+      <ul class="bul hint">
+        <li><span class="badge badge-green">원문 확인</span> 법령 원문에서 주기를 대조한 업무</li>
+        <li><span class="badge badge-orange">확인 필요</span> 원문 대조 전 — 사업장이 직접 확인</li>
+        <li><span class="badge badge-line">권장</span> 의무는 있지만 주기는 법에 없거나 사내 운영 업무</li>
+      </ul>
+      <p class="src-line" id="sSrc"></p>
+    </div>
+  </aside>
+</div>
+
+<dialog id="sDlg" class="dlg" aria-labelledby="sDlgT">
+  <form method="dialog" id="sForm" class="calc" style="box-shadow:none;border:0">
+    <h2 id="sDlgT">업무 설정</h2>
+    <label class="field"><span class="label">업무 이름</span><input type="text" id="fTitle" required maxlength="80"></label>
+    <div class="grid3">
+      <label class="field"><span class="label">주기</span><select id="fFreq" class="sort">
+        <option value="daily">매일</option><option value="every2">격일(2일에 1회)</option><option value="weekly">매주</option><option value="monthly">매월</option>
+        <option value="bimonthly">2개월마다</option><option value="quarterly">분기마다</option><option value="semiannual">반기마다</option><option value="yearly">매년</option></select></label>
+      <label class="field" data-f="wd"><span class="label">요일</span><select id="fWeekday" class="sort"><option value="1">월</option><option value="2">화</option><option value="3">수</option><option value="4">목</option><option value="5">금</option><option value="6">토</option><option value="0">일</option></select></label>
+      <label class="field" data-f="month"><span class="label" id="fMonthL">월</span><select id="fMonth" class="sort"></select></label>
+      <label class="field" data-f="day"><span class="label">일</span><select id="fDay" class="sort"></select></label>
+      <label class="field"><span class="label">시각</span><input type="time" id="fTime"></label>
+      <label class="field" data-f="work"><span class="label">요일 범위</span><select id="fWork" class="sort"><option value="1">월~금만</option><option value="0">매일(주말 포함)</option></select></label>
+    </div>
+    <label class="field"><span class="label">메모 · 근거</span><textarea id="fMemo" rows="3" class="ta"></textarea></label>
+    <p class="hint" id="fBasis"></p>
+    <div class="btns">
+      <button type="submit" class="btn" value="save">저장</button>
+      <button type="submit" class="btn btn-ghost" value="cancel" formnovalidate>취소</button>
+      <span class="grow"></span>
+      <button type="button" class="btn btn-ghost" id="fDel" style="color:var(--red)">삭제</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  var KEY = "anjeonduck.schedule";
+  var S = { ov: {}, custom: [], done: {}, since: "" };
+  function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || "null"); if (x && typeof x === "object") S = { ov: x.ov || {}, custom: x.custom || [], done: x.done || {}, since: x.since || "" }; } catch (e) {} }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  load();
+  if (!S.since) { var _t = new Date(); S.since = _t.getFullYear() + "-" + ("0" + (_t.getMonth() + 1)).slice(-2) + "-" + ("0" + _t.getDate()).slice(-2); save(); }
+  var WD = ["일", "월", "화", "수", "목", "금", "토"];
+  var FREQ = { daily: "매일", every2: "격일", weekly: "매주", monthly: "매월", bimonthly: "2개월마다", quarterly: "분기", semiannual: "반기", yearly: "매년" };
+  var ORDER = ["daily", "every2", "weekly", "monthly", "bimonthly", "quarterly", "semiannual", "yearly"];
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function today() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function lastDay(y, m) { return new Date(y, m + 1, 0).getDate(); }
+  function dayIn(y, m, day) { return new Date(y, m, Math.min(day || 1, lastDay(y, m))); }
+
+  function tasks() {
+    var base = D.tasks.map(function (t) {
+      var o = S.ov[t.key] || {};
+      var x = {}; Object.keys(t).forEach(function (k) { x[k] = t[k]; }); Object.keys(o).forEach(function (k) { x[k] = o[k]; });
+      x.on = o.hasOwnProperty("on") ? o.on : !t.off; x.edited = Object.keys(o).some(function (k) { return k !== "on"; });
+      return x;
+    });
+    return base.concat(S.custom.map(function (c) { var x = {}; Object.keys(c).forEach(function (k) { x[k] = c[k]; }); x.status = "custom"; x.custom = true; if (!x.hasOwnProperty("on")) x.on = true; return x; }));
+  }
+  // 회차: 이 주기의 기간 id와 기한일
+  function period(t, ref) {
+    var y = ref.getFullYear(), m = ref.getMonth();
+    switch (t.freq) {
+      case "daily": return { id: ymd(ref), due: ref };
+      case "every2": { var a = t.anchor ? new Date(t.anchor + "T00:00:00") : new Date(y, 0, 1); var diff = Math.round((ref - a) / 864e5); var s = new Date(ref); s.setDate(s.getDate() - (((diff % 2) + 2) % 2)); var e = new Date(s); e.setDate(e.getDate() + 1); return { id: ymd(s), due: e }; }
+      case "weekly": { var st = new Date(ref); st.setDate(st.getDate() - ((st.getDay() + 6) % 7)); var du = new Date(st); du.setDate(du.getDate() + (((+t.weekday || 1) + 6) % 7)); return { id: "W" + ymd(st), due: du }; }
+      case "monthly": return { id: y + "-" + pad(m + 1), due: dayIn(y, m, t.day) };
+      case "bimonthly": { var m0 = ((+t.m0 || 1) - 1) % 2; var b = m - (((m - m0) % 2) + 2) % 2; return { id: y + "-B" + b, due: dayIn(y, b, t.day) }; }
+      case "quarterly": { var q = Math.floor(m / 3); return { id: y + "-Q" + (q + 1), due: dayIn(y, q * 3 + ((+t.qmonth || 1) - 1), t.day) }; }
+      case "semiannual": { var h = m < 6 ? 0 : 1; return { id: y + "-H" + (h + 1), due: dayIn(y, h * 6 + ((+t.hmonth || 6) - 1), t.day) }; }
+      default: return { id: String(y), due: dayIn(y, (+t.month || 1) - 1, t.day) };
+    }
+  }
+  function when(t) {
+    var d = t.day >= 29 ? "말일" : (t.day || 1) + "일";
+    switch (t.freq) {
+      case "daily": return t.work === false || t.work === "0" ? "매일" : "작업일(월~금) 매일";
+      case "every2": return "2일에 1회";
+      case "weekly": return "매주 " + WD[+t.weekday || 1] + "요일";
+      case "monthly": return "매월 " + d;
+      case "bimonthly": return "2개월마다(" + ((+t.m0 || 1) === 1 ? "홀수 달" : "짝수 달") + ") " + d;
+      case "quarterly": return "분기 " + (+t.qmonth || 1) + "번째 달 " + d;
+      case "semiannual": return "반기 " + (+t.hmonth || 6) + "번째 달 " + d + " (" + (+t.hmonth || 6) + "월·" + ((+t.hmonth || 6) + 6) + "월)";
+      default: return "매년 " + (+t.month || 1) + "월 " + d;
+    }
+  }
+  function occursOn(t, d) {
+    switch (t.freq) {
+      case "daily": return (t.work === false || t.work === "0") ? true : (d.getDay() > 0 && d.getDay() < 6);
+      case "every2": { var a = t.anchor ? new Date(t.anchor + "T00:00:00") : new Date(d.getFullYear(), 0, 1); return Math.round((d - a) / 864e5) % 2 === 0; }
+      case "weekly": return d.getDay() === (+t.weekday || 1) % 7;
+      default: return ymd(period(t, d).due) === ymd(d);
+    }
+  }
+  var LINK = { form: function (id) { return "../forms/" + id + "/"; }, tool: function (id) { return "../" + id + "/"; } };
+  var BADGE = { verified: ["badge-green", "원문 확인"], check: ["badge-orange", "확인 필요"], practice: ["badge-line", "권장"], custom: ["badge-navy", "직접 추가"] };
+
+  var view = "list", freqF = "", cur = new Date(today().getFullYear(), today().getMonth(), 1);
+  function filtered() {
+    var st = document.getElementById("sStatus").value, only = document.getElementById("sOnlyOn").checked;
+    return tasks().filter(function (t) {
+      if (only && !t.on) return false;
+      if (st && t.status !== st) return false;
+      if (freqF === "d") return t.freq === "daily" || t.freq === "every2";
+      if (freqF === "m") return t.freq === "monthly" || t.freq === "bimonthly";
+      return !freqF || t.freq === freqF;
+    }).sort(function (a, b) { return ORDER.indexOf(a.freq) - ORDER.indexOf(b.freq); });
+  }
+  function card(t) {
+    var p = period(t, today()), done = !!S.done[t.key + "|" + p.id], past = !done && p.due < today() && t.freq !== "daily", unsure = past && ymd(p.due) < S.since, late = past && !unsure;
+    var b = BADGE[t.status] || BADGE.practice;
+    var links = (t.form ? '<a href="' + LINK.form(t.form) + '">서식 작성 →</a>' : "") + (t.tool ? '<a href="' + LINK.tool(t.tool) + '">도구 열기 →</a>' : "");
+    return '<li class="task' + (t.on ? "" : " off") + '">' +
+      '<div class="task-top"><label class="switch" title="우리 사업장 해당"><input type="checkbox" data-on="' + esc(t.key) + '"' + (t.on ? " checked" : "") + '><span class="sr">사용</span></label>' +
+      '<div class="task-main"><p class="task-when">' + esc(when(t)) + (t.time ? " · " + esc(t.time) : "") + ' <span class="badge ' + b[0] + '">' + b[1] + "</span>" + (t.edited ? ' <span class="badge badge-line">수정함</span>' : "") + "</p>" +
+      '<h3 class="task-title">' + esc(t.title) + "</h3>" +
+      (t.basis ? '<p class="task-basis">' + esc(t.basis) + "</p>" : "") +
+      (t.cond ? '<p class="task-cond">대상: ' + esc(t.cond) + "</p>" : "") +
+      (t.memo ? '<p class="task-memo">' + esc(t.memo) + "</p>" : "") +
+      '<p class="task-links">' + links + '<button type="button" class="linkbtn" data-edit="' + esc(t.key) + '">설정 바꾸기</button></p></div>' +
+      (t.on && t.freq !== "daily" ? '<label class="task-done' + (late ? " late" : unsure ? " unsure" : "") + '"><input type="checkbox" data-done="' + esc(t.key) + '" data-p="' + esc(p.id) + '"' + (done ? " checked" : "") + '><span>' + (done ? "이번 회차 완료" : (late ? "기한 지남 " : unsure ? "했는지 확인 " : "이번 기한 ") + (p.due.getMonth() + 1) + "/" + p.due.getDate()) + "</span></label>" : "") +
+      "</div></li>";
+  }
+  function renderList() {
+    var list = filtered(), groups = {};
+    list.forEach(function (t) { var g = t.freq === "every2" ? "daily" : t.freq === "bimonthly" ? "monthly" : t.freq; (groups[g] = groups[g] || []).push(t); });
+    var LBL = { daily: "매일 · 격일", weekly: "주간", monthly: "월간 · 2개월", quarterly: "분기", semiannual: "반기", yearly: "연간" };
+    var h = Object.keys(LBL).filter(function (g) { return groups[g]; }).map(function (g) {
+      return '<section class="task-group"><h2 class="h-sm">' + LBL[g] + ' <span class="muted">' + groups[g].length + "건</span></h2><ul class=\"tasks\">" + groups[g].map(card).join("") + "</ul></section>";
+    }).join("");
+    document.getElementById("sOut").innerHTML = h || '<div class="empty"><p>조건에 맞는 업무가 없습니다.</p></div>';
+  }
+  function renderMonth() {
+    var y = cur.getFullYear(), m = cur.getMonth(), first = new Date(y, m, 1), days = lastDay(y, m);
+    document.getElementById("sMonthLabel").textContent = y + "년 " + (m + 1) + "월";
+    var list = filtered(), daily = list.filter(function (t) { return t.freq === "daily"; }), rest = list.filter(function (t) { return t.freq !== "daily"; });
+    var cells = [], lead = first.getDay(), td = ymd(today());
+    for (var i = 0; i < lead; i++) cells.push('<div class="cal-c cal-x"></div>');
+    for (var d = 1; d <= days; d++) {
+      var dt = new Date(y, m, d), items = rest.filter(function (t) { return occursOn(t, dt); });
+      cells.push('<div class="cal-c' + (ymd(dt) === td ? " cal-today" : "") + (dt.getDay() === 0 ? " cal-sun" : "") + '"><span class="cal-d">' + d + "</span>" +
+        items.map(function (t) { var p = period(t, dt), done = S.done[t.key + "|" + p.id]; return '<button type="button" class="cal-t f-' + t.freq + (done ? " done" : "") + '" data-edit="' + esc(t.key) + '" title="' + esc(t.title) + '">' + esc(t.title.replace(/\s*\(.*?\)\s*$/, "").replace(/^\[중처법\]\s*/, "중처 ")) + "</button>"; }).join("") + "</div>");
+    }
+    document.getElementById("sOut").innerHTML = (daily.length ? '<p class="hint" style="margin-bottom:8px">매일 업무 ' + daily.length + "건(" + daily.map(function (t) { return esc(t.title.replace(/\s*\(.*?\)\s*$/, "")); }).join(", ") + ")은 달력에서 뺐습니다.</p>" : "") +
+      '<div class="cal"><div class="cal-h">' + WD.map(function (w) { return "<span>" + w + "</span>"; }).join("") + '</div><div class="cal-g">' + cells.join("") + "</div></div>";
+  }
+  function yearRows() {
+    var y = today().getFullYear();
+    return filtered().filter(function (t) { return ["daily", "every2", "weekly"].indexOf(t.freq) < 0; }).map(function (t) {
+      var ms = []; for (var m = 0; m < 12; m++) { var hit = []; for (var d = 1; d <= lastDay(y, m); d++) if (occursOn(t, new Date(y, m, d))) hit.push(d); ms.push(hit.length ? hit.join(",") : ""); }
+      return { t: t, ms: ms };
+    });
+  }
+  function renderYear() {
+    var rows = yearRows(), y = today().getFullYear();
+    document.getElementById("sOut").innerHTML = '<p class="hint" style="margin-bottom:8px">' + y + "년 · 칸의 숫자는 기한일입니다. 매일·격일·주간 업무는 표에서 뺐습니다.</p>" +
+      '<div class="table-wrap"><table class="dtable ytable"><thead><tr><th>업무</th>' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (m) { return "<th>" + m + "월</th>"; }).join("") + "</tr></thead><tbody>" +
+      rows.map(function (r) { return '<tr><td class="yt">' + esc(r.t.title) + "</td>" + r.ms.map(function (x) { return "<td" + (x ? ' class="on"' : "") + ">" + x + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>";
+  }
+  function renderDue() {
+    var t0 = today(), in30 = new Date(t0); in30.setDate(in30.getDate() + 30);
+    var list = tasks().filter(function (t) { return t.on && t.freq !== "daily"; }).map(function (t) {
+      var p = period(t, t0), done = !!S.done[t.key + "|" + p.id];
+      if (!done && p.due < t0) return { t: t, d: p.due, k: ymd(p.due) < S.since ? "unsure" : "late" };
+      var n = p.due >= t0 ? p : period(t, nextRef(t, t0));
+      return S.done[t.key + "|" + n.id] ? null : { t: t, d: n.due, k: "next" };
+    }).filter(Boolean);
+    var late = list.filter(function (x) { return x.k === "late"; }), unsure = list.filter(function (x) { return x.k === "unsure"; }),
+      soon = list.filter(function (x) { return x.k === "next" && x.d <= in30; }).sort(function (a, b) { return a.d - b.d; });
+    document.getElementById("sDueN").textContent = "30일 안 " + soon.length + "건";
+    var row = function (x, color) { return "<div><dt>" + esc(x.t.title.replace(/\s*\(.*?\)\s*$/, "")) + "</dt><dd" + (color ? ' style="color:' + color + '"' : "") + ">" + (x.d.getMonth() + 1) + "/" + x.d.getDate() + "</dd></div>"; };
+    document.getElementById("sDue").innerHTML = late.map(function (x) { return row(x, "var(--red)"); }).join("") + soon.slice(0, 10).map(function (x) { return row(x); }).join("") +
+      (unsure.length ? '<div><dt>처음 쓰기 전 기한이 지난 업무 — 했는지 확인</dt><dd style="color:var(--orange)">' + unsure.length + "건</dd></div>" : "");
+  }
+  function nextRef(t, d) {
+    var n = new Date(d);
+    if (t.freq === "every2") n.setDate(n.getDate() + 2); else if (t.freq === "weekly") n.setDate(n.getDate() + 7);
+    else n.setMonth(n.getMonth() + ({ monthly: 1, bimonthly: 2, quarterly: 3, semiannual: 6, yearly: 12 }[t.freq] || 1), 1);
+    return n;
+  }
+  function render() {
+    document.querySelectorAll("[data-for=list]").forEach(function (el) { el.hidden = view !== "list"; });
+    document.getElementById("sMonthNav").hidden = view !== "month";
+    if (view === "list") renderList(); else if (view === "month") renderMonth(); else renderYear();
+    renderDue();
+  }
+
+  // 세그먼트
+  document.querySelectorAll("[data-seg]").forEach(function (g) {
+    g.addEventListener("click", function (ev) {
+      var b = ev.target.closest("button"); if (!b) return;
+      g.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      if (g.dataset.seg === "view") view = b.dataset.v; else freqF = b.dataset.v;
+      render();
+    });
+  });
+  document.getElementById("sOnlyOn").addEventListener("change", render);
+  document.getElementById("sStatus").addEventListener("change", render);
+  document.getElementById("sPrev").addEventListener("click", function () { cur = new Date(cur.getFullYear(), cur.getMonth() - 1, 1); render(); });
+  document.getElementById("sNext").addEventListener("click", function () { cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1); render(); });
+  document.getElementById("sToday").addEventListener("click", function () { cur = new Date(today().getFullYear(), today().getMonth(), 1); render(); });
+  var out = document.getElementById("sOut");
+  out.addEventListener("change", function (ev) {
+    var t = ev.target;
+    if (t.dataset.on) { var cst = S.custom.filter(function (c) { return c.key === t.dataset.on; })[0]; if (cst) cst.on = t.checked; else { S.ov[t.dataset.on] = S.ov[t.dataset.on] || {}; S.ov[t.dataset.on].on = t.checked; } save(); render(); }
+    if (t.dataset.done) { var k = t.dataset.done + "|" + t.dataset.p; if (t.checked) S.done[k] = ymd(today()); else delete S.done[k]; save(); render(); }
+  });
+  document.querySelector(".sched").addEventListener("click", function (ev) { var b = ev.target.closest("[data-edit]"); if (b) openDlg(b.dataset.edit); });
+
+  // 편집 대화상자
+  var dlg = document.getElementById("sDlg"), editing = null;
+  var fMonth = document.getElementById("fMonth"), fDay = document.getElementById("fDay");
+  fDay.innerHTML = Array.apply(null, Array(28)).map(function (_, i) { return '<option value="' + (i + 1) + '">' + (i + 1) + "일</option>"; }).join("") + '<option value="31">말일</option>';
+  function syncFields() {
+    var f = document.getElementById("fFreq").value;
+    var show = { wd: f === "weekly", month: ["bimonthly", "quarterly", "semiannual", "yearly"].indexOf(f) >= 0, day: ["monthly", "bimonthly", "quarterly", "semiannual", "yearly"].indexOf(f) >= 0, work: f === "daily" };
+    document.querySelectorAll("[data-f]").forEach(function (el) { el.hidden = !show[el.dataset.f]; });
+    var n = f === "yearly" ? 12 : f === "semiannual" ? 6 : f === "quarterly" ? 3 : 2, keep = fMonth.value;
+    document.getElementById("fMonthL").textContent = f === "yearly" ? "월" : f === "bimonthly" ? "시작 달" : f === "quarterly" ? "분기의 몇 번째 달" : "반기의 몇 번째 달";
+    fMonth.innerHTML = Array.apply(null, Array(n)).map(function (_, i) { return '<option value="' + (i + 1) + '">' + (f === "yearly" ? (i + 1) + "월" : f === "bimonthly" ? (i ? "짝수 달" : "홀수 달") : (i + 1) + "번째 달") + "</option>"; }).join("");
+    if (+keep && +keep <= n) fMonth.value = keep;
+  }
+  document.getElementById("fFreq").addEventListener("change", syncFields);
+  function openDlg(key) {
+    var t = key ? tasks().filter(function (x) { return x.key === key; })[0] : { key: "", title: "", freq: "monthly", day: 1, time: "09:00", memo: "", custom: true };
+    editing = t;
+    document.getElementById("sDlgT").textContent = key ? "업무 설정 바꾸기" : "업무 추가";
+    document.getElementById("fTitle").value = t.title;
+    document.getElementById("fFreq").value = t.freq; syncFields();
+    document.getElementById("fWeekday").value = String((+t.weekday || 1) % 7);
+    fMonth.value = String(t.freq === "yearly" ? (t.month || 1) : t.freq === "quarterly" ? (t.qmonth || 1) : t.freq === "semiannual" ? (t.hmonth || 6) : (t.m0 || 1));
+    fDay.value = String(t.day >= 29 ? 31 : (t.day || 1));
+    document.getElementById("fTime").value = t.time || "";
+    document.getElementById("fWork").value = (t.work === false || t.work === "0") ? "0" : "1";
+    document.getElementById("fMemo").value = t.memo || "";
+    document.getElementById("fBasis").textContent = t.basis ? "근거: " + t.basis + (t.custom ? "" : " — 이름·날짜를 바꿔도 근거와 원래 주기 표시는 남습니다.") : "";
+    document.getElementById("fDel").textContent = t.custom ? "삭제" : "기본값으로";
+    document.getElementById("fDel").hidden = !key || (!t.custom && !t.edited);
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+    document.getElementById("fTitle").focus();
+  }
+  document.getElementById("sAdd").addEventListener("click", function () { openDlg(null); });
+  document.getElementById("sForm").addEventListener("submit", function (ev) {
+    var sub = ev.submitter && ev.submitter.value;
+    if (sub !== "save") return;
+    var title = document.getElementById("fTitle").value.trim();
+    if (!title) { ev.preventDefault(); document.getElementById("fTitle").focus(); return; }
+    var f = document.getElementById("fFreq").value, mv = +fMonth.value;
+    var v = { title: title, freq: f, day: +fDay.value, time: document.getElementById("fTime").value, memo: document.getElementById("fMemo").value.trim(), weekday: +document.getElementById("fWeekday").value, work: document.getElementById("fWork").value };
+    if (f === "yearly") v.month = mv; else if (f === "quarterly") v.qmonth = mv; else if (f === "semiannual") v.hmonth = mv; else if (f === "bimonthly") v.m0 = mv;
+    if (f === "every2") v.anchor = ymd(today());
+    if (editing.custom) {
+      if (editing.key) { var c = S.custom.filter(function (x) { return x.key === editing.key; })[0]; Object.keys(v).forEach(function (k) { c[k] = v[k]; }); }
+      else { v.key = "u" + Date.now().toString(36); v.on = true; S.custom.push(v); }
+    } else {
+      var o = S.ov[editing.key] || {}; var base = D.tasks.filter(function (x) { return x.key === editing.key; })[0];
+      Object.keys(v).forEach(function (k) { if ((k === "anchor" && base.freq === "every2" && !o.anchor) || (k === "m0" && base[k] == null && v[k] === 1)) { delete o[k]; return; } if (String(base[k] == null ? "" : base[k]) !== String(v[k]) && !(k === "work" && v[k] === "1" && base.work == null) && !(k === "weekday" && base.freq !== "weekly" && f !== "weekly")) o[k] = v[k]; else delete o[k]; });
+      S.ov[editing.key] = o;
+    }
+    save(); render();
+  });
+  document.getElementById("fDel").addEventListener("click", function () {
+    if (!editing) return;
+    if (editing.custom) S.custom = S.custom.filter(function (x) { return x.key !== editing.key; });
+    else { var on = S.ov[editing.key] && S.ov[editing.key].on; S.ov[editing.key] = on === undefined ? {} : { on: on }; }
+    save(); dlg.close(); render();
+  });
+
+  // 내보내기
+  function dl(name, text, type) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: type })); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function icsEsc(s) { return String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
+  function rrule(t) {
+    var md = t.day >= 29 ? -1 : (t.day || 1);
+    switch (t.freq) {
+      case "daily": return (t.work === false || t.work === "0") ? "FREQ=DAILY" : "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR";
+      case "every2": return "FREQ=DAILY;INTERVAL=2";
+      case "weekly": return "FREQ=WEEKLY;BYDAY=" + ["SU", "MO", "TU", "WE", "TH", "FR", "SA"][(+t.weekday || 1) % 7];
+      case "monthly": return "FREQ=MONTHLY;BYMONTHDAY=" + md;
+      case "bimonthly": return "FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=" + md;
+      case "quarterly": return "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=" + md;
+      case "semiannual": return "FREQ=MONTHLY;INTERVAL=6;BYMONTHDAY=" + md;
+      default: return "FREQ=YEARLY;BYMONTH=" + (+t.month || 1) + ";BYMONTHDAY=" + md;
+    }
+  }
+  function firstDate(t) {
+    var t0 = today();
+    if (t.freq === "daily" || t.freq === "every2") return t0;
+    if (t.freq === "weekly") { var d = new Date(t0); while (d.getDay() !== (+t.weekday || 1) % 7) d.setDate(d.getDate() + 1); return d; }
+    var p = period(t, t0).due; if (p < t0) { var n = new Date(t0); n.setMonth(n.getMonth() + ({ monthly: 1, bimonthly: 2, quarterly: 3, semiannual: 6, yearly: 12 }[t.freq])); p = period(t, n).due; }
+    return p;
+  }
+  document.getElementById("sIcs").addEventListener("click", function () {
+    var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+    var ev = tasks().filter(function (t) { return t.on; }).map(function (t) {
+      var d = firstDate(t), hm = (t.time || "09:00").split(":"), ds = ymd(d).replace(/-/g, "");
+      return ["BEGIN:VEVENT", "UID:" + t.key + "@anjeonduck", "DTSTAMP:" + stamp, "DTSTART;TZID=Asia/Seoul:" + ds + "T" + pad(+hm[0]) + pad(+hm[1] || 0) + "00", "DURATION:PT1H",
+        "RRULE:" + rrule(t), "SUMMARY:" + icsEsc(t.title), "DESCRIPTION:" + icsEsc([t.basis ? "근거: " + t.basis : "", t.memo || ""].filter(Boolean).join("\n")), "END:VEVENT"].join("\r\n");
+    });
+    dl("안전duck_주기업무.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//anjeonduck//schedule//KO", "CALSCALE:GREGORIAN", "X-WR-CALNAME:안전보건 주기업무", "X-WR-TIMEZONE:Asia/Seoul"].concat(ev).concat(["END:VCALENDAR"]).join("\r\n"), "text/calendar;charset=utf-8");
+  });
+  document.getElementById("sPrint").addEventListener("click", function () {
+    var old = view; view = "year"; render(); document.body.classList.add("printing-sched"); window.print();
+    setTimeout(function () { document.body.classList.remove("printing-sched"); view = old; render(); }, 400);
+  });
+  document.getElementById("sExport").addEventListener("click", function () { dl("안전duck_주기업무_설정.json", JSON.stringify({ app: "anjeonduck.schedule", v: 1, data: S }, null, 1), "application/json"); });
+  document.getElementById("sImport").addEventListener("change", function (ev) {
+    var f = ev.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function () { try { var x = JSON.parse(r.result); if (!x || x.app !== "anjeonduck.schedule" || !x.data) throw 0; S = { ov: x.data.ov || {}, custom: x.data.custom || [], done: x.data.done || {}, since: x.data.since || S.since }; save(); render(); } catch (e) { document.getElementById("sDueN").textContent = "불러올 수 없는 파일"; } };
+    r.readAsText(f); ev.target.value = "";
+  });
+  document.getElementById("sReset").addEventListener("click", function () {
+    if (!window.confirm("켜고 끈 설정, 바꾼 날짜, 직접 추가한 업무, 완료 표시를 모두 지울까요?")) return;
+    S = { ov: {}, custom: [], done: {}, since: S.since }; save(); render();
+  });
+  document.getElementById("sSrc").textContent = "법령 대조일 " + D.checked + " · " + D.source;
+  render();
+})();
+</script>

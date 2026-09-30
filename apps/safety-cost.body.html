@@ -1,0 +1,153 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>산업안전보건관리비 계산기</p>
+  <h1>산업안전보건관리비 계산기</h1>
+  <p>「건설업 산업안전보건관리비 계상 및 사용기준」 별표 1과 제4조 기준으로 최소 계상액을 계산합니다. 입력값은 이 브라우저 안에서만 계산됩니다.</p>
+</div></section>
+<div class="wrap layout-detail layout-calc">
+  <section class="col-main">
+    <form class="calc" id="costForm" novalidate>
+      <div class="field">
+        <span class="label">공사 종류</span>
+        <div class="seg" role="radiogroup" aria-label="공사 종류" data-seg="type"></div>
+        <p class="hint">공사 종류는 고시 별표 5의 예시표를 따릅니다. 한 사업장에 공사 종류가 둘 이상이면(분리발주 제외) 공사금액이 가장 큰 종류를 적용합니다.</p>
+      </div>
+      <label class="check"><input type="checkbox" id="health"> 산업안전보건법 시행령 별표 5에 따라 보건관리자를 선임해야 하는 건설공사입니다</label>
+
+      <div class="field">
+        <span class="label">대상액 입력 방식</span>
+        <div class="seg" role="radiogroup" aria-label="대상액 입력 방식" data-seg="mode">
+          <button type="button" data-v="parts" aria-pressed="true">재료비·노무비로 계산</button>
+          <button type="button" data-v="direct" aria-pressed="false">대상액 직접 입력</button>
+          <button type="button" data-v="total" aria-pressed="false">대상액 불명확(총공사금액)</button>
+        </div>
+      </div>
+      <div class="grid3" data-show="parts">
+        <label class="field"><span class="label">직접재료비</span><input class="money" id="dm" inputmode="numeric" placeholder="0"></label>
+        <label class="field"><span class="label">간접재료비</span><input class="money" id="im" inputmode="numeric" placeholder="0"></label>
+        <label class="field"><span class="label">직접노무비</span><input class="money" id="dl" inputmode="numeric" placeholder="0"></label>
+      </div>
+      <label class="field" data-show="direct" hidden><span class="label">대상액 (직접재료비 + 간접재료비 + 직접노무비)</span><input class="money" id="base" inputmode="numeric" placeholder="0"></label>
+      <label class="field" data-show="total" hidden><span class="label">총공사금액 (도급계약 또는 자체사업계획상)</span><input class="money" id="total" inputmode="numeric" placeholder="0">
+        <span class="hint">대상액이 명확하지 않으면 총공사금액의 10분의 7을 대상액으로 봅니다(제4조제1항제3호).</span></label>
+
+      <label class="check"><input type="checkbox" id="hasSupply"> 발주자가 재료를 제공하거나, 완제품 형태로 제작·납품되는 물품이 있습니다</label>
+      <label class="field" data-show="supply" hidden><span class="label">발주자 제공 재료비 또는 완제품 가액</span><input class="money" id="supply" inputmode="numeric" placeholder="0">
+        <span class="hint">위 대상액에 이 금액이 <b>포함되지 않은</b> 상태로 입력하세요. 포함해 계산한 값과, 빼고 계산한 값의 1.2배 중 작은 값을 적용합니다(제4조제1항 단서).</span></label>
+      <p class="form-error" id="err" role="alert" hidden></p>
+    </form>
+  </section>
+  <aside class="col-side">
+    <div class="result-card" aria-live="polite">
+      <p class="apply-label">최소 계상액</p>
+      <p class="result-big" id="rTotal">—</p>
+      <dl class="result-dl" id="rDetail"></dl>
+      <button type="button" class="btn btn-block btn-ghost" id="copyBtn" disabled>결과 복사</button>
+    </div>
+    <section class="side-box">
+      <h2 class="h-sm">적용 범위</h2>
+      <p>총공사금액 2천만 원 이상인 건설공사에 적용합니다(단가계약은 총계약금액 기준, 제3조). 설계변경으로 대상액이 바뀌면 별표 1의3에 따라 조정 계상하고, 공사금액이 800억 원 이상으로 늘면 다시 계상합니다(제4조제5항).</p>
+    </section>
+  </aside>
+</div>
+<section class="wrap" style="padding-bottom:64px">
+  <div class="sec-head"><div><h2>요율표 (별표 1)</h2><p>고용노동부고시 제2025-11호 · 2025. 2. 12. 시행 · 원문 확인 2026. 9. 28.</p></div>
+  <a class="more" href="https://www.law.go.kr/행정규칙/건설업산업안전보건관리비계상및사용기준" target="_blank" rel="noopener">고시 원문 ↗</a></div>
+  <div class="table-wrap"><table class="dtable" id="rateTable"><thead><tr><th>공사 종류</th><th>5억 미만</th><th>5억~50억 비율</th><th>기초액</th><th>50억 이상</th><th>보건관리자 선임 대상</th></tr></thead><tbody></tbody></table></div>
+  <p class="muted" style="margin-top:10px">계산 결과는 법정 최소 금액의 참고용입니다. 실제 계상은 발주 기관의 원가계산 기준과 고시 원문을 따르세요. 원 단위 미만은 버렸습니다.</p>
+</section>
+<script>
+(function(){
+  "use strict";
+  // 고용노동부고시 제2025-11호 별표 1 (원문 확인 2026-09-28)
+  var RATES = {
+    "건축공사":     { lt5: 3.11, mid: 2.28, base: 4325000, ge50: 2.37, health: 2.64 },
+    "토목공사":     { lt5: 3.15, mid: 2.53, base: 3300000, ge50: 2.60, health: 2.73 },
+    "중건설공사":   { lt5: 3.64, mid: 3.05, base: 2975000, ge50: 3.11, health: 3.39 },
+    "특수건설공사": { lt5: 2.07, mid: 1.59, base: 2450000, ge50: 1.64, health: 1.78 }
+  };
+  var EOK = 100000000;
+  var state = { type: "건축공사", mode: "parts" };
+  var $ = function (id) { return document.getElementById(id); };
+  var won = function (n) { return Math.floor(n).toLocaleString("ko-KR") + "원"; };
+  var pct = function (n) { return n.toFixed(2) + "%"; };
+  function num(el) { var v = (el.value || "").replace(/[^\d]/g, ""); return v ? parseInt(v, 10) : 0; }
+
+  // 공사 종류 버튼, 요율표
+  var segType = document.querySelector('[data-seg="type"]');
+  var tb = document.querySelector("#rateTable tbody");
+  Object.keys(RATES).forEach(function (k, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.dataset.v = k; b.textContent = k; b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+    segType.appendChild(b);
+    var r = RATES[k];
+    tb.insertAdjacentHTML("beforeend", "<tr><th scope='row'>" + k + "</th><td>" + pct(r.lt5) + "</td><td>" + pct(r.mid) + "</td><td>" + r.base.toLocaleString("ko-KR") + "원</td><td>" + pct(r.ge50) + "</td><td>" + pct(r.health) + "</td></tr>");
+  });
+
+  // 금액 입력: 숫자만, 천 단위 쉼표
+  document.querySelectorAll(".money").forEach(function (el) {
+    el.addEventListener("input", function () {
+      var n = num(el); el.value = n ? n.toLocaleString("ko-KR") : ""; calc();
+    });
+  });
+  document.querySelectorAll("[data-seg]").forEach(function (g) {
+    g.addEventListener("click", function (ev) {
+      var b = ev.target.closest("button"); if (!b) return;
+      g.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      state[g.dataset.seg] = b.dataset.v;
+      document.querySelectorAll('[data-show="parts"],[data-show="direct"],[data-show="total"]').forEach(function (el) { el.hidden = el.dataset.show !== state.mode; });
+      calc();
+    });
+  });
+  ["health", "hasSupply"].forEach(function (id) { $(id).addEventListener("change", calc); });
+
+  // 대상액 → 계상액 (제4조제1항제1호·제2호)
+  // 부동소수점 오차로 1원이 틀리지 않도록 요율을 만분율 정수로 바꿔 계산하고 원 미만은 버림
+  function mul(base, rate) { return Math.floor(base * Math.round(rate * 100) / 10000); }
+  function costOf(base, r, health) {
+    if (base <= 0) return { amount: 0, rule: "" };
+    if (health) return { amount: mul(base, r.health), rule: "보건관리자 선임 대상 " + pct(r.health) };
+    if (base < 5 * EOK) return { amount: mul(base, r.lt5), rule: "5억 원 미만 " + pct(r.lt5) };
+    if (base < 50 * EOK) return { amount: mul(base, r.mid) + r.base, rule: "5억~50억 " + pct(r.mid) + " + 기초액 " + r.base.toLocaleString("ko-KR") + "원" };
+    return { amount: mul(base, r.ge50), rule: "50억 원 이상 " + pct(r.ge50) };
+  }
+
+  var lastText = "";
+  function calc() {
+    $("err").hidden = true;
+    var supplyOn = $("hasSupply").checked;
+    document.querySelector('[data-show="supply"]').hidden = !supplyOn;
+    var r = RATES[state.type], health = $("health").checked;
+    var base, basis;
+    if (state.mode === "parts") { base = num($("dm")) + num($("im")) + num($("dl")); basis = "직접재료비 + 간접재료비 + 직접노무비"; }
+    else if (state.mode === "direct") { base = num($("base")); basis = "직접 입력"; }
+    else { base = Math.floor(num($("total")) * 0.7); basis = "총공사금액 × 7/10"; }
+    var supply = supplyOn ? num($("supply")) : 0;
+    var rows = [];
+    if (base <= 0 && supply <= 0) { $("rTotal").textContent = "—"; $("rDetail").innerHTML = ""; $("copyBtn").disabled = true; return; }
+    var result, used;
+    if (supply > 0) {
+      var inc = costOf(base + supply, r, health), exc = costOf(base, r, health);
+      var exc12 = Math.floor(exc.amount * 12 / 10);
+      used = inc.amount <= exc12 ? "포함" : "제외×1.2";
+      result = Math.min(inc.amount, exc12);
+      rows = [["대상액(" + basis + ")", won(base)], ["발주자 제공분", won(supply)],
+              ["① 포함 계산 (" + inc.rule + ")", won(inc.amount)], ["② 제외 계산 × 1.2 (" + exc.rule + ")", won(exc12)],
+              ["적용", used === "포함" ? "① 포함 계산 (더 작음)" : "② 제외 × 1.2 (더 작음)"]];
+    } else {
+      var c = costOf(base, r, health); result = c.amount;
+      rows = [["대상액(" + basis + ")", won(base)], ["적용 기준", c.rule]];
+    }
+    rows.unshift(["공사 종류", state.type + (health ? " · 보건관리자 선임 대상" : "")]);
+    $("rTotal").textContent = won(result);
+    $("rDetail").innerHTML = rows.map(function (x) { return "<div><dt>" + x[0] + "</dt><dd>" + x[1] + "</dd></div>"; }).join("");
+    $("copyBtn").disabled = false;
+    lastText = "[산업안전보건관리비 계산]\n" + rows.map(function (x) { return x[0] + ": " + x[1]; }).join("\n") + "\n최소 계상액: " + won(result) + "\n(근거: 고용노동부고시 제2025-11호 제4조·별표 1)";
+  }
+  $("copyBtn").addEventListener("click", function () {
+    var b = this;
+    function done(ok) { b.textContent = ok ? "복사했습니다" : "복사하지 못했습니다"; setTimeout(function () { b.textContent = "결과 복사"; }, 1600); }
+    try { navigator.clipboard.writeText(lastText).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+  calc();
+})();
+</script>

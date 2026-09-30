@@ -1,0 +1,66 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>서류 보존기간·벌칙 조회</p>
+  <h1>서류 보존기간 · 벌칙 조회</h1>
+  <p>산업안전보건법 제164조가 정한 서류별 보존기간과, 제167조~제173조의 벌칙을 표로 찾습니다. 과태료는 <a href="../penalty/">과태료 부과기준 조회</a>에서 보세요.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <div class="seg" role="radiogroup" aria-label="보기" data-seg="tab">
+      <button type="button" data-v="ret" aria-pressed="true">서류 보존기간</button>
+      <button type="button" data-v="pen" aria-pressed="false">벌칙 (징역·벌금)</button>
+    </div>
+    <div class="listbar"><div class="search-inline">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="rq" placeholder="예: 회의록, 건강진단, 석면, 제64조, 은폐" aria-label="검색"></div></div>
+    <p class="count" aria-live="polite">항목 <strong id="rCount">0</strong>건</p>
+    <div id="rOut"></div>
+    <div class="empty" id="rEmpty" hidden><p>검색 결과가 없습니다.</p></div>
+    <details class="lawbox" id="rOrig"><summary><strong>조문 원문 보기</strong></summary><div id="rOrigBody" class="stack" style="margin-top:10px"></div></details>
+  </section>
+  <aside class="col-side stack">
+    <section class="side-box"><h2 class="h-sm">알아 두기</h2><ul class="bul hint" id="rNotes"></ul></section>
+    <section class="side-box"><h2 class="h-sm">관련 도구</h2><ul class="bul">
+      <li><a href="../penalty/">과태료 부과기준 조회 (시행령 별표 35)</a></li>
+      <li><a href="../schedule/">법정 주기업무 달력</a></li>
+      <li><a href="../duties/">직무·책임 조회</a></li></ul></section>
+    <p class="src-line" id="rSrc"></p>
+  </aside>
+</div>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null, L = /*@LAWREF@*/null;
+  if (!D) return;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var tab = "ret";
+  function render() {
+    var q = document.getElementById("rq").value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var hit = function (t) { t = t.toLowerCase(); return q.every(function (w) { return t.indexOf(w) >= 0; }); };
+    var h = "", n = 0;
+    if (tab === "ret") {
+      var rows = D.retention.filter(function (r) { return hit(r.join(" ")); }); n = rows.length;
+      h = '<div class="table-wrap"><table class="dtable rtable"><thead><tr><th>서류</th><th>보존 의무자</th><th>보존기간</th><th>근거</th></tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr><td class="txt">' + esc(r[1]) + '</td><td class="txt">' + esc(r[0]) + '</td><td class="period">' + esc(r[2]) + '</td><td class="txt basis">' + esc(r[3]) + "</td></tr>"; }).join("") + "</tbody></table></div>";
+    } else {
+      var ps = D.penalties.filter(function (p) { return hit(p.art + " " + p.penalty + " " + p.who + " " + (p.extra || "")); }); n = ps.length;
+      h = '<div class="plist">' + ps.map(function (p) { return '<article class="pitem"><p class="rrow-top"><span class="badge badge-navy">법 ' + esc(p.art) + '</span></p><h3 class="rrow-title">' + esc(p.penalty) + '</h3><p class="lawtext">' + esc(p.who) + "</p>" + (p.extra ? '<p class="hint">' + esc(p.extra) + "</p>" : "") + "</article>"; }).join("") + "</div>";
+    }
+    document.getElementById("rOut").innerHTML = n ? h : "";
+    document.getElementById("rCount").textContent = n;
+    document.getElementById("rEmpty").hidden = n > 0;
+    var arts = tab === "ret" ? [["act", "제164조(서류의 보존)"], ["rule", "제241조(서류의 보존)"], ["krule", "제619조의2(산소 및 유해가스 농도의 측정 및 기록 등)"]]
+      : [["act", "제167조(벌칙)"], ["act", "제168조(벌칙)"], ["act", "제169조(벌칙)"], ["act", "제170조(벌칙)"], ["act", "제170조의2(벌칙)"], ["act", "제171조(벌칙)"], ["act", "제172조(벌칙)"], ["act", "제173조(양벌규정)"]];
+    document.getElementById("rOrigBody").innerHTML = L ? arts.map(function (a) { var law = L.laws[a[0]], t = law && law.articles[a[1]]; if (!t) return ""; return '<section><h3 class="h-sm">' + esc(law.law + " " + a[1]) + '</h3><p class="lawtext">' + esc(t.slice(a[1].length).trim()) + '</p><p class="src-line">' + esc(law.version) + ' · <a href="' + esc(law.url) + '" target="_blank" rel="noopener">원문 ↗</a></p></section>'; }).join("") : "";
+  }
+  document.querySelector('[data-seg="tab"]').addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    this.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    tab = b.dataset.v; render();
+  });
+  document.getElementById("rq").addEventListener("input", render);
+  document.getElementById("rNotes").innerHTML = D.notes.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "<li>과태료(질서위반)는 벌칙과 별개입니다. 같은 위반이라도 결과(사망 여부 등)에 따라 적용 조문이 달라집니다.</li>";
+  document.getElementById("rSrc").textContent = "법령 원문 확인일 " + D.checked + " · 국가법령정보센터";
+  try { var t0 = new URLSearchParams(location.search).get("tab"); if (t0 === "pen") document.querySelector('[data-v="pen"]').click(); } catch (e) {}
+  render();
+})();
+</script>

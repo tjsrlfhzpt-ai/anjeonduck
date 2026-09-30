@@ -1,0 +1,164 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>선임·구성 대상 조회</p>
+  <h1>안전보건 조직 선임·구성 대상 조회</h1>
+  <p>업종과 상시근로자 수(건설업은 공사금액)를 넣으면 안전보건관리책임자·안전관리자·보건관리자·안전보건관리담당자·산업보건의·산업안전보건위원회·안전보건관리규정·안전보건총괄책임자 대상 여부와 인원을 시행령·시행규칙 별표 원문 기준으로 보여 줍니다.</p>
+</div></section>
+<div class="wrap layout-detail layout-calc">
+  <section class="col-main stack">
+    <form class="calc" id="sForm" onsubmit="return false" autocomplete="off">
+      <div class="grid3">
+        <label class="field" style="grid-column:span 2"><span class="label">업종 (한국표준산업분류 이름 일부)</span><input type="text" id="sInd" placeholder="예: 식료품, 화학, 도매, 건설, 소프트웨어"></label>
+        <label class="field"><span class="label">상시근로자 수</span><input type="number" id="sN" min="0" inputmode="numeric" placeholder="명"></label>
+      </div>
+      <p class="hint">상시근로자 수가 헷갈리면 <a href="../headcount/">상시근로자 수 계산기</a>로 먼저 구하세요. 업종명이 별표마다 조금씩 달라서, 아래에서 표마다 해당 행을 직접 고를 수 있습니다.</p>
+      <label class="check"><input type="checkbox" id="sCon"><span>건설업(공사금액 기준)</span></label>
+      <div class="grid3" id="sConBox" hidden>
+        <label class="field"><span class="label">공사금액(억원)</span><input type="number" id="sAmt" min="0" step="0.1" inputmode="decimal"></label>
+        <label class="check" style="align-self:end"><input type="checkbox" id="sCivil"><span>토목공사업에 속하는 공사</span></label>
+        <label class="check" style="align-self:end"><input type="checkbox" id="sSub"><span>관계수급인으로서 선임</span></label>
+      </div>
+      <label class="check"><input type="checkbox" id="sDo"><span>도급인 사업장에서 관계수급인 근로자가 작업함</span></label>
+      <div class="grid3" id="sDoBox" hidden>
+        <label class="field"><span class="label">수급인 근로자 포함 상시근로자</span><input type="number" id="sDoN" min="0" inputmode="numeric"></label>
+        <label class="field"><span class="label">총공사금액(억원, 건설업)</span><input type="number" id="sDoAmt" min="0" step="0.1" inputmode="decimal"></label>
+        <label class="check" style="align-self:end"><input type="checkbox" id="sDo50"><span>선박·보트 건조업, 1차 금속 제조업, 토사석 광업</span></label>
+      </div>
+      <label class="check"><input type="checkbox" id="sShmInd"><span>제조업·임업·하수/폐수/분뇨 처리업·폐기물 수집·운반·처리 및 원료 재생업·환경 정화 및 복원업</span></label>
+      <details class="lawbox" id="sRowsBox"><summary><strong>표마다 적용할 업종 행 확인·변경</strong> <span class="muted" id="sRowsSum"></span></summary><div class="stack" id="sRows" style="margin-top:10px"></div></details>
+    </form>
+    <div class="table-wrap"><table class="dtable seltable"><thead><tr><th>구분</th><th>판정</th><th>인원</th><th>기준·선임방법</th></tr></thead><tbody id="sOut"></tbody></table></div>
+    <details class="lawbox"><summary><strong>안전관리자 자격 (시행령 별표 4)</strong></summary><ol class="qlist" id="sQ4"></ol></details>
+    <details class="lawbox"><summary><strong>보건관리자 자격 (시행령 별표 6)</strong></summary><ol class="qlist" id="sQ6"></ol></details>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">꼭 알아 두기</h2><ul class="bul hint">
+      <li>표는 원문을 정리한 것입니다. 업종 해당 여부(한국표준산업분류)와 겸직·위탁 가능 여부는 원문과 관할 지방고용노동관서로 확인하세요.</li>
+      <li>안전관리자·보건관리자·산업보건의는 선임(위촉)한 날부터 14일 이내에 증명 서류를 제출합니다(영 제16조제6항, 제20조제3항, 제29조제3항).</li>
+      <li>상시근로자 300명 이상(건설업 120억원·토목 150억원 이상)은 안전관리자를, 300명 이상은 보건관리자를 그 업무만 전담하게 해야 합니다(영 제16조제2항, 제20조제2항).</li>
+      <li>관리감독자는 규모와 상관없이 생산 업무와 소속 직원을 직접 지휘·감독하는 사람이 맡습니다(법 제16조).</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">다음 할 일</h2><ul class="bul">
+      <li><a href="../forms/appoint/">인사발령서 작성</a></li>
+      <li><a href="../duties/">직무·책임 조회 · 직무분장표</a></li>
+      <li><a href="../forms/edu-ledger/">직무교육 이수 관리대장</a></li>
+    </ul></div>
+    <p class="src-line" id="sSrc"></p>
+  </aside>
+</div>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function num(id) { var v = parseFloat($(id).value); return isFinite(v) ? v : null; }
+  var TABLES = [["b2", "안전보건관리책임자 (영 별표 2)"], ["b3", "안전관리자 (영 별표 3)"], ["b5", "보건관리자 (영 별표 5)"], ["b9", "산업안전보건위원회 (영 별표 9)"], ["r2", "안전보건관리규정 (규칙 별표 2)"]];
+  var pick = {}, manual = {};
+  $("sQ4").innerHTML = D.b4.items.map(function (q) { return '<li><strong>제' + esc(q.no) + "호</strong> " + esc(q.text) + "</li>"; }).join("");
+  $("sQ6").innerHTML = D.b6.items.map(function (q) { return '<li><strong>제' + esc(q.no) + "호</strong> " + esc(q.text) + "</li>"; }).join("");
+  function isCatchAll(r) { return /제외한 사업$/.test(r.name); }
+  function autoPick(t, kw, con) {
+    var rows = D[t].rows;
+    if (con) { var c = rows.filter(function (r) { return r.name === "건설업"; })[0]; if (c) return c.no; }
+    var ws = kw.split(/[\s,]+/).filter(function (w) { return w.length >= 2; });
+    if (ws.length) {
+      var best = null, bs = 0;
+      rows.forEach(function (r) { if (isCatchAll(r) || r.name === "건설업") return; var s = ws.filter(function (w) { return r.name.indexOf(w) >= 0; }).length; if (s > bs) { bs = s; best = r; } });
+      if (best) return best.no;
+      if (ws.some(function (w) { return /제조/.test(w); })) { var m = rows.filter(function (r) { return /사업을 제외한 제조업/.test(r.name); })[0]; if (m) return m.no; }
+    }
+    var ca = rows.filter(isCatchAll)[0];
+    return ca ? ca.no : "";
+  }
+  function rowsUI() {
+    $("sRows").innerHTML = TABLES.map(function (t) {
+      var d = D[t[0]];
+      return '<label class="field"><span class="label">' + esc(t[1]) + '</span><select class="sort" data-t="' + t[0] + '" style="width:100%"><option value="">— 해당하는 행 없음(대상 아님) —</option>' +
+        d.rows.map(function (r) { return '<option value="' + esc(r.no) + '"' + (pick[t[0]] === r.no ? " selected" : "") + ">" + esc(r.no + ". " + r.name) + "</option>"; }).join("") + "</select></label>";
+    }).join("");
+  }
+  function row(t) { return D[t].rows.filter(function (r) { return r.no === pick[t]; })[0] || null; }
+  function tierBy(list, N, r) { for (var i = 0; i < list.length; i++) { var x = list[i], mn = (i === 0 && r && r.min) ? r.min : x.min; if (N >= mn && (x.max == null || N < x.max)) return x; } return null; }
+
+  function calc() {
+    var kw = $("sInd").value.trim(), N = num("sN"), con = $("sCon").checked, A = num("sAmt"), civil = $("sCivil").checked, sub = $("sSub").checked;
+    $("sConBox").hidden = !con; $("sDoBox").hidden = !$("sDo").checked;
+    TABLES.forEach(function (t) { if (!manual[t[0]]) pick[t[0]] = autoPick(t[0], kw, con); });
+    // 제조업인데 별표에 개별 행이 없으면 "제○호부터 제○호까지의 사업을 제외한 제조업" 행으로
+    var mfg = ["b2", "b3"].some(function (t) { var r = D[t].rows.filter(function (x) { return x.no === pick[t]; })[0]; return r && /제조업/.test(r.name) && !/제외한 (사업|제조업)$/.test(r.name); }) || /제조/.test(kw);
+    ["b3", "b5"].forEach(function (t) { if (manual[t] || !mfg) return; var cur = D[t].rows.filter(function (x) { return x.no === pick[t]; })[0]; if (cur && !/제외한 사업$/.test(cur.name)) return; var m = D[t].rows.filter(function (x) { return /사업을 제외한 제조업$/.test(x.name); })[0]; if (m) pick[t] = m.no; });
+    if (!document.activeElement || !document.activeElement.dataset || !document.activeElement.dataset.t) rowsUI();
+    $("sRowsSum").textContent = TABLES.map(function (t) { return t[0].toUpperCase() + ":" + (pick[t[0]] || "없음"); }).join(" · ");
+    var out = [];
+    function add(name, verdict, n, basis, cls) { out.push('<tr class="' + (cls || "") + '"><th>' + esc(name) + '</th><td class="v">' + verdict + '</td><td class="n">' + esc(n || "") + '</td><td class="txt">' + basis + "</td></tr>"); }
+    var yes = '<span class="badge badge-red">선임 대상</span>', no = '<span class="badge badge-line">대상 아님</span>', need = '<span class="badge badge-muted">입력 필요</span>';
+    // 책임자
+    var r2 = row("b2");
+    if (!r2) add("안전보건관리책임자", no, "", "선택한 업종이 별표 2에 없습니다.");
+    else { var g = D.b2.groups[r2.g]; var ok = r2.g === "con" ? (A == null ? null : A >= g.amount) : (N == null ? null : N >= g.min);
+      add("안전보건관리책임자", ok == null ? need : ok ? yes : no, ok ? "1명" : "", esc(r2.no + ". " + r2.name) + " — " + esc(g.label)); }
+    // 안전관리자
+    var r3 = row("b3"), smRequired = false;
+    if (!r3) add("안전관리자", no, "", "선택한 업종이 별표 3에 없습니다(별표 3에 없는 사업은 안전관리자 선임 의무가 없습니다).");
+    else if (r3.g === "C") {
+      if (A == null) add("안전관리자", need, "", "공사금액을 넣으세요.");
+      else { var tiers = D.b3.groups.C, hit = null;
+        for (var i = 0; i < tiers.length; i++) { var x = tiers[i]; var lo = x.amin; if (i === 0 && sub) lo = x.amin_sub; if (x.amin_civil && civil) lo = x.amin_civil; var hi = x.amax; if (x.amax_civil && civil) hi = x.amax_civil; if (i === 0 && civil) hi = 150; if (A >= lo && (hi == null || A < hi)) { hit = x; break; } }
+        if (!hit) add("안전관리자", no, "", "공사금액 50억원(관계수급인 100억원) 미만");
+        else { smRequired = true; var n = hit.n, pp = hit.pp, extra = "";
+          if (hit.amin === 10000) { var add1 = A < 20000 ? Math.floor((A - 10000) / 2000) : 5 + Math.floor((A - 20000) / 3000); n = 11 + add1; pp = Math.ceil(n / 2); extra = " (1조원 초과분 가산은 '매 2천억원(2조원 이상 매 3천억원)마다 1명'을 1조원 기준으로 계산한 값 — 원문 확인)"; }
+          add("안전관리자", yes, n + "명 이상" + (pp ? " (전·후 15 기간 " + pp + "명 이상)" : ""), esc(hit.label) + extra + "<br>" + esc(D.b3.methods[hit.m]) + (pp ? '<br><span class="muted">' + esc(D.b3.pp_note) + "</span>" : "") + (A >= (civil ? 150 : 120) ? '<br><strong>전담</strong> — 공사금액 120억원(토목 150억원) 이상은 안전관리 업무만 전담(영 제16조제2항)' : "")); }
+      } }
+    else {
+      if (N == null) add("안전관리자", need, "", "상시근로자 수를 넣으세요.");
+      else { var t3 = tierBy(D.b3.groups[r3.g], N, r3);
+        if (!t3) add("안전관리자", no, "", esc(r3.no + ". " + r3.name) + " — 상시근로자 " + (r3.min || 50) + "명 미만" + (r3.min_note ? " (" + esc(r3.min_note) + ")" : ""));
+        else { smRequired = true; add("안전관리자", yes, t3.n + "명 이상", esc(r3.no + ". " + r3.name) + " — " + esc(t3.label) + "<br>" + esc(D.b3.methods[t3.m]) + (N >= 300 ? "<br><strong>전담</strong> — 상시근로자 300명 이상은 안전관리 업무만 전담(영 제16조제2항)" : "")); } } }
+    // 보건관리자
+    var r5 = row("b5"), hmRequired = false;
+    if (!r5) add("보건관리자", no, "", "선택한 업종이 별표 5에 없습니다(별표 5에 없는 사업은 보건관리자 선임 의무가 없습니다).");
+    else if (r5.g === "D") {
+      var d = D.b5.groups.D[0], base = civil ? d.amin_civil : d.amin;
+      if (A == null && N == null) add("보건관리자", need, "", "공사금액 또는 상시근로자 수를 넣으세요.");
+      else if ((A != null && A >= base) || (N != null && N >= d.hmin)) { hmRequired = true;
+        var na = A != null && A >= base ? Math.floor((A - base) / 1400) : 0, nn = N != null && N >= 600 ? Math.floor((N - 600) / 600) : 0;
+        add("보건관리자", yes, (1 + Math.max(na, nn)) + "명 이상", esc(d.label) + "<br>" + esc(D.b5.methods[d.m]) + '<br><span class="muted">가산 인원은 공사금액·근로자 수 기준 중 큰 값으로 계산했습니다 — 원문 확인</span>'); }
+      else add("보건관리자", no, "", esc(d.label) + " 미만");
+    } else {
+      if (N == null) add("보건관리자", need, "", "상시근로자 수를 넣으세요.");
+      else { var t5 = tierBy(D.b5.groups[r5.g], N, r5);
+        if (!t5) add("보건관리자", no, "", esc(r5.no + ". " + r5.name) + " — 상시근로자 " + (r5.min || 50) + "명 미만");
+        else { hmRequired = true; add("보건관리자", yes, t5.n + "명 이상", esc(r5.no + ". " + r5.name) + " — " + esc(t5.label) + "<br>" + esc(D.b5.methods[t5.m]) + (N >= 300 ? "<br><strong>전담</strong> — 상시근로자 300명 이상은 보건관리 업무만 전담(영 제20조제2항)" : "")); } } }
+    // 담당자
+    var shmInd = $("sShmInd").checked;
+    if (N == null) add("안전보건관리담당자", need, "", D.shm.law);
+    else if (smRequired || hmRequired) add("안전보건관리담당자", no, "", "안전관리자 또는 보건관리자를 두어야 하는 경우에는 두지 않아도 됩니다(법 제19조제1항 단서).");
+    else if (shmInd && N >= 20 && N < 50) add("안전보건관리담당자", yes, "1명 이상", esc(D.shm.law) + " — " + esc(D.shm.industries.join(", ")) + ", 상시근로자 20명 이상 50명 미만. 해당 사업장 소속 근로자로서 안전관리자 또는 보건관리자 자격을 갖추거나 고용노동부장관이 정하는 안전보건교육을 이수한 사람");
+    else add("안전보건관리담당자", no, "", esc(D.shm.law) + " — 대상 업종(" + esc(D.shm.industries.join(", ")) + ")의 상시근로자 20명 이상 50명 미만 사업장");
+    // 산업보건의
+    add("산업보건의", hmRequired && N != null && N >= 50 ? '<span class="badge badge-orange">원칙적 대상</span>' : no, hmRequired && N >= 50 ? "1명" : "", esc(D.doc.law) + " — " + esc(D.doc.text));
+    // 산보위
+    var r9 = row("b9");
+    if (!r9) add("산업안전보건위원회", no, "", "선택한 업종이 별표 9에 없습니다.");
+    else { var g9 = D.b9.groups[r9.g]; var ok9 = r9.g === "con" ? (A == null ? null : A >= (civil ? g9.amount_civil : g9.amount)) : (N == null ? null : N >= g9.min);
+      add("산업안전보건위원회", ok9 == null ? need : ok9 ? '<span class="badge badge-red">구성 대상</span>' : no, "", esc(r9.no + ". " + r9.name) + " — " + esc(g9.label)); }
+    // 규정
+    var rr = row("r2");
+    if (!rr) add("안전보건관리규정", no, "", "선택한 업종이 규칙 별표 2에 없습니다.");
+    else { var gr = D.r2.groups[rr.g]; var okr = N == null ? null : N >= gr.min;
+      add("안전보건관리규정", okr == null ? need : okr ? '<span class="badge badge-red">작성 대상</span>' : no, "", esc(rr.no + ". " + rr.name) + " — 상시근로자 " + esc(gr.label)); }
+    // 총괄책임자
+    if (!$("sDo").checked) add("안전보건총괄책임자", no, "", "도급인 사업장에서 관계수급인 근로자가 작업하는 경우에만 해당(법 제62조)");
+    else { var dn = num("sDoN"), da = num("sDoAmt"), lim = $("sDo50").checked ? 50 : 100;
+      var okg = (dn != null && dn >= lim) || (da != null && da >= 20);
+      add("안전보건총괄책임자", (dn == null && da == null) ? need : okg ? '<span class="badge badge-red">지정 대상</span>' : no, okg ? "1명(보통 안전보건관리책임자)" : "", esc(D.gm.law) + " — " + esc(D.gm.text)); }
+    add("관리감독자", '<span class="badge badge-blue">모든 사업</span>', "부서·작업별", "생산 관련 업무와 소속 직원을 직접 지휘·감독하는 직위의 사람에게 법정 업무를 맡겨야 합니다(법 제16조, 영 제15조).");
+    $("sOut").innerHTML = out.join("");
+  }
+  $("sForm").addEventListener("input", function (ev) { if (ev.target.dataset && ev.target.dataset.t) { pick[ev.target.dataset.t] = ev.target.value; manual[ev.target.dataset.t] = true; } else if (ev.target.id === "sInd" || ev.target.id === "sCon") { manual = {}; } calc(); });
+  $("sForm").addEventListener("change", function (ev) { if (ev.target.dataset && ev.target.dataset.t) { pick[ev.target.dataset.t] = ev.target.value; manual[ev.target.dataset.t] = true; } else if (ev.target.id === "sCon") manual = {}; calc(); });
+  $("sSrc").textContent = "원문 확인 " + D.checked + " · " + [D.b2.law, D.b3.law, D.b5.law, D.b9.law, D.r2.law].join(" / ");
+  calc();
+})();
+</script>

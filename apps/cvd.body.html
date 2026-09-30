@@ -1,0 +1,241 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>뇌심혈관질환 발병위험도 평가</p>
+  <h1>뇌·심혈관질환 발병위험도 평가</h1>
+  <p>KOSHA GUIDE H-200-2018의 표 4~7(혈압 분류 → 위험인자 수 → 위험도 분류 → 일반건강검진 결과 통합)을 그대로 적용합니다. 종합조사표와 결과 통지서를 A4로 인쇄할 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail layout-calc no-print">
+  <section class="col-main stack">
+    <form class="calc" id="cForm" onsubmit="return false" autocomplete="off">
+      <div class="grid3">
+        <label class="field"><span class="label">사업장명</span><input type="text" id="cCo"></label>
+        <label class="field"><span class="label">성명</span><input type="text" id="cName"></label>
+        <label class="field"><span class="label">평가일</span><input type="date" id="cDate"></label>
+      </div>
+      <div class="grid3">
+        <div class="field"><span class="label">성별</span><div class="seg" data-seg="sex"><button type="button" data-v="m" aria-pressed="true">남</button><button type="button" data-v="f" aria-pressed="false">여</button></div></div>
+        <label class="field"><span class="label">연령(만)</span><input type="number" id="cAge" min="15" max="99" inputmode="numeric"></label>
+        <label class="check" style="align-self:end"><input type="checkbox" id="cMeno"><span>자궁절제술 또는 폐경 이후(여)</span></label>
+      </div>
+      <h2 class="h-sm">신체 계측 · 혈압</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">신장(cm)</span><input type="number" id="cH" step="0.1" inputmode="decimal"></label>
+        <label class="field"><span class="label">체중(kg)</span><input type="number" id="cW" step="0.1" inputmode="decimal"></label>
+        <label class="field"><span class="label">허리둘레(cm)</span><input type="number" id="cWaist" step="0.1" inputmode="decimal"></label>
+        <label class="field"><span class="label">수축기 혈압</span><input type="number" id="cSbp" inputmode="numeric"></label>
+        <label class="field"><span class="label">이완기 혈압</span><input type="number" id="cDbp" inputmode="numeric"></label>
+        <label class="check" style="align-self:end"><input type="checkbox" id="cBpMed"><span>고혈압약 복용</span></label>
+      </div>
+      <h2 class="h-sm">혈액·소변 검사</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">공복혈당(mg/dL)</span><input type="number" id="cFbs" inputmode="numeric"></label>
+        <label class="field"><span class="label">식후 2시간 혈당</span><input type="number" id="cPp" inputmode="numeric" placeholder="선택"></label>
+        <label class="field"><span class="label">당화혈색소(%)</span><input type="number" id="cA1c" step="0.1" inputmode="decimal" placeholder="선택"></label>
+        <label class="field"><span class="label">총콜레스테롤</span><input type="number" id="cTc" inputmode="numeric"></label>
+        <label class="field"><span class="label">HDL 콜레스테롤</span><input type="number" id="cHdl" inputmode="numeric"></label>
+        <label class="field"><span class="label">중성지방</span><input type="number" id="cTg" inputmode="numeric"></label>
+        <label class="field"><span class="label">LDL 실측치(없으면 계산)</span><input type="number" id="cLdl" inputmode="numeric" placeholder="자동 계산"></label>
+        <label class="field"><span class="label">혈청 크레아티닌</span><input type="number" id="cCr" step="0.01" inputmode="decimal"></label>
+        <label class="field"><span class="label">eGFR(없으면 MDRD 계산)</span><input type="number" id="cGfr" inputmode="numeric" placeholder="자동 계산"></label>
+      </div>
+      <label class="check"><input type="checkbox" id="cDmMed"><span>당뇨약 복용 또는 당뇨병 진단</span></label>
+      <h2 class="h-sm">문진</h2>
+      <div class="grid3">
+        <label class="check"><input type="checkbox" id="cSmoke"><span>현재 흡연</span></label>
+        <label class="check"><input type="checkbox" id="cFam"><span>직계가족 조기발병(남 55세 미만, 여 65세 미만)</span></label>
+        <label class="check"><input type="checkbox" id="cInact"><span>운동부족(주 3일·1회 30분 미만)</span></label>
+      </div>
+      <h2 class="h-sm">표적장기 손상 · 동반질환 (진단·소견이 있는 것만)</h2>
+      <div class="grid3">
+        <label class="check"><input type="checkbox" id="cLvh"><span>좌심실비대</span></label>
+        <label class="check"><input type="checkbox" id="cProt"><span>단백뇨(미세단백뇨 포함)</span></label>
+        <label class="check"><input type="checkbox" id="cAth"><span>죽상동맥경화증</span></label>
+        <label class="check"><input type="checkbox" id="cRet"><span>고혈압성 망막증(grade III·IV)</span></label>
+        <label class="check"><input type="checkbox" id="cCvd"><span>증상 있는 심뇌혈관질환(뇌경색·뇌출혈·일과성허혈발작·심근경색·협심증·심부전 등)</span></label>
+        <label class="check"><input type="checkbox" id="cPad"><span>말초혈관질환·대동맥박리, 영상검사상 50% 이상 협착</span></label>
+      </div>
+      <h2 class="h-sm">일반건강검진 결과 (있으면)</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">심뇌혈관질환 10년 발병위험도(%)</span><input type="number" id="cNhis" step="0.1" inputmode="decimal" placeholder="검진 결과표 값"></label>
+      </div>
+      <p class="hint">일반건강검진 결과표의 "심뇌혈관질환 위험 평가" 값을 넣으면 표 7에 따라 두 결과 중 높은 군으로 정합니다(지침 7.2(4)).</p>
+      <h2 class="h-sm">현재 업무 (표 11 — 고위험군 이상일 때 작업전환 검토 대상)</h2>
+      <div class="grid3" id="cWork"></div>
+      <div class="btns">
+        <button type="button" class="btn btn-ghost btn-sm" id="cEx">지침 예시(45세 남성) 넣기</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="cReset">비우기</button>
+      </div>
+    </form>
+  </section>
+  <aside class="col-side stack">
+    <div class="result-card" aria-live="polite">
+      <p class="apply-label">발병위험도</p>
+      <p class="result-big" id="rLevel">—</p>
+      <dl class="result-dl" id="rDl"></dl>
+      <div class="btns" style="margin-top:6px">
+        <button type="button" class="btn btn-sm" data-print="survey">종합조사표 인쇄</button>
+        <button type="button" class="btn btn-sm btn-ghost" data-print="result">결과 통지서 인쇄</button>
+      </div>
+    </div>
+    <div class="side-box"><h2 class="h-sm">판정 근거</h2><ul class="bul hint" id="rWhy"></ul></div>
+    <div class="side-box"><h2 class="h-sm">꼭 알아 두기</h2><ul class="bul hint">
+      <li>이 결과는 지침의 분류 기준을 기계적으로 적용한 참고 결과입니다. 업무적합성 평가와 근무상 조치는 의사인 보건관리자(또는 직업환경의학전문의)가 판단합니다(지침 10.1).</li>
+      <li>고위험군·최고위험군은 의사의 업무적합성 평가를 받아야 합니다(10.1(2)).</li>
+      <li>평가 결과로 근로자에게 고용상 불이익을 주어서는 안 됩니다(10.3(1)).</li>
+      <li>입력한 건강정보는 저장하지 않습니다. 페이지를 닫으면 지워집니다.</li>
+    </ul></div>
+  </aside>
+</div>
+
+<article class="paper print-doc" id="pSurvey"></article>
+<article class="paper print-doc" id="pResult"></article>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var WORK = ["주당 60시간 이상의 장시간노동", "고정적인 야간작업", "정신적·심리적으로 부담이 큰 업무", "힘이 많이 드는 중노동을 연속적으로 하는 작업", "부정맥이 있을 때: 운전작업, 고소작업", "근무일정 예측이 어렵거나 시차가 큰 출장이 잦은 업무", "고열작업 또는 한랭작업", "과도한 소음에 노출되는 작업", "갱내작업 등 산소가 부족하기 쉬운 곳의 작업", "순환기계장해 유발 화학물질 노출(이황화탄소, 일산화탄소 등)"];
+  $("cWork").innerHTML = WORK.map(function (w, i) { return '<label class="check"><input type="checkbox" data-w="' + i + '"><span>' + esc(w) + "</span></label>"; }).join("");
+  var sex = "m";
+  document.querySelector('[data-seg="sex"]').addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    this.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    sex = b.dataset.v; calc();
+  });
+  function num(id) { var v = parseFloat($(id).value); return isFinite(v) ? v : null; }
+  function on(id) { return $(id).checked; }
+  var LV = ["저위험군", "중등도위험군", "고위험군", "최고위험군"];
+
+  // 표 4 — 수축기·이완기 중 높은 단계
+  function bpClass(s, d) {
+    if (s == null || d == null) return null;
+    var cs = s >= 160 ? 4 : s >= 140 ? 3 : s >= 130 ? 2 : s >= 120 ? 1 : 0;
+    var cd = d >= 100 ? 4 : d >= 90 ? 3 : d >= 80 ? 2 : 0;
+    return Math.max(cs, cd);
+  }
+  var BPN = ["정상 혈압", "주의 혈압", "고혈압 전단계", "1기 고혈압", "2기 고혈압"];
+
+  function calc() {
+    var age = num("cAge"), h = num("cH"), w = num("cW"), waist = num("cWaist"), sbp = num("cSbp"), dbp = num("cDbp");
+    var fbs = num("cFbs"), pp = num("cPp"), a1c = num("cA1c"), tc = num("cTc"), hdl = num("cHdl"), tg = num("cTg"), cr = num("cCr");
+    var why = [], out = {};
+    var bmi = h && w ? Math.round(w / Math.pow(h / 100, 2) * 10) / 10 : null;
+    var ldl = num("cLdl"); var ldlCalc = false;
+    if (ldl == null && tc != null && hdl != null && tg != null) { ldl = Math.round(tc - hdl - tg / 5); ldlCalc = true; }
+    var gfr = num("cGfr"), gfrCalc = false;
+    if (gfr == null && cr && age) { gfr = Math.round(186 * Math.pow(cr, -1.154) * Math.pow(age, -0.203) * (sex === "f" ? 0.742 : 1)); gfrCalc = true; }
+    var dm = on("cDmMed") || (fbs != null && fbs >= 126) || (pp != null && pp >= 200) || (a1c != null && a1c >= 6.5);
+    var bpc = bpClass(sbp, dbp);
+
+    // 표 5 — 위험인자 수
+    var rf = [];
+    if (age != null && ((sex === "m" && age >= 45) || (sex === "f" && (age >= 55 || on("cMeno"))))) rf.push("연령");
+    if (on("cFam")) rf.push("가족력(조기발병)");
+    if (on("cSmoke")) rf.push("흡연");
+    if ((bmi != null && bmi >= 25) || (waist != null && waist >= (sex === "m" ? 90 : 85))) rf.push("비만·복부비만");
+    if (!dm && ((fbs != null && fbs >= 100 && fbs < 126) || (pp != null && pp >= 140 && pp < 200) || (a1c != null && a1c >= 5.7 && a1c < 6.5))) rf.push("공복혈당장애·내당능장애");
+    if (hdl != null && hdl < 40) rf.push("HDL<40");
+    if ((tc != null && tc >= 220) || (ldl != null && ldl >= 150) || (tg != null && tg >= 200)) rf.push("총콜레스테롤·LDL·중성지방 기준 이상");
+    var relief = hdl != null && hdl >= 60;
+    var nrf = Math.max(0, rf.length - (relief ? 1 : 0));
+
+    // 표 6
+    var ckd = gfr == null ? 0 : gfr < 30 ? 4 : gfr < 60 ? 3 : 0;
+    var htod = on("cLvh") || on("cProt") || on("cAth") || on("cRet");
+    var dmTod = dm && (on("cProt") || (sbp != null && sbp >= 180) || (dbp != null && dbp >= 110) || (tc != null && tc >= 310));
+    var cvd = on("cCvd") || on("cPad");
+    var col = bpc == null ? null : Math.max(0, bpc - 2); // 0:전단계(정상·주의 포함) 1:1기 2:2기
+    var t6 = null, stage = "";
+    if (col != null) {
+      if (ckd === 4 || dmTod || cvd) { t6 = 3; stage = "3단계"; }
+      else if (dm || ckd === 3 || htod) { t6 = col === 2 ? 3 : 2; stage = "2단계"; }
+      else { stage = "1단계"; t6 = nrf === 0 ? [0, 0, 1][col] : nrf <= 2 ? [0, 1, 1][col] : [1, 1, 2][col]; }
+    }
+    // 표 7 통합
+    var lv = t6 == null ? -1 : t6;
+    if (t6 != null) why.push("표 6(" + stage + ", " + ["고혈압 전단계 이하", "1기 고혈압", "2기 고혈압"][col] + ", 위험인자 " + nrf + "개): " + LV[t6]);
+    function bump(v, msg) { if (v > lv) lv = v; why.push(msg + " → " + LV[v] + " 이상"); }
+    if (cvd) bump(3, "임상적 심뇌혈관질환·말초동맥질환 또는 영상상 50% 이상 협착");
+    if (dmTod) bump(3, "당뇨병 + 표적장기 손상(단백뇨·180/110 이상·총콜레스테롤 310 이상)");
+    if (ckd === 4) bump(3, "만성신장질환 4기 이상(eGFR<30)");
+    if ((tc != null && tc >= 310) || (sbp != null && sbp >= 180) || (dbp != null && dbp >= 110)) bump(2, "단일 위험요인 과도 증가(총콜레스테롤≥310 또는 혈압≥180/110)");
+    if (dm) bump(2, "당뇨병");
+    if (on("cLvh")) bump(2, "고혈압성 심비대(좌심실비대)");
+    if (ckd === 3) bump(2, "만성신장질환 3기(eGFR 30~59)");
+    var nh = num("cNhis");
+    if (nh != null) { var nv = nh >= 10 ? 3 : nh >= 5 ? 2 : nh >= 1 ? 1 : 0; if (nv > lv) lv = nv; why.push("일반건강검진 10년 발병위험도 " + nh + "%: " + LV[nv]); }
+    var works = [].slice.call(document.querySelectorAll("[data-w]:checked")).map(function (x) { return WORK[+x.dataset.w]; });
+
+    out = { bmi: bmi, ldl: ldl, ldlCalc: ldlCalc, gfr: gfr, gfrCalc: gfrCalc, dm: dm, bpc: bpc, rf: rf, relief: relief, nrf: nrf, ckd: ckd, htod: htod, cvd: cvd, lv: lv, works: works, nh: nh };
+    var MG = [
+      { care: "통상근무 또는 조건부근무", follow: "보건관리자 상담, 생활습관 개선 또는 약물치료", cyc: "2년에 1회(기본). 개선할 생활습관이 있으면 1년에 1회" },
+      { care: "조건부근무", follow: "의사인 보건관리자의 적합성 평가, 보건관리자 상담, 생활습관 개선 또는 약물치료", cyc: "1년에 1회 이상 또는 건강진단기관 의사 권고 시기" },
+      { care: "조건부근무 또는 병가/휴직", follow: "의사인 보건관리자의 적합성 평가 필수 — 근무상 조치 및 작업(환경) 개선 권고, 생활습관 개선과 약물치료", cyc: "건강진단기관 의사가 권고하는 시기" },
+      { care: "병가/휴직, 조건부근무", follow: "의사인 보건관리자의 적합성 평가 필수 — 근무상 조치 및 작업(환경) 개선 권고, 생활습관 개선과 약물치료", cyc: "건강진단기관 의사가 권고하는 시기" }
+    ];
+    out.mg = lv >= 0 ? MG[lv] : null;
+    $("rLevel").textContent = lv >= 0 ? LV[lv] : "혈압을 입력하세요";
+    $("rLevel").className = "result-big lv" + lv;
+    $("rDl").innerHTML = [["혈압 분류", bpc == null ? "—" : BPN[bpc] + " (" + sbp + "/" + dbp + ")"], ["위험인자", nrf + "개" + (relief ? " (HDL≥60 1개 감함)" : "")], ["당뇨병", dm ? "해당" : "해당 없음"],
+      ["eGFR", gfr == null ? "—" : gfr + (gfrCalc ? " (MDRD 계산)" : "")], ["BMI", bmi == null ? "—" : bmi], ["LDL", ldl == null ? "—" : ldl + (ldlCalc ? " (계산)" : "")],
+      ["근무 조치(표 10)", out.mg ? out.mg.care : "—"], ["재평가", out.mg ? out.mg.cyc : "—"]].map(function (r) { return "<div><dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("");
+    $("rWhy").innerHTML = (rf.length ? "<li>위험인자: " + esc(rf.join(", ")) + (relief ? " − HDL≥60(완화)" : "") + "</li>" : "<li>위험인자 없음</li>") + why.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
+      (lv >= 2 && works.length ? '<li style="color:var(--red)">고위험군 이상 + 표 11 업무 종사 → 정밀 업무적합성 평가 대상: ' + esc(works.join(", ")) + "</li>" : "") +
+      (bpc != null && bpc < 2 ? "<li>표 6에는 정상·주의혈압 열이 없어 고혈압 전단계 열로 분류했습니다(표 8 주석 준용).</li>" : "");
+    window.__cvd = out;
+    return out;
+  }
+  document.querySelector(".layout-calc").addEventListener("input", calc);
+  document.querySelector(".layout-calc").addEventListener("change", calc);
+
+  function v(id) { return esc($(id).value || ""); }
+  function ck(b) { return b ? "✔" : " "; }
+  function head(title) {
+    return '<header class="paper-h"><div class="paper-co">' + v("cCo") + '</div><h2 class="paper-t">' + title + '</h2><table class="appr"><tr><th rowspan="2" class="appr-h">확<br>인</th><th>평가자</th><th>보건관리자</th></tr><tr><td class="appr-sign"></td><td class="appr-sign"></td></tr></table></header>';
+  }
+  function printDoc(kind) {
+    var o = calc(), age = v("cAge"), sx = sex === "m";
+    var info = '<table class="ftab"><tr><th>성명</th><td>' + v("cName") + "</td><th>성별·연령</th><td>" + (sx ? "남" : "여") + " / " + age + "세" + (on("cMeno") ? " (폐경·수술)" : "") + "</td><th>평가일</th><td>" + v("cDate") + "</td></tr></table>";
+    if (kind === "survey") {
+      $("pSurvey").innerHTML = head("뇌심혈관질환 발병위험도평가자료 종합조사표") + info +
+        '<table class="gtab" style="margin-top:8px"><colgroup><col style="width:9%"><col style="width:17%"><col></colgroup><tbody>' +
+        '<tr><th rowspan="4">문진</th><th>성, 연령</th><td>' + (sx ? "☑ 남자 (" + age + ")세, □ 여자 (  )세" : "□ 남자 (  )세, ☑ 여자 (" + age + ")세") + "</td></tr>" +
+        "<tr><th>흡연</th><td>현재 하고 있다 (" + ck(on("cSmoke")) + "), 안 한다 (" + ck(!on("cSmoke")) + ")</td></tr>" +
+        "<tr><th>신체 활동부족</th><td>규칙적으로 한다 (" + ck(!on("cInact")) + "), 운동부족이다 (" + ck(on("cInact")) + ")</td></tr>" +
+        "<tr><th>가족력</th><td>직계가족의 심혈관질환 조기발병 (" + ck(on("cFam")) + ")</td></tr>" +
+        '<tr><th rowspan="5">측정 및 검사</th><th>비만도·허리둘레</th><td>체중 ' + v("cW") + " kg, 신장 " + v("cH") + " cm, BMI " + (o.bmi == null ? "" : o.bmi) + " ㎏/㎡, 허리둘레 " + v("cWaist") + " cm</td></tr>" +
+        "<tr><th>혈압</th><td>" + v("cSbp") + " / " + v("cDbp") + " mmHg (고혈압약 " + (on("cBpMed") ? "복용" : "미복용") + ") — " + (o.bpc == null ? "" : BPN[o.bpc]) + "</td></tr>" +
+        "<tr><th>혈중지질</th><td>총콜레스테롤 " + v("cTc") + ", HDL " + v("cHdl") + ", 중성지방 " + v("cTg") + ", LDL " + (o.ldl == null ? "" : o.ldl + (o.ldlCalc ? "(계산)" : "")) + " ㎎/㎗</td></tr>" +
+        "<tr><th>혈당</th><td>공복혈당 " + v("cFbs") + " ㎎/㎗, 식후 2시간 " + v("cPp") + " ㎎/㎗, 당화혈색소 " + v("cA1c") + " %</td></tr>" +
+        "<tr><th>신장기능</th><td>크레아티닌 " + v("cCr") + " ㎎/㎗, eGFR " + (o.gfr == null ? "" : o.gfr) + "</td></tr>" +
+        '<tr><th colspan="2">표적장기 손상 여부</th><td>좌심실비대 (' + ck(on("cLvh")) + "), 단백뇨 (" + ck(on("cProt")) + "), 죽상동맥경화증 (" + ck(on("cAth")) + "), 고혈압성 망막증 (" + ck(on("cRet")) + ")</td></tr>" +
+        '<tr><th colspan="2">동반된 질병상태</th><td>당뇨병 (' + ck(o.dm) + "), 뇌혈관 및 심혈관질환 (" + ck(on("cCvd")) + "), 신장질환 (" + ck(o.ckd >= 3) + "), 말초혈관질환 (" + ck(on("cPad")) + ")</td></tr>" +
+        '<tr><th colspan="2">결과</th><td><strong>' + (o.lv >= 0 ? LV[o.lv] : "") + "</strong> — 위험인자 " + o.nrf + "개" + (o.rf.length ? " (" + esc(o.rf.join(", ")) + ")" : "") + (o.nh != null ? ", 일반건강검진 10년 발병위험도 " + o.nh + "%" : "") + "</td></tr>" +
+        '</tbody></table><p class="paper-foot">근거: KOSHA GUIDE H-200-2018 표 3~7</p>';
+    } else {
+      $("pResult").innerHTML = head("뇌심혈관질환 발병위험도 평가 결과 통지서") + info +
+        '<table class="gtab" style="margin-top:8px"><tbody>' +
+        '<tr><th style="width:22%">발병위험도</th><td><strong style="font-size:15px">' + (o.lv >= 0 ? LV[o.lv] : "") + "</strong></td></tr>" +
+        "<tr><th>혈압 분류</th><td>" + (o.bpc == null ? "" : BPN[o.bpc]) + " (" + v("cSbp") + "/" + v("cDbp") + " mmHg)</td></tr>" +
+        "<tr><th>확인된 위험인자</th><td>" + (o.rf.length ? esc(o.rf.join(", ")) : "없음") + (o.relief ? " / 완화인자: HDL 60 이상" : "") + "</td></tr>" +
+        "<tr><th>표적장기 손상·동반질환</th><td>" + ([o.dm ? "당뇨병" : "", on("cLvh") ? "좌심실비대" : "", on("cProt") ? "단백뇨" : "", on("cAth") ? "죽상동맥경화증" : "", on("cRet") ? "고혈압성 망막증" : "", o.ckd ? "만성신장질환 " + o.ckd + "기 이상" : "", on("cCvd") ? "심뇌혈관질환" : "", on("cPad") ? "말초혈관질환 등" : ""].filter(Boolean).join(", ") || "없음") + "</td></tr>" +
+        "<tr><th>사후관리(표 10)</th><td>" + (o.mg ? esc(o.mg.follow) : "") + "</td></tr>" +
+        "<tr><th>근무상 조치 범위</th><td>" + (o.mg ? esc(o.mg.care) : "") + " — 최종 결정은 의사인 보건관리자(또는 직업환경의학전문의)의 업무적합성 평가에 따릅니다.</td></tr>" +
+        "<tr><th>다음 평가</th><td>" + (o.mg ? esc(o.mg.cyc) : "") + "</td></tr>" +
+        '<tr><th>의사 의견</th><td style="height:90px"></td></tr>' +
+        '</tbody></table><p class="paper-note">이 통지서는 진단서가 아닙니다. 위험군에 해당하면 의료기관에서 정확한 진단과 치료를 받으세요. 평가 결과를 이유로 고용상 불이익을 주지 않으며, 건강정보는 필요한 범위에서만 다룹니다(KOSHA GUIDE H-200-2018 10.3, 11.1(4)).</p><p class="paper-foot">근거: KOSHA GUIDE H-200-2018 8·9·10</p>';
+    }
+    document.body.classList.remove("pr-survey", "pr-result"); document.body.classList.add("pr-" + kind);
+    window.print();
+  }
+  document.querySelectorAll("[data-print]").forEach(function (b) { b.addEventListener("click", function () { printDoc(b.dataset.print); }); });
+  var EX = { cAge: 45, cH: 170, cW: 79, cWaist: 91, cSbp: 138, cDbp: 90, cFbs: 105, cTc: 230, cHdl: 45, cTg: 180, cLdl: 130, cCr: 1.1 };
+  $("cEx").addEventListener("click", function () {
+    $("cReset").click();
+    Object.keys(EX).forEach(function (k) { $(k).value = EX[k]; });
+    $("cInact").checked = true; $("cNhis").value = 4.2; calc();
+  });
+  $("cReset").addEventListener("click", function () { $("cForm").reset(); sex = "m"; document.querySelectorAll('[data-seg="sex"] button').forEach(function (x, i) { x.setAttribute("aria-pressed", i === 0 ? "true" : "false"); }); var d = new Date(); $("cDate").value = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); calc(); });
+  $("cReset").click();
+})();
+</script>

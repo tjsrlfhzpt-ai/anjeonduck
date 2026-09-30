@@ -1,0 +1,111 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>과태료 부과기준 조회</p>
+  <h1>산업안전보건법 과태료 부과기준 조회</h1>
+  <p id="pVer">시행령 별표 35의 개별기준을 위반행위·조문·장별로 찾고, 사업장 규모에 따른 감경 금액까지 확인하세요.</p>
+</div></section>
+<div class="wrap layout-list">
+  <aside class="col-filter">
+    <details class="fpanel" open data-fpanel><summary>필터</summary><div class="fpanel-body">
+      <div class="fgroup"><p class="fgroup-label">산업안전보건법 장</p><div class="chips catnav" data-filter="ch" role="group" aria-label="장" id="chNav"></div></div>
+      <div class="fgroup"><p class="fgroup-label">사업장 규모 (감경 계산)</p>
+        <select id="scale" class="sort" style="width:100%"></select>
+        <p class="hint" style="margin-top:6px">개별기준 금액이 100만 원 미만이면 감경하지 않고, 감경 후 100만 원 미만이 되면 100만 원입니다.</p></div>
+      <label class="switch"><input type="checkbox" id="special"><span>중대재해·중대산업사고 발생 사업장</span></label>
+      <p class="hint">발생원인 조사·감독에서 적발되면 3차 이상 금액을 부과합니다.</p>
+    </div></details>
+  </aside>
+  <section class="col-list">
+    <div class="listbar"><div class="search-inline">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="pq" placeholder="예: 안전교육, 제29조, MSDS, 작업환경측정" aria-label="과태료 검색"></div></div>
+    <p class="count" aria-live="polite">항목 <strong id="pCount">0</strong>건 <span class="muted">· 금액 단위 만원</span></p>
+    <div id="pList" class="plist"></div>
+    <div class="empty" id="pEmpty" hidden><p>검색 결과가 없습니다.</p></div>
+    <section class="note" style="margin-top:28px">
+      <h2 class="h-sm">일반기준 요약</h2>
+      <ul class="bul" id="pGeneral"></ul>
+      <p class="muted" style="margin-top:10px">이 조회 결과는 참고용입니다. 실제 부과 금액은 관할 지방고용노동관서가 위반 내용과 감경 사유를 보고 정합니다. <a id="pSrc" target="_blank" rel="noopener">별표 35 원문 ↗</a></p>
+    </section>
+  </section>
+</div>
+<script>
+(function(){
+  "use strict";
+  var DATA = /*@PENALTIES@*/null;
+  if (!DATA) return;
+  var CH = [
+    [1, 13, "제1장 총칙"], [14, 28, "제2장 안전보건관리체제"], [29, 33, "제3장 안전보건교육"],
+    [34, 57, "제4장 유해·위험 방지 조치"], [58, 79, "제5장 도급 시 산업재해 예방"], [80, 103, "제6장 유해·위험 기계 등"],
+    [104, 124, "제7장 유해·위험물질"], [125, 141, "제8장 근로자 보건관리"], [142, 154, "제9장 지도사"], [155, 170, "제10·11장 감독·보칙"]
+  ];
+  function chapterOf(v) {
+    var m = /법 제(\d+)조/.exec(v); if (!m) return "기타";
+    var n = +m[1]; for (var i = 0; i < CH.length; i++) if (n >= CH[i][0] && n <= CH[i][1]) return CH[i][2];
+    return "기타";
+  }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var isNum = function (s) { return /^\d+$/.test(s); };
+  var fmt = function (n) { return Number(n).toLocaleString("ko-KR"); };
+
+  DATA.items.forEach(function (it) { it.ch = chapterOf(it.v); it.text = (it.c + " " + it.v + " " + it.b + " " + (it.u || "") + " " + (it.d || []).map(function (d) { return d.t; }).join(" ")).toLowerCase(); });
+
+  document.getElementById("pVer").textContent = "산업안전보건법 시행령 별표 35 (" + DATA.version + ") 개별기준을 위반행위·조문·장별로 찾고, 사업장 규모에 따른 감경 금액까지 확인하세요.";
+  document.getElementById("pSrc").href = DATA.source_url;
+  document.getElementById("pGeneral").innerHTML = DATA.general.concat([DATA.special]).map(function (g) { return "<li>" + esc(g) + "</li>"; }).join("");
+
+  var scaleSel = document.getElementById("scale");
+  scaleSel.innerHTML = DATA.scale.map(function (s, i) { return '<option value="' + i + '">' + esc(s.label) + (s.rate < 1 ? " — " + Math.round(s.rate * 100) + "%" : " — 감경 없음") + "</option>"; }).join("");
+
+  var chs = CH.map(function (c) { return c[2]; }).filter(function (c) { return DATA.items.some(function (it) { return it.ch === c; }); });
+  var nav = document.getElementById("chNav");
+  nav.innerHTML = '<button type="button" class="chip" data-value="" aria-pressed="true">전체 <span class="n">' + DATA.items.length + "</span></button>" +
+    chs.map(function (c) { return '<button type="button" class="chip" data-value="' + esc(c) + '" aria-pressed="false">' + esc(c) + ' <span class="n">' + DATA.items.filter(function (it) { return it.ch === c; }).length + "</span></button>"; }).join("");
+
+  // 규모 감경: 금액 100만원 이상일 때만 비율 적용, 결과가 100만원 미만이면 100만원 (일반기준 마목)
+  function reduce(v) {
+    if (!isNum(v)) return null;
+    var rate = DATA.scale[+scaleSel.value].rate, n = +v;
+    if (rate >= 1 || n < 100) return n;
+    return Math.max(100, Math.floor(n * rate * 10) / 10);
+  }
+  function cell(v, strong) {
+    if (!v) return "<td>—</td>";
+    if (!isNum(v)) return '<td class="txt">' + esc(v) + "</td>";
+    var r = reduce(v), same = r === +v;
+    return "<td" + (strong ? ' class="hit"' : "") + ">" + fmt(v) + (same ? "" : '<span class="red">' + fmt(r) + "</span>") + "</td>";
+  }
+  function amountTable(rows) {
+    var special = document.getElementById("special").checked;
+    var anyReduce = rows.some(function (r) { return r.a && r.a.some(function (v) { var x = reduce(v); return x !== null && x !== +v; }); });
+    return '<div class="table-wrap"><table class="dtable ptable"><thead><tr><th>세부 내용</th><th' + (special ? "" : ' class="hl"') + '>1차</th><th>2차</th><th' + (special ? ' class="hl"' : "") + ">3차 이상</th></tr></thead><tbody>" +
+      rows.map(function (r) {
+        if (!r.a) return '<tr class="sub-h"><td colspan="4">' + esc(r.t) + "</td></tr>";
+        return "<tr><td class=\"txt\">" + esc(r.t) + "</td>" + cell(r.a[0], !special) + cell(r.a[1]) + cell(r.a[2], special) + "</tr>";
+      }).join("") + "</tbody></table></div>" +
+      (anyReduce ? '<p class="hint">빨간 숫자는 선택한 사업장 규모 감경(시행령 별표 35 제3호)을 적용한 금액입니다.</p>' : "");
+  }
+  function render() {
+    var q = document.getElementById("pq").value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var on = nav.querySelector('[aria-pressed="true"]'), ch = on ? on.dataset.value : "";
+    var list = DATA.items.filter(function (it) { return (!ch || it.ch === ch) && q.every(function (t) { return it.text.indexOf(t) >= 0; }); });
+    document.getElementById("pCount").textContent = list.length;
+    document.getElementById("pEmpty").hidden = list.length > 0;
+    document.getElementById("pList").innerHTML = list.map(function (it) {
+      var rows = it.d && it.d.length ? it.d : [{ t: it.u || "위반 시", a: it.a }];
+      return '<article class="pitem"><p class="rrow-top"><span class="badge badge-navy">' + esc(it.c) + '목</span><span class="rrow-meta">' + esc(it.ch) + " · 근거 " + esc(it.b) + "</span></p>" +
+        '<h3 class="rrow-title">' + esc(it.v) + "</h3>" + amountTable(rows) + "</article>";
+    }).join("");
+  }
+  nav.addEventListener("click", function (ev) {
+    var b = ev.target.closest(".chip"); if (!b) return;
+    nav.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    render();
+  });
+  ["pq"].forEach(function (id) { document.getElementById(id).addEventListener("input", render); });
+  ["scale", "special"].forEach(function (id) { document.getElementById(id).addEventListener("change", render); });
+  var fp = document.querySelector("[data-fpanel]");
+  if (fp && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) fp.removeAttribute("open");
+  try { var pq = new URLSearchParams(location.search).get("q"); if (pq) document.getElementById("pq").value = pq; } catch (e) {}
+  render();
+})();
+</script>

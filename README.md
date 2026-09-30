@@ -26,6 +26,31 @@ templates/*.csv       구글 시트 머리글 서식
 | `/tools/tbm/` TBM 일지 | `apps/tbm.html` | `data/hazards.json` (위험요인 목록) |
 | `/tools/risk/` 위험성평가서 | `apps/risk.html` | `data/hazards.json` |
 | `/tools/committee/` 산보위 회의록·공고·결과보고 | `apps/committee.html` | `apps/committee.tailwind.css` |
+| `/tools/safety-cost/` 산업안전보건관리비 계산기 | `apps/safety-cost.body.html` | 사이트 공통 틀(헤더·푸터) |
+| `/tools/penalty/` 과태료 부과기준 조회 | `apps/penalty.body.html` | `data/penalties.json` + 공통 틀 |
+| `/tools/headcount/` 상시근로자 수 계산기 | `apps/headcount.body.html` | 공통 틀 |
+| `/tools/schedule/` 법정 주기업무 달력 | `apps/schedule.body.html` | `data/schedule.json` |
+| `/tools/duties/` 직무·책임 조회 · 직무분장표 | `apps/duties.body.html` | `data/lawref.json` |
+| `/tools/edu-hours/` 법정교육 시간 조회 | `apps/edu.body.html` | `data/edu_hours.json` |
+| `/tools/retention/` 서류 보존기간·벌칙 조회 | `apps/retention.body.html` | `data/retention.json` + `data/lawref.json` |
+| `/tools/forms/<id>/` 서식 작성기 42종 | `apps/form.body.html` (서식 엔진 1개) | `data/forms.json` 23종 + 별표 3에서 자동 생성한 작업시작 전 점검표 19종 |
+| `/tools/` 법령 순서 카탈로그 | `build.py` | `data/catalog.json` (벤치마킹 목록 78개와 상태) |
+
+### 서식 추가하는 법
+`data/forms.json` 의 `forms` 에 하나 더 넣으면 빌드 때 페이지가 생깁니다. 칸 종류: `fields`(라벨·입력, `type`: text/date/select/radio), `text`(긴 글), `table`(행 추가 가능, `defaults`로 기본 문구), `check`(점검표, `opts`로 판정 칸), `signs`(서명줄), `note`(법령 안내문). 사용자는 결재란 이름·점검 항목 문구·표 기본 문구를 화면에서 고칠 수 있고 행·점검 항목을 늘릴 수 있습니다.
+
+### 법령이 바뀌면 고칠 곳
+
+| 도구 | 근거 (원문 확인 2026-09-28) | 고칠 곳 |
+|---|---|---|
+| 산업안전보건관리비 | 고용노동부고시 제2025-11호(2025.2.12 시행) 제4조·별표 1 | `apps/safety-cost.body.html` 의 `RATES` |
+| 과태료 | 산안법 시행령 별표 35(대통령령 제36540호, 2026.8.1 시행) | `data/penalties.json` (version·items) |
+| 상시근로자 수 | 근로기준법 시행령 제7조의2 | `apps/headcount.body.html` |
+| 직무·조문 원문 | 산안법(2026.8.1)·시행령·시행규칙(고용노동부령 제477호)·기준규칙(제450호)·중처법 시행령 — 원문 확인 2026-09-29 | `data/lawref.json` (조문별 원문, 별표 2·3 표) |
+| 교육시간 | 시행규칙 별표 4(2025.5.30 개정) | `data/edu_hours.json` |
+| 보존기간·벌칙 | 법 제164조, 규칙 제241조, 기준규칙 제619조의2, 법 제167조~제173조 | `data/retention.json` |
+| 주기업무 | 각 업무의 `basis`·`status`(verified=원문 확인 / check=확인 필요 / practice=권장) | `data/schedule.json` |
+| 작업계획서·점검표 | 기준규칙 제38조·별표 4, 제35조·별표 3 | `data/forms.json`, 별표 3은 `data/lawref.json` 의 `byl3` |
 
 - 위험요인은 `data/hazards.json` 한 곳만 고치면 두 도구에 같이 반영됩니다(업종 `groups`, 항목 `items`).
 - 회의록 도구의 화면 클래스(Tailwind)를 바꿨다면 CSS를 다시 만들어야 합니다:
@@ -71,9 +96,50 @@ templates/*.csv       구글 시트 머리글 서식
 
 법령 개정 소식(`law_updates_csv`), 서식·자료(`resources_csv`)도 같은 방식입니다.
 
+## 서식 자동화
+
+| 기능 | 적용 서식 | 데이터 |
+|---|---|---|
+| 사업장 정보(회사·대표자·책임자·안전/보건관리자·관리감독자) 한 번 입력 → 모든 서식 자동 기입 | 전 서식(해당 칸) | 브라우저 localStorage `anjeonduck.profile` |
+| 교육과정 선택 → 법정 교육시간·교육내용, 특별교육 39개 작업 개별내용 | 교육일지 | `data/edu_contents.json`(규칙 별표 5, HWP 원본 추출), `data/edu_hours.json`(별표 4) |
+| 작업 종류 선택 → 법정 확인 항목 | 작업허가서(화기·밀폐·고소·전기·굴착·중장비) | `data/form_auto.json` (기준규칙 조문) |
+| 예방대책·작업방법 자동 기입 | 작업계획서 4종 | `data/form_auto.json` |
+| 다음 기한 자동 표시 | 협의체(매월), 순회점검(2일/1주), 합동점검(2개월/분기) | 시행규칙 제79·80·82조 |
+| 자동 계산 | 참석 인원, 예산 합계·집행률, 직무교육 보수교육 기한(±6개월·기한 경과) | 시행규칙 제29조 |
+| 날짜 칸 오늘, 작업시작 전 점검표 점검자 = 관리감독자 | 해당 서식 | 기준규칙 제35조제2항 |
+
+- 자동으로 들어간 값은 모두 고칠 수 있고, 사용자가 고친 계산 칸은 다시 덮어쓰지 않습니다.
+- 법령이 바뀌면 `data/lawtext/*.json`(조문 전문), `data/form_auto.json`, `data/edu_contents.json`을 다시 확인하세요.
+
+## 채용·뉴스 자동 수집 (공공데이터포털 공식 API)
+
+민간 채용사이트·언론사·다른 커뮤니티의 글은 가져오지 않습니다. 아래 세 가지 **공식 공개 API**만 씁니다(이용조건 확인 2026-09-30).
+
+| 화면 | API (공공데이터포털) | 이용허락범위 | 승인 |
+|---|---|---|---|
+| 채용정보 (공공기관) | 재정경제부_공공기관 채용정보 조회서비스 | 제한 없음 | 개발 자동승인 |
+| 안전뉴스 – 정책뉴스 | 문화체육관광부_정책브리핑_정책뉴스_API | 공공누리 제1유형(출처표시) | 자동승인 |
+| 안전뉴스 – 사고사망 속보 | 한국산업안전보건공단_사고사망 게시판 정보 조회서비스 | 제한 없음 | 개발 자동승인 |
+
+설정 (한 번만)
+1. data.go.kr 회원가입 → 위 세 API 페이지에서 각각 **활용신청** (개인 회원 가능, 자동승인).
+2. 마이페이지 → 개발계정 → **일반 인증키(Encoding)** 복사. 세 API가 같은 키를 씁니다.
+3. GitHub 저장소 → Settings → Secrets and variables → Actions → New repository secret
+   이름 `DATA_GO_KR_KEY`, 값에 인증키 붙여넣기.
+4. Actions → 빌드·배포 → Run workflow. 이후 매일 오전 6시 10분 자동 갱신.
+
+- 키는 빌드 서버에서만 쓰이고 사이트 파일에는 들어가지 않습니다.
+- 키가 없거나 API가 실패해도 빌드는 계속되고, 화면에는 "자동 수집 설정 전" 안내가 나옵니다.
+- 기사·공고 본문은 저장하지 않습니다. 제목·기관·날짜·원문 링크만 싣습니다.
+- 개발계정 트래픽은 API별 하루 1,000회. 이 사이트는 하루 약 45회 씁니다(채용 최대 30회, 뉴스 10회, 사고 1회).
+- 운영계정 전환은 활용사례 등록 후 신청(채용·사고 API는 심의).
+
+민간 기업 채용공고(고용24)는 고용24 **기업회원** 인증키가 필요하고 이용허락이 공공누리 제4유형(비상업)이라 기본으로 넣지 않았습니다.
+
 ## 로컬에서 확인
 
 ```
 python3 build.py
 python3 -m http.server -d _site 8000   # http://localhost:8000
+python3 build.py --local --out _preview  # 더블클릭으로 여는 미리보기(폴더 링크를 index.html로 바꿈)
 ```

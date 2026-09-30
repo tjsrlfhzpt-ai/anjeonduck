@@ -1,0 +1,672 @@
+{
+ "benchmark": "safetysupport.co.kr/safety-tools (2026-09-29 목록 기준)",
+ "categories": [
+  {
+   "act": "산업안전보건법",
+   "cat": "제1장 총칙·적용범위",
+   "items": [
+    {
+     "name": "상시근로자 수 산정",
+     "basis": "근로기준법 시행령 제7조의2",
+     "status": "ok",
+     "link": "headcount/",
+     "note": ""
+    },
+    {
+     "name": "법 적용 제외 규정 조회",
+     "basis": "법 제3조 · 영 별표 1",
+     "status": "planned",
+     "link": "",
+     "note": "영 별표 1 원문 표 추출 예정"
+    },
+    {
+     "name": "재해 발생건수 등 공표 대상",
+     "basis": "법 제10조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "안전보건 현황 공시",
+     "basis": "법 제10조의2 (2026.8.1 시행)",
+     "status": "planned",
+     "link": "",
+     "note": "시행령 원문 대조 후 제공"
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제2장 안전보건관리체제",
+   "items": [
+    {
+     "name": "이사회 안전보건계획 보고·승인",
+     "basis": "법 제14조 · 영 제13조",
+     "status": "ok",
+     "link": "forms/board/",
+     "note": ""
+    },
+    {
+     "name": "직무·책임 조회 (책임자·관리감독자·안전·보건관리자·담당자·산업보건의)",
+     "basis": "법 제15조~제19조·제22조 · 영 제15조·제18조·제22조·제25조·제31조",
+     "status": "ok",
+     "link": "duties/",
+     "note": ""
+    },
+    {
+     "name": "직무분장표",
+     "basis": "법 제15조~제19조",
+     "status": "ok",
+     "link": "duties/",
+     "note": ""
+    },
+    {
+     "name": "관리감독자 유해·위험 방지업무",
+     "basis": "기준규칙 제35조제1항 · 별표 2",
+     "status": "ok",
+     "link": "duties/?role=sup",
+     "note": ""
+    },
+    {
+     "name": "작업시작 전 점검표 (19개 작업)",
+     "basis": "기준규칙 제35조제2항 · 별표 3",
+     "status": "ok",
+     "link": "forms/#pre",
+     "note": ""
+    },
+    {
+     "name": "선임 대상 조회 (책임자·안전관리자·보건관리자)",
+     "basis": "영 별표 2·3·5",
+     "status": "ok",
+     "link": "selection/",
+     "note": ""
+    },
+    {
+     "name": "안전보건 조직도 생성기",
+     "basis": "법 제15조~제19조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "산업안전보건위원회 회의록·공고·결과보고",
+     "basis": "법 제24조 · 영 제37조",
+     "status": "ok",
+     "link": "committee/",
+     "note": ""
+    },
+    {
+     "name": "산업안전보건위원회 구성 대상",
+     "basis": "영 제34조 · 별표 9",
+     "status": "ok",
+     "link": "selection/",
+     "note": ""
+    },
+    {
+     "name": "안전보건관리규정 작성 대상·표준안",
+     "basis": "법 제25조 · 규칙 별표 2·3",
+     "status": "ok",
+     "link": "selection/",
+     "note": "작성 대상 조회 제공 · 표준안은 준비 중"
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제3장 안전보건교육",
+   "items": [
+    {
+     "name": "법정교육 시간 조회",
+     "basis": "법 제29조 · 규칙 별표 4",
+     "status": "ok",
+     "link": "edu-hours/",
+     "note": ""
+    },
+    {
+     "name": "교육일지·참석자 서명부",
+     "basis": "법 제29조 · 규칙 제26조",
+     "status": "ok",
+     "link": "forms/edu-log/",
+     "note": ""
+    },
+    {
+     "name": "직무교육 이수 관리대장",
+     "basis": "법 제32조 · 규칙 제29조",
+     "status": "ok",
+     "link": "forms/edu-ledger/",
+     "note": ""
+    },
+    {
+     "name": "원포인트 안전(OPS) 자료",
+     "basis": "법 제29조",
+     "status": "external",
+     "link": "../resources/library/",
+     "note": "공단 산업안전포털 자료실로 연결(공공누리 조건 안내)"
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제4장 유해·위험 방지조치",
+   "items": [
+    {
+     "name": "위험성평가서",
+     "basis": "법 제36조",
+     "status": "ok",
+     "link": "risk/",
+     "note": ""
+    },
+    {
+     "name": "TBM 일지",
+     "basis": "위험성평가 결과 공유",
+     "status": "ok",
+     "link": "tbm/",
+     "note": ""
+    },
+    {
+     "name": "안전작업허가서",
+     "basis": "기준규칙 제241조의2·제619조의2 참고",
+     "status": "ok",
+     "link": "forms/permit/",
+     "note": ""
+    },
+    {
+     "name": "지게차 작업계획서",
+     "basis": "기준규칙 제38조 · 별표 4 제2호",
+     "status": "ok",
+     "link": "forms/wp-forklift/",
+     "note": ""
+    },
+    {
+     "name": "고소작업대 작업계획서",
+     "basis": "기준규칙 제38조 · 별표 4 제2호",
+     "status": "ok",
+     "link": "forms/wp-aerial/",
+     "note": ""
+    },
+    {
+     "name": "차량계 건설기계(굴착기) 작업계획서",
+     "basis": "기준규칙 제38조 · 별표 4 제3호",
+     "status": "ok",
+     "link": "forms/wp-excavator/",
+     "note": ""
+    },
+    {
+     "name": "중량물 취급 작업계획서",
+     "basis": "기준규칙 제38조 · 별표 4 제11호",
+     "status": "ok",
+     "link": "forms/wp-heavy/",
+     "note": ""
+    },
+    {
+     "name": "안전보건표지",
+     "basis": "법 제37조 · 규칙 별표 6~9",
+     "status": "ok",
+     "link": "../resources/signs/",
+     "note": "공단 원본(공공누리 제4유형) 20개 언어"
+    },
+    {
+     "name": "보건조치 세부 도구 (환기·밀폐공간·관리대상물질)",
+     "basis": "기준규칙 제3편",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "유해위험방지계획서 대상 판정",
+     "basis": "법 제42조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "공정안전보고서 대상 판정",
+     "basis": "법 제44조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "산업재해 사례",
+     "basis": "법 제36조 참고",
+     "status": "external",
+     "link": "../resources/library/",
+     "note": "공단 자료실로 연결"
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제5장 도급·건설안전",
+   "items": [
+    {
+     "name": "안전보건총괄책임자 지정 대상·직무",
+     "basis": "법 제62조 · 영 제52조·제53조",
+     "status": "ok",
+     "link": "duties/?role=gm",
+     "note": ""
+    },
+    {
+     "name": "안전 및 보건에 관한 협의체 회의록",
+     "basis": "법 제64조 · 규칙 제79조",
+     "status": "ok",
+     "link": "forms/council/",
+     "note": ""
+    },
+    {
+     "name": "작업장 순회점검표",
+     "basis": "법 제64조 · 규칙 제80조",
+     "status": "ok",
+     "link": "forms/patrol/",
+     "note": ""
+    },
+    {
+     "name": "합동 안전·보건점검표",
+     "basis": "법 제64조제2항 · 규칙 제82조",
+     "status": "ok",
+     "link": "forms/joint/",
+     "note": ""
+    },
+    {
+     "name": "산업안전보건관리비 계산",
+     "basis": "법 제72조 · 고시 제2025-11호",
+     "status": "ok",
+     "link": "safety-cost/",
+     "note": ""
+    },
+    {
+     "name": "안전관리계획서 (건설기술 진흥법)",
+     "basis": "건설기술 진흥법",
+     "status": "skip",
+     "link": "",
+     "note": "산안법 밖 — 범위 외"
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제6장 기계·기구 안전",
+   "items": [
+    {
+     "name": "방호조치 점검표",
+     "basis": "법 제80조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "안전인증·안전검사 대상·주기",
+     "basis": "법 제84조·제93조",
+     "status": "ok",
+     "link": "inspect/",
+     "note": "안전검사 대상·주기 계산 제공 · 안전인증 대상은 준비 중"
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제7장 유해·위험물질",
+   "items": [
+    {
+     "name": "MSDS 게시·경고표지",
+     "basis": "법 제114조·제115조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "제조등 금지·허가물질 조회",
+     "basis": "법 제117조·제118조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "석면 조사·해체 기준",
+     "basis": "법 제119조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제8장 근로자 보건관리",
+   "items": [
+    {
+     "name": "뇌·심혈관질환 발병위험도 평가",
+     "basis": "KOSHA GUIDE H-200-2018 · 기준규칙 제669조",
+     "status": "ok",
+     "link": "cvd/",
+     "note": ""
+    },
+    {
+     "name": "폭염작업 체감온도 기록지",
+     "basis": "기준규칙 제559조·제560조·제562조·별표 13의2",
+     "status": "ok",
+     "link": "heat/",
+     "note": "체감온도는 측정값 또는 기상청 값을 입력(산식 계산 안 함)"
+    },
+    {
+     "name": "휴게시설 설치기준",
+     "basis": "법 제128조의2",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "건강진단 대상·주기",
+     "basis": "법 제129조~제130조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "작업환경측정 대상 판정",
+     "basis": "법 제125조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제9장 산업안전지도사",
+   "items": [
+    {
+     "name": "지도사 제도·시험 안내",
+     "basis": "법 제142조~제145조",
+     "status": "external",
+     "link": "https://www.q-net.or.kr/",
+     "note": "Q-Net 공식 안내로 연결"
+    }
+   ]
+  },
+  {
+   "act": "산업안전보건법",
+   "cat": "제10·11장 기타",
+   "items": [
+    {
+     "name": "서류 보존기간 조회",
+     "basis": "법 제164조 · 규칙 제241조",
+     "status": "ok",
+     "link": "retention/",
+     "note": ""
+    },
+    {
+     "name": "벌칙 조회",
+     "basis": "법 제167조~제173조",
+     "status": "ok",
+     "link": "retention/?tab=pen",
+     "note": ""
+    },
+    {
+     "name": "과태료 부과기준 조회",
+     "basis": "영 별표 35",
+     "status": "ok",
+     "link": "penalty/",
+     "note": ""
+    },
+    {
+     "name": "법정 주기업무 달력",
+     "basis": "산안법·중처법 주기 의무 모음",
+     "status": "ok",
+     "link": "schedule/",
+     "note": ""
+    },
+    {
+     "name": "안전관계업무 견적 산출",
+     "basis": "—",
+     "status": "skip",
+     "link": "",
+     "note": "특정 업체 영업용 기능 — 제공하지 않음"
+    }
+   ]
+  },
+  {
+   "act": "중대재해처벌법",
+   "cat": "제4조 안전보건 확보의무",
+   "items": [
+    {
+     "name": "안전보건 방침·목표",
+     "basis": "영 제4조제1호",
+     "status": "ok",
+     "link": "forms/sapa-policy/",
+     "note": ""
+    },
+    {
+     "name": "예산 편성·집행 관리표",
+     "basis": "영 제4조제4호",
+     "status": "ok",
+     "link": "forms/sapa-budget/",
+     "note": ""
+    },
+    {
+     "name": "안전보건관리책임자등 업무평가",
+     "basis": "영 제4조제5호",
+     "status": "ok",
+     "link": "forms/sapa-eval/",
+     "note": ""
+    },
+    {
+     "name": "종사자 의견청취 대장",
+     "basis": "영 제4조제7호",
+     "status": "ok",
+     "link": "forms/sapa-voice/",
+     "note": ""
+    },
+    {
+     "name": "중대산업재해 대응 매뉴얼",
+     "basis": "영 제4조제8호",
+     "status": "ok",
+     "link": "forms/sapa-emergency/",
+     "note": ""
+    },
+    {
+     "name": "반기 점검 보고서",
+     "basis": "영 제4조 · 제5조",
+     "status": "ok",
+     "link": "forms/sapa-half/",
+     "note": ""
+    },
+    {
+     "name": "위임전결 기준표 (권한 부여 증빙)",
+     "basis": "영 제4조제5호가목",
+     "status": "ok",
+     "link": "forms/delegation/",
+     "note": ""
+    },
+    {
+     "name": "경영책임자 의무 조문 조회",
+     "basis": "영 제4조·제5조",
+     "status": "ok",
+     "link": "duties/?role=ceo",
+     "note": ""
+    },
+    {
+     "name": "전담조직 구성 여부 판단",
+     "basis": "영 제4조제2호",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "중대재해처벌법",
+   "cat": "제5조 도급·용역·위탁 시 의무",
+   "items": [
+    {
+     "name": "수급인 안전보건 평가표",
+     "basis": "영 제4조제9호",
+     "status": "ok",
+     "link": "forms/sapa-contractor/",
+     "note": ""
+    },
+    {
+     "name": "도급 시 확보의무 점검표",
+     "basis": "법 제5조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "중대재해처벌법",
+   "cat": "제6·8조 처벌·교육",
+   "items": [
+    {
+     "name": "벌칙·양벌규정",
+     "basis": "법 제6조·제7조",
+     "status": "planned",
+     "link": "",
+     "note": "중처법 원문 대조 후 제공"
+    },
+    {
+     "name": "경영책임자 안전보건교육",
+     "basis": "법 제8조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "관계 법령",
+   "cat": "연구실안전법",
+   "items": [
+    {
+     "name": "연구실 안전점검·위원회·사전유해인자위험분석",
+     "basis": "연구실안전법",
+     "status": "skip",
+     "link": "",
+     "note": "대상(대학·연구기관)이 달라 후순위"
+    }
+   ]
+  },
+  {
+   "act": "관계 법령",
+   "cat": "화학물질관리법",
+   "items": [
+    {
+     "name": "유해화학물질 취급기준·화학사고예방관리계획서",
+     "basis": "화관법",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "관계 법령",
+   "cat": "소방시설법",
+   "items": [
+    {
+     "name": "특정소방대상물 조회",
+     "basis": "소방시설법 시행령 별표 2",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "차량용 소화기 설치기준",
+     "basis": "소방시설법 제11조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    },
+    {
+     "name": "소방안전관리자 선임기준",
+     "basis": "화재예방법 제24조",
+     "status": "planned",
+     "link": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "사업장 운영서식",
+   "cat": "조직·발령",
+   "items": [
+    {
+     "name": "안전보건 관계자 인사발령서",
+     "basis": "선임 증빙",
+     "status": "ok",
+     "link": "forms/appoint/",
+     "note": ""
+    },
+    {
+     "name": "직무분장표",
+     "basis": "권한·책임 증빙",
+     "status": "ok",
+     "link": "duties/",
+     "note": ""
+    },
+    {
+     "name": "겸직 발령서",
+     "basis": "선임 증빙",
+     "status": "ok",
+     "link": "forms/concurrent/",
+     "note": ""
+    },
+    {
+     "name": "안전보건 조직 변경 통보",
+     "basis": "변경 증빙",
+     "status": "ok",
+     "link": "forms/reorg/",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "act": "사업장 운영서식",
+   "cat": "규정·전결",
+   "items": [
+    {
+     "name": "위임전결 기준표",
+     "basis": "중처법 영 제4조제5호",
+     "status": "ok",
+     "link": "forms/delegation/",
+     "note": ""
+    },
+    {
+     "name": "이사회 보고자료",
+     "basis": "산안법 제14조",
+     "status": "ok",
+     "link": "forms/board/",
+     "note": ""
+    },
+    {
+     "name": "안전보건 관련 사규 예시",
+     "basis": "사내 규정",
+     "status": "skip",
+     "link": "",
+     "note": "사업장마다 달라 예시 배포보다 규정 작성 도구가 적합 — 후순위"
+    }
+   ]
+  },
+  {
+   "act": "사업장 운영서식",
+   "cat": "관리대장",
+   "items": [
+    {
+     "name": "자격증 관리대장",
+     "basis": "자격 관리",
+     "status": "ok",
+     "link": "forms/cert-ledger/",
+     "note": ""
+    },
+    {
+     "name": "교육이수 관리대장",
+     "basis": "이수 관리",
+     "status": "ok",
+     "link": "forms/edu-ledger/",
+     "note": ""
+    }
+   ]
+  }
+ ]
+}

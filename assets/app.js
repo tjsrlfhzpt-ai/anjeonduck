@@ -57,7 +57,7 @@
     document.querySelectorAll("[data-fav]").forEach(function (b) {
       var on = favs.indexOf(b.getAttribute("data-fav")) >= 0;
       b.setAttribute("aria-pressed", on ? "true" : "false");
-      b.textContent = on ? "★" : "☆";
+      b.textContent = (on ? "★" : "☆") + (b.classList.contains("fav-big") ? (on ? " 즐겨찾기됨" : " 즐겨찾기") : "");
       b.setAttribute("aria-label", on ? "즐겨찾기 해제" : "즐겨찾기");
     });
   }
@@ -80,7 +80,9 @@
   var countEl = document.querySelector("[data-count]");
   var emptyEl = document.querySelector("[data-empty]");
   var sortEl = document.querySelector(".sort");
-  var ATTR = { job: "data-job", ctype: "data-ctype", industry: "data-industry", cat: "data-cat" };
+  var ATTR = { job: "data-job", ctype: "data-ctype", industry: "data-industry", cat: "data-cat", topic: "data-topic" };
+  var pageSize = list ? +(list.getAttribute("data-page-size") || 0) : 0, limit = pageSize;
+  var moreWrap = document.querySelector("[data-more-wrap]"), moreBtn = document.querySelector("[data-more]");
 
   function selected() {
     var s = {};
@@ -105,10 +107,14 @@
       });
       if (ok && hideClosed && hideClosed.checked && it.classList.contains("closed")) ok = false;
       if (ok && onlyFav && onlyFav.checked && favs.indexOf(it.getAttribute("data-id")) < 0) ok = false;
-      it.hidden = !ok;
       if (ok) shown++;
+      it.hidden = !ok || (pageSize > 0 && shown > limit);
     });
     if (countEl) countEl.textContent = shown;
+    if (moreWrap) {
+      moreWrap.hidden = !(pageSize > 0 && shown > limit);
+      if (moreBtn) moreBtn.textContent = "더 보기 (" + Math.min(limit, shown) + " / " + shown + ")";
+    }
     if (emptyEl) {
       emptyEl.hidden = shown !== 0;
       var p = emptyEl.querySelector("p");
@@ -142,7 +148,20 @@
     if (c && c.parentNode.hasAttribute("data-filter")) {
       c.parentNode.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
       c.setAttribute("aria-pressed", "true");
-      apply();
+      limit = pageSize; apply();
+      return;
+    }
+    var go = ev.target.closest("[data-topic-go]");
+    if (go) {
+      var g = document.querySelector('[data-filter="topic"]');
+      if (g) {
+        ev.preventDefault();
+        document.querySelectorAll('[data-filter] .chip').forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-value") === "" ? "true" : "false"); });
+        g.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-value") === go.getAttribute("data-topic-go") ? "true" : "false"); });
+        if (q) q.value = "";
+        limit = pageSize; apply();
+        var tgt = document.getElementById("res-list"); if (tgt) tgt.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       return;
     }
     if (ev.target.closest("[data-reset]")) {
@@ -155,7 +174,9 @@
       apply();
     }
   });
-  if (q) q.addEventListener("input", apply);
+  function applyReset() { limit = pageSize; apply(); }
+  if (moreBtn) moreBtn.addEventListener("click", function () { limit += pageSize; apply(); });
+  if (q) q.addEventListener("input", applyReset);
   [hideClosed, onlyFav].forEach(function (x) { if (x) x.addEventListener("change", apply); });
   if (sortEl) sortEl.addEventListener("change", sortList);
 
@@ -167,6 +188,12 @@
   try {
     var pq = new URLSearchParams(location.search).get("q");
     if (pq && q) q.value = pq;
+    var sp = new URLSearchParams(location.search);
+    ["topic", "cat"].forEach(function (k) {
+      var v = sp.get(k), g = document.querySelector('[data-filter="' + k + '"]');
+      if (!v || !g) return;
+      g.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-value") === v ? "true" : "false"); });
+    });
   } catch (e) { /* 구형 브라우저: 무시 */ }
   sortList();
   apply();
