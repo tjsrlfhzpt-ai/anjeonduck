@@ -182,6 +182,19 @@
       "kind": "page"
     },
     {
+      "id": "msds",
+      "name": "MSDS 관리 · 경고표지",
+      "short": "MSDS",
+      "desc": "MSDS를 붙여 넣으면 H·P 문구·신호어·응급조치를 채우고 그림문자를 추천합니다. 용기 경고표지(QR), 작업공정별 관리요령, 교육 기록, 관리대장까지 인쇄.",
+      "src": "apps/msds.body.html",
+      "kind": "page",
+      "inject": "msds",
+      "cat": "작성기",
+      "tag": "화학물질",
+      "group": "서류 작성",
+      "law": "법 제114조·제115조 · 규칙 제167조~제170조"
+    },
+    {
       "id": "heat",
       "name": "폭염작업 체감온도 기록",
       "short": "폭염 기록",
@@ -196,11 +209,11 @@
   ],
   "home_tools": [
     "schedule",
-    "selection",
+    "msds",
     "tbm",
     "risk",
     "committee",
-    "duties",
+    "selection",
     "safety-cost",
     "penalty"
   ],

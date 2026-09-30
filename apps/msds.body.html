@@ -1,0 +1,500 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>MSDS 관리</p>
+  <h1>MSDS 관리 · 경고표지 · 관리요령</h1>
+  <p>제품의 물질안전보건자료(MSDS)를 붙여 넣으면 유해·위험문구, 예방조치문구, 신호어, 응급조치·취급·보호구 내용을 골라 채우고, 그림문자를 추천합니다. 여기서 바로 <b>용기 경고표지</b>(법 제115조), <b>작업공정별 관리요령 게시물</b>(시행규칙 제168조), <b>MSDS 교육 기록</b>(제169조)과 <b>관리대장</b>을 인쇄합니다. 입력 내용은 이 브라우저에만 저장됩니다.</p>
+</div></section>
+
+<div class="wrap stack no-print ms-wrap" style="padding-top:8px;padding-bottom:48px">
+  <nav class="ms-tabs" role="tablist" aria-label="MSDS 기능">
+    <button type="button" role="tab" class="ms-tab" data-tab="list" aria-selected="true">① 관리대장 <span class="n" id="mCount">0</span></button>
+    <button type="button" role="tab" class="ms-tab" data-tab="edit" aria-selected="false">② 물질 정보</button>
+    <button type="button" role="tab" class="ms-tab" data-tab="out" aria-selected="false">③ 경고표지·게시물 인쇄</button>
+  </nav>
+
+  <!-- ① 관리대장 -->
+  <section class="ms-pane" data-pane="list">
+    <div class="ms-kpis" id="mKpis"></div>
+    <div class="listbar">
+      <div class="search-inline">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="mQ" placeholder="제품명, 공급사, 사용 장소, CAS" aria-label="물질 검색">
+      </div>
+      <div class="btns">
+        <button type="button" class="btn" id="mNew">＋ 물질 추가</button>
+        <button type="button" class="btn btn-ghost" id="mCsv">CSV 저장</button>
+        <button type="button" class="btn btn-ghost" id="mPrintList">관리대장 인쇄</button>
+      </div>
+    </div>
+    <div class="table-wrap"><table class="dtable mtable">
+      <thead><tr><th>제품명</th><th>사용 장소</th><th>그림문자</th><th>MSDS 개정일</th><th>게시·비치</th><th>경고표지</th><th>교육</th><th></th></tr></thead>
+      <tbody id="mRows"></tbody>
+    </table></div>
+    <div class="empty" id="mEmpty"><p><b>아직 등록한 물질이 없습니다.</b></p><p class="hint" style="margin-top:6px">"＋ 물질 추가"를 누르고 제품 MSDS의 글자를 복사해 붙여 넣으면 대부분 칸이 자동으로 채워집니다.</p></div>
+    <div class="appr-panel"><p class="appr-panel-l">관리대장 결재란 <span class="muted">— 칸 이름·성명을 고치고, 서명 칸을 눌러 서명하세요</span></p><div data-appr="tool.msds"></div></div>
+    <section class="lawbox">
+      <h3>사업주가 할 일 (산업안전보건법 제114조·제115조)</h3>
+      <ul class="bul">
+        <li><b>게시·비치</b> — 취급 작업공정이 있는 장소, 근로자가 가장 보기 쉬운 장소 또는 쉽게 접근할 수 있는 전산장비에 MSDS를 항상 게시하거나 갖추어 둡니다(시행규칙 제167조).</li>
+        <li><b>관리요령 게시</b> — 작업공정별로 제품명·유해성·취급주의·보호구·응급조치를 담은 관리요령을 게시합니다(제168조). 유해성이 비슷한 물질은 묶어서 작성할 수 있습니다.</li>
+        <li><b>교육</b> — 배치할 때, 새 물질 도입 시, 유해성·위험성 정보가 바뀐 때 별표 5 제6호 내용을 교육하고 시간·내용을 기록·보존합니다(제169조). 교육 시간은 정기교육 시간으로 인정됩니다.</li>
+        <li><b>경고표시</b> — 사업장에서 쓰는 용기에 경고표지를 붙입니다. 공급자가 이미 붙인 용기와 옮겨 담기 위해 일시적으로 쓰는 용기는 예외입니다(법 제115조제2항, 시행규칙 제170조제4항).</li>
+      </ul>
+      <p class="src-line"><a href="../../laws/act/#j114">법 제114조</a> · <a href="../../laws/act/#j115">제115조</a> · <a href="../../laws/rule/#j167">시행규칙 제167조~제170조</a> 원문 보기</p>
+    </section>
+  </section>
+
+  <!-- ② 물질 정보 -->
+  <section class="ms-pane" data-pane="edit" hidden>
+    <div class="ms-editbar"><strong id="mEditTitle">새 물질</strong><span class="grow"></span><span class="form-save" id="mSaved" aria-live="polite"></span><button type="button" class="btn btn-sm btn-ghost" id="mBack">← 관리대장</button></div>
+    <details class="ms-paste" id="mPasteBox" open>
+      <summary>MSDS 붙여넣기로 자동 채우기</summary>
+      <p class="hint">MSDS 파일(PDF·한글)을 열어 전체 선택(Ctrl+A) → 복사(Ctrl+C) 후 아래에 붙여 넣으세요. 1·2·4·7·8번 항목에서 제품명, 공급자, 신호어, H·P 문구, 응급조치, 취급 주의, 보호구를 찾아 채웁니다. 글자로 복사되지 않는 스캔본은 직접 입력하세요.</p>
+      <textarea id="mPaste" rows="7" placeholder="예) 1. 화학제품과 회사에 관한 정보&#10;가. 제품명 : ○○ 세척제&#10;...&#10;2. 유해성·위험성&#10;신호어 : 위험&#10;H225 고인화성 액체 및 증기&#10;P210 열·스파크·화염·고열로부터 멀리하시오 ..."></textarea>
+      <div class="btns"><button type="button" class="btn" id="mParse">자동 채우기</button><button type="button" class="btn btn-ghost" id="mPasteClear">지우기</button><span class="hint" id="mParseMsg"></span></div>
+    </details>
+
+    <div class="ms-grid">
+      <label class="field"><span class="label">제품명 *</span><input type="text" data-f="name" required></label>
+      <label class="field"><span class="label">사용 부서·작업공정</span><input type="text" data-f="dept" placeholder="예: 도장반 / 세척 공정"></label>
+      <label class="field"><span class="label">보관·사용 장소</span><input type="text" data-f="place" placeholder="예: 2층 도장실 약품장"></label>
+      <label class="field"><span class="label">주요 성분 (CAS)</span><input type="text" data-f="cas" placeholder="예: 톨루엔 108-88-3"></label>
+      <label class="field"><span class="label">공급자(제조·수입사)</span><input type="text" data-f="supplier"></label>
+      <label class="field"><span class="label">공급자 전화(긴급)</span><input type="text" data-f="tel"></label>
+      <label class="field span2"><span class="label">공급자 주소</span><input type="text" data-f="addr"></label>
+      <label class="field"><span class="label">MSDS 작성·개정일</span><input type="date" data-f="msdsDate"></label>
+      <label class="field"><span class="label">월 사용량(선택)</span><input type="text" data-f="qty" placeholder="예: 20L"></label>
+      <label class="field span2"><span class="label">MSDS 원본 주소(경고표지 QR용, 선택)</span><input type="url" data-f="url" placeholder="https:// — 공급사 MSDS 페이지나 사내 공유 폴더 링크"></label>
+    </div>
+
+    <fieldset class="ms-fs"><legend>신호어</legend>
+      <label class="check"><input type="radio" name="mSig" value="위험"><span><b class="sig-d">위험</b></span></label>
+      <label class="check"><input type="radio" name="mSig" value="경고"><span><b class="sig-w">경고</b></span></label>
+      <label class="check"><input type="radio" name="mSig" value=""><span>해당 없음</span></label>
+    </fieldset>
+
+    <fieldset class="ms-fs"><legend>그림문자 <span class="muted" id="mPicHint"></span></legend>
+      <div class="ms-pics" id="mPics"></div>
+      <p class="hint">H 코드에 맞춰 추천(점선 표시)합니다. MSDS 2항의 그림문자와 같은지 확인하고 눌러서 고르세요.</p>
+    </fieldset>
+
+    <div class="ms-grid2">
+      <label class="field"><span class="label">유해·위험 문구 (한 줄에 하나, 예: H225 고인화성 액체 및 증기)</span><textarea data-f="h" rows="6"></textarea>
+        <span class="hint">코드만 적으면 고시 별표 3 문구로 채웁니다 → <button type="button" class="lnk-btn" id="mFillH">코드로 문구 채우기</button></span></label>
+      <label class="field"><span class="label">예방조치 문구 (한 줄에 하나)</span><textarea data-f="p" rows="6"></textarea>
+        <span class="hint" id="mPCount"></span></label>
+      <label class="field"><span class="label">응급조치 요령 (MSDS 4항)</span><textarea data-f="firstaid" rows="5"></textarea></label>
+      <label class="field"><span class="label">취급상 주의사항 (MSDS 7항)</span><textarea data-f="handling" rows="5"></textarea></label>
+      <label class="field"><span class="label">적절한 보호구 (MSDS 8항)</span><textarea data-f="ppe" rows="4"></textarea></label>
+      <label class="field"><span class="label">누출·화재 시 대처 (MSDS 5·6항)</span><textarea data-f="spill" rows="4"></textarea></label>
+    </div>
+
+    <fieldset class="ms-fs"><legend>이행 확인</legend>
+      <div class="ms-grid">
+        <label class="field"><span class="label">MSDS 게시·비치 확인일</span><input type="date" data-f="posted"></label>
+        <label class="field"><span class="label">경고표지 부착 확인일</span><input type="date" data-f="labeled"></label>
+        <label class="field"><span class="label">최근 MSDS 교육일</span><input type="date" data-f="trained"></label>
+        <label class="field"><span class="label">비고</span><input type="text" data-f="note"></label>
+      </div>
+    </fieldset>
+    <div class="btns"><button type="button" class="btn" id="mSave">저장</button><button type="button" class="btn btn-ghost" id="mToOut">경고표지·게시물 만들기 →</button><span class="grow"></span><button type="button" class="btn btn-ghost btn-danger" id="mDel">이 물질 삭제</button></div>
+  </section>
+
+  <!-- ③ 인쇄 -->
+  <section class="ms-pane" data-pane="out" hidden>
+    <div class="ms-editbar"><label class="field" style="flex:1;min-width:220px"><span class="label">물질</span><select class="sort" id="mPick"></select></label></div>
+    <div class="ms-outs">
+      <section class="ms-out">
+        <h3>용기 경고표지</h3>
+        <p class="hint">법 제115조 · 시행규칙 제170조: 명칭, 그림문자, 신호어, 유해·위험문구, 예방조치문구, 공급자 정보를 모두 담습니다.</p>
+        <label class="field"><span class="label">크기·배치 (A4 한 장 기준)</span>
+          <select class="sort" id="mSize">
+            <option value="1">A4 1장 (큰 용기·드럼)</option>
+            <option value="2">A5 크기 2장</option>
+            <option value="4" selected>A6 크기 4장</option>
+            <option value="8">소형 8장 (약 99×67mm)</option>
+          </select></label>
+        <label class="check"><input type="checkbox" id="mP6"><span>예방조치 문구가 7개 이상이면 6개만 싣고 "그 밖의 예방조치 문구는 물질안전보건자료 참조"로 표시</span></label>
+        <label class="check"><input type="checkbox" id="mQr" checked><span>MSDS 원본 주소가 있으면 QR 코드 넣기</span></label>
+        <p class="hint">용기 크기별 최소 표지 크기와 문구 생략 기준은 고시에서 정합니다. 인쇄 전에 <a href="#" data-link="2" target="_blank" rel="noopener">고시 원문</a>을 확인하세요.</p>
+        <div class="btns"><button type="button" class="btn" data-print="label">경고표지 인쇄</button></div>
+      </section>
+      <section class="ms-out">
+        <h3>작업공정별 관리요령 게시물</h3>
+        <p class="hint">시행규칙 제168조: 제품명, 유해성·위험성, 취급주의, 보호구, 응급조치·사고 시 대처방법. 같은 공정의 물질을 함께 고르면 한 장에 묶습니다.</p>
+        <div class="ms-multi" id="mGuidePick"></div>
+        <div class="btns"><button type="button" class="btn" data-print="guide">관리요령 인쇄 (A4)</button></div>
+      </section>
+      <section class="ms-out">
+        <h3>MSDS 교육 기록</h3>
+        <p class="hint">시행규칙 제169조 · 별표 5 제6호 교육 내용을 채운 기록지입니다. 교육한 시간만큼 정기 안전보건교육으로 인정됩니다.</p>
+        <div class="ms-grid">
+          <label class="field"><span class="label">교육일</span><input type="date" id="eDate"></label>
+          <label class="field"><span class="label">교육 시간</span><input type="text" id="eHours" placeholder="예: 1시간"></label>
+          <label class="field"><span class="label">교육 사유</span><select class="sort" id="eWhy"></select></label>
+          <label class="field"><span class="label">교육자</span><input type="text" id="eWho"></label>
+        </div>
+        <div class="btns"><button type="button" class="btn" data-print="edu">교육 기록 인쇄</button><span class="hint">인쇄하면 선택한 물질의 "최근 MSDS 교육일"이 교육일로 바뀝니다.</span></div>
+      </section>
+    </div>
+    <div class="ms-preview" id="mPreview" aria-label="경고표지 미리보기"></div>
+  </section>
+
+  <section class="note">
+    <h2 class="h-sm">참고 · 출처</h2>
+    <ul class="bul" id="mLinks"></ul>
+    <p class="src-line" id="mSrc"></p>
+  </section>
+</div>
+
+<article class="paper print-doc ms-print" id="mPaper"></article>
+
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  var KEY = "anjeonduck.msds.v1", ROOT = "../../";
+  var S = { items: [] }, cur = null, tab = "list";
+  try { S = JSON.parse(localStorage.getItem(KEY) || "null") || { items: [] }; } catch (e) { S = { items: [] }; }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); say("이 브라우저에 저장됨"); }
+    catch (e) { say("저장하지 못했습니다(저장 공간 부족 또는 사생활 보호 모드)"); }
+  }
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function pad(n) { return ("0" + n).slice(-2); }
+  function ymd(d) { d = d || new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function say(m) { var el = $("mSaved"); if (el) el.textContent = m; }
+  function uid() { return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+  function lines(t) { return String(t || "").split(/\n+/).map(function (s) { return s.trim(); }).filter(Boolean); }
+  var PIC = {}; D.pictograms.forEach(function (p) { PIC[p.k] = p; });
+  function picImg(k, cls) { return '<img class="' + (cls || "") + '" src="' + ROOT + "assets/ghs/" + PIC[k].file + '" alt="' + esc(PIC[k].ko) + ' 그림문자">'; }
+  function hCodes(t) { var m = String(t || "").match(/H\d{3}/g) || []; return m.filter(function (c, i) { return m.indexOf(c) === i; }); }
+  function suggestPics(h) {
+    var set = {};
+    hCodes(h).forEach(function (c) { Object.keys(D.pic_by_h).forEach(function (k) { if (D.pic_by_h[k].indexOf(c) >= 0) set[k] = true; }); });
+    // GHS 우선순위: 해골(급성독성)이 있으면 느낌표를 쓰지 않는다
+    if (set.GHS06) delete set.GHS07;
+    return Object.keys(set).sort();
+  }
+
+  // ---------------- 탭
+  function show(t) {
+    tab = t;
+    [].forEach.call(document.querySelectorAll(".ms-tab"), function (b) { b.setAttribute("aria-selected", String(b.dataset.tab === t)); });
+    [].forEach.call(document.querySelectorAll(".ms-pane"), function (p) { p.hidden = p.dataset.pane !== t; });
+    if (t === "list") drawList();
+    if (t === "out") drawOut();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  document.querySelector(".ms-tabs").addEventListener("click", function (ev) { var b = ev.target.closest("[data-tab]"); if (!b) return; if (b.dataset.tab === "edit" && !cur) newItem(); else show(b.dataset.tab); });
+
+  // ---------------- ① 관리대장
+  function status(it) {
+    return {
+      posted: it.posted ? { ok: true, t: it.posted } : { ok: false, t: "미확인" },
+      labeled: it.labeled ? { ok: true, t: it.labeled } : { ok: false, t: "미확인" },
+      trained: it.trained ? { ok: true, t: it.trained } : { ok: false, t: "기록 없음" }
+    };
+  }
+  function chip(s) { return '<span class="ms-st ' + (s.ok ? "ok" : "no") + '">' + esc(s.t) + "</span>"; }
+  function drawList() {
+    var q = ($("mQ").value || "").trim().toLowerCase();
+    var rows = S.items.filter(function (it) { return !q || [it.name, it.supplier, it.place, it.dept, it.cas].join(" ").toLowerCase().indexOf(q) >= 0; });
+    $("mCount").textContent = S.items.length;
+    $("mRows").innerHTML = rows.map(function (it) {
+      var st = status(it);
+      return '<tr><td><button type="button" class="lnk-btn ms-name" data-edit="' + it.id + '">' + esc(it.name || "(이름 없음)") + "</button>" + (it.supplier ? '<span class="ms-sub">' + esc(it.supplier) + "</span>" : "") + "</td>" +
+        "<td>" + esc([it.dept, it.place].filter(Boolean).join(" · ")) + '</td><td class="ms-pcell">' + (it.pics || []).map(function (k) { return PIC[k] ? picImg(k, "ms-mini") : ""; }).join("") + (it.signal ? '<span class="ms-sig ' + (it.signal === "위험" ? "d" : "w") + '">' + esc(it.signal) + "</span>" : "") + "</td>" +
+        "<td>" + esc(it.msdsDate || "—") + "</td><td>" + chip(st.posted) + "</td><td>" + chip(st.labeled) + "</td><td>" + chip(st.trained) + "</td>" +
+        '<td class="ms-acts"><button type="button" class="btn btn-sm btn-ghost" data-edit="' + it.id + '">편집</button><button type="button" class="btn btn-sm" data-out="' + it.id + '">인쇄</button></td></tr>';
+    }).join("");
+    $("mEmpty").hidden = S.items.length > 0;
+    var n = S.items.length, np = S.items.filter(function (i) { return !i.posted; }).length, nl = S.items.filter(function (i) { return !i.labeled; }).length, nt = S.items.filter(function (i) { return !i.trained; }).length;
+    var nd = S.items.filter(function (i) { return i.signal === "위험"; }).length;
+    $("mKpis").innerHTML = n ? [["등록 물질", n, ""], ["신호어 '위험'", nd, nd ? "warn" : ""], ["게시·비치 미확인", np, np ? "bad" : "good"], ["경고표지 미확인", nl, nl ? "bad" : "good"], ["교육 기록 없음", nt, nt ? "bad" : "good"]]
+      .map(function (k) { return '<div class="ms-kpi ' + k[2] + '"><span>' + k[0] + "</span><b>" + k[1] + "</b></div>"; }).join("") : "";
+  }
+  $("mQ").addEventListener("input", drawList);
+  $("mRows").addEventListener("click", function (ev) {
+    var e1 = ev.target.closest("[data-edit]"), o = ev.target.closest("[data-out]");
+    if (e1) edit(e1.dataset.edit); else if (o) { cur = S.items.filter(function (x) { return x.id === o.dataset.out; })[0]; show("out"); }
+  });
+  $("mNew").addEventListener("click", newItem);
+  $("mCsv").addEventListener("click", function () {
+    var head = ["제품명", "공급자", "공급자 전화", "사용 부서·공정", "보관·사용 장소", "주요 성분(CAS)", "신호어", "그림문자", "H 코드", "MSDS 작성·개정일", "게시·비치 확인", "경고표지 확인", "최근 교육", "월 사용량", "비고"];
+    var rows = S.items.map(function (i) { return [i.name, i.supplier, i.tel, i.dept, i.place, i.cas, i.signal, (i.pics || []).map(function (k) { return PIC[k] ? PIC[k].ko : k; }).join("/"), hCodes(i.h).join(" "), i.msdsDate, i.posted, i.labeled, i.trained, i.qty, i.note]; });
+    var csv = "﻿" + [head].concat(rows).map(function (r) { return r.map(function (v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(","); }).join("\r\n");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "MSDS_관리대장_" + ymd() + ".csv"; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  });
+
+  // ---------------- ② 편집
+  var FIELDS = ["name", "dept", "place", "cas", "supplier", "tel", "addr", "msdsDate", "qty", "url", "h", "p", "firstaid", "handling", "ppe", "spill", "posted", "labeled", "trained", "note"];
+  function newItem() { cur = { id: uid(), created: ymd(), pics: [], signal: "" }; fillForm(); $("mPasteBox").open = true; show("edit"); setTimeout(function () { $("mPaste").focus(); }, 300); }
+  function edit(id) { cur = S.items.filter(function (x) { return x.id === id; })[0]; if (!cur) return; fillForm(); $("mPasteBox").open = false; show("edit"); }
+  function fillForm() {
+    FIELDS.forEach(function (f) { var el = document.querySelector('[data-f="' + f + '"]'); if (el) el.value = cur[f] || ""; });
+    [].forEach.call(document.getElementsByName("mSig"), function (r) { r.checked = (cur.signal || "") === r.value; });
+    $("mEditTitle").textContent = cur.name ? cur.name : "새 물질"; $("mDel").hidden = !S.items.some(function (x) { return x.id === cur.id; });
+    drawPics(); countP(); say("");
+  }
+  function readForm() {
+    FIELDS.forEach(function (f) { var el = document.querySelector('[data-f="' + f + '"]'); if (el) cur[f] = el.value.trim(); });
+    var r = document.querySelector('input[name="mSig"]:checked'); cur.signal = r ? r.value : "";
+  }
+  function drawPics() {
+    var sug = suggestPics(document.querySelector('[data-f="h"]').value), sel = cur.pics || [];
+    $("mPics").innerHTML = D.pictograms.map(function (p) {
+      var on = sel.indexOf(p.k) >= 0, s = sug.indexOf(p.k) >= 0;
+      return '<button type="button" class="ms-pic' + (on ? " on" : "") + (s && !on ? " sug" : "") + '" data-pic="' + p.k + '" aria-pressed="' + on + '">' + picImg(p.k) + "<span>" + esc(p.ko) + "</span></button>";
+    }).join("");
+    var miss = sug.filter(function (k) { return sel.indexOf(k) < 0; }), extra = sel.filter(function (k) { return sug.indexOf(k) < 0; });
+    $("mPicHint").textContent = sug.length ? ("— H 코드 기준 추천 " + sug.length + "개" + (miss.length ? ", 아직 안 고른 추천 " + miss.length + "개" : "") + (extra.length ? ", 추천 밖 선택 " + extra.length + "개" : "")) : "";
+  }
+  $("mPics").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-pic]"); if (!b) return;
+    var k = b.dataset.pic, i = (cur.pics = cur.pics || []).indexOf(k);
+    if (i >= 0) cur.pics.splice(i, 1); else cur.pics.push(k);
+    cur.pics.sort(); drawPics(); dirty();
+  });
+  function countP() { var n = lines(document.querySelector('[data-f="p"]').value).length; $("mPCount").textContent = n ? "예방조치 문구 " + n + "개" + (n > 6 ? " — 경고표지에는 6개만 싣는 옵션을 쓸 수 있습니다" : "") : ""; }
+  var dt;
+  function dirty() { say("저장 안 됨"); clearTimeout(dt); dt = setTimeout(function () { if (cur && (cur.name || "").trim()) commit(true); }, 1200); }
+  document.querySelector('[data-pane="edit"]').addEventListener("input", function (ev) {
+    if (ev.target.id === "mPaste") return;
+    if (ev.target.dataset.f === "h") drawPics();
+    if (ev.target.dataset.f === "p") countP();
+    if (ev.target.dataset.f === "name") $("mEditTitle").textContent = ev.target.value || "새 물질";
+    dirty();
+  });
+  document.querySelector('[data-pane="edit"]').addEventListener("change", function (ev) { if (ev.target.name === "mSig") dirty(); });
+  function commit(quiet) {
+    readForm();
+    if (!cur.name) { if (!quiet) { say("제품명을 적어 주세요"); document.querySelector('[data-f="name"]').focus(); } return false; }
+    cur.updated = ymd();
+    var i = S.items.findIndex(function (x) { return x.id === cur.id; });
+    if (i < 0) S.items.unshift(cur); else S.items[i] = cur;
+    save(); $("mDel").hidden = false; return true;
+  }
+  $("mSave").addEventListener("click", function () { if (commit()) { say("저장했습니다"); } });
+  $("mBack").addEventListener("click", function () { if ((cur.name || "").trim()) commit(true); show("list"); });
+  $("mToOut").addEventListener("click", function () { if (commit()) show("out"); });
+  $("mDel").addEventListener("click", function () {
+    if (!window.confirm("'" + (cur.name || "") + "'을(를) 관리대장에서 삭제할까요? 되돌릴 수 없습니다(백업 파일이 있으면 복원 가능).")) return;
+    S.items = S.items.filter(function (x) { return x.id !== cur.id; }); cur = null; save(); show("list");
+  });
+  $("mFillH").addEventListener("click", function () {
+    var ta = document.querySelector('[data-f="h"]'), n = 0;
+    ta.value = lines(ta.value).map(function (l) {
+      var m = l.match(/^(H\d{3})\s*$/); if (m && D.h[m[1]]) { n++; return m[1] + " " + D.h[m[1]]; } return l;
+    }).join("\n");
+    drawPics(); dirty(); say(n ? n + "개 문구를 고시 별표 3으로 채웠습니다 — MSDS 2항과 대조하세요" : "문구 없이 코드만 적힌 줄이 없습니다");
+  });
+
+  // ---------------- MSDS 붙여넣기 해석
+  var SEC = [/화학\s*제품과\s*회사|제품\s*및\s*회사/, /유해\s*성\s*[·ㆍ.,]?\s*위험\s*성/, /구성\s*성분/, /응급\s*조치/, /폭발\s*[·ㆍ.,]?\s*화재/, /누출\s*사고/, /취급\s*및\s*저장/, /노출\s*방지|개인\s*보호구/, /물리\s*화학/, /안정성\s*및\s*반응성/, /독성에\s*관한/, /환경에\s*미치는/, /폐기\s*시|폐기시/, /운송에\s*필요한/, /법적\s*규제/, /그\s*밖의\s*참고/];
+  function sections(t) {
+    var ls = t.split(/\n/), marks = [];
+    ls.forEach(function (l, i) {
+      var m = l.match(/^\s*(\d{1,2})\s*[.)]\s*(.{2,40})$/) || l.match(/^\s*(\d{1,2})\s*[.)]\s*(.+)$/);
+      if (!m) return; var n = +m[1]; if (n < 1 || n > 16) return;
+      if (SEC[n - 1].test(m[2]) && !marks.some(function (x) { return x.n === n; })) marks.push({ n: n, i: i });
+    });
+    marks.sort(function (a, b) { return a.i - b.i; });
+    var out = {};
+    marks.forEach(function (m, k) { out[m.n] = ls.slice(m.i + 1, k + 1 < marks.length ? marks[k + 1].i : ls.length).join("\n").trim(); });
+    return out;
+  }
+  function pick(text, re) { var m = String(text || "").match(re); return m ? m[1].replace(/\s+/g, " ").trim() : ""; }
+  function clean(t, max) {
+    t = String(t || "").split(/\n/).map(function (s) { return s.replace(/\s+/g, " ").trim(); }).filter(function (s) { return s && !/^-+$/.test(s) && !/^(자료없음|해당없음)$/.test(s); }).join("\n");
+    return max && t.length > max ? t.slice(0, max) + "…" : t;
+  }
+  function statements(t, letter) {
+    // "H225 고인화성…" / "P303+P361+P353 피부(또는 머리카락)에 묻으면…" 형태를 한 줄씩
+    var re = new RegExp("(" + letter + "\\d{3}(?:\\s*\\+\\s*" + letter + "\\d{3})*)\\s*[:：\\-–]?\\s*", "g"), out = [], m, idx = [];
+    t = String(t || "").replace(/\r/g, "");
+    while ((m = re.exec(t))) idx.push({ code: m[1].replace(/\s+/g, ""), s: m.index, e: re.lastIndex });
+    idx.forEach(function (x, i) {
+      var end = i + 1 < idx.length ? idx[i + 1].s : t.length, body = t.slice(x.e, end);
+      body = body.split(/\n\s*\n|\n(?=\s*(?:[가-하]\.|\d+\.|[○●■□▪·\-]\s|예방|대응|저장|폐기|신호어|그림문자|유해|나\.|다\.|라\.))/)[0].replace(/\s+/g, " ").trim();
+      if (!out.some(function (o) { return o.indexOf(x.code + " ") === 0; })) out.push(x.code + (body ? " " + body : ""));
+    });
+    return out;
+  }
+  $("mParse").addEventListener("click", function () {
+    var t = $("mPaste").value; if (!t.trim()) { $("mParseMsg").textContent = "먼저 MSDS 글자를 붙여 넣으세요."; return; }
+    t = t.replace(/ /g, " ").replace(/[ \t]+/g, " ");
+    var sec = sections(t), all = t, got = [];
+    var LBL = { name: "제품명", supplier: "공급자", addr: "주소", tel: "전화", cas: "CAS", firstaid: "응급조치", handling: "취급주의", ppe: "보호구", spill: "화재·누출" };
+    function set(f, v) { if (!v) return; var el = document.querySelector('[data-f="' + f + '"]'); if (el && el.value.trim() !== v) { el.value = v; got.push(LBL[f] || f); } }
+    var s1 = sec[1] || all;
+    set("name", pick(s1, /제[ \t]*품[ \t]*명[ \t]*[:：]?[ \t]*([^\n]+)/));
+    set("supplier", pick(s1, /(?:회[ \t]*사[ \t]*명|업[ \t]*체[ \t]*명|상[ \t]*호|공급자[ \t]*정보|제조자[ \t]*정보)[ \t]*[:：][ \t]*([^\n]+)/) || pick(s1, /(?:회[ \t]*사[ \t]*명|상[ \t]*호)[ \t]+([^\n:：]+)/));
+    set("addr", pick(s1, /주[ \t]*소[ \t]*[:：]?[ \t]*([^\n]+)/));
+    set("tel", pick(s1, /(?:긴급[ \t]*전화[ \t]*번호|긴급[ \t]*연락처|전화[ \t]*번호|연[ \t]*락[ \t]*처)[ \t]*[:：]?[ \t]*([0-9\-()~, ]{7,})/));
+    var s2 = sec[2] || all;
+    var sig = pick(s2, /신\s*호\s*어\s*[:：]?\s*(위험|경고)/);
+    if (sig) { [].forEach.call(document.getElementsByName("mSig"), function (r) { r.checked = r.value === sig; }); got.push("신호어"); }
+    var hs = statements(s2, "H"), ps = statements(s2, "P");
+    if (hs.length) { document.querySelector('[data-f="h"]').value = hs.join("\n"); got.push("H " + hs.length); }
+    if (ps.length) { document.querySelector('[data-f="p"]').value = ps.join("\n"); got.push("P " + ps.length); }
+    var s3 = sec[3] || ""; var cas = (s3.match(/\b\d{2,7}-\d{2}-\d\b/g) || []).slice(0, 3); if (cas.length) set("cas", cas.join(", "));
+    set("firstaid", clean(sec[4], 700)); set("handling", clean(sec[7] ? sec[7].split(/나\.\s*안전한\s*저장|저장\s*방법/)[0] : "", 600));
+    if (sec[8]) { var ppe = sec[8].split(/(?:[다라]\.\s*)?개인\s*보호구/); set("ppe", clean(ppe.length > 1 ? ppe.slice(1).join(" ") : sec[8], 500)); }
+    set("spill", clean([sec[5] ? "[화재] " + sec[5] : "", sec[6] ? "[누출] " + sec[6] : ""].filter(Boolean).join("\n"), 600));
+    var d = pick(all, /(?:최종\s*개정\s*일자|개정\s*일자|최종\s*개정일|작성\s*일자|개정일)\s*[:：]?\s*(\d{4}[.\-/년 ]\s*\d{1,2}[.\-/월 ]\s*\d{1,2})/);
+    if (d) { var m = d.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); if (m) { var el = document.querySelector('[data-f="msdsDate"]'); el.value = m[1] + "-" + pad(m[2]) + "-" + pad(m[3]); got.push("개정일"); } }
+    // 그림문자: 비어 있으면 H 코드 추천으로 채움
+    if (!(cur.pics || []).length) cur.pics = suggestPics(document.querySelector('[data-f="h"]').value);
+    drawPics(); countP(); dirty();
+    $("mEditTitle").textContent = document.querySelector('[data-f="name"]').value || "새 물질";
+    $("mParseMsg").textContent = got.length ? "채운 항목: " + got.join(", ") + " — 원본과 대조한 뒤 저장하세요." : "알아볼 수 있는 항목을 찾지 못했습니다. 항목 번호(1.~16.)와 H·P 코드가 보이도록 붙여 넣었는지 확인하세요.";
+  });
+  $("mPasteClear").addEventListener("click", function () { $("mPaste").value = ""; $("mParseMsg").textContent = ""; });
+
+  // ---------------- ③ 인쇄
+  function drawOut() {
+    var opts = S.items.map(function (it) { return '<option value="' + it.id + '"' + (cur && cur.id === it.id ? " selected" : "") + ">" + esc(it.name) + (it.place ? " — " + esc(it.place) : "") + "</option>"; }).join("");
+    $("mPick").innerHTML = opts || '<option value="">먼저 ②에서 물질을 저장하세요</option>';
+    if (!cur && S.items.length) cur = S.items[0];
+    $("mGuidePick").innerHTML = S.items.map(function (it) { return '<label class="check"><input type="checkbox" value="' + it.id + '"' + (cur && it.id === cur.id ? " checked" : "") + "><span>" + esc(it.name) + "</span></label>"; }).join("") || '<p class="hint">등록한 물질이 없습니다.</p>';
+    $("eWhy").innerHTML = D.edu_when.map(function (w) { return "<option>" + esc(w) + "</option>"; }).join("");
+    if (!$("eDate").value) $("eDate").value = ymd();
+    preview();
+  }
+  $("mPick").addEventListener("change", function () { cur = S.items.filter(function (x) { return x.id === $("mPick").value; })[0] || null; drawOut(); });
+  ["mSize", "mP6", "mQr"].forEach(function (id) { $(id).addEventListener("change", preview); });
+  var QR = null, qrLoading = false;
+  function qrSvg(text, cb) {
+    if (QR) return cb(QR);
+    if (qrLoading) return; qrLoading = true;
+    var s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
+    s.onload = function () { QR = window.qrcode; cb(QR); }; s.onerror = function () { qrLoading = false; cb(null); };
+    document.head.appendChild(s);
+  }
+  function qrHtml(url) {
+    if (!QR || !url) return "";
+    try { var q = QR(0, "M"); q.addData(url); q.make(); return '<div class="lb-qr">' + q.createSvgTag({ cellSize: 2, margin: 0, scalable: true }) + "<span>MSDS 원본</span></div>"; } catch (e) { return ""; }
+  }
+  function labelHtml(it) {
+    var ps = lines(it.p), cut = $("mP6").checked && ps.length > 6;
+    if (cut) ps = ps.slice(0, 6).concat(["그 밖의 예방조치 문구는 물질안전보건자료를 참조하시오."]);
+    var sig = it.signal ? '<p class="lb-sig ' + (it.signal === "위험" ? "d" : "w") + '">' + esc(it.signal) + "</p>" : "";
+    var pics = (it.pics || []).map(function (k) { return PIC[k] ? picImg(k, "lb-pic") : ""; }).join("");
+    return '<div class="lb"><p class="lb-name">' + esc(it.name) + "</p>" +
+      '<div class="lb-top"><div class="lb-pics">' + pics + "</div>" + sig + "</div>" +
+      '<div class="lb-body"><p class="lb-h">유해·위험 문구</p><ul>' + lines(it.h).map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul>" +
+      '<p class="lb-h">예방조치 문구</p><ul>' + ps.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul></div>" +
+      '<div class="lb-foot"><div><b>공급자</b> ' + esc(it.supplier || "") + (it.tel ? " · ☎ " + esc(it.tel) : "") + (it.addr ? "<br>" + esc(it.addr) : "") + "</div>" + ($("mQr").checked ? qrHtml(it.url) : "") + "</div></div>";
+  }
+  function missing(it) {
+    var m = [];
+    if (!it.name) m.push("제품명"); if (!(it.pics || []).length) m.push("그림문자"); if (!it.signal) m.push("신호어");
+    if (!lines(it.h).length) m.push("유해·위험 문구"); if (!lines(it.p).length) m.push("예방조치 문구"); if (!it.supplier || !it.tel) m.push("공급자 이름·전화");
+    return m;
+  }
+  function preview() {
+    var box = $("mPreview");
+    if (!cur) { box.innerHTML = ""; return; }
+    var go = function () {
+      var m = missing(cur);
+      box.innerHTML = '<p class="ms-prevh">경고표지 미리보기' + (m.length ? ' <span class="ms-st no">빠진 항목: ' + esc(m.join(", ")) + "</span>" : ' <span class="ms-st ok">시행규칙 제170조 기재항목 6가지 모두 있음</span>') + "</p>" +
+        '<div class="lb-wrap n' + $("mSize").value + '">' + labelHtml(cur) + "</div>";
+    };
+    if ($("mQr").checked && cur.url && !QR) qrSvg(cur.url, go); go();
+  }
+  function header(title) {
+    var co = ""; try { co = localStorage.getItem("anjeonduck.company") || ""; } catch (e) {}
+    return '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">' + esc(title) + "</h2>" + (window.ADoc ? ADoc.apprHTML("tool.msds") : "") + "</header>";
+  }
+  function fitLabels(root) {
+    // 표지 칸을 넘치는 문구가 잘려 나가지 않도록 글자 크기를 줄여 맞춘다(가장 작게 6px). 그래도 넘치면 경고
+    var over = 0;
+    [].forEach.call(root.querySelectorAll(".lb"), function (lb) {
+      lb.style.fontSize = ""; var fs = parseFloat(getComputedStyle(lb).fontSize), guard = 0, bd = lb.querySelector(".lb-body");
+      function ov() { return bd.scrollHeight > bd.clientHeight + 1 || lb.scrollHeight > lb.clientHeight + 1; }
+      while (ov() && fs > 6 && guard++ < 60) { fs -= 0.5; lb.style.fontSize = fs + "px"; }
+      if (ov()) over++;
+    });
+    return over;
+  }
+  function printAs(kind, html) {
+    $("mPaper").innerHTML = html; $("mPaper").className = "paper print-doc ms-print ms-" + kind;
+    if (kind === "label") {
+      $("mPaper").classList.add("ms-measure");
+      var over = fitLabels($("mPaper"));
+      $("mPaper").classList.remove("ms-measure");
+      if (over && !window.confirm("표지 크기에 비해 문구가 많아 글자를 가장 작게 줄여도 다 들어가지 않습니다. 더 큰 크기를 고르거나 예방조치 문구 6개 옵션을 쓰세요.\n그래도 인쇄할까요?")) return;
+    }
+    document.body.classList.add("pr-msds");
+    var t0 = document.title; document.title = ({ label: "경고표지", guide: "관리요령", edu: "MSDS교육기록", list: "MSDS관리대장" }[kind] || "MSDS") + "_" + ymd();
+    // 인쇄 창이 닫힌 뒤(afterprint)에 원래대로 — 모바일 사파리처럼 print()가 바로 돌아오는 브라우저에서도 빈 종이가 나오지 않게
+    var done = false, end = function () { if (done) return; done = true; document.body.classList.remove("pr-msds"); document.title = t0; window.removeEventListener("afterprint", end); };
+    window.addEventListener("afterprint", end);
+    setTimeout(function () { window.print(); setTimeout(end, 120000); }, 60);
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-print]"); if (!b) return;
+    var k = b.dataset.print;
+    if (k === "label") {
+      if (!cur) return; var m = missing(cur);
+      if (m.length && !window.confirm("경고표지에 빠진 항목이 있습니다: " + m.join(", ") + "\n그대로 인쇄할까요?")) return;
+      var n = +$("mSize").value, one = labelHtml(cur), h = "";
+      for (var i = 0; i < n; i++) h += one;
+      var doPrint = function () { printAs("label", '<div class="lb-wrap n' + n + '">' + h + "</div>"); };
+      if ($("mQr").checked && cur.url && !QR) qrSvg(cur.url, function () { h = ""; one = labelHtml(cur); for (var j = 0; j < n; j++) h += one; doPrint(); }); else doPrint();
+    } else if (k === "guide") {
+      var ids = [].map.call(document.querySelectorAll("#mGuidePick input:checked"), function (x) { return x.value; });
+      var its = S.items.filter(function (x) { return ids.indexOf(x.id) >= 0; });
+      if (!its.length) { window.alert("관리요령에 넣을 물질을 하나 이상 고르세요."); return; }
+      var dept = its.map(function (x) { return x.dept; }).filter(Boolean)[0] || "";
+      printAs("guide", header("물질안전보건자료대상물질 관리요령") +
+        '<p class="ms-gsub">작업공정: <b>' + esc(dept) + "</b> · 게시일 " + ymd() + " · 시행규칙 제168조</p>" +
+        its.map(function (it) {
+          return '<section class="ms-gcard"><div class="ms-ghead"><div class="ms-gpics">' + (it.pics || []).map(function (k) { return PIC[k] ? picImg(k, "g-pic") : ""; }).join("") + "</div><div><h3>" + esc(it.name) + "</h3>" +
+            (it.signal ? '<span class="lb-sig sm ' + (it.signal === "위험" ? "d" : "w") + '">' + esc(it.signal) + "</span>" : "") + (it.place ? ' <span class="ms-sub">' + esc(it.place) + "</span>" : "") + "</div></div>" +
+            '<table class="gtab"><tbody>' +
+            "<tr><th>유해성·위험성</th><td>" + lines(it.h).map(esc).join("<br>") + "</td></tr>" +
+            "<tr><th>취급 주의사항</th><td>" + esc(it.handling || "").replace(/\n/g, "<br>") + "</td></tr>" +
+            "<tr><th>적절한 보호구</th><td>" + esc(it.ppe || "").replace(/\n/g, "<br>") + "</td></tr>" +
+            "<tr><th>응급조치 요령</th><td>" + esc(it.firstaid || "").replace(/\n/g, "<br>") + "</td></tr>" +
+            "<tr><th>사고 시 대처</th><td>" + esc(it.spill || "").replace(/\n/g, "<br>") + "</td></tr>" +
+            "</tbody></table></section>";
+        }).join("") + '<p class="paper-foot">근거: 산업안전보건법 제114조제2항 · 시행규칙 제168조 — 내용은 각 물질안전보건자료를 참고해 작성</p>');
+    } else if (k === "edu") {
+      if (!cur) return;
+      var date = $("eDate").value || ymd();
+      var rows = ""; for (var r = 1; r <= 15; r++) rows += '<tr><td class="num">' + r + '</td><td></td><td></td><td class="sign"></td></tr>';
+      printAs("edu", header("물질안전보건자료(MSDS) 교육 기록") +
+        '<table class="ftab"><tbody><tr><th>교육일</th><td>' + esc(date) + "</td><th>교육 시간</th><td>" + esc($("eHours").value) + "</td></tr>" +
+        "<tr><th>대상 물질</th><td>" + esc(cur.name) + "</td><th>작업공정·장소</th><td>" + esc([cur.dept, cur.place].filter(Boolean).join(" · ")) + "</td></tr>" +
+        '<tr><th>교육 사유</th><td colspan="3">' + esc($("eWhy").value) + "</td></tr>" +
+        '<tr><th>교육자</th><td colspan="3">' + esc($("eWho").value) + "</td></tr></tbody></table>" +
+        '<h3 class="sec-t">교육 내용 (시행규칙 별표 5 제6호)</h3><table class="gtab"><tbody>' +
+        D.edu_items.map(function (x, i) {
+          var v = [cur.name, lines(cur.h).join(" / "), cur.handling, cur.ppe, cur.firstaid, "경고표지 그림문자·신호어·문구 읽는 법, MSDS 16개 항목 위치(게시·비치 장소: " + (cur.place || "") + ")"][i] || "";
+          return '<tr><th style="width:30%">' + esc(x) + "</th><td>" + esc(v).replace(/\n/g, "<br>") + "</td></tr>";
+        }).join("") + "</tbody></table>" +
+        '<h3 class="sec-t">교육 대상자</h3><table class="gtab"><thead><tr><th style="width:8%">번호</th><th>소속</th><th>성명</th><th style="width:20%">서명</th></tr></thead><tbody>' + rows + "</tbody></table>" +
+        '<p class="paper-foot">근거: 산업안전보건법 제114조제3항 · 시행규칙 제169조 — 교육 시간·내용을 기록해 보존</p>');
+      cur.trained = date; var i2 = S.items.findIndex(function (x) { return x.id === cur.id; }); if (i2 >= 0) { S.items[i2] = cur; save(); }
+    }
+  });
+  $("mPrintList").addEventListener("click", function () {
+    if (!S.items.length) { window.alert("등록한 물질이 없습니다."); return; }
+    printAs("list", header("물질안전보건자료(MSDS) 관리대장") +
+      '<table class="gtab ms-ltab"><thead><tr><th>번호</th><th>제품명</th><th>공급자·전화</th><th>공정·장소</th><th>그림문자·신호어</th><th>MSDS 개정일</th><th>게시·비치</th><th>경고표지</th><th>최근 교육</th></tr></thead><tbody>' +
+      S.items.map(function (it, i) {
+        return '<tr><td class="num">' + (i + 1) + "</td><td>" + esc(it.name) + "</td><td>" + esc(it.supplier || "") + (it.tel ? "<br>" + esc(it.tel) : "") + "</td><td>" + esc([it.dept, it.place].filter(Boolean).join(" · ")) + "</td><td>" +
+          (it.pics || []).map(function (k) { return PIC[k] ? picImg(k, "ms-mini") : ""; }).join("") + " " + esc(it.signal || "") + "</td><td>" + esc(it.msdsDate || "") + "</td><td>" + esc(it.posted || "") + "</td><td>" + esc(it.labeled || "") + "</td><td>" + esc(it.trained || "") + "</td></tr>";
+      }).join("") + "</tbody></table>" + '<p class="paper-foot">근거: 산업안전보건법 제114조·제115조 · 시행규칙 제167조~제170조</p>');
+  });
+
+  // ---------------- 참고
+  $("mLinks").innerHTML = D.links.map(function (l, i) { return '<li><a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.name) + " ↗</a> — " + esc(l.desc) + "</li>"; }).join("");
+  [].forEach.call(document.querySelectorAll("[data-link]"), function (a) { a.href = D.links[+a.dataset.link].url; });
+  $("mSrc").textContent = D.h_source + " " + D.pic_source + ". 교육 내용: " + D.edu_source + ". 확인일 " + D.checked + ".";
+  drawList();
+})();
+</script>

@@ -458,7 +458,7 @@ LOGO_SVG = ('<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">'
 
 AVATAR_COLORS = ["#1F6FD1", "#17365D", "#0E8A6A", "#8A4FD6", "#C2571A", "#3B6E8F"]
 HOME_FORMS = ["lf-f29-288431", "lf-f35-288431", "lf-f102-288431", "lf-f50-288431", "lf-f5-288431"]
-QUICK_KEYWORDS = ["산업재해조사표", "선임 보고서", "위험성평가", "TBM", "작업허가"]
+QUICK_KEYWORDS = ["산업재해조사표", "선임 보고서", "위험성평가", "TBM", "MSDS", "작업허가"]
 
 
 def avatar(name):
