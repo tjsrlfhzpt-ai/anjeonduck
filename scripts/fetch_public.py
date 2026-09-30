@@ -19,6 +19,7 @@ import json
 import os
 import re
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -49,20 +50,48 @@ GATEWAY_ERR = {"SERVICE_KEY_IS_NOT_REGISTERED_ERROR": "인증키 미등록(해�
 def gateway_check(raw):
     """공공데이터포털 게이트웨이 오류(<OpenAPI_ServiceResponse>)를 사람이 읽을 수 있는 메시지로."""
     if "OpenAPI_ServiceResponse" in raw or "returnAuthMsg" in raw:
-        m = re.search(r"<returnAuthMsg>([^<]+)", raw)
+        m = re.search(r"<errMsg>([^<]+)", raw) or re.search(r"<returnAuthMsg>([^<]+)", raw)
         code = m.group(1).strip() if m else "UNKNOWN"
         raise RuntimeError(f"공공데이터포털 거부: {GATEWAY_ERR.get(code, code)}")
+
+
+def snippet(text, n=160):
+    """오류 응답 본문 요약(키가 섞이지 않도록 serviceKey 값은 가린다)."""
+    text = re.sub(r"serviceKey=[^&\s\"'<]+", "serviceKey=***", text)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text)).strip()[:n]
 
 
 def get(url, params, timeout=30):
     # serviceKey 는 공공데이터포털이 '인코딩된 키'를 그대로 요구하는 경우가 있어 따로 붙인다
     q = urllib.parse.urlencode(params)
     full = f"{url}?serviceKey={KEY if '%' in KEY else urllib.parse.quote(KEY, safe='')}&{q}"
-    req = urllib.request.Request(full, headers={"User-Agent": "anjeonduck-fetch/1.0"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        raw = r.read().decode("utf-8", "replace")
+    req = urllib.request.Request(full, headers={"User-Agent": "Mozilla/5.0 (anjeonduck-fetch/1.0)"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            raw = r.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")
+        gateway_check(body)
+        raise RuntimeError(f"HTTP {e.code} — 응답: {snippet(body) or '(본문 없음)'}") from None
     gateway_check(raw)
     return raw
+
+
+def probe():
+    """키 없이 한 번 호출해 이 서버(빌드 러너)에서 공공데이터포털 게이트웨이에 닿는지 확인.
+    국내에서는 SERVICE_KEY_IS_NULL(XML)이 돌아오고, 해외 IP 차단이면 HTTP 403 등이 돌아온다."""
+    url = "https://apis.data.go.kr/1371000/policyNewsService2/policyNewsList2?startDate=20260101&endDate=20260102"
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=20) as r:
+            body, code = r.read().decode("utf-8", "replace"), r.status
+    except urllib.error.HTTPError as e:
+        body, code = e.read().decode("utf-8", "replace"), e.code
+    except Exception as e:
+        print(f"  진단: 게이트웨이 연결 실패 — {type(e).__name__}: {e}")
+        return False
+    ok = "SERVICE_KEY_IS_NULL" in body
+    print(f"  진단(키 없이 호출): HTTP {code} / {'게이트웨이 정상 응답' if ok else '게이트웨이 응답 아님 → 이 서버 IP가 차단됐을 가능성'} / {snippet(body, 120)}")
+    return ok
 
 
 def ymd(s):
@@ -190,6 +219,7 @@ def main():
     if not KEY:
         print("  DATA_GO_KR_KEY 없음 — 공공 API 수집을 건너뜁니다(기존 data/auto 파일이 있으면 그대로 사용).")
         return 0
+    probe()
     for name, fn in (("공공기관 채용", fetch_jobs), ("정책뉴스", fetch_news), ("사고사망 속보", fetch_accidents)):
         try:
             fn()
