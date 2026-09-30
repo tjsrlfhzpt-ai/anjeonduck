@@ -680,11 +680,11 @@ def tool_card(href, kind, name, desc, law="", sub=""):
 
 
 def free_tool_cards(site, rel_root, group=None, limit=None, ids=None, kind=None):
-    tools = [t for t in site.get("free_tools", []) if (group is None or t.get("group") == group) and (kind is None or t.get("kind") == kind)]
+    tools = [t for t in site.get("free_tools", []) if (group is None or t.get("group") == group) and (kind is None or t.get("cat") == kind)]
     if ids:
         by = {t["id"]: t for t in tools}
         tools = [by[i] for i in ids if i in by]
-    return "".join(tool_card(f'{rel_root}tools/{e(t["id"])}/', t.get("kind", "작성기"), t["name"], t.get("desc", ""), t.get("law", ""), t.get("tag", ""))
+    return "".join(tool_card(f'{rel_root}tools/{e(t["id"])}/', t.get("cat", "작성기"), t["name"], t.get("desc", ""), t.get("law", ""), t.get("tag", ""))
                    for t in tools[:limit])
 
 
@@ -1262,7 +1262,7 @@ def build(out, today):
   <p>회원가입도 서버도 없습니다. 입력한 내용은 내 브라우저 안에서만 처리됩니다. 법령 원문을 기준으로 만들었고 각 도구에 근거 조문과 확인일을 적어 두었습니다.</p>
 </div></section>
 <section class="wrap ftools-page">
-  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("kind") == k) + (1 if k == "작성기" else 0)}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
+  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("cat") == k) + (1 if k == "작성기" else 0)}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
 </section>
 {kind_secs}
 <section class="wrap ftools-page" id="catalog">
@@ -1281,6 +1281,9 @@ def build(out, today):
 
     # ---- 무료 작성 도구 (각각 한 파일로 완결)
     for t in site.get("free_tools", []):
+        # 본문 조각(*.body.html)은 반드시 공통 레이아웃(page)으로 감싸야 한다 — kind 누락 시 CSS·메뉴 없는 페이지가 배포됨
+        if t["src"].endswith(".body.html") and t.get("kind") != "page":
+            sys.exit(f"config/site.json 도구 {t['id']}: 본문 조각인데 kind가 'page'가 아닙니다")
         write(f"tools/{t['id']}/index.html", render_free_tool(t, hazards, site, penalties))
 
     # ---- 404 (어느 경로에서 열려도 되도록 절대 주소 사용)
