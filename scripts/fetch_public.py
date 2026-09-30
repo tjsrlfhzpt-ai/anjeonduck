@@ -44,15 +44,18 @@ def warn(msg):
 GATEWAY_ERR = {"SERVICE_KEY_IS_NOT_REGISTERED_ERROR": "인증키 미등록(해당 API 활용신청 전이거나 승인 대기)",
                "SERVICE_ACCESS_DENIED_ERROR": "이 API에 대한 활용 승인 없음",
                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR": "일일 호출 한도 초과",
-               "UNREGISTERED_IP_ERROR": "등록되지 않은 IP"}
+               "UNREGISTERED_IP_ERROR": "등록되지 않은 IP",
+               "SERVICE_KEY_IS_NULL": "인증키가 비어 있음",
+               "INVALID_REQUEST_PARAMETER_ERROR": "요청 항목 오류"}
 
 
 def gateway_check(raw):
     """공공데이터포털 게이트웨이 오류(<OpenAPI_ServiceResponse>)를 사람이 읽을 수 있는 메시지로."""
     if "OpenAPI_ServiceResponse" in raw or "returnAuthMsg" in raw:
         m = re.search(r"<errMsg>([^<]+)", raw) or re.search(r"<returnAuthMsg>([^<]+)", raw)
-        code = m.group(1).strip() if m else "UNKNOWN"
-        raise RuntimeError(f"공공데이터포털 거부: {GATEWAY_ERR.get(code, code)}")
+        code = m.group(1).strip() if m else ""
+        msg = GATEWAY_ERR.get(code, code) or "사유 코드 없음"
+        raise RuntimeError(f"공공데이터포털 거부: {msg} / 응답: {snippet(raw, 120)}")
 
 
 def snippet(text, n=160):
