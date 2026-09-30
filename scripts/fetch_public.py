@@ -52,7 +52,7 @@ GATEWAY_ERR = {"SERVICE_KEY_IS_NOT_REGISTERED_ERROR": "인증키 미등록(해�
 def gateway_check(raw):
     """공공데이터포털 게이트웨이 오류(<OpenAPI_ServiceResponse>)를 사람이 읽을 수 있는 메시지로."""
     if "OpenAPI_ServiceResponse" in raw or "returnAuthMsg" in raw:
-        m = re.search(r"<errMsg>([^<]+)", raw) or re.search(r"<returnAuthMsg>([^<]+)", raw)
+        m = re.search(r"<errMsg>([^<]+)", raw) or re.search(r'"errMsg"\s*:\s*"([^"]+)"', raw) or re.search(r"<returnAuthMsg>([^<]+)", raw)
         code = m.group(1).strip() if m else ""
         msg = GATEWAY_ERR.get(code, code) or "사유 코드 없음"
         raise RuntimeError(f"공공데이터포털 거부: {msg} / 응답: {snippet(raw, 120)}")
