@@ -93,6 +93,12 @@
   .del-btn:hover { color: #c0392b; }
   .people td { height: 26px; }
 </style>
+<script src="../../assets/docs.js"></script>
+<style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746}.risk-appr .ad-appr td.ad-s{height:24px}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}.risk-appr .ad-appr th{padding:1px 3px}</style>
+<style>
+  .photo-page{height:auto !important;min-height:0 !important;overflow:visible !important;page-break-after:auto !important}
+  @media print{.photo-page:not(.has-photos){display:none !important}.photo-page{page-break-before:always}}
+</style>
 </head>
 <body>
 
@@ -107,6 +113,7 @@
     <select id="globalWorkType" onchange="applyAutoData()"></select>
   </div>
   <button class="btn btn-blue" onclick="applyAutoData()">🔄 기본 항목 다시 채우기</button>
+  <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">📷 사진 첨부</button>
   <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
   <button class="btn btn-red" onclick="resetForm()">↻ 초기화</button>
   <p class="ctrl-note">현재 위험성은 기본 목록의 상·중·하로 미리 채운 <b>추천값</b>입니다. 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
@@ -117,10 +124,7 @@
     <div>
       <h1>위 험 성 평 가 서</h1>
     </div>
-    <table class="approval">
-      <tr><th>작성</th><th>검토</th><th>승인</th></tr>
-      <tr><td></td><td></td><td></td></tr>
-    </table>
+    <div class="risk-appr" data-appr="tool.risk"></div>
   </div>
   <p class="sub-title">작업별 유해·위험요인을 파악하고 위험성을 결정한 뒤 감소대책을 수립·이행하기 위한 기록</p>
 
@@ -191,6 +195,17 @@
   </table>
 </div>
 
+<div class="page-container photo-page" id="riskPhotosPage"><div id="riskPhotos"></div></div>
+<script>
+(function () {
+  if (!window.ADoc) { document.getElementById("riskPhotosPage").style.display = "none"; return; }
+  var pg = document.getElementById("riskPhotosPage");
+  ADoc.mountPhotos(document.getElementById("riskPhotos"), "tool.risk", { title: "위험성평가 사진대지 (유해·위험요인·개선 전후)", cols: 2 });
+  function sync() { ADoc.countPhotos("tool.risk").then(function (c) { pg.classList.toggle("has-photos", c.total > 0); }); }
+  ADoc.onPhotos("tool.risk", sync); sync();
+  window.addPhotos = function () { ADoc.pickPhoto("tool.risk", ""); pg.scrollIntoView({ behavior: "smooth" }); };
+})();
+</script>
 <script>
   var HAZARD_DB = /*@HAZARDS@*/null;
   if (!HAZARD_DB) HAZARD_DB = { groups: ["공통"], items: [] };

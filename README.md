@@ -111,6 +111,23 @@ templates/*.csv       구글 시트 머리글 서식
 - 자동으로 들어간 값은 모두 고칠 수 있고, 사용자가 고친 계산 칸은 다시 덮어쓰지 않습니다.
 - 법령이 바뀌면 `data/lawtext/*.json`(조문 전문), `data/form_auto.json`, `data/edu_contents.json`을 다시 확인하세요.
 
+## 결재란·서명·사진·내 데이터 (assets/docs.js)
+
+모든 페이지 `<head>`에서 불러오는 공통 모듈입니다. 서버 없이 이 기기에만 저장합니다.
+
+| 기능 | 저장 위치 | 쓰는 곳 |
+|---|---|---|
+| 결재란(기본 담당·검토·승인, 칸 이름·칸 수·성명 수정) | localStorage `anjeonduck.appr.<문서>` / 기본값 `anjeonduck.appr.default` | 서식 작성기 42종, TBM, 위험성평가, 직무분장표, 폭염 기록부, 안전검사 관리대장 |
+| 전자서명(손글씨·성명 도장, 서명일 표시) | 결재란과 같은 곳(PNG, 240×100 이하로 축소) | 결재란 서명 칸 |
+| 사진 첨부(사진마다 개별 칸, 설명·관련 항목·촬영일, 인쇄 시 사진대지) | IndexedDB `anjeonduck`/`photos` (긴 변 1600px JPEG로 축소) | 서식 작성기(점검 항목별 📷 포함), TBM, 위험성평가 |
+| 내 데이터 관리(JSON 내보내기·불러오기) | `anjeonduck.*` localStorage 전부 + 사진 | 상단 알림바·푸터 버튼 |
+
+## 법령 전문 (lawpages.py)
+
+`data/lawraw/<key>.txt`(국가법령정보센터 본문 페이지 텍스트) → `python3 scripts/parse_lawtext.py` → `data/lawtext/<key>.json`(편·장·절 목차, 조문, 별표 목록).
+빌드하면 `laws/<key>/`(act·yeong·rule·krule·sapa·sapa_dec) 전문 페이지와 `assets/data/lawidx.js`(법령 홈 전체 검색 색인)가 생깁니다.
+법령이 개정되면 본문 페이지 텍스트를 다시 받아 lawraw 파일을 바꾸고 파서를 다시 돌리세요(lsiSeq는 parse_lawtext.py 의 LAWS).
+
 ## 채용·뉴스 자동 수집 (공공데이터포털 공식 API)
 
 민간 채용사이트·언론사·다른 커뮤니티의 글은 가져오지 않습니다. 아래 세 가지 **공식 공개 API**만 씁니다(이용조건 확인 2026-09-30).

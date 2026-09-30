@@ -15,7 +15,11 @@ SITE = Path(sys.argv[1] if len(sys.argv) > 1 else "_site")
 links = set()
 for f in SITE.rglob("*.html"):
     for u in re.findall(r'href="(https?://[^"]+)"', f.read_text(encoding="utf-8")):
-        links.add(unescape(u))
+        u = unescape(u)
+        # 법령 전문 페이지의 조문별 원문 링크(1천여 개)는 같은 법령 주소 + 조번호라 법령 주소 하나만 점검
+        if "law.go.kr/" in u and re.search(r"/%EC%A0%9C\d+%EC%A1%B0|/제\d+조", u):
+            u = re.sub(r"/(%EC%A0%9C\d+%EC%A1%B0.*|제\d+조.*)$", "", u)
+        links.add(u)
 
 
 def check(u):

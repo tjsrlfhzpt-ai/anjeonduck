@@ -7,6 +7,7 @@
   <div class="form-bar no-print" role="toolbar" aria-label="서식 도구">
     <button type="button" class="btn" id="fPrint">인쇄 · PDF 저장</button>
     <button type="button" class="btn btn-ghost" id="fSample" hidden>예시로 채우기</button>
+    <button type="button" class="btn btn-ghost" id="fPhotoBtn">사진 첨부</button>
     <button type="button" class="btn btn-ghost" id="fProfileBtn" aria-expanded="false" aria-controls="fProfile">사업장 정보</button>
     <button type="button" class="btn btn-ghost" id="fClear">모두 비우기</button>
     <span class="form-save" id="fSaved" aria-live="polite"></span>
@@ -18,10 +19,13 @@
   <section class="fauto no-print" id="fAuto" hidden></section>
   <p class="hint no-print" id="fBasis"></p>
   <article class="paper" id="paper" aria-label="서식 본문"></article>
+  <article class="paper paper-photos" id="paperPhotos" aria-label="사진대지"><div id="fPhotos"></div></article>
   <section class="note no-print" style="margin-top:20px">
     <h2 class="h-sm">사용 안내</h2>
     <ul class="bul">
-      <li>회색 칸은 모두 고칠 수 있습니다 — 결재란 이름, 점검 항목 문구, 표의 기본 문구까지. 행·점검 항목도 추가할 수 있습니다.</li>
+      <li>회색 칸은 모두 고칠 수 있습니다 — 점검 항목 문구, 표의 기본 문구까지. 행·점검 항목도 추가할 수 있습니다.</li>
+      <li>결재란은 담당·검토·승인이 기본입니다. 칸 이름을 눌러 고치고 ＋/－로 칸 수를 바꾸세요. 서명 칸을 누르면 손가락·마우스로 서명하거나 성명 도장을 찍을 수 있고, "모든 서식 기본으로"를 누르면 다른 서식에도 같은 결재선·성명이 들어갑니다.</li>
+      <li>사진은 "사진 첨부" 또는 점검 항목 옆 📷 버튼으로 붙입니다. 사진마다 칸이 따로 생기고 설명·관련 항목·촬영일을 적을 수 있으며, 인쇄하면 서식 뒤에 사진대지로 붙습니다(사진이 없으면 인쇄되지 않음).</li>
       <li>입력 내용은 이 브라우저에만 자동 저장되고 서버로 보내지 않습니다. "모두 비우기"를 누르면 원래 서식으로 돌아갑니다.</li>
       <li>인쇄 창에서 대상을 "PDF로 저장"으로 바꾸면 파일로 남길 수 있습니다. 여백은 "기본", 배율은 100%를 권장합니다.</li>
       <li>법정 서식이 따로 정해진 서류가 아니라, 법령이 요구하는 기재 사항을 빠짐없이 담도록 만든 참고 서식입니다. 사업장 상황에 맞게 고쳐 쓰세요.</li>
@@ -70,10 +74,8 @@
     return ed(k, f.default, f.multi ? "multi" : "", f.ph);
   }
 
-  function approval(list) {
-    if (!list || !list.length) return "";
-    return '<table class="appr"><tr><th rowspan="2" class="appr-h">결<br>재</th>' + list.map(function (a, i) { return "<th>" + ed("ap." + i, a, "ap") + "</th>"; }).join("") + "</tr><tr>" + list.map(function () { return '<td class="appr-sign"></td>'; }).join("") + "</tr></table>";
-  }
+  function approval() { return '<div class="ad-wrap paper-appr" id="fAppr"></div>'; }
+  var DOC = "form." + F.id;
 
   function secFields(s, si) {
     var cols = s.cols || 2, cells = [], row = [], used = 0;
@@ -112,6 +114,66 @@
     return '<table class="gtab">' + head + "<tbody>" + body + "</tbody></table>" +
       (s.fixed ? "" : '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-add="' + esc(s.k) + '">행 추가</button> <button type="button" class="btn btn-sm btn-ghost" data-del="' + esc(s.k) + '">마지막 행 삭제</button></p>');
   }
+  // ---------- 점검표 자동화: 집계, 빈 항목 일괄 체크, 불량 항목 → 조치 표, 항목별 사진
+  var FLOW = F.flow || {}, PHOTO_REL = {};
+  function itemText(s, i, it) { var v = val("ci." + s.k + "." + i, typeof it === "string" ? it : ""); return String(v || "").replace(/\s+/g, " ").trim(); }
+  function itemLabel(s, i, no) { var t = itemText(s, i, (checkItems(s)[i])); return no + ". " + (t.length > 34 ? t.slice(0, 33) + "…" : t); }
+  function checkItems(s) {
+    var over = null; try { over = state["cx." + s.k] ? JSON.parse(state["cx." + s.k]) : null; } catch (e) { over = null; }
+    var items = (over || s.items).slice(), extra = +val("cn." + s.k, 0);
+    for (var x = 0; x < extra; x++) items.push("");
+    return items;
+  }
+  function checkTally(s, items, opts) {
+    var c = {}, none = 0, total = 0;
+    opts.forEach(function (o) { c[o] = 0; });
+    items.forEach(function (it, i) { if (typeof it === "object") return; total++; var v = val("c." + s.k + "." + i, ""); if (v && c[v] != null) c[v]++; else none++; });
+    return "집계 — " + opts.map(function (o) { return esc(o) + " <b>" + c[o] + "</b>"; }).join(" · ") + (none ? ' · <span class="ctally-miss">미점검 <b>' + none + "</b></span>" : ' · <span class="ctally-ok">전 항목 점검 완료</span>') + " / 전체 " + total;
+  }
+  function refreshTally(k) {
+    var s = F.sections.filter(function (x) { return x.k === k && x.type === "check"; })[0]; if (!s) return;
+    var el = document.getElementById("tally-" + k); if (el) el.innerHTML = checkTally(s, checkItems(s), s.opts || ["적합", "부적합", "해당없음"]);
+  }
+  function unchecked() {
+    var n = 0;
+    F.sections.forEach(function (s) { if (s.type !== "check") return; checkItems(s).forEach(function (it, i) { if (typeof it !== "object" && itemText(s, i, it) && !val("c." + s.k + "." + i, "")) n++; }); });
+    return n;
+  }
+  function allOk(k) {
+    var s = F.sections.filter(function (x) { return x.k === k; })[0], o = (s.opts || ["적합"])[0], n = 0;
+    checkItems(s).forEach(function (it, i) { if (typeof it === "object" || !itemText(s, i, it)) return; if (!val("c." + k + "." + i, "")) { state["c." + k + "." + i] = o; n++; } });
+    save(); render(); say(n ? "빈 항목 " + n + "개를 '" + o + "'(으)로 채웠습니다 — 실제로 확인한 항목만 두고 나머지는 고치세요" : "빈 항목이 없습니다");
+  }
+  function flow(k) {
+    var fl = FLOW[k], s = F.sections.filter(function (x) { return x.k === k; })[0], t = F.sections.filter(function (x) { return x.k === fl.to; })[0];
+    if (!fl || !s || !t) return;
+    var bad = [], nos = 0;
+    checkItems(s).forEach(function (it, i) {
+      if (typeof it === "object") return; nos++;
+      var v = val("c." + k + "." + i, ""); if (fl.bad.indexOf(v) < 0) return;
+      var remark = String(val("c." + k + "." + i + ".r", "") || "").trim();
+      bad.push(nos + ". " + itemText(s, i, it) + (remark ? " — " + remark : ""));
+    });
+    if (!bad.length) { say("'" + fl.bad.join("·") + "' 표시한 항목이 없습니다"); return; }
+    var n = tableRows(t), have = [];
+    for (var r = 0; r < n; r++) have.push(String(val("t." + fl.to + "." + r + "." + fl.col, "") || "").trim());
+    var add = bad.filter(function (b) { return have.indexOf(b) < 0; });
+    if (!add.length) { say("이미 모두 옮겨 두었습니다"); return; }
+    var r2 = 0;
+    add.forEach(function (b) { while (r2 < n && have[r2]) r2++; state["t." + fl.to + "." + r2 + "." + fl.col] = b; have[r2] = b; if (r2 >= n) n = r2 + 1; });
+    state["n." + fl.to] = Math.max(n, tableRows(t));
+    save(); render(); say(add.length + "개 항목을 '" + fl.label + "'에 옮겼습니다 — 조치 내용·기한을 적으세요");
+    var tb = document.querySelector('[data-add="' + fl.to + '"]'); if (tb) tb.closest(".rowbtns").previousElementSibling.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function say(m) { var el = document.getElementById("fSaved"); if (el) el.textContent = m; }
+  function photoItems() {
+    var out = [];
+    F.sections.forEach(function (s) {
+      if (s.type === "check") { var no = 0; checkItems(s).forEach(function (it, i) { if (typeof it === "object") return; no++; if (itemText(s, i, it)) out.push(itemLabel(s, i, no)); }); }
+      else if (s.type === "table" && s.title) out.push("[표] " + s.title);
+    });
+    return out;
+  }
   function secCheck(s) {
     var opts = s.opts || ["적합", "부적합", "해당없음"];
     var over = null; try { over = state["cx." + s.k] ? JSON.parse(state["cx." + s.k]) : null; } catch (e) { over = null; }
@@ -120,12 +182,18 @@
     var rows = items.map(function (it, i) {
       var k = "c." + s.k + "." + i;
       if (typeof it === "object" && it.group) return '<tr class="grp"><th colspan="' + (3 + opts.length) + '">' + esc(it.group) + "</th></tr>";
-      return '<tr><td class="num">' + (i + 1 - items.slice(0, i).filter(function (x) { return typeof x === "object"; }).length) + '</td><td class="item">' + ed("ci." + s.k + "." + i, it, "multi", "점검 항목 입력") + "</td>" +
+      var no = i + 1 - items.slice(0, i).filter(function (x) { return typeof x === "object"; }).length, lab = itemLabel(s, i, no);
+      var pc = PHOTO_REL[lab] || 0;
+      return '<tr><td class="num">' + no + '</td><td class="item">' + ed("ci." + s.k + "." + i, it, "multi", "점검 항목 입력") + '<button type="button" class="ad-cam" data-cam="' + esc(lab) + '" aria-label="' + esc(no + "번 항목 사진 첨부") + '">📷' + (pc ? " <b>" + pc + "</b>" : "") + "</button></td>" +
         opts.map(function (o) { var on = val(k) === o; return '<td class="opt"><label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (on ? " checked" : "") + '><span class="sr">' + esc(o) + "</span></label></td>"; }).join("") +
         "<td>" + ed(k + ".r", "") + "</td></tr>";
     }).join("");
+    var tally = checkTally(s, items, opts);
     return '<table class="gtab ctab"><thead><tr><th style="width:6%">번호</th><th>' + esc(s.item_label || "점검 항목") + "</th>" + opts.map(function (o) { return '<th style="width:9%">' + esc(o) + "</th>"; }).join("") + '<th style="width:22%">' + esc(s.remark_label || "비고·조치") + "</th></tr></thead><tbody>" + rows + "</tbody></table>" +
-      '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-addc="' + esc(s.k) + '">점검 항목 추가</button>' + (extra ? ' <button type="button" class="btn btn-sm btn-ghost" data-delc="' + esc(s.k) + '">추가한 항목 삭제</button>' : "") + "</p>";
+      '<p class="ctally" id="tally-' + esc(s.k) + '">' + tally + "</p>" +
+      '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-addc="' + esc(s.k) + '">점검 항목 추가</button>' + (extra ? ' <button type="button" class="btn btn-sm btn-ghost" data-delc="' + esc(s.k) + '">추가한 항목 삭제</button>' : "") +
+      ' <button type="button" class="btn btn-sm btn-ghost" data-allok="' + esc(s.k) + '">빈 항목 모두 "' + esc(opts[0]) + '"</button>' +
+      (FLOW[s.k] ? ' <button type="button" class="btn btn-sm" data-flow="' + esc(s.k) + '">"' + esc(FLOW[s.k].bad.join("·")) + '" 항목 → ' + esc(FLOW[s.k].label) + "</button>" : "") + "</p>";
   }
   function secSigns(s) {
     return '<table class="gtab"><thead><tr>' + s.cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody><tr>" + s.cols.map(function (c, i) { return i === s.cols.length - 1 && s.sign_last !== false ? '<td class="sign"></td>' : "<td>" + ed("s." + s.k + "." + i, "") + "</td>"; }).join("") + "</tr></tbody></table>";
@@ -133,7 +201,7 @@
 
   function render() {
     var h = '<header class="paper-h"><div class="paper-co">' + '<div class="ed co" contenteditable="true" role="textbox" data-co="1" data-ph="회사·현장명">' + esc(company) + "</div></div>" +
-      '<h2 class="paper-t">' + esc(F.doc_title || F.title) + "</h2>" + approval(F.approval) + "</header>";
+      '<h2 class="paper-t">' + esc(F.doc_title || F.title) + "</h2>" + approval() + "</header>";
     F.sections.forEach(function (s, si) {
       var t = s.title ? '<h3 class="sec-t">' + esc(s.title) + "</h3>" : "";
       if (s.type === "fields") h += t + secFields(s, si);
@@ -147,6 +215,7 @@
     (A.next || []).forEach(function (n, i) { h += '<p class="paper-next" id="fNext' + i + '"></p>'; });
     if (F.footer !== false) h += '<p class="paper-foot">' + esc(F.law ? "근거: " + F.law : "") + "</p>";
     document.getElementById("paper").innerHTML = h;
+    if (window.ADoc) ADoc.mountApproval(document.getElementById("fAppr"), DOC);
     runCalc();
   }
 
@@ -228,7 +297,7 @@
     state[k] = t.isContentEditable ? t.innerText.replace(/\n$/, "") : t.value;
     runCalc(); save();
   });
-  paper.addEventListener("change", function (ev) { var t = ev.target; if (t.dataset.k && !t.isContentEditable) { state[t.dataset.k] = t.value; if (t.type === "date") t.toggleAttribute("data-empty", !t.value); runCalc(); save(); } });
+  paper.addEventListener("change", function (ev) { var t = ev.target; if (t.dataset.k && !t.isContentEditable) { state[t.dataset.k] = t.value; if (t.type === "date") t.toggleAttribute("data-empty", !t.value); if (t.type === "radio") refreshTally(t.dataset.k.split(".")[1]); runCalc(); save(); } });
   paper.addEventListener("paste", function (ev) {
     var t = ev.target.closest && ev.target.closest("[contenteditable]"); if (!t) return;
     ev.preventDefault();
@@ -240,6 +309,10 @@
     var t = ev.target; if (ev.key === "Enter" && t.isContentEditable && !t.classList.contains("multi")) ev.preventDefault();
   });
   paper.addEventListener("click", function (ev) {
+    var cam = ev.target.closest("[data-cam]");
+    if (cam) { if (window.ADoc) ADoc.pickPhoto(DOC, cam.dataset.cam); return; }
+    var ao = ev.target.closest("[data-allok]"); if (ao) { allOk(ao.dataset.allok); return; }
+    var fw = ev.target.closest("[data-flow]"); if (fw) { flow(fw.dataset.flow); return; }
     var c = ev.target.closest("[data-addc],[data-delc]");
     if (c) {
       var ck = c.dataset.addc || c.dataset.delc, cs = F.sections.filter(function (x) { return x.k === ck; })[0], n0 = +val("cn." + ck, 0);
@@ -253,10 +326,19 @@
     if (a.dataset.add) n++; else if (n > 1) { n--; s.cols.forEach(function (c, ci) { delete state["t." + k + "." + n + "." + ci]; }); }
     state["n." + k] = n; save(); render();
   });
-  document.getElementById("fPrint").addEventListener("click", function () { window.print(); });
+  document.getElementById("fPrint").addEventListener("click", function () {
+    var n = unchecked();
+    if (n && !window.confirm("아직 점검 결과를 고르지 않은 항목이 " + n + "개 있습니다. 그대로 인쇄할까요?")) return;
+    var t0 = document.title, co = (company || "").trim(), d = val("f.date", "") || ymd(new Date());
+    document.title = [F.doc_title || F.title, co, d].filter(Boolean).join("_").replace(/[\\/:*?"<>|]/g, "");  // PDF 저장 시 파일 이름
+    window.print();
+    setTimeout(function () { document.title = t0; }, 1000);
+  });
+  document.getElementById("fPhotoBtn").addEventListener("click", function () { if (window.ADoc) ADoc.pickPhoto(DOC, ""); document.getElementById("paperPhotos").scrollIntoView({ behavior: "smooth", block: "start" }); });
   document.getElementById("fClear").addEventListener("click", function () {
     if (!window.confirm("이 서식에 입력한 내용을 모두 지울까요? (회사명은 남습니다)")) return;
-    state = {}; try { localStorage.removeItem(KEY); } catch (e) {}
+    state = {}; try { localStorage.removeItem(KEY); localStorage.removeItem("anjeonduck.appr." + DOC); } catch (e) {}
+    if (window.ADoc && window.confirm("첨부한 사진도 함께 지울까요? (취소하면 사진은 남습니다)")) ADoc.clearPhotos(DOC);
     render(); document.getElementById("fSaved").textContent = "비웠습니다";
   });
   if (F.sample) {
@@ -326,5 +408,12 @@
   var src = document.getElementById("fSrc");
   if (F.source_url) src.innerHTML = '법령 원문: <a href="' + esc(F.source_url) + '" target="_blank" rel="noopener">국가법령정보센터 ↗</a>';
   render();
+  // ---------- 사진대지
+  if (window.ADoc) {
+    ADoc.mountPhotos(document.getElementById("fPhotos"), DOC, { title: "사진대지 — " + (F.doc_title || F.title), items: photoItems,
+      hint: "점검 항목 옆 📷 버튼으로 찍으면 그 항목과 자동으로 연결됩니다." });
+    function syncCam() { ADoc.countPhotos(DOC).then(function (c) { PHOTO_REL = c.byRel; [].forEach.call(document.querySelectorAll("[data-cam]"), function (b) { var n = PHOTO_REL[b.dataset.cam] || 0; b.innerHTML = "📷" + (n ? " <b>" + n + "</b>" : ""); }); var pp = document.getElementById("paperPhotos"); if (pp) pp.classList.toggle("has-photos", c.total > 0); }); }
+    ADoc.onPhotos(DOC, syncCam); syncCam();
+  } else { document.getElementById("paperPhotos").hidden = true; document.getElementById("fPhotoBtn").hidden = true; }
 })();
 </script>

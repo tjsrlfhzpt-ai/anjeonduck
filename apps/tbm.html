@@ -130,6 +130,19 @@
     .page-container { transform-origin: top left; }
   }
 </style>
+<script src="../../assets/docs.js"></script>
+<style>
+  .tbm-appr{vertical-align:top}
+  .tbm-appr .ad-appr{width:100%;font-size:9pt}
+  .tbm-appr .ad-appr th,.tbm-appr .ad-appr td{min-width:0}
+  .tbm-appr .ad-appr td.ad-s{height:44px}
+  .tbm-appr .ad-ctl{font-size:10.5px}
+  .approval-note{font-size:7.5pt;color:#c0392b;font-weight:bold;text-align:center;margin:3px 0 0}
+</style>
+<style>
+  .photo-page{height:auto !important;min-height:0 !important;overflow:visible !important;page-break-after:auto !important}
+  @media print{.photo-page:not(.has-photos){display:none !important}.photo-page{page-break-before:always}}
+</style>
 </head>
 <body>
 
@@ -150,6 +163,7 @@
     <button class="btn-circle" onclick="changeCount(1)" aria-label="페이지 늘리기">＋</button>
   </div>
   <button class="btn btn-blue" onclick="generatePages()">📄 일지 다시 만들기</button>
+  <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">📷 사진 첨부</button>
   <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
   <button class="btn btn-red" onclick="resetData()">↻ 초기화</button>
   <p class="ctrl-note">위험요인은 선택한 공종의 기본 목록으로 채워집니다. 번호 칸을 누르면 다음 항목, 구분 칸을 누르면 목록에서 고를 수 있습니다. <b>오늘 작업에 맞는지 확인한 뒤 인쇄하세요.</b></p>
@@ -166,6 +180,17 @@
 </div>
 
 <div id="pages-wrapper"></div>
+<div class="page-container photo-page" id="tbmPhotosPage"><div id="tbmPhotos"></div></div>
+<script>
+(function () {
+  if (!window.ADoc) { document.getElementById("tbmPhotosPage").style.display = "none"; return; }
+  var pg = document.getElementById("tbmPhotosPage");
+  ADoc.mountPhotos(document.getElementById("tbmPhotos"), "tool.tbm", { title: "TBM 사진대지 (교육·점검 장면)", cols: 2 });
+  function sync() { ADoc.countPhotos("tool.tbm").then(function (c) { pg.classList.toggle("has-photos", c.total > 0); }); }
+  ADoc.onPhotos("tool.tbm", sync); sync();
+  window.addPhotos = function () { ADoc.pickPhoto("tool.tbm", ""); pg.scrollIntoView({ behavior: "smooth" }); };
+})();
+</script>
 
 <script>
   // 위험요인 목록: 안전duck 빌드 때 data/hazards.json 이 들어간다
@@ -340,11 +365,7 @@
             '<tr><th class="th-label th-blue">공종(부서/팀)</th><td class="align-left"><select class="work-type-select" onchange="changeWorkType(this)">' + groupOptions(state.group) + '</select></td></tr>' +
             '<tr><th class="th-label th-blue">일 자</th><td class="align-left">' + g("year", "width:38px") + '년 ' + g("month", "width:22px") + '월 ' + g("day", "width:22px") + '일 (' + g("weekday", "width:16px") + ')요일</td></tr>' +
           '</table></td><td></td>' +
-          '<td><table class="data-table approval-table"><colgroup><col style="width:20%"><col style="width:40%"><col style="width:40%"></colgroup>' +
-            '<tr><th class="th-grey">구분</th><th class="th-grey">담당</th><th class="th-grey">총괄</th></tr>' +
-            '<tr><th class="th-grey sign-space">확인</th><td></td><td></td></tr>' +
-            '<tr><td colspan="3" class="approval-footer">* 당일 작업 시작 전 작성</td></tr>' +
-          '</table></td>' +
+          '<td class="tbm-appr"><div data-appr="tool.tbm"></div><p class="approval-note">* 당일 작업 시작 전 작성</p></td>' +
         '</tr></table>' +
         '<table class="data-table work-table">' +
           '<tr><th class="th-label th-blue">금일 작업구간<br>및 주요내용</th><td class="align-left"><textarea style="height:30px;font-weight:bold;" placeholder="예) 2라인 컨베이어 벨트 교체, 오전 9시~12시" data-global="workArea" oninput="updateGlobal(this, \'workArea\')">' + esc(state.workArea) + '</textarea></td></tr>' +
@@ -365,6 +386,7 @@
       '</div>';
     }
     wrap.innerHTML = html;
+    if (window.ADoc) ADoc.mountAll(wrap);
   }
 
   (function init() {

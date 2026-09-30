@@ -457,6 +457,7 @@ LOGO_SVG = ('<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">'
             '<path d="M28 28.5q5 .3 5.2 1.9-2 1.7-5.7 1.1z" fill="#F58A1F"/></svg>')
 
 AVATAR_COLORS = ["#1F6FD1", "#17365D", "#0E8A6A", "#8A4FD6", "#C2571A", "#3B6E8F"]
+HOME_FORMS = ["lf-f29-288431", "lf-f35-288431", "lf-f102-288431", "lf-f50-288431", "lf-f5-288431"]
 QUICK_KEYWORDS = ["산업재해조사표", "선임 보고서", "위험성평가", "TBM", "작업허가"]
 
 
@@ -502,9 +503,11 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="{rel_root}assets/style.css">
+<script src="{rel_root}assets/docs.js"></script>
 </head>
 <body>
 <a class="skip" href="#main">본문으로 바로가기</a>
+<div class="nbar"><div class="wrap nbar-in"><span class="nbar-ico" aria-hidden="true">🛡️</span><span>모든 작업 내역은 안전하게 현재 기기에만 저장됩니다.</span><button type="button" class="nbar-btn" data-mydata>내 데이터 관리</button></div></div>
 <header class="hd">
   <div class="wrap hd-in">
     <a class="logo" href="{rel_root}" aria-label="{e(site['name'])} 홈">{LOGO_SVG}<span>{e(site['name'])}</span></a>
@@ -516,6 +519,10 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 {body}
 </main>
 <footer class="ft">
+  <div class="wrap ft-data">
+    <div><strong>내 데이터 관리</strong><p>작성한 서식·도구 입력값·서명·사진은 서버가 아니라 이 기기의 브라우저에만 있습니다. 브라우저 기록을 지우거나 기기를 바꾸기 전에 백업 파일로 내보내 두세요.</p></div>
+    <button type="button" class="btn btn-sm btn-ghost" data-mydata>JSON 내보내기 / 불러오기</button>
+  </div>
   <div class="wrap ft-in">
     <div>
       <a class="logo logo-ft" href="{rel_root}">{LOGO_SVG}<span>{e(site['name'])}</span></a>
@@ -658,21 +665,26 @@ def tool_panel(site, rel_root, big=False):
 </div>"""
 
 
-def free_tool_cards(site, rel_root, group=None, limit=None, ids=None):
-    cards = []
-    tools = [t for t in site.get("free_tools", []) if group is None or t.get("group") == group]
+TOOL_KINDS = [("작성기", "k-write", "바로 작성해 A4로 인쇄·PDF 저장"), ("계산기", "k-calc", "법령 기준으로 대상·시간·금액 계산"),
+              ("조회·일정", "k-find", "의무·주기·과태료를 찾아보고 일정 관리")]
+ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+
+
+def tool_card(href, kind, name, desc, law="", sub=""):
+    cls = next((c for k, c, _ in TOOL_KINDS if k == kind), "k-write")
+    return (f'<a class="tcard {cls}" href="{href}"><span class="tcard-top"><span class="tbadge">{e(kind)}</span>'
+            f'{f"<span class=tcard-sub>{e(sub)}</span>" if sub else ""}</span>'
+            f'<strong class="tcard-t">{e(name)}</strong><span class="tcard-d">{e(desc)}</span>'
+            f'<span class="tcard-f"><span class="tcard-law">{e(law) or "&nbsp;"}</span>{ARROW}</span></a>')
+
+
+def free_tool_cards(site, rel_root, group=None, limit=None, ids=None, kind=None):
+    tools = [t for t in site.get("free_tools", []) if (group is None or t.get("group") == group) and (kind is None or t.get("kind") == kind)]
     if ids:
         by = {t["id"]: t for t in tools}
         tools = [by[i] for i in ids if i in by]
-    for t in tools[:limit]:
-        cards.append(f'''<a class="ftool" href="{rel_root}tools/{e(t["id"])}/">
-  <span class="ftool-tag">{e(t.get("tag",""))}</span>
-  <strong>{e(t["name"])}</strong>
-  <span class="ftool-desc">{e(t.get("desc",""))}</span>
-  {f'<span class="ftool-law">{e(t["law"])}</span>' if t.get("law") else ''}
-  <span class="ftool-go">{"바로 열기 →" if t.get("group") == "계산·조회" else "바로 작성 →"}</span>
-</a>''')
-    return "".join(cards)
+    return "".join(tool_card(f'{rel_root}tools/{e(t["id"])}/', t.get("kind", "작성기"), t["name"], t.get("desc", ""), t.get("law", ""), t.get("tag", ""))
+                   for t in tools[:limit])
 
 
 def inject_data(src, names, where):
@@ -746,6 +758,11 @@ def all_forms(lawref):
         if f.get("src_law"):
             f["source_url"] = law_url(f["src_law"])
         f["auto"] = auto.get(f["id"], {"source": "", "checked": ""})
+        f.pop("approval", None)  # 결재란은 공통(담당·검토·승인, 사용자가 고침) — assets/docs.js
+        if f["id"] == "patrol":
+            f["flow"] = {"chk": {"bad": ["불량"], "to": "fix", "col": 1, "label": "지적 사항 표"}}
+        elif f["id"].startswith("pre-"):
+            f["flow"] = {"chk": {"bad": ["불량"], "to": "fix", "col": 0, "label": "이상 발견 시 조치 표"}}
         a = f["auto"]
         # 공통 자동화: 날짜(…일) 칸은 오늘, 작업시작 전 점검표의 점검자는 관리감독자(기준규칙 제35조제2항)
         for sec in f["sections"]:
@@ -811,7 +828,7 @@ def build(out, today):
     web_forms = [{"id": "wf-" + f["id"], "category": "웹 작성 서식", "title": f["title"], "law": "", "form_no": f.get("group", ""),
                   "summary": f.get("desc", ""), "tags": [f.get("group", ""), f.get("short", "")], "topic": WF_TOPIC.get(f.get("group", ""), "기타"),
                   "free_tool": "forms/" + f["id"], "basis": f.get("law", "")} for f in _forms]
-    resources = [resolve_resource(r) for r in base_res + web_forms + lawform_resources(base_res)]
+    resources = [resolve_resource(r) for r in base_res + web_forms + lawform_resources(base_res) if r.get("category") != "무료 작성 도구"]
     for r in resources:
         if not r.get("topic") or r["topic"] == "기타":
             probe = r.get("title", "") + " " + " ".join(r.get("tags") or [])
@@ -868,16 +885,31 @@ def build(out, today):
     job_search_html = "".join(
         f'<a class="btn btn-sm btn-ghost" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])} ↗</a>'
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
+    EXT = '<svg class="chip-ext" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>'
+    job_chips = "".join(
+        f'<a class="jchip" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])}{EXT}<span class="sr">(새 창)</span></a>'
+        for s in sites.get("job_search", []) if safe_url(s.get("url")))
+    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true">🕵️‍♂️</div>'
+                  f'<p class="jempty-t">현재 안전duck에 직접 등록된 공고는 없어요.</p>'
+                  f'<p class="jempty-d">하지만 아래 통합 채용 플랫폼에서 실시간 공고를 바로 확인할 수 있습니다!</p>'
+                  f'<div class="jchips">{job_chips}</div></div>')
     updates = sorted(laws.get("updates", []), key=lambda u: u.get("date", ""), reverse=True)
     official_list = "".join(
         f'<li><a href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener"><strong>{e(s["name"])}</strong><span>{e(s["desc"])}</span></a></li>'
         for s in sites.get("official", []) if safe_url(s.get("url")))
 
+    n_forms = len(_forms)
     # ---- 홈
     quick = "".join(f'<a class="qk" href="resources/?q={quote(k)}">{e(k)}</a>' for k in QUICK_KEYWORDS)
-    popular = [r for r in resources if r.get("popular")][:6]
-    home_jobs = (f'<ul class="jlist">{"".join(job_row(j, "./") for j in open_jobs[:6])}</ul>' if open_jobs else
-                 empty_box("지금 등록된 공고가 없습니다. 아래에서 바로 찾아볼 수 있습니다.", f'<div class="btns">{job_search_html}</div>'))
+    # 자주 찾는 서식·자료: 법정 서식(원본 파일 있음)과 고시·지침만. 작성 도구는 '무료 도구'에서만 보여 중복을 없앤다
+    by_id = {r["id"]: r for r in resources}
+    popular = [r for r in resources if r.get("popular") and r.get("category") in ("법정 서식", "고시·지침")]
+    popular += [by_id[i] for i in HOME_FORMS if i in by_id and by_id[i] not in popular]
+    popular = popular[:8]
+    tools_cta = ('<aside class="cta-banner"><div><strong>실무 문서는 무료 도구에서 바로 작성하세요</strong>'
+                 '<p>법정 서식이 아닌 실무용 문서(TBM 일지, 위험성평가서, 산보위 회의록, 점검표 등)는 무료 도구에서 직접 작성하고 결재·서명·사진까지 넣어 인쇄할 수 있습니다 👉</p></div>'
+                 '<a class="btn" href="{rel}tools/">무료 도구로 가기 <span aria-hidden="true">→</span></a></aside>')
+    home_jobs = f'<ul class="jlist">{"".join(job_row(j, "./") for j in open_jobs[:6])}</ul>' if open_jobs else jobs_empty
     home = f"""
 <section class="hero">
   <div class="wrap">
@@ -901,14 +933,15 @@ def build(out, today):
 </section>
 <section class="wrap ftools-home">
   {sec_head("무료 안전관리 도구", "tools/", more="모두 보기", sub="회원가입 없이 바로 쓰는 서류 작성기와 계산기. 입력 내용은 서버로 가지 않습니다.")}
-  <div class="ftools">{free_tool_cards(site, "./", ids=site.get("home_tools"))}<a class="ftool ftool-more" href="tools/forms/"><span class="ftool-tag">서식</span><strong>서식 작성기 40여 종</strong><span class="ftool-desc">교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식.</span><span class="ftool-go">서식 모두 보기 →</span></a></div>
+  <div class="tgrid">{free_tool_cards(site, "./", ids=site.get("home_tools"))}{tool_card("tools/forms/", "작성기", f"서식 작성기 {n_forms}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식. 결재·서명·사진 첨부까지.", "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진")}</div>
 </section>
 <div class="wrap layout-home">
   <section class="col-main">
-    {sec_head("최신 채용정보", "jobs/", sub=f"진행 중 {len(open_jobs)}건")}
+    {sec_head("최신 채용정보", "jobs/", sub=(f"진행 중 {len(open_jobs)}건" if open_jobs else None))}
     {home_jobs}
     {sec_head("자주 찾는 서식·자료", "resources/")}
     <ul class="rlist">{"".join(resource_row(r, site, "./") for r in popular)}</ul>
+    {tools_cta.format(rel="./")}
   </section>
   <aside class="col-side">
     <section class="side-box">
@@ -957,8 +990,7 @@ def build(out, today):
         side = f"""<details class="fpanel" open data-fpanel><summary>필터</summary><div class="fpanel-body">{filters}
       <button type="button" class="btn btn-sm btn-ghost fpanel-reset" data-reset>필터 초기화</button></div></details>"""
     else:
-        main = empty_box("지금 등록된 공고가 없습니다. 공고는 매일 정리해 올립니다. 그 사이에는 아래에서 찾아보세요.",
-                         f'<div class="btns">{job_search_html}</div>')
+        main = jobs_empty
         side = ""
     jobs_body = f"""
 <section class="phead"><div class="wrap">
@@ -969,7 +1001,7 @@ def build(out, today):
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
   <section class="col-list">{main}
-    <div class="more-box"><p>다른 채용 사이트에서 더 찾기</p><div class="btns">{job_search_html}</div></div>
+    {f'<div class="more-box"><p>다른 채용 사이트에서 더 찾기</p><div class="jchips">{job_chips}</div></div>' if jobs else ''}
   </section>
 </div>"""
     write("jobs/index.html", page(site, "../", "jobs/", "채용정보", jobs_body,
@@ -1039,6 +1071,7 @@ def build(out, today):
   <h1>서식·자료</h1>
   <p>법정 서식·별표 {n_law}건은 국가법령정보센터 현행 원본으로 열리고(개정되면 같은 버튼이 최신본을 엽니다), 웹 작성 서식 {n_web}건은 여기서 바로 작성·인쇄합니다.</p>
 </div></section>
+<section class="wrap" style="padding-top:16px">{tools_cta.format(rel="../")}</section>
 <section class="wrap ftools-page" style="padding-top:8px">
   <div class="ftools">
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>웹 서식 작성기 {n_web}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
@@ -1126,31 +1159,35 @@ def build(out, today):
     write("news/index.html", page(site, "../", "news/", "안전뉴스", news_body,
                                   desc="산업안전 관련 정부 정책뉴스와 안전보건공단 사고사망 속보 — 공식 공공데이터 API로 수집.", active="news/"))
 
-    # ---- 법령
+    # ---- 법령: 홈(검색·주제별·개정 소식) + 법령별 전문 페이지
+    import lawpages
+    LAWS = lawpages.load_laws()
+    byl_map = {}
+    for r in resources:
+        if r.get("byl_no") and r.get("detail"):
+            byl_map[(r["law"], r.get("byl_cls", "BF"), r["byl_no"], r.get("byl_br", "00"))] = r["detail"]
+
+    def byl_href(law, cls, no, br, rel):
+        d = byl_map.get((law, cls, str(no).zfill(4), str(br or 0).zfill(2)))
+        return rel + d if d else None
+
+    rev = lawpages.reverse_index(LAWS)
+    for k in LAWS:
+        body, n_art = lawpages.law_page(k, LAWS, rev, byl_href, law_url)
+        d = LAWS[k]
+        write(f"laws/{k}/index.html", page(site, "../../", f"laws/{k}/", f'{d["law"]} 전문', body,
+              desc=f'{d["law"]} 현행 전문 {n_art}개 조문 — 목차, 조문 검색, 인용 조문 바로가기, 하위 법령 역참조. {d["version"]}', active="laws/"))
+    (out / "assets/data").mkdir(parents=True, exist_ok=True)
+    (out / "assets/data/lawidx.js").write_text(lawpages.search_index(LAWS), encoding="utf-8")
     statutes = "".join(
         f'<li><a href="{e(law_url(s["name"], s.get("type","법령")))}" target="_blank" rel="noopener"><span class="badge {"badge-navy" if s.get("type")=="행정규칙" else "badge-line"}">{e(s.get("type"))}</span><strong>{e(s["name"])}</strong><span class="arr" aria-hidden="true">↗</span></a></li>'
-        for s in laws.get("statutes", []))
-    law_body = f"""
-<section class="phead"><div class="wrap">
-  <p class="crumbs"><a href="../">홈</a><span>/</span>법령</p>
-  <h1>법령</h1>
-  <p>자주 보는 법령은 현행 본문으로 바로 열리고, 개정 소식은 원문 링크와 함께 정리합니다.</p>
-</div></section>
-<div class="wrap layout-detail">
-  <section class="col-main">
-    {sec_head("개정 소식", sub="요약은 원문을 읽고 정리한 것입니다. 적용 여부는 원문과 전문가 확인을 거치세요.")}
-    <div class="listbar"><div class="search-inline">
+        for s in laws.get("statutes", []) if s.get("type") != "법령" or s["name"] not in lawpages.BY_NAME)
+    upd_filter = """<div class="listbar"><div class="search-inline">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input type="search" class="filter-q" placeholder="법령명, 내용" aria-label="개정 소식 검색"></div></div>
-    <ul class="ulist" data-list>{''.join(update_row(u) for u in updates)}</ul>
-    {empty_box("검색 결과가 없습니다.").replace('class="empty"', 'class="empty" data-empty hidden')}
-  </section>
-  <aside class="col-side">
-    <section class="side-box">{sec_head("법령 바로가기")}<ul class="llist">{statutes}</ul></section>
-  </aside>
-</div>"""
+      <input type="search" class="filter-q" placeholder="법령명, 내용" aria-label="개정 소식 검색"></div></div>"""
+    law_body = lawpages.hub_page(LAWS, "".join(update_row(u) for u in updates), len(updates), statutes, upd_filter)
     write("laws/index.html", page(site, "../", "laws/", "법령", law_body,
-                                  desc="산업안전보건법·중대재해처벌법 바로가기와 시행규칙 개정 소식.", active="laws/"))
+                                  desc="산업안전보건법·시행령·시행규칙·안전보건규칙·중대재해처벌법 현행 전문 검색, 주제별 조문, 개정 소식.", active="laws/"))
 
     # ---- 서식 작성기 (data/forms.json + 별표 3 점검표)
     lawref = load("data/lawref.json")
@@ -1181,6 +1218,11 @@ def build(out, today):
     # ---- 도구
     n_ok = sum(1 for c in catalog["categories"] for x in c["items"] if x["status"] in ("ok", "external"))
     n_all = sum(len(c["items"]) for c in catalog["categories"])
+    kind_secs = ""
+    for k, c, sub in TOOL_KINDS:
+        extra = (tool_card("forms/", "작성기", f"서식 작성기 {len(forms)}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식까지. 결재·서명·사진 첨부.",
+                           "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진") if k == "작성기" else "")
+        kind_secs += f'<section class="wrap ftools-page" id="{c}">{sec_head(k, sub=sub)}<div class="tgrid">{free_tool_cards(site, "../", kind=k)}{extra}</div></section>'
     tools_body = f"""
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>무료 도구</p>
@@ -1188,13 +1230,9 @@ def build(out, today):
   <p>회원가입도 서버도 없습니다. 입력한 내용은 내 브라우저 안에서만 처리됩니다. 법령 원문을 기준으로 만들었고 각 도구에 근거 조문과 확인일을 적어 두었습니다.</p>
 </div></section>
 <section class="wrap ftools-page">
-  {sec_head("서류 작성", sub="바로 작성하고 A4로 인쇄하거나 PDF로 저장합니다")}
-  <div class="ftools">{free_tool_cards(site, "../", group="서류 작성")}<a class="ftool ftool-more" href="forms/"><span class="ftool-tag">{len(forms)}종</span><strong>서식 작성기</strong><span class="ftool-desc">교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식까지.</span><span class="ftool-go">서식 모두 보기 →</span></a></div>
+  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("kind") == k) + (1 if k == "작성기" else 0)}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
 </section>
-<section class="wrap ftools-page">
-  {sec_head("계산·조회", sub="법령 원문 기준으로 계산하고 찾아봅니다")}
-  <div class="ftools">{free_tool_cards(site, "../", group="계산·조회")}</div>
-</section>
+{kind_secs}
 <section class="wrap ftools-page" id="catalog">
   {sec_head("법령 순서로 찾기", sub=f"산업안전보건법·중대재해처벌법 조문 순서대로 정리했습니다. 지금 바로 쓸 수 있는 것 {n_ok}개 / 전체 {n_all}개")}
   {catalog_html(catalog, "")}

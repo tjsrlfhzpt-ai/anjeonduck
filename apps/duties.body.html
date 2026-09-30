@@ -20,6 +20,7 @@
       <p class="apply-label">직무분장표 만들기</p>
       <p class="hint">담당자 이름을 넣고 인쇄하면 직무별 법정 업무가 채워진 A4 직무분장표가 나옵니다. 입력 내용은 이 브라우저에만 저장됩니다.</p>
       <div class="pick" id="dPick"></div>
+<div class="appr-panel"><p class="appr-panel-l">인쇄할 결재란 <span class="muted">— 칸 이름·성명을 고치고, 서명 칸을 눌러 서명하세요</span></p><div data-appr="tool.duties"></div></div>
       <button type="button" class="btn btn-block" id="dPrint">직무분장표 인쇄 · PDF</button>
     </div>
     <p class="src-line" id="dSrc" style="margin-top:12px"></p>
@@ -121,7 +122,7 @@
       var items = dutyItems(r.duty), a = art(r.duty);
       return "<tr><th>" + esc(r.name) + "</th><td>" + esc(saved[r.id].name) + '</td><td class="duty">' + esc(items.join("\n")) + '</td><td class="basis">' + esc(a.law.law.replace("산업안전보건법", "산안법").replace("중대재해 처벌 등에 관한 법률", "중처법") + " " + r.duty[1].replace(/\(.*$/, "")) + "</td></tr>";
     }).join("");
-    document.getElementById("dPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">안전보건 직무분장표</h2><table class="appr"><tr><th rowspan="2" class="appr-h">결<br>재</th><th>작성</th><th>검토</th><th>승인</th></tr><tr><td class="appr-sign"></td><td class="appr-sign"></td><td class="appr-sign"></td></tr></table></header>' +
+    document.getElementById("dPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">안전보건 직무분장표</h2>' + (window.ADoc ? ADoc.apprHTML("tool.duties") : "") + '</header>' +
       '<table class="gtab dutytab"><thead><tr><th style="width:15%">직무</th><th style="width:13%">담당자</th><th>법정 업무</th><th style="width:12%">근거</th></tr></thead><tbody>' + rows + "</tbody></table>" +
       '<p class="paper-note">법정 업무는 ' + esc(D.checked) + " 국가법령정보센터 현행 원문 기준입니다. 사내 추가 업무는 별도로 적어 넣으세요.</p>";
     document.body.classList.add("printing-duty");

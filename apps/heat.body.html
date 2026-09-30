@@ -16,6 +16,7 @@
     <div id="hJudge" class="heat-judge" aria-live="polite"></div>
     <fieldset class="heat-acts"><legend class="label">이날 한 조치 (해당하는 것 모두)</legend><div id="hActs"></div>
       <label class="field" style="margin-top:6px"><span class="label">휴식 부여 내용·기타</span><input type="text" id="hMemo" placeholder="예: 13~15시 옥외작업 중지, 매 2시간 20분 휴식"></label></fieldset>
+    <div class="appr-panel"><p class="appr-panel-l">인쇄할 결재란 <span class="muted">— 칸 이름·성명을 고치고, 서명 칸을 눌러 서명하세요</span></p><div data-appr="tool.heat"></div></div>
     <div class="btns"><button type="button" class="btn" id="hAdd">기록 추가</button><span class="grow"></span><button type="button" class="btn btn-ghost" id="hCsv">CSV 저장</button><button type="button" class="btn btn-ghost" id="hPrint">기록부 인쇄</button></div>
   </div>
   <div class="listbar"><div class="chips" role="group" aria-label="연도" id="hYears"></div><span class="grow"></span><span class="muted" id="hSum"></span></div>
@@ -105,7 +106,7 @@
   $("hPrint").addEventListener("click", function () {
     var co = ""; try { co = localStorage.getItem("anjeonduck.company") || ""; } catch (e) {}
     var rs = rowsOf(year);
-    $("hPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">폭염작업 체감온도 및 조치 기록부 (' + year + '년)</h2><table class="appr"><tr><th rowspan="2" class="appr-h">결<br>재</th><th>담당</th><th>관리감독자</th></tr><tr><td class="appr-sign"></td><td class="appr-sign"></td></tr></table></header>' +
+    $("hPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">폭염작업 체감온도 및 조치 기록부 (' + year + '년)</h2>' + (window.ADoc ? ADoc.apprHTML("tool.heat") : "") + '</header>' +
       '<table class="gtab"><thead><tr><th style="width:15%">날짜·시각</th><th style="width:16%">장소·작업</th><th style="width:9%">체감온도</th><th style="width:12%">판정</th><th>조치 내용</th><th style="width:9%">기록자</th></tr></thead><tbody>' +
       (rs.length ? rs : [null, null, null, null, null]).map(function (p) { if (!p) return "<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>"; var r = p[0]; return "<tr><td>" + esc(r.date + " " + r.time) + "</td><td>" + esc(r.place) + '</td><td class="num">' + esc(r.temp) + "℃</td><td>" + esc(judge(r.temp, r.acts).label) + "</td><td>" + esc(actText(r)) + "</td><td>" + esc(r.by) + "</td></tr>"; }).join("") +
       '</tbody></table><p class="paper-note">' + esc(LAW.map(function (l) { return "· " + l[0] + ": " + l[1]; }).join("\n")) + '</p><p class="paper-foot">근거: 산업안전보건기준에 관한 규칙 제559조·제560조·제562조, 별표 13의2 · 보존: ' + year + '년 12월 31일까지</p>';

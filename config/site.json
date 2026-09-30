@@ -1,193 +1,196 @@
 {
-    "name": "안전duck",
-    "tagline": "안전관리 서류 작성부터 채용·법령까지",
-    "description": "안전관리자·보건관리자 채용정보, 산업안전보건 법정 서식, 법령 개정 소식을 모았습니다. 서식은 국가법령정보센터 원본으로 연결됩니다.",
-    "base_url": "https://tjsrlfhzpt-ai.github.io/anjeonduck",
-    "contact_email": "",
-    "tools": [
-        {
-            "id": "duckhee",
-            "name": "SAFE 덕희 (PC)",
-            "desc": "위험성평가·TBM·CAPA·법정업무 이행관리까지. 설치 없이 브라우저에서 열리고 기록은 내 PC에만 저장됩니다.",
-            "url": "",
-            "deep_link_template": ""
-        }
-    ],
-    "_comment": "base_url, tools[].url 은 실제 배포 주소로 바꿔야 합니다. 비어 있으면 해당 버튼은 '준비 중'으로 표시됩니다. deep_link_template 예: https://.../safe-duckhee.html#/new/{kind} ({kind}는 자료의 app_kind 값으로 치환)",
-    "free_tools": [
-        {
-            "id": "tbm",
-            "name": "TBM 일지 작성기",
-            "short": "TBM 일지",
-            "desc": "공종을 고르면 위험요인·감소대책이 채워집니다. 서명란까지 A4 한 장으로 인쇄하세요.",
-            "src": "apps/tbm.html",
-            "inject": "hazards",
-            "tag": "매일",
-            "group": "서류 작성",
-            "law": "산안법 제4장 · 위험성평가"
-        },
-        {
-            "id": "risk",
-            "name": "위험성평가서 작성기",
-            "short": "위험성평가서",
-            "desc": "빈도×강도(5×4) 방식. 위험요인을 불러와 점수를 고르면 등급 색이 자동으로 표시됩니다.",
-            "src": "apps/risk.html",
-            "inject": "hazards",
-            "tag": "정기·수시",
-            "group": "서류 작성",
-            "law": "산안법 제36조 · 위험성평가 고시"
-        },
-        {
-            "id": "committee",
-            "name": "산업안전보건위원회 문서 작성기",
-            "short": "산보위 회의록",
-            "desc": "회의록·개최 공고·결과 보고서 3종. 법 제24조 제2항 심의·의결 사항 9개가 기본으로 들어갑니다.",
-            "src": "apps/committee.html",
-            "inject": "tailwind",
-            "css": "apps/committee.tailwind.css",
-            "tag": "분기",
-            "group": "서류 작성",
-            "law": "산안법 제24조"
-        },
-        {
-            "id": "safety-cost",
-            "name": "산업안전보건관리비 계산기",
-            "short": "안전관리비",
-            "desc": "공사 종류와 대상액을 넣으면 최소 계상액이 나옵니다. 대상액 불명확(70%)·발주자 제공 자재(1.2배 비교)까지 계산합니다.",
-            "src": "apps/safety-cost.body.html",
-            "kind": "page",
-            "tag": "건설",
-            "group": "계산·조회",
-            "law": "산안법 제72조 · 고시 제2025-11호"
-        },
-        {
-            "id": "penalty",
-            "name": "과태료 부과기준 조회",
-            "short": "과태료",
-            "desc": "시행령 별표 35의 118개 위반행위를 장·조문으로 찾고, 사업장 규모 감경 금액까지 확인합니다.",
-            "src": "apps/penalty.body.html",
-            "kind": "page",
-            "inject": "penalties",
-            "tag": "조회",
-            "group": "계산·조회",
-            "law": "시행령 별표 35 (2026.8.1 시행)"
-        },
-        {
-            "id": "headcount",
-            "name": "상시근로자 수 계산기",
-            "short": "상시근로자",
-            "desc": "발생일 전 1개월의 날짜별 인원으로 평균과 기준 미달 일수를 계산해 적용 여부를 판정합니다.",
-            "src": "apps/headcount.body.html",
-            "kind": "page",
-            "tag": "기초",
-            "group": "계산·조회",
-            "law": "근로기준법 시행령 제7조의2"
-        },
-        {
-            "id": "selection",
-            "name": "선임·구성 대상 조회",
-            "short": "선임 대상",
-            "desc": "업종과 상시근로자 수(건설업은 공사금액)로 안전보건관리책임자·안전관리자·보건관리자·담당자·산업보건의·산보위·관리규정·총괄책임자 대상과 인원을 확인합니다.",
-            "src": "apps/selection.body.html",
-            "kind": "page",
-            "inject": "selection",
-            "tag": "조회",
-            "group": "계산·조회",
-            "law": "시행령 별표 2·3·5·9 · 시행규칙 별표 2"
-        },
-        {
-            "id": "schedule",
-            "name": "법정 주기업무 달력",
-            "short": "주기업무",
-            "desc": "매일·주간·월간·분기·반기·연간 안전보건 업무를 한 달력에. 켜고 끄고 날짜를 바꾸고 직접 추가하며, 캘린더 파일(.ics)로 내보냅니다.",
-            "src": "apps/schedule.body.html",
-            "kind": "page",
-            "inject": "schedule",
-            "tag": "일정",
-            "group": "계산·조회",
-            "law": "산안법·중처법 주기 의무 33건"
-        },
-        {
-            "id": "duties",
-            "name": "안전보건 관계자 직무·책임 조회",
-            "short": "직무 조회",
-            "desc": "책임자·관리감독자·안전·보건관리자·총괄책임자·경영책임자의 법정 업무를 원문으로 보고, 직무분장표로 인쇄합니다.",
-            "src": "apps/duties.body.html",
-            "kind": "page",
-            "inject": "lawref",
-            "tag": "조회",
-            "group": "계산·조회",
-            "law": "산안법 제15조~제24조·제62조 · 중처법 영 제4조"
-        },
-        {
-            "id": "edu-hours",
-            "name": "법정교육 시간 조회",
-            "short": "교육시간",
-            "desc": "근로자 구분을 고르면 정기·채용 시·작업내용 변경·특별교육 시간이 나옵니다. 2분의 1 적용 사업장도 계산합니다.",
-            "src": "apps/edu.body.html",
-            "kind": "page",
-            "inject": "edu_hours",
-            "tag": "교육",
-            "group": "계산·조회",
-            "law": "시행규칙 별표 4 (2025.5.30 개정)"
-        },
-        {
-            "id": "retention",
-            "name": "서류 보존기간·벌칙 조회",
-            "short": "보존기간·벌칙",
-            "desc": "서류별 법정 보존기간(2년·3년·5년·30년)과 제167조~제173조 벌칙을 찾습니다.",
-            "src": "apps/retention.body.html",
-            "kind": "page",
-            "inject": [
-                "retention",
-                "lawref"
-            ],
-            "tag": "조회",
-            "group": "계산·조회",
-            "law": "산안법 제164조·제167조~제173조"
-        },
-        {
-            "id": "cvd",
-            "name": "뇌·심혈관질환 발병위험도 평가",
-            "short": "뇌심혈관",
-            "desc": "혈압·검사치·문진을 넣으면 KOSHA GUIDE H-200 표 4~7로 저·중등도·고·최고위험군을 분류하고, 종합조사표와 결과 통지서를 인쇄합니다. 입력값은 저장하지 않습니다.",
-            "src": "apps/cvd.body.html",
-            "kind": "page",
-            "tag": "보건",
-            "group": "계산·조회",
-            "law": "KOSHA GUIDE H-200-2018 · 기준규칙 제669조"
-        },
-        {
-            "id": "inspect",
-            "name": "안전검사 대상·다음 검사일",
-            "short": "안전검사",
-            "desc": "프레스·크레인·컨베이어 등 17종 안전검사 대상 기계를 등록하면 최초·정기 검사 기한을 계산하고 관리대장으로 인쇄합니다.",
-            "src": "apps/inspect.body.html",
-            "kind": "page",
-            "tag": "설비",
-            "group": "계산·조회",
-            "law": "법 제93조 · 영 제78조 · 규칙 제126조"
-        },
-        {
-            "id": "heat",
-            "name": "폭염작업 체감온도 기록",
-            "short": "폭염 기록",
-            "desc": "체감온도를 넣으면 31도·33도 기준으로 판정하고, 그날 조치를 기록해 연도별 기록부로 인쇄·CSV 저장합니다.",
-            "src": "apps/heat.body.html",
-            "kind": "page",
-            "tag": "보건",
-            "group": "서류 작성",
-            "law": "기준규칙 제559조·제560조·제562조"
-        }
-    ],
-    "home_tools": [
-        "schedule",
-        "selection",
-        "tbm",
-        "risk",
-        "committee",
-        "duties",
-        "safety-cost",
-        "penalty"
-    ]
+  "name": "안전duck",
+  "tagline": "안전관리 서류 작성부터 채용·법령까지",
+  "description": "안전관리자·보건관리자 채용정보, 산업안전보건 법정 서식, 법령 개정 소식을 모았습니다. 서식은 국가법령정보센터 원본으로 연결됩니다.",
+  "base_url": "https://tjsrlfhzpt-ai.github.io/anjeonduck",
+  "contact_email": "",
+  "tools": [
+    {
+      "id": "duckhee",
+      "name": "SAFE 덕희 (PC)",
+      "desc": "위험성평가·TBM·CAPA·법정업무 이행관리까지. 설치 없이 브라우저에서 열리고 기록은 내 PC에만 저장됩니다.",
+      "url": "",
+      "deep_link_template": ""
+    }
+  ],
+  "_comment": "base_url, tools[].url 은 실제 배포 주소로 바꿔야 합니다. 비어 있으면 해당 버튼은 '준비 중'으로 표시됩니다. deep_link_template 예: https://.../safe-duckhee.html#/new/{kind} ({kind}는 자료의 app_kind 값으로 치환)",
+  "free_tools": [
+    {
+      "id": "tbm",
+      "name": "TBM 일지 작성기",
+      "short": "TBM 일지",
+      "desc": "공종을 고르면 위험요인·감소대책이 채워집니다. 서명란까지 A4 한 장으로 인쇄하세요.",
+      "src": "apps/tbm.html",
+      "inject": "hazards",
+      "tag": "매일",
+      "group": "서류 작성",
+      "law": "산안법 제4장 · 위험성평가",
+      "kind": "작성기"
+    },
+    {
+      "id": "risk",
+      "name": "위험성평가서 작성기",
+      "short": "위험성평가서",
+      "desc": "빈도×강도(5×4) 방식. 위험요인을 불러와 점수를 고르면 등급 색이 자동으로 표시됩니다.",
+      "src": "apps/risk.html",
+      "inject": "hazards",
+      "tag": "정기·수시",
+      "group": "서류 작성",
+      "law": "산안법 제36조 · 위험성평가 고시",
+      "kind": "작성기"
+    },
+    {
+      "id": "committee",
+      "name": "산업안전보건위원회 문서 작성기",
+      "short": "산보위 회의록",
+      "desc": "회의록·개최 공고·결과 보고서 3종. 법 제24조 제2항 심의·의결 사항 9개가 기본으로 들어갑니다.",
+      "src": "apps/committee.html",
+      "inject": "tailwind",
+      "css": "apps/committee.tailwind.css",
+      "tag": "분기",
+      "group": "서류 작성",
+      "law": "산안법 제24조",
+      "kind": "작성기"
+    },
+    {
+      "id": "safety-cost",
+      "name": "산업안전보건관리비 계산기",
+      "short": "안전관리비",
+      "desc": "공사 종류와 대상액을 넣으면 최소 계상액이 나옵니다. 대상액 불명확(70%)·발주자 제공 자재(1.2배 비교)까지 계산합니다.",
+      "src": "apps/safety-cost.body.html",
+      "kind": "계산기",
+      "tag": "건설",
+      "group": "계산·조회",
+      "law": "산안법 제72조 · 고시 제2025-11호"
+    },
+    {
+      "id": "penalty",
+      "name": "과태료 부과기준 조회",
+      "short": "과태료",
+      "desc": "시행령 별표 35의 118개 위반행위를 장·조문으로 찾고, 사업장 규모 감경 금액까지 확인합니다.",
+      "src": "apps/penalty.body.html",
+      "kind": "조회·일정",
+      "inject": "penalties",
+      "tag": "조회",
+      "group": "계산·조회",
+      "law": "시행령 별표 35 (2026.8.1 시행)"
+    },
+    {
+      "id": "headcount",
+      "name": "상시근로자 수 계산기",
+      "short": "상시근로자",
+      "desc": "발생일 전 1개월의 날짜별 인원으로 평균과 기준 미달 일수를 계산해 적용 여부를 판정합니다.",
+      "src": "apps/headcount.body.html",
+      "kind": "계산기",
+      "tag": "기초",
+      "group": "계산·조회",
+      "law": "근로기준법 시행령 제7조의2"
+    },
+    {
+      "id": "selection",
+      "name": "선임·구성 대상 조회",
+      "short": "선임 대상",
+      "desc": "업종과 상시근로자 수(건설업은 공사금액)로 안전보건관리책임자·안전관리자·보건관리자·담당자·산업보건의·산보위·관리규정·총괄책임자 대상과 인원을 확인합니다.",
+      "src": "apps/selection.body.html",
+      "kind": "계산기",
+      "inject": "selection",
+      "tag": "조회",
+      "group": "계산·조회",
+      "law": "시행령 별표 2·3·5·9 · 시행규칙 별표 2"
+    },
+    {
+      "id": "schedule",
+      "name": "법정 주기업무 달력",
+      "short": "주기업무",
+      "desc": "매일·주간·월간·분기·반기·연간 안전보건 업무를 한 달력에. 켜고 끄고 날짜를 바꾸고 직접 추가하며, 캘린더 파일(.ics)로 내보냅니다.",
+      "src": "apps/schedule.body.html",
+      "kind": "조회·일정",
+      "inject": "schedule",
+      "tag": "일정",
+      "group": "계산·조회",
+      "law": "산안법·중처법 주기 의무 33건"
+    },
+    {
+      "id": "duties",
+      "name": "안전보건 관계자 직무·책임 조회",
+      "short": "직무 조회",
+      "desc": "책임자·관리감독자·안전·보건관리자·총괄책임자·경영책임자의 법정 업무를 원문으로 보고, 직무분장표로 인쇄합니다.",
+      "src": "apps/duties.body.html",
+      "kind": "조회·일정",
+      "inject": "lawref",
+      "tag": "조회",
+      "group": "계산·조회",
+      "law": "산안법 제15조~제24조·제62조 · 중처법 영 제4조"
+    },
+    {
+      "id": "edu-hours",
+      "name": "법정교육 시간 조회",
+      "short": "교육시간",
+      "desc": "근로자 구분을 고르면 정기·채용 시·작업내용 변경·특별교육 시간이 나옵니다. 2분의 1 적용 사업장도 계산합니다.",
+      "src": "apps/edu.body.html",
+      "kind": "계산기",
+      "inject": "edu_hours",
+      "tag": "교육",
+      "group": "계산·조회",
+      "law": "시행규칙 별표 4 (2025.5.30 개정)"
+    },
+    {
+      "id": "retention",
+      "name": "서류 보존기간·벌칙 조회",
+      "short": "보존기간·벌칙",
+      "desc": "서류별 법정 보존기간(2년·3년·5년·30년)과 제167조~제173조 벌칙을 찾습니다.",
+      "src": "apps/retention.body.html",
+      "kind": "조회·일정",
+      "inject": [
+        "retention",
+        "lawref"
+      ],
+      "tag": "조회",
+      "group": "계산·조회",
+      "law": "산안법 제164조·제167조~제173조"
+    },
+    {
+      "id": "cvd",
+      "name": "뇌·심혈관질환 발병위험도 평가",
+      "short": "뇌심혈관",
+      "desc": "혈압·검사치·문진을 넣으면 KOSHA GUIDE H-200 표 4~7로 저·중등도·고·최고위험군을 분류하고, 종합조사표와 결과 통지서를 인쇄합니다. 입력값은 저장하지 않습니다.",
+      "src": "apps/cvd.body.html",
+      "kind": "계산기",
+      "tag": "보건",
+      "group": "계산·조회",
+      "law": "KOSHA GUIDE H-200-2018 · 기준규칙 제669조"
+    },
+    {
+      "id": "inspect",
+      "name": "안전검사 대상·다음 검사일",
+      "short": "안전검사",
+      "desc": "프레스·크레인·컨베이어 등 17종 안전검사 대상 기계를 등록하면 최초·정기 검사 기한을 계산하고 관리대장으로 인쇄합니다.",
+      "src": "apps/inspect.body.html",
+      "kind": "조회·일정",
+      "tag": "설비",
+      "group": "계산·조회",
+      "law": "법 제93조 · 영 제78조 · 규칙 제126조"
+    },
+    {
+      "id": "heat",
+      "name": "폭염작업 체감온도 기록",
+      "short": "폭염 기록",
+      "desc": "체감온도를 넣으면 31도·33도 기준으로 판정하고, 그날 조치를 기록해 연도별 기록부로 인쇄·CSV 저장합니다.",
+      "src": "apps/heat.body.html",
+      "kind": "작성기",
+      "tag": "보건",
+      "group": "서류 작성",
+      "law": "기준규칙 제559조·제560조·제562조"
+    }
+  ],
+  "home_tools": [
+    "schedule",
+    "selection",
+    "tbm",
+    "risk",
+    "committee",
+    "duties",
+    "safety-cost",
+    "penalty"
+  ]
 }
