@@ -1,0 +1,21 @@
+{
+ "note": "안전duck 자체 제작 현장 안내 게시물(법정 안전보건표지 별표 6이 아님). 이미지는 assets/img/ 에 두고 여기에 추가하면 표지 페이지와 A4 인쇄 페이지가 생깁니다.",
+ "items": [
+  {
+   "id": "firstaid",
+   "title": "구급용구 보관장소",
+   "langs": [
+    "한국어",
+    "English",
+    "Español",
+    "中文"
+   ],
+   "img": "assets/img/duck-sign-firstaid.webp",
+   "print": "assets/img/duck-sign-firstaid.png",
+   "thumb": "assets/img/duck-sign-firstaid-thumb.webp",
+   "desc": "구급상자·구급용구를 두는 곳에 붙이는 4개 언어(한국어·영어·스페인어·중국어) 안내 게시물. 안전보건규칙 제82조는 구급용구를 갖추고 그 장소와 사용방법을 근로자에게 알리도록 정합니다.",
+   "basis": "안전보건규칙 제82조(구급용구)",
+   "law_href": "laws/krule/#j82"
+  }
+ ]
+}

@@ -478,7 +478,8 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     canonical = f"{base}/{path}"
     full_title = f"{title} | {site['name']}" if title != site["name"] else f"{site['name']} — {site['tagline']}"
     cur = ' aria-current="page"'
-    nav = "".join(f'<a href="{rel_root}{href}"{cur if active == href else ""}>{e(label)}</a>' for href, label in NAV)
+    on_news = (site.get("features") or {}).get("public_api", False)
+    nav = "".join(f'<a href="{rel_root}{href}"{cur if active == href else ""}>{e(label)}</a>' for href, label in NAV if on_news or href != "news/")
     tl = tool_link(site, rel_root)
     ext = ' target="_blank" rel="noopener"' if tl.startswith("http") else ""
     contact = site.get("contact_email", "")
@@ -819,6 +820,31 @@ def empty_box(msg, extra=""):
     return f'<div class="empty"><p>{e(msg)}</p>{extra}</div>'
 
 
+def duck_signs_html(site, write):
+    """안전duck 자체 제작 현장 안내 게시물 — 목록(표지 페이지 상단) + 한 장씩 A4 인쇄 페이지."""
+    d = load("data/duck_signs.json")
+    cards = []
+    for it in d["items"]:
+        pid = f"resources/signs/duck-{it['id']}/"
+        cards.append(f'<li class="dk-card"><a href="duck-{e(it["id"])}/"><img src="../../{e(it["thumb"])}" width="240" height="240" alt="{e(it["title"])} 안내 게시물 미리보기" loading="lazy">'
+                     f'<strong>{e(it["title"])}</strong><span>{e(" · ".join(it.get("langs", [])))}</span></a></li>')
+        body = f"""
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">서식·자료</a><span>/</span><a href="../#duck">안전보건표지</a><span>/</span>{e(it["title"])}</p>
+  <h1>{e(it["title"])} <span class="muted" style="font-size:.6em">안전duck 안내 게시물</span></h1>
+  <p>{e(it.get("desc", ""))}</p>
+  <p class="btns" style="margin-top:14px"><button type="button" class="btn" onclick="window.print()">A4 인쇄 · PDF 저장</button>
+  <a class="btn btn-ghost" href="../../../{e(it["print"])}" download="안전duck_{e(it["title"])}.png">원본 이미지 내려받기</a>
+  {f'<a class="btn btn-ghost" href="../../../{e(it["law_href"])}">근거 조문 보기</a>' if it.get("law_href") else ""}</p>
+  <p class="hint" style="margin-top:10px">근거: {e(it.get("basis", ""))} · 법정 안전보건표지(시행규칙 별표 6)가 아니라 현장 안내용 게시물입니다.</p>
+</div></section>
+<div class="dk-sheet"><img src="../../../{e(it["print"])}" alt="{e(it["title"])} 안내 게시물"></div>"""
+        write(f"{pid}index.html", page(site, "../../../", pid, f'{it["title"]} 안내 게시물', body, desc=it.get("desc"), active="resources/"))
+    return (f'<section class="dk-sec" id="duck"><div class="dk-head"><div><h2>안전duck 현장 안내 게시물</h2>'
+            f'<p>현장에 바로 붙이는 다국어 안내 게시물입니다. 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
+            f'<ul class="dk-grid">{"".join(cards)}</ul></section>')
+
+
 # ---------------------------------------------------------------- 페이지
 
 def build(out, today):
@@ -912,7 +938,8 @@ def build(out, today):
     home_jobs = f'<ul class="jlist">{"".join(job_row(j, "./") for j in open_jobs[:6])}</ul>' if open_jobs else jobs_empty
     home = f"""
 <section class="hero">
-  <div class="wrap">
+  <div class="wrap hero-in">
+   <div class="hero-txt">
     <p class="hero-eyebrow">안전관리자·보건관리자를 위한</p>
     <h1>안전관리 서류,<br class="br-m"> 여기서 바로</h1>
     <p class="hero-sub">TBM 일지·위험성평가서·산보위 회의록은 무료로 바로 작성해 인쇄하고, 법정 서식은 기관 원본으로, 채용 공고는 핵심 조건만 모았습니다.</p>
@@ -929,6 +956,8 @@ def build(out, today):
       </div>
     </form>
     <p class="quick"><span>자주 찾는</span>{quick}</p>
+   </div>
+   <a class="hero-duck" href="resources/signs/#duck" aria-label="안전duck 현장 안내 게시물 보기"><img src="assets/img/duck-hero.webp" width="420" height="481" alt="안전모를 쓰고 구급상자를 든 안전duck 캐릭터" fetchpriority="high"></a>
   </div>
 </section>
 <section class="wrap ftools-home">
@@ -1108,6 +1137,8 @@ def build(out, today):
         ("library", "apps/library.body.html", "library", "안전보건 자료실", "안전보건공단 공공누리 자료(OPS·포스터·책자·교안·동영상) 9천여 건을 검색하고 원본으로 연결."),
     ]:
         body = inject_data((ROOT / src).read_text(encoding="utf-8"), [name], src)
+        if pid == "signs":
+            body = body.replace("<!--@DUCK@-->", duck_signs_html(site, write))
         write(f"resources/{pid}/index.html", page(site, "../../", f"resources/{pid}/", title, body, desc=desc, active="resources/"))
     for r in resources:
         if r.get("detail"):
@@ -1156,7 +1187,8 @@ def build(out, today):
     <section class="side-box"><p class="hint">안전duck은 기사 본문을 옮기지 않습니다. 제목·부제·부처·날짜만 싣고 원문으로 연결합니다. 민간 언론사 기사와 다른 사이트의 게시물은 싣지 않습니다.</p></section>
   </aside>
 </div>"""
-    write("news/index.html", page(site, "../", "news/", "안전뉴스", news_body,
+    if (site.get("features") or {}).get("public_api", False):
+      write("news/index.html", page(site, "../", "news/", "안전뉴스", news_body,
                                   desc="산업안전 관련 정부 정책뉴스와 안전보건공단 사고사망 속보 — 공식 공공데이터 API로 수집.", active="news/"))
 
     # ---- 법령: 홈(검색·주제별·개정 소식) + 법령별 전문 페이지

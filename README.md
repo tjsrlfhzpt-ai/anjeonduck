@@ -128,7 +128,14 @@ templates/*.csv       구글 시트 머리글 서식
 빌드하면 `laws/<key>/`(act·yeong·rule·krule·sapa·sapa_dec) 전문 페이지와 `assets/data/lawidx.js`(법령 홈 전체 검색 색인)가 생깁니다.
 법령이 개정되면 본문 페이지 텍스트를 다시 받아 lawraw 파일을 바꾸고 파서를 다시 돌리세요(lsiSeq는 parse_lawtext.py 의 LAWS).
 
-## 채용·뉴스 자동 수집 (공공데이터포털 공식 API)
+## 안전duck 안내 게시물 (data/duck_signs.json)
+
+이미지를 `assets/img/`에 넣고 `data/duck_signs.json`의 items에 한 줄 추가하면 표지 페이지 상단 목록과 A4 인쇄 페이지(`resources/signs/duck-<id>/`)가 생깁니다. 웹용은 WebP(1000px), 인쇄용은 PNG 원본을 씁니다.
+
+## 채용·뉴스 자동 수집 (공공데이터포털 공식 API) — 현재 꺼 둠
+
+켜는 방법: `config/site.json`의 `features.public_api`를 `true`로, 저장소 Settings → Variables에 `PUBLIC_API` = `true`. 끄면 수집 단계와 "안전뉴스" 메뉴·페이지가 모두 빠집니다.
+
 
 민간 채용사이트·언론사·다른 커뮤니티의 글은 가져오지 않습니다. 아래 세 가지 **공식 공개 API**만 씁니다(이용조건 확인 2026-09-30).
 
