@@ -473,13 +473,40 @@ def tool_link(site, rel_root):
     return safe_url(t.get("url")) or f"{rel_root}tools/"
 
 
+DIAG_TOOLS = ["selection", "hpp", "machines", "docmap"]
+LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), ("rule", "산안법 시행규칙"), ("krule", "안전보건기준에 관한 규칙"),
+            ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
+
+
+def mega_item(site, rel, href, label, cur):
+    """주 메뉴 한 칸. 무료 도구·법령은 데스크톱에서 펼침 메뉴(마우스 올림·키보드 포커스)를 붙인다."""
+    a = f'<a href="{rel}{href}"{cur}>{e(label)}</a>'
+    if href == "tools/":
+        by = {t["id"]: t for t in site.get("free_tools", [])}
+        def li(t):
+            return f'<li><a href="{rel}tools/{e(t["id"])}/" title="{e(t["name"])}">{e(t.get("menu") or t.get("short") or t["name"])}</a></li>'
+        cols = [("판정·진단", [by[i] for i in DIAG_TOOLS if i in by])]
+        for k, _, _ in TOOL_KINDS:
+            cols.append((k, [t for t in site.get("free_tools", []) if t.get("cat") == k and t["id"] not in DIAG_TOOLS]))
+        cols[1][1].append({"id": "forms", "name": "서식 작성기 전체", "short": "서식 작성기 전체"})
+        body = "".join(f'<div class="mega-col"><p class="mega-h">{e(h)}</p><ul>{"".join(li(t) for t in ts)}</ul></div>' for h, ts in cols if ts)
+        return f'<div class="gnb-item">{a}<div class="mega" role="region" aria-label="무료 도구 메뉴"><div class="mega-in">{body}</div></div></div>'
+    if href == "laws/":
+        lis = "".join(f'<li><a href="{rel}laws/{k}/">{e(n)}</a></li>' for k, n in LAW_MENU)
+        return (f'<div class="gnb-item">{a}<div class="mega mega-sm" role="region" aria-label="법령 메뉴"><div class="mega-in">'
+                f'<div class="mega-col"><p class="mega-h">현행 전문</p><ul>{lis}</ul></div>'
+                f'<div class="mega-col"><p class="mega-h">더 보기</p><ul><li><a href="{rel}laws/#updates">개정 소식</a></li><li><a href="{rel}laws/#statutes">고시·관련 법령 바로가기</a></li>'
+                f'<li><a href="{rel}tools/selection/">적용범위 판정</a></li><li><a href="{rel}tools/penalty/">과태료 부과기준</a></li></ul></div></div></div></div>')
+    return a
+
+
 def page(site, rel_root, path, title, body, desc=None, active=""):
     base = site["base_url"].rstrip("/")
     canonical = f"{base}/{path}"
     full_title = f"{title} | {site['name']}" if title != site["name"] else f"{site['name']} — {site['tagline']}"
     cur = ' aria-current="page"'
     on_news = (site.get("features") or {}).get("public_api", False)
-    nav = "".join(f'<a href="{rel_root}{href}"{cur if active == href else ""}>{e(label)}</a>' for href, label in NAV if on_news or href != "news/")
+    nav = "".join(mega_item(site, rel_root, href, label, cur if active == href else "") for href, label in NAV if on_news or href != "news/")
     tl = tool_link(site, rel_root)
     ext = ' target="_blank" rel="noopener"' if tl.startswith("http") else ""
     contact = site.get("contact_email", "")
@@ -925,6 +952,48 @@ def build(out, today):
         for s in sites.get("official", []) if safe_url(s.get("url")))
 
     n_forms = len(_forms)
+    counsel_list = "".join(
+        f'<li><a href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener"><strong>{e(s["name"])} ↗</strong><span>{e(s["desc"])}</span></a></li>'
+        for s in sites.get("counsel", []) if safe_url(s.get("url")))
+    diag_band = f"""<section class="dx" aria-label="빠른 판정">
+  <div class="wrap dx-in">
+    <form class="dx-main" action="tools/selection/" method="get">
+      <p class="dx-eye">⚖️ 인원·업종별 적용범위</p>
+      <h2>우리 사업장, 산안법·중처법 어디까지?<br><span class="dx-yn y">YES</span><span class="dx-or">or</span><span class="dx-yn n">NO</span></h2>
+      <div class="dx-row">
+        <label class="sr" for="dxInd">업종</label><input id="dxInd" name="ind" type="text" placeholder="업종 (예: 식료품, 금속가공, 건설)" autocomplete="off">
+        <label class="sr" for="dxN">상시근로자 수</label><input id="dxN" name="n" type="number" min="0" inputmode="numeric" placeholder="상시근로자 수">
+        <button class="btn" type="submit">판정하기</button>
+      </div>
+      <p class="dx-sub">공통 의무·선임·위원회·공시·도급·중대재해처벌법까지 근거 조문과 함께 적용/조건부/미적용으로 보여 줍니다.</p>
+    </form>
+    <div class="dx-cards">
+      <a class="dx-card" href="tools/hpp/"><span class="i" aria-hidden="true">🏭</span><span><b>유해위험방지계획서, 내야 하나?</b><span>공장 설치·증설 300kW·100kW, 위험 설비, 건설공사</span></span><span class="arr" aria-hidden="true">→</span></a>
+      <a class="dx-card" href="tools/machines/"><span class="i" aria-hidden="true">⚙️</span><span><b>이 기계, 무슨 의무가 있지?</b><span>안전인증·자율안전확인·안전검사·방호조치 31종</span></span><span class="arr" aria-hidden="true">→</span></a>
+      <a class="dx-card" href="tools/docmap/"><span class="i" aria-hidden="true">🗂️</span><span><b>감독 오면 서류 다 있나?</b><span>업무 12가지 서류 자가점검 · 준비율 계산</span></span><span class="arr" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>"""
+    sched = load("data/schedule.json")
+    mo_tasks = [{"t": t["title"], "f": t["freq"], "m": t.get("month"), "d": t.get("day"), "tool": t.get("tool"), "form": t.get("form")}
+                for t in sched["tasks"] if t["freq"] in ("monthly", "yearly")]
+    mo_json = json.dumps(mo_tasks, ensure_ascii=False).replace("</", "<\\/")
+    month_box = f"""<section class="side-box" id="moBox">
+      {sec_head("이번 달 안전보건 일정", "tools/schedule/", more="달력")}
+      <ul class="mo-list" id="moList"><li>달력을 불러오는 중…</li></ul>
+      <p class="hint" style="margin-top:8px">분기·반기 업무와 매일·매주 업무는 <a href="tools/schedule/">법정 주기업무 달력</a>에서 날짜를 정해 관리하세요.</p>
+      <script>
+      (function () {{
+        var T = {mo_json}, now = new Date(), m = now.getMonth() + 1, el = document.getElementById("moList");
+        var L = T.filter(function (t) {{ return t.f === "monthly" || t.m === m; }}).sort(function (a, b) {{ return (a.d || 0) - (b.d || 0); }});
+        function esc(s) {{ return String(s).replace(/[&<>"]/g, function (c) {{ return {{ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }}[c]; }}); }}
+        el.innerHTML = "<li style=\\"border:0;padding-top:0\\"><strong>" + now.getFullYear() + "년 " + m + "월</strong></li>" + L.map(function (t) {{
+          var href = t.form ? "tools/forms/" + t.form + "/" : t.tool ? "tools/" + t.tool + "/" : "tools/schedule/";
+          return '<li><span class="mo-d' + (t.f === "yearly" ? " y" : "") + '">' + (t.f === "monthly" ? "매월" : m + "/" + (t.d || 1)) + '</span><a href="' + href + '">' + esc(t.t) + "</a></li>";
+        }}).join("");
+      }})();
+      </script>
+    </section>"""
     # ---- 홈
     quick = "".join(f'<a class="qk" href="resources/?q={quote(k)}">{e(k)}</a>' for k in QUICK_KEYWORDS)
     # 자주 찾는 서식·자료: 법정 서식(원본 파일 있음)과 고시·지침만. 작성 도구는 '무료 도구'에서만 보여 중복을 없앤다
@@ -960,6 +1029,7 @@ def build(out, today):
    <a class="hero-duck" href="resources/signs/#duck" aria-label="안전duck 현장 안내 게시물 보기"><img src="assets/img/duck-hero.webp" width="420" height="481" alt="안전모를 쓰고 구급상자를 든 안전duck 캐릭터" fetchpriority="high"></a>
   </div>
 </section>
+{diag_band}
 <section class="wrap ftools-home">
   {sec_head("무료 안전관리 도구", "tools/", more="모두 보기", sub="회원가입 없이 바로 쓰는 서류 작성기와 계산기. 입력 내용은 서버로 가지 않습니다.")}
   <div class="tgrid">{free_tool_cards(site, "./", ids=site.get("home_tools"))}{tool_card("tools/forms/", "작성기", f"서식 작성기 {n_forms}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식. 결재·서명·사진 첨부까지.", "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진")}</div>
@@ -977,7 +1047,12 @@ def build(out, today):
       {sec_head("법령 개정", "laws/", more="더보기")}
       <ul class="ulist compact">{"".join(update_row(u, full=False) for u in updates[:4])}</ul>
     </section>
+    {month_box}
     {tool_panel(site, "./")}
+    <section class="side-box">
+      {sec_head("질의·상담 바로가기")}
+      <ul class="counsel">{counsel_list}</ul>
+    </section>
     <section class="side-box">
       {sec_head("공식 사이트")}
       <ul class="olist">{official_list}</ul>

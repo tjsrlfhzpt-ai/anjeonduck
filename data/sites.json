@@ -11,5 +11,11 @@
     {"name": "사람인 · 안전관리자", "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"},
     {"name": "잡코리아 · 안전관리자", "url": "https://www.jobkorea.co.kr/Search/?stext=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"},
     {"name": "사람인 · 보건관리자", "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EB%B3%B4%EA%B1%B4%EA%B4%80%EB%A6%AC%EC%9E%90"}
+  ],
+  "counsel": [
+    {"name": "고용노동부 빠른인터넷상담", "url": "https://www.moel.go.kr/minwon/fastcounsel/fastcounselList.do", "desc": "100자 이내 간단한 질문, 8근무시간 내 답변"},
+    {"name": "고용노동부 자주하는 질문 · 산업안전", "url": "https://www.moel.go.kr/faq/faqList.do?cvlcCtgCd=MC04", "desc": "교육·산재처리 등 산업안전 분야 FAQ"},
+    {"name": "고용노동부 훈령·예규·고시", "url": "https://www.moel.go.kr/info/lawinfo/instruction/list.do", "desc": "고시 개정·제정 원문"},
+    {"name": "국가법령정보센터 법령해석례", "url": "https://www.law.go.kr/LSW/expcSc.do", "desc": "법제처 법령해석 검색"}
   ]
 }

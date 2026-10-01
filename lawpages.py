@@ -358,7 +358,7 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html):
     <div class="empty" data-empty hidden><p>검색 결과가 없습니다.</p></div>
   </section>
   <aside class="col-side">
-    <section class="side-box"><div class="sec-head"><div><h2>고시·지침 원문</h2></div></div><ul class="llist">{statutes_html}</ul></section>
+    <section class="side-box" id="statutes"><div class="sec-head"><div><h2>고시·관련 법령 원문</h2></div></div><ul class="llist">{statutes_html}</ul></section>
   </aside>
 </div>
 <script>{HUB_JS}</script>"""

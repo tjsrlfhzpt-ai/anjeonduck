@@ -1,0 +1,146 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>LOTO 작업금지 태그</p>
+  <h1>LOTO 작업금지 태그 인쇄 (잠금·꼬리표)</h1>
+  <p>정비·청소·수리 중 다른 사람이 기계를 켜지 못하게 기동장치에 거는 꼬리표입니다. A4 가로 한 장에 3개, 양면으로 인쇄하면 뒷면에 잠금·해제 기록란이 들어갑니다. 비워 두면 손으로 쓰는 빈 칸으로 나옵니다.</p>
+</div></section>
+<div class="wrap layout-detail no-print">
+  <section class="col-main stack">
+    <form class="calc" id="lForm" onsubmit="return false" autocomplete="off">
+      <div class="grid3">
+        <label class="field"><span class="label">회사·현장명</span><input type="text" id="lCo" data-k="co" placeholder="비우면 빈 칸"></label>
+        <label class="field"><span class="label">설비명·관리번호</span><input type="text" id="lEq" data-k="eq" placeholder="예: 2호 컨베이어"></label>
+        <label class="field"><span class="label">작업 내용</span><input type="text" id="lJob" data-k="job" placeholder="예: 벨트 교체"></label>
+        <label class="field"><span class="label">잠근 사람(소속·성명)</span><input type="text" id="lWho" data-k="who"></label>
+        <label class="field"><span class="label">연락처</span><input type="text" id="lTel" data-k="tel" inputmode="tel"></label>
+        <label class="field"><span class="label">잠금 일시</span><input type="datetime-local" id="lAt" data-k="at"></label>
+      </div>
+      <div class="grid3">
+        <label class="field"><span class="label">태그 색</span><select class="sort" id="lColor" data-k="color" style="width:100%"><option value="red">빨강 — 위험(조작 금지)</option><option value="orange">주황 — 경고(점검 중)</option></select></label>
+        <label class="field"><span class="label">양면 인쇄 뒤집기</span><select class="sort" id="lFlip" data-k="flip" style="width:100%"><option value="short">짧은 쪽으로 넘기기(가로 인쇄 기본)</option><option value="long">긴 쪽으로 넘기기</option></select></label>
+        <label class="field"><span class="label">한 장에 같은 내용</span><select class="sort" id="lSame" data-k="same" style="width:100%"><option value="all">3개 모두 위 내용으로</option><option value="first">첫 번째만, 나머지는 빈 칸</option><option value="none">3개 모두 빈 칸</option></select></label>
+      </div>
+      <p class="hint">입력값은 이 브라우저에만 기억됩니다. 인쇄 창에서 <strong>용지 A4 · 가로 · 양면 · 배율 100%(실제 크기)</strong>로 맞추세요. 양면이 안 되는 프린터는 1쪽을 찍고 종이를 뒤집어 넣은 다음 2쪽을 찍습니다.</p>
+      <div class="btns"><button type="button" class="btn" id="lPrint">인쇄하기 (A4 가로 2쪽)</button><button type="button" class="btn btn-ghost" id="lReset">입력 지우기</button></div>
+    </form>
+    <h2 class="h-sm">미리보기</h2>
+    <div class="lt-prev" id="lPrev"></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">법에서 정한 것</h2><ul class="bul hint">
+      <li>정비·청소·급유·검사·수리·교체·조정 작업으로 위험할 우려가 있으면 운전을 정지하고, 다른 사람이 운전하지 못하게 <strong>기동장치에 잠금장치를 하고 열쇠를 따로 관리하거나 표지판을 설치</strong>합니다(기준규칙 제92조제1항·제2항).</li>
+      <li>압축된 기체·액체가 방출될 우려가 있으면 미리 방출시킵니다(같은 조 제4항).</li>
+      <li>정전 작업은 차단장치·단로기에 <strong>잠금장치와 꼬리표</strong>를 붙이고, 잔류전하 방전·검전기 확인 후 작업하며, 잠금장치와 꼬리표는 <strong>설치한 근로자가 직접 철거</strong>합니다(기준규칙 제319조).</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">현장에서</h2><ul class="bul hint">
+      <li>펀칭 표시(⊕)에 구멍을 뚫고 케이블타이·잠금 고리로 겁니다.</li>
+      <li>코팅하거나 두꺼운 종이(200g 이상)에 찍으면 오래 갑니다.</li>
+      <li>여러 명이 함께 작업하면 사람마다 자기 자물쇠와 태그를 겁니다(그룹 잠금).</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">이어서 쓰는 도구</h2><ul class="bul">
+      <li><a href="../forms/permit/">안전작업허가서</a></li>
+      <li><a href="../machines/">기계·기구 법정 의무</a></li>
+      <li><a href="../../resources/signs/">안전보건표지</a></li>
+    </ul></div>
+  </aside>
+</div>
+<div class="lt-print" id="lSheet" aria-hidden="true"></div>
+<style>
+.lt-prev{display:flex;flex-direction:column;gap:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;overflow:auto}
+.lt-prev .lt-page{transform-origin:top left}
+.lt-page{width:297mm;height:210mm;padding:8mm 6mm;display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:#fff;color:#111;box-sizing:border-box;font-family:var(--font)}
+.lt-prev .lt-page{box-shadow:var(--shadow-2)}
+.lt-tag{position:relative;margin:0 2.5mm;border:0.4mm dashed #9aa3af;border-radius:3mm;display:flex;flex-direction:column;overflow:hidden;background:#fff}
+.lt-hole{position:absolute;top:5mm;left:50%;width:9mm;height:9mm;margin-left:-4.5mm;border:0.5mm solid #111;border-radius:50%;background:#fff;z-index:2;display:flex;align-items:center;justify-content:center;font-size:8pt;color:#111}
+.lt-head{background:var(--lt,#C8102E);color:#fff;text-align:center;padding:17mm 3mm 5mm}
+.lt-head .en{font-size:20pt;font-weight:900;letter-spacing:.08em;line-height:1}
+.lt-head .ko{font-size:30pt;font-weight:900;letter-spacing:.06em;line-height:1.15;margin-top:2mm}
+.lt-big{padding:5mm 4mm 3mm;text-align:center;border-bottom:0.6mm solid var(--lt,#C8102E)}
+.lt-big .k{font-size:27pt;font-weight:900;line-height:1.15;color:#111}
+.lt-big .e{font-size:11pt;font-weight:800;letter-spacing:.04em;color:var(--lt,#C8102E);margin-top:1.5mm}
+.lt-big .s{font-size:8.5pt;margin-top:2.5mm;color:#333;line-height:1.35}
+.lt-rows{flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:3mm 4mm 3mm}
+.lt-row{display:flex;align-items:flex-end;gap:2mm;border-bottom:0.3mm solid #555;min-height:12mm;padding-bottom:1mm;font-size:9.5pt}
+.lt-row span{flex:none;width:19mm;font-weight:700;color:#333}
+.lt-row b{flex:1;font-size:10.5pt;font-weight:700;color:#000;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lt-foot{font-size:7.5pt;color:#444;text-align:center;padding:2mm 3mm 3mm}
+.lt-back .lt-head{padding:16mm 3mm 3mm}
+.lt-back .lt-head .ko{font-size:17pt;line-height:1.25;margin:0}
+.lt-back .lt-head .en{font-size:9pt;letter-spacing:.06em;margin-top:1.5mm;line-height:1.2}
+.lt-sec{padding:3mm 4mm 0;font-size:9.4pt;line-height:1.5}
+.lt-sec h4{margin:0 0 1.2mm;font-size:10pt;color:var(--lt,#C8102E)}
+.lt-ck{display:flex;flex-wrap:wrap;gap:1mm 3mm}
+.lt-ck i{font-style:normal;white-space:nowrap}
+.lt-ck i::before{content:"";display:inline-block;width:3mm;height:3mm;border:0.3mm solid #111;margin-right:1mm;vertical-align:-0.4mm}
+.lt-sign{display:grid;grid-template-columns:1fr 1fr;gap:0;border:0.3mm solid #555;margin-top:1mm}
+.lt-sign div{border-right:0.3mm solid #555;padding:1mm 1.5mm;min-height:15mm;font-size:8pt;font-weight:700}
+.lt-sign div:nth-child(2n){border-right:0}
+.lt-sign div:nth-child(n+3){border-top:0.3mm solid #555}
+.lt-rot{transform:rotate(180deg)}
+.lt-print{display:none}
+@media print{
+  @page{size:A4 landscape;margin:0}
+  html,body{background:#fff!important}
+  body>*:not(main){display:none!important}
+  main>*:not(.lt-print){display:none!important}
+  .lt-print{display:block!important}
+  .lt-print .lt-page{page-break-after:always;break-after:page}
+  .lt-print .lt-page:last-child{page-break-after:auto;break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var KEY = "anjeonduck.loto", st = {};
+  try { st = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { st = {}; }
+  var F = [].slice.call(document.querySelectorAll("#lForm [data-k]"));
+  F.forEach(function (el) { if (st[el.dataset.k] != null) el.value = st[el.dataset.k]; });
+  function save() { F.forEach(function (el) { st[el.dataset.k] = el.value; }); try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* 저장 못 해도 인쇄는 가능 */ } }
+  function fmtAt(v) { if (!v) return ""; var d = new Date(v); if (isNaN(d)) return v; return d.getFullYear() + ". " + (d.getMonth() + 1) + ". " + d.getDate() + ". " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }
+  function vals(i) {
+    var same = st.same || "all", use = same === "all" || (same === "first" && i === 0);
+    return use ? { co: st.co, eq: st.eq, job: st.job, who: st.who, tel: st.tel, at: fmtAt(st.at) } : {};
+  }
+  function color() { return st.color === "orange" ? "#E06A00" : "#C8102E"; }
+  function front(v) {
+    var warn = st.color === "orange";
+    return '<div class="lt-tag" style="--lt:' + color() + '"><span class="lt-hole">⊕</span>' +
+      '<div class="lt-head"><div class="en">' + (warn ? "WARNING" : "DANGER") + '</div><div class="ko">' + (warn ? "경 고" : "위 험") + "</div></div>" +
+      '<div class="lt-big"><div class="k">' + (warn ? "점검 중<br>조작 금지" : "작업 중<br>조작 금지") + '</div><div class="e">DO NOT OPERATE</div><div class="s">이 잠금장치와 꼬리표는<br>건 사람만 풀 수 있습니다.</div></div>' +
+      '<div class="lt-rows">' + [["설비", v.eq], ["작업 내용", v.job], ["잠근 사람", v.who], ["연락처", v.tel], ["잠금 일시", v.at]].map(function (r) { return '<div class="lt-row"><span>' + r[0] + "</span><b>" + esc(r[1] || "") + "</b></div>"; }).join("") + "</div>" +
+      '<div class="lt-foot">' + (v.co ? esc(v.co) + " · " : "") + "산업안전보건기준에 관한 규칙 제92조·제319조</div></div>";
+  }
+  function back() {
+    return '<div class="lt-tag lt-back" style="--lt:' + color() + '"><span class="lt-hole">⊕</span>' +
+      '<div class="lt-head"><div class="ko">잠금 · 해제 기록</div><div class="en">LOCKOUT / TAGOUT RECORD</div></div>' +
+      '<div class="lt-sec"><h4>① 차단한 에너지</h4><div class="lt-ck"><i>전기</i><i>유압</i><i>공압</i><i>기계(중력·스프링)</i><i>열</i><i>화학·가스</i><i>기타(　　　)</i></div></div>' +
+      '<div class="lt-sec"><h4>② 잠금 지점</h4><div class="lt-row" style="font-size:8pt"><span>차단기·밸브</span><b></b></div></div>' +
+      '<div class="lt-sec"><h4>③ 작업 전 확인</h4><div class="lt-ck"><i>운전 정지</i><i>잠금·열쇠 별도 보관</i><i>잔류 압력·전하 방출</i><i>검전·기동 시험으로 무에너지 확인</i></div></div>' +
+      '<div class="lt-sec"><h4>④ 해제 전 확인</h4><div class="lt-ck"><i>인원 철수</i><i>공구·자재 제거</i><i>방호장치 원상 복구</i><i>관계자에게 재가동 알림</i></div></div>' +
+      '<div class="lt-sec"><div class="lt-sign"><div>잠금 서명</div><div>확인(관리감독자)</div><div>해제 일시</div><div>해제 서명</div></div></div>' +
+      '<div class="lt-foot" style="margin-top:auto">해제는 잠근 사람이 직접 합니다 · 부재 시 사내 절차에 따릅니다</div></div>';
+  }
+  function pages() {
+    var fr = [0, 1, 2].map(function (i) { return front(vals(i)); });
+    var bk = [back(), back(), back()];
+    var backPage = st.flip === "long" ? bk.map(function (h) { return h.replace('class="lt-tag lt-back"', 'class="lt-tag lt-back lt-rot"'); }) : bk.slice().reverse();
+    return '<div class="lt-page">' + fr.join("") + '</div><div class="lt-page">' + backPage.join("") + "</div>";
+  }
+  function render() {
+    save();
+    var html = pages();
+    $("lSheet").innerHTML = html;
+    $("lPrev").innerHTML = html;
+    var w = $("lPrev").clientWidth - 32, scale = Math.min(1, w / (297 * 96 / 25.4));
+    [].forEach.call($("lPrev").querySelectorAll(".lt-page"), function (p) { p.style.transform = "scale(" + scale + ")"; p.style.marginBottom = (-(1 - scale) * 210 * 96 / 25.4) + "px"; p.style.marginRight = (-(1 - scale) * 297 * 96 / 25.4) + "px"; });
+  }
+  $("lForm").addEventListener("input", render);
+  $("lForm").addEventListener("change", render);
+  window.addEventListener("resize", render);
+  $("lPrint").addEventListener("click", function () { render(); window.print(); });
+  $("lReset").addEventListener("click", function () { F.forEach(function (el) { if (el.tagName === "INPUT") el.value = ""; }); render(); });
+  render();
+})();
+</script>

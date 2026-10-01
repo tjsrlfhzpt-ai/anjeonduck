@@ -33,7 +33,12 @@ templates/*.csv       구글 시트 머리글 서식
 | `/tools/duties/` 직무·책임 조회 · 직무분장표 | `apps/duties.body.html` | `data/lawref.json` |
 | `/tools/edu-hours/` 법정교육 시간 조회 | `apps/edu.body.html` | `data/edu_hours.json` |
 | `/tools/retention/` 서류 보존기간·벌칙 조회 | `apps/retention.body.html` | `data/retention.json` + `data/lawref.json` |
-| `/tools/forms/<id>/` 서식 작성기 42종 | `apps/form.body.html` (서식 엔진 1개) | `data/forms.json` 23종 + 별표 3에서 자동 생성한 작업시작 전 점검표 19종 |
+| `/tools/selection/` 산안법·중처법 적용범위 판정(선임·구성 포함) | `apps/selection.body.html` | `data/selection.json` |
+| `/tools/machines/` 기계·기구 법정 의무(안전인증·자율안전확인·안전검사·방호조치·작업 전 점검) | `apps/machines.body.html` | `data/machines.json` |
+| `/tools/hpp/` 유해위험방지계획서 대상 진단 | `apps/hpp.body.html` | `data/hpp.json` |
+| `/tools/loto/` LOTO 작업금지 태그(A4 가로 3개·양면) | `apps/loto.body.html` | 공통 틀 |
+| `/tools/docmap/` 안전보건 서류 체계·감독 대비 자가점검 | `apps/docmap.body.html` | `data/docmap.json` |
+| `/tools/forms/<id>/` 서식 작성기 45종(업무일지 3종 포함) | `apps/form.body.html` (서식 엔진 1개) | `data/forms.json` 23종 + 별표 3에서 자동 생성한 작업시작 전 점검표 19종 |
 | `/tools/` 법령 순서 카탈로그 | `build.py` | `data/catalog.json` (벤치마킹 목록 78개와 상태) |
 
 ### 서식 추가하는 법
@@ -51,12 +56,24 @@ templates/*.csv       구글 시트 머리글 서식
 | 보존기간·벌칙 | 법 제164조, 규칙 제241조, 기준규칙 제619조의2, 법 제167조~제173조 | `data/retention.json` |
 | 주기업무 | 각 업무의 `basis`·`status`(verified=원문 확인 / check=확인 필요 / practice=권장) | `data/schedule.json` |
 | 작업계획서·점검표 | 기준규칙 제38조·별표 4, 제35조·별표 3 | `data/forms.json`, 별표 3은 `data/lawref.json` 의 `byl3` |
+| 기계·기구 의무 | 법 제80·84·89·93조, 영 제70·74·77·78조·별표 20, 규칙 제98·126조 — 원문 확인 2026-10-01 | `data/machines.json` |
+| 유해위험방지계획서 | 법·영·규칙 제42조, 고용노동부고시 제2023-50호 제2·3·6·7조 — 원문 확인 2026-10-01 | `data/hpp.json` |
+| 적용범위(공통의무·공시·중처법) | 법 제10조의2·제14조·제36조·부칙(법률 제21374호), 영 제12조의2·제13조, 중처법 제3~7조·영 제4·5조 | `apps/selection.body.html` 의 calc() |
+| 서류 체계 | 각 서류의 `basis` | `data/docmap.json` |
 
 - 위험요인은 `data/hazards.json` 한 곳만 고치면 두 도구에 같이 반영됩니다(업종 `groups`, 항목 `items`).
 - 회의록 도구의 화면 클래스(Tailwind)를 바꿨다면 CSS를 다시 만들어야 합니다:
   `npx tailwindcss@3.4.19 -c tools-src/tailwind.config.js -i tools-src/tailwind.in.css -o apps/committee.tailwind.css --minify`
 - 도구는 입력 내용을 서버로 보내지 않습니다. TBM만 회사명·공종 등을 그 브라우저(localStorage)에 기억합니다.
 - 회의록 도구는 Vue 3.5.43, Phosphor 아이콘 2.1.2, html2pdf 0.10.1을 CDN에서 버전 고정으로 불러옵니다.
+
+## v2.4 화면 구성 (KISCOB 벤치마킹)
+
+- 주 메뉴 `무료 도구`·`법령`에 펼침 메뉴(데스크톱, 마우스 올림·키보드 포커스). 메뉴 문구는 `config/site.json` 의 `menu`, 판정·진단 묶음은 `build.py` 의 `DIAG_TOOLS`.
+- 홈 판정 띠: 업종·인원 입력 → `/tools/selection/?ind=..&n=..` 로 바로 판정. 유해위험방지계획서·기계 의무·서류 자가점검 바로가기.
+- 홈 사이드: 이번 달 안전보건 일정(`data/schedule.json` 의 매월·연간 업무), 질의·상담 바로가기(`data/sites.json` 의 `counsel`).
+- 법령 허브 `고시·관련 법령 원문`에 화관법·위험물·고압가스·소방시설법 등 관련 법령 추가(`data/laws.json`).
+- 서식 엔진 자동 계산에 `product`(빈도×강도=위험성, 등급 표시) 추가 — `data/form_auto.json` 의 `calc`.
 
 ## 서버비를 안 쓰는 방법
 

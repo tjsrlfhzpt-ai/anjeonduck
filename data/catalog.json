@@ -29,8 +29,8 @@
     {
      "name": "안전보건 현황 공시",
      "basis": "법 제10조의2 (2026.8.1 시행)",
-     "status": "planned",
-     "link": "",
+     "status": "ok",
+     "link": "selection/",
      "note": "시행령 원문 대조 후 제공"
     }
    ]
@@ -215,8 +215,8 @@
     {
      "name": "유해위험방지계획서 대상 판정",
      "basis": "법 제42조",
-     "status": "planned",
-     "link": "",
+     "status": "ok",
+     "link": "hpp/",
      "note": ""
     },
     {
@@ -290,9 +290,9 @@
     {
      "name": "방호조치 점검표",
      "basis": "법 제80조",
-     "status": "planned",
-     "link": "",
-     "note": ""
+     "status": "ok",
+     "link": "machines/",
+     "note": "기계·기구 법정 의무 조회(방호조치·안전인증·자율안전확인·안전검사)"
     },
     {
      "name": "안전인증·안전검사 대상·주기",
@@ -310,8 +310,8 @@
     {
      "name": "MSDS 게시·경고표지",
      "basis": "법 제114조·제115조",
-     "status": "planned",
-     "link": "",
+     "status": "ok",
+     "link": "msds/",
      "note": ""
     },
     {
@@ -488,8 +488,8 @@
     {
      "name": "전담조직 구성 여부 판단",
      "basis": "영 제4조제2호",
-     "status": "planned",
-     "link": "",
+     "status": "ok",
+     "link": "selection/",
      "note": ""
     }
    ]
@@ -521,8 +521,8 @@
     {
      "name": "벌칙·양벌규정",
      "basis": "법 제6조·제7조",
-     "status": "planned",
-     "link": "",
+     "status": "ok",
+     "link": "selection/",
      "note": "중처법 원문 대조 후 제공"
     },
     {

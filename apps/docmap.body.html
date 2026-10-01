@@ -1,0 +1,124 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>안전보건 서류 체계</p>
+  <h1>안전보건 서류 체계 · 감독 대비 자가점검</h1>
+  <p>사업장이 갖춰야 할 안전보건 서류를 업무 12가지로 묶었습니다. 갖춘 서류를 체크하면 준비율이 계산되고, 빠진 서류는 바로 만들 수 있는 도구·서식으로 연결됩니다. 체크 상태는 이 브라우저에만 저장됩니다.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <div class="dm-top">
+      <div class="dm-ring" id="dRing" role="img" aria-label="준비율"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" class="bg"/><circle cx="60" cy="60" r="50" class="fg" id="dArc"/></svg><span id="dPct">0%</span></div>
+      <div class="grow">
+        <p class="dm-lead" id="dLead"></p>
+        <div class="seg" id="dFilter" role="group" aria-label="보기">
+          <button type="button" data-f="" aria-pressed="true">전체</button>
+          <button type="button" data-f="miss" aria-pressed="false">빠진 서류만</button>
+          <button type="button" data-f="na" aria-pressed="false">해당 없음 표시한 것</button>
+        </div>
+      </div>
+    </div>
+    <div class="dm-grid" id="dOut"></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">쓰는 법</h2><ul class="bul hint">
+      <li><strong>보유</strong> — 서류가 있고 최신 상태임</li>
+      <li><strong>해당 없음</strong> — 우리 사업장에 적용되지 않음(준비율 계산에서 빠짐)</li>
+      <li>무엇이 적용되는지 모르면 먼저 <a href="../selection/">적용범위 판정</a>을 하세요.</li>
+    </ul>
+    <div class="btns" style="margin-top:12px"><button type="button" class="btn btn-sm" id="dPrint">점검표 A4 인쇄</button><button type="button" class="btn btn-sm btn-ghost" id="dReset">체크 초기화</button></div></div>
+    <div class="side-box"><h2 class="h-sm">감독 전에 함께 보면 좋은 것</h2><ul class="bul">
+      <li><a href="../retention/">서류 보존기간·벌칙</a></li>
+      <li><a href="../schedule/">법정 주기업무 달력</a></li>
+      <li><a href="../penalty/">과태료 부과기준</a></li>
+    </ul></div>
+    <p class="src-line" id="dSrc"></p>
+  </aside>
+</div>
+<div class="print-only" id="dSheet"></div>
+<style>
+.dm-top{display:flex;gap:20px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 22px}
+.dm-ring{position:relative;width:104px;height:104px;flex:none}
+.dm-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dm-ring circle{fill:none;stroke-width:12}
+.dm-ring .bg{stroke:var(--line-2)}
+.dm-ring .fg{stroke:var(--green);stroke-linecap:round;stroke-dasharray:314.16;stroke-dashoffset:314.16;transition:stroke-dashoffset .3s}
+.dm-ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--navy)}
+.dm-lead{font-size:15px;color:var(--text-2);margin-bottom:10px}
+.dm-lead b{color:var(--navy)}
+.dm-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dm-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px}
+.dm-card h2{display:flex;align-items:center;gap:8px;font-size:16px;margin-bottom:8px}
+.dm-card h2 .n{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700}
+.dm-card h2 .no{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--navy);color:var(--surface);font-size:12px;align-items:center;justify-content:center}
+.dm-doc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:9px 0;border-top:1px dashed var(--line-2)}
+.dm-doc:first-of-type{border-top:0}
+.dm-doc .t{font-size:14px;font-weight:600;color:var(--text)}
+.dm-doc .b{font-size:12px;color:var(--muted)}
+.dm-doc .b .cond{display:inline-block;margin-left:4px;padding:0 6px;border-radius:5px;background:var(--orange-50);color:var(--orange);font-weight:700}
+.dm-doc .acts{display:flex;gap:4px;align-items:start}
+.dm-doc .acts button{height:28px;padding:0 9px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--text-2);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.dm-doc .acts button[aria-pressed="true"].ok{background:var(--green);border-color:var(--green);color:#fff}
+.dm-doc .acts button[aria-pressed="true"].na{background:var(--line-2);color:var(--muted)}
+.dm-doc .go{grid-column:1/-1;font-size:13px}
+.dm-doc.done .t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+@media (max-width:900px){.dm-grid{grid-template-columns:1fr}}
+@media (max-width:560px){.dm-top{flex-direction:column;align-items:flex-start}}
+@media print{
+  .phead,.layout-detail{display:none!important}
+  #dSheet{display:block!important;color:#000;font-size:10pt}
+  #dSheet h1{font-size:15pt;color:#000;margin-bottom:3mm}
+  #dSheet table{width:100%;border-collapse:collapse}
+  #dSheet th,#dSheet td{border:1px solid #555;padding:1.6mm 2mm;vertical-align:top;font-size:9pt}
+  #dSheet th{background:#eee}
+  @page{size:A4;margin:12mm}
+}
+</style>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var KEY = "anjeonduck.docmap", st = {}, filt = "";
+  try { st = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { st = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { alert("이 브라우저에 저장하지 못했습니다. 체크 상태는 새로고침하면 사라집니다."); } }
+  function id(g, i) { return g.id + "." + i; }
+  function href(h) { return "../../" + h; }
+  function render() {
+    var tot = 0, ok = 0, na = 0;
+    D.groups.forEach(function (g) { g.docs.forEach(function (d, i) { var v = st[id(g, i)]; if (v === "na") na++; else { tot++; if (v === "ok") ok++; } }); });
+    var pct = tot ? Math.round(ok / tot * 100) : 0;
+    $("dPct").textContent = pct + "%";
+    $("dArc").style.strokeDashoffset = String(314.16 * (1 - pct / 100));
+    $("dRing").setAttribute("aria-label", "준비율 " + pct + "%");
+    $("dLead").innerHTML = "해당 서류 <b>" + tot + "건</b> 중 <b>" + ok + "건</b> 보유 · 빠진 서류 <b>" + (tot - ok) + "건</b>" + (na ? " · 해당 없음 " + na + "건" : "");
+    $("dOut").innerHTML = D.groups.map(function (g, gi) {
+      var rows = g.docs.map(function (d, i) {
+        var v = st[id(g, i)] || "";
+        if (filt === "miss" && v) return ""; if (filt === "na" && v !== "na") return "";
+        return '<div class="dm-doc' + (v ? " done" : "") + '"><div><div class="t">' + esc(d.name) + '</div><div class="b">' + esc(d.basis) + (d.cond ? '<span class="cond">' + esc(d.cond) + "</span>" : "") + "</div></div>" +
+          '<div class="acts"><button type="button" class="ok" data-id="' + id(g, i) + '" data-v="ok" aria-pressed="' + (v === "ok") + '">보유</button><button type="button" class="na" data-id="' + id(g, i) + '" data-v="na" aria-pressed="' + (v === "na") + '">해당 없음</button></div>' +
+          (v !== "ok" && d.href ? '<a class="go" href="' + esc(href(d.href)) + '">' + (/^tools\//.test(d.href) ? "바로 작성·확인 →" : "서식·자료 찾기 →") + "</a>" : "") + "</div>";
+      }).join("");
+      if (!rows) return "";
+      var gk = g.docs.filter(function (d, i) { return st[id(g, i)] === "ok"; }).length, gn = g.docs.filter(function (d, i) { return st[id(g, i)] !== "na"; }).length;
+      return '<section class="dm-card"><h2><span class="no">' + (gi + 1) + "</span>" + esc(g.title) + '<span class="n">' + gk + " / " + gn + "</span></h2>" + rows + "</section>";
+    }).join("") || '<p class="hint">해당하는 서류가 없습니다.</p>';
+  }
+  $("dOut").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-id]"); if (!b) return;
+    st[b.dataset.id] = st[b.dataset.id] === b.dataset.v ? "" : b.dataset.v; if (!st[b.dataset.id]) delete st[b.dataset.id];
+    save(); render();
+  });
+  $("dFilter").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; filt = b.dataset.f; [].forEach.call($("dFilter").children, function (x) { x.setAttribute("aria-pressed", String(x === b)); }); render(); });
+  $("dReset").addEventListener("click", function () { if (confirm("체크한 내용을 모두 지울까요?")) { st = {}; save(); render(); } });
+  $("dPrint").addEventListener("click", function () {
+    var L = { ok: "보유", na: "해당 없음", "": "" };
+    $("dSheet").innerHTML = "<h1>안전보건 서류 자가점검표</h1><p>점검일 " + new Date().toLocaleDateString("ko-KR") + " · 준비율 " + $("dPct").textContent + "</p><table><thead><tr><th style=\"width:16%\">업무</th><th>서류</th><th style=\"width:30%\">근거</th><th style=\"width:12%\">상태</th></tr></thead><tbody>" +
+      D.groups.map(function (g) { return g.docs.map(function (d, i) { return "<tr>" + (i === 0 ? '<td rowspan="' + g.docs.length + '">' + esc(g.title) + "</td>" : "") + "<td>" + esc(d.name) + (d.cond ? " <small>(" + esc(d.cond) + ")</small>" : "") + "</td><td>" + esc(d.basis) + "</td><td>" + L[st[id(g, i)] || ""] + "</td></tr>"; }).join(""); }).join("") + "</tbody></table>";
+    window.print();
+  });
+  $("dSrc").textContent = "정리 " + D.checked + " · " + D.note;
+  render();
+})();
+</script>

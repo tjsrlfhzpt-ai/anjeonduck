@@ -1,0 +1,147 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>유해위험방지계획서 대상 진단</p>
+  <h1>유해위험방지계획서 제출 대상 자가진단</h1>
+  <p>공장 신설·이전·증설, 위험 설비 설치, 건설공사 착공 세 갈래를 한 번에 확인합니다. 해당하면 언제까지 무엇을 내야 하는지와 미제출 과태료까지 보여 줍니다.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <form class="calc" id="hForm" onsubmit="return false" autocomplete="off">
+      <div class="hp-step"><span class="hp-no">1</span><div class="grow stack" style="gap:10px">
+        <h2 class="h-sm">공장(생산 설비 일체) 설치·이전·주요 구조부분 변경 <span class="muted">법 제42조제1항제1호 · 영 제42조제1항</span></h2>
+        <label class="field"><span class="label">업종 (영 제42조제1항의 13개 업종)</span><select class="sort" id="hInd" style="width:100%"><option value="">— 해당 업종 없음 / 모름 —</option></select></label>
+        <div class="grid3">
+          <label class="field"><span class="label">전기 계약용량 (kW)</span><input type="number" id="hKw" min="0" inputmode="decimal" placeholder="예: 500"></label>
+          <label class="field" style="grid-column:span 2"><span class="label">하려는 일</span><select class="sort" id="hAct" style="width:100%">
+            <option value="">— 선택 —</option>
+            <option value="new">생산 공정 설비 등 전부를 새로 설치</option>
+            <option value="move">설비 등 일체를 다른 단위공장·지역으로 이전</option>
+            <option value="chg">주요 구조부분 변경(증설·교체·일부 이설)</option>
+          </select></label>
+        </div>
+        <p class="hint" id="hKwNote"></p>
+        <label class="field" id="hChgBox" hidden><span class="label">늘어나거나 옮기는 설비의 전기 정격용량 합계 (kW)</span><input type="number" id="hChgKw" min="0" inputmode="decimal" placeholder="예: 150"></label>
+      </div></div>
+      <div class="hp-step"><span class="hp-no">2</span><div class="grow stack" style="gap:10px">
+        <h2 class="h-sm">위험 설비 설치·이전·주요 구조부분 변경 <span class="muted">법 제42조제1항제2호 · 영 제42조제2항 — 업종 무관</span></h2>
+        <div class="stack" id="hEq" style="gap:8px"></div>
+        <p class="hint" id="hChgNote"></p>
+      </div></div>
+      <div class="hp-step"><span class="hp-no">3</span><div class="grow stack" style="gap:10px">
+        <h2 class="h-sm">건설공사 착공 <span class="muted">법 제42조제1항제3호 · 영 제42조제3항</span></h2>
+        <div class="stack" id="hCon" style="gap:6px"></div>
+      </div></div>
+    </form>
+    <div class="hp-result" id="hOut" aria-live="polite"></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">꼭 알아 두기</h2><ul class="bul hint">
+      <li>업종은 한국표준산업분류 기준입니다. 공장등록증·고용보험 사업장 업종을 함께 확인하세요.</li>
+      <li>설비 세부 기준(용해로 용량, 배풍량 등)은 「제조업 등 유해·위험방지계획서 제출·심사·확인에 관한 고시」(고용노동부고시 제2023-50호) 제2조·제3조를 옮긴 것입니다.</li>
+      <li>공정안전보고서(PSM)를 낸 유해·위험설비는 계획서를 낸 것으로 봅니다(법 제42조제3항).</li>
+      <li>판정이 애매하면 안전보건공단 지역본부에 사전 상담을 받는 것이 가장 확실합니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">원문</h2><ul class="bul">
+      <li><a href="../../laws/act/#j42">산업안전보건법 제42조</a></li>
+      <li><a href="../../laws/yeong/#j42">시행령 제42조</a></li>
+      <li><a href="../../laws/rule/#j42">시행규칙 제42조</a></li>
+      <li><a id="hNotice" href="#" target="_blank" rel="noopener">고시 원문(국가법령정보센터) ↗</a></li>
+    </ul></div>
+    <p class="src-line" id="hSrc"></p>
+  </aside>
+</div>
+<style>
+.hp-step{display:flex;gap:14px;padding:4px 0 18px;border-bottom:1px solid var(--line-2)}
+.hp-step:last-child{border-bottom:0;padding-bottom:0}
+.hp-no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--navy);color:var(--surface);display:flex;align-items:center;justify-content:center;font-weight:800}
+.hp-step .h-sm .muted{font-size:12px;font-weight:500;margin-left:4px}
+.hp-eq{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.hp-eq .hint{display:block}
+.hp-result{border-radius:var(--r-lg);border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.hp-verdict{display:flex;align-items:center;gap:14px;padding:18px 22px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.hp-verdict.yes{background:var(--red-50)}
+.hp-verdict b{font-size:24px;letter-spacing:-.03em}
+.hp-verdict.yes b{color:var(--red)}
+.hp-verdict.no b{color:var(--green)}
+.hp-body{padding:16px 22px 20px}
+.hp-body h3{margin:14px 0 6px}
+.hp-body li{font-size:14px;color:var(--text-2);padding:2px 0}
+.hp-body ol,.hp-body .hp-list{padding-left:20px;margin:0}.hp-body .hp-list{list-style:disc}
+@media (max-width:640px){.hp-eq{grid-template-columns:1fr}}
+</style>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function num(id) { var el = $(id); if (!el) return null; var v = parseFloat(el.value); return isFinite(v) ? v : null; }
+  $("hInd").innerHTML += D.industries.map(function (x, i) { return '<option value="' + i + '">' + (i + 1) + ". " + esc(x) + "</option>"; }).join("");
+  $("hEq").innerHTML = D.equip.map(function (q) {
+    var inp = q.min != null ? '<label class="field"><span class="label">' + esc(q.unit) + '</span><input type="number" min="0" inputmode="decimal" id="hEqV_' + q.k + '" disabled></label>'
+      : '<label class="check"><input type="checkbox" id="hEqM_' + q.k + '" disabled><span>기준 이상</span></label>';
+    return '<div class="hp-eq"><div><label class="check"><input type="checkbox" id="hEqC_' + q.k + '"><span><strong>' + esc(q.name) + "</strong></span></label>" +
+      '<span class="hint">' + esc(q.rule) + " · " + esc(q.law) + "</span>" + (q.also ? '<label class="check" style="margin-top:6px"><input type="checkbox" id="hEqA_' + q.k + '" disabled><span>' + esc(q.also) + "</span></label>" : "") + "</div>" + inp + "</div>";
+  }).join("");
+  $("hCon").innerHTML = D.construction.map(function (c, i) { return '<label class="check"><input type="checkbox" data-con="' + i + '"><span>' + esc(c) + "</span></label>"; }).join("");
+  $("hNotice").href = D.notice_url;
+  $("hKwNote").textContent = D.kw_note; $("hChgNote").textContent = D.change_note;
+  $("hSrc").textContent = "원문 확인 " + D.checked + " · " + D.source;
+
+  function calc() {
+    var act = $("hAct").value;
+    $("hChgBox").hidden = act !== "chg";
+    D.equip.forEach(function (q) { var on = $("hEqC_" + q.k).checked; var v = $("hEqV_" + q.k) || $("hEqM_" + q.k); v.disabled = !on; if ($("hEqA_" + q.k)) $("hEqA_" + q.k).disabled = !on; });
+    var hits = [], need = [], notes = [];
+    // 1호
+    var ind = $("hInd").value, kw = num("hKw");
+    if (ind !== "" && act) {
+      if (kw == null) need.push("1번: 전기 계약용량을 넣으세요.");
+      else if (kw < D.kw_min) notes.push("1번: 전기 계약용량 " + kw + "kW — 300kW 미만이라 제1호 대상이 아닙니다.");
+      else if (act === "chg") {
+        var ck = num("hChgKw");
+        if (ck == null) need.push("1번: 변경되는 설비의 전기 정격용량 합계를 넣으세요.");
+        else if (ck >= D.change_kw) hits.push({ t: "제1호 — " + D.industries[+ind] + ", 계약용량 " + kw + "kW, 주요 구조부분 변경(정격용량 합 " + ck + "kW ≥ 100kW)", g: "mfg1" });
+        else notes.push("1번: 변경 설비 정격용량 합 " + ck + "kW — 고시상 주요 구조부분 변경(100kW 이상 증가·이설)에 못 미칩니다.");
+      } else hits.push({ t: "제1호 — " + D.industries[+ind] + ", 계약용량 " + kw + "kW, " + (act === "new" ? "설치" : "이전"), g: "mfg1" });
+    } else if (ind === "" && act) notes.push("1번: 13개 업종이 아니면 제1호는 해당하지 않습니다(2번·3번은 업종과 상관없이 확인).");
+    // 2호
+    D.equip.forEach(function (q) {
+      if (!$("hEqC_" + q.k).checked) return;
+      if (q.min != null) {
+        var v = num("hEqV_" + q.k);
+        if (v == null) need.push("2번: " + q.name + " 값(" + q.unit + ")을 넣으세요.");
+        else if (v >= q.min && q.also && !$("hEqA_" + q.k).checked) notes.push("2번: " + q.name + " — 용량은 기준 이상이지만 '" + q.also + "'에 해당해야 대상입니다.");
+        else if (v >= q.min) hits.push({ t: "제2호 — " + q.name + " (" + v + " " + q.unit + " ≥ " + q.min + ")", g: "mfg2" });
+        else notes.push("2번: " + q.name + " " + v + " " + q.unit + " — 기준(" + q.min + ") 미만");
+      } else if ($("hEqM_" + q.k).checked) hits.push({ t: "제2호 — " + q.name + " (기준 이상)", g: "mfg2" });
+      else notes.push("2번: " + q.name + " — '기준 이상'을 체크하지 않음. 기준: " + q.rule);
+    });
+    // 3호
+    [].forEach.call(document.querySelectorAll("[data-con]:checked"), function (c) { hits.push({ t: "제3호 — " + D.construction[+c.dataset.con], g: "con" }); });
+
+    var touched = act || ind !== "" || document.querySelector("#hEq input:checked, [data-con]:checked");
+    if (!touched) { $("hOut").innerHTML = '<div class="hp-verdict"><b>입력 대기</b><span class="hint">1~3번 중 해당하는 항목을 고르세요.</span></div>'; return; }
+    var yes = hits.length > 0, groups = {};
+    hits.forEach(function (h) { groups[h.g] = 1; });
+    var S = D.submit, P = D.penalty, body = "";
+    if (yes) {
+      body += "<h3>해당 근거</h3><ul class=\"hp-list\">" + hits.map(function (h) { return "<li>" + esc(h.t) + "</li>"; }).join("") + "</ul>";
+      if (groups.mfg1 || groups.mfg2) {
+        body += "<h3>제출 — 제조업 등</h3><p class=\"hint\">" + esc(S.mfg) + "</p>";
+        if (groups.mfg1) body += "<p class=\"hint\" style=\"margin-top:6px\"><strong>제1호 첨부서류</strong></p><ol>" + S.mfg_docs1.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol>";
+        if (groups.mfg2) body += "<p class=\"hint\" style=\"margin-top:6px\"><strong>제2호 첨부서류</strong></p><ol>" + S.mfg_docs2.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol>";
+        body += '<p class="hint" style="margin-top:6px">' + esc(P.mfg) + "</p>";
+      }
+      if (groups.con) body += "<h3>제출 — 건설공사</h3><p class=\"hint\">" + esc(S.con) + '</p><p class="hint" style="margin-top:6px">' + esc(P.con) + "</p>";
+      body += "<h3>그 밖에</h3><ul class=\"hp-list\">" + (groups.mfg1 || groups.mfg2 ? "<li>" + esc(S.writer) + "</li>" : "") + (groups.mfg1 && groups.mfg2 ? "<li>" + esc(S.exempt) + "</li>" : "") + "<li>" + esc(S.psm) + "</li><li>" + esc(S.keep) + " — " + esc(P.keep) + "</li></ul>";
+    } else body += "<p class=\"hint\">입력한 내용으로는 제출 대상이 아닙니다. 계획이 바뀌거나 설비가 추가되면 다시 확인하세요.</p>";
+    if (need.length) body += "<h3>더 넣어야 할 값</h3><ul class=\"hp-list\">" + need.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+    if (notes.length) body += "<h3>참고</h3><ul class=\"hp-list\">" + notes.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+    $("hOut").innerHTML = '<div class="hp-verdict ' + (yes ? "yes" : need.length ? "" : "no") + '"><b>' + (yes ? "제출 대상" : need.length ? "판정 보류" : "대상 아님") + '</b><span class="hint">' + (yes ? hits.length + "개 근거에 해당" : need.length ? "값을 더 넣어 주세요" : "입력 기준") + '</span></div><div class="hp-body">' + body + "</div>";
+  }
+  $("hForm").addEventListener("input", calc);
+  $("hForm").addEventListener("change", calc);
+  calc();
+})();
+</script>
