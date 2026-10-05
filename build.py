@@ -705,7 +705,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
   <div class="wrap hd-in">
     <a class="logo" href="{rel_root}" aria-label="{e(site['name'])} 홈">{LOGO_SVG}<span>{e(site['name'])}</span></a>
     <nav class="gnb" aria-label="주 메뉴">{nav}</nav>
-    <a class="btn btn-sm hd-cta" href="{e(tl)}"{ext}>Mallo 열기</a>
+    {f'<a class="btn btn-sm hd-cta" href="{e(tl)}"{ext}>Mallo 열기</a>' if safe_url(((site.get("tools") or [{}])[0]).get("url")) else ""}
   </div>
 </header>
 <main id="main">
@@ -857,6 +857,8 @@ def tool_panel(site, rel_root, big=False):
     if not t:
         return ""
     url = safe_url(t.get("url"))
+    if not url:
+        return ""  # PC 버전 주소가 생기기 전에는 패널을 내지 않는다
     btn = (f'<a class="btn btn-white" href="{e(url)}" target="_blank" rel="noopener">열기 ↗</a>' if url
            else f'<a class="btn btn-white" href="{rel_root}tools/">자세히 보기</a>' if not big
            else '<span class="btn btn-white btn-disabled" aria-disabled="true">주소 준비 중</span>')
@@ -1065,7 +1067,8 @@ def build(out, today):
     web_forms = [{"id": "wf-" + f["id"], "category": "웹 작성 서식", "title": f["title"], "law": "", "form_no": f.get("group", ""),
                   "summary": f.get("desc", ""), "tags": [f.get("group", ""), f.get("short", "")], "topic": WF_TOPIC.get(f.get("group", ""), "기타"),
                   "free_tool": "forms/" + f["id"], "basis": f.get("law", "")} for f in _forms]
-    resources = [resolve_resource(r) for r in base_res + web_forms + lawform_resources(base_res) if r.get("category") != "무료 작성 도구"]
+    HAS_PC = bool(safe_url(((site.get("tools") or [{}])[0]).get("url")))
+    resources = [resolve_resource(r) for r in base_res + web_forms + lawform_resources(base_res) if r.get("category") != "무료 작성 도구" and (HAS_PC or r.get("category") != "Mallo 서식")]
     for r in resources:
         if not r.get("topic") or r["topic"] == "기타":
             probe = r.get("title", "") + " " + " ".join(r.get("tags") or [])
@@ -1771,7 +1774,7 @@ def build(out, today):
   {catalog_html(catalog, "")}
 </section>
 <div class="wrap layout-detail">
-  <section class="col-main">{sec_head("기록까지 관리하려면")}{tool_panel(site, "../", big=True)}</section>
+  <section class="col-main">{(sec_head("기록까지 관리하려면") + tool_panel(site, "../", big=True)) if tool_panel(site, "../") else ""}</section>
   <aside class="col-side"><section class="side-box">
     <h2 class="h-sm">왜 서버가 없나요?</h2>
     <p>안전관리 기록에는 사고·건강 정보처럼 민감한 내용이 많습니다. 서버에 모으지 않으면 유출 위험과 운영비가 함께 사라집니다.</p>
