@@ -28,6 +28,8 @@ jobs:
         with:
           python-version: "3.11"
       - name: 구글 시트 → 데이터 (설정한 경우만)
+        env:
+          JOB_POSTS_CSV: ${{ vars.JOB_POSTS_CSV }}
         run: python3 scripts/sync_sheets.py
       - name: 공공데이터포털 API → 채용·뉴스·사고속보 (저장소 변수 PUBLIC_API=true 일 때만)
         if: vars.PUBLIC_API == 'true'

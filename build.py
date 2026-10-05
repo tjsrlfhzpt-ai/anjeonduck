@@ -58,6 +58,63 @@ def fmt_date(d):
     return f"{y}.{m}.{dd}"
 
 
+# ---------------------------------------------------------------- 안전 브리핑 (data/briefs/YYYY-MM-DD.json)
+
+BRIEF_CATS = {"법령": "badge-navy", "정책": "badge-blue", "감독": "badge-orange", "사고": "badge-red", "화학물질": "badge-green", "보건": "badge-green", "자료": "badge-line"}
+
+
+def load_briefs(today):
+    """하루 한 건. 형식이 틀린 파일·항목은 빼고 경고만 남긴다(브리핑 때문에 배포가 멈추지 않게)."""
+    out = []
+    d = ROOT / "data/briefs"
+    for f in sorted(d.glob("*.json"), reverse=True) if d.exists() else []:
+        try:
+            b = json.loads(f.read_text(encoding="utf-8"))
+        except Exception as ex:  # noqa: BLE001
+            warn(f"브리핑 {f.name}: JSON 오류로 제외 — {ex}")
+            continue
+        if b.get("date") != f.stem or not DATE_RE.match(f.stem) or f.stem > today:
+            warn(f"브리핑 {f.name}: date 값이 파일 이름과 다르거나 미래 날짜라 제외")
+            continue
+        items = []
+        for it in b.get("items", []):
+            srcs = [x for x in it.get("sources", []) if safe_url(x.get("url")) and x.get("name")]
+            if not it.get("title") or not it.get("summary") or not srcs:
+                warn(f"브리핑 {f.stem}: 제목·요약·출처(https)가 없는 항목 제외 — {it.get('title')!r}")
+                continue
+            it["sources"] = srcs
+            items.append(it)
+        if not b.get("title") or not items:
+            warn(f"브리핑 {f.name}: 제목 또는 유효한 항목이 없어 제외")
+            continue
+        b["items"] = items
+        out.append(b)
+    return out
+
+
+def brief_article(b, rel):
+    def item(it):
+        cat = it.get("cat") or "정책"
+        srcs = " · ".join(f'<a class="link-ext" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener nofollow">{e(x["name"])} ↗</a>' for x in it["sources"])
+        d = it.get("date") or ""
+        when = f'<time datetime="{e(d)}">{fmt_date(d)}</time>' if DATE_RE.match(d) else ""
+        point = f'<p class="br-point"><b>실무 포인트</b>{e(it["point"])}</p>' if it.get("point") else ""
+        return (f'<article class="br-item"><p class="br-meta"><span class="badge {BRIEF_CATS.get(cat, "badge-line")}">{e(cat)}</span>{when}</p>'
+                f'<h3>{e(it["title"])}</h3><p class="br-sum">{e(it["summary"])}</p>{point}<p class="br-src">출처 {srcs}</p></article>')
+
+    def todo_li(t):
+        href = str(t.get("href") or "")
+        ok = bool(re.match(r"^(tools|resources|laws|jobs|brief)/[A-Za-z0-9_\-/#?=&%.]*$", href))
+        return f'<li><a href="{e(rel + href)}">{e(t["text"])}</a></li>' if ok else f'<li>{e(t["text"])}</li>'
+
+    todo = "".join(todo_li(t) for t in b.get("todo", []) if t.get("text"))
+    lead = f'<p class="br-lead">{e(b["lead"])}</p>' if b.get("lead") else ""
+    todo_sec = f'<section class="br-todo"><h3>이번 주 챙길 일</h3><ul class="bul">{todo}</ul></section>' if todo else ""
+    return (f'{lead}{"".join(item(it) for it in b["items"])}{todo_sec}'
+            f'<p class="src-note">{e(b.get("by") or "안전duck 리포터")}가 공개된 보도자료·기사를 읽고 직접 요약했습니다(AI 작성). '
+            f'원문을 옮겨 싣지 않으며, 적용 여부는 출처 원문과 법령으로 확인하세요. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
+
+
 # ---------------------------------------------------------------- 검증
 
 def validate_jobs(jobs, today):
@@ -73,8 +130,8 @@ def validate_jobs(jobs, today):
         if not j.get("title") or not j.get("company"):
             warn(f"채용 {jid}: 제목·회사명이 없어 제외")
             continue
-        if not safe_url(j.get("source_url")):
-            warn(f"채용 {jid}: 공고 원문 주소(https)가 없어 제외")
+        if not safe_url(j.get("source_url")) and not str(j.get("apply", "")).strip():
+            warn(f"채용 {jid}: 공고 원문 주소(https)도 지원 방법도 없어 제외")
             continue
         dl = str(j.get("deadline", "")).strip()
         if dl and not DATE_RE.match(dl) and dl not in ("상시", "채용 시"):
@@ -446,7 +503,7 @@ def form_auto_map():
 
 # ---------------------------------------------------------------- 레이아웃
 
-NAV = [("tools/", "무료 도구"), ("jobs/", "채용정보"), ("resources/", "서식·자료"), ("news/", "안전뉴스"), ("laws/", "법령")]
+NAV = [("tools/", "무료 도구"), ("resources/", "서식·자료"), ("laws/", "법령"), ("brief/", "안전 브리핑"), ("jobs/", "채용정보"), ("news/", "안전뉴스")]
 
 LOGO_SVG = ('<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">'
             '<rect width="40" height="40" rx="11" fill="#1F6FD1"/>'
@@ -535,7 +592,6 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 </head>
 <body>
 <a class="skip" href="#main">본문으로 바로가기</a>
-<div class="nbar"><div class="wrap nbar-in"><span class="nbar-ico" aria-hidden="true">🛡️</span><span>모든 작업 내역은 안전하게 현재 기기에만 저장됩니다.</span><button type="button" class="nbar-btn" data-mydata>내 데이터 관리</button></div></div>
 <header class="hd">
   <div class="wrap hd-in">
     <a class="logo" href="{rel_root}" aria-label="{e(site['name'])} 홈">{LOGO_SVG}<span>{e(site['name'])}</span></a>
@@ -547,10 +603,6 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 {body}
 </main>
 <footer class="ft">
-  <div class="wrap ft-data">
-    <div><strong>내 데이터 관리</strong><p>작성한 서식·도구 입력값·서명·사진은 서버가 아니라 이 기기의 브라우저에만 있습니다. 브라우저 기록을 지우거나 기기를 바꾸기 전에 백업 파일로 내보내 두세요.</p></div>
-    <button type="button" class="btn btn-sm btn-ghost" data-mydata>JSON 내보내기 / 불러오기</button>
-  </div>
   <div class="wrap ft-in">
     <div>
       <a class="logo logo-ft" href="{rel_root}">{LOGO_SVG}<span>{e(site['name'])}</span></a>
@@ -561,7 +613,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
       <li>채용 조건과 마감일은 공고 원문이 우선합니다.</li>
       <li>방문자 정보를 서버에 저장하지 않습니다. 즐겨찾기는 이 기기에만 남습니다.</li>
     </ul>
-    <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''}</p>
+    <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''} · <a href="{rel_root}jobs/post/">채용공고 올리기</a> · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button></p>
   </div>
 </footer>
 <script src="{rel_root}assets/app.js" defer></script>
@@ -905,7 +957,12 @@ def build(out, today):
     for j in pubjobs["items"]:
         j.setdefault("company_type", "공공기관")
         j.setdefault("employment", j.get("ctype", ""))
-    jobs = validate_jobs(load("data/jobs.json") + pubjobs["items"], today)
+    user_jobs = load("data/job_posts.json") if (ROOT / "data/job_posts.json").exists() else []
+    for j in user_jobs:
+        j["origin"] = "user"
+        j.setdefault("source_name", "기업 직접 등록")
+    jobs = validate_jobs(load("data/jobs.json") + user_jobs + pubjobs["items"], today)
+    briefs = load_briefs(today)
     auto_news, auto_acc = load_auto("news.json"), load_auto("accidents.json")
     hazards = load("data/hazards.json")
     hazards = {"groups": hazards["groups"], "items": hazards["items"]}
@@ -944,7 +1001,7 @@ def build(out, today):
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
     jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true">🕵️‍♂️</div>'
                   f'<p class="jempty-t">현재 안전duck에 직접 등록된 공고는 없어요.</p>'
-                  f'<p class="jempty-d">하지만 아래 통합 채용 플랫폼에서 실시간 공고를 바로 확인할 수 있습니다!</p>'
+                  f'<p class="jempty-d">안전·보건 인력을 찾는 기업은 <a href="{{post}}">무료로 공고를 올릴 수 있습니다</a>. 구직 중이라면 아래 채용 플랫폼에서 실시간 공고를 확인하세요.</p>'
                   f'<div class="jchips">{job_chips}</div></div>')
     updates = sorted(laws.get("updates", []), key=lambda u: u.get("date", ""), reverse=True)
     official_list = "".join(
@@ -979,18 +1036,28 @@ def build(out, today):
                 for t in sched["tasks"] if t["freq"] in ("monthly", "yearly")]
     mo_json = json.dumps(mo_tasks, ensure_ascii=False).replace("</", "<\\/")
     month_box = f"""<section class="side-box" id="moBox">
-      {sec_head("이번 달 안전보건 일정", "tools/schedule/", more="달력")}
+      {sec_head("이번 달 안전보건 달력", "tools/schedule/", more="전체 달력")}
+      <div class="mc" id="moCal" aria-hidden="true"></div>
       <ul class="mo-list" id="moList"><li>달력을 불러오는 중…</li></ul>
-      <p class="hint" style="margin-top:8px">분기·반기 업무와 매일·매주 업무는 <a href="tools/schedule/">법정 주기업무 달력</a>에서 날짜를 정해 관리하세요.</p>
+      <p class="hint" style="margin-top:8px">날짜는 권장 기준일입니다. 분기·반기·매일 업무는 <a href="tools/schedule/">법정 주기업무 달력</a>에서 사업장에 맞게 정하세요.</p>
       <script>
       (function () {{
-        var T = {mo_json}, now = new Date(), m = now.getMonth() + 1, el = document.getElementById("moList");
+        var T = {mo_json}, now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1, el = document.getElementById("moList"), cal = document.getElementById("moCal");
         var L = T.filter(function (t) {{ return t.f === "monthly" || t.m === m; }}).sort(function (a, b) {{ return (a.d || 0) - (b.d || 0); }});
         function esc(s) {{ return String(s).replace(/[&<>"]/g, function (c) {{ return {{ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }}[c]; }}); }}
-        el.innerHTML = "<li style=\\"border:0;padding-top:0\\"><strong>" + now.getFullYear() + "년 " + m + "월</strong></li>" + L.map(function (t) {{
+        var marks = {{}}; L.forEach(function (t) {{ var d = t.d || 1; (marks[d] = marks[d] || []).push(t.t); }});
+        var first = new Date(y, m - 1, 1).getDay(), days = new Date(y, m, 0).getDate(), h = '<div class="mc-h">' + y + "년 " + m + "월</div><div class=\\"mc-g\\">";
+        ["일", "월", "화", "수", "목", "금", "토"].forEach(function (w, i) {{ h += '<span class="mc-w' + (i === 0 ? " sun" : "") + '">' + w + "</span>"; }});
+        for (var i = 0; i < first; i++) h += "<span></span>";
+        for (var d = 1; d <= days; d++) {{
+          var c = "mc-d" + (d === now.getDate() ? " today" : "") + (marks[d] ? " on" : "") + ((first + d - 1) % 7 === 0 ? " sun" : "");
+          h += '<span class="' + c + '"' + (marks[d] ? ' title="' + esc(marks[d].join(" / ")) + '"' : "") + ">" + d + "</span>";
+        }}
+        cal.innerHTML = h + "</div>";
+        el.innerHTML = L.map(function (t) {{
           var href = t.form ? "tools/forms/" + t.form + "/" : t.tool ? "tools/" + t.tool + "/" : "tools/schedule/";
-          return '<li><span class="mo-d' + (t.f === "yearly" ? " y" : "") + '">' + (t.f === "monthly" ? "매월" : m + "/" + (t.d || 1)) + '</span><a href="' + href + '">' + esc(t.t) + "</a></li>";
-        }}).join("");
+          return '<li><span class="mo-d' + (t.f === "yearly" ? " y" : "") + '">' + m + "/" + (t.d || 1) + '</span><a href="' + href + '">' + esc(t.t) + "</a></li>";
+        }}).join("") || "<li>이번 달 기준일이 정해진 업무가 없습니다.</li>";
       }})();
       </script>
     </section>"""
@@ -1004,7 +1071,41 @@ def build(out, today):
     tools_cta = ('<aside class="cta-banner"><div><strong>실무 문서는 무료 도구에서 바로 작성하세요</strong>'
                  '<p>법정 서식이 아닌 실무용 문서(TBM 일지, 위험성평가서, 산보위 회의록, 점검표 등)는 무료 도구에서 직접 작성하고 결재·서명·사진까지 넣어 인쇄할 수 있습니다 👉</p></div>'
                  '<a class="btn" href="{rel}tools/">무료 도구로 가기 <span aria-hidden="true">→</span></a></aside>')
-    home_jobs = f'<ul class="jlist">{"".join(job_row(j, "./") for j in open_jobs[:6])}</ul>' if open_jobs else jobs_empty
+    def board(title, href, rows, more="더보기", badge=""):
+        return (f'<section class="bd"><div class="bd-h"><h2>{e(title)}{badge}</h2><a class="more" href="{href}">{e(more)} <span aria-hidden="true">→</span></a></div>'
+                f'<ul class="bd-list">{rows}</ul></section>')
+
+    def bd_row(href, text, meta="", tag="", ext=False):
+        t = f'<span class="bd-tag">{e(tag)}</span>' if tag else ""
+        x = ' target="_blank" rel="noopener"' if ext else ""
+        return f'<li><a href="{e(href)}"{x}>{t}<span class="bd-t">{e(text)}</span></a>{f"<span class=bd-m>{e(meta)}</span>" if meta else ""}</li>'
+
+    def md(d):
+        return f"{d[5:7]}.{d[8:10]}" if DATE_RE.match(str(d or "")) else ""
+
+    if briefs:
+        b0 = briefs[0]
+        rows = "".join(bd_row(f"brief/{b0['date']}/", it["title"], md(it.get("date") or b0["date"]), it.get("cat") or "정책") for it in b0["items"][:4])
+        rows += "".join(bd_row(f"brief/{b['date']}/", b["title"], md(b["date"]), "지난 호") for b in briefs[1:3])
+        bd_brief = board("오늘의 안전 브리핑", "brief/", rows, badge=f'<span class="bd-new">{md(b0["date"])}</span>')
+    else:
+        bd_brief = board("오늘의 안전 브리핑", "brief/", '<li class="bd-empty">아직 발행된 브리핑이 없습니다.</li>')
+    if open_jobs:
+        rows = "".join(bd_row(f"jobs/{j['id']}/", f"{j['company']} · {j['title']}", (md(j.get("deadline")) + " 마감") if DATE_RE.match(str(j.get("deadline") or "")) else str(j.get("deadline") or ""), (j["jobs_list"] or ["채용"])[0]) for j in open_jobs[:5])
+    else:
+        rows = '<li class="bd-empty">등록된 공고가 없습니다. 안전·보건 인력을 찾는 기업은 무료로 올릴 수 있습니다.</li>' + "".join(
+            bd_row(safe_url(x["url"]), x["name"] + "에서 찾기", "", "외부", ext=True) for x in sites.get("job_search", [])[:3] if safe_url(x.get("url")))
+    bd_jobs = board("채용정보", "jobs/", rows + '<li class="bd-cta"><a class="btn btn-sm" href="jobs/post/">채용공고 올리기 · 무료</a></li>')
+    bd_laws = board("법령 개정", "laws/#updates", "".join(bd_row(f"laws/#updates", u["title"], md(u.get("date")), u.get("law", "").replace("산업안전보건법 ", "").replace("산업안전보건", "산안")[:6]) for u in updates[:5]))
+    FORM_PICKS = ["log-sup", "log-safety", "edu-log", "permit", "patrol", "sapa-half"]
+    fby = {f["id"]: f for f in _forms}
+    bd_forms = board(f"서식 작성기 {n_forms}종", "tools/forms/", "".join(bd_row(f"tools/forms/{i}/", fby[i]["title"], "", fby[i]["group"][:5]) for i in FORM_PICKS if i in fby))
+    bd_res = board("자주 찾는 법정 서식", "resources/", "".join(bd_row(f"resources/{r['detail']}" if r.get("detail") else "resources/", r["title"], "", "서식" if r.get("category") == "법정 서식" else "고시") for r in popular[:6]))
+    lib = load("data/library.json")
+    bd_lib = board("안전보건 자료실", "resources/library/", "".join(bd_row(safe_url(x["url"]), x["name"], "", "공식", ext=True) for x in lib.get("official", [])[:3] if safe_url(x.get("url")))
+                   + bd_row("resources/signs/", "안전보건표지 40종 · 안전duck 현장 안내 게시물", "", "표지") + bd_row("tools/docmap/", "감독 대비 서류 자가점검", "", "점검"))
+    quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로가기</span>' + "".join(
+        f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url"))) + "</div></section>")
     home = f"""
 <section class="hero">
   <div class="wrap hero-in">
@@ -1030,36 +1131,107 @@ def build(out, today):
   </div>
 </section>
 {diag_band}
-<section class="wrap ftools-home">
-  {sec_head("무료 안전관리 도구", "tools/", more="모두 보기", sub="회원가입 없이 바로 쓰는 서류 작성기와 계산기. 입력 내용은 서버로 가지 않습니다.")}
-  <div class="tgrid">{free_tool_cards(site, "./", ids=site.get("home_tools"))}{tool_card("tools/forms/", "작성기", f"서식 작성기 {n_forms}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식. 결재·서명·사진 첨부까지.", "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진")}</div>
-</section>
+{quick_strip}
 <div class="wrap layout-home">
   <section class="col-main">
-    {sec_head("최신 채용정보", "jobs/", sub=(f"진행 중 {len(open_jobs)}건" if open_jobs else None))}
-    {home_jobs}
-    {sec_head("자주 찾는 서식·자료", "resources/")}
-    <ul class="rlist">{"".join(resource_row(r, site, "./") for r in popular)}</ul>
-    {tools_cta.format(rel="./")}
+    <div class="bd-grid">
+      {bd_brief}
+      {bd_jobs}
+      {bd_laws}
+      {bd_forms}
+      {bd_res}
+      {bd_lib}
+    </div>
   </section>
   <aside class="col-side">
-    <section class="side-box">
-      {sec_head("법령 개정", "laws/", more="더보기")}
-      <ul class="ulist compact">{"".join(update_row(u, full=False) for u in updates[:4])}</ul>
-    </section>
     {month_box}
     {tool_panel(site, "./")}
     <section class="side-box">
       {sec_head("질의·상담 바로가기")}
       <ul class="counsel">{counsel_list}</ul>
     </section>
-    <section class="side-box">
-      {sec_head("공식 사이트")}
-      <ul class="olist">{official_list}</ul>
-    </section>
+  </aside>
+</div>
+<section class="wrap ftools-home">
+  {sec_head("무료 안전관리 도구", "tools/", more="모두 보기", sub="회원가입 없이 바로 쓰는 서류 작성기와 계산기. 입력 내용은 서버로 가지 않습니다.")}
+  <div class="tgrid">{free_tool_cards(site, "./", ids=site.get("home_tools"))}{tool_card("tools/forms/", "작성기", f"서식 작성기 {n_forms}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식. 결재·서명·사진 첨부까지.", "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진")}</div>
+</section>"""
+    write("index.html", page(site, "./", "", site["name"], home))
+
+    # ---- 안전 브리핑
+    if briefs:
+        b0 = briefs[0]
+        arch = "".join(f'<li><a href="{e(b["date"])}/"><time datetime="{e(b["date"])}">{fmt_date(b["date"])}</time><span>{e(b["title"])}</span></a></li>' for b in briefs)
+        brief_main = f'<article class="br"><p class="br-date">{fmt_date(b0["date"])} 브리핑</p><h2 class="br-title">{e(b0["title"])}</h2>{brief_article(b0, "../")}</article>'
+    else:
+        arch, brief_main = "", empty_box("아직 발행된 브리핑이 없습니다.")
+    brief_side = f"""<aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">지난 브리핑</h2><ul class="br-arch">{arch or '<li>없음</li>'}</ul></div>
+    <div class="side-box"><h2 class="h-sm">브리핑은 이렇게 만듭니다</h2><ul class="bul hint">
+      <li>평일 아침, 고용노동부·안전보건공단 발표와 법령 개정, 주요 보도를 읽고 실무에 필요한 것만 추립니다.</li>
+      <li>기사·보도자료 원문은 싣지 않고 직접 요약한 뒤 출처로 연결합니다.</li>
+      <li>AI가 정리하므로 날짜·숫자는 반드시 출처 원문으로 확인하세요.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">원문 보러 가기</h2><ul class="bul">
+      <li><a href="https://www.moel.go.kr/news/enews/report/enewsList.do" target="_blank" rel="noopener">고용노동부 보도자료 ↗</a></li>
+      <li><a href="https://www.moel.go.kr/info/lawinfo/instruction/list.do" target="_blank" rel="noopener">고용노동부 훈령·예규·고시 ↗</a></li>
+      <li><a href="../laws/#updates">안전duck 법령 개정 소식</a></li>
+    </ul></div></aside>"""
+    brief_head = """
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="{up}">홈</a><span>/</span>{crumb}</p>
+  <h1>안전 브리핑</h1>
+  <p>안전관리자가 아침에 5분이면 읽는 요약입니다. 법령·정책·감독·사고 소식에서 실무에 영향이 있는 것만 골라 '그래서 무엇을 해야 하는지'까지 적습니다.</p>
+</div></section>"""
+    write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
+          brief_head.format(up="../", crumb="안전 브리핑") + f'<div class="wrap layout-detail"><section class="col-main">{brief_main}</section>{brief_side}</div>',
+          desc="산업안전 법령·정책·감독·사고 소식을 매일 요약하고 실무 포인트를 정리한 안전duck 브리핑.", active="brief/"))
+    for b in briefs:
+        body = (brief_head.format(up="../../", crumb='<a href="../">안전 브리핑</a><span>/</span>' + fmt_date(b["date"]))
+                + f'<div class="wrap layout-detail"><section class="col-main"><article class="br"><p class="br-date">{fmt_date(b["date"])} 브리핑</p><h2 class="br-title">{e(b["title"])}</h2>{brief_article(b, "../../")}</article></section>'
+                + brief_side.replace('href="../laws/', 'href="../../laws/').replace('<a href="20', '<a href="../20') + "</div>")
+        write(f"brief/{b['date']}/index.html", page(site, "../../", f"brief/{b['date']}/", f'{fmt_date(b["date"])} 안전 브리핑 — {b["title"]}', body,
+              desc=(b.get("lead") or b["title"])[:150], active="brief/"))
+
+    # ---- 채용공고 올리기
+    jf = site.get("job_form") or {}
+    jf_url = safe_url(jf.get("url"))
+    if not jf_url:
+        warn("채용공고 등록 폼 주소(config/site.json 의 job_form.url)가 비어 있음 → 등록 페이지에 '접수 준비 중'으로 표시")
+    jf_embed = jf_url + ("&" if "?" in jf_url else "?") + "embedded=true" if jf_url else ""
+    post_form = (f'<div class="jp-frame"><iframe src="{e(jf_embed)}" title="채용공고 등록 양식" loading="lazy"></iframe></div>'
+                 f'<p class="hint">양식이 보이지 않으면 <a href="{e(jf_url)}" target="_blank" rel="noopener">새 창에서 열기 ↗</a></p>') if jf_url else (
+                 '<div class="jempty"><div class="jempty-ico" aria-hidden="true">🛠️</div><p class="jempty-t">등록 양식을 준비하고 있습니다.</p>'
+                 '<p class="jempty-d">곧 이 자리에서 바로 공고를 올릴 수 있습니다.</p></div>')
+    post_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">채용정보</a><span>/</span>공고 올리기</p>
+  <h1>채용공고 올리기</h1>
+  <p>안전관리자·보건관리자·EHS·소방 인력을 찾는 기업이라면 누구나 무료로 올릴 수 있습니다. 회원가입은 없고, 운영자가 내용을 확인한 뒤 게시합니다.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <ol class="jp-steps">
+      <li><b>1</b><div><strong>양식 작성</strong><span>회사명, 직무, 근무지, 마감일, 지원 방법</span></div></li>
+      <li><b>2</b><div><strong>운영자 확인</strong><span>안전·보건 직무인지, 지원 방법이 분명한지</span></div></li>
+      <li><b>3</b><div><strong>게시</strong><span>확인된 공고는 다음 날 아침 목록에 올라갑니다</span></div></li>
+    </ol>
+    {post_form}
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">등록 기준</h2><ul class="bul hint">
+      <li>안전·보건·소방·환경(EHS) 관련 직무만 받습니다.</li>
+      <li>채용하는 기업 또는 그 채용 담당자가 직접 올려야 합니다. 다른 사이트 공고를 옮겨 적는 것은 받지 않습니다.</li>
+      <li>지원 방법(공고 원문 주소 또는 접수 이메일)이 있어야 합니다. 적은 연락처는 공고에 그대로 공개됩니다.</li>
+      <li>허위·과장, 수수료를 요구하는 공고, 직무와 무관한 광고는 게시하지 않습니다.</li>
+      <li>마감일이 지나면 자동으로 '마감'으로 바뀝니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">수정·삭제</h2><p>같은 양식에서 '요청 종류'를 수정 또는 삭제로 고르고 회사명과 공고 제목을 적어 주세요. 확인 후 반영합니다.</p></div>
+    <div class="side-box"><h2 class="h-sm">구직자라면</h2><ul class="bul"><li><a href="../">등록된 공고 보기</a></li>{"".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x["name"])} ↗</a></li>' for x in sites.get("job_search", []) if safe_url(x.get("url")))}</ul></div>
   </aside>
 </div>"""
-    write("index.html", page(site, "./", "", site["name"], home))
+    write("jobs/post/index.html", page(site, "../../", "jobs/post/", "채용공고 올리기", post_body,
+          desc="안전관리자·보건관리자·EHS·소방 채용공고를 무료로 등록하세요. 회원가입 없이 양식만 작성하면 확인 후 게시합니다.", active="jobs/"))
 
     # ---- 채용 목록
     def vals(key, split=False):
@@ -1094,13 +1266,14 @@ def build(out, today):
         side = f"""<details class="fpanel" open data-fpanel><summary>필터</summary><div class="fpanel-body">{filters}
       <button type="button" class="btn btn-sm btn-ghost fpanel-reset" data-reset>필터 초기화</button></div></details>"""
     else:
-        main = jobs_empty
+        main = jobs_empty.replace("{post}", "post/")
         side = ""
     jobs_body = f"""
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>채용정보</p>
   <h1>안전·보건 채용정보</h1>
   <p>안전관리자·보건관리자·EHS·소방 공고를 핵심 조건만 정리했습니다. 지원 전에는 공고 원문을 꼭 확인하세요.</p>
+  <p class="btns" style="margin-top:14px"><a class="btn" href="post/">채용공고 올리기 · 무료</a></p>
 </div></section>
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
@@ -1112,6 +1285,15 @@ def build(out, today):
                                   desc="안전관리자·보건관리자·EHS·소방 채용공고를 직무·기업분류·업종별로 찾아보세요.", active="jobs/"))
 
     # ---- 채용 상세
+    def apply_html(j):
+        src = safe_url(j.get("source_url"))
+        if src:
+            return f'<a class="btn btn-block" href="{e(src)}" target="_blank" rel="noopener nofollow">공고 원문에서 지원 ↗</a>'
+        ap = str(j.get("apply") or "").strip()
+        m = re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", ap)
+        btn = f'<a class="btn btn-block" href="mailto:{e(m.group(0))}">이메일로 지원</a>' if m else ""
+        return f'<p class="apply-how"><b>지원 방법</b>{e(ap)}</p>{btn}'
+
     for j in jobs:
         def lines(v):
             return "".join(f"<li>{e(x.strip())}</li>" for x in str(v or "").split("|") if x.strip())
@@ -1143,13 +1325,14 @@ def build(out, today):
     <section class="block"><h2>모집 조건</h2><dl class="dl-grid">{table}</dl></section>
     {f'<section class="block"><h2>주요 업무</h2><ul class="bul">{duties}</ul></section>' if duties else ''}
     {f'<section class="block"><h2>자격 요건</h2><ul class="bul">{reqs}</ul></section>' if reqs else ''}
+    {'<p class="src-note">이 공고는 채용 기업이 안전duck에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
     <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''} · 조건과 일정은 원문이 우선합니다.</p>
   </article>
   <aside class="col-side">
     <div class="apply-card" data-deadline="{e(dl)}">
       <p class="apply-label">마감</p>
       <p class="apply-dl"><span data-dl-text>{e(dl_txt)}</span> {dl_badge(j)}</p>
-      <a class="btn btn-block" href="{e(safe_url(j['source_url']))}" target="_blank" rel="noopener nofollow">공고 원문에서 지원 ↗</a>
+      {apply_html(j)}
       <a class="btn btn-block btn-ghost" href="../">다른 공고 보기</a>
     </div>
   </aside>

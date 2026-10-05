@@ -290,5 +290,9 @@
   "features": {
     "public_api": false,
     "_comment": "public_api: 공공데이터포털(정책뉴스·공공기관 채용·사고사망 속보) 수집·안전뉴스 메뉴. 켜려면 true + 저장소 변수 PUBLIC_API=true"
+  },
+  "job_form": {
+    "url": "",
+    "_comment": "구글 설문지 주소(https://docs.google.com/forms/d/e/.../viewform). 넣으면 /jobs/post/ 에 양식이 들어갑니다. 응답 시트 CSV 주소는 저장소 변수 JOB_POSTS_CSV 또는 config/sources.json 의 job_posts_csv"
   }
 }
