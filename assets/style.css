@@ -1214,3 +1214,11 @@ details.lawbox summary{cursor:pointer}
 .lst-cur::before{content:"🟢"}.lst-next::before{content:"🟡"}.lst-bill::before{content:"🔵"}.lst-rec::before{content:"⚪"}.lst-chk::before{content:"🔴"}
 .asof .lst{background:rgba(255,255,255,.14);color:#fff;border-color:transparent}
 .ft-op{grid-column:1/-1;font-size:12.5px;color:var(--text-2)}
+
+/* v2.7 */
+p.asof{background:var(--surface);color:var(--muted);font-size:12.5px;border-bottom:1px solid var(--line-2);margin:0}
+p.asof .wrap{display:block;padding-top:6px;padding-bottom:6px}
+p.asof a{color:var(--text-2);text-decoration:none}p.asof a:hover{color:var(--blue);text-decoration:underline}
+p.asof b{font-weight:700;color:var(--text-2)}
+.qs a.qs-go{background:var(--blue-50);color:var(--blue);font-weight:700;margin-right:4px}
+.qs-l2{margin-left:14px}

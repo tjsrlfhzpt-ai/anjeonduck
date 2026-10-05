@@ -106,6 +106,9 @@ def load_briefs(today):
     return out
 
 
+BRIEF_PENDING = '<span class="lst lst-chk">확인 필요</span> 자동으로 작성해 게시한 브리핑입니다. 사실 확인이 끝나지 않았으니 공식 출처 원문을 함께 확인하세요. '
+
+
 def brief_article(b, rel):
     def item(it):
         cat = it.get("cat") or "정책"
@@ -133,7 +136,7 @@ def brief_article(b, rel):
     lead = f'<p class="br-lead">{e(b["lead"])}</p>' if b.get("lead") else ""
     todo_sec = f'<section class="br-todo"><h3>이번 주 챙길 일</h3><ul class="bul">{todo}</ul></section>' if todo else ""
     return (f'{lead}{"".join(item(it) for it in b["items"])}{todo_sec}'
-            f'<p class="src-note">안전duck이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
+            f'<p class="src-note">{BRIEF_PENDING if b.get("review") != "verified" else ""}안전duck이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
             f'국회 통과안·입법예고는 현행 법령이 아닙니다. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
 
 
@@ -680,7 +683,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
   <div class="wrap hd-in">
     <a class="logo" href="{rel_root}" aria-label="{e(site['name'])} 홈">{LOGO_SVG}<span>{e(site['name'])}</span></a>
     <nav class="gnb" aria-label="주 메뉴">{nav}</nav>
-    <a class="btn btn-sm hd-cta" href="{e(tl)}"{ext}>SAFE 덕희 열기</a>
+    <a class="btn btn-sm hd-cta" href="{e(tl)}"{ext}>Mallo 열기</a>
   </div>
 </header>
 <main id="main">
@@ -699,7 +702,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
       <li>판정·계산 결과는 자가진단용 참고 자료이며 행정기관의 공식 해석·처분을 대체하지 않습니다. <a href="{rel_root}legal/">법령정보·면책 안내</a></li>
     </ul>
     <p class="ft-op">{operator_html(site, rel_root)}</p>
-    <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''} · <a href="{rel_root}jobs/post/">채용공고 올리기</a> · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button></p>
+    <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''} · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button></p>
   </div>
 </footer>
 <script src="{rel_root}assets/app.js" defer></script>
@@ -763,8 +766,8 @@ def resource_row(r, site, rel_root="./"):
         tpl, url = tool.get("deep_link_template", ""), safe_url(tool.get("url"))
         link = tpl.replace("{kind}", quote(r["app_kind"])) if tpl else url
         if safe_url(link):
-            acts.append(f'<a class="btn btn-sm btn-accent" href="{e(link)}" target="_blank" rel="noopener">덕희에서 작성</a>')
-        elif r.get("category") == "SAFE 덕희 서식":
+            acts.append(f'<a class="btn btn-sm btn-accent" href="{e(link)}" target="_blank" rel="noopener">Mallo에서 작성</a>')
+        elif r.get("category") == "Mallo 서식":
             acts.append('<span class="btn btn-sm btn-disabled" aria-disabled="true">도구 주소 준비 중</span>')
     meta = [x for x in [r.get("law"), r.get("form_no"), (r.get("rel") + " 관련") if r.get("rel") else ""] if x]
     tags = r.get("tags") or []
@@ -772,7 +775,7 @@ def resource_row(r, site, rel_root="./"):
         tags = [t for t in tags.split("|") if t]
     text = " ".join([r.get("title", ""), r.get("summary", ""), r.get("law", ""), r.get("form_no", ""), r.get("basis", ""), " ".join(tags)])
     cat = r.get("category", "")
-    cat_cls = {"법정 서식": "badge-blue", "고시·지침": "badge-navy", "SAFE 덕희 서식": "badge-orange", "무료 작성 도구": "badge-green",
+    cat_cls = {"법정 서식": "badge-blue", "고시·지침": "badge-navy", "Mallo 서식": "badge-orange", "무료 작성 도구": "badge-green",
                "웹 작성 서식": "badge-green", "공단 자료": "badge-navy"}.get(cat, "badge-line")
     return f"""<li class="rrow" data-item data-cat="{e(cat)}" data-topic="{e(r.get('topic', ''))}" data-id="{e(r['id'])}" data-text="{e(text)}">
   <div class="rrow-main">
@@ -1080,7 +1083,7 @@ def build(out, today):
         if not safe_url(t.get("url")):
             warn(f"도구 '{t.get('name')}' 주소가 비어 있음 → '준비 중'으로 표시")
     for r in resources:
-        if r.get("category") != "SAFE 덕희 서식" and not r.get("free_tool") and not r.get("href"):
+        if r.get("category") != "Mallo 서식" and not r.get("free_tool") and not r.get("href"):
             warn(f"자료 {r['id']}: 원본 주소가 없음")
 
     if out.exists():
@@ -1106,8 +1109,8 @@ def build(out, today):
         f'<a class="jchip" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])}{EXT}<span class="sr">(새 창)</span></a>'
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
     jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true">🕵️‍♂️</div>'
-                  f'<p class="jempty-t">현재 안전duck에 직접 등록된 공고는 없어요.</p>'
-                  f'<p class="jempty-d">안전·보건 인력을 찾는 기업은 <a href="{{post}}">무료로 공고를 올릴 수 있습니다</a>. 구직 중이라면 아래 채용 플랫폼에서 실시간 공고를 확인하세요.</p>'
+                  f'<p class="jempty-t">채용 플랫폼의 안전·보건 공고로 바로 연결합니다.</p>'
+                  f'<p class="jempty-d">아래 채용 플랫폼에서 안전·보건 직무의 실시간 공고를 바로 확인하세요.</p>'
                   f'<div class="jchips">{job_chips}</div></div>')
     updates = sorted(laws.get("updates", []), key=lambda u: u.get("date", ""), reverse=True)
     official_list = "".join(
@@ -1199,9 +1202,9 @@ def build(out, today):
     if open_jobs:
         rows = "".join(bd_row(f"jobs/{j['id']}/", f"{j['company']} · {j['title']}", (md(j.get("deadline")) + " 마감") if DATE_RE.match(str(j.get("deadline") or "")) else str(j.get("deadline") or ""), (j["jobs_list"] or ["채용"])[0]) for j in open_jobs[:5])
     else:
-        rows = '<li class="bd-empty">등록된 공고가 없습니다. 안전·보건 인력을 찾는 기업은 무료로 올릴 수 있습니다.</li>' + "".join(
+        rows = "".join(
             bd_row(safe_url(x["url"]), x["name"] + "에서 찾기", "", "외부", ext=True) for x in sites.get("job_search", [])[:3] if safe_url(x.get("url")))
-    bd_jobs = board("채용정보", "jobs/", rows + '<li class="bd-cta"><a class="btn btn-sm" href="jobs/post/">채용공고 올리기 · 무료</a></li>')
+    bd_jobs = board("채용정보", "jobs/", rows)
     import lawpages
     man = manifest()
     LAWS_KEYS = {l["key"] for l in man["laws"]}
@@ -1212,11 +1215,9 @@ def build(out, today):
     chg_txt = ("오늘 시행·공포 " + ", ".join(f"{nm} {u['no']}" for nm, u in today_chg)) if today_chg else "오늘 시행·공포된 변경 없음(확인일 기준)"
     nxt_txt = f"다음 시행 {lawpages.kdate(ups_all[0][0])} {ups_all[0][1]}" if ups_all else "확인된 시행 예정 없음"
     stale_txt = ' · <b>확인일이 오래되었습니다 — 공식 원문 재확인 필요</b>' if stale(man.get("checked_at", ""), dt.date.fromisoformat(today)) else ""
-    asof_strip = (f'<section class="asof" aria-label="법령 데이터 기준"><div class="wrap"><span><b>법령 데이터 기준일: {e(man.get("checked_at", ""))}</b>{stale_txt}</span>'
-                  f'<a href="laws/#versions"><span class="lst lst-cur">현재 시행</span> {sum(1 for l in man["laws"] if l["key"] in LAWS_KEYS)}개 법령</a>'
-                  f'<a href="laws/#upcoming"><span class="lst lst-next">시행 예정</span> {n_up}건 · {e(nxt_txt)}</a>'
-                  f'<span>오늘의 법령 변경: {e(chg_txt)}</span>'
-                  f'<a href="legal/#check"><span class="lst lst-chk">확인 필요</span> 데이터 {n_chk}건</a></div></section>')
+    stale_txt2 = ' · <b>공식 원문 재확인 필요</b>' if stale_txt else ""
+    asof_strip = (f'<p class="asof"><span class="wrap">법령 데이터 기준일 <b>{e(man.get("checked_at", ""))}</b>{stale_txt2}'
+                  f' · <a href="laws/#upcoming">시행 예정 {n_up}건</a> · <a href="legal/#check">확인 필요 {n_chk}건</a></span></p>')
     law_rows = "".join(bd_row("laws/#upcoming", f"{nm.replace('산업안전보건법', '산안법').replace('산업안전보건기준에 관한 규칙', '안전보건규칙')} {u['no'].split(' ')[-1]}", md(eff), "시행 예정") for eff, nm, u in ups_all[:3])
     law_rows += "".join(bd_row("laws/#bills", b.get("title", ""), md(b.get("stage_date")), "입법 동향") for b in man.get("bills", [])[:1])
     law_rows += "".join(bd_row("laws/#updates", u["title"], md(u.get("date")), "시행 중") for u in [x for x in updates if (x.get("effective") or x.get("date") or "") <= today][:2])
@@ -1229,7 +1230,8 @@ def build(out, today):
     lib = load("data/library.json")
     bd_lib = board("안전보건 자료실", "resources/library/", "".join(bd_row(safe_url(x["url"]), x["name"], "", "공식", ext=True) for x in lib.get("official", [])[:3] if safe_url(x.get("url")))
                    + bd_row("resources/signs/", "안전보건표지 40종 · 안전duck 현장 안내 게시물", "", "표지") + bd_row("tools/docmap/", "감독 대비 서류 자가점검", "", "점검"))
-    quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로가기</span>' + "".join(
+    quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로 신청·신고</span>' + "".join(
+        f'<a class="qs-go" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}">{e(x["name"])} ↗</a>' for x in sites.get("civil", []) if safe_url(x.get("url"))) + '<span class="qs-l qs-l2">기관</span>' + "".join(
         f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url"))) + "</div></section>")
     home = f"""
 {asof_strip}
@@ -1354,9 +1356,9 @@ def build(out, today):
   <h2 id="links">7. 외부 링크 책임범위</h2>
   <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, 안전duck은 외부 사이트의 내용을 보증하지 않습니다.</p>
   <h2 id="jobs">8. 채용공고 책임범위</h2>
-  <p>채용공고는 채용 기업이 직접 등록한 내용을 운영자가 확인해 게시합니다. 채용 조건·마감일은 공고 원문과 채용 기업이 책임지며 안전duck은 내용의 진위를 보증하지 않습니다. 허위 공고나 권리를 침해하는 공고는 신고를 받으면 확인 후 게시를 중단합니다. 등록 기준과 개인정보 처리는 <a href="../jobs/post/">채용공고 올리기</a>에 적었습니다.</p>
+  <p>채용정보는 외부 채용 플랫폼과 공공 채용 사이트로 연결합니다. 안전duck은 공고를 직접 받거나 게시하지 않으며, 채용 조건·마감일은 각 플랫폼의 공고 원문과 채용 기업이 책임집니다.</p>
   <h2 id="data">9. 데이터 저장 방식</h2>
-  <p>작성 도구에 입력한 내용, 서명 이미지, 첨부 사진은 안전duck 서버로 전송하지 않고 사용 중인 브라우저(localStorage·IndexedDB)에 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 사라지므로 필요하면 화면 아래 '작성 내용 백업'으로 파일을 내려받아 두세요. 다만 사이트는 GitHub Pages에서 제공되고 글꼴 등 일부 자원을 외부 CDN에서 불러오므로, 접속 기록(IP 주소 등)에는 해당 제공자의 정책이 적용됩니다. 채용공고 등록 양식은 Google 설문지를 사용합니다.</p>
+  <p>작성 도구에 입력한 내용, 서명 이미지, 첨부 사진은 안전duck 서버로 전송하지 않고 사용 중인 브라우저(localStorage·IndexedDB)에 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 사라지므로 필요하면 화면 아래 '작성 내용 백업'으로 파일을 내려받아 두세요. 다만 사이트는 GitHub Pages에서 제공되고 글꼴 등 일부 자원을 외부 CDN에서 불러오므로, 접속 기록(IP 주소 등)에는 해당 제공자의 정책이 적용됩니다. </p>
   <h2 id="report">10. 오류 신고 방법</h2>
   <p>법령 내용·시행일·판정 결과·계산식의 오류를 발견하면 알려 주세요. 해당 화면 주소와 근거 조문을 함께 적어 주시면 확인이 빠릅니다.</p>
   <p>{op_html}</p>
@@ -1368,58 +1370,6 @@ def build(out, today):
 </div>"""
     write("legal/index.html", page(site, "../", "legal/", "법령정보·면책 안내", legal_body,
           desc="안전duck 법령 정보의 출처와 기준일, 자가진단·계산 결과의 한계, 자체 양식의 법적 지위, 데이터 저장 방식, 오류 신고 방법."))
-
-    # ---- 채용공고 올리기
-    jf = site.get("job_form") or {}
-    jf_url = safe_url(jf.get("url"))
-    if not jf_url:
-        warn("채용공고 등록 폼 주소(config/site.json 의 job_form.url)가 비어 있음 → 등록 페이지에 '접수 준비 중'으로 표시")
-    jf_embed = jf_url + ("&" if "?" in jf_url else "?") + "embedded=true" if jf_url else ""
-    post_form = (f'<div class="jp-frame"><iframe src="{e(jf_embed)}" title="채용공고 등록 양식" loading="lazy"></iframe></div>'
-                 f'<p class="hint">양식이 보이지 않으면 <a href="{e(jf_url)}" target="_blank" rel="noopener">새 창에서 열기 ↗</a></p>') if jf_url else (
-                 '<div class="jempty"><div class="jempty-ico" aria-hidden="true">🛠️</div><p class="jempty-t">등록 양식을 준비하고 있습니다.</p>'
-                 '<p class="jempty-d">곧 이 자리에서 바로 공고를 올릴 수 있습니다.</p></div>')
-    post_body = f"""
-<section class="phead"><div class="wrap">
-  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">채용정보</a><span>/</span>공고 올리기</p>
-  <h1>채용공고 올리기</h1>
-  <p>안전관리자·보건관리자·EHS·소방 인력을 찾는 기업이라면 누구나 무료로 올릴 수 있습니다. 회원가입은 없고, 운영자가 내용을 확인한 뒤 게시합니다.</p>
-</div></section>
-<div class="wrap layout-detail">
-  <section class="col-main stack">
-    <ol class="jp-steps">
-      <li><b>1</b><div><strong>양식 작성</strong><span>회사명, 직무, 근무지, 마감일, 지원 방법</span></div></li>
-      <li><b>2</b><div><strong>운영자 확인</strong><span>안전·보건 직무인지, 지원 방법이 분명한지</span></div></li>
-      <li><b>3</b><div><strong>게시</strong><span>확인된 공고는 다음 날 아침 목록에 올라갑니다</span></div></li>
-    </ol>
-    {post_form}
-  </section>
-  <aside class="col-side stack">
-    <div class="side-box"><h2 class="h-sm">등록 기준</h2><ul class="bul hint">
-      <li>안전·보건·소방·환경(EHS) 관련 직무만 받습니다.</li>
-      <li>채용하는 기업 또는 그 채용 담당자가 직접 올려야 합니다. 다른 사이트 공고를 옮겨 적는 것은 받지 않습니다.</li>
-      <li>지원 방법(공고 원문 주소 또는 접수 이메일)이 있어야 합니다. 적은 연락처는 공고에 그대로 공개됩니다.</li>
-      <li>허위·과장, 수수료를 요구하는 공고, 직무와 무관한 광고는 게시하지 않습니다.</li>
-      <li>마감일이 지나면 자동으로 '마감'으로 바뀝니다.</li>
-    </ul></div>
-    <div class="side-box"><h2 class="h-sm">게시 승인 기준</h2><ul class="bul hint">
-      <li>운영자가 직무 관련성, 회사·지원 방법의 확인 가능 여부, 허위·과장 여부를 보고 게시합니다. 기준에 맞지 않으면 게시하지 않을 수 있습니다.</li>
-      <li>허위 공고, 거짓 채용 조건, 구직자에게 금품을 요구하는 공고는 금지합니다(채용절차의 공정화에 관한 법률·직업안정법 등 관계 법령은 등록자가 직접 확인해야 합니다).</li>
-      <li>안전duck은 공고 내용의 진위를 보증하지 않으며, 채용 조건은 공고 원문과 채용 기업이 책임집니다.</li>
-    </ul></div>
-    <div class="side-box"><h2 class="h-sm">개인정보 처리</h2><ul class="bul hint">
-      <li>수집 항목: 양식에 적은 회사명·담당자 연락처·공고 내용. 목적: 공고 확인과 게시.</li>
-      <li><strong>양식에 적은 지원 연락처(이메일·전화)는 공고에 그대로 공개됩니다.</strong> 공개에 동의하는 연락처만 적어 주세요. 개인 휴대전화보다 회사 대표 연락처를 권장합니다.</li>
-      <li>양식은 Google 설문지로 접수되므로 응답은 Google과 운영자의 스프레드시트에 저장됩니다.</li>
-      <li>공고가 마감되거나 삭제를 요청하면 게시 목록에서 내립니다.</li>
-    </ul></div>
-    <div class="side-box"><h2 class="h-sm">수정·삭제·게시중단·권리침해 신고</h2><p>같은 양식에서 '요청 종류'를 수정 또는 삭제로 고르고 회사명과 공고 제목을 적어 주세요. 확인 후 반영합니다.</p>
-      <p class="hint">내 회사 이름이 도용되었거나 권리를 침해하는 공고를 발견하면 아래로 알려 주세요. 확인되는 대로 게시를 중단합니다.<br>{operator_html(site, "../../")}</p></div>
-    <div class="side-box"><h2 class="h-sm">구직자라면</h2><ul class="bul"><li><a href="../">등록된 공고 보기</a></li>{"".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x["name"])} ↗</a></li>' for x in sites.get("job_search", []) if safe_url(x.get("url")))}</ul></div>
-  </aside>
-</div>"""
-    write("jobs/post/index.html", page(site, "../../", "jobs/post/", "채용공고 올리기", post_body,
-          desc="안전관리자·보건관리자·EHS·소방 채용공고를 무료로 등록하세요. 회원가입 없이 양식만 작성하면 확인 후 게시합니다.", active="jobs/"))
 
     # ---- 채용 목록
     def vals(key, split=False):
@@ -1454,14 +1404,13 @@ def build(out, today):
         side = f"""<details class="fpanel" open data-fpanel><summary>필터</summary><div class="fpanel-body">{filters}
       <button type="button" class="btn btn-sm btn-ghost fpanel-reset" data-reset>필터 초기화</button></div></details>"""
     else:
-        main = jobs_empty.replace("{post}", "post/")
+        main = jobs_empty
         side = ""
     jobs_body = f"""
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>채용정보</p>
   <h1>안전·보건 채용정보</h1>
-  <p>안전관리자·보건관리자·EHS·소방 공고를 핵심 조건만 정리했습니다. 지원 전에는 공고 원문을 꼭 확인하세요.</p>
-  <p class="btns" style="margin-top:14px"><a class="btn" href="post/">채용공고 올리기 · 무료</a></p>
+  <p>안전관리자·보건관리자·EHS·소방 채용 공고를 채용 플랫폼과 공공 채용 사이트에서 바로 찾을 수 있게 연결합니다. 지원 조건은 공고 원문을 확인하세요.</p>
 </div></section>
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
@@ -1529,7 +1478,7 @@ def build(out, today):
                                                   desc=f"{j['company']} · {j.get('region','')} · {j.get('career','')} · 마감 {dl}", active="jobs/"))
 
     # ---- 서식·자료
-    CAT_ORDER = ["법정 서식", "웹 작성 서식", "무료 작성 도구", "법정 기준표(별표)", "고시·지침", "공단 자료", "SAFE 덕희 서식", "기관·행정용"]
+    CAT_ORDER = ["법정 서식", "웹 작성 서식", "무료 작성 도구", "법정 기준표(별표)", "고시·지침", "공단 자료", "Mallo 서식", "기관·행정용"]
     corder = {c: i for i, c in enumerate(CAT_ORDER)}
     resources.sort(key=lambda r: (0 if r.get("popular") else 1, corder.get(r.get("category"), 99)))
     cats = sorted({r["category"] for r in resources if r.get("category")}, key=lambda c: corder.get(c, 99))

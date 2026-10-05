@@ -5,7 +5,7 @@
 ## 구조
 
 ```
-config/site.json      사이트 이름·주소·도구(SAFE 덕희) 링크
+config/site.json      사이트 이름·주소·도구(Mallo) 링크
 config/sources.json   구글 시트 CSV 주소(선택)
 data/jobs.json        채용공고
 data/resources.json   서식·자료
@@ -108,16 +108,16 @@ templates/*.csv       구글 시트 머리글 서식
 | 내용 편집 | 구글 시트 → 매일 새벽 자동 반영 |
 | 검색·필터 | 방문자 브라우저에서 처리 |
 | 즐겨찾기 | 방문자 브라우저(localStorage)에만 저장 |
-| 안전관리 기록 | SAFE 덕희가 각자 PC에 저장 |
+| 안전관리 기록 | Mallo가 각자 PC에 저장 |
 
 ## 처음 올리기 (GitHub Pages)
 
 1. GitHub에 새 저장소 `anjeonduck`(공개)를 만들고 이 폴더 전체를 올립니다.
 2. 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 바꿉니다.
-3. `config/site.json`에서 `base_url`을 실제 주소로, `tools[0].url`을 SAFE 덕희 주소로 바꿉니다.
+3. `config/site.json`에서 `base_url`을 실제 주소로, `tools[0].url`을 Mallo 주소로 바꿉니다.
 4. Actions 탭에서 "빌드·배포"가 끝나면 사이트가 열립니다.
 
-> **SAFE 덕희는 지금 주소에서 옮기지 마세요.** 기록은 주소(도메인)별로 저장되므로 주소가 바뀌면 사용자에게 빈 화면으로 보입니다. 포털은 링크만 겁니다.
+> **Mallo는 지금 주소에서 옮기지 마세요.** 기록은 주소(도메인)별로 저장되므로 주소가 바뀌면 사용자에게 빈 화면으로 보입니다. 포털은 링크만 겁니다.
 
 ## 채용공고 올리기 (구글 시트)
 

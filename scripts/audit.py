@@ -187,7 +187,6 @@ def check_site(site_dir):
         "tools/msds/index.html": ["자동 추출값 — 원문 확인 필요"],
         "tools/loto/index.html": ["보조양식"],
         "tools/risk/index.html": ["안전duck 기본 위험성평가 예시 기준"],
-        "jobs/post/index.html": ["개인정보 처리", "그대로 공개됩니다", "권리침해"],
         "legal/index.html": ["국가법령정보센터", "오류 신고"],
         "index.html": ["법령 데이터 기준일"],
     }

@@ -1,27 +1,118 @@
 {
   "official": [
-    {"name": "국가법령정보센터", "url": "https://www.law.go.kr/", "desc": "법령 본문, 시행일, 별표·서식 원본", "short": "국가법령정보센터"},
-    {"name": "고용노동부", "url": "https://www.moel.go.kr/", "desc": "안전보건 정책, 보도자료, 지방관서 안내", "short": "고용노동부"},
-    {"name": "한국산업안전보건공단(KOSHA)", "url": "https://www.kosha.or.kr/", "desc": "KOSHA 가이드, 교육·기술 자료, 재해사례", "short": "안전보건공단"},
-    {"name": "근로복지공단", "url": "https://www.comwel.or.kr/", "desc": "산재보험 신청·보상", "short": "근로복지공단"},
-    {"name": "고용24", "url": "https://www.work24.go.kr/", "desc": "공공 채용정보, 고용보험", "short": "고용24"}
+    {
+      "name": "국가법령정보센터",
+      "url": "https://www.law.go.kr/",
+      "desc": "법령 본문, 시행일, 별표·서식 원본",
+      "short": "국가법령정보센터"
+    },
+    {
+      "name": "고용노동부",
+      "url": "https://www.moel.go.kr/",
+      "desc": "안전보건 정책, 보도자료, 지방관서 안내",
+      "short": "고용노동부"
+    },
+    {
+      "name": "한국산업안전보건공단(KOSHA)",
+      "url": "https://www.kosha.or.kr/",
+      "desc": "KOSHA 가이드, 교육·기술 자료, 재해사례",
+      "short": "안전보건공단"
+    },
+    {
+      "name": "근로복지공단",
+      "url": "https://www.comwel.or.kr/",
+      "desc": "산재보험 신청·보상",
+      "short": "근로복지공단"
+    },
+    {
+      "name": "고용24",
+      "url": "https://www.work24.go.kr/",
+      "desc": "공공 채용정보, 고용보험",
+      "short": "고용24"
+    }
   ],
   "job_search": [
-    {"name": "고용24", "url": "https://www.work24.go.kr/"},
-    {"name": "사람인 · 안전관리자", "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"},
-    {"name": "잡코리아 · 안전관리자", "url": "https://www.jobkorea.co.kr/Search/?stext=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"},
-    {"name": "사람인 · 보건관리자", "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EB%B3%B4%EA%B1%B4%EA%B4%80%EB%A6%AC%EC%9E%90"}
+    {
+      "name": "고용24",
+      "url": "https://www.work24.go.kr/"
+    },
+    {
+      "name": "사람인 · 안전관리자",
+      "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"
+    },
+    {
+      "name": "잡코리아 · 안전관리자",
+      "url": "https://www.jobkorea.co.kr/Search/?stext=%EC%95%88%EC%A0%84%EA%B4%80%EB%A6%AC%EC%9E%90"
+    },
+    {
+      "name": "사람인 · 보건관리자",
+      "url": "https://www.saramin.co.kr/zf_user/search?searchword=%EB%B3%B4%EA%B1%B4%EA%B4%80%EB%A6%AC%EC%9E%90"
+    }
   ],
   "counsel": [
-    {"name": "고용노동부 빠른인터넷상담", "url": "https://www.moel.go.kr/minwon/fastcounsel/fastcounselList.do", "desc": "100자 이내 간단한 질문, 8근무시간 내 답변"},
-    {"name": "고용노동부 자주하는 질문 · 산업안전", "url": "https://www.moel.go.kr/faq/faqList.do?cvlcCtgCd=MC04", "desc": "교육·산재처리 등 산업안전 분야 FAQ"},
-    {"name": "고용노동부 훈령·예규·고시", "url": "https://www.moel.go.kr/info/lawinfo/instruction/list.do", "desc": "고시 개정·제정 원문"},
-    {"name": "국가법령정보센터 법령해석례", "url": "https://www.law.go.kr/LSW/expcSc.do", "desc": "법제처 법령해석 검색"}
+    {
+      "name": "고용노동부 빠른인터넷상담",
+      "url": "https://www.moel.go.kr/minwon/fastcounsel/fastcounselList.do",
+      "desc": "100자 이내 간단한 질문, 8근무시간 내 답변"
+    },
+    {
+      "name": "고용노동부 자주하는 질문 · 산업안전",
+      "url": "https://www.moel.go.kr/faq/faqList.do?cvlcCtgCd=MC04",
+      "desc": "교육·산재처리 등 산업안전 분야 FAQ"
+    },
+    {
+      "name": "고용노동부 훈령·예규·고시",
+      "url": "https://www.moel.go.kr/info/lawinfo/instruction/list.do",
+      "desc": "고시 개정·제정 원문"
+    },
+    {
+      "name": "국가법령정보센터 법령해석례",
+      "url": "https://www.law.go.kr/LSW/expcSc.do",
+      "desc": "법제처 법령해석 검색"
+    }
   ],
   "quick": [
-    {"name": "KOSHA MSDS 검색", "short": "MSDS 검색", "url": "https://msds.kosha.or.kr/"},
-    {"name": "산업안전포털 자료실", "short": "KOSHA 자료실", "url": "https://portal.kosha.or.kr/archive/cent-archive/master-arch"},
-    {"name": "고용노동부 보도자료", "short": "노동부 보도자료", "url": "https://www.moel.go.kr/news/enews/report/enewsList.do"},
-    {"name": "공공기관 채용정보", "short": "공공기관 채용", "url": "https://job.alio.go.kr/recruit.do"}
+    {
+      "name": "KOSHA MSDS 검색",
+      "short": "MSDS 검색",
+      "url": "https://msds.kosha.or.kr/"
+    },
+    {
+      "name": "산업안전포털 자료실",
+      "short": "KOSHA 자료실",
+      "url": "https://portal.kosha.or.kr/archive/cent-archive/master-arch"
+    },
+    {
+      "name": "고용노동부 보도자료",
+      "short": "노동부 보도자료",
+      "url": "https://www.moel.go.kr/news/enews/report/enewsList.do"
+    },
+    {
+      "name": "공공기관 채용정보",
+      "short": "공공기관 채용",
+      "url": "https://job.alio.go.kr/recruit.do"
+    }
+  ],
+  "civil": [
+    {
+      "name": "산업재해조사표 제출",
+      "url": "https://labor.moel.go.kr/minwonApply/minwonFormat.do?searchVal=AH038&searchGubun=1&searchRlm=2",
+      "desc": "고용노동부 노동포털 · 산업재해 조사표 온라인 제출"
+    },
+    {
+      "name": "안전·보건관리자 선임 보고",
+      "url": "https://labor.moel.go.kr/minwonApply/minwonFormat.do?searchVal=AD032&searchRlm=2",
+      "desc": "고용노동부 노동포털 · 안전관리자ㆍ보건관리자ㆍ산업보건의 선임 등 보고서"
+    },
+    {
+      "name": "선임 보고(건설업)",
+      "url": "https://labor.moel.go.kr/minwonApply/minwonFormat.do?searchVal=AD045&searchGubun=4&searchRlm=2",
+      "desc": "고용노동부 노동포털 · 선임 등 보고서(건설업)"
+    },
+    {
+      "name": "안전보건교육 신청",
+      "url": "https://edu.kosha.or.kr/headquater/",
+      "desc": "안전보건공단 안전보건교육포털"
+    }
   ]
 }

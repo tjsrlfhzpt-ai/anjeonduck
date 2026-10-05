@@ -147,7 +147,7 @@
   },
   {
     "id": "app-ptw",
-    "category": "SAFE 덕희 서식",
+    "category": "Mallo 서식",
     "title": "작업허가서(PTW)",
     "summary": "화기·밀폐공간·고소 등 위험작업의 허가, 안전조치 확인, 종료 확인을 기록하고 인쇄합니다.",
     "tags": [
@@ -160,7 +160,7 @@
   },
   {
     "id": "app-patrol",
-    "category": "SAFE 덕희 서식",
+    "category": "Mallo 서식",
     "title": "순회점검 일지",
     "summary": "항목별 적합·부적합을 체크하고, 부적합은 개선조치(CAPA)로 바로 넘깁니다.",
     "tags": [
@@ -172,7 +172,7 @@
   },
   {
     "id": "app-accident",
-    "category": "SAFE 덕희 서식",
+    "category": "Mallo 서식",
     "title": "사고·아차사고 조사",
     "summary": "현상 → 원인 → 대책 순서로 조사하고 개선조치와 사건번호로 연결합니다.",
     "tags": [
