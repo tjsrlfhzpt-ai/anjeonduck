@@ -203,6 +203,29 @@ def check_site(site_dir):
     print(f"  도구 {len(site.get('free_tools', []))}개 · 서식 {len(forms)}종 표기 검사")
 
 
+def check_internal_links(site_dir):
+    """빌드 결과의 내부 링크가 실제 파일을 가리키는지(스크립트 안의 조립식 주소는 제외)."""
+    sd = pathlib.Path(site_dir).resolve()
+    bad = {}
+    n = 0
+    for p in sd.rglob("*.html"):
+        if p.name == "404.html":
+            continue
+        t = re.sub(r"<script[\s\S]*?</script>", "", p.read_text(encoding="utf-8"))
+        for h in set(re.findall(r'href="([^"#?]+)', t)):
+            if re.match(r"^(https?:|mailto:|tel:|javascript:|data:)", h):
+                continue
+            n += 1
+            q = (p.parent / h).resolve()
+            if q.is_dir():
+                q = q / "index.html"
+            if not q.exists():
+                bad.setdefault(h, str(p.relative_to(sd)))
+    for h, src in list(bad.items())[:20]:
+        ERR.append(f"깨진 내부 링크: {h} (예: {src})")
+    print(f"  내부 링크 {n}개 검사, 깨진 주소 {len(bad)}종")
+
+
 def check_online(m):
     """국가법령정보센터 연혁 첫 줄의 공포번호가 매니페스트 current/upcoming 에 있는지. 접속 실패는 경고."""
     import urllib.request
@@ -238,6 +261,7 @@ def main():
     check_phrases(site_dir)
     if site_dir:
         check_site(site_dir)
+        check_internal_links(site_dir)
     if "--online" in args:
         check_online(m)
     for w in WARN:

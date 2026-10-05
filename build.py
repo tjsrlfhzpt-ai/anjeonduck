@@ -276,7 +276,7 @@ def situation_cards(resources, rel):
             continue
         items.sort(key=lambda r: (0 if r.get("popular") else 1, CAT_RANK[r["category"]]))
         lis = "".join(
-            f'<li><a href="{rel}{e(r["detail"]) if r.get("detail") else rel + "tools/" + e(r.get("free_tool","")) + "/"}">{e(r["title"])}</a></li>'
+            f'<li><a href="{rel}{e(r["detail"]) if r.get("detail") else "tools/" + e(r.get("free_tool","")) + "/"}">{e(r["title"])}</a></li>'
             for r in items[:4] if r.get("detail") or r.get("free_tool"))
         n = sum(1 for r in resources if r.get("topic") == topic)
         out.append(f'<section class="sit"><h3>{e(title)}</h3><p class="sit-sub">{e(sub)}</p><ul>{lis}</ul>'
@@ -567,8 +567,8 @@ WRITE_TOOLS = ["tbm", "risk", "committee", "msds", "loto", "heat"]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
-NAV4 = [("write", "작성기·도구", "tools/#k-write"), ("calc", "진단·계산기", "tools/#k-calc"), ("res", "서식·자료실", "resources/"), ("law", "법령·소식", "laws/")]
-ACTIVE_GROUP = {"resources/": "res", "laws/": "law", "brief/": "law", "jobs/": "law", "news/": "law"}
+NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "안전 브리핑", "brief/"), ("jobs", "채용", "jobs/")]
+ACTIVE_GROUP = {"tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs"}
 
 
 def nav_cols(site, rel):
@@ -576,11 +576,11 @@ def nav_cols(site, rel):
     def tl(ids):
         return [(f'{rel}tools/{i}/', by[i].get("menu") or by[i].get("short") or by[i]["name"]) for i in ids if i in by]
     return {
-        "write": [("문서 작성", tl(WRITE_TOOLS)), ("서식", [(f"{rel}tools/forms/", "서식 작성기 전체")])],
-        "calc": [("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS))],
-        "res": [("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}tools/forms/", "웹 서식 작성기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
+        "lib": [("작성기", tl(WRITE_TOOLS) + [(f"{rel}tools/forms/", "서식 작성기 전체")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS)),
+                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}tools/", "도구 전체 보기")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
-                ("소식", [(f"{rel}laws/#upcoming", "시행 예정·개정 소식"), (f"{rel}brief/", "오늘의 안전 브리핑"), (f"{rel}jobs/", "채용정보"), (f"{rel}legal/", "법령정보·면책 안내")])],
+                ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")])],
+        "brief": [], "jobs": [],
     }
 
 
@@ -591,13 +591,14 @@ def gnb_html(site, rel, active):
     for key, label, href in NAV4:
         cur = ' aria-current="page"' if key == grp else ""
         body = "".join(f'<div class="mega-col"><p class="mega-h">{e(h)}</p><ul>{"".join(f"<li><a href={chr(34)}{e(u)}{chr(34)}>{e(n)}</a></li>" for u, n in ls)}</ul></div>' for h, ls in cols[key])
-        out += (f'<div class="gnb-item"><a href="{rel}{href}"{cur}>{e(label)}</a><div class="mega" role="region" aria-label="{e(label)} 메뉴"><div class="mega-in">{body}</div></div></div>')
+        mega = f'<div class="mega" role="region" aria-label="{e(label)} 메뉴"><div class="mega-in">{body}</div></div>' if body else ""
+        out += f'<div class="gnb-item"><a href="{rel}{href}"{cur}>{e(label)}</a>{mega}</div>'
     return out
 
 
 def dock_html(rel, active):
     grp = ACTIVE_GROUP.get(active, "")
-    items = [("", "🏠", "홈", "home")] + [(href, ic, label.split("·")[0], key) for (key, label, href), ic in zip(NAV4, ["📝", "🧮", "📄", "📰"])]
+    items = [("", "🏠", "홈", "home")] + [(href, ic, label.replace("안전 ", ""), key) for (key, label, href), ic in zip(NAV4, ["🗂️", "⚖️", "📰", "💼"])]
     return '<nav class="dock" aria-label="빠른 이동">' + "".join(
         f'<a href="{rel}{href}"{" aria-current=" + chr(34) + "page" + chr(34) if key == grp else ""}><span aria-hidden="true">{ic}</span>{e(label)}</a>' for href, ic, label, key in items) + "</nav>"
 
@@ -671,8 +672,6 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     cur = ' aria-current="page"'
     on_news = (site.get("features") or {}).get("public_api", False)
     nav = gnb_html(site, rel_root, active)
-    if active == "tools/":
-        nav = nav.replace(f'<a href="{rel_root}tools/#k-write">', f'<a href="{rel_root}tools/#k-write" aria-current="page">', 1)
     tl = tool_link(site, rel_root)
     ext = ' target="_blank" rel="noopener"' if tl.startswith("http") else ""
     contact = site.get("contact_email", "")
@@ -1244,9 +1243,17 @@ def build(out, today):
     stale_txt2 = ' · <b>공식 원문 재확인 필요</b>' if stale_txt else ""
     asof_strip = (f'<p class="asof"><span class="wrap">법령 데이터 기준일 <b>{e(man.get("checked_at", ""))}</b>{stale_txt2}'
                   f' · <a href="laws/#upcoming">시행 예정 {n_up}건</a> · <a href="legal/#check">확인 필요 {n_chk}건</a></span></p>')
-    law_rows = "".join(bd_row("laws/#upcoming", f"{nm.replace('산업안전보건법', '산안법').replace('산업안전보건기준에 관한 규칙', '안전보건규칙')} {u['no'].split(' ')[-1]}", md(eff), "시행 예정") for eff, nm, u in ups_all[:3])
+    def short_law(nm):
+        return nm.replace("산업안전보건기준에 관한 규칙", "안전보건규칙").replace("산업안전보건법", "산안법").replace("중대재해 처벌 등에 관한 법률", "중대재해처벌법")
+    law_rows = "".join(bd_row("laws/#upcoming", f"{short_law(nm)} {lawpages.kdate(eff)} 시행 ({u['no'].split(' ')[-1]})", "", "시행 예정") for eff, nm, u in ups_all[:4])
     law_rows += "".join(bd_row("laws/#bills", b.get("title", ""), md(b.get("stage_date")), "입법 동향") for b in man.get("bills", [])[:1])
-    law_rows += "".join(bd_row("laws/#updates", u["title"], md(u.get("date")), "시행 중") for u in [x for x in updates if (x.get("effective") or x.get("date") or "") <= today][:2])
+    seen_t = set()
+    for u in [x for x in updates if (x.get("effective") or x.get("date") or "") <= today]:
+        key = (u.get("law"), u["title"].split(" — ")[0])
+        if key in seen_t or len(seen_t) >= 2:
+            continue
+        seen_t.add(key)
+        law_rows += bd_row("laws/#updates", short_law(u.get("law", "")) + " " + u["title"].split(" — ")[0], md(u.get("effective") or u.get("date")), "시행 중")
     bd_laws = board(f"법령 현황 · 기준일 {md(man.get('checked_at'))}", "laws/", law_rows)
     _unused = board("법령 개정", "laws/#updates", "".join(bd_row(f"laws/#updates", u["title"], md(u.get("date")), u.get("law", "").replace("산업안전보건법 ", "").replace("산업안전보건", "산안")[:6]) for u in updates[:5]))
     FORM_PICKS = ["log-sup", "log-safety", "edu-log", "permit", "patrol", "sapa-half"]
@@ -1264,15 +1271,15 @@ def build(out, today):
         d = re.split(r"(?<=[.다요])\s", str(d or "").strip())[0]
         return d.rstrip(".")
     def mcard(href, icon, title, desc, badge):
-        return (f'<a class="mc" href="{e(href)}"><span class="mc-i" aria-hidden="true">{icon}</span><span class="mc-b"><strong>{e(title)}</strong>'
-                f'<span class="mc-d">{e(desc)}</span></span><span class="mc-g">{e(badge)}</span></a>')
+        return (f'<a class="hc" href="{e(href)}"><span class="hc-i" aria-hidden="true">{icon}</span><span class="hc-b"><strong>{e(title)}</strong>'
+                f'<span class="hc-d">{e(desc)}</span></span><span class="hc-g">{e(badge)}</span></a>')
     def tcards(ids):
         return "".join(mcard(f"tools/{i}/", TOOL_ICONS.get(i, "📄"), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
     tab1 = tcards(WRITE_TOOLS)
     tab2 = tcards(CALC_TOOLS)
     look = "".join(f'<a href="tools/{i}/">{TOOL_ICONS.get(i, "")} {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
     form_rows = "".join(f'<li data-s="{e((f["title"] + " " + f.get("group", "")).lower())}"><a href="tools/forms/{e(f["id"])}/"><span class="fl-g">{e(f.get("group", "")[:10])}</span>{e(f["title"])}</a><span class="fkind fkind-b">웹 작성</span></li>' for f in _forms)
-    form_rows += "".join(f'<li data-s="{e((r["title"] + " " + (r.get("form_no") or "")).lower())}"><a href="{e("resources/" + r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]))}"><span class="fl-g">{e((r.get("form_no") or "원본")[:10])}</span>{e(r["title"])}</a><span class="fkind fkind-a">법령 원본</span></li>' for r in popular)
+    form_rows += "".join(f'<li data-s="{e((r["title"] + " " + (r.get("form_no") or "")).lower())}"><a href="{e(r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]))}"><span class="fl-g">{e((r.get("form_no") or "원본")[:10])}</span>{e(r["title"])}</a><span class="fkind fkind-a">법령 원본</span></li>' for r in popular)
     if briefs:
         b0 = briefs[0]
         brief_rows = "".join(bd_row(f"brief/{b0['date']}/", it["title"], md(it.get("date") or b0["date"]), it.get("cat") or "정책") for it in b0["items"][:4])
@@ -1282,7 +1289,7 @@ def build(out, today):
     idx = [{"t": t["name"], "k": "도구", "h": f"tools/{t['id']}/", "d": (t.get("short") or "") + " " + (t.get("law") or "")} for t in site.get("free_tools", [])]
     idx += [{"t": f["title"], "k": "웹 서식", "h": f"tools/forms/{f['id']}/", "d": f.get("group", "")} for f in _forms]
     idx += [{"t": n, "k": "법령", "h": f"laws/{k}/", "d": "현행 전문"} for k, n in LAW_MENU]
-    idx += [{"t": r["title"], "k": "서식·자료", "h": ("resources/" + r["detail"]) if r.get("detail") else "resources/?q=" + quote(r["title"]), "d": (r.get("form_no") or "") + " " + " ".join(r.get("tags") or [])}
+    idx += [{"t": r["title"], "k": "서식·자료", "h": r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]), "d": (r.get("form_no") or "") + " " + " ".join(r.get("tags") or [])}
             for r in resources if r.get("category") != "웹 작성 서식"]
     idx += [{"t": "안전보건표지 40종", "k": "자료", "h": "resources/signs/", "d": "표지 금지 경고 지시 안내"}, {"t": "오늘의 안전 브리핑", "k": "소식", "h": "brief/", "d": "뉴스 리포트"},
             {"t": "채용정보", "k": "소식", "h": "jobs/", "d": "안전관리자 보건관리자 채용"}, {"t": "법령 개정 소식·시행 예정", "k": "법령", "h": "laws/#upcoming", "d": "개정"}]
@@ -1363,11 +1370,11 @@ def build(out, today):
       <button type="button" role="tab" class="hub-tab" data-tab="news" aria-controls="pane-news" aria-selected="false">📰 브리핑·법령 동향</button>
     </div>
     <div class="hub-pane" role="tabpanel" id="pane-write" data-pane="write">
-      <div class="mc-grid">{tab1}</div>
+      <div class="hc-grid">{tab1}</div>
       <p class="hub-more"><a href="tools/forms/">교육일지·점검표·작업계획서 등 서식 작성기 {n_forms}종 →</a></p>
     </div>
     <div class="hub-pane" role="tabpanel" id="pane-calc" data-pane="calc" hidden>
-      <div class="mc-grid">{tab2}</div>
+      <div class="hc-grid">{tab2}</div>
       <p class="hub-links"><span>조회·일정</span>{look}</p>
     </div>
     <div class="hub-pane" role="tabpanel" id="pane-forms" data-pane="forms" hidden>
