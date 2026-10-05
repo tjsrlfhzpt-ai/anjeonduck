@@ -1325,3 +1325,8 @@ p.asof b{font-weight:700;color:var(--text-2)}
 .go-h{display:flex;align-items:center;gap:8px}
 .go-h img{width:40px;height:40px}
 .jempty-ico img{width:96px;height:96px}
+
+img.logo-mark{width:36px;height:36px;object-fit:contain;border-radius:0}
+.logo-ft img.logo-mark{width:30px;height:30px}
+.hub-links a{display:inline-flex;align-items:center;gap:6px}
+.hub-links a img{width:20px;height:20px}

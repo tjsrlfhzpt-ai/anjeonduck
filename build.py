@@ -530,13 +530,7 @@ def form_auto_map():
 
 NAV = [("tools/", "무료 도구"), ("resources/", "서식·자료"), ("laws/", "법령"), ("brief/", "안전 브리핑"), ("jobs/", "채용정보"), ("news/", "안전뉴스")]
 
-LOGO_SVG = ('<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">'
-            '<rect width="40" height="40" rx="11" fill="#0F172A"/>'
-            '<circle cx="19" cy="24" r="10.5" fill="#FFD23F"/>'
-            '<path d="M8.5 22.5a10.5 9.5 0 0 1 21 0z" fill="#F58A1F"/>'
-            '<rect x="6.5" y="21" width="25" height="3" rx="1.5" fill="#D86F0C"/>'
-            '<circle cx="23" cy="26.5" r="1.6" fill="#17365D"/>'
-            '<path d="M28 28.5q5 .3 5.2 1.9-2 1.7-5.7 1.1z" fill="#F58A1F"/></svg>')
+LOGO_SVG = "@LOGO@"  # page()에서 경로에 맞는 <img>로 바뀐다
 
 AVATAR_COLORS = ["#1F6FD1", "#17365D", "#0E8A6A", "#8A4FD6", "#C2571A", "#3B6E8F"]
 HOME_FORMS = ["lf-f29-288431", "lf-f35-288431", "lf-f102-288431", "lf-f50-288431", "lf-f5-288431"]
@@ -564,7 +558,8 @@ TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "msds": "�
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 TOOL_DUCKS = {"tbm": "clipboard", "risk": "warning", "committee": "help", "msds": "gloves", "loto": "stop", "heat": "think",
-              "selection": "think", "penalty": "surprised", "hpp": "clipboard", "machines": "stop", "safety-cost": "thumb", "edu-hours": "happy", "headcount": "wave", "cvd": "wash"}
+              "selection": "v-check", "penalty": "surprised", "hpp": "v-sign", "machines": "stop", "safety-cost": "thumb", "edu-hours": "ic-edu", "headcount": "wave", "cvd": "v-aid",
+              "schedule": "ic-star", "duties": "ic-shield", "retention": "ic-lock", "inspect": "ic-ok", "docmap": "v-search"}
 WRITE_TOOLS = ["tbm", "risk", "committee", "msds", "loto", "heat"]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
@@ -703,7 +698,8 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <meta property="og:url" content="{e(canonical)}">
 <meta property="og:locale" content="ko_KR">
 <meta name="theme-color" content="#0F172A">
-<link rel="icon" href="{rel_root}assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{rel_root}assets/favicon.png?v={ASSET_VER}" type="image/png">
+<link rel="apple-touch-icon" href="{rel_root}assets/apple-touch-icon.png?v={ASSET_VER}">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="{rel_root}assets/style.css?v={ASSET_VER}">
@@ -741,7 +737,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <script src="{rel_root}assets/app.js?v={ASSET_VER}" defer></script>
 </body>
 </html>
-"""
+""".replace("@LOGO@", f'<img class="logo-mark" alt="" width="36" height="36" src="{rel_root}assets/img/duck/logo.webp">')
 
 
 # ---------------------------------------------------------------- 컴포넌트
@@ -1144,7 +1140,7 @@ def build(out, today):
     job_chips = "".join(
         f'<a class="jchip" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])}{EXT}<span class="sr">(새 창)</span></a>'
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
-    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/duck/think.webp" width="96" height="96" alt=""></div>'
+    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/duck/v-search.webp" width="96" height="96" alt=""></div>'
                   f'<p class="jempty-t">채용 플랫폼의 안전·보건 공고로 바로 연결합니다.</p>'
                   f'<p class="jempty-d">아래 채용 플랫폼에서 안전·보건 직무의 실시간 공고를 바로 확인하세요.</p>'
                   f'<div class="jchips">{job_chips}</div></div>')
@@ -1288,7 +1284,7 @@ def build(out, today):
         return "".join(mcard(f"tools/{i}/", (f'<img src="assets/img/duck/{TOOL_DUCKS[i]}.webp" width="44" height="44" alt="" loading="lazy">' if i in TOOL_DUCKS else TOOL_ICONS.get(i, "📄")), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
     tab1 = tcards(WRITE_TOOLS)
     tab2 = tcards(CALC_TOOLS)
-    look = "".join(f'<a href="tools/{i}/">{TOOL_ICONS.get(i, "")} {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
+    look = "".join(f'<a href="tools/{i}/"><img src="assets/img/duck/{TOOL_DUCKS[i]}.webp" width="20" height="20" alt="" loading="lazy"> {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
     form_rows = "".join(f'<li data-s="{e((f["title"] + " " + f.get("group", "")).lower())}"><a href="tools/forms/{e(f["id"])}/"><span class="fl-g">{e(f.get("group", "")[:10])}</span>{e(f["title"])}</a><span class="fkind fkind-b">웹 작성</span></li>' for f in _forms)
     form_rows += "".join(f'<li data-s="{e((r["title"] + " " + (r.get("form_no") or "")).lower())}"><a href="{e(r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]))}"><span class="fl-g">{e((r.get("form_no") or "원본")[:10])}</span>{e(r["title"])}</a><span class="fkind fkind-a">법령 원본</span></li>' for r in popular)
     if briefs:
