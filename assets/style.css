@@ -1315,3 +1315,13 @@ p.asof b{font-weight:700;color:var(--text-2)}
 .hub-pane .bd-list li a{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
 .hub-pane .bd-list .bd-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hub-pane .bd-list .bd-tag,.hub-pane .bd-list .bd-m{flex:none}
+
+/* 캐릭터 아이콘 */
+.hero2-in{position:relative}
+.hero2-duck{position:absolute;right:-150px;bottom:0;width:150px;height:150px}
+@media (max-width:1180px){.hero2-duck{position:static;width:84px;height:84px;margin:0 auto 6px;display:block}}
+.hc-i img{width:40px;height:40px;object-fit:contain}
+.hc-i:has(img){background:var(--accent-50)}
+.go-h{display:flex;align-items:center;gap:8px}
+.go-h img{width:40px;height:40px}
+.jempty-ico img{width:96px;height:96px}

@@ -563,6 +563,8 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
 TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
+TOOL_DUCKS = {"tbm": "clipboard", "risk": "warning", "committee": "help", "msds": "gloves", "loto": "stop", "heat": "think",
+              "selection": "think", "penalty": "surprised", "hpp": "clipboard", "machines": "stop", "safety-cost": "thumb", "edu-hours": "happy", "headcount": "wave", "cvd": "wash"}
 WRITE_TOOLS = ["tbm", "risk", "committee", "msds", "loto", "heat"]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
@@ -1142,7 +1144,7 @@ def build(out, today):
     job_chips = "".join(
         f'<a class="jchip" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])}{EXT}<span class="sr">(새 창)</span></a>'
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
-    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true">🕵️‍♂️</div>'
+    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/duck/think.webp" width="96" height="96" alt=""></div>'
                   f'<p class="jempty-t">채용 플랫폼의 안전·보건 공고로 바로 연결합니다.</p>'
                   f'<p class="jempty-d">아래 채용 플랫폼에서 안전·보건 직무의 실시간 공고를 바로 확인하세요.</p>'
                   f'<div class="jchips">{job_chips}</div></div>')
@@ -1283,7 +1285,7 @@ def build(out, today):
         return (f'<a class="hc" href="{e(href)}"><span class="hc-i" aria-hidden="true">{icon}</span><span class="hc-b"><strong>{e(title)}</strong>'
                 f'<span class="hc-d">{e(desc)}</span></span><span class="hc-g">{e(badge)}</span></a>')
     def tcards(ids):
-        return "".join(mcard(f"tools/{i}/", TOOL_ICONS.get(i, "📄"), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
+        return "".join(mcard(f"tools/{i}/", (f'<img src="assets/img/duck/{TOOL_DUCKS[i]}.webp" width="44" height="44" alt="" loading="lazy">' if i in TOOL_DUCKS else TOOL_ICONS.get(i, "📄")), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
     tab1 = tcards(WRITE_TOOLS)
     tab2 = tcards(CALC_TOOLS)
     look = "".join(f'<a href="tools/{i}/">{TOOL_ICONS.get(i, "")} {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
@@ -1359,6 +1361,7 @@ def build(out, today):
 {asof_strip}
 <section class="hero2">
   <div class="wrap hero2-in">
+    <img class="hero2-duck" src="assets/img/duck/wave.webp" width="150" height="150" alt="손을 흔드는 안전duck 캐릭터" fetchpriority="high">
     <p class="hero2-eye">안전관리자·보건관리자를 위한 무료 업무 도구</p>
     <h1>안전관리 서류, 여기서 바로</h1>
     <div class="uq" role="search">
@@ -1403,7 +1406,7 @@ def build(out, today):
   </section>
   <aside class="home2-side">
     {month_box}
-    <section class="side-box go-box"><h2 class="h-sm">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
+    <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/duck/call.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
 {home_js}"""
@@ -1809,7 +1812,7 @@ def build(out, today):
     # ---- 404 (어느 경로에서 열려도 되도록 절대 주소 사용)
     base = site["base_url"].rstrip("/")
     (out / "404.html").write_text(page(site, base + "/", "404.html", "페이지를 찾을 수 없습니다",
-        f'<section class="phead"><div class="wrap"><h1>페이지를 찾을 수 없습니다</h1><p>마감되어 내려간 공고이거나 주소가 바뀌었을 수 있습니다.</p><p class="btns"><a class="btn" href="{e(base)}/">홈으로</a></p></div></section>'),
+        f'<section class="phead"><div class="wrap"><img src="{e(base)}/assets/img/duck/surprised.webp" width="110" height="110" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>마감되어 내려간 공고이거나 주소가 바뀌었을 수 있습니다.</p><p class="btns"><a class="btn" href="{e(base)}/">홈으로</a></p></div></section>'),
         encoding="utf-8")
 
     sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc><lastmod>{today}</lastmod></url>" for u in urls)
