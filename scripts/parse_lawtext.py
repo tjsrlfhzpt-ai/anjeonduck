@@ -24,6 +24,22 @@ LAWS = {
 HEAD_RE = re.compile(r"^\s*(제\d+(?:편|장|절|관)(?:의\d+)?)\s+(.+?)\s*(<[^>]*>)?\s*$")
 ART_RE = re.compile(r"^\s?(제\d+조(?:의\d+)?)(?:\(([^)\n]{1,80})\))?\s?(.*)$")
 BYL_RE = re.compile(r"^\s*\[별표\s*(\d+)(?:의(\d+))?\]\s*(.+?)\s*$")
+# 국가법령정보센터 본문은 아직 시행 전인 개정 조문을 현행 조문 바로 아래에 한 번 더 싣고 "[시행일: 2026. 12. 8.] 제6조" 로 닫는다.
+PEND_RE = re.compile(r"^\s*\[시행일\s*:\s*(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.\]\s*(제\d+조(?:의\d+)?)?\s*$")
+PEND_HEAD_RE = re.compile(r"^(제\d+(?:편|장|절|관)(?:의\d+)?)\s+(.+?)\s*(<[^>]*>)?\s*$")
+AMEND_RE = re.compile(r"(?:개정|신설|본조신설|전문개정|제목개정)\s*((?:\d{4}\.\s*\d{1,2}\.\s*\d{1,2}\.(?:,\s*)?)+)")
+
+
+def iso(y, m, d):
+    return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
+
+
+def amend_dates(text):
+    out = set()
+    for grp in AMEND_RE.findall(text):
+        for y, m, d in re.findall(r"(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.", grp):
+            out.add(iso(y, m, d))
+    return sorted(out)
 
 
 def parse(key):
@@ -49,9 +65,34 @@ def parse(key):
 
     toc, arts, cur, path = [], [], None, {}
     level = {"편": 0, "장": 1, "절": 2, "관": 3}
+    em = re.match(r"\s*(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})", ver.group(1)) if ver else None
+    law_eff = iso(*em.groups()) if em else "0000-00-00"
+    pend, pend_head = None, None   # pend: 현행 조문 아래 다시 실린 '시행 전 개정 조문' 모으는 중
     for ln in body:
         s = ln.rstrip()
         if not s.strip():
+            continue
+        pm = PEND_RE.match(s)
+        if pm:
+            eff = iso(pm.group(1), pm.group(2), pm.group(3))
+            if eff <= law_eff:            # 이미 지난 시행일 표기(예: 중처법 제16조)는 현행 조문에 붙은 안내일 뿐
+                pend, pend_head = None, None
+                continue
+            if pm.group(4) and cur and pm.group(4) == cur["jo"]:
+                if pend is not None:      # 현행 + 시행 예정 두 벌
+                    cur["pending"] = {"effective": eff, "title": pend["title"], "text": pend["text"]}
+                else:                     # 한 벌뿐 = 아직 시행 전인 신설 조문
+                    cur["pending"] = {"effective": eff, "title": cur["title"], "text": cur["text"]}
+                    cur["text"], cur["not_in_force"] = "", True
+            elif not pm.group(4) and pend_head and toc:
+                tgt = next((t for t in reversed(toc) if t["no"] == pend_head[0]), None)
+                if tgt:
+                    tgt["pending"] = {"effective": eff, "title": pend_head[1]}
+            pend, pend_head = None, None
+            continue
+        ph = PEND_HEAD_RE.match(s) if not s.startswith(" ") else None
+        if ph and not ART_RE.match(s) :
+            pend_head = (ph.group(1), ph.group(2).strip())
             continue
         h = HEAD_RE.match(s) if s.startswith("    ") else None
         if h and not ART_RE.match(s.strip()):
@@ -72,12 +113,38 @@ def parse(key):
                 if tt["first"] is None:
                     tt["first"] = jo
             continue
-        if cur:
+        if a and cur and a.group(1) == cur["jo"] and a.group(2) and not s.startswith(" "):
+            pend = {"title": a.group(2).strip(), "text": (a.group(3) or "").strip()}
+            continue
+        if pend is not None:
+            pend["text"] += "\n" + s.strip()
+        elif cur:
             cur["text"] += "\n" + s.strip()
+    assert pend is None, f"{key}: 닫히지 않은 시행 예정 조문 — {cur and cur['jo']}"
     for a in arts:
         a["text"] = re.sub(r"\n{2,}", "\n", a["text"]).strip()
+        if a.get("pending"):
+            a["pending"]["text"] = re.sub(r"\n{2,}", "\n", a["pending"]["text"]).strip()
+        am = amend_dates(a["text"] + "\n" + (a.get("pending") or {}).get("text", ""))
+        if am:
+            a["amended"] = am
         if not a.get("deleted") and re.fullmatch(r"삭제\s*<[^>]*>", a["text"]):
             a["deleted"] = True
+    # 부칙: 최근 공포분만(시행일·적용례 원문 확인용)
+    addenda, cur_add = [], None
+    for ln in tail:
+        st = ln.strip()
+        hm = re.match(r"^부\s+칙\s*<([^,>]+),\s*(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.>", st)
+        if hm:
+            cur_add = {"no": hm.group(1).strip(), "date": iso(hm.group(2), hm.group(3), hm.group(4)), "text": ""}
+            addenda.append(cur_add)
+            continue
+        if BYL_RE.match(ln) or st.startswith("Tab Context") or st.startswith("- Executed") or st.startswith("- Available") or st.startswith("•"):
+            cur_add = None
+            continue
+        if cur_add is not None and st:
+            cur_add["text"] += ("\n" if cur_add["text"] else "") + st
+    addenda = [x for x in addenda if x["date"] >= "2025-01-01" and x["text"]]
     byl = []
     for ln in tail:
         m = BYL_RE.match(ln)
@@ -88,10 +155,10 @@ def parse(key):
     assert len(nums) == len(set(nums)), f"{key}: 조문 번호 중복"
     return {
         "key": key, "law": name, "short": short, "lsiSeq": seq,
-        "effective": ver.group(1).strip() if ver else "", "version": ver.group(2).strip() if ver else "",
+        "effective": ver.group(1).strip() if ver else "", "effective_iso": law_eff, "version": ver.group(2).strip() if ver else "",
         "url": f"https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq={seq}",
         "checked": "2026-09-30", "source": f"국가법령정보센터 lsInfoP.do?lsiSeq={seq} 본문",
-        "toc": toc, "articles": arts, "byl": byl,
+        "toc": toc, "articles": arts, "byl": byl, "addenda": addenda,
     }
 
 

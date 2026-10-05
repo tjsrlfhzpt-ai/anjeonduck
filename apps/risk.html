@@ -97,6 +97,19 @@
 <style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746}.risk-appr .ad-appr td.ad-s{height:24px}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}.risk-appr .ad-appr th{padding:1px 3px}</style>
 <style>
   .photo-page{height:auto !important;min-height:0 !important;overflow:visible !important;page-break-after:auto !important}
+  .sec-note{font-size:11px;font-weight:500;color:#555;margin-left:6px}
+  .cfg{border:1px dashed #9aa3af;border-radius:6px;padding:6px 10px;margin:6px 0;font-size:12px;background:#fafbfc}
+  .cfg summary{cursor:pointer;font-weight:700}
+  .cfg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
+  .cfg-grid label{display:flex;flex-direction:column;gap:3px;font-weight:600}
+  .cfg select,.cfg input{height:28px;border:1px solid #c7ccd4;border-radius:5px;padding:0 6px;font:inherit;width:100%}
+  .cfg-cuts{width:100%;margin:4px 0}.cfg-cuts th,.cfg-cuts td{padding:2px 4px;border:0;font-size:12px}
+  .cfg-note{font-size:11.5px;color:#555;margin-top:4px}
+  .law-check td label{display:inline-block;margin:1px 8px 1px 0;font-size:12px}
+  .law-check .law-ref{font-size:10.5px;color:#444}
+  .ed.inline{display:inline-block;min-width:80px;border-bottom:1px solid #999}
+  .form-status{font-size:10.5px;color:#555;margin-top:6px}
+  #ra .ed{font-size:11.5px}#ra label.done{font-size:11px;white-space:nowrap}
   @media print{.photo-page:not(.has-photos){display:none !important}.photo-page{page-break-before:always}}
 </style>
 </head>
@@ -116,7 +129,7 @@
   <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">📷 사진 첨부</button>
   <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
   <button class="btn btn-red" onclick="resetForm()">↻ 초기화</button>
-  <p class="ctrl-note">현재 위험성은 기본 목록의 상·중·하로 미리 채운 <b>추천값</b>입니다. 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
+  <p class="ctrl-note">현재 위험성과 감소대책은 기본 목록으로 미리 채운 <b>안전duck 추천값</b>입니다(법정 문구 아님). 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
 </div>
 
 <div class="page-container" id="page1">
@@ -150,36 +163,33 @@
     </tbody>
   </table>
 
-  <div class="section-title">2. 위험성 평가기준 (가능성·빈도 5단계 × 중대성·강도 4단계)</div>
+  <div class="section-title">2. 위험성 평가기준 <span class="sec-note">안전duck 기본 위험성평가 예시 기준 — 평가기법은 사업장의 위험성평가 방법에 맞게 설정</span></div>
+  <div class="cfg no-print" id="cfgBox">
+    <details><summary>평가기준 바꾸기 (단계 수·계산 방식·등급 구간·허용 기준)</summary>
+      <div class="cfg-grid">
+        <label>가능성(빈도) 단계 <select id="cfgP"><option>3</option><option>4</option><option selected>5</option></select></label>
+        <label>중대성(강도) 단계 <select id="cfgC"><option>3</option><option selected>4</option><option>5</option></select></label>
+        <label>점수 계산 <select id="cfgM"><option value="mul" selected>가능성 × 중대성</option><option value="add">가능성 + 중대성</option></select></label>
+        <label>허용 가능한 최대 점수 <input type="number" id="cfgA" min="1" value="6"></label>
+      </div>
+      <table class="cfg-cuts"><thead><tr><th>등급 이름</th><th>이 점수 이상</th><th>관리기준</th></tr></thead><tbody id="cfgCuts"></tbody></table>
+      <p class="cfg-note">법령은 특정 점수표를 정하고 있지 않습니다. 사업장 위험성평가 실시 규정에서 정한 방법(빈도·강도법, 체크리스트, 3단계 판단법, 핵심요인 기술법 등)에 맞게 고쳐 쓰세요. <button type="button" class="btn btn-blue" style="padding:3px 10px;font-size:12px" onclick="resetCfg()">안전duck 기본 예시로 되돌리기</button></p>
+    </details>
+  </div>
   <div class="criteria-box">
-    <table class="matrix-table">
-      <thead><tr><th>빈도 ↓ \ 강도 →</th><th>④</th><th>③</th><th>②</th><th>①</th></tr></thead>
-      <tbody>
-        <tr><th>⑤</th><td class="risk20">20</td><td class="risk15">15</td><td class="risk10">10</td><td class="risk5">5</td></tr>
-        <tr><th>④</th><td class="risk20">16</td><td class="risk12">12</td><td class="risk8">8</td><td class="risk4">4</td></tr>
-        <tr><th>③</th><td class="risk12">12</td><td class="risk9">9</td><td class="risk6">6</td><td class="risk3">3</td></tr>
-        <tr><th>②</th><td class="risk8">8</td><td class="risk6">6</td><td class="risk4">4</td><td class="risk2">2</td></tr>
-        <tr><th>①</th><td class="risk4">4</td><td class="risk3">3</td><td class="risk2">2</td><td class="risk1">1</td></tr>
-      </tbody>
-    </table>
+    <table class="matrix-table" id="matrixTable"></table>
     <table class="level-table">
-      <colgroup><col style="width:27%"><col style="width:18%"><col style="width:55%"></colgroup>
-      <thead><tr><th>위험성 수준</th><th>관리기준</th><th>내 용</th></tr></thead>
-      <tbody>
-        <tr><td class="risk20">16~20 (매우높음)</td><td class="risk20">즉시개선</td><td class="desc">긴급하게 대책 수립·시행이 필요한 상태</td></tr>
-        <tr><td class="risk15">15 (높음)</td><td class="risk15">즉시개선</td><td class="desc">긴급하게 대책 수립·시행이 필요한 상태</td></tr>
-        <tr><td class="risk9">8~12 (보통)</td><td class="risk9">개 선</td><td class="desc">안전보건대책을 수립하여 개선이 필요한 상태</td></tr>
-        <tr><td class="risk4">4~6 (낮음)</td><td class="risk4">현상유지</td><td class="desc">현재 안전보건대책의 유지 관리가 필요한 상태</td></tr>
-        <tr><td class="risk1">1~3 (매우낮음)</td><td class="risk1">현상유지</td><td class="desc">현재 안전보건대책의 유지 관리가 필요한 상태</td></tr>
-      </tbody>
+      <colgroup><col style="width:30%"><col style="width:20%"><col style="width:50%"></colgroup>
+      <thead><tr><th>위험성 수준</th><th>관리기준</th><th>허용 여부</th></tr></thead>
+      <tbody id="levelBody"></tbody>
     </table>
   </div>
 
   <div class="section-title">3. 위험성평가 및 감소대책</div>
   <table id="ra">
-    <colgroup><col style="width:6%"><col style="width:29%"><col style="width:16%"><col style="width:33%"><col style="width:16%"></colgroup>
+    <colgroup><col style="width:4%"><col style="width:19%"><col style="width:15%"><col style="width:12%"><col style="width:19%"><col style="width:11%"><col style="width:12%"><col style="width:8%"></colgroup>
     <thead>
-      <tr><th>연번</th><th>유해·위험요인</th><th>현재 위험성<br>(빈도×강도)</th><th>위험성 감소대책</th><th>개선 후 위험성<br>(빈도×강도)</th></tr>
+      <tr><th>연번</th><th>유해·위험요인</th><th>현재 안전보건조치</th><th>현재 위험성</th><th>추가 감소대책</th><th>담당자<br>개선기한</th><th>개선 후 위험성</th><th>완료<br>확인</th></tr>
     </thead>
     <tbody id="ra-tbody"></tbody>
   </table>
@@ -187,12 +197,34 @@
     <button class="btn btn-blue" style="padding:4px 10px;font-size:12px;" onclick="addEmptyRow()">+ 빈 줄 추가</button>
   </div>
 
-  <div class="section-title">4. 평가 참여자</div>
+  <div class="section-title">4. 평가 참여자 (참여한 근로자·근로자대표)</div>
   <table class="people">
     <colgroup><col style="width:6%"><col style="width:17%"><col style="width:15%"><col style="width:12%"><col style="width:6%"><col style="width:17%"><col style="width:15%"><col style="width:12%"></colgroup>
     <thead><tr><th>No</th><th>소속</th><th>성명</th><th>서명</th><th>No</th><th>소속</th><th>성명</th><th>서명</th></tr></thead>
     <tbody id="people-tbody"></tbody>
   </table>
+
+  <div class="section-title">5. 근로자 참여 · 결과 공유 · 기록</div>
+  <table class="law-check">
+    <colgroup><col style="width:16%"><col style="width:54%"><col style="width:30%"></colgroup>
+    <tbody>
+      <tr><th>근로자 참여</th><td>
+        <label><input type="checkbox"> 사업장 순회 점검에 근로자 참여</label>
+        <label><input type="checkbox"> 설문조사</label> <label><input type="checkbox"> 면담</label> <label><input type="checkbox"> 그 밖의 의견 수렴</label>
+        <div class="ed left" contenteditable data-ph="순회 점검에 참여시킬 수 없는 특별한 사정이 있으면 적으세요"></div></td>
+        <td class="law-ref">법 제36조제2항 · 규칙 제37조의2<br>근로자대표가 요구하면 근로자대표 참여(법 제36조제3항)</td></tr>
+      <tr><th>결과 공유</th><td>
+        <label><input type="checkbox"> 실시 전: 평가 일정을 알림</label>
+        <label><input type="checkbox"> 실시 후: 유해·위험요인, 위험성 수준, 개선대책과 이행 결과를 알림</label><br>
+        방법 <label><input type="checkbox"> 안전보건교육</label> <label><input type="checkbox"> 설명회</label> <label><input type="checkbox"> 사업장 게시</label> <label><input type="checkbox"> 서면·전자</label> <label><input type="checkbox"> 작업 전 안전점검회의</label></td>
+        <td class="law-ref">법 제36조제4항 · 규칙 제37조의3</td></tr>
+      <tr><th>기록·보존</th><td>
+        <label><input type="checkbox"> 실시 시기·담당자</label> <label><input type="checkbox"> 참여 근로자·근로자대표</label> <label><input type="checkbox"> 요인·수준·대책·이행 결과</label><br>
+        보존 시작일 <span class="ed inline" contenteditable data-ph="YYYY-MM-DD"></span> — 3년간 보존</td>
+        <td class="law-ref">법 제36조제5항 · 규칙 제37조의4</td></tr>
+    </tbody>
+  </table>
+  <p class="form-status">안전duck 자체 제공 양식 · 법정 지정서식이 아님 — 위험성평가 결과에 적어야 할 사항(규칙 제37조의4)을 담은 보조 양식입니다. 근거 확인일 2026-10-05(고용노동부령 제477호).</p>
 </div>
 
 <div class="page-container photo-page" id="riskPhotosPage"><div id="riskPhotos"></div></div>
@@ -220,21 +252,53 @@
     var d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
+  var DEF_CFG = { p: 5, c: 4, mode: "mul", accept: 6, cuts: [["매우높음", 16, "즉시개선"], ["높음", 15, "즉시개선"], ["보통", 8, "개선"], ["낮음", 4, "현상유지"], ["매우낮음", 1, "현상유지"]] };
+  var CLS = ["risk20", "risk15", "risk9", "risk4", "risk1"], CFG_KEY = "anjeonduck.risk.cfg", CFG;
+  try { CFG = JSON.parse(localStorage.getItem(CFG_KEY) || "null"); } catch (e) { CFG = null; }
+  if (!CFG || !CFG.cuts || CFG.cuts.length !== 5) CFG = JSON.parse(JSON.stringify(DEF_CFG));
+  function scoreOf(p, c) { return p && c ? (CFG.mode === "add" ? p + c : p * c) : 0; }
   function levelInfo(score) {
     if (!score) return { text: "미평가", cls: "risk0" };
-    if (score >= 16) return { text: "매우높음", cls: "risk20" };
-    if (score === 15) return { text: "높음", cls: "risk15" };
-    if (score >= 8) return { text: "보통", cls: "risk9" };
-    if (score >= 4) return { text: "낮음", cls: "risk4" };
-    return { text: "매우낮음", cls: "risk1" };
+    for (var i = 0; i < CFG.cuts.length; i++) if (score >= +CFG.cuts[i][1]) return { text: CFG.cuts[i][0], cls: CLS[i] };
+    return { text: CFG.cuts[4][0], cls: CLS[4] };
   }
-  // 기본 목록의 상/중/하 → 현재 위험성 추천값(빈도, 강도)
+  // 기본 목록의 상/중/하 → 현재 위험성 추천값(가능성, 중대성). 단계 수가 바뀌면 비율로 맞춘다.
   function suggest(level) {
-    if (level === "상") return { p: 4, c: 3 };
-    if (level === "중") return { p: 3, c: 2 };
-    if (level === "하") return { p: 2, c: 1 };
-    return { p: 0, c: 0 };
+    var r = level === "상" ? [0.8, 0.75] : level === "중" ? [0.6, 0.5] : level === "하" ? [0.4, 0.25] : null;
+    return r ? { p: Math.max(1, Math.round(CFG.p * r[0])), c: Math.max(1, Math.round(CFG.c * r[1])) } : { p: 0, c: 0 };
   }
+  function renderCfg() {
+    var h = "<thead><tr><th>가능성 ↓ \\ 중대성 →</th>";
+    for (var c = CFG.c; c >= 1; c--) h += "<th>" + MARKS[c - 1] + "</th>";
+    h += "</tr></thead><tbody>";
+    for (var p = CFG.p; p >= 1; p--) { h += "<tr><th>" + MARKS[p - 1] + "</th>"; for (var c2 = CFG.c; c2 >= 1; c2--) { var sc = scoreOf(p, c2); h += '<td class="' + levelInfo(sc).cls + '">' + sc + "</td>"; } h += "</tr>"; }
+    document.getElementById("matrixTable").innerHTML = h + "</tbody>";
+    var max = scoreOf(CFG.p, CFG.c);
+    document.getElementById("levelBody").innerHTML = CFG.cuts.map(function (x, i) {
+      var hi = i === 0 ? max : +CFG.cuts[i - 1][1] - 1, lo = +x[1];
+      return '<tr><td class="' + CLS[i] + '">' + (lo >= hi ? lo : lo + "~" + hi) + " (" + esc(x[0]) + ')</td><td class="' + CLS[i] + '">' + esc(x[2]) + '</td><td class="desc">' + (lo > +CFG.accept ? "허용 불가 — 감소대책 수립·이행" : hi <= +CFG.accept ? "허용 가능 — 현재 조치 유지" : "일부 허용(" + CFG.accept + "점 이하)") + "</td></tr>";
+    }).join("");
+    document.getElementById("cfgP").value = CFG.p; document.getElementById("cfgC").value = CFG.c; document.getElementById("cfgM").value = CFG.mode; document.getElementById("cfgA").value = CFG.accept;
+    document.getElementById("cfgCuts").innerHTML = CFG.cuts.map(function (x, i) {
+      return '<tr><td><input data-cut="' + i + '" data-f="0" value="' + esc(x[0]) + '"></td><td><input type="number" min="1" data-cut="' + i + '" data-f="1" value="' + esc(x[1]) + '"></td><td><input data-cut="' + i + '" data-f="2" value="' + esc(x[2]) + '"></td></tr>';
+    }).join("");
+  }
+  function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); } catch (e) { /* 저장 못 해도 화면에는 반영 */ } }
+  function resetCfg() { CFG = JSON.parse(JSON.stringify(DEF_CFG)); saveCfg(); renderCfg(); rebuildSelects(); }
+  function rebuildSelects() {
+    document.querySelectorAll(".scoreSel").forEach(function (w) {
+      var ss = w.querySelectorAll("select"), pv = Math.min(+ss[0].value, CFG.p), cv = Math.min(+ss[1].value, CFG.c);
+      w.innerHTML = sel(pv, CFG.p, "가능성") + (CFG.mode === "add" ? " + " : " × ") + sel(cv, CFG.c, "중대성") + '<div class="score-badge"></div>';
+    });
+    updateAll();
+  }
+  document.getElementById("cfgBox").addEventListener("change", function (ev) {
+    var t = ev.target;
+    if (t.dataset.cut != null) CFG.cuts[+t.dataset.cut][+t.dataset.f] = t.dataset.f === "1" ? Math.max(1, +t.value || 1) : t.value;
+    else { CFG.p = +document.getElementById("cfgP").value; CFG.c = +document.getElementById("cfgC").value; CFG.mode = document.getElementById("cfgM").value; CFG.accept = Math.max(1, +document.getElementById("cfgA").value || 1); }
+    CFG.cuts.sort(function (x, y) { return y[1] - x[1]; });
+    saveCfg(); renderCfg(); rebuildSelects();
+  });
   function itemsFor(dept, n) {
     var own = HAZARD_DB.items.filter(function (i) { return i.group === dept; });
     var common = dept === "공통" ? [] : HAZARD_DB.items.filter(function (i) { return i.group === "공통"; });
@@ -242,20 +306,23 @@
     while (list.length < n) list.push({ risk: "", level: "", measure: "" });
     return list;
   }
-  function sel(val, max) {
-    var h = '<select onchange="updateScore(this)" aria-label="' + (max === 5 ? "빈도" : "강도") + '"><option value="0"' + (val ? "" : " selected") + '>-</option>';
+  function sel(val, max, label) {
+    var h = '<select onchange="updateScore(this)" aria-label="' + label + '"><option value="0"' + (val ? "" : " selected") + '>-</option>';
     for (var i = 1; i <= max; i++) h += '<option value="' + i + '"' + (i === val ? " selected" : "") + '>' + MARKS[i - 1] + '</option>';
     return h + '</select>';
   }
   function appendRow(tbody, no, hazard, p, c, measure) {
-    var tr = document.createElement("tr");
+    var tr = document.createElement("tr"), op = CFG.mode === "add" ? " + " : " × ";
     tr.innerHTML =
       '<td style="text-align:center;"><span class="row-num">' + no + '</span>' +
         '<button type="button" class="del-btn no-print" onclick="this.closest(\'tr\').remove(); renumber();">삭제</button></td>' +
-      '<td><div class="ed left" contenteditable data-ph="유해·위험요인 입력">' + esc(hazard) + '</div></td>' +
-      '<td><div class="scoreSel">' + sel(p, 5) + ' × ' + sel(c, 4) + '<div class="score-badge"></div></div></td>' +
-      '<td><div class="ed left" contenteditable data-ph="감소대책 입력">' + esc(measure) + '</div></td>' +
-      '<td><div class="scoreSel">' + sel(0, 5) + ' × ' + sel(0, 4) + '<div class="score-badge"></div></div></td>';
+      '<td><div class="ed left" contenteditable data-ph="유해·위험요인">' + esc(hazard) + '</div></td>' +
+      '<td><div class="ed left" contenteditable data-ph="지금 하고 있는 조치"></div></td>' +
+      '<td><div class="scoreSel">' + sel(p, CFG.p, "가능성") + op + sel(c, CFG.c, "중대성") + '<div class="score-badge"></div></div></td>' +
+      '<td><div class="ed left" contenteditable data-ph="추가 감소대책">' + esc(measure) + '</div></td>' +
+      '<td><div class="ed" contenteditable data-ph="담당자"></div><div class="ed" contenteditable data-ph="기한"></div></td>' +
+      '<td><div class="scoreSel">' + sel(0, CFG.p, "가능성") + op + sel(0, CFG.c, "중대성") + '<div class="score-badge"></div></div></td>' +
+      '<td style="text-align:center"><label class="done"><input type="checkbox" aria-label="개선 완료"> 완료</label><div class="ed" contenteditable data-ph="확인자"></div></td>';
     tbody.appendChild(tr);
   }
   function applyAutoData() {
@@ -278,10 +345,10 @@
     var wrap = el.closest(".scoreSel");
     var s = wrap.querySelectorAll("select");
     var p = parseInt(s[0].value, 10), c = parseInt(s[1].value, 10);
-    var score = p && c ? p * c : 0;
+    var score = scoreOf(p, c);
     var info = levelInfo(score);
     var badge = wrap.querySelector(".score-badge");
-    badge.innerText = score ? score + " (" + info.text + ")" : info.text;
+    badge.innerText = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
     badge.className = "score-badge " + info.cls;
   }
   function updateAll() { document.querySelectorAll(".scoreSel").forEach(function (w) { updateScore(w.querySelector("select")); }); }
@@ -305,6 +372,7 @@
     gs.innerHTML = HAZARD_DB.groups.map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join("");
     document.getElementById("evalDate").innerText = today();
     peopleRows();
+    renderCfg();
     applyAutoData();
   })();
 </script>

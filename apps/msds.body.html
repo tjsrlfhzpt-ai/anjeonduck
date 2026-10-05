@@ -48,10 +48,12 @@
     <div class="ms-editbar"><strong id="mEditTitle">새 물질</strong><span class="grow"></span><span class="form-save" id="mSaved" aria-live="polite"></span><button type="button" class="btn btn-sm btn-ghost" id="mBack">← 관리대장</button></div>
     <details class="ms-paste" id="mPasteBox" open>
       <summary>MSDS 붙여넣기로 자동 채우기</summary>
+      <ol class="ms-steps" aria-label="진행 순서"><li>① MSDS 붙여넣기</li><li>② 자동 추출</li><li>③ 원문 대조</li><li>④ 사용자 확인 체크</li><li>⑤ 경고표지 출력</li></ol>
       <p class="hint">MSDS 파일(PDF·한글)을 열어 전체 선택(Ctrl+A) → 복사(Ctrl+C) 후 아래에 붙여 넣으세요. 1·2·4·7·8번 항목에서 제품명, 공급자, 신호어, H·P 문구, 응급조치, 취급 주의, 보호구를 찾아 채웁니다. 글자로 복사되지 않는 스캔본은 직접 입력하세요.</p>
       <textarea id="mPaste" rows="7" placeholder="예) 1. 화학제품과 회사에 관한 정보&#10;가. 제품명 : ○○ 세척제&#10;...&#10;2. 유해성·위험성&#10;신호어 : 위험&#10;H225 고인화성 액체 및 증기&#10;P210 열·스파크·화염·고열로부터 멀리하시오 ..."></textarea>
       <div class="btns"><button type="button" class="btn" id="mParse">자동 채우기</button><button type="button" class="btn btn-ghost" id="mPasteClear">지우기</button><span class="hint" id="mParseMsg"></span></div>
     </details>
+    <p class="ms-auto" id="mAutoBadge" hidden><strong>자동 추출값 — 원문 확인 필요</strong> 아래 값은 붙여 넣은 글자에서 규칙으로 찾아낸 것입니다. 빠지거나 잘못 들어간 문구가 있을 수 있으니 공급자가 제공한 MSDS 원문과 한 줄씩 대조하세요. 안전duck은 MSDS 내용의 정확성을 보증하지 않습니다.</p>
 
     <div class="ms-grid">
       <label class="field"><span class="label">제품명 *</span><input type="text" data-f="name" required></label>
@@ -96,6 +98,10 @@
         <label class="field"><span class="label">비고</span><input type="text" data-f="note"></label>
       </div>
     </fieldset>
+    <div class="ms-verify" id="mVerifyBox">
+      <label class="check"><input type="checkbox" id="mVerify"><span><strong>MSDS 원문과 대조해 제품명·그림문자·신호어·유해·위험 문구·예방조치 문구·공급자 정보를 확인했습니다.</strong></span></label>
+      <p class="hint" id="mVerifyMsg"></p>
+    </div>
     <div class="btns"><button type="button" class="btn" id="mSave">저장</button><button type="button" class="btn btn-ghost" id="mToOut">경고표지·게시물 만들기 →</button><span class="grow"></span><button type="button" class="btn btn-ghost btn-danger" id="mDel">이 물질 삭제</button></div>
   </section>
 
@@ -236,8 +242,17 @@
     FIELDS.forEach(function (f) { var el = document.querySelector('[data-f="' + f + '"]'); if (el) el.value = cur[f] || ""; });
     [].forEach.call(document.getElementsByName("mSig"), function (r) { r.checked = (cur.signal || "") === r.value; });
     $("mEditTitle").textContent = cur.name ? cur.name : "새 물질"; $("mDel").hidden = !S.items.some(function (x) { return x.id === cur.id; });
-    drawPics(); countP(); say("");
+    drawPics(); countP(); say(""); drawVerify();
   }
+  function drawVerify() {
+    $("mVerify").checked = !!cur.verified; $("mAutoBadge").hidden = !(cur.auto && !cur.verified);
+    $("mVerifyMsg").textContent = (cur.verified ? "원문 대조 확인일 " + cur.verified + " — 위 항목을 고치면 체크가 풀립니다." : "확인 체크를 해야 경고표지를 인쇄할 수 있습니다. 확인 뒤에 위 항목을 고치면 체크가 풀립니다.") + " 경고표지의 내용과 부착 책임은 사업주에게 있습니다.";
+  }
+  var CRIT = { name: 1, supplier: 1, addr: 1, tel: 1, h: 1, p: 1, cas: 1 };
+  function unverify() { if (cur && cur.verified) { cur.verified = ""; drawVerify(); } }
+  $("mVerify").addEventListener("change", function () {
+    cur.verified = this.checked ? ymd() : ""; drawVerify(); dirty();
+  });
   function readForm() {
     FIELDS.forEach(function (f) { var el = document.querySelector('[data-f="' + f + '"]'); if (el) cur[f] = el.value.trim(); });
     var r = document.querySelector('input[name="mSig"]:checked'); cur.signal = r ? r.value : "";
@@ -255,19 +270,20 @@
     var b = ev.target.closest("[data-pic]"); if (!b) return;
     var k = b.dataset.pic, i = (cur.pics = cur.pics || []).indexOf(k);
     if (i >= 0) cur.pics.splice(i, 1); else cur.pics.push(k);
-    cur.pics.sort(); drawPics(); dirty();
+    cur.pics.sort(); unverify(); drawPics(); dirty();
   });
   function countP() { var n = lines(document.querySelector('[data-f="p"]').value).length; $("mPCount").textContent = n ? "예방조치 문구 " + n + "개" + (n > 6 ? " — 경고표지에는 6개만 싣는 옵션을 쓸 수 있습니다" : "") : ""; }
   var dt;
   function dirty() { say("저장 안 됨"); clearTimeout(dt); dt = setTimeout(function () { if (cur && (cur.name || "").trim()) commit(true); }, 1200); }
   document.querySelector('[data-pane="edit"]').addEventListener("input", function (ev) {
-    if (ev.target.id === "mPaste") return;
+    if (ev.target.id === "mPaste" || ev.target.id === "mVerify") return;
+    if (CRIT[ev.target.dataset.f]) unverify();
     if (ev.target.dataset.f === "h") drawPics();
     if (ev.target.dataset.f === "p") countP();
     if (ev.target.dataset.f === "name") $("mEditTitle").textContent = ev.target.value || "새 물질";
     dirty();
   });
-  document.querySelector('[data-pane="edit"]').addEventListener("change", function (ev) { if (ev.target.name === "mSig") dirty(); });
+  document.querySelector('[data-pane="edit"]').addEventListener("change", function (ev) { if (ev.target.name === "mSig") { unverify(); dirty(); } });
   function commit(quiet) {
     readForm();
     if (!cur.name) { if (!quiet) { say("제품명을 적어 주세요"); document.querySelector('[data-f="name"]').focus(); } return false; }
@@ -317,7 +333,7 @@
     while ((m = re.exec(t))) idx.push({ code: m[1].replace(/\s+/g, ""), s: m.index, e: re.lastIndex });
     idx.forEach(function (x, i) {
       var end = i + 1 < idx.length ? idx[i + 1].s : t.length, body = t.slice(x.e, end);
-      body = body.split(/\n\s*\n|\n(?=\s*(?:[가-하]\.|\d+\.|[○●■□▪·\-]\s|예방|대응|저장|폐기|신호어|그림문자|유해|나\.|다\.|라\.))/)[0].replace(/\s+/g, " ").trim();
+      body = body.split(/\n\s*\n|\n(?=\s*(?:[HP]\d{3}|EUH\d{3}|[가-하]\.|\d+\.|[○●■□▪·\-]\s|예방|대응|저장|폐기|신호어|그림문자|유해|나\.|다\.|라\.))/)[0].replace(/\s+/g, " ").trim();
       if (!out.some(function (o) { return o.indexOf(x.code + " ") === 0; })) out.push(x.code + (body ? " " + body : ""));
     });
     return out;
@@ -347,9 +363,10 @@
     if (d) { var m = d.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); if (m) { var el = document.querySelector('[data-f="msdsDate"]'); el.value = m[1] + "-" + pad(m[2]) + "-" + pad(m[3]); got.push("개정일"); } }
     // 그림문자: 비어 있으면 H 코드 추천으로 채움
     if (!(cur.pics || []).length) cur.pics = suggestPics(document.querySelector('[data-f="h"]').value);
-    drawPics(); countP(); dirty();
+    if (got.length) { cur.auto = true; cur.verified = ""; }
+    drawPics(); countP(); drawVerify(); dirty();
     $("mEditTitle").textContent = document.querySelector('[data-f="name"]').value || "새 물질";
-    $("mParseMsg").textContent = got.length ? "채운 항목: " + got.join(", ") + " — 원본과 대조한 뒤 저장하세요." : "알아볼 수 있는 항목을 찾지 못했습니다. 항목 번호(1.~16.)와 H·P 코드가 보이도록 붙여 넣었는지 확인하세요.";
+    $("mParseMsg").textContent = got.length ? "채운 항목: " + got.join(", ") + " — 자동 추출값입니다. MSDS 원문과 대조한 뒤 아래 확인란에 체크하세요." : "알아볼 수 있는 항목을 찾지 못했습니다. 항목 번호(1.~16.)와 H·P 코드가 보이도록 붙여 넣었는지 확인하세요.";
   });
   $("mPasteClear").addEventListener("click", function () { $("mPaste").value = ""; $("mParseMsg").textContent = ""; });
 
@@ -399,7 +416,7 @@
     if (!cur) { box.innerHTML = ""; return; }
     var go = function () {
       var m = missing(cur);
-      box.innerHTML = '<p class="ms-prevh">경고표지 미리보기' + (m.length ? ' <span class="ms-st no">빠진 항목: ' + esc(m.join(", ")) + "</span>" : ' <span class="ms-st ok">시행규칙 제170조 기재항목 6가지 모두 있음</span>') + "</p>" +
+      box.innerHTML = '<p class="ms-prevh">경고표지 미리보기' + (m.length ? ' <span class="ms-st no">빠진 항목: ' + esc(m.join(", ")) + "</span>" : ' <span class="ms-st ok">시행규칙 제170조 기재항목 6가지 입력됨</span>') + (cur.verified ? ' <span class="ms-st ok">원문 대조 확인 ' + esc(cur.verified) + "</span>" : ' <span class="ms-st no">원문 확인 필요 — ② 물질 정보에서 확인 체크 후 인쇄 가능</span>') + "</p>" +
         '<div class="lb-wrap n' + $("mSize").value + '">' + labelHtml(cur) + "</div>";
     };
     if ($("mQr").checked && cur.url && !QR) qrSvg(cur.url, go); go();
@@ -439,6 +456,7 @@
     var k = b.dataset.print;
     if (k === "label") {
       if (!cur) return; var m = missing(cur);
+      if (!cur.verified) { window.alert("이 물질은 아직 MSDS 원문 대조 확인이 되지 않았습니다.\n② 물질 정보에서 내용을 원문과 대조하고 확인란에 체크한 뒤 인쇄하세요."); edit(cur.id); $("mVerifyBox").scrollIntoView({ block: "center" }); return; }
       if (m.length && !window.confirm("경고표지에 빠진 항목이 있습니다: " + m.join(", ") + "\n그대로 인쇄할까요?")) return;
       var n = +$("mSize").value, one = labelHtml(cur), h = "";
       for (var i = 0; i < n; i++) h += one;

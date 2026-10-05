@@ -78,6 +78,8 @@
     </div>
     <div class="side-box"><h2 class="h-sm">판정 근거</h2><ul class="bul hint" id="rWhy"></ul></div>
     <div class="side-box"><h2 class="h-sm">꼭 알아 두기</h2><ul class="bul hint">
+      <li><strong>본 도구는 입력된 기준을 이용한 참고용 계산 기능이며 의료적 진단이나 업무적합성 판정을 대신하지 않습니다.</strong></li>
+      <li>이 결과를 채용·배치·인사상 불이익의 근거로 쓰면 안 됩니다. 건강정보는 꼭 필요한 사람만 다루고, 이름 대신 관리번호를 쓰는 것이 안전합니다. 입력값은 이 브라우저에만 저장되며 푸터의 '작성 내용 백업'에서 삭제할 수 있습니다.</li>
       <li>이 결과는 지침의 분류 기준을 기계적으로 적용한 참고 결과입니다. 업무적합성 평가와 근무상 조치는 의사인 보건관리자(또는 직업환경의학전문의)가 판단합니다(지침 10.1).</li>
       <li>고위험군·최고위험군은 의사의 업무적합성 평가를 받아야 합니다(10.1(2)).</li>
       <li>평가 결과로 근로자에게 고용상 불이익을 주어서는 안 됩니다(10.3(1)).</li>
@@ -178,7 +180,7 @@
     $("rLevel").className = "result-big lv" + lv;
     $("rDl").innerHTML = [["혈압 분류", bpc == null ? "—" : BPN[bpc] + " (" + sbp + "/" + dbp + ")"], ["위험인자", nrf + "개" + (relief ? " (HDL≥60 1개 감함)" : "")], ["당뇨병", dm ? "해당" : "해당 없음"],
       ["eGFR", gfr == null ? "—" : gfr + (gfrCalc ? " (MDRD 계산)" : "")], ["BMI", bmi == null ? "—" : bmi], ["LDL", ldl == null ? "—" : ldl + (ldlCalc ? " (계산)" : "")],
-      ["근무 조치(표 10)", out.mg ? out.mg.care : "—"], ["재평가", out.mg ? out.mg.cyc : "—"]].map(function (r) { return "<div><dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("");
+      ["참고 결과 — 지침 표 10 분류(의료진 평가 필요)", out.mg ? out.mg.care + " · 업무적합성 평가 필요" : "—"], ["재평가", out.mg ? out.mg.cyc : "—"]].map(function (r) { return "<div><dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("");
     $("rWhy").innerHTML = (rf.length ? "<li>위험인자: " + esc(rf.join(", ")) + (relief ? " − HDL≥60(완화)" : "") + "</li>" : "<li>위험인자 없음</li>") + why.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
       (lv >= 2 && works.length ? '<li style="color:var(--red)">고위험군 이상 + 표 11 업무 종사 → 정밀 업무적합성 평가 대상: ' + esc(works.join(", ")) + "</li>" : "") +
       (bpc != null && bpc < 2 ? "<li>표 6에는 정상·주의혈압 열이 없어 고혈압 전단계 열로 분류했습니다(표 8 주석 준용).</li>" : "");
@@ -220,7 +222,7 @@
         "<tr><th>확인된 위험인자</th><td>" + (o.rf.length ? esc(o.rf.join(", ")) : "없음") + (o.relief ? " / 완화인자: HDL 60 이상" : "") + "</td></tr>" +
         "<tr><th>표적장기 손상·동반질환</th><td>" + ([o.dm ? "당뇨병" : "", on("cLvh") ? "좌심실비대" : "", on("cProt") ? "단백뇨" : "", on("cAth") ? "죽상동맥경화증" : "", on("cRet") ? "고혈압성 망막증" : "", o.ckd ? "만성신장질환 " + o.ckd + "기 이상" : "", on("cCvd") ? "심뇌혈관질환" : "", on("cPad") ? "말초혈관질환 등" : ""].filter(Boolean).join(", ") || "없음") + "</td></tr>" +
         "<tr><th>사후관리(표 10)</th><td>" + (o.mg ? esc(o.mg.follow) : "") + "</td></tr>" +
-        "<tr><th>근무상 조치 범위</th><td>" + (o.mg ? esc(o.mg.care) : "") + " — 최종 결정은 의사인 보건관리자(또는 직업환경의학전문의)의 업무적합성 평가에 따릅니다.</td></tr>" +
+        "<tr><th>참고 분류(지침 표 10)</th><td>" + (o.mg ? esc(o.mg.care) : "") + " — 최종 결정은 의사인 보건관리자(또는 직업환경의학전문의)의 업무적합성 평가에 따릅니다.</td></tr>" +
         "<tr><th>다음 평가</th><td>" + (o.mg ? esc(o.mg.cyc) : "") + "</td></tr>" +
         '<tr><th>의사 의견</th><td style="height:90px"></td></tr>' +
         '</tbody></table><p class="paper-note">이 통지서는 진단서가 아닙니다. 위험군에 해당하면 의료기관에서 정확한 진단과 치료를 받으세요. 평가 결과를 이유로 고용상 불이익을 주지 않으며, 건강정보는 필요한 범위에서만 다룹니다(KOSHA GUIDE H-200-2018 10.3, 11.1(4)).</p><p class="paper-foot">근거: KOSHA GUIDE H-200-2018 8·9·10</p>';

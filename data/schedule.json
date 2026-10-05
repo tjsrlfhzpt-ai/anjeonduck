@@ -1,5 +1,5 @@
 {
- "checked": "2026-09-29",
+ "checked": "2026-10-05",
  "source": "SAFE 덕희 S2-3.0 주기업무(LEGAL_TASKS·반복업무)를 바탕으로 안전duck에서 법령 원문과 다시 대조",
  "status_labels": {
   "verified": "원문 확인",
@@ -11,11 +11,18 @@
    "key": "tbm",
    "title": "작업 전 안전점검회의(TBM)",
    "freq": "daily",
-   "basis": "위험성평가 결과 공유(고시) · 사내 운영",
+   "basis": "산업안전보건법 제36조제4항(작업 전 안전점검회의 등으로 상시 주지하도록 노력) · 사내 운영",
    "status": "practice",
-   "memo": "작업 시작 전 위험요인·안전대책을 공유합니다. 법정 주기는 아니지만 위험성평가 결과를 근로자에게 알리는 대표적 방법입니다.",
+   "memo": "법령이 매일 하도록 주기를 정한 업무는 아닙니다. 중대재해로 이어질 수 있는 유해·위험요인을 작업 전 안전점검회의 등으로 상시 알리도록 노력하라는 규정에 따른 권장 운영입니다.",
    "tool": "tbm",
-   "time": "08:30"
+   "time": "08:30",
+   "klass": "권장 운영",
+   "links": [
+    {
+     "label": "산안법 제36조",
+     "href": "laws/act/#j36"
+    }
+   ]
   },
   {
    "key": "prestart",
@@ -26,7 +33,14 @@
    "memo": "해당 기계·작업을 하는 날 작업 시작 전에 관리감독자가 점검하고, 이상이 있으면 즉시 수리 등 조치합니다(제35조제3항).",
    "cond": "별표 3의 작업을 하는 사업장",
    "form": "pre-09",
-   "time": "08:00"
+   "time": "08:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "안전보건규칙 제35조",
+     "href": "laws/krule/#j35"
+    }
+   ]
   },
   {
    "key": "patrol2",
@@ -37,7 +51,18 @@
    "memo": "건설업, 제조업, 토사석 광업, 서적·잡지 및 기타 인쇄물 출판업, 음악 및 기타 오디오물 출판업, 금속 및 비금속 원료 재생업.",
    "cond": "도급인 사업장에서 관계수급인이 작업하는 경우 · 위 업종",
    "form": "patrol",
-   "time": "13:00"
+   "time": "13:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제64조",
+     "href": "laws/act/#j64"
+    },
+    {
+     "label": "산안법 시행규칙 제80조",
+     "href": "laws/rule/#j80"
+    }
+   ]
   },
   {
    "key": "patrol7",
@@ -50,7 +75,18 @@
    "form": "patrol",
    "weekday": 1,
    "time": "13:00",
-   "off": true
+   "off": true,
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제64조",
+     "href": "laws/act/#j64"
+    },
+    {
+     "label": "산안법 시행규칙 제80조",
+     "href": "laws/rule/#j80"
+    }
+   ]
   },
   {
    "key": "council",
@@ -62,7 +98,18 @@
    "cond": "도급인 사업장에서 관계수급인이 작업하는 경우",
    "form": "council",
    "day": 5,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제64조",
+     "href": "laws/act/#j64"
+    },
+    {
+     "label": "산안법 시행규칙 제79조",
+     "href": "laws/rule/#j79"
+    }
+   ]
   },
   {
    "key": "msds",
@@ -72,7 +119,14 @@
    "status": "practice",
    "memo": "법정 점검 주기는 없지만 물질이 바뀌면 바로 반영해야 하므로 월 1회 확인을 권장합니다.",
    "day": 5,
-   "time": "14:00"
+   "time": "14:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "산안법 제114조",
+     "href": "laws/act/#j114"
+    }
+   ]
   },
   {
    "key": "ppe",
@@ -82,7 +136,14 @@
    "status": "practice",
    "memo": "지급 대장 확인, 기능이 떨어진 보호구 교체.",
    "day": 5,
-   "time": "15:00"
+   "time": "15:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "안전보건규칙 제32조",
+     "href": "laws/krule/#j32"
+    }
+   ]
   },
   {
    "key": "osh",
@@ -95,7 +156,18 @@
    "tool": "committee",
    "qmonth": 1,
    "day": 15,
-   "time": "14:00"
+   "time": "14:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제24조",
+     "href": "laws/act/#j24"
+    },
+    {
+     "label": "산안법 시행령 제37조",
+     "href": "laws/yeong/#j37"
+    }
+   ]
   },
   {
    "key": "joint_q",
@@ -108,7 +180,18 @@
    "form": "joint",
    "qmonth": 2,
    "day": 10,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제64조",
+     "href": "laws/act/#j64"
+    },
+    {
+     "label": "산안법 시행규칙 제82조",
+     "href": "laws/rule/#j82"
+    }
+   ]
   },
   {
    "key": "stat",
@@ -119,7 +202,14 @@
    "memo": "통계를 기록·유지하는 것은 안전보건관리책임자 업무입니다. 분기 분석은 권장 주기입니다.",
    "qmonth": 1,
    "day": 10,
-   "time": "14:00"
+   "time": "14:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "산안법 제15조",
+     "href": "laws/act/#j15"
+    }
+   ]
   },
   {
    "key": "joint_2m",
@@ -132,7 +222,18 @@
    "form": "joint",
    "day": 10,
    "time": "10:00",
-   "off": true
+   "off": true,
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제64조",
+     "href": "laws/act/#j64"
+    },
+    {
+     "label": "산안법 시행규칙 제82조",
+     "href": "laws/rule/#j82"
+    }
+   ]
   },
   {
    "key": "edu_half",
@@ -145,7 +246,14 @@
    "tool": "edu-hours",
    "hmonth": 6,
    "day": 10,
-   "time": "14:00"
+   "time": "14:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제29조",
+     "href": "laws/act/#j29"
+    }
+   ]
   },
   {
    "key": "s3",
@@ -158,7 +266,14 @@
    "form": "sapa-half",
    "hmonth": 6,
    "day": 15,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "s5",
@@ -171,7 +286,14 @@
    "form": "sapa-eval",
    "hmonth": 6,
    "day": 15,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "s7",
@@ -184,7 +306,14 @@
    "form": "sapa-voice",
    "hmonth": 6,
    "day": 15,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "s8",
@@ -197,7 +326,14 @@
    "form": "sapa-emergency",
    "hmonth": 6,
    "day": 15,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "s9",
@@ -210,7 +346,14 @@
    "form": "sapa-contractor",
    "hmonth": 6,
    "day": 15,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "s5_1",
@@ -223,7 +366,14 @@
    "form": "sapa-half",
    "hmonth": 6,
    "day": 20,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "중처법 시행령 제5조",
+     "href": "laws/sapa_dec/#j5"
+    }
+   ]
   },
   {
    "key": "s5_3",
@@ -236,7 +386,14 @@
    "form": "sapa-half",
    "hmonth": 6,
    "day": 20,
-   "time": "11:00"
+   "time": "11:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "중처법 시행령 제5조",
+     "href": "laws/sapa_dec/#j5"
+    }
+   ]
   },
   {
    "key": "env",
@@ -248,7 +405,18 @@
    "cond": "측정 대상 유해인자 노출 사업장",
    "hmonth": 5,
    "day": 1,
-   "time": "09:00"
+   "time": "09:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제125조",
+     "href": "laws/act/#j125"
+    },
+    {
+     "label": "산안법 시행규칙 제190조",
+     "href": "laws/rule/#j190"
+    }
+   ]
   },
   {
    "key": "drill",
@@ -259,7 +427,18 @@
    "memo": "반기 훈련은 법정 주기가 아니라 매뉴얼 반기 점검과 함께 하도록 권장하는 것입니다.",
    "hmonth": 5,
    "day": 20,
-   "time": "14:00"
+   "time": "14:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "산안법 제64조",
+     "href": "laws/act/#j64"
+    },
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "edu_sup",
@@ -271,7 +450,14 @@
    "tool": "edu-hours",
    "month": 11,
    "day": 30,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제29조",
+     "href": "laws/act/#j29"
+    }
+   ]
   },
   {
    "key": "goal",
@@ -283,7 +469,14 @@
    "form": "sapa-policy",
    "month": 1,
    "day": 5,
-   "time": "11:00"
+   "time": "11:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "budget",
@@ -295,7 +488,14 @@
    "form": "sapa-budget",
    "month": 12,
    "day": 1,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "중처법 시행령 제4조",
+     "href": "laws/sapa_dec/#j4"
+    }
+   ]
   },
   {
    "key": "board",
@@ -309,19 +509,41 @@
    "month": 2,
    "day": 1,
    "time": "10:00",
-   "off": true
+   "off": true,
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제14조",
+     "href": "laws/act/#j14"
+    },
+    {
+     "label": "산안법 시행령 제13조",
+     "href": "laws/yeong/#j13"
+    }
+   ]
   },
   {
    "key": "risk",
    "title": "정기 위험성평가",
    "freq": "yearly",
-   "basis": "산업안전보건법 제36조 · 사업장 위험성평가에 관한 지침",
-   "status": "check",
-   "memo": "최초·정기·수시 평가 시기는 고용노동부 고시(지침) 원문으로 확인하세요(이 사이트에서 원문 대조 전).",
+   "basis": "산업안전보건법 제36조 · 산업안전보건법 시행규칙 제37조제2항제2호(정기평가: 최초평가 다음 연도부터 매년 1회 이상)",
+   "status": "verified",
+   "memo": "정기평가는 최초평가를 실시한 연도의 다음 연도부터 매년 1회 이상 합니다. 날짜(1월)는 예시이며 사업장 일정에 맞추세요. 수시평가는 새 유해·위험요인이 생기거나 산업재해가 발생한 경우 관련 작업 시작 전까지 합니다.",
    "tool": "risk",
    "month": 1,
    "day": 20,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제36조",
+     "href": "laws/act/#j36"
+    },
+    {
+     "label": "산안법 시행규칙 제37조",
+     "href": "laws/rule/#j37"
+    }
+   ]
   },
   {
    "key": "health",
@@ -332,7 +554,18 @@
    "memo": "사무직(공장·공사현장과 같은 구역에 있지 않은 사무실에서 서무·인사·경리·판매·설계 등 사무업무 종사자, 판매업무 직접 종사자 제외)은 2년에 1회 이상, 그 밖의 근로자는 1년에 1회 이상. 실시 시기를 안전보건관리규정 또는 취업규칙에 정하도록 노력(제197조제2항).",
    "month": 3,
    "day": 1,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 주기",
+   "links": [
+    {
+     "label": "산안법 제129조",
+     "href": "laws/act/#j129"
+    },
+    {
+     "label": "산안법 시행규칙 제197조",
+     "href": "laws/rule/#j197"
+    }
+   ]
   },
   {
    "key": "eduplan",
@@ -343,7 +576,18 @@
    "memo": "교육계획 수립은 안전관리자 보좌 업무입니다. 연초 수립이 일반적입니다.",
    "month": 1,
    "day": 10,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "산안법 제15조",
+     "href": "laws/act/#j15"
+    },
+    {
+     "label": "산안법 시행령 제18조",
+     "href": "laws/yeong/#j18"
+    }
+   ]
   },
   {
    "key": "plan",
@@ -354,7 +598,14 @@
    "memo": "안전보건관리책임자의 총괄 업무입니다. 주기는 법에 없고 연 1회 수립이 일반적입니다.",
    "month": 1,
    "day": 5,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "산안법 제15조",
+     "href": "laws/act/#j15"
+    }
+   ]
   },
   {
    "key": "heat",
@@ -365,7 +616,26 @@
    "memo": "체감온도 31도 이상 폭염작업: 냉방·통풍/작업시간 조정/휴식 조치, 33도 이상은 매 2시간 이내 20분 이상 휴식. 온습도계 비치, 폭염작업 날마다 체감온도·조치 기록(그 해 12월 31일까지 보존). 기록은 '폭염작업 체감온도 기록' 도구 사용.",
    "month": 5,
    "day": 20,
-   "time": "09:00"
+   "time": "09:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "안전보건규칙 제559조",
+     "href": "laws/krule/#j559"
+    },
+    {
+     "label": "안전보건규칙 제560조",
+     "href": "laws/krule/#j560"
+    },
+    {
+     "label": "안전보건규칙 제562조",
+     "href": "laws/krule/#j562"
+    },
+    {
+     "label": "안전보건규칙 제567조",
+     "href": "laws/krule/#j567"
+    }
+   ]
   },
   {
    "key": "cold",
@@ -376,7 +646,9 @@
    "memo": "냉동·옥외 작업장 방한 대책 점검.",
    "month": 11,
    "day": 10,
-   "time": "09:00"
+   "time": "09:00",
+   "klass": "사업장 자체업무",
+   "links": []
   },
   {
    "key": "regcheck",
@@ -387,7 +659,18 @@
    "memo": "규정 변경 시 산업안전보건위원회 심의·의결(위원회가 없으면 근로자대표 동의)을 거칩니다. 검토 주기는 권장.",
    "month": 12,
    "day": 10,
-   "time": "10:00"
+   "time": "10:00",
+   "klass": "법정 의무지만 특정 주기가 아님",
+   "links": [
+    {
+     "label": "산안법 제25조",
+     "href": "laws/act/#j25"
+    },
+    {
+     "label": "산안법 제26조",
+     "href": "laws/act/#j26"
+    }
+   ]
   },
   {
    "key": "fire",
@@ -399,7 +682,21 @@
    "month": 3,
    "day": 15,
    "time": "10:00",
-   "off": true
+   "off": true,
+   "klass": "확인 필요",
+   "links": [
+    {
+     "label": "산안법 제22조",
+     "href": "laws/act/#j22"
+    }
+   ]
   }
- ]
+ ],
+ "klass_labels": {
+  "법정 주기": "법령에 주기가 적혀 있고 원문과 대조함",
+  "법정 의무지만 특정 주기가 아님": "의무는 법령에 있으나 주기는 정해져 있지 않음 — 날짜는 안전duck 제안",
+  "권장 운영": "법정 주기 아님 — 권장",
+  "사업장 자체업무": "법령 근거 없이 사업장이 정하는 업무",
+  "확인 필요": "공식 원문과 대조하지 못함"
+ }
 }

@@ -1,4 +1,4 @@
-/* 안전duck 문서 공통 모듈 — 결재란 · 전자서명 · 사진 첨부 · 내 데이터 백업
+/* 안전duck 문서 공통 모듈 — 결재란 · 인쇄용 서명 이미지 · 사진 첨부 · 내 데이터 백업
    서버 없이 이 기기(브라우저)에만 저장한다.
    - 결재란/서명: localStorage "anjeonduck.appr.*"
    - 사진: IndexedDB "anjeonduck" / store "photos" (용량이 커서 localStorage 대신)
@@ -175,7 +175,7 @@
   function openPad(o, done) {
     var m = document.createElement("div");
     m.className = "ad-modal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-label", o.title);
-    m.innerHTML = '<div class="ad-box"><h2>' + esc(o.title) + '</h2><p>손가락이나 마우스로 아래 칸에 서명하세요. 서명 이미지는 이 기기에만 저장됩니다.</p>' +
+    m.innerHTML = '<div class="ad-box"><h2>' + esc(o.title) + '</h2><p>손가락이나 마우스로 아래 칸에 서명하세요. 서명 이미지는 이 기기의 브라우저에만 저장됩니다.</p><p style="font-size:12.5px;color:#6B788C">이 기능은 인쇄용 서명 표시 기능이며, 모든 법정 전자서명 또는 전자문서 제출 요건을 충족한다는 의미가 아닙니다. 기관의 전자 제출 시스템이 요구하는 인증·서명은 따로 확인하세요.</p>' +
       '<canvas class="ad-cv" aria-label="서명 칸"></canvas>' +
       '<div class="ad-row">' + (o.name ? '<button type="button" class="ad-btn g" data-b="stamp">성명 도장으로</button>' : "") +
       (o.has ? '<button type="button" class="ad-btn r" data-b="remove">서명 지우기</button>' : "") +
@@ -431,11 +431,12 @@
   function openDataModal() {
     var m = document.createElement("div");
     m.className = "ad-modal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "adDataT");
-    m.innerHTML = '<div class="ad-box"><h2 id="adDataT">🛡️ 내 데이터 관리</h2>' +
-      '<p>안전duck에서 작성한 서식·도구 입력값, 결재란·서명, 첨부 사진은 서버가 아니라 <b>이 기기의 이 브라우저</b>에만 저장됩니다. 브라우저 기록을 지우거나 다른 PC·휴대폰으로 옮기면 보이지 않으니, 가끔 백업 파일로 내보내 두세요.</p>' +
+    m.innerHTML = '<div class="ad-box"><h2 id="adDataT">작성 내용 백업 · 삭제</h2>' +
+      '<p>안전duck 작성 도구는 입력한 내용을 안전duck 서버로 보내지 않고 <b>이 기기의 이 브라우저</b>에 저장합니다. 브라우저 기록을 지우거나 다른 기기로 옮기면 보이지 않습니다.</p>' +
+      '<ul style="font-size:13px;line-height:1.6;margin:8px 0 10px 18px;list-style:disc"><li><b>저장 위치</b> — 서식·도구 입력값, 결재란 이름, 인쇄용 서명 이미지: localStorage / 첨부 사진: IndexedDB</li><li><b>백업 파일(JSON)에 들어가는 것</b> — 위 항목 전부(사진·서명 이미지 포함). 파일을 받은 사람은 내용을 모두 볼 수 있습니다.</li><li><b>건강정보</b> — 건강진단 결과·질병명 등은 꼭 필요한 만큼만 적고, 이름 대신 관리번호를 쓰세요.</li><li><b>공용 PC</b> — 다른 사람도 같은 브라우저에서 내용을 볼 수 있습니다. 쓰고 나면 아래에서 삭제하세요.</li></ul>' +
       '<p data-sum>저장된 내용을 세는 중…</p>' +
       '<div class="ad-row" style="justify-content:flex-start"><button type="button" class="ad-btn" data-b="exp">백업 파일 내보내기 (JSON)</button>' +
-      '<label class="ad-btn g"><input type="file" accept="application/json,.json" hidden data-imp>백업 불러오기</label></div>' +
+      '<label class="ad-btn g"><input type="file" accept="application/json,.json" hidden data-imp>백업 불러오기</label><button type="button" class="ad-btn r" data-b="wipe">이 브라우저의 안전duck 데이터 모두 삭제</button></div>' +
       '<p style="margin-top:12px;font-size:12.5px">불러오기는 같은 이름의 항목을 파일 내용으로 덮어씁니다. 파일에는 입력한 내용이 그대로 들어 있으니 안전한 곳에 보관하세요. 서버로는 아무것도 보내지 않습니다.</p>' +
       '<div class="ad-row"><button type="button" class="ad-btn g" data-b="close">닫기</button></div></div>';
     document.body.appendChild(m);
@@ -449,6 +450,13 @@
       if (ev.target === m) { close(); return; }
       var b = ev.target.closest("[data-b]"); if (!b) return;
       if (b.dataset.b === "close") close();
+      if (b.dataset.b === "wipe") {
+        if (!window.confirm("이 브라우저에 저장된 안전duck 서식·도구 입력값, 서명 이미지, 사진을 모두 지웁니다. 되돌릴 수 없습니다. 계속할까요?")) return;
+        var ks = []; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("anjeonduck.") === 0) ks.push(k); }
+        ks.forEach(function (k) { localStorage.removeItem(k); });
+        var done = function () { toast("삭제했습니다 — 항목 " + ks.length + "개와 사진. 새로고침합니다."); setTimeout(function () { location.reload(); }, 900); };
+        try { var rq = indexedDB.deleteDatabase("anjeonduck"); rq.onsuccess = done; rq.onerror = done; rq.onblocked = done; } catch (e) { done(); }
+      }
       if (b.dataset.b === "exp") { b.disabled = true; exportAll().then(function (r) { toast("백업 파일을 내려받았습니다 — 항목 " + r.keys + "개, 사진 " + r.photos + "장"); }).catch(function (e) { toast("내보내지 못했습니다: " + (e.message || e)); }).then(function () { b.disabled = false; }); }
     });
     m.querySelector("[data-imp]").addEventListener("change", function (ev) {

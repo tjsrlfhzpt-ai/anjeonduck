@@ -25,8 +25,7 @@
       <div class="toolbar sched-bar">
         <label class="switch"><input type="checkbox" id="sOnlyOn" checked><span>켠 업무만 보기</span></label>
         <select class="sort" id="sStatus" aria-label="근거 상태">
-          <option value="">근거 상태 전체</option><option value="verified">원문 확인</option><option value="check">확인 필요</option><option value="practice">권장(법정 주기 아님)</option><option value="custom">직접 추가</option>
-        </select>
+          <option value="">분류 전체</option><option value="법정 주기">법정 주기</option><option value="법정 의무지만 특정 주기가 아님">의무 · 주기는 법정 아님</option><option value="권장 운영">권장 운영</option><option value="사업장 자체업무">사업장 자체업무</option><option value="확인 필요">확인 필요</option><option value="custom">직접 추가</option></select>
         <span class="grow"></span>
         <button type="button" class="btn btn-sm" id="sAdd">+ 업무 추가</button>
       </div>
@@ -61,9 +60,10 @@
     <div class="side-box">
       <h2 class="h-sm">근거 표시</h2>
       <ul class="bul hint">
-        <li><span class="badge badge-green">원문 확인</span> 법령 원문에서 주기를 대조한 업무</li>
-        <li><span class="badge badge-orange">확인 필요</span> 원문 대조 전 — 사업장이 직접 확인</li>
-        <li><span class="badge badge-line">권장</span> 의무는 있지만 주기는 법에 없거나 사내 운영 업무</li>
+        <li><span class="lst lst-cur">법정 주기</span> 법령에 주기가 적혀 있고 원문과 대조한 업무. 달력의 날짜 자체는 예시입니다.</li>
+        <li><span class="lst lst-next">의무 · 주기는 법정 아님</span> 의무는 법령에 있지만 '매월·매년' 같은 주기는 정해져 있지 않음</li>
+        <li><span class="lst lst-rec">권장 운영</span> <span class="lst lst-rec">사업장 자체업무</span> 법정 주기가 아닌 운영 제안</li>
+        <li><span class="lst-chk">확인 필요</span> 공식 원문과 대조하지 못한 업무</li>
       </ul>
       <p class="src-line" id="sSrc"></p>
     </div>
@@ -161,6 +161,7 @@
     }
   }
   var LINK = { form: function (id) { return "../forms/" + id + "/"; }, tool: function (id) { return "../" + id + "/"; } };
+  var KLASS = { "법정 주기": ["lst lst-cur", "법정 주기"], "법정 의무지만 특정 주기가 아님": ["lst lst-next", "의무 · 주기는 법정 아님"], "권장 운영": ["lst lst-rec", "권장 운영"], "사업장 자체업무": ["lst lst-rec", "사업장 자체업무"], "확인 필요": ["lst-chk", "확인 필요"] };
   var BADGE = { verified: ["badge-green", "원문 확인"], check: ["badge-orange", "확인 필요"], practice: ["badge-line", "권장"], custom: ["badge-navy", "직접 추가"] };
 
   var view = "list", freqF = "", cur = new Date(today().getFullYear(), today().getMonth(), 1);
@@ -168,7 +169,7 @@
     var st = document.getElementById("sStatus").value, only = document.getElementById("sOnlyOn").checked;
     return tasks().filter(function (t) {
       if (only && !t.on) return false;
-      if (st && t.status !== st) return false;
+      if (st && (st === "custom" ? !t.custom : (t.custom || t.klass !== st))) return false;
       if (freqF === "d") return t.freq === "daily" || t.freq === "every2";
       if (freqF === "m") return t.freq === "monthly" || t.freq === "bimonthly";
       return !freqF || t.freq === freqF;
@@ -176,13 +177,14 @@
   }
   function card(t) {
     var p = period(t, today()), done = !!S.done[t.key + "|" + p.id], past = !done && p.due < today() && t.freq !== "daily", unsure = past && ymd(p.due) < S.since, late = past && !unsure;
-    var b = BADGE[t.status] || BADGE.practice;
+    var b = t.custom ? BADGE.custom : (KLASS[t.klass] || BADGE[t.status] || BADGE.practice);
+    var laws = (t.links || []).map(function (x) { return '<a href="../../' + esc(x.href) + '">' + esc(x.label) + "</a>"; }).join(" · ");
     var links = (t.form ? '<a href="' + LINK.form(t.form) + '">서식 작성 →</a>' : "") + (t.tool ? '<a href="' + LINK.tool(t.tool) + '">도구 열기 →</a>' : "");
     return '<li class="task' + (t.on ? "" : " off") + '">' +
       '<div class="task-top"><label class="switch" title="우리 사업장 해당"><input type="checkbox" data-on="' + esc(t.key) + '"' + (t.on ? " checked" : "") + '><span class="sr">사용</span></label>' +
-      '<div class="task-main"><p class="task-when">' + esc(when(t)) + (t.time ? " · " + esc(t.time) : "") + ' <span class="badge ' + b[0] + '">' + b[1] + "</span>" + (t.edited ? ' <span class="badge badge-line">수정함</span>' : "") + "</p>" +
+      '<div class="task-main"><p class="task-when">' + esc(when(t)) + (t.time ? " · " + esc(t.time) : "") + ' <span class="' + (/^lst/.test(b[0]) ? b[0] : "badge " + b[0]) + '">' + b[1] + "</span>" + (t.edited ? ' <span class="badge badge-line">수정함</span>' : "") + "</p>" +
       '<h3 class="task-title">' + esc(t.title) + "</h3>" +
-      (t.basis ? '<p class="task-basis">' + esc(t.basis) + "</p>" : "") +
+      (t.basis ? '<p class="task-basis">' + esc(t.basis) + (laws ? ' <span class="task-laws">조문 ' + laws + "</span>" : "") + "</p>" : "") +
       (t.cond ? '<p class="task-cond">대상: ' + esc(t.cond) + "</p>" : "") +
       (t.memo ? '<p class="task-memo">' + esc(t.memo) + "</p>" : "") +
       '<p class="task-links">' + links + '<button type="button" class="linkbtn" data-edit="' + esc(t.key) + '">설정 바꾸기</button></p></div>' +

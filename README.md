@@ -159,7 +159,7 @@ templates/*.csv       구글 시트 머리글 서식
 | 기능 | 저장 위치 | 쓰는 곳 |
 |---|---|---|
 | 결재란(기본 담당·검토·승인, 칸 이름·칸 수·성명 수정) | localStorage `anjeonduck.appr.<문서>` / 기본값 `anjeonduck.appr.default` | 서식 작성기 42종, TBM, 위험성평가, 직무분장표, 폭염 기록부, 안전검사 관리대장 |
-| 전자서명(손글씨·성명 도장, 서명일 표시) | 결재란과 같은 곳(PNG, 240×100 이하로 축소) | 결재란 서명 칸 |
+| 인쇄용 서명 이미지(손글씨·성명 도장, 서명일 표시) | 결재란과 같은 곳(PNG, 240×100 이하로 축소) | 결재란 서명 칸 |
 | 사진 첨부(사진마다 개별 칸, 설명·관련 항목·촬영일, 인쇄 시 사진대지) | IndexedDB `anjeonduck`/`photos` (긴 변 1600px JPEG로 축소) | 서식 작성기(점검 항목별 📷 포함), TBM, 위험성평가 |
 | 내 데이터 관리(JSON 내보내기·불러오기) | `anjeonduck.*` localStorage 전부 + 사진 | 상단 알림바·푸터 버튼 |
 
@@ -208,3 +208,27 @@ python3 build.py
 python3 -m http.server -d _site 8000   # http://localhost:8000
 python3 build.py --local --out _preview  # 더블클릭으로 여는 미리보기(폴더 링크를 index.html로 바꿈)
 ```
+
+## v2.6 — 법령 버전·판정·표현 전수 감사 (2026-10-05)
+
+| 구분 | 내용 |
+|---|---|
+| 법령 버전 | `data/law_manifest.json` 이 법령별 현재 시행본·시행 예정본·최근 개정·확인일·사용 도구(`used_by`)·고시(`notices`)·입법 동향(`bills`)·미확인 항목(`open_items`)을 관리 |
+| 조문별 시행일 | `scripts/parse_lawtext.py` 가 본문의 `[시행일: …]` 표기를 읽어 현행 문언과 시행 예정 문언(`pending`)을 분리. 법령 페이지에서 기준일을 고르면 적용 문언이 바뀜 |
+| 판정 | 적용범위 판정은 적용·조건부·확인 필요·적용 제외 4단계 + 시행령 별표 1(일부 적용 제외) 반영 |
+| 표기 | 도구·서식 하단에 법적 근거 확인일·적용 법령 버전·원문 링크(`build.py` `lawver_html`), 홈 최상단에 법령 데이터 기준일 |
+| 양식 지위 | 웹 서식·TBM·산보위·위험성평가·LOTO 는 "안전duck 자체 제공 양식 · 법정 지정서식이 아님" |
+| MSDS | 자동 추출 → 원문 대조 → 확인 체크 후에만 경고표지 인쇄 |
+| 브리핑 | 공식 1차 출처가 없는 항목은 빌드에서 제외. 예약 작업은 초안을 PR로만 올리고 사람이 확인 후 병합 |
+| 안내 | `/legal/` 법령정보·면책 안내, 푸터 운영·신고 채널(`config/site.json` 의 `operator`, `contact_email`) |
+
+### 감사 스크립트
+
+```
+python3 scripts/verify_tables.py        # 적용범위 데이터 ↔ 별표 원본(PDF) 대조
+python3 scripts/audit.py _site          # 버전·시행일·출처·금지 표현·필수 안내 (오류면 배포 중단)
+python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공포번호 비교 (주 1회, 실패는 경고)
+```
+
+법령이 개정되면: ① `data/lawraw/*.txt` 교체 → `scripts/parse_lawtext.py` ② `data/law_manifest.json` 의 current/upcoming/checked_at 갱신 ③ 영향받는 도구 데이터(`used_by`) 재대조 ④ `audit.py` 통과 확인. 확인일이 `stale_after_days`(45일)를 넘기면 화면에 "공식 원문 재확인 필요"가 표시됩니다.
+

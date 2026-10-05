@@ -1137,3 +1137,80 @@ details.lawbox summary{cursor:pointer}
 .ftools-home{padding-bottom:64px}
 .gnb>a,.gnb-item>a{white-space:nowrap}
 .gnb-item{flex:none}
+
+/* ---------- v2.6: 상태 표시 통일 · 법령 버전 ---------- */
+.lst,.lst-chk{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:99px;font-size:12px;font-weight:800;white-space:nowrap;vertical-align:1px;border:1px solid transparent}
+.lst::before,.lst-chk::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.lst-cur{color:#0B7A55;background:#E6F6EF;border-color:#BFE6D5}
+.lst-next{color:#8A5A00;background:#FFF4D6;border-color:#F2DC9A}
+.lst-bill{color:#1F5FBF;background:#E8F0FD;border-color:#C5D8F8}
+.lst-rec{color:#5B6676;background:#F1F3F6;border-color:#DDE2EA}
+.lst-chk{color:#B3261E;background:#FDECEA;border-color:#F5C6C1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lst-cur{color:#5FD3A8;background:#12301F;border-color:#1F4A35}:root:not([data-theme="light"]) .lst-next{color:#F2C55C;background:#33280F;border-color:#55431A}:root:not([data-theme="light"]) .lst-bill{color:#8DB6F5;background:#152338;border-color:#243B5E}:root:not([data-theme="light"]) .lst-rec{color:#B6C1D1;background:#1F2B3F;border-color:#2B3A52}:root:not([data-theme="light"]) .lst-chk{color:#F28B82;background:#2E1917;border-color:#55302C}}
+.lver{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:18px}
+.lver-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.lasof{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--navy)}
+.lasof input{height:36px;border:1px solid var(--line);border-radius:9px;padding:0 10px;font:inherit;background:var(--surface);color:var(--text)}
+.lvt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+.lvt th,.lvt td{padding:9px 10px;border-top:1px solid var(--line-2);text-align:left;vertical-align:top}
+.lvt thead th{border-top:0;font-size:12.5px;color:var(--muted);background:var(--surface-2)}
+.lvt tbody th{font-weight:700}
+.lvt .muted{font-size:12.5px}
+.lwarn{color:var(--red)}
+.lart-pend{border-left:3px solid #E9C766;padding-left:12px}
+.lpend{margin-top:10px;padding:12px 14px;border:1px dashed #E0C472;border-radius:10px;background:color-mix(in srgb,#FFF4D6 45%,var(--surface))}
+.lart-on .lpend{border-style:solid;border-color:#BFE6D5;background:color-mix(in srgb,#E6F6EF 50%,var(--surface))}
+.lpend-h{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:6px}
+.lnotyet{color:var(--muted);font-size:14px}
+.ladds{margin-top:28px}
+.ladd{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 14px;margin-top:8px}
+.ladd summary{font-weight:700;cursor:pointer}
+.ladd .lart-b{margin-top:8px;font-size:14px}
+.lstat{padding-top:28px}
+.lups{display:flex;flex-direction:column;gap:10px}
+.lup{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;font-size:14.5px}
+.lup-d{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.lup-d b{font-size:16px;color:var(--navy);font-variant-numeric:tabular-nums}
+.lup-t{font-weight:700;margin-bottom:4px}
+.lup-a{font-size:13px;color:var(--text-2);margin-top:6px}
+.lup-i{margin-top:6px;padding:8px 12px;background:var(--surface-2);border-radius:8px;font-size:13.5px}
+.lup-i b{color:var(--navy);margin-right:6px;font-size:12.5px}
+.lstages{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.lstage{font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.lstage.on{background:#1F5FBF;border-color:#1F5FBF;color:#fff}
+.urow-k{display:block;font-size:11px;color:var(--muted);font-weight:600}
+@media (max-width:640px){.lup{grid-template-columns:1fr;gap:8px}}
+.br-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px;margin:6px 0 10px;padding:10px 12px;background:var(--surface-2);border-radius:10px;font-size:13px}
+.br-facts div{display:flex;gap:8px;min-width:0}
+.br-facts dt{flex:none;color:var(--muted);font-weight:700;min-width:5.5em}
+.br-facts dd{margin:0;color:var(--text)}
+.br-facts div:nth-child(n+4){grid-column:1/-1}
+.br-press{font-size:12.5px}
+@media (max-width:640px){.br-facts{grid-template-columns:1fr}}
+
+/* v2.6 MSDS 원문 확인 단계 */
+.ms-steps{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:8px 0}
+.ms-steps li{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--line-2);color:var(--text-2)}
+.ms-auto{margin:12px 0;padding:10px 14px;border:1px solid var(--orange);background:var(--orange-50);border-radius:var(--r);font-size:13px;color:var(--text)}
+.ms-auto strong{display:block;color:var(--orange)}
+.ms-verify{margin:16px 0 10px;padding:12px 14px;border:2px solid var(--navy);border-radius:var(--r);background:var(--surface)}
+/* v2.6 서식 지위·법령 버전 표기 */
+.fkind{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--text-2)}
+.fkind-a{border-color:var(--green);color:var(--green)}
+.fkind-b{border-color:var(--navy);color:var(--navy)}
+.fkind-c{border-color:var(--orange);color:var(--orange)}
+.lawver{margin:28px 0 0;padding:12px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);font-size:12.5px;color:var(--text-2);line-height:1.7}
+.lawver b{color:var(--navy)}
+.lawver .stale{color:var(--red,#c0392b);font-weight:700}
+.asof{background:var(--navy);color:#fff;font-size:13px}
+.asof .wrap{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding-top:8px;padding-bottom:8px}
+.asof a{color:#fff;text-decoration:underline}
+.asof b{font-weight:800}
+.legal-doc h2{font-size:18px;margin:26px 0 8px;color:var(--navy)}
+.legal-doc p,.legal-doc li{font-size:14.5px;line-height:1.8;color:var(--text)}
+@media print{.lawver,.asof{display:none!important}}
+
+.lst::before,.lst-chk::before{width:auto;height:auto;background:none;border-radius:0;font-size:10px}
+.lst-cur::before{content:"🟢"}.lst-next::before{content:"🟡"}.lst-bill::before{content:"🔵"}.lst-rec::before{content:"⚪"}.lst-chk::before{content:"🔴"}
+.asof .lst{background:rgba(255,255,255,.14);color:#fff;border-color:transparent}
+.ft-op{grid-column:1/-1;font-size:12.5px;color:var(--text-2)}

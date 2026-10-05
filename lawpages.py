@@ -77,6 +77,15 @@ def load_laws():
     return laws
 
 
+def load_manifest():
+    return json.loads((ROOT / "data" / "law_manifest.json").read_text(encoding="utf-8"))
+
+
+def kdate(iso):
+    y, m, d = iso.split("-")
+    return f"{y}. {int(m)}. {int(d)}."
+
+
 # ------------------------------------------------------------------ 인용 연결
 REF_RE = re.compile(r"(「([^」]{2,40})」\s*|(?<![가-힣])(법|영|규칙)\s+|같은\s*(?:법|영|규칙)\s*(?:시행령|시행규칙)?\s*)?제(\d+)조(?:의(\d+))?")
 GAP_OK = re.compile(r"^(?:\s|제\d+항|제\d+호|[가-하]목|각\s*호|각\s*목|부터|까지|,|및|ㆍ|·|또는|와|과|이나|나|의|본문|단서|후단|전단|\(|\))*$")
@@ -160,8 +169,9 @@ def reverse_index(laws):
 
 
 # ------------------------------------------------------------------ 페이지
-def law_page(k, laws, rev, byl_href, law_url):
+def law_page(k, laws, rev, byl_href, law_url, manifest=None, today=""):
     d = laws[k]
+    mf = next((x for x in (manifest or {}).get("laws", []) if x["key"] == k), None)
     idx = {kk: {a["jo"]: a for a in dd["articles"]} for kk, dd in laws.items()}
 
     def href_of(key, jo):
@@ -192,6 +202,17 @@ def law_page(k, laws, rev, byl_href, law_url):
             body.append(f'<article class="lart del" id="{aid}" data-jo="{e(a["jo"])}"><h3><a class="lart-no" href="#{aid}">{e(a["jo"])}</a> <span class="muted">{e(a["text"])}</span></h3></article>')
             continue
         paras = "".join(para_html(ln, k, href_of, byl) for ln in a["text"].split("\n") if ln.strip())
+        pd = a.get("pending")
+        pend_html, pend_attr, st_badge = "", "", ""
+        if pd:
+            pparas = "".join(para_html(ln, k, href_of, byl) for ln in pd["text"].split("\n") if ln.strip())
+            pend_attr = f' data-eff="{e(pd["effective"])}"' + (' data-new="1"' if a.get("not_in_force") else "")
+            st_badge = f'<span class="lst lst-next" data-st>시행 예정 · {e(kdate(pd["effective"]))}</span>'
+            ttl = f' <b>{e(pd["title"])}</b>' if pd.get("title") and pd["title"] != a["title"] else ""
+            pend_html = (f'<div class="lpend" data-pend><p class="lpend-h"><span class="lst lst-next">시행 예정</span> {e(kdate(pd["effective"]))} 부터 적용되는 조문{ttl}</p>'
+                         f'<div class="lart-b">{pparas}</div></div>')
+            if a.get("not_in_force"):
+                paras = f'<p class="lnotyet" data-notyet>이 조문은 {e(kdate(pd["effective"]))} 부터 시행합니다. 그 전에는 적용되지 않습니다.</p>'
         down = rev.get((k, a["jo"]), [])
         down_html = ""
         if down:
@@ -202,9 +223,9 @@ def law_page(k, laws, rev, byl_href, law_url):
             down_html = f'<div class="lrev"><span class="lrev-l">이 조문을 인용한 하위 법령</span>{chips}</div>'
         src = law_url(d["law"]) + "/" + quote(a["jo"])
         body.append(
-            f'<article class="lart" id="{aid}" data-jo="{e(a["jo"])}" >'
-            f'<h3><a class="lart-no" href="#{aid}">{e(a["jo"])}</a> <span class="lart-t">{e(a["title"])}</span></h3>'
-            f'<div class="lart-b">{paras}</div>{down_html}'
+            f'<article class="lart{" lart-pend" if pd else ""}" id="{aid}" data-jo="{e(a["jo"])}"{pend_attr}>'
+            f'<h3><a class="lart-no" href="#{aid}">{e(a["jo"])}</a> <span class="lart-t">{e(a["title"])}</span> {st_badge}</h3>'
+            f'<div class="lart-b" data-cur>{paras}</div>{pend_html}{down_html}'
             f'<p class="lart-f"><button type="button" class="lnk" data-copy="#{aid}">링크 복사</button>'
             f'<a class="lnk" href="{e(src)}" target="_blank" rel="noopener">국가법령정보센터 ↗</a></p></article>')
     live = [a for a in d["articles"] if not a.get("deleted")]
@@ -220,12 +241,31 @@ def law_page(k, laws, rev, byl_href, law_url):
             a_open = f'<a href="{e(h)}">' if h else ""
             lis.append(f'<li>{a_open}<b>{e(lab)}</b> {e(b["title"])}{"</a>" if h else ""}</li>')
         byl_list = f'<details class="lbyl"><summary>별표 {len(d["byl"])}개</summary><ul>{"".join(lis)}</ul></details>'
+    n_pend = sum(1 for a in d["articles"] if a.get("pending"))
+    ver_rows = ""
+    if mf:
+        c = mf["current"]
+        ver_rows += (f'<tr class="cur"><td><span class="lst lst-cur">현재 시행</span></td><td>{e(kdate(c["effective"]))}</td><td>{e(c["no"])} · {e(kdate(c["promulgated"]))} {e(c["kind"])}</td>'
+                     f'<td>이 페이지 본문</td><td><a href="{e(c["source_url"])}" target="_blank" rel="noopener">원문 ↗</a></td></tr>')
+        for u in sorted(mf.get("upcoming", []), key=lambda x: x["effective"]):
+            where = "본문에 '시행 예정'으로 함께 표시" if u.get("text") == "inline" else "본문 미수록 — 원문에서 확인"
+            ver_rows += (f'<tr data-up="{e(u["effective"])}"><td><span class="lst lst-next">시행 예정</span></td><td>{e(kdate(u["effective"]))}</td><td>{e(u["no"])} · {e(kdate(u["promulgated"]))} {e(u["kind"])}<br><span class="muted">{e(u.get("summary", ""))}</span></td>'
+                         f'<td>{e(where)}</td><td><a href="{e(u["source_url"])}" target="_blank" rel="noopener">원문 ↗</a></td></tr>')
+    add_html = ""
+    if d.get("addenda"):
+        blocks = "".join(f'<details class="ladd"><summary>부칙 &lt;{e(x["no"])}, {e(kdate(x["date"]))}&gt;</summary><div class="lart-b">' + "".join(f"<p>{e(ln)}</p>" for ln in x["text"].split("\n")) + "</div></details>"
+                         for x in reversed(d["addenda"]))
+        add_html = f'<section class="ladds" id="addenda"><h2 class="lhead lh1">최근 부칙 (시행일·적용례)</h2><p class="hint">2025년 이후 공포분만 실었습니다. 조문별 시행일이 다를 때는 부칙이 기준입니다.</p>{blocks}</section>'
+    ver_box = (f'<section class="lver" id="versions"><div class="lver-h"><h2 class="h-sm">법령 버전 · 기준일</h2>'
+               f'<label class="lasof">기준일 <input type="date" id="lAsof" value="{e(today)}" min="{e(mf["current"]["effective"])}"></label></div>'
+               f'<div class="table-wrap"><table class="lvt"><thead><tr><th>상태</th><th>시행일</th><th>공포</th><th>안전duck 수록</th><th>출처</th></tr></thead><tbody>{ver_rows}</tbody></table></div>'
+               f'<p class="hint" id="lAsofMsg">기준일을 바꾸면 그날 적용되는 조문으로 본문이 바뀝니다. 이전 연혁은 <a href="{e(mf.get("history_url") or d["url"])}" target="_blank" rel="noopener">국가법령정보센터 연혁 ↗</a>에서 확인하세요. 마지막 공식 확인일 {e(mf["checked_at"])}.</p></section>') if mf else ""
     body_html = f"""
 <section class="phead lphead"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">법령</a><span>/</span>{e(d["short"])}</p>
   <nav class="lsibs" aria-label="같은 법령 체계">{sibs}</nav>
   <h1>{e(d["law"])}</h1>
-  <p class="lmeta"><span class="badge badge-line">{e(LEVEL_LABEL[k])}</span> {e(d["version"])} · 시행 {e(d["effective"])}. · 조문 {len(live)}개 · 원문 확인 {e(d["checked"])}</p>
+  <p class="lmeta"><span class="badge badge-line">{e(LEVEL_LABEL[k])}</span> {e(d["version"])} · 시행 {e(d["effective"])}. · 조문 {len(live)}개{f" · 시행 예정 조문 {n_pend}개" if n_pend else ""} · 원문 확인 {e((mf or {}).get("checked_at") or d["checked"])}</p>
 </div></section>
 <div class="wrap lwrap">
   <aside class="ltoc">
@@ -243,9 +283,11 @@ def law_page(k, laws, rev, byl_href, law_url):
       <form class="ljump" data-ljump><label class="sr" for="ljump">조문 번호로 이동</label><span>제</span><input id="ljump" inputmode="numeric" placeholder="38" autocomplete="off"><span>조</span><button class="btn btn-sm" type="submit">이동</button></form>
     </div>
     <p class="lcount" aria-live="polite" hidden></p>
+    {ver_box}
     <div class="lbody">{"".join(body)}</div>
+    {add_html}
     <p class="src-line">원문: 국가법령정보센터 <a href="{e(d["url"])}" target="_blank" rel="noopener">{e(d["law"])} ({e(d["version"])}) ↗</a> · 확인일 {e(d["checked"])}.
-    부칙과 별표 본문은 원문에서 확인하세요. 법령 원문은 저작권 보호 대상이 아닙니다(저작권법 제7조). 파란 글씨 조문 번호를 누르면 해당 조문으로 이동합니다.</p>
+    별표 본문과 2024년 이전 부칙은 원문에서 확인하세요. 법령 원문은 저작권 보호 대상이 아닙니다(저작권법 제7조). 파란 글씨 조문 번호를 누르면 해당 조문으로 이동합니다.</p>
   </section>
 </div>
 <script>{LAW_JS}</script>"""
@@ -278,6 +320,23 @@ LAW_JS = r"""
     (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){b.textContent='복사됨';setTimeout(function(){b.textContent='링크 복사';},1400);},function(){window.prompt('링크를 복사하세요',u);});});
   function flash(){var h=location.hash.slice(1);if(!h)return;var el=document.getElementById(h);if(el&&el.classList.contains('lart')){el.hidden=false;el.classList.add('lflash');setTimeout(function(){el.classList.remove('lflash');},1800);}}
   window.addEventListener('hashchange',flash);flash();
+  var asof=document.getElementById('lAsof'), amsg=document.getElementById('lAsofMsg'), base=amsg?amsg.innerHTML:'';
+  function kd(s){var p=s.split('-');return p[0]+'. '+(+p[1])+'. '+(+p[2])+'.';}
+  function applyAsof(){
+    if(!asof||!asof.value)return; var v=asof.value, n=0;
+    [].slice.call(document.querySelectorAll('.lart[data-eff]')).forEach(function(a){
+      var on=a.getAttribute('data-eff')<=v, cur=a.querySelector('[data-cur]'), pd=a.querySelector('[data-pend]'), st=a.querySelector('[data-st]'), h=pd&&pd.querySelector('.lpend-h');
+      a.classList.toggle('lart-on',on); if(on)n++;
+      if(st){st.textContent=(on?'기준일 현재 시행 · ':'시행 예정 · ')+kd(a.getAttribute('data-eff'));st.className='lst '+(on?'lst-cur':'lst-next');}
+      if(cur)cur.hidden=on; 
+      if(h)h.firstChild.textContent=on?'기준일 적용':'시행 예정';
+      if(h)h.firstChild.className='lst '+(on?'lst-cur':'lst-next');
+    });
+    [].slice.call(document.querySelectorAll('.lvt tr[data-up]')).forEach(function(r){var on=r.getAttribute('data-up')<=v, b=r.querySelector('.lst');b.textContent=on?'기준일 현재 시행':'시행 예정';b.className='lst '+(on?'lst-cur':'lst-next');});
+    var miss=[].slice.call(document.querySelectorAll('.lvt tr[data-up]')).filter(function(r){return r.getAttribute('data-up')<=v&&/미수록/.test(r.textContent);}).length;
+    if(amsg)amsg.innerHTML=(v===asof.defaultValue?'':'<strong>기준일 '+kd(v)+'</strong> — 시행 예정 조문 '+n+'개를 적용해 표시합니다.'+(miss?' <strong class="lwarn">이 기준일에 시행되는 개정 중 '+miss+'건은 본문에 수록되지 않았습니다. 원문에서 확인하세요.</strong> ':' '))+base;
+  }
+  if(asof){asof.addEventListener('change',applyAsof);applyAsof();}
   var tb=document.querySelector('[data-ltoc]');if(tb&&window.matchMedia('(max-width: 960px)').matches)tb.open=false;
   if(tb)tb.addEventListener('click',function(ev){if(ev.target.closest('a')&&window.matchMedia('(max-width: 960px)').matches)tb.open=false;});
 })();
@@ -293,12 +352,63 @@ def search_index(laws):
             if a.get("deleted"):
                 continue
             t = re.sub(r"<(?:개정|신설|전문개정|제목개정|타법개정)[^>]*>|\[[^\]]*(?:개정|신설|시행일|이동)[^\]]*\]", "", a["text"])
+            if a.get("not_in_force"):
+                t = f'[{kdate(a["pending"]["effective"])} 시행 예정] ' + a["pending"]["text"]
             rows.append([k, a["jo"], a["title"], re.sub(r"\s+", " ", t).strip()])
     meta = {k: {"short": laws[k]["short"], "law": laws[k]["law"]} for k in laws}
     return "window.ANJEONDUCK_LAWIDX=" + json.dumps({"meta": meta, "rows": rows}, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + ";"
 
 
-def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html):
+STAGES = ["법안", "국회 통과", "공포", "시행 예정", "시행 중"]
+
+
+def status_panel(laws, manifest, today, rel=""):
+    """법령별 현재 시행본·시행 예정본 표. 홈과 법령 허브가 같이 쓴다."""
+    rows, n_up, n_chk = "", 0, 0
+    for l in manifest["laws"]:
+        if l["key"] not in laws:
+            continue
+        c = l["current"]
+        ups = [u for u in l.get("upcoming", []) if u["effective"] > today]
+        n_up += len(ups)
+        chk = "확인 필요" if "확인 필요" in (l.get("note") or "") else ""
+        n_chk += 1 if chk else 0
+        chk_html = f'<br><span class="lst-chk">확인 필요</span> <span class="muted">{e(l["note"])}</span>' if chk else ""
+        up_txt = "<br>".join(f'<span class="lst lst-next">시행 예정</span> {e(kdate(u["effective"]))} {e(u["no"])}' for u in sorted(ups, key=lambda x: x["effective"])) or '<span class="muted">확인된 시행 예정 없음</span>'
+        rows += (f'<tr><th><a href="{rel}{l["key"]}/">{e(l["name"])}</a></th><td><span class="lst lst-cur">현재 시행</span> {e(kdate(c["effective"]))}<br><span class="muted">{e(c["no"])} · {e(kdate(c["promulgated"]))} {e(c["kind"])}</span></td>'
+                 f'<td>{up_txt}{chk_html}</td><td>{e(l["checked_at"])}</td></tr>')
+    table = f'<div class="table-wrap"><table class="lvt lvt-hub"><thead><tr><th>법령</th><th>현재 시행본</th><th>시행 예정</th><th>공식 확인일</th></tr></thead><tbody>{rows}</tbody></table></div>'
+    return table, n_up, n_chk
+
+
+def upcoming_html(manifest, today, rel=""):
+    items = []
+    for l in manifest["laws"]:
+        for u in l.get("upcoming", []):
+            if u["effective"] > today:
+                items.append((u["effective"], l, u))
+    out = ""
+    for eff, l, u in sorted(items, key=lambda x: x[0]):
+        arts = " · ".join(e(x) for x in u.get("articles", []))
+        imp = f'<p class="lup-i"><b>실무 영향</b> {e(u["impact"])}</p>' if u.get("impact") else ""
+        out += (f'<li class="lup"><div class="lup-d"><span class="lst lst-next">시행 예정</span><b>{e(kdate(eff))}</b></div><div><p class="lup-t"><a href="{rel}{l["key"]}/#versions">{e(l["name"])}</a> <span class="muted">{e(u["no"])} · {e(kdate(u["promulgated"]))} {e(u["kind"])}</span></p>'
+                f'<p>{e(u.get("summary", ""))}</p>{f"<p class=lup-a>대상 조문: {arts}</p>" if arts else ""}{imp}'
+                f'<p class="urow-foot"><a class="link-ext" href="{e(u["source_url"])}" target="_blank" rel="noopener">국가법령정보센터 ↗</a><span>근거 {e(u.get("basis", ""))}</span>'
+                f'<span>{"본문에 함께 수록" if u.get("text") == "inline" else "개정 조문 본문은 원문에서 확인"}</span></p></div></li>')
+    return out, len(items)
+
+
+def bills_html(manifest):
+    out = ""
+    for b in manifest.get("bills", []):
+        steps = "".join(f'<span class="lstage{" on" if st == b.get("stage") else ""}">{e(st)}</span>' for st in STAGES)
+        src = f'<a class="link-ext" href="{e(b["source_url"])}" target="_blank" rel="noopener">{e(b.get("source_name") or "출처")} ↗</a>' if str(b.get("source_url", "")).startswith("https://") else '<span class="lst-chk">공식 출처 확인 필요</span>'
+        out += (f'<li class="lup"><div class="lup-d"><span class="lst lst-bill">입법 동향</span><b>{e(kdate(b["stage_date"]))}</b></div><div><p class="lup-t">{e(b["title"])}</p><p class="lstages">{steps}</p>'
+                f'<p>{e(b.get("summary", ""))}</p><p class="urow-foot">{src}<span>{e(b.get("note", ""))}</span></p></div></li>')
+    return out
+
+
+def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html, manifest=None, today=""):
     idx = {k: {a["jo"]: a for a in d["articles"]} for k, d in laws.items()}
     cards = {}
     for k in ORDER:
@@ -321,6 +431,23 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html):
         if lis:
             topics.append(f'<section class="ltopic"><h3>{e(title)}</h3><p>{e(sub)}</p><ul>{"".join(lis)}</ul></section>')
     total = sum(1 for d in laws.values() for a in d["articles"] if not a.get("deleted"))
+    status_sec = ""
+    if manifest:
+        table, n_up, n_chk = status_panel(laws, manifest, today)
+        up, _ = upcoming_html(manifest, today)
+        bills = bills_html(manifest)
+        status_sec = f"""<section class="wrap lstat" id="status">
+  <div class="sec-head"><div><h2>A · 현재 시행 법령</h2><p>법령 데이터 기준일 <strong>{e(manifest["checked_at"])}</strong> · 국가법령정보센터 연혁과 대조. 조문마다 시행일이 다르면 법령 전체 시행일 하나로 표시하지 않고 조문에 '시행 예정'을 따로 붙입니다.</p></div></div>
+  {table}
+</section>
+<section class="wrap lstat" id="upcoming">
+  <div class="sec-head"><div><h2>B · 공포됐지만 아직 시행 전</h2><p>이미 공포돼 시행일이 정해진 개정입니다. 시행일 전에는 적용되지 않습니다.</p></div></div>
+  <ul class="lups">{up or '<li class="lup"><div></div><div><p>확인된 시행 예정 개정이 없습니다.</p></div></li>'}</ul>
+</section>
+<section class="wrap lstat" id="bills">
+  <div class="sec-head"><div><h2>입법 동향</h2><p>국회 통과안·입법예고는 <strong>현행 법령이 아닙니다.</strong> 공포돼야 법령이 되고, 내용과 시행일은 공포문으로 확정됩니다.</p></div></div>
+  <ul class="lups">{bills or '<li class="lup"><div></div><div><p>등록된 입법 동향이 없습니다.</p></div></li>'}</ul>
+</section>"""
     return f"""
 <section class="phead lhero"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>법령</p>
@@ -346,18 +473,20 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html):
     <div class="lcards">{cards.get("sapa","")}{cards.get("sapa_dec","")}</div>
   </div>
 </section>
+{status_sec}
 <section class="wrap" style="padding-top:28px">
   <div class="sec-head"><div><h2>주제별 조문 찾기</h2><p>실무에서 자주 찾는 조문을 주제별로 모았습니다. 제목은 현행 본문 그대로입니다.</p></div></div>
   <div class="ltopics">{"".join(topics)}</div>
 </section>
 <div class="wrap layout-detail" style="padding-top:28px">
   <section class="col-main" id="updates">
-    <div class="sec-head"><div><h2>개정 소식</h2><p>요약은 원문을 읽고 정리한 것입니다. 적용 여부는 원문과 전문가 확인을 거치세요.</p></div></div>
+    <div class="sec-head"><div><h2>C · 시행 중인 최근 개정</h2><p>공포일 순서. 요약은 조문 개정 표기와 부칙을 읽고 정리한 것입니다. 적용 여부는 원문으로 확인하세요.</p></div></div>
     {update_filter_html}
     <ul class="ulist" data-list>{updates_html}</ul>
     <div class="empty" data-empty hidden><p>검색 결과가 없습니다.</p></div>
   </section>
   <aside class="col-side">
+    <section class="side-box" id="past"><div class="sec-head"><div><h2>D · 과거 법령</h2></div></div><p>개정 전 조문과 연혁은 안전duck에 싣지 않습니다. 각 법령 페이지의 '국가법령정보센터 연혁'에서 시행일별 본문을 확인하세요.</p></section>
     <section class="side-box" id="statutes"><div class="sec-head"><div><h2>고시·관련 법령 원문</h2></div></div><ul class="llist">{statutes_html}</ul></section>
   </aside>
 </div>

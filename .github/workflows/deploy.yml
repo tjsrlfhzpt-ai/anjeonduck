@@ -38,6 +38,16 @@ jobs:
         run: python3 scripts/fetch_public.py
       - name: 정적 페이지 생성
         run: python3 build.py --out _site
+      - name: 법령 별표 원본 대조 (적용범위 판정 데이터)
+        run: |
+          sudo apt-get install -y -qq poppler-utils >/dev/null 2>&1 || echo "poppler 설치 실패 — 대조 건너뜀"
+          python3 scripts/verify_tables.py
+      - name: 법령 데이터·표현 감사 (버전·시행일·출처·금지 표현·필수 안내 — 오류면 배포 중단)
+        run: python3 scripts/audit.py _site
+      - name: 국가법령정보센터 연혁 비교 (주 1회 또는 수동 실행, 접속 실패는 경고만)
+        if: github.event.schedule == '20 22 * * 0' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: python3 scripts/audit.py --online
       - name: 링크 점검 (주 1회 또는 수동 실행)
         if: github.event.schedule == '20 22 * * 0' || github.event_name == 'workflow_dispatch'
         run: python3 scripts/check_links.py _site

@@ -60,6 +60,18 @@ def fmt_date(d):
 
 # ---------------------------------------------------------------- 안전 브리핑 (data/briefs/YYYY-MM-DD.json)
 
+# 브리핑·법령 근거로 쓸 수 있는 공식 1차 출처(도메인 끝). 그 밖의 주소는 '참고 보도'로만 표시하고 근거로 세지 않는다.
+OFFICIAL_HOSTS = ("law.go.kr", "moel.go.kr", "kosha.or.kr", "korea.kr", "assembly.go.kr", "moleg.go.kr", "lawmaking.go.kr", "gwanbo.go.kr",
+                  "comwel.or.kr", "me.go.kr", "nfa.go.kr", "mois.go.kr", "molit.go.kr", "kgs.or.kr", "data.go.kr", "work24.go.kr", "opinion.lawmaking.go.kr")
+
+
+def is_official(url):
+    m = re.match(r"^https://([^/:?#]+)", str(url or ""))
+    host = m.group(1).lower() if m else ""
+    return any(host == h or host.endswith("." + h) for h in OFFICIAL_HOSTS)
+
+
+BRIEF_STAGE = {"법안": "lst-bill", "입법예고": "lst-bill", "국회 통과": "lst-bill", "공포": "lst-next", "시행 예정": "lst-next", "시행 중": "lst-cur", "발표": "lst-rec", "권장": "lst-rec"}
 BRIEF_CATS = {"법령": "badge-navy", "정책": "badge-blue", "감독": "badge-orange", "사고": "badge-red", "화학물질": "badge-green", "보건": "badge-green", "자료": "badge-line"}
 
 
@@ -78,9 +90,11 @@ def load_briefs(today):
             continue
         items = []
         for it in b.get("items", []):
-            srcs = [x for x in it.get("sources", []) if safe_url(x.get("url")) and x.get("name")]
+            allsrc = [x for x in it.get("sources", []) + it.get("press", []) if safe_url(x.get("url")) and x.get("name")]
+            srcs = [x for x in allsrc if is_official(x["url"])]
+            it["press"] = [x for x in allsrc if not is_official(x["url"])]
             if not it.get("title") or not it.get("summary") or not srcs:
-                warn(f"브리핑 {f.stem}: 제목·요약·출처(https)가 없는 항목 제외 — {it.get('title')!r}")
+                warn(f"브리핑 {f.stem}: 제목·요약·공식 1차 출처가 없는 항목 제외 — {it.get('title')!r}")
                 continue
             it["sources"] = srcs
             items.append(it)
@@ -95,24 +109,32 @@ def load_briefs(today):
 def brief_article(b, rel):
     def item(it):
         cat = it.get("cat") or "정책"
-        srcs = " · ".join(f'<a class="link-ext" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener nofollow">{e(x["name"])} ↗</a>' for x in it["sources"])
+        link = lambda x: f'<a class="link-ext" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener nofollow">{e(x["name"])} ↗</a>'
+        srcs = " · ".join(link(x) for x in it["sources"])
+        press = " · ".join(link(x) for x in it.get("press", []))
         d = it.get("date") or ""
-        when = f'<time datetime="{e(d)}">{fmt_date(d)}</time>' if DATE_RE.match(d) else ""
+        ev = it.get("event_date") or ""
+        stage = it.get("stage") or ""
+        st = f'<span class="lst {BRIEF_STAGE.get(stage, "lst-rec")}">{e(stage)}</span>' if stage else ""
+        facts = [("발표·공포일", fmt_date(d) if DATE_RE.match(d) else ""), ("사건·기준일", fmt_date(ev) if DATE_RE.match(ev) else ""), ("기관", e(it.get("agency") or "")),
+                 ("공식 제목", e(it.get("official_title") or "")), ("시행일", fmt_date(it["effective"]) if DATE_RE.match(str(it.get("effective") or "")) else e(it.get("effective") or ""))]
+        dl = "".join(f"<div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in facts if v)
         point = f'<p class="br-point"><b>실무 포인트</b>{e(it["point"])}</p>' if it.get("point") else ""
-        return (f'<article class="br-item"><p class="br-meta"><span class="badge {BRIEF_CATS.get(cat, "badge-line")}">{e(cat)}</span>{when}</p>'
-                f'<h3>{e(it["title"])}</h3><p class="br-sum">{e(it["summary"])}</p>{point}<p class="br-src">출처 {srcs}</p></article>')
+        return (f'<article class="br-item"><p class="br-meta"><span class="badge {BRIEF_CATS.get(cat, "badge-line")}">{e(cat)}</span>{st}</p>'
+                f'<h3>{e(it["title"])}</h3><dl class="br-facts">{dl}</dl><p class="br-sum">{e(it["summary"])}</p>{point}<p class="br-src">공식 출처 {srcs}</p>'
+                + (f'<p class="br-src br-press">참고 보도(법령·정책의 근거로 쓰지 않음) {press}</p>' if press else "") + "</article>")
 
     def todo_li(t):
         href = str(t.get("href") or "")
-        ok = bool(re.match(r"^(tools|resources|laws|jobs|brief)/[A-Za-z0-9_\-/#?=&%.]*$", href))
+        ok = bool(re.match(r"^(tools|resources|laws|jobs|brief)/[A-Za-z0-9_/#?=&%.-]*$", href))
         return f'<li><a href="{e(rel + href)}">{e(t["text"])}</a></li>' if ok else f'<li>{e(t["text"])}</li>'
 
     todo = "".join(todo_li(t) for t in b.get("todo", []) if t.get("text"))
     lead = f'<p class="br-lead">{e(b["lead"])}</p>' if b.get("lead") else ""
     todo_sec = f'<section class="br-todo"><h3>이번 주 챙길 일</h3><ul class="bul">{todo}</ul></section>' if todo else ""
     return (f'{lead}{"".join(item(it) for it in b["items"])}{todo_sec}'
-            f'<p class="src-note">{e(b.get("by") or "안전duck 리포터")}가 공개된 보도자료·기사를 읽고 직접 요약했습니다(AI 작성). '
-            f'원문을 옮겨 싣지 않으며, 적용 여부는 출처 원문과 법령으로 확인하세요. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
+            f'<p class="src-note">안전duck이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
+            f'국회 통과안·입법예고는 현행 법령이 아닙니다. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
 
 
 # ---------------------------------------------------------------- 검증
@@ -557,6 +579,68 @@ def mega_item(site, rel, href, label, cur):
     return a
 
 
+_MAN = None
+
+
+def manifest():
+    global _MAN
+    if _MAN is None:
+        import lawpages
+        _MAN = lawpages.load_manifest()
+    return _MAN
+
+
+def stale(checked, today=None):
+    """확인일이 기준 기간(매니페스트 stale_after_days)을 넘겼는지."""
+    try:
+        d = dt.date.fromisoformat(checked)
+    except Exception:
+        return True
+    return ((today or dt.date.today()) - d).days > int(manifest().get("stale_after_days", 45))
+
+
+def lawver_html(tool_id, rel_root, fallback=""):
+    """도구·서식 하단: 법적 근거 확인일 / 적용 법령 버전 / 원문 링크."""
+    m = manifest()
+    rows, dates = [], []
+    for l in m.get("laws", []):
+        if tool_id in l.get("used_by", []):
+            c = l["current"]
+            nxt = [u for u in l.get("upcoming", []) if u.get("effective", "") > dt.date.today().isoformat()]
+            nx = f' · <span class="lst lst-next">시행 예정 {len(nxt)}건</span>' if nxt else ""
+            rows.append(f'<a href="{e(c.get("source_url") or l.get("history_url") or "")}" target="_blank" rel="noopener">{e(l["name"])}</a> {e(c["no"])} · 시행 {e(c["effective"])}{nx}')
+            dates.append(l.get("checked_at") or m.get("checked_at"))
+    for n in m.get("notices", []):
+        if tool_id in n.get("used_by", []):
+            chk = ' · <span class="lst lst-chk">확인 필요</span>' if n.get("status") != "verified" else ""
+            rows.append(f'<a href="{e(n["source_url"])}" target="_blank" rel="noopener">{e(n["name"])}</a> {e(n["no"])}{(" · 시행 " + e(n["effective"])) if n.get("effective") else ""}{chk}')
+            dates.append(n.get("checked_at"))
+    if not rows:
+        if not fallback:
+            return ""
+        return (f'<aside class="wrap"><p class="lawver"><b>관련 근거</b> {e(fallback)}<br><b>적용 법령 버전</b> 법령 버전 목록(law_manifest)에 등록되지 않은 근거입니다 — <span class="stale">공식 원문 재확인 필요</span><br>'
+                f'<b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a></p></aside>')
+    oldest = min(d for d in dates if d)
+    warn_s = ' <span class="stale">· 확인일이 오래되었습니다 — 공식 원문 재확인 필요</span>' if stale(oldest) else ""
+    return (f'<aside class="wrap"><p class="lawver"><b>법적 근거 확인일</b> {e(oldest)}{warn_s}<br><b>적용 법령 버전</b> ' + " / ".join(rows)
+            + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#versions">법령 버전·시행 예정 보기</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a>'
+            + '<br>이 화면의 판정·계산·예시 문구는 안전duck이 정리한 참고 자료이며 법령 원문이 아닙니다.</p></aside>')
+
+
+def operator_html(site, rel_root):
+    op = site.get("operator") or {}
+    iss = safe_url(op.get("issues_url"))
+    mail = site.get("contact_email", "")
+    def issue(title, label):
+        return f'<a href="{e(iss)}?title={quote(title)}" target="_blank" rel="noopener">{label}</a>' if iss else label
+    parts = [f'운영 주체: {e(op.get("name") or site["name"])}']
+    parts.append("문의: " + (f'<a href="mailto:{e(mail)}">{e(mail)}</a>' if mail else issue("[문의] ", "GitHub 이슈로 접수")))
+    parts.append(issue("[개인정보] ", "개인정보 문의"))
+    parts.append(issue("[삭제 요청] ", "게시물 삭제·수정 요청"))
+    parts.append(issue("[법령 오류] ", "법령 오류 신고"))
+    return " · ".join(parts)
+
+
 def page(site, rel_root, path, title, body, desc=None, active=""):
     base = site["base_url"].rstrip("/")
     canonical = f"{base}/{path}"
@@ -611,8 +695,10 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     <ul class="ft-notes">
       <li>서식·법령은 국가법령정보센터 등 기관 원본으로 연결됩니다.</li>
       <li>채용 조건과 마감일은 공고 원문이 우선합니다.</li>
-      <li>방문자 정보를 서버에 저장하지 않습니다. 즐겨찾기는 이 기기에만 남습니다.</li>
+      <li>작성 도구는 입력한 문서 내용을 안전duck 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
+      <li>판정·계산 결과는 자가진단용 참고 자료이며 행정기관의 공식 해석·처분을 대체하지 않습니다. <a href="{rel_root}legal/">법령정보·면책 안내</a></li>
     </ul>
+    <p class="ft-op">{operator_html(site, rel_root)}</p>
     <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''} · <a href="{rel_root}jobs/post/">채용공고 올리기</a> · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button></p>
   </div>
 </footer>
@@ -701,16 +787,29 @@ def resource_row(r, site, rel_root="./"):
 </li>"""
 
 
-def update_row(u, full=True):
+def update_row(u, full=True, today=""):
     src = safe_url(u.get("source_url"))
     link = f'<a class="link-ext" href="{e(src)}" target="_blank" rel="noopener">{e(u.get("source_name") or "원문")} ↗</a>' if src else ""
     d = u.get("date", "")
+    eff = str(u.get("effective") or "")
+    st = ""
+    if DATE_RE.match(eff) and today:
+        st = '<span class="lst lst-next">시행 예정</span>' if eff > today else '<span class="lst lst-cur">시행 중</span>'
+    arts = " · ".join(e(x) for x in u.get("affected_articles", []) or [])
+    extra = ""
+    basis = f'<span>근거 {e(u["basis"])}</span>' if u.get("basis") else ""
+    if full:
+        extra = (f'<p class="urow-desc">{e(u.get("summary"))}</p>'
+                 + (f'<p class="lup-a">대상 조문: {arts}</p>' if arts else "")
+                 + (f'<p class="lup-i"><b>실무 영향</b> {e(u["practical_impact"])}</p>' if u.get("practical_impact") else "")
+                 + f'<p class="urow-foot">{link}{basis}'
+                 + ('<span class="lst-chk">확인 필요</span>' if u.get("verify") else "") + f'<span>원문 확인 {fmt_date(u.get("checked"))}</span></p>')
     return f"""<li class="urow" data-item data-text="{e(u.get('title','') + ' ' + u.get('summary','') + ' ' + u.get('law',''))}">
-  <time class="urow-date" datetime="{e(d)}">{fmt_date(d)}</time>
+  <time class="urow-date" datetime="{e(d)}">{fmt_date(d)}<span class="urow-k">공포</span></time>
   <div class="urow-body">
-    <p class="urow-law">{e(u.get('law'))}{(' · 시행 ' + fmt_date(u.get('effective'))) if u.get('effective') else ''}</p>
+    <p class="urow-law">{st} {e(u.get('law'))}{(' · 시행 ' + fmt_date(eff)) if eff else ''}{(' · ' + e(u.get('kind'))) if u.get('kind') else ''}</p>
     <h3 class="urow-title">{e(u['title'])}</h3>
-    {f'<p class="urow-desc">{e(u.get("summary"))}</p><p class="urow-foot">{link}<span>원문 확인 {fmt_date(u.get("checked"))}</span></p>' if full else ''}
+    {extra}
   </div>
 </li>"""
 
@@ -787,6 +886,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         elif t.get("inject"):
             names = t["inject"] if isinstance(t["inject"], list) else [t["inject"]]
             src = inject_data(src, names, t["src"])
+        src += lawver_html(t["id"], "../../", t.get("law", ""))
         return page(site, "../../", f"tools/{t['id']}/", t["name"], src, desc=t.get("desc"), active="tools/")
     if t.get("inject") == "hazards":
         payload = json.dumps(hazards, ensure_ascii=False).replace("</", "<\\/")
@@ -796,6 +896,12 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         css = (ROOT / t["css"]).read_text(encoding="utf-8").replace("</style", "<\\/style")
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
+    if t["id"] in ("tbm", "committee"):
+        note = ('<p style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#555;line-height:1.6">안전duck 자체 제공 양식 · 법정 지정서식이 아님 — '
+                '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
+                f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')
+        assert "</body>" in src
+        src = src.replace("</body>", note + "</body>", 1)
     return src
 
 
@@ -920,7 +1026,7 @@ def duck_signs_html(site, write):
 <div class="dk-sheet"><img src="../../../{e(it["print"])}" alt="{e(it["title"])} 안내 게시물"></div>"""
         write(f"{pid}index.html", page(site, "../../../", pid, f'{it["title"]} 안내 게시물', body, desc=it.get("desc"), active="resources/"))
     return (f'<section class="dk-sec" id="duck"><div class="dk-head"><div><h2>안전duck 현장 안내 게시물</h2>'
-            f'<p>현장에 바로 붙이는 다국어 안내 게시물입니다. 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
+            f'<p>안전duck이 자체 제작·자체 번역한 다국어 안내 게시물입니다(공식 번역 아님). 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
             f'<ul class="dk-grid">{"".join(cards)}</ul></section>')
 
 
@@ -1022,7 +1128,7 @@ def build(out, today):
         <label class="sr" for="dxN">상시근로자 수</label><input id="dxN" name="n" type="number" min="0" inputmode="numeric" placeholder="상시근로자 수">
         <button class="btn" type="submit">판정하기</button>
       </div>
-      <p class="dx-sub">공통 의무·선임·위원회·공시·도급·중대재해처벌법까지 근거 조문과 함께 적용/조건부/미적용으로 보여 줍니다.</p>
+      <p class="dx-sub">공통 의무·선임·위원회·공시·도급·중대재해처벌법까지 근거 조문과 함께 적용·조건부·확인 필요·적용 제외로 보여 주는 자가진단입니다.</p>
     </form>
     <div class="dx-cards">
       <a class="dx-card" href="tools/hpp/"><span class="i" aria-hidden="true">🏭</span><span><b>유해위험방지계획서, 내야 하나?</b><span>공장 설치·증설 300kW·100kW, 위험 설비, 건설공사</span></span><span class="arr" aria-hidden="true">→</span></a>
@@ -1096,7 +1202,26 @@ def build(out, today):
         rows = '<li class="bd-empty">등록된 공고가 없습니다. 안전·보건 인력을 찾는 기업은 무료로 올릴 수 있습니다.</li>' + "".join(
             bd_row(safe_url(x["url"]), x["name"] + "에서 찾기", "", "외부", ext=True) for x in sites.get("job_search", [])[:3] if safe_url(x.get("url")))
     bd_jobs = board("채용정보", "jobs/", rows + '<li class="bd-cta"><a class="btn btn-sm" href="jobs/post/">채용공고 올리기 · 무료</a></li>')
-    bd_laws = board("법령 개정", "laws/#updates", "".join(bd_row(f"laws/#updates", u["title"], md(u.get("date")), u.get("law", "").replace("산업안전보건법 ", "").replace("산업안전보건", "산안")[:6]) for u in updates[:5]))
+    import lawpages
+    man = manifest()
+    LAWS_KEYS = {l["key"] for l in man["laws"]}
+    _tbl, n_up, n_chk = lawpages.status_panel(LAWS_KEYS, man, today, "laws/")
+    n_chk += sum(1 for n in man.get("notices", []) if n.get("status") != "verified") + len(man.get("open_items", []))
+    ups_all = sorted(((u["effective"], l["name"], u) for l in man["laws"] for u in l.get("upcoming", []) if u["effective"] > today), key=lambda x: x[0])
+    today_chg = [(l["name"], u) for l in man["laws"] for u in l.get("upcoming", []) + l.get("recent", []) + [l["current"]] if u.get("effective") == today or u.get("promulgated") == today]
+    chg_txt = ("오늘 시행·공포 " + ", ".join(f"{nm} {u['no']}" for nm, u in today_chg)) if today_chg else "오늘 시행·공포된 변경 없음(확인일 기준)"
+    nxt_txt = f"다음 시행 {lawpages.kdate(ups_all[0][0])} {ups_all[0][1]}" if ups_all else "확인된 시행 예정 없음"
+    stale_txt = ' · <b>확인일이 오래되었습니다 — 공식 원문 재확인 필요</b>' if stale(man.get("checked_at", ""), dt.date.fromisoformat(today)) else ""
+    asof_strip = (f'<section class="asof" aria-label="법령 데이터 기준"><div class="wrap"><span><b>법령 데이터 기준일: {e(man.get("checked_at", ""))}</b>{stale_txt}</span>'
+                  f'<a href="laws/#versions"><span class="lst lst-cur">현재 시행</span> {sum(1 for l in man["laws"] if l["key"] in LAWS_KEYS)}개 법령</a>'
+                  f'<a href="laws/#upcoming"><span class="lst lst-next">시행 예정</span> {n_up}건 · {e(nxt_txt)}</a>'
+                  f'<span>오늘의 법령 변경: {e(chg_txt)}</span>'
+                  f'<a href="legal/#check"><span class="lst lst-chk">확인 필요</span> 데이터 {n_chk}건</a></div></section>')
+    law_rows = "".join(bd_row("laws/#upcoming", f"{nm.replace('산업안전보건법', '산안법').replace('산업안전보건기준에 관한 규칙', '안전보건규칙')} {u['no'].split(' ')[-1]}", md(eff), "시행 예정") for eff, nm, u in ups_all[:3])
+    law_rows += "".join(bd_row("laws/#bills", b.get("title", ""), md(b.get("stage_date")), "입법 동향") for b in man.get("bills", [])[:1])
+    law_rows += "".join(bd_row("laws/#updates", u["title"], md(u.get("date")), "시행 중") for u in [x for x in updates if (x.get("effective") or x.get("date") or "") <= today][:2])
+    bd_laws = board(f"법령 현황 · 기준일 {md(man.get('checked_at'))}", "laws/", law_rows)
+    _unused = board("법령 개정", "laws/#updates", "".join(bd_row(f"laws/#updates", u["title"], md(u.get("date")), u.get("law", "").replace("산업안전보건법 ", "").replace("산업안전보건", "산안")[:6]) for u in updates[:5]))
     FORM_PICKS = ["log-sup", "log-safety", "edu-log", "permit", "patrol", "sapa-half"]
     fby = {f["id"]: f for f in _forms}
     bd_forms = board(f"서식 작성기 {n_forms}종", "tools/forms/", "".join(bd_row(f"tools/forms/{i}/", fby[i]["title"], "", fby[i]["group"][:5]) for i in FORM_PICKS if i in fby))
@@ -1107,6 +1232,7 @@ def build(out, today):
     quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로가기</span>' + "".join(
         f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url"))) + "</div></section>")
     home = f"""
+{asof_strip}
 <section class="hero">
   <div class="wrap hero-in">
    <div class="hero-txt">
@@ -1168,9 +1294,10 @@ def build(out, today):
     brief_side = f"""<aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">지난 브리핑</h2><ul class="br-arch">{arch or '<li>없음</li>'}</ul></div>
     <div class="side-box"><h2 class="h-sm">브리핑은 이렇게 만듭니다</h2><ul class="bul hint">
-      <li>평일 아침, 고용노동부·안전보건공단 발표와 법령 개정, 주요 보도를 읽고 실무에 필요한 것만 추립니다.</li>
-      <li>기사·보도자료 원문은 싣지 않고 직접 요약한 뒤 출처로 연결합니다.</li>
-      <li>AI가 정리하므로 날짜·숫자는 반드시 출처 원문으로 확인하세요.</li>
+      <li>국가법령정보센터, 고용노동부, 안전보건공단, 정부 부처·국회·공공기관의 공식 발표만 근거로 씁니다.</li>
+      <li>언론 기사는 근거로 쓰지 않습니다. 싣더라도 '참고 보도'로 따로 표시합니다.</li>
+      <li>원문은 싣지 않고 요약한 뒤 공식 출처로 연결합니다. 숫자·조문·시행일은 원문과 대조한 것만 적습니다.</li>
+      <li>법안·국회 통과·공포·시행 예정·시행 중을 구분해 표시합니다.</li>
     </ul></div>
     <div class="side-box"><h2 class="h-sm">원문 보러 가기</h2><ul class="bul">
       <li><a href="https://www.moel.go.kr/news/enews/report/enewsList.do" target="_blank" rel="noopener">고용노동부 보도자료 ↗</a></li>
@@ -1192,6 +1319,55 @@ def build(out, today):
                 + brief_side.replace('href="../laws/', 'href="../../laws/').replace('<a href="20', '<a href="../20') + "</div>")
         write(f"brief/{b['date']}/index.html", page(site, "../../", f"brief/{b['date']}/", f'{fmt_date(b["date"])} 안전 브리핑 — {b["title"]}', body,
               desc=(b.get("lead") or b["title"])[:150], active="brief/"))
+
+    # ---- 법령정보·면책 안내
+    man = manifest()
+    need = [(l["name"], l.get("note", "")) for l in man["laws"] if "확인 필요" in (l.get("note") or "")]
+    need += [(n["name"] + " " + n["no"], n.get("note", "")) for n in man.get("notices", []) if n.get("status") != "verified"]
+    need += [(x["name"], x["note"]) for x in man.get("open_items", [])]
+    need_html = "".join(f"<li><b>{e(a)}</b> — {e(b)}</li>" for a, b in need) or "<li>현재 표시할 항목이 없습니다.</li>"
+    src_rows = "".join(f'<tr><th>{e(l["name"])}</th><td>{e(l["current"]["no"])} · 시행 {e(l["current"]["effective"])}</td><td>{e(l.get("checked_at", ""))}</td><td><a href="{e(l["current"].get("source_url") or l.get("history_url") or "")}" target="_blank" rel="noopener">국가법령정보센터 ↗</a></td></tr>' for l in man["laws"])
+    src_rows += "".join(f'<tr><th>{e(n["name"])}</th><td>{e(n["no"])}</td><td>{e(n.get("checked_at", ""))}</td><td><a href="{e(n["source_url"])}" target="_blank" rel="noopener">국가법령정보센터 ↗</a></td></tr>' for n in man.get("notices", []))
+    op_html = operator_html(site, "../")
+    legal_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../">홈</a><span>/</span>법령정보·면책 안내</p>
+  <h1>법령정보·면책 안내</h1>
+  <p>안전duck이 보여 주는 법령 정보, 판정·계산 결과, 양식이 어떤 성격의 자료인지 정리했습니다. 법령 데이터 기준일 {e(man.get("checked_at", ""))}.</p>
+</div></section>
+<div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
+  <h2 id="info">1. 법령정보 안내</h2>
+  <p>안전duck의 법령 본문·별표·서식은 국가법령정보센터에 공개된 원문을 옮겨 실은 것이고, 그 밖의 요약·분류·판정 기준·계산식·예시 문구는 안전duck이 정리한 참고 자료입니다. 두 가지는 화면에서 구분해 표시합니다. 현재 시행 중인 내용, 공포되었지만 아직 시행 전인 내용, 국회를 통과했거나 입법예고 중인 내용은 서로 다른 상태로 나누어 보여 줍니다.</p>
+  <p>상태 표시: <span class="lst lst-cur">현재 시행</span> <span class="lst lst-next">시행 예정</span> <span class="lst lst-bill">법안·입법 동향</span> <span class="lst lst-rec">권장사항</span> <span class="lst lst-chk">확인 필요</span></p>
+  <h2 id="source">2. 법령 원문 출처</h2>
+  <div class="table-wrap"><table class="lvt"><thead><tr><th>법령·고시</th><th>안전duck이 쓰는 버전</th><th>공식 확인일</th><th>원문</th></tr></thead><tbody>{src_rows}</tbody></table></div>
+  <p>법적 근거로는 국가법령정보센터, 고용노동부, 한국산업안전보건공단 등 공식 기관의 자료만 사용합니다. 언론 보도는 '참고 보도'로만 표시하며 법령·정책의 근거로 쓰지 않습니다. 확인일로부터 {int(man.get("stale_after_days", 45))}일이 지나면 화면에 '공식 원문 재확인 필요'가 표시됩니다.</p>
+  <h2 id="limit">3. 자가진단 도구의 한계</h2>
+  <p>적용범위 판정, 유해위험방지계획서 대상 확인, 기계·설비 의무 조회 등의 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 관할 행정기관의 공식 해석·처분을 대체하지 않습니다. 업종 분류, 상시근로자 수 산정, 도급 관계처럼 사실관계 판단이 필요한 부분은 도구가 대신 판단할 수 없습니다. 결과는 적용 · 조건부 · 확인 필요 · 적용 제외 네 단계로만 표시합니다.</p>
+  <h2 id="calc">4. 안전duck 계산 결과의 성격</h2>
+  <p>과태료, 산업안전보건관리비, 상시근로자 수, 교육시간, 체감온도 등의 계산 결과는 참고 계산입니다. 과태료의 최종 처분 금액은 실제 위반사실과 감경·가중사유를 기준으로 관할 행정기관이 판단합니다. 상시근로자 수 산정방법은 적용 법령별로 별도 확인이 필요합니다. 위험성평가의 가능성·중대성 척도와 등급 구간은 '안전duck 기본 위험성평가 예시 기준'이며 사업장이 정한 방법으로 바꿔 쓸 수 있습니다.</p>
+  <h2 id="health">5. 건강정보 도구 안내</h2>
+  <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 참고용이며 의학적 진단이 아닙니다. 업무 적합성과 사후관리 판단은 의사 등 보건의료 전문가의 평가가 필요하고, 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
+  <h2 id="forms">6. 안전duck 자체 양식의 법적 지위</h2>
+  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">안전duck 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 법정 지정서식이 아니며, 관련 조문을 참고해 만든 보조양식입니다. <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 그대로 쓰는 것이 아니라 실제 내용으로 바꿔야 하는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
+  <p>결재란의 서명은 인쇄용 서명 이미지이며, 모든 법정 전자서명 또는 전자문서 제출 요건을 충족한다는 의미가 아닙니다.</p>
+  <h2 id="links">7. 외부 링크 책임범위</h2>
+  <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, 안전duck은 외부 사이트의 내용을 보증하지 않습니다.</p>
+  <h2 id="jobs">8. 채용공고 책임범위</h2>
+  <p>채용공고는 채용 기업이 직접 등록한 내용을 운영자가 확인해 게시합니다. 채용 조건·마감일은 공고 원문과 채용 기업이 책임지며 안전duck은 내용의 진위를 보증하지 않습니다. 허위 공고나 권리를 침해하는 공고는 신고를 받으면 확인 후 게시를 중단합니다. 등록 기준과 개인정보 처리는 <a href="../jobs/post/">채용공고 올리기</a>에 적었습니다.</p>
+  <h2 id="data">9. 데이터 저장 방식</h2>
+  <p>작성 도구에 입력한 내용, 서명 이미지, 첨부 사진은 안전duck 서버로 전송하지 않고 사용 중인 브라우저(localStorage·IndexedDB)에 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 사라지므로 필요하면 화면 아래 '작성 내용 백업'으로 파일을 내려받아 두세요. 다만 사이트는 GitHub Pages에서 제공되고 글꼴 등 일부 자원을 외부 CDN에서 불러오므로, 접속 기록(IP 주소 등)에는 해당 제공자의 정책이 적용됩니다. 채용공고 등록 양식은 Google 설문지를 사용합니다.</p>
+  <h2 id="report">10. 오류 신고 방법</h2>
+  <p>법령 내용·시행일·판정 결과·계산식의 오류를 발견하면 알려 주세요. 해당 화면 주소와 근거 조문을 함께 적어 주시면 확인이 빠릅니다.</p>
+  <p>{op_html}</p>
+  <h2 id="check">확인 필요로 남겨 둔 데이터</h2>
+  <p>공식 원문으로 다시 확인하지 못해 임의로 고치지 않고 표시만 해 둔 항목입니다.</p>
+  <ul class="bul">{need_html}</ul>
+  <h2 id="priority">11. 국가법령정보센터 원문 우선 원칙</h2>
+  <p>안전duck의 내용과 법령 원문이 다르면 언제나 <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a>의 현행 원문이 우선합니다. 실제 적용 여부와 해석은 관할 지방고용노동관서 등 행정기관에 확인하시기 바랍니다.</p>
+</div>"""
+    write("legal/index.html", page(site, "../", "legal/", "법령정보·면책 안내", legal_body,
+          desc="안전duck 법령 정보의 출처와 기준일, 자가진단·계산 결과의 한계, 자체 양식의 법적 지위, 데이터 저장 방식, 오류 신고 방법."))
 
     # ---- 채용공고 올리기
     jf = site.get("job_form") or {}
@@ -1226,7 +1402,19 @@ def build(out, today):
       <li>허위·과장, 수수료를 요구하는 공고, 직무와 무관한 광고는 게시하지 않습니다.</li>
       <li>마감일이 지나면 자동으로 '마감'으로 바뀝니다.</li>
     </ul></div>
-    <div class="side-box"><h2 class="h-sm">수정·삭제</h2><p>같은 양식에서 '요청 종류'를 수정 또는 삭제로 고르고 회사명과 공고 제목을 적어 주세요. 확인 후 반영합니다.</p></div>
+    <div class="side-box"><h2 class="h-sm">게시 승인 기준</h2><ul class="bul hint">
+      <li>운영자가 직무 관련성, 회사·지원 방법의 확인 가능 여부, 허위·과장 여부를 보고 게시합니다. 기준에 맞지 않으면 게시하지 않을 수 있습니다.</li>
+      <li>허위 공고, 거짓 채용 조건, 구직자에게 금품을 요구하는 공고는 금지합니다(채용절차의 공정화에 관한 법률·직업안정법 등 관계 법령은 등록자가 직접 확인해야 합니다).</li>
+      <li>안전duck은 공고 내용의 진위를 보증하지 않으며, 채용 조건은 공고 원문과 채용 기업이 책임집니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">개인정보 처리</h2><ul class="bul hint">
+      <li>수집 항목: 양식에 적은 회사명·담당자 연락처·공고 내용. 목적: 공고 확인과 게시.</li>
+      <li><strong>양식에 적은 지원 연락처(이메일·전화)는 공고에 그대로 공개됩니다.</strong> 공개에 동의하는 연락처만 적어 주세요. 개인 휴대전화보다 회사 대표 연락처를 권장합니다.</li>
+      <li>양식은 Google 설문지로 접수되므로 응답은 Google과 운영자의 스프레드시트에 저장됩니다.</li>
+      <li>공고가 마감되거나 삭제를 요청하면 게시 목록에서 내립니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">수정·삭제·게시중단·권리침해 신고</h2><p>같은 양식에서 '요청 종류'를 수정 또는 삭제로 고르고 회사명과 공고 제목을 적어 주세요. 확인 후 반영합니다.</p>
+      <p class="hint">내 회사 이름이 도용되었거나 권리를 침해하는 공고를 발견하면 아래로 알려 주세요. 확인되는 대로 게시를 중단합니다.<br>{operator_html(site, "../../")}</p></div>
     <div class="side-box"><h2 class="h-sm">구직자라면</h2><ul class="bul"><li><a href="../">등록된 공고 보기</a></li>{"".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x["name"])} ↗</a></li>' for x in sites.get("job_search", []) if safe_url(x.get("url")))}</ul></div>
   </aside>
 </div>"""
@@ -1452,6 +1640,7 @@ def build(out, today):
     # ---- 법령: 홈(검색·주제별·개정 소식) + 법령별 전문 페이지
     import lawpages
     LAWS = lawpages.load_laws()
+    MANIFEST = lawpages.load_manifest()
     byl_map = {}
     for r in resources:
         if r.get("byl_no") and r.get("detail"):
@@ -1463,7 +1652,7 @@ def build(out, today):
 
     rev = lawpages.reverse_index(LAWS)
     for k in LAWS:
-        body, n_art = lawpages.law_page(k, LAWS, rev, byl_href, law_url)
+        body, n_art = lawpages.law_page(k, LAWS, rev, byl_href, law_url, MANIFEST, today)
         d = LAWS[k]
         write(f"laws/{k}/index.html", page(site, "../../", f"laws/{k}/", f'{d["law"]} 전문', body,
               desc=f'{d["law"]} 현행 전문 {n_art}개 조문 — 목차, 조문 검색, 인용 조문 바로가기, 하위 법령 역참조. {d["version"]}', active="laws/"))
@@ -1475,7 +1664,8 @@ def build(out, today):
     upd_filter = """<div class="listbar"><div class="search-inline">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input type="search" class="filter-q" placeholder="법령명, 내용" aria-label="개정 소식 검색"></div></div>"""
-    law_body = lawpages.hub_page(LAWS, "".join(update_row(u) for u in updates), len(updates), statutes, upd_filter)
+    in_force = [u for u in updates if not u.get("effective") or u["effective"] <= today]
+    law_body = lawpages.hub_page(LAWS, "".join(update_row(u, today=today) for u in in_force), len(in_force), statutes, upd_filter, MANIFEST, today)
     write("laws/index.html", page(site, "../", "laws/", "법령", law_body,
                                   desc="산업안전보건법·시행령·시행규칙·안전보건규칙·중대재해처벌법 현행 전문 검색, 주제별 조문, 개정 소식.", active="laws/"))
 
@@ -1485,7 +1675,7 @@ def build(out, today):
     groups, forms = all_forms(lawref)
     form_src = (ROOT / "apps/form.body.html").read_text(encoding="utf-8")
     for f in forms:
-        body = form_src.replace("/*@DATA@*/null", json.dumps(f, ensure_ascii=False).replace("</", "<\\/"))
+        body = form_src.replace("/*@DATA@*/null", json.dumps(f, ensure_ascii=False).replace("</", "<\\/")) + lawver_html("forms", "../../../")
         write(f"tools/forms/{f['id']}/index.html", page(site, "../../../", f"tools/forms/{f['id']}/", f["title"], body, desc=f.get("desc"), active="tools/"))
     gid = {"작업시작 전 점검(별표 3)": "pre"}
     fsecs = []

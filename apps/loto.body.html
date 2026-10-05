@@ -1,7 +1,7 @@
 <section class="phead no-print"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>LOTO 작업금지 태그</p>
   <h1>LOTO 작업금지 태그 인쇄 (잠금·꼬리표)</h1>
-  <p>정비·청소·수리 중 다른 사람이 기계를 켜지 못하게 기동장치에 거는 꼬리표입니다. A4 가로 한 장에 3개, 양면으로 인쇄하면 뒷면에 잠금·해제 기록란이 들어갑니다. 비워 두면 손으로 쓰는 빈 칸으로 나옵니다.</p>
+  <p><strong>안전duck 제공 현장 안전관리용 보조양식</strong>입니다(법에서 정한 서식이 아님). 정비·청소·수리 중 다른 사람이 기계를 켜지 못하게 기동장치에 거는 꼬리표입니다. A4 가로 한 장에 3개, 양면으로 인쇄하면 뒷면에 잠금·해제 기록란이 들어갑니다. 비워 두면 손으로 쓰는 빈 칸으로 나옵니다.</p>
 </div></section>
 <div class="wrap layout-detail no-print">
   <section class="col-main stack">
@@ -26,7 +26,8 @@
     <div class="lt-prev" id="lPrev"></div>
   </section>
   <aside class="col-side stack">
-    <div class="side-box"><h2 class="h-sm">법에서 정한 것</h2><ul class="bul hint">
+    <div class="side-box"><h2 class="h-sm">법에서 정한 것은 '조치'입니다</h2><ul class="bul hint">
+      <li><strong>태그를 붙였다고 법정 안전조치를 한 것이 되지는 않습니다.</strong> 운전 정지, 잠금장치와 열쇠 별도 관리(또는 표지판), 잔류 에너지 방출 같은 실제 조치가 있어야 합니다.</li>
       <li>정비·청소·급유·검사·수리·교체·조정 작업으로 위험할 우려가 있으면 운전을 정지하고, 다른 사람이 운전하지 못하게 <strong>기동장치에 잠금장치를 하고 열쇠를 따로 관리하거나 표지판을 설치</strong>합니다(기준규칙 제92조제1항·제2항).</li>
       <li>압축된 기체·액체가 방출될 우려가 있으면 미리 방출시킵니다(같은 조 제4항).</li>
       <li>정전 작업은 차단장치·단로기에 <strong>잠금장치와 꼬리표</strong>를 붙이고, 잔류전하 방전·검전기 확인 후 작업하며, 잠금장치와 꼬리표는 <strong>설치한 근로자가 직접 철거</strong>합니다(기준규칙 제319조).</li>
@@ -110,7 +111,7 @@
       '<div class="lt-head"><div class="en">' + (warn ? "WARNING" : "DANGER") + '</div><div class="ko">' + (warn ? "경 고" : "위 험") + "</div></div>" +
       '<div class="lt-big"><div class="k">' + (warn ? "점검 중<br>조작 금지" : "작업 중<br>조작 금지") + '</div><div class="e">DO NOT OPERATE</div><div class="s">이 잠금장치와 꼬리표는<br>건 사람만 풀 수 있습니다.</div></div>' +
       '<div class="lt-rows">' + [["설비", v.eq], ["작업 내용", v.job], ["잠근 사람", v.who], ["연락처", v.tel], ["잠금 일시", v.at]].map(function (r) { return '<div class="lt-row"><span>' + r[0] + "</span><b>" + esc(r[1] || "") + "</b></div>"; }).join("") + "</div>" +
-      '<div class="lt-foot">' + (v.co ? esc(v.co) + " · " : "") + "산업안전보건기준에 관한 규칙 제92조·제319조</div></div>";
+      '<div class="lt-foot">' + (v.co ? esc(v.co) + " · " : "") + "안전duck 보조양식 · 근거 조치: 기준규칙 제92조·제319조</div></div>";
   }
   function back() {
     return '<div class="lt-tag lt-back" style="--lt:' + color() + '"><span class="lt-hole">⊕</span>' +
