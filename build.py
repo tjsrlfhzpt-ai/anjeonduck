@@ -531,7 +531,7 @@ def form_auto_map():
 NAV = [("tools/", "무료 도구"), ("resources/", "서식·자료"), ("laws/", "법령"), ("brief/", "안전 브리핑"), ("jobs/", "채용정보"), ("news/", "안전뉴스")]
 
 LOGO_SVG = ('<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">'
-            '<rect width="40" height="40" rx="11" fill="#1F6FD1"/>'
+            '<rect width="40" height="40" rx="11" fill="#0F172A"/>'
             '<circle cx="19" cy="24" r="10.5" fill="#FFD23F"/>'
             '<path d="M8.5 22.5a10.5 9.5 0 0 1 21 0z" fill="#F58A1F"/>'
             '<rect x="6.5" y="21" width="25" height="3" rx="1.5" fill="#D86F0C"/>'
@@ -560,26 +560,46 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
             ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
 
 
-def mega_item(site, rel, href, label, cur):
-    """주 메뉴 한 칸. 무료 도구·법령은 데스크톱에서 펼침 메뉴(마우스 올림·키보드 포커스)를 붙인다."""
-    a = f'<a href="{rel}{href}"{cur}>{e(label)}</a>'
-    if href == "tools/":
-        by = {t["id"]: t for t in site.get("free_tools", [])}
-        def li(t):
-            return f'<li><a href="{rel}tools/{e(t["id"])}/" title="{e(t["name"])}">{e(t.get("menu") or t.get("short") or t["name"])}</a></li>'
-        cols = [("판정·진단", [by[i] for i in DIAG_TOOLS if i in by])]
-        for k, _, _ in TOOL_KINDS:
-            cols.append((k, [t for t in site.get("free_tools", []) if t.get("cat") == k and t["id"] not in DIAG_TOOLS]))
-        cols[1][1].append({"id": "forms", "name": "서식 작성기 전체", "short": "서식 작성기 전체"})
-        body = "".join(f'<div class="mega-col"><p class="mega-h">{e(h)}</p><ul>{"".join(li(t) for t in ts)}</ul></div>' for h, ts in cols if ts)
-        return f'<div class="gnb-item">{a}<div class="mega" role="region" aria-label="무료 도구 메뉴"><div class="mega-in">{body}</div></div></div>'
-    if href == "laws/":
-        lis = "".join(f'<li><a href="{rel}laws/{k}/">{e(n)}</a></li>' for k, n in LAW_MENU)
-        return (f'<div class="gnb-item">{a}<div class="mega mega-sm" role="region" aria-label="법령 메뉴"><div class="mega-in">'
-                f'<div class="mega-col"><p class="mega-h">현행 전문</p><ul>{lis}</ul></div>'
-                f'<div class="mega-col"><p class="mega-h">더 보기</p><ul><li><a href="{rel}laws/#updates">개정 소식</a></li><li><a href="{rel}laws/#statutes">고시·관련 법령 바로가기</a></li>'
-                f'<li><a href="{rel}tools/selection/">적용범위 판정</a></li><li><a href="{rel}tools/penalty/">과태료 부과기준</a></li></ul></div></div></div></div>')
-    return a
+TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "selection": "⚖️", "hpp": "🏭",
+              "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
+              "duties": "🧑‍💼", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
+WRITE_TOOLS = ["tbm", "risk", "committee", "msds", "loto", "heat"]
+CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
+LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
+# 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
+NAV4 = [("write", "작성기·도구", "tools/#k-write"), ("calc", "진단·계산기", "tools/#k-calc"), ("res", "서식·자료실", "resources/"), ("law", "법령·소식", "laws/")]
+ACTIVE_GROUP = {"resources/": "res", "laws/": "law", "brief/": "law", "jobs/": "law", "news/": "law"}
+
+
+def nav_cols(site, rel):
+    by = {t["id"]: t for t in site.get("free_tools", [])}
+    def tl(ids):
+        return [(f'{rel}tools/{i}/', by[i].get("menu") or by[i].get("short") or by[i]["name"]) for i in ids if i in by]
+    return {
+        "write": [("문서 작성", tl(WRITE_TOOLS)), ("서식", [(f"{rel}tools/forms/", "서식 작성기 전체")])],
+        "calc": [("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS))],
+        "res": [("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}tools/forms/", "웹 서식 작성기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
+        "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
+                ("소식", [(f"{rel}laws/#upcoming", "시행 예정·개정 소식"), (f"{rel}brief/", "오늘의 안전 브리핑"), (f"{rel}jobs/", "채용정보"), (f"{rel}legal/", "법령정보·면책 안내")])],
+    }
+
+
+def gnb_html(site, rel, active):
+    grp = ACTIVE_GROUP.get(active, "")
+    cols = nav_cols(site, rel)
+    out = ""
+    for key, label, href in NAV4:
+        cur = ' aria-current="page"' if key == grp else ""
+        body = "".join(f'<div class="mega-col"><p class="mega-h">{e(h)}</p><ul>{"".join(f"<li><a href={chr(34)}{e(u)}{chr(34)}>{e(n)}</a></li>" for u, n in ls)}</ul></div>' for h, ls in cols[key])
+        out += (f'<div class="gnb-item"><a href="{rel}{href}"{cur}>{e(label)}</a><div class="mega" role="region" aria-label="{e(label)} 메뉴"><div class="mega-in">{body}</div></div></div>')
+    return out
+
+
+def dock_html(rel, active):
+    grp = ACTIVE_GROUP.get(active, "")
+    items = [("", "🏠", "홈", "home")] + [(href, ic, label.split("·")[0], key) for (key, label, href), ic in zip(NAV4, ["📝", "🧮", "📄", "📰"])]
+    return '<nav class="dock" aria-label="빠른 이동">' + "".join(
+        f'<a href="{rel}{href}"{" aria-current=" + chr(34) + "page" + chr(34) if key == grp else ""}><span aria-hidden="true">{ic}</span>{e(label)}</a>' for href, ic, label, key in items) + "</nav>"
 
 
 _MAN = None
@@ -650,7 +670,9 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     full_title = f"{title} | {site['name']}" if title != site["name"] else f"{site['name']} — {site['tagline']}"
     cur = ' aria-current="page"'
     on_news = (site.get("features") or {}).get("public_api", False)
-    nav = "".join(mega_item(site, rel_root, href, label, cur if active == href else "") for href, label in NAV if on_news or href != "news/")
+    nav = gnb_html(site, rel_root, active)
+    if active == "tools/":
+        nav = nav.replace(f'<a href="{rel_root}tools/#k-write">', f'<a href="{rel_root}tools/#k-write" aria-current="page">', 1)
     tl = tool_link(site, rel_root)
     ext = ' target="_blank" rel="noopener"' if tl.startswith("http") else ""
     contact = site.get("contact_email", "")
@@ -670,7 +692,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <meta property="og:description" content="{d}">
 <meta property="og:url" content="{e(canonical)}">
 <meta property="og:locale" content="ko_KR">
-<meta name="theme-color" content="#1F6FD1">
+<meta name="theme-color" content="#0F172A">
 <link rel="icon" href="{rel_root}assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -705,6 +727,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''} · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button></p>
   </div>
 </footer>
+{dock_html(rel_root, active)}
 <script src="{rel_root}assets/app.js" defer></script>
 </body>
 </html>
@@ -1233,57 +1256,138 @@ def build(out, today):
     quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로 신청·신고</span>' + "".join(
         f'<a class="qs-go" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}">{e(x["name"])} ↗</a>' for x in sites.get("civil", []) if safe_url(x.get("url"))) + '<span class="qs-l qs-l2">기관</span>' + "".join(
         f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url"))) + "</div></section>")
+    tby = {t["id"]: t for t in site.get("free_tools", [])}
+    def one_line(d):
+        d = re.split(r"(?<=[.다요])\s", str(d or "").strip())[0]
+        return d.rstrip(".")
+    def mcard(href, icon, title, desc, badge):
+        return (f'<a class="mc" href="{e(href)}"><span class="mc-i" aria-hidden="true">{icon}</span><span class="mc-b"><strong>{e(title)}</strong>'
+                f'<span class="mc-d">{e(desc)}</span></span><span class="mc-g">{e(badge)}</span></a>')
+    def tcards(ids):
+        return "".join(mcard(f"tools/{i}/", TOOL_ICONS.get(i, "📄"), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
+    tab1 = tcards(WRITE_TOOLS)
+    tab2 = tcards(CALC_TOOLS)
+    look = "".join(f'<a href="tools/{i}/">{TOOL_ICONS.get(i, "")} {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
+    form_rows = "".join(f'<li data-s="{e((f["title"] + " " + f.get("group", "")).lower())}"><a href="tools/forms/{e(f["id"])}/"><span class="fl-g">{e(f.get("group", "")[:10])}</span>{e(f["title"])}</a><span class="fkind fkind-b">웹 작성</span></li>' for f in _forms)
+    form_rows += "".join(f'<li data-s="{e((r["title"] + " " + (r.get("form_no") or "")).lower())}"><a href="{e("resources/" + r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]))}"><span class="fl-g">{e((r.get("form_no") or "원본")[:10])}</span>{e(r["title"])}</a><span class="fkind fkind-a">법령 원본</span></li>' for r in popular)
+    if briefs:
+        b0 = briefs[0]
+        brief_rows = "".join(bd_row(f"brief/{b0['date']}/", it["title"], md(it.get("date") or b0["date"]), it.get("cat") or "정책") for it in b0["items"][:4])
+        brief_rows += "".join(bd_row(f"brief/{b['date']}/", b["title"], md(b["date"]), "지난 호") for b in briefs[1:3])
+    else:
+        brief_rows = '<li class="bd-empty">아직 발행된 브리핑이 없습니다.</li>'
+    idx = [{"t": t["name"], "k": "도구", "h": f"tools/{t['id']}/", "d": (t.get("short") or "") + " " + (t.get("law") or "")} for t in site.get("free_tools", [])]
+    idx += [{"t": f["title"], "k": "웹 서식", "h": f"tools/forms/{f['id']}/", "d": f.get("group", "")} for f in _forms]
+    idx += [{"t": n, "k": "법령", "h": f"laws/{k}/", "d": "현행 전문"} for k, n in LAW_MENU]
+    idx += [{"t": r["title"], "k": "서식·자료", "h": ("resources/" + r["detail"]) if r.get("detail") else "resources/?q=" + quote(r["title"]), "d": (r.get("form_no") or "") + " " + " ".join(r.get("tags") or [])}
+            for r in resources if r.get("category") != "웹 작성 서식"]
+    idx += [{"t": "안전보건표지 40종", "k": "자료", "h": "resources/signs/", "d": "표지 금지 경고 지시 안내"}, {"t": "오늘의 안전 브리핑", "k": "소식", "h": "brief/", "d": "뉴스 리포트"},
+            {"t": "채용정보", "k": "소식", "h": "jobs/", "d": "안전관리자 보건관리자 채용"}, {"t": "법령 개정 소식·시행 예정", "k": "법령", "h": "laws/#upcoming", "d": "개정"}]
+    idx_json = json.dumps(idx, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    civil = "".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}">{e(x["name"])} <span aria-hidden="true">↗</span></a></li>' for x in sites.get("civil", []) if safe_url(x.get("url")))
+    orgs = "".join(f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url")))
+    chips = "".join(f'<a class="qk" href="{h}">{e(k)}</a>' for k, h in [("TBM 일지", "tools/tbm/"), ("위험성평가", "tools/risk/"), ("적용범위 판정", "tools/selection/"), ("과태료", "tools/penalty/"), ("산업재해조사표", "resources/?q=" + quote("산업재해조사표")), ("MSDS 경고표지", "tools/msds/")])
+    home_js = """<script>
+(function () {
+  var IDX = /*IDX*/[];
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var q = document.getElementById("uq"), box = document.getElementById("uqOut"), sel = -1;
+  function find(v) {
+    var ws = v.toLowerCase().split(/\\s+/).filter(Boolean); if (!ws.length) return [];
+    var out = [];
+    for (var i = 0; i < IDX.length && out.length < 60; i++) {
+      var x = IDX[i], tt = x.t.toLowerCase(), all = tt + " " + (x.d || "").toLowerCase() + " " + x.k;
+      if (ws.every(function (w) { return all.indexOf(w) >= 0; })) out.push({ x: x, s: (tt.indexOf(ws[0]) === 0 ? 0 : tt.indexOf(ws[0]) > 0 ? 1 : 2) + (x.k === "도구" ? 0 : 0.5) });
+    }
+    return out.sort(function (a, b) { return a.s - b.s; }).slice(0, 8).map(function (o) { return o.x; });
+  }
+  function draw() {
+    var v = q.value.trim(), r = find(v); sel = -1;
+    if (!v) { box.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
+    box.innerHTML = r.map(function (x, i) { return '<a role="option" id="uqo' + i + '" href="' + esc(x.h) + '"><span class="uq-k">' + esc(x.k) + "</span>" + esc(x.t) + "</a>"; }).join("") +
+      '<a class="uq-all" href="resources/?q=' + encodeURIComponent(v) + '">서식·자료 전체에서 “' + esc(v) + '” 찾기 →</a>';
+    box.hidden = false; q.setAttribute("aria-expanded", "true");
+  }
+  q.addEventListener("input", draw); q.addEventListener("focus", draw);
+  q.addEventListener("keydown", function (ev) {
+    var as = box.querySelectorAll("a"); if (box.hidden || !as.length) return;
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") { ev.preventDefault(); sel = (sel + (ev.key === "ArrowDown" ? 1 : -1) + as.length) % as.length; [].forEach.call(as, function (a, i) { a.classList.toggle("on", i === sel); }); }
+    else if (ev.key === "Enter" && sel >= 0) { ev.preventDefault(); location.href = as[sel].href; }
+    else if (ev.key === "Escape") { box.hidden = true; }
+  });
+  document.addEventListener("click", function (ev) { if (!ev.target.closest(".uq")) box.hidden = true; });
+  // 탭
+  var tabs = [].slice.call(document.querySelectorAll(".hub-tab")), panes = [].slice.call(document.querySelectorAll(".hub-pane"));
+  function show(id, focus) {
+    tabs.forEach(function (t) { var on = t.dataset.tab === id; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; if (on && focus) t.focus(); });
+    panes.forEach(function (p) { p.hidden = p.dataset.pane !== id; });
+    try { sessionStorage.setItem("anjeonduck.hometab", id); } catch (e) {}
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { show(t.dataset.tab); });
+    t.addEventListener("keydown", function (ev) { if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") { ev.preventDefault(); show(tabs[(i + (ev.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length].dataset.tab, true); } });
+  });
+  var want = (location.hash || "").replace("#tab-", ""), saved = ""; try { saved = sessionStorage.getItem("anjeonduck.hometab") || ""; } catch (e) {}
+  var ids = tabs.map(function (t) { return t.dataset.tab; });
+  show(ids.indexOf(want) >= 0 ? want : ids.indexOf(saved) >= 0 ? saved : ids[0]);
+  // 서식 필터
+  var fq = document.getElementById("fq"), fl = document.getElementById("fList"), fn = document.getElementById("fNone");
+  function filt() { var v = fq.value.trim().toLowerCase(), n = 0; [].forEach.call(fl.children, function (li) { var ok = !v || li.dataset.s.indexOf(v) >= 0; li.hidden = !ok; if (ok) n++; }); fn.hidden = n > 0; }
+  fq.addEventListener("input", filt);
+})();
+</script>""".replace("/*IDX*/[]", idx_json)
     home = f"""
 {asof_strip}
-<section class="hero">
-  <div class="wrap hero-in">
-   <div class="hero-txt">
-    <p class="hero-eyebrow">안전관리자·보건관리자를 위한</p>
-    <h1>안전관리 서류,<br class="br-m"> 여기서 바로</h1>
-    <p class="hero-sub">TBM 일지·위험성평가서·산보위 회의록은 무료로 바로 작성해 인쇄하고, 법정 서식은 기관 원본으로, 채용 공고는 핵심 조건만 모았습니다.</p>
-    <form class="hsearch" action="resources/" role="search" data-scope-form>
-      <div class="scope" role="radiogroup" aria-label="검색 범위">
-        <label><input type="radio" name="scope" value="resources/" checked> 서식·자료</label>
-        <label><input type="radio" name="scope" value="jobs/"> 채용정보</label>
-      </div>
-      <div class="hsearch-box">
-        <label for="q" class="sr">검색어</label>
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" name="q" type="search" placeholder="서식명, 회사명, 키워드" autocomplete="off">
-        <button class="btn" type="submit">검색</button>
-      </div>
-    </form>
-    <p class="quick"><span>자주 찾는</span>{quick}</p>
-   </div>
-   <a class="hero-duck" href="resources/signs/#duck" aria-label="안전duck 현장 안내 게시물 보기"><img src="assets/img/duck-hero.webp" width="420" height="481" alt="안전모를 쓰고 구급상자를 든 안전duck 캐릭터" fetchpriority="high"></a>
+<section class="hero2">
+  <div class="wrap hero2-in">
+    <p class="hero2-eye">안전관리자·보건관리자를 위한 무료 업무 도구</p>
+    <h1>안전관리 서류, 여기서 바로</h1>
+    <div class="uq" role="search">
+      <label for="uq" class="sr">통합 검색</label>
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="uq" type="search" placeholder="필요한 서식, 법령, 계산기를 검색하세요" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="uqOut">
+      <div class="uq-out" id="uqOut" role="listbox" hidden></div>
+    </div>
+    <p class="quick">{chips}</p>
   </div>
 </section>
-{diag_band}
-{quick_strip}
-<div class="wrap layout-home">
-  <section class="col-main">
-    <div class="bd-grid">
-      {bd_brief}
-      {bd_jobs}
-      {bd_laws}
-      {bd_forms}
-      {bd_res}
-      {bd_lib}
+<div class="wrap home2">
+  <section class="hub" aria-label="주요 기능">
+    <div class="hub-tabs" role="tablist" aria-label="기능 묶음">
+      <button type="button" role="tab" class="hub-tab" data-tab="write" aria-controls="pane-write" aria-selected="true">🔥 자주 쓰는 작성기</button>
+      <button type="button" role="tab" class="hub-tab" data-tab="calc" aria-controls="pane-calc" aria-selected="false">🧮 진단·계산기</button>
+      <button type="button" role="tab" class="hub-tab" data-tab="forms" aria-controls="pane-forms" aria-selected="false">📄 서식 통합 검색</button>
+      <button type="button" role="tab" class="hub-tab" data-tab="news" aria-controls="pane-news" aria-selected="false">📰 브리핑·법령 동향</button>
+    </div>
+    <div class="hub-pane" role="tabpanel" id="pane-write" data-pane="write">
+      <div class="mc-grid">{tab1}</div>
+      <p class="hub-more"><a href="tools/forms/">교육일지·점검표·작업계획서 등 서식 작성기 {n_forms}종 →</a></p>
+    </div>
+    <div class="hub-pane" role="tabpanel" id="pane-calc" data-pane="calc" hidden>
+      <div class="mc-grid">{tab2}</div>
+      <p class="hub-links"><span>조회·일정</span>{look}</p>
+    </div>
+    <div class="hub-pane" role="tabpanel" id="pane-forms" data-pane="forms" hidden>
+      <div class="search-inline fl-q"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="fq" placeholder="서식 이름으로 찾기 (예: 교육, 점검, 작업계획서, 선임)" aria-label="서식 찾기"></div>
+      <ul class="fl" id="fList">{form_rows}</ul>
+      <p class="hint" id="fNone" hidden>맞는 서식이 없습니다. <a href="resources/">서식·자료 {len(resources)}건 전체에서 찾기 →</a></p>
+      <p class="hub-more"><a href="resources/">법령 별지 서식·별표·고시 등 자료 {len(resources)}건 전체 보기 →</a></p>
+    </div>
+    <div class="hub-pane" role="tabpanel" id="pane-news" data-pane="news" hidden>
+      <div class="news2">
+        <section><div class="bd-h"><h2>오늘의 안전 브리핑</h2><a class="more" href="brief/">더보기 →</a></div><ul class="bd-list">{brief_rows}</ul></section>
+        <section><div class="bd-h"><h2>법령 동향</h2><a class="more" href="laws/">더보기 →</a></div><ul class="bd-list">{law_rows}</ul></section>
+      </div>
+      <p class="hub-links"><span>더 보기</span><a href="jobs/">채용정보</a><a href="laws/act/">산업안전보건법</a><a href="laws/sapa/">중대재해처벌법</a></p>
     </div>
   </section>
-  <aside class="col-side">
+  <aside class="home2-side">
     {month_box}
-    {tool_panel(site, "./")}
-    <section class="side-box">
-      {sec_head("질의·상담 바로가기")}
-      <ul class="counsel">{counsel_list}</ul>
-    </section>
+    <section class="side-box go-box"><h2 class="h-sm">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
-<section class="wrap ftools-home">
-  {sec_head("무료 안전관리 도구", "tools/", more="모두 보기", sub="회원가입 없이 바로 쓰는 서류 작성기와 계산기. 입력 내용은 서버로 가지 않습니다.")}
-  <div class="tgrid">{free_tool_cards(site, "./", ids=site.get("home_tools"))}{tool_card("tools/forms/", "작성기", f"서식 작성기 {n_forms}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식. 결재·서명·사진 첨부까지.", "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진")}</div>
-</section>"""
+{home_js}"""
     write("index.html", page(site, "./", "", site["name"], home))
 
     # ---- 안전 브리핑
