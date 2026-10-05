@@ -603,6 +603,15 @@ def dock_html(rel, active):
         f'<a href="{rel}{href}"{" aria-current=" + chr(34) + "page" + chr(34) if key == grp else ""}><span aria-hidden="true">{ic}</span>{e(label)}</a>' for href, ic, label, key in items) + "</nav>"
 
 
+def _asset_ver():
+    import hashlib
+    h = hashlib.sha1()
+    for f in ("assets/style.css", "assets/docs.js", "assets/app.js"):
+        h.update((ROOT / f).read_bytes())
+    return h.hexdigest()[:8]
+
+
+ASSET_VER = _asset_ver()  # 스타일·스크립트가 바뀌면 주소가 바뀌어 브라우저가 예전 파일을 쓰지 않는다
 _MAN = None
 
 
@@ -695,8 +704,8 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <link rel="icon" href="{rel_root}assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="{rel_root}assets/style.css">
-<script src="{rel_root}assets/docs.js"></script>
+<link rel="stylesheet" href="{rel_root}assets/style.css?v={ASSET_VER}">
+<script src="{rel_root}assets/docs.js?v={ASSET_VER}"></script>
 </head>
 <body>
 <a class="skip" href="#main">본문으로 바로가기</a>
@@ -727,7 +736,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
   </div>
 </footer>
 {dock_html(rel_root, active)}
-<script src="{rel_root}assets/app.js" defer></script>
+<script src="{rel_root}assets/app.js?v={ASSET_VER}" defer></script>
 </body>
 </html>
 """
