@@ -10,12 +10,18 @@
     <button type="button" class="btn btn-ghost" id="fSample" hidden>예시로 채우기</button>
     <button type="button" class="btn btn-ghost" id="fPhotoBtn">사진 첨부</button>
     <button type="button" class="btn btn-ghost" id="fProfileBtn" aria-expanded="false" aria-controls="fProfile">사업장 정보</button>
+    <button type="button" class="btn btn-ghost" id="fArchive" title="지금 문서를 보관함에 넣고 빈 서식으로 시작합니다">보관하고 새로 작성</button>
+    <button type="button" class="btn btn-ghost" id="fHistBtn" aria-expanded="false" aria-controls="fHist">지난 문서 <span class="n" id="fHistN"></span></button>
     <button type="button" class="btn btn-ghost" id="fClear">모두 비우기</button>
     <span class="form-save" id="fSaved" aria-live="polite"></span>
   </div>
   <section class="fprof no-print" id="fProfile" hidden>
     <h2 class="h-sm">사업장 정보 <span class="muted">— 한 번 넣으면 모든 서식의 해당 칸에 자동으로 들어갑니다(이 브라우저에만 저장)</span></h2>
     <div class="fprof-grid" id="fProfFields"></div>
+  </section>
+  <section class="fprof no-print" id="fHist" hidden>
+    <h2 class="h-sm">지난 문서 <span class="muted">— 이 브라우저에 최근 60건까지 보관합니다. 결재 서명과 사진은 보관되지 않습니다</span></h2>
+    <div id="fHistList"></div>
   </section>
   <section class="fauto no-print" id="fAuto" hidden></section>
   <p class="hint no-print" id="fBasis"></p>
@@ -30,7 +36,8 @@
       <li>입력 내용은 이 브라우저에만 자동 저장되고 서버로 보내지 않습니다. "모두 비우기"를 누르면 원래 서식으로 돌아갑니다.</li>
       <li>인쇄 창에서 대상을 "PDF로 저장"으로 바꾸면 파일로 남길 수 있습니다. 여백은 "기본", 배율은 100%를 권장합니다.</li>
       <li>이 양식은 법령 별지로 정해진 서식이 아니라 SafePlum이 만든 보조양식입니다. 관련 조문을 참고해 항목을 구성했지만, 이 양식을 채운 것만으로 해당 의무를 이행했다고 볼 수는 없습니다. 사업장 상황에 맞게 고쳐 쓰세요.</li>
-      <li>"예시로 채우기"와 자동 입력 문구는 사업장 예시입니다. 실제 내용으로 바꿔 쓰세요.</li>
+      <li>자동으로 들어가는 문구는 법령 기준 예시입니다. 실제 내용으로 바꿔 쓰세요.</li>
+      <li>매일·매주 쓰는 서식은 "보관하고 새로 작성"을 누르면 지금 문서가 "지난 문서"에 남고 빈 서식이 열립니다. 지난 문서는 다시 열거나 "복사해서 새로 작성"으로 내용을 이어 쓸 수 있습니다.</li>
       <li>서식 맨 아래의 근거 문구는 눌러서 고치거나 지울 수 있습니다. 비워 두면 인쇄되지 않습니다. SafePlum 표시는 인쇄물에 들어가지 않습니다.</li>
     </ul>
     <p class="muted" style="margin-top:10px" id="fSrc"></p>
@@ -60,6 +67,8 @@
     return null;
   }
 
+  // 줄바꿈이 두 번 저장되지 않게 글자만 받는 편집 칸을 쓴다(지원하지 않는 브라우저는 기존 방식)
+  var CE = (function () { var d = document.createElement("div"); try { d.contentEditable = "plaintext-only"; return d.contentEditable === "plaintext-only" ? "plaintext-only" : "true"; } catch (e) { return "true"; } })();
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function val(k, d) {
     if (Object.prototype.hasOwnProperty.call(state, k)) return state[k];
@@ -67,11 +76,11 @@
     return a != null && a !== "" ? a : (d == null ? "" : d);
   }
   function ed(k, d, cls, ph) {
-    return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="true" role="textbox" aria-multiline="true" data-k="' + esc(k) + '"' + (ph ? ' data-ph="' + esc(ph) + '"' : "") + ">" + esc(val(k, d)) + "</div>";
+    return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="' + CE + '" role="textbox" aria-multiline="true" data-k="' + esc(k) + '"' + (ph ? ' data-ph="' + esc(ph) + '"' : "") + ">" + esc(val(k, d)) + "</div>";
   }
   function inp(f, k) {
     var v = val(k, f.default);
-    if (f.type === "select") return '<select class="fi" data-k="' + esc(k) + '">' + ['<option value=""></option>'].concat(f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; })).join("") + "</select>";
+    if (f.type === "select") return '<select class="fi" data-k="' + esc(k) + '">' + ['<option value=""></option>'].concat(f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; })).join("") + '</select><span class="fi-print" aria-hidden="true">' + esc(v) + "</span>";
     if (f.type === "date") return '<input class="fi" type="date" data-k="' + esc(k) + '" value="' + esc(v) + '"' + (v ? "" : " data-empty") + ">";
     if (f.type === "radio") return '<span class="radios">' + f.options.map(function (o) { return '<label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (o === v ? " checked" : "") + ">" + esc(o) + "</label>"; }).join("") + "</span>";
     return ed(k, f.default, f.multi ? "multi" : "", f.ph);
@@ -115,7 +124,7 @@
       }).join("") + "</tr>";
     }
     return '<table class="gtab">' + head + "<tbody>" + body + "</tbody></table>" +
-      (s.fixed ? "" : '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-add="' + esc(s.k) + '">행 추가</button> <button type="button" class="btn btn-sm btn-ghost" data-del="' + esc(s.k) + '">마지막 행 삭제</button></p>');
+      (s.fixed ? "" : '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-add="' + esc(s.k) + '">행 추가</button> <button type="button" class="btn btn-sm btn-ghost" data-dup="' + esc(s.k) + '" title="맨 아래에 줄을 추가하고 바로 윗줄 내용을 복사합니다">윗 행 복사</button> <button type="button" class="btn btn-sm btn-ghost" data-del="' + esc(s.k) + '">마지막 행 삭제</button></p>');
   }
   // ---------- 점검표 자동화: 집계, 빈 항목 일괄 체크, 불량 항목 → 조치 표, 항목별 사진
   var FLOW = F.flow || {}, PHOTO_REL = {};
@@ -228,7 +237,7 @@
   }
 
   // ---------- 자동 계산: 인원 집계, 예산 합계·집행률, 보수교육 기한, 다음 예정일
-  function num(v) { var x = String(v || "").replace(/[,\s원천만]/g, ""); return x && !isNaN(+x) ? +x : null; }
+  function num(v) { var x = String(v || "").replace(/[,\s원]/g, ""); return x && !isNaN(+x) ? +x : null; }
   function putAuto(k, v) {
     var cur = state[k], last = state["_a." + k];
     if (cur !== undefined && cur !== "" && cur !== last) return;  // 사용자가 직접 고친 값은 건드리지 않음
@@ -268,8 +277,11 @@
       } else if (c.type === "due") {
         var today = new Date(); today.setHours(0, 0, 0, 0);
         for (var r3 = 0; r3 < n; r3++) {
-          var first = parseD(cell(c.table, r3, c.from)), last = parseD(cell(c.table, r3, c.from + 1)), appt = parseD(cell(c.table, r3, c.base_fallback)), txt = "";
-          if (first) {
+          var rawF = cell(c.table, r3, c.from), rawL = cell(c.table, r3, c.from + 1), rawA = cell(c.table, r3, c.base_fallback);
+          var first = parseD(rawF), last = parseD(rawL), appt = parseD(rawA), txt = "";
+          if ((rawF && !first) || (rawL && !last) || (!rawF && rawA && !appt)) {
+            txt = "날짜 형식 확인 (예: 2026-03-05)";
+          } else if (first) {
             // 신규교육 이수일 기준 매 2년 되는 날 ±6개월. 마지막 보수교육이 들어간 주기 다음 차례를 계산
             var k = 1;
             if (last) while (addM(first, 24 * k - 6) <= last) k++;
@@ -313,9 +325,18 @@
     if (t.dataset.co) { company = t.innerText.trim(); save(); return; }
     var k = t.dataset.k; if (!k) return;
     state[k] = t.isContentEditable ? t.innerText.replace(/\n$/, "") : t.value;
-    runCalc(); save();
+    if (t.isContentEditable && !t.textContent.trim() && t.innerHTML) { t.innerHTML = ""; state[k] = ""; }  // 다 지우면 안내 문구가 다시 보이게
+    keepToday(); runCalc(); save();
   });
-  paper.addEventListener("change", function (ev) { var t = ev.target; if (t.dataset.k && !t.isContentEditable) { state[t.dataset.k] = t.value; if (t.type === "date") t.toggleAttribute("data-empty", !t.value); if (t.type === "radio") refreshTally(t.dataset.k.split(".")[1]); runCalc(); save(); } });
+  // 자동으로 들어간 오늘 날짜는 문서를 쓰기 시작한 날로 굳힌다(며칠 뒤 다시 열어도 날짜가 바뀌지 않게)
+  function keepToday() { (A.today || []).forEach(function (tk) { if (state[tk] === undefined) state[tk] = ymd(new Date()); }); }
+  // 서식 본문의 선택 상자(교육과정·작업 종류)를 바꿔도 '자동 채우기'와 똑같이 채운다
+  function pickFromPaper(k, v) {
+    var hit = null;
+    (A.pickers || []).forEach(function (pk) { pk.options.forEach(function (o) { if (hit || o.variants) return; if ((pk.target === k && o.label === v) || (o.set && o.set[k] === v)) hit = [pk, o]; }); });
+    if (hit) applyOption(hit[0], hit[1]);
+  }
+  paper.addEventListener("change", function (ev) { var t = ev.target; if (t.dataset.k && !t.isContentEditable) { state[t.dataset.k] = t.value; if (t.type === "date") t.toggleAttribute("data-empty", !t.value); if (t.type === "radio") refreshTally(t.dataset.k.split(".")[1]); if (t.tagName === "SELECT" && t.nextElementSibling && t.nextElementSibling.className === "fi-print") t.nextElementSibling.textContent = t.value; keepToday(); runCalc(); save(); if (t.tagName === "SELECT" && t.value) pickFromPaper(t.dataset.k, t.value); } });
   paper.addEventListener("paste", function (ev) {
     var t = ev.target.closest && ev.target.closest("[contenteditable]"); if (!t) return;
     ev.preventDefault();
@@ -338,6 +359,12 @@
       if (c.dataset.addc) n0++; else if (n0 > 0) { n0--; var ix = baseN + n0; delete state["c." + ck + "." + ix]; delete state["ci." + ck + "." + ix]; delete state["c." + ck + "." + ix + ".r"]; }
       state["cn." + ck] = n0; save(); render(); return;
     }
+    var dp = ev.target.closest("[data-dup]");
+    if (dp) {
+      var dk = dp.dataset.dup, ds = F.sections.filter(function (x) { return x.k === dk; })[0], dn = tableRows(ds);
+      ds.cols.forEach(function (c, ci) { if (c.auto || c.sign) return; var pv = state["t." + dk + "." + (dn - 1) + "." + ci]; if (pv !== undefined && pv !== "" && state["_a.t." + dk + "." + (dn - 1) + "." + ci] !== pv) state["t." + dk + "." + dn + "." + ci] = pv; });
+      state["n." + dk] = dn + 1; save(); render(); return;
+    }
     var a = ev.target.closest("[data-add],[data-del]"); if (!a) return;
     var k = a.dataset.add || a.dataset.del, s = F.sections.filter(function (x) { return x.k === k; })[0];
     var n = tableRows(s);
@@ -359,6 +386,61 @@
     if (window.ADoc && window.confirm("첨부한 사진도 함께 지울까요? (취소하면 사진은 남습니다)")) ADoc.clearPhotos(DOC);
     render(); document.getElementById("fSaved").textContent = "비웠습니다";
   });
+  // ---------- 지난 문서 보관함: 매일·매주 쓰는 서식이 하루치로 덮어써지지 않게
+  var HK = "safetake.formhist." + F.id, HMAX = 60;
+  function hist() { try { var a = JSON.parse(localStorage.getItem(HK) || "[]"); return Array.isArray(a) ? a.filter(function (x) { return x && x.state && typeof x.state === "object"; }) : []; } catch (e) { return []; } }
+  function histSave(a) { try { localStorage.setItem(HK, JSON.stringify(a.slice(0, HMAX))); return true; } catch (e) { return false; } }
+  function hasContent() { return Object.keys(state).some(function (k) { return k.indexOf("_a.") !== 0 && k.charAt(0) !== "n" && k.indexOf("cn.") !== 0 && String(state[k] || "").trim() && !((A.today || []).indexOf(k) >= 0); }); }
+  function docLabel(st) {
+    var bits = [];
+    F.sections.forEach(function (s) { (s.fields || []).forEach(function (f) { var v = st["f." + f.k]; if (f.type !== "date" && v && String(v).trim() && bits.length < 2) bits.push(String(v).trim().slice(0, 24)); }); });
+    return bits.join(" · ");
+  }
+  function drawHist() {
+    var a = hist(), box = document.getElementById("fHistList");
+    document.getElementById("fHistN").textContent = a.length ? a.length : "";
+    box.innerHTML = a.length ? '<ul class="fhist">' + a.map(function (x, i) {
+      return '<li><span class="fhist-d">' + esc(x.date || "") + '</span><span class="fhist-t">' + esc(x.label || "(내용 요약 없음)") + '</span><span class="fhist-a">' +
+        '<button type="button" class="linkbtn" data-hopen="' + i + '">열기</button><button type="button" class="linkbtn" data-hcopy="' + i + '">복사해서 새로 작성</button><button type="button" class="linkbtn" data-hdel="' + i + '">삭제</button></span></li>';
+    }).join("") + "</ul>" : '<p class="hint">아직 보관한 문서가 없습니다. "보관하고 새로 작성"을 누르면 지금 문서가 여기에 남습니다.</p>';
+  }
+  function archive() {
+    if (!hasContent()) return true;
+    var a = hist(), snap = JSON.parse(JSON.stringify(state));
+    (A.today || []).forEach(function (tk) { if (snap[tk] === undefined) snap[tk] = ymd(new Date()); });
+    a.unshift({ id: Date.now(), saved: new Date().toISOString(), date: snap["f.date"] || ymd(new Date()), label: docLabel(snap), company: company, state: snap });
+    if (!histSave(a)) { window.alert("브라우저 저장 공간이 부족해 보관하지 못했습니다. 지난 문서를 몇 개 지운 뒤 다시 시도하세요."); return false; }
+    return true;
+  }
+  function loadState(st, msg) {
+    state = st; clearTimeout(tm); tm = null;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.removeItem("safetake.appr." + DOC); } catch (e) {}
+    render(); drawHist(); document.getElementById("fSaved").textContent = msg;
+  }
+  document.getElementById("fArchive").addEventListener("click", function () {
+    if (!hasContent()) { document.getElementById("fSaved").textContent = "보관할 내용이 없습니다"; return; }
+    if (!archive()) return;
+    loadState({}, "보관했습니다 — 빈 서식으로 시작합니다");
+  });
+  var hb = document.getElementById("fHistBtn"), hp = document.getElementById("fHist");
+  hb.addEventListener("click", function () { hp.hidden = !hp.hidden; hb.setAttribute("aria-expanded", String(!hp.hidden)); });
+  hp.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-hopen],[data-hcopy],[data-hdel]"); if (!b) return;
+    var a = hist(), i = +(b.dataset.hopen || b.dataset.hcopy || b.dataset.hdel), x = a[i]; if (!x) return;
+    if (b.dataset.hdel) { if (!window.confirm("보관한 문서(" + (x.date || "") + ")를 삭제할까요?")) return; a.splice(i, 1); histSave(a); drawHist(); return; }
+    if (hasContent() && !window.confirm("지금 작성 중인 문서를 먼저 보관함에 넣고 진행할까요?\n(취소하면 아무것도 바뀌지 않습니다)")) return;
+    if (!archive()) return;
+    var st = JSON.parse(JSON.stringify(x.state));
+    if (b.dataset.hcopy) {
+      // 내용은 이어 쓰되 날짜·점검 결과·자동 계산 값은 새로 시작한다
+      Object.keys(st).forEach(function (k) { if (k.indexOf("_a.") === 0 || /^c\.[^.]+\.\d+(\.r)?$/.test(k) || (A.today || []).indexOf(k) >= 0) delete st[k]; });
+      loadState(st, "복사했습니다 — 날짜와 점검 결과는 비웠습니다");
+    } else {
+      a = hist().filter(function (y) { return y.id !== x.id; }); histSave(a);   // 다시 연 문서는 보관함에서 꺼낸다(중복 방지)
+      loadState(st, "지난 문서를 열었습니다");
+    }
+  });
+  drawHist();
   if (F.sample) {
     var sb = document.getElementById("fSample"); sb.hidden = false;
     sb.addEventListener("click", function () { Object.keys(F.sample).forEach(function (k) { state[k] = F.sample[k]; }); save(); render(); });
@@ -379,7 +461,7 @@
   function applyOption(pk, o) {
     var set = o.set || null;
     if (o.variants) { var ctx = pk.depends ? val(pk.depends, "") : ""; set = o.variants[ctx] || o.variants["*"]; }
-    var changes = {}, touched = [];
+    var changes = {}, touched = [], wipe = [];
     Object.keys(set || {}).forEach(function (k) { changes[k] = set[k]; });
     if (pk.target && !o.variants) changes[pk.target] = o.label;
     Object.keys(o.rows || {}).forEach(function (tk) {
@@ -389,12 +471,17 @@
     });
     Object.keys(o.checks || {}).forEach(function (ck) {
       var items = o.checks[ck];
-      Object.keys(state).forEach(function (k) { if (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) delete state[k]; });
-      delete state["cn." + ck];
-      if (items.length) changes["cx." + ck] = JSON.stringify(items); else delete state["cx." + ck];
+      wipe.push(ck);
+      if (Object.keys(state).some(function (k) { return (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) && String(state[k] || "").trim(); })) touched.push("c." + ck);
     });
     Object.keys(changes).forEach(function (k) { if (k.charAt(0) !== "n" && state[k] && state[k] !== changes[k] && String(state[k]).trim()) touched.push(k); });
-    if (touched.length && !window.confirm("이미 입력한 내용 일부가 법령 기준 문구로 바뀝니다. 계속할까요?")) return;
+    if (touched.length && !window.confirm("이미 입력한 내용(점검 결과 포함) 일부가 법령 기준 문구로 바뀝니다. 계속할까요?")) { render(); return; }
+    wipe.forEach(function (ck) {
+      Object.keys(state).forEach(function (k) { if (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) delete state[k]; });
+      delete state["cn." + ck];
+      var items = o.checks[ck];
+      if (items.length) changes["cx." + ck] = JSON.stringify(items); else delete state["cx." + ck];
+    });
     Object.keys(changes).forEach(function (k) { state[k] = changes[k]; });
     save(); render();
     document.getElementById("fSaved").textContent = "'" + o.label + "' 기준으로 채웠습니다 — 현장에 맞게 고쳐 쓰세요";

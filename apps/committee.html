@@ -8,15 +8,50 @@
     <link rel="icon" href="../../assets/favicon.png" type="image/png">
     <!-- Tailwind: 빌드 때 미리 만든 CSS (런타임 CDN 사용 안 함) -->
     <style>/*@TAILWIND@*/</style>
-    <!-- Vue 3 (버전 고정) -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.global.prod.js"></script>
-    <!-- html2pdf.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Phosphor Icons -->
-    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2"></script>
+    <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
+    <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
+    <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
     <style>
         [v-cloak] { display: none; }
+        /* Phosphor Icons 2.1 (MIT) — 쓰는 아이콘만 CSS 마스크로 넣음(외부 CDN 사용 안 함) */
+        .ph-bold,.ph-fill{display:inline-block;width:1em;height:1em;vertical-align:-0.125em;background-color:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat;flex:none}
+        .ph-bold.ph-arrow-counter-clockwise{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,128a100,100,0,0,1-98.66,100H128a99.39,99.39,0,0,1-68.62-27.29,12,12,0,0,1,16.48-17.45,76,76,0,1,0-1.57-109c-.13.13-.25.25-.39.37L54.89,92H72a12,12,0,0,1,0,24H24a12,12,0,0,1-12-12V56a12,12,0,0,1,24,0V76.72L57.48,57.06A100,100,0,0,1,228,128Z%22/></svg>")}
+        .ph-bold.ph-arrow-right{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z%22/></svg>")}
+        .ph-bold.ph-arrows-clockwise{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,48V96a12,12,0,0,1-12,12H168a12,12,0,0,1,0-24h19l-7.8-7.8a75.55,75.55,0,0,0-53.32-22.26h-.43A75.49,75.49,0,0,0,72.39,75.57,12,12,0,1,1,55.61,58.41a99.38,99.38,0,0,1,69.87-28.47H126A99.42,99.42,0,0,1,196.2,59.23L204,67V48a12,12,0,0,1,24,0ZM183.61,180.43a75.49,75.49,0,0,1-53.09,21.63h-.43A75.55,75.55,0,0,1,76.77,179.8L69,172H88a12,12,0,0,0,0-24H40a12,12,0,0,0-12,12v48a12,12,0,0,0,24,0V189l7.8,7.8A99.42,99.42,0,0,0,130,226.06h.56a99.38,99.38,0,0,0,69.87-28.47,12,12,0,0,0-16.78-17.16Z%22/></svg>")}
+        .ph-bold.ph-check{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z%22/></svg>")}
+        .ph-bold.ph-file-pdf{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M200,164v8h12a12,12,0,0,1,0,24H200v12a12,12,0,0,1-24,0V152a12,12,0,0,1,12-12h32a12,12,0,0,1,0,24ZM92,172a32,32,0,0,1-32,32H56v4a12,12,0,0,1-24,0V152a12,12,0,0,1,12-12H60A32,32,0,0,1,92,172Zm-24,0a8,8,0,0,0-8-8H56v16h4A8,8,0,0,0,68,172Zm100,8a40,40,0,0,1-40,40H112a12,12,0,0,1-12-12V152a12,12,0,0,1,12-12h16A40,40,0,0,1,168,180Zm-24,0a16,16,0,0,0-16-16h-4v32h4A16,16,0,0,0,144,180ZM36,108V40A20,20,0,0,1,56,20h96a12,12,0,0,1,8.49,3.52l56,56A12,12,0,0,1,220,88v20a12,12,0,0,1-24,0v-4H148a12,12,0,0,1-12-12V44H60v64a12,12,0,0,1-24,0ZM160,57V80h23Z%22/></svg>")}
+        .ph-bold.ph-file-text{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M216.49,79.52l-56-56A12,12,0,0,0,152,20H56A20,20,0,0,0,36,40V216a20,20,0,0,0,20,20H200a20,20,0,0,0,20-20V88A12,12,0,0,0,216.49,79.52ZM160,57l23,23H160ZM60,212V44h76V92a12,12,0,0,0,12,12h48V212Zm112-80a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,132Zm0,40a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,172Z%22/></svg>")}
+        .ph-bold.ph-floppy-disk{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M222.14,69.17,186.83,33.86A19.86,19.86,0,0,0,172.69,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V83.31A19.86,19.86,0,0,0,222.14,69.17ZM164,204H92V160h72Zm40,0H188V156a20,20,0,0,0-20-20H88a20,20,0,0,0-20,20v48H52V52H171l33,33ZM164,84a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h56A12,12,0,0,1,164,84Z%22/></svg>")}
+        .ph-bold.ph-lightbulb{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M180,232a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h80A12,12,0,0,1,180,232Zm40-128a91.51,91.51,0,0,1-35.17,72.35A12.26,12.26,0,0,0,180,186v2a20,20,0,0,1-20,20H96a20,20,0,0,1-20-20v-2a12,12,0,0,0-4.7-9.51A91.57,91.57,0,0,1,36,104.52C35.73,54.69,76,13.2,125.79,12A92,92,0,0,1,220,104Zm-24,0a68,68,0,0,0-69.65-68C89.56,36.88,59.8,67.55,60,104.38a67.71,67.71,0,0,0,26.1,53.19A35.87,35.87,0,0,1,100,184h56.1A36.13,36.13,0,0,1,170,157.49,67.68,67.68,0,0,0,196,104Zm-20.07-5.32a48.5,48.5,0,0,0-31.91-40,12,12,0,0,0-8,22.62,24.31,24.31,0,0,1,16.09,20,12,12,0,0,0,23.86-2.64Z%22/></svg>")}
+        .ph-bold.ph-magic-wand{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M252,152a12,12,0,0,1-12,12H228v12a12,12,0,0,1-24,0V164H192a12,12,0,0,1,0-24h12V128a12,12,0,0,1,24,0v12h12A12,12,0,0,1,252,152ZM56,76H68V88a12,12,0,0,0,24,0V76h12a12,12,0,1,0,0-24H92V40a12,12,0,0,0-24,0V52H56a12,12,0,0,0,0,24ZM184,188h-4v-4a12,12,0,0,0-24,0v4h-4a12,12,0,0,0,0,24h4v4a12,12,0,0,0,24,0v-4h4a12,12,0,0,0,0-24ZM222.14,82.83,82.82,222.14a20,20,0,0,1-28.28,0L33.85,201.46a20,20,0,0,1,0-28.29L173.17,33.86a20,20,0,0,1,28.28,0l20.69,20.68A20,20,0,0,1,222.14,82.83ZM159,112,144,97,53.65,187.31l15,15Zm43.31-43.31-15-15L161,80l15,15Z%22/></svg>")}
+        .ph-bold.ph-megaphone{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M252,120a52.06,52.06,0,0,0-52-52H160.32c-3.44-.21-52.6-4-99.46-43.3A20,20,0,0,0,28,40V200a19.8,19.8,0,0,0,11.54,18.12,19.86,19.86,0,0,0,21.32-2.81A192.92,192.92,0,0,1,144,174.47v26.2a20,20,0,0,0,8.9,16.64,11.35,11.35,0,0,0,1.39.8l14.44,7.06A20,20,0,0,0,198.37,213l11.09-41.82A52.07,52.07,0,0,0,252,120ZM52,191.63V48.4c36.17,28.07,72.17,38.1,92,41.66V150C124.17,153.52,88.17,163.55,52,191.63ZM176.39,202.2,168,198.1V172h16.4ZM200,148H168V92h32a28,28,0,1,1,0,56Z%22/></svg>")}
+        .ph-bold.ph-plus-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm52-84a12,12,0,0,1-12,12H140v28a12,12,0,0,1-24,0V140H88a12,12,0,0,1,0-24h28V88a12,12,0,0,1,24,0v28h28A12,12,0,0,1,180,128Z%22/></svg>")}
+        .ph-bold.ph-printer{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M214.67,68H204V40a12,12,0,0,0-12-12H64A12,12,0,0,0,52,40V68H41.33C25.16,68,12,80.56,12,96v80a12,12,0,0,0,12,12H52v28a12,12,0,0,0,12,12H192a12,12,0,0,0,12-12V188h28a12,12,0,0,0,12-12V96C244,80.56,230.84,68,214.67,68ZM76,52H180V68H76ZM180,204H76V172H180Zm40-40H204v-4a12,12,0,0,0-12-12H64a12,12,0,0,0-12,12v4H36V96c0-2.17,2.44-4,5.33-4H214.67c2.89,0,5.33,1.83,5.33,4Zm-16-44a16,16,0,1,1-16-16A16,16,0,0,1,204,120Z%22/></svg>")}
+        .ph-bold.ph-shield-check{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,36H48A20,20,0,0,0,28,56v56c0,54.29,26.32,87.22,48.4,105.29,23.71,19.39,47.44,26,48.44,26.29a12.1,12.1,0,0,0,6.32,0c1-.28,24.73-6.9,48.44-26.29,22.08-18.07,48.4-51,48.4-105.29V56A20,20,0,0,0,208,36Zm-4,76c0,35.71-13.09,64.69-38.91,86.15A126.28,126.28,0,0,1,128,219.38a126.14,126.14,0,0,1-37.09-21.23C65.09,176.69,52,147.71,52,112V60H204ZM79.51,144.49a12,12,0,1,1,17-17L112,143l47.51-47.52a12,12,0,0,1,17,17l-56,56a12,12,0,0,1-17,0Z%22/></svg>")}
+        .ph-bold.ph-spinner{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M140,32V64a12,12,0,0,1-24,0V32a12,12,0,0,1,24,0Zm33.25,62.75a12,12,0,0,0,8.49-3.52L204.37,68.6a12,12,0,0,0-17-17L164.77,74.26a12,12,0,0,0,8.48,20.49ZM224,116H192a12,12,0,0,0,0,24h32a12,12,0,0,0,0-24Zm-42.26,48.77a12,12,0,1,0-17,17l22.63,22.63a12,12,0,0,0,17-17ZM128,180a12,12,0,0,0-12,12v32a12,12,0,0,0,24,0V192A12,12,0,0,0,128,180ZM74.26,164.77,51.63,187.4a12,12,0,0,0,17,17l22.63-22.63a12,12,0,1,0-17-17ZM76,128a12,12,0,0,0-12-12H32a12,12,0,0,0,0,24H64A12,12,0,0,0,76,128ZM68.6,51.63a12,12,0,1,0-17,17L74.26,91.23a12,12,0,0,0,17-17Z%22/></svg>")}
+        .ph-bold.ph-upload-simple{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0ZM96.49,80.49,116,61v83a12,12,0,0,0,24,0V61l19.51,19.52a12,12,0,1,0,17-17l-40-40a12,12,0,0,0-17,0l-40,40a12,12,0,1,0,17,17Z%22/></svg>")}
+        .ph-bold.ph-users{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M125.18,156.94a64,64,0,1,0-82.36,0,100.23,100.23,0,0,0-39.49,32,12,12,0,0,0,19.35,14.2,76,76,0,0,1,122.64,0,12,12,0,0,0,19.36-14.2A100.33,100.33,0,0,0,125.18,156.94ZM44,108a40,40,0,1,1,40,40A40,40,0,0,1,44,108Zm206.1,97.67a12,12,0,0,1-16.78-2.57A76.31,76.31,0,0,0,172,172a12,12,0,0,1,0-24,40,40,0,1,0-10.3-78.67,12,12,0,1,1-6.16-23.19,64,64,0,0,1,57.64,110.8,100.23,100.23,0,0,1,39.49,32A12,12,0,0,1,250.1,205.67Z%22/></svg>")}
+        .ph-bold.ph-warning{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M240.26,186.1,152.81,34.23h0a28.74,28.74,0,0,0-49.62,0L15.74,186.1a27.45,27.45,0,0,0,0,27.71A28.31,28.31,0,0,0,40.55,228h174.9a28.31,28.31,0,0,0,24.79-14.19A27.45,27.45,0,0,0,240.26,186.1Zm-20.8,15.7a4.46,4.46,0,0,1-4,2.2H40.55a4.46,4.46,0,0,1-4-2.2,3.56,3.56,0,0,1,0-3.73L124,46.2a4.77,4.77,0,0,1,8,0l87.44,151.87A3.56,3.56,0,0,1,219.46,201.8ZM116,136V104a12,12,0,0,1,24,0v32a12,12,0,0,1-24,0Zm28,40a16,16,0,1,1-16-16A16,16,0,0,1,144,176Z%22/></svg>")}
+        .ph-bold.ph-x{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z%22/></svg>")}
+        .ph-fill.ph-camera{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-44,76a36,36,0,1,1-36-36A36,36,0,0,1,164,132Z%22/></svg>")}
+        .ph-fill.ph-check-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z%22/></svg>")}
+        .ph-fill.ph-info{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z%22/></svg>")}
+        .ph-fill.ph-lightbulb{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-32.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z%22/></svg>")}
+        .ph-fill.ph-magic-wand{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M248,152a8,8,0,0,1-8,8H224v16a8,8,0,0,1-16,0V160H192a8,8,0,0,1,0-16h16V128a8,8,0,0,1,16,0v16h16A8,8,0,0,1,248,152ZM56,72H72V88a8,8,0,0,0,16,0V72h16a8,8,0,0,0,0-16H88V40a8,8,0,0,0-16,0V56H56a8,8,0,0,0,0,16ZM184,192h-8v-8a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0v-8h8a8,8,0,0,0,0-16ZM219.31,80,80,219.31a16,16,0,0,1-22.62,0L36.68,198.63a16,16,0,0,1,0-22.63L176,36.69a16,16,0,0,1,22.63,0l20.68,20.68A16,16,0,0,1,219.31,80ZM208,68.69,187.31,48l-32,32L176,100.69Z%22/></svg>")}
+        .ph-fill.ph-sparkle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,144a15.78,15.78,0,0,1-10.42,14.94L146,178l-19,51.62a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.62a15.92,15.92,0,0,1,29.88,0L146,110l51.62,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z%22/></svg>")}
+        .ph-fill.ph-users-three{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z%22/></svg>")}
+        .ph-fill.ph-warning-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z%22/></svg>")}
+
+        .cm-warn { font-size: 11px; line-height: 1.5; color: #b45309; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 6px 8px; margin: 0; }
+        .cm-ok { font-size: 11px; line-height: 1.5; color: #047857; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 6px 8px; margin: 0; }
+        .cm-law { font-size: 11px; line-height: 1.6; color: #475569; margin: 0; padding-left: 14px; list-style: disc; }
+        .cm-abs { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: #475569; white-space: nowrap; flex: none; }
+        .cm-save { font-size: 11px; color: #94a3b8; }
+        .cm-fail { margin: 40px auto; max-width: 520px; padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; line-height: 1.7; }
+        /* 화면에서는 A4 미리보기를 칸 너비에 맞춰 줄여 보여 준다(값은 스크립트가 넣음). 인쇄·PDF에는 적용하지 않는다 */
+        @media screen { .cm-zoom { zoom: var(--pz, 1); } }
+        .adk-note { padding-bottom: 16px !important; }
         body {
             font-family: 'Noto Sans KR', sans-serif;
             background-color: #f1f5f9;
@@ -45,9 +80,16 @@
                 box-shadow: none;
                 margin: 0;
                 width: 100%;
-                min-height: 100%;
+                min-height: 0;
+                border: 0 !important;
+                padding: 0 !important;
             }
+            #app { min-height: 0 !important; display: block !important; }
+            main { display: block !important; padding: 0 !important; max-width: none !important; }
+            tr, img { break-inside: avoid; page-break-inside: avoid; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
+        @page { size: A4; margin: 14mm 13mm; }
     </style>
 </head>
 <body class="text-slate-800">
@@ -61,19 +103,23 @@
                         <i class="ph-bold ph-shield-check text-xl"></i>
                     </span>
                     <div>
-                        <h1 class="text-base font-bold tracking-tight">산업안전보건위원회 스마트 문서 작성기</h1>
-                        <p class="text-[11px] text-slate-400">산업안전보건법 제24조 준수 · 회의록 / 개최공고 / 결과보고서 자동화</p>
+                        <h1 class="text-base font-bold tracking-tight">산업안전보건위원회 문서 작성기</h1>
+                        <p class="text-[11px] text-slate-400">산업안전보건법 제24조 · 회의록 / 개최 공고 / 결과 보고서</p>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="cm-save" role="status" aria-live="polite">{{ saveMsg }}</span>
                     <button @click="resetToDefault" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
-                        <i class="ph-bold ph-arrow-counter-clockwise"></i> 기본값 복원
+                        <i class="ph-bold ph-arrow-counter-clockwise"></i> 안건·의결 기본값
                     </button>
-                    <button @click="downloadPDF" :disabled="isGeneratingPDF" class="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <button @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
+                    </button>
+                    <button @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
                         <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
                         <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
-                        <span>{{ isGeneratingPDF ? 'PDF 생성 중...' : 'PDF 문서 다운로드' }}</span>
+                        <span>{{ isGeneratingPDF ? 'PDF 만드는 중…' : 'PDF 파일로 받기' }}</span>
                     </button>
                 </div>
             </div>
@@ -169,9 +215,9 @@
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
                     <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                         <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-users-three text-emerald-600"></i> 2. 참석 위원 구성
+                            <i class="ph-fill ph-users-three text-emerald-600"></i> 2. 위원 구성·출석
                         </h3>
-                        <span class="text-[11px] text-slate-400">총 {{ totalRepsCount }}명</span>
+                        <span class="text-[11px] text-slate-400">위원 {{ totalRepsCount }}명 · 출석 {{ presentCount }}명</span>
                     </div>
 
                     <!-- 사용자위원 -->
@@ -183,9 +229,10 @@
                             </button>
                         </div>
                         <div v-for="(rep, idx) in employerReps" :key="'emp-' + idx" class="flex gap-2 items-center">
-                            <input v-model="rep.title" type="text" placeholder="직책 (예: 책임자)" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <input v-model="rep.name" type="text" placeholder="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <button v-if="employerReps.length > 1" type="button" @click="removeRep('employer', idx)" class="text-slate-400 hover:text-rose-500 p-1">
+                            <input v-model="rep.title" type="text" placeholder="직책 (예: 대표자)" aria-label="직책" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <input v-model="rep.name" type="text" placeholder="성명" aria-label="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <label class="cm-abs"><input type="checkbox" v-model="rep.absent"> 불참</label>
+                            <button v-if="employerReps.length > 1" type="button" @click="removeRep('employer', idx)" aria-label="이 위원 삭제" class="text-slate-400 hover:text-rose-500 p-1">
                                 <i class="ph-bold ph-x"></i>
                             </button>
                         </div>
@@ -200,13 +247,20 @@
                             </button>
                         </div>
                         <div v-for="(rep, idx) in employeeReps" :key="'worker-' + idx" class="flex gap-2 items-center">
-                            <input v-model="rep.title" type="text" placeholder="직책 (예: 근로자대표)" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <input v-model="rep.name" type="text" placeholder="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <button v-if="employeeReps.length > 1" type="button" @click="removeRep('employee', idx)" class="text-slate-400 hover:text-rose-500 p-1">
+                            <input v-model="rep.title" type="text" placeholder="직책 (예: 근로자대표)" aria-label="직책" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <input v-model="rep.name" type="text" placeholder="성명" aria-label="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
+                            <label class="cm-abs"><input type="checkbox" v-model="rep.absent"> 불참</label>
+                            <button v-if="employeeReps.length > 1" type="button" @click="removeRep('employee', idx)" aria-label="이 위원 삭제" class="text-slate-400 hover:text-rose-500 p-1">
                                 <i class="ph-bold ph-x"></i>
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- 구성·정족수 자동 확인 -->
+                <div class="space-y-2" style="margin-top:-8px">
+                    <p v-if="!balanced" class="cm-warn">사용자위원 {{ employerReps.length }}명 · 근로자위원 {{ employeeReps.length }}명 — 산업안전보건위원회는 근로자위원과 사용자위원을 <b>같은 수</b>로 구성합니다(법 제24조제1항).</p>
+                    <p :class="quorumOk ? 'cm-ok' : 'cm-warn'">출석: 사용자위원 {{ presentEmployer }}/{{ employerReps.length }}명 · 근로자위원 {{ presentEmployee }}/{{ employeeReps.length }}명 — {{ quorumOk ? '각 과반수 출석으로 개의 요건을 충족합니다' : '근로자위원·사용자위원 각 과반수가 출석해야 개의할 수 있습니다' }}(시행령 제37조제2항).</p>
                 </div>
 
                 <!-- 4. 회의 내용 및 AI 지원 도구 -->
@@ -226,7 +280,7 @@
                             <label class="block text-xs font-bold text-slate-700">주요 심의 및 의결 안건</label>
                             <span class="text-[11px] text-purple-700 font-medium">법 제24조 제2항 심의·의결 사항</span>
                         </div>
-                        <textarea v-model="formData.agenda" rows="8" placeholder="회의 안건을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed font-mono"></textarea>
+                        <textarea v-model="formData.agenda" rows="10" placeholder="회의 안건을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed font-mono"></textarea>
                     </div>
 
                     <!-- [분기 1] 개최공고인 경우: 안내 및 협조사항 전용 에디터 -->
@@ -277,26 +331,38 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 mb-2">법령 메모</h3>
+                    <ul class="cm-law">
+                        <li>정기회의는 분기마다 위원장이 소집하고, 임시회의는 위원장이 필요하다고 인정할 때 소집합니다(시행령 제37조제1항).</li>
+                        <li>근로자위원·사용자위원 각 과반수 출석으로 개의하고, 출석위원 과반수 찬성으로 의결합니다(시행령 제37조제2항).</li>
+                        <li>회의록에는 개최 일시·장소, 출석위원, 심의 내용 및 의결·결정 사항, 그 밖의 토의사항을 적어 갖추어 둡니다(시행령 제37조제4항).</li>
+                        <li>회의 결과는 사내방송·사내보·게시·정례조회 등으로 근로자에게 신속히 알립니다(시행령 제39조).</li>
+                        <li>회의록은 2년 동안 보존합니다(법 제164조제1항제2호).</li>
+                    </ul>
+                    <p class="text-[11px] text-slate-400" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
+                </div>
             </div>
 
             <!-- Right Document Preview Area (lg:col-span-7) -->
-            <div class="lg:col-span-7 flex flex-col items-center">
+            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
                 <div class="w-full flex justify-between items-center mb-3 no-print">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span class="text-xs font-bold text-slate-600">A4 실시간 미리보기</span>
                     </div>
-                    <span class="text-[11px] text-slate-400">PDF 출력 규격 최적화 (210mm × 297mm)</span>
+                    <span class="text-[11px] text-slate-400">A4 (210mm × 297mm)</span>
                 </div>
 
                 <!-- Printable A4 Document Container -->
-                <div id="print-area" class="a4-container p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm">
+                <div id="print-area" class="a4-container cm-zoom p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm">
                     
                     <!-- [DOC 1] 회의록 양식 (법정 서명란 포함) -->
                     <div v-if="formData.docType === 'minutes'">
                         <div class="text-center mb-6">
                             <h2 class="text-2xl font-black tracking-wide border-b-2 border-slate-900 pb-3">
-                                {{ formData.year }}년 {{ formData.quarter }}분기 산업안전보건위원회 회의록
+                                {{ titlePrefix }} 산업안전보건위원회 회의록
                             </h2>
                         </div>
 
@@ -320,8 +386,8 @@
                         <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
                             <thead>
                                 <tr class="bg-slate-100 text-center font-bold">
-                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">사용자위원 ({{ employerReps.length }}명)</th>
-                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">근로자위원 ({{ employeeReps.length }}명)</th>
+                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">사용자위원 ({{ employerReps.length }}명 중 {{ presentEmployer }}명 출석)</th>
+                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">근로자위원 ({{ employeeReps.length }}명 중 {{ presentEmployee }}명 출석)</th>
                                 </tr>
                                 <tr class="bg-slate-50 text-center text-[11px] text-slate-600 font-semibold">
                                     <th class="border border-slate-800 p-1 w-20">직책</th>
@@ -337,14 +403,14 @@
                                     <!-- 사용자위원 -->
                                     <td class="border border-slate-800 p-1 text-[11px]">{{ employerReps[idx-1]?.title || '' }}</td>
                                     <td class="border border-slate-800 p-1">{{ employerReps[idx-1]?.name || '' }}</td>
-                                    <td class="border border-slate-800 p-1 text-[10px] text-slate-300 font-serif">
-                                        {{ employerReps[idx-1] ? '(서명)' : '' }}
+                                    <td class="border border-slate-800 p-1 text-[10px] font-serif" :class="employerReps[idx-1]?.absent ? 'text-slate-600' : 'text-slate-300'">
+                                        {{ employerReps[idx-1] ? (employerReps[idx-1].absent ? '불참' : '(서명)') : '' }}
                                     </td>
                                     <!-- 근로자위원 -->
                                     <td class="border border-slate-800 p-1 text-[11px]">{{ employeeReps[idx-1]?.title || '' }}</td>
                                     <td class="border border-slate-800 p-1">{{ employeeReps[idx-1]?.name || '' }}</td>
-                                    <td class="border border-slate-800 p-1 text-[10px] text-slate-300 font-serif">
-                                        {{ employeeReps[idx-1] ? '(서명)' : '' }}
+                                    <td class="border border-slate-800 p-1 text-[10px] font-serif" :class="employeeReps[idx-1]?.absent ? 'text-slate-600' : 'text-slate-300'">
+                                        {{ employeeReps[idx-1] ? (employeeReps[idx-1].absent ? '불참' : '(서명)') : '' }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -353,7 +419,7 @@
                         <!-- 회의 안건 및 의결사항 표 -->
                         <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
                             <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">회의 안건<br><span class="text-[10px] font-normal text-slate-500">(필수 심의사항)</span></th>
+                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">회의 안건</th>
                                 <td class="border border-slate-800 p-2.5 align-top">
                                     <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.agenda }}</div>
                                 </td>
@@ -451,7 +517,7 @@
                     <div v-else-if="formData.docType === 'report'">
                         <div class="text-center mb-6 pb-3 border-b-2 border-slate-900">
                             <h2 class="text-2xl font-black tracking-wide">
-                                {{ formData.year }}년 {{ formData.quarter }}분기 산업안전보건위원회 회의 결과 보고
+                                {{ titlePrefix }} 산업안전보건위원회 회의 결과 보고
                             </h2>
                         </div>
 
@@ -476,7 +542,7 @@
                                 <tr>
                                     <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">참석 인원</th>
                                     <td class="border border-slate-800 p-2" colspan="3">
-                                        총 {{ totalRepsCount }}명 (사용자위원 {{ employerReps.length }}명, 근로자위원 {{ employeeReps.length }}명)
+                                        위원 {{ totalRepsCount }}명 중 {{ presentCount }}명 출석 (사용자위원 {{ presentEmployer }}/{{ employerReps.length }}명, 근로자위원 {{ presentEmployee }}/{{ employeeReps.length }}명)
                                     </td>
                                 </tr>
                             </table>
@@ -630,14 +696,31 @@
         </div>
 
         <!-- Toast Notification Box -->
-        <div v-if="toast.visible" class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-300" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'">
-            <i class="ph-fill ph-check-circle text-base"></i>
+        <div v-if="toast.visible" role="status" class="no-print fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-300" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'">
+            <i :class="toast.type === 'error' ? 'ph-fill ph-warning-circle text-base' : 'ph-fill ph-check-circle text-base'"></i>
             <span>{{ toast.message }}</span>
         </div>
     </div>
 
     <script>
-        const { createApp, ref, computed } = Vue;
+        // Vue 파일을 못 불러오면 빈 화면 대신 안내를 보여 준다
+        if (!window.Vue) {
+            document.getElementById('app').removeAttribute('v-cloak');
+            document.getElementById('app').innerHTML = '<div class="cm-fail"><b>화면을 불러오지 못했습니다.</b><br>새로 고침(F5)해 보세요. 계속 안 되면 브라우저의 확장 프로그램·보안 프로그램이 스크립트를 막고 있는지 확인하세요.<br><a href="../../">← SafePlum으로 돌아가기</a></div>';
+            throw new Error('Vue not loaded');
+        }
+        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        const STORE_KEY = 'safetake.committee.v1';
+        function readProfile() {
+            try {
+                const p = JSON.parse(localStorage.getItem('safetake.profile') || '{}') || {};
+                if (!p.company) p.company = localStorage.getItem('safetake.company') || '';
+                return p;
+            } catch (e) { return {}; }
+        }
+        function readSaved() {
+            try { const v = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return v && typeof v === 'object' ? v : null; } catch (e) { return null; }
+        }
         // 브라우저 현지 시각 기준 'YYYY-MM-DDTHH:mm' (toISOString은 UTC라 한국에서 9시간 어긋남)
         function localNow() {
             const d = new Date();
@@ -649,7 +732,7 @@
             setup() {
                 // Document type selections
                 const docTypes = [
-                    { label: '회의록 (서명 必)', value: 'minutes', icon: 'ph-bold ph-users' },
+                    { label: '회의록', value: 'minutes', icon: 'ph-bold ph-users' },
                     { label: '개최 공고', value: 'notice', icon: 'ph-bold ph-megaphone' },
                     { label: '결과 보고서', value: 'report', icon: 'ph-bold ph-file-text' }
                 ];
@@ -683,9 +766,9 @@
 4) 작업환경: 작업환경측정 결과 유해인자 노출기준 미만 확인 및 국소배기장치 정기점검 유지.
 5) 건강관리: 일반/특수건강진단 유소견자 사후관리 프로그램 지속 운영 및 보호구 추가 지급.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 최근 3개월 무재해 유지 확인, 경미한 아차사고 발굴 건에 대한 작업발판 개선 완료.
+7) 중대재해: 최근 3개월 무재해 유지 확인, 경미한 아차사고 발굴 건에 대한 작업발판 개선 완료.
 8) 설비조치: 유해위험설비 신규 도입 계획 없음 확인 (차기 도입 시 사전 위험성평가 시행).
-9) 건강증진: 전 근로자 대상 스트레칭 및 쾌적한 휴게시설 위생관리를 지속하기로 가결함.`;
+9) 기타: 전 근로자 대상 스트레칭 및 쾌적한 휴게시설 위생관리를 지속하기로 가결함.`;
 
                 // Standard notice instructions
                 const defaultNoticeInstructions = `1. 각 위원님께서는 지각이나 결석 없이 정시에 참석하여 주시기 바랍니다.
@@ -694,13 +777,15 @@
 4. 본 회의는 산업안전보건법 제24조에 따른 법정 의무 회의이므로 전원 참석을 원칙으로 합니다.`;
 
                 // Main Reactive Form State
+                const profile = readProfile();
+                const saved = readSaved();
                 const formData = ref({
                     docType: 'minutes',
                     year: new Date().getFullYear(),
                     quarter: String(Math.floor((new Date().getMonth() + 3) / 3)),
                     type: '정기',
                     round: Math.floor((new Date().getMonth() + 3) / 3),
-                    company: '',
+                    company: profile.company || '',
                     datetime: localNow(),
                     location: '',
                     noticeFooter: '산업안전보건위원회 위원장',
@@ -712,17 +797,68 @@
                 });
 
                 // Representative Lists
+                // 저장해 둔 사업장 정보(안전보건관리책임자·안전관리자·보건관리자 이름)가 있으면 미리 채운다
                 const employerReps = ref([
-                    { title: '안전보건관리책임자', name: '' },
-                    { title: '안전관리자', name: '' },
-                    { title: '보건관리자', name: '' }
+                    { title: '안전보건관리책임자', name: profile.resp || '', absent: false },
+                    { title: '안전관리자', name: profile.manager || '', absent: false },
+                    { title: '보건관리자', name: profile.health || '', absent: false }
                 ]);
 
                 const employeeReps = ref([
-                    { title: '근로자대표', name: '' },
-                    { title: '근로자위원', name: '' },
-                    { title: '근로자위원', name: '' }
+                    { title: '근로자대표', name: '', absent: false },
+                    { title: '근로자위원', name: '', absent: false },
+                    { title: '근로자위원', name: '', absent: false }
                 ]);
+
+                // 지난번에 적은 내용 이어 쓰기(공고 → 회의록 → 결과 보고를 같은 내용으로 이어 만들 수 있게 전부 되살린다)
+                const cleanReps = (a) => Array.isArray(a) && a.length ? a.map(r => ({ title: String((r && r.title) || ''), name: String((r && r.name) || ''), absent: !!(r && r.absent) })) : null;
+                let restored = false;
+                if (saved) {
+                    const f = saved.formData || {};
+                    Object.keys(formData.value).forEach(k => { if (typeof f[k] === typeof formData.value[k]) formData.value[k] = f[k]; });
+                    if (!['minutes', 'notice', 'report'].includes(formData.value.docType)) formData.value.docType = 'minutes';
+                    employerReps.value = cleanReps(saved.employerReps) || employerReps.value;
+                    employeeReps.value = cleanReps(saved.employeeReps) || employeeReps.value;
+                    if (!formData.value.company && profile.company) formData.value.company = profile.company;
+                    restored = true;
+                }
+                const saveMsg = ref(restored ? '지난번 내용을 이어서 엽니다' : '');
+                let saveTimer = null;
+                const persist = () => {
+                    try {
+                        localStorage.setItem(STORE_KEY, JSON.stringify({ saved: Date.now(), formData: formData.value, employerReps: employerReps.value, employeeReps: employeeReps.value }));
+                        saveMsg.value = '이 기기에 저장됨';
+                    } catch (e) { saveMsg.value = '저장하지 못했습니다'; }
+                };
+                watch([formData, employerReps, employeeReps], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
+                window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); persist(); } });
+
+                // 회의 일시를 바꾸면 연도·분기를 따라 맞춘다(직접 고칠 수 있음)
+                watch(() => formData.value.datetime, (v) => {
+                    const dt = new Date(v);
+                    if (!v || isNaN(dt.getTime())) return;
+                    formData.value.year = dt.getFullYear();
+                    formData.value.quarter = String(Math.floor(dt.getMonth() / 3) + 1);
+                });
+
+                // 출석·정족수(시행령 제37조제2항: 근로자위원·사용자위원 각 과반수 출석으로 개의)
+                const presentEmployer = computed(() => employerReps.value.filter(r => !r.absent).length);
+                const presentEmployee = computed(() => employeeReps.value.filter(r => !r.absent).length);
+                const presentCount = computed(() => presentEmployer.value + presentEmployee.value);
+                const balanced = computed(() => employerReps.value.length === employeeReps.value.length);
+                const quorumOk = computed(() => presentEmployer.value * 2 > employerReps.value.length && presentEmployee.value * 2 > employeeReps.value.length);
+                const titlePrefix = computed(() => formData.value.type === '임시'
+                    ? `${formData.value.year}년 제${formData.value.round}차(임시)`
+                    : `${formData.value.year}년 ${formData.value.quarter}분기`);
+
+                // A4 미리보기를 오른쪽 칸 너비에 맞춘다
+                const fitPreview = () => {
+                    const col = document.getElementById('preview-col');
+                    if (!col) return;
+                    const a4 = 210 * 96 / 25.4;
+                    document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
+                };
+                onMounted(() => { fitPreview(); window.addEventListener('resize', fitPreview); });
 
                 const photoDataUrl = ref(null);
                 const isGeneratingPDF = ref(false);
@@ -781,9 +917,9 @@
                 // Representative list helpers
                 const addRep = (type) => {
                     if (type === 'employer') {
-                        employerReps.value.push({ title: '사용자위원', name: '' });
+                        employerReps.value.push({ title: '사용자위원', name: '', absent: false });
                     } else {
-                        employeeReps.value.push({ title: '근로자위원', name: '' });
+                        employeeReps.value.push({ title: '근로자위원', name: '', absent: false });
                     }
                 };
 
@@ -826,11 +962,12 @@
 
                 // Reset helpers
                 const resetToDefault = () => {
+                    if (!window.confirm('회의 안건·의결사항·협조사항·기타 사항을 기본값으로 되돌릴까요?\n(위원 명단과 기본 회의 정보는 그대로 둡니다)')) return;
                     formData.value.agenda = baseAgendaText;
                     formData.value.resolutions = initialResolutions;
                     formData.value.noticeInstructions = defaultNoticeInstructions;
                     formData.value.others = '';
-                    showToast('기본 데이터로 초기화되었습니다.');
+                    showToast('안건·의결사항을 기본값으로 되돌렸습니다.');
                 };
 
                 const resetNoticeInstructions = () => {
@@ -857,11 +994,11 @@
 2) 관리규정: 아차사고 신고 포상제 도입에 따른 사내 안전규정 개정안 심의 의결.
 3) 안전교육: 작업 전 10분 TBM(Toolbox Meeting) 실효성 강화 교육 전 부서 시행.
 4) 작업환경: 분진 및 소음 발생 공정 특별점검 및 국소배기장치 후드 유속 점검.
-5) 건강진단: 특수건강진단 대상자 100% 수검 및 청력보존 프로그램 수립.
+5) 건강관리: 특수건강진단 대상자 100% 수검 및 청력보존 프로그램 수립.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 동종업종 중대재해 사례 공유 및 당사 유사공정 수평전개 개선 조치.
+7) 중대재해: 동종업종 중대재해 사례 공유 및 당사 유사공정 수평전개 개선 조치.
 8) 설비조치: 생산라인 자동화 신규 장비 반입 전 안전인증 적합성 사전 심의.
-9) 건강증진: 교대근무자 뇌심혈관질환 예방을 위한 심리상담 및 휴게환경 개선.`,
+9) 기타: 교대근무자 뇌심혈관질환 예방을 위한 심리상담 및 휴게환경 개선.`,
                         others: '근로자 상시 위험제안 창구를 사내 인트라넷에 개설하기로 함.'
                     },
                     {
@@ -873,11 +1010,11 @@
 2) 관리규정: 체감온도 35도 이상 시 옥외작업 중지 기준을 안전보건규정에 명문화.
 3) 안전교육: 열사병·열탈진 응급처치 요령 및 심폐소생술(CPR) 전사원 실습 교육.
 4) 작업환경: 고열 발생 보일러실 및 조리실 환기 상태 집중 점검 및 제빙기 확충.
-5) 건강진단: 고혈압·당뇨 등 온열질환 고위험군 근로자 1:1 보건상담 매주 시행.
+5) 건강관리: 고혈압·당뇨 등 온열질환 고위험군 근로자 1:1 보건상담 매주 시행.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 침수 우려 지하 피트 및 배전반 침수방지 차수판 설치 상태 점검 완료.
+7) 중대재해: 침수 우려 지하 피트 및 배전반 침수방지 차수판 설치 상태 점검 완료.
 8) 설비조치: 이동식 에어컨 및 이동형 차양막 현장 추가 배치 승인.
-9) 건강증진: 현장 식염포도당 비치 및 쿨토시·아이스조끼 등 개인 보랭장구 지급.`,
+9) 기타: 현장 식염포도당 비치 및 쿨토시·아이스조끼 등 개인 보랭장구 지급.`,
                         others: '폭염경보 발령 시 오후 2시~5시 단축근무 지침을 준수하기로 함.'
                     },
                     {
@@ -889,11 +1026,11 @@
 2) 관리규정: 동절기 옥외작업 안전수칙 및 난방기구 취급 기준 정립.
 3) 안전교육: 밀폐공간 갈탄/방동제 중독 예방 및 소화기 사용법 훈련 실시.
 4) 작업환경: 옥외 하역장 및 통로 결빙구간 친환경 제설제 비치 및 미끄럼방지 테이프 시공.
-5) 건강진단: 야외작업자 저체온증·동상 예방을 위한 건강상태 일일 모니터링.
+5) 건강관리: 야외작업자 저체온증·동상 예방을 위한 건강상태 일일 모니터링.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 계단실 및 보행로 미끄러짐 위험구간 안전난간 보강 및 조명 개선.
+7) 중대재해: 계단실 및 보행로 미끄러짐 위험구간 안전난간 보강 및 조명 개선.
 8) 설비조치: 동파 방지용 열선 피복 점검 및 누전차단기 정상작동 전수검사.
-9) 건강증진: 옥외 근로자용 방한복, 핫팩, 방한장갑 적기 지급 완료.`,
+9) 기타: 옥외 근로자용 방한복, 핫팩, 방한장갑 적기 지급 완료.`,
                         others: '난방용 온열기구 무단 반입을 금지하고 정기 화재 순찰을 강화함.'
                     },
                     {
@@ -905,11 +1042,11 @@
 2) 관리규정: 지게차 운전자 자격확인 및 작업계획서 사전 승인제도 의무화 규정화.
 3) 안전교육: 지게차 사각지대 위험성 및 신호수 지정에 관한 특별안전교육.
 4) 작업환경: 보행자 통로와 지게차 주행로의 완전 분리(방호울타리 시공).
-5) 건강진단: 중량물 다빈도 취급자 대상 근골격계 정밀검진 및 물리치료 연계.
+5) 건강관리: 중량물 다빈도 취급자 대상 근골격계 정밀검진 및 물리치료 연계.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 과거 물류창고 적재물 낙하 아차사고 구간 랙(Rack) 안전망 설치.
+7) 중대재해: 과거 물류창고 적재물 낙하 아차사고 구간 랙(Rack) 안전망 설치.
 8) 설비조치: 지게차 어라운드뷰(AI 카메라) 및 후방감지센서 전 차량 설치 승인.
-9) 건강증진: 상하차 작업 전 교대별 맞춤 스트레칭 프로그램 정례화.`,
+9) 기타: 상하차 작업 전 교대별 맞춤 스트레칭 프로그램 정례화.`,
                         others: '물류동 내 지게차 제한속도(10km/h) 준수 계도를 매주 실시하기로 함.'
                     }
                 ];
@@ -928,11 +1065,11 @@
 2) 관리규정: 정비·보수 시 LOTO(잠금장치 및 표지부착) 절차 위반 시 제재 규정 신설.
 3) 안전교육: 기계 위험점(협착점, 물림점) 실습형 안전체험 교육 분기 내 이수.
 4) 작업환경: 소음 기준 초과 프레스 공정에 대한 방음벽 보강공사 추진.
-5) 건강진단: 소음성 난청 유소견자 방음보호구 1:1 맞춤 피팅 및 지급.
+5) 건강관리: 소음성 난청 유소견자 방음보호구 1:1 맞춤 피팅 및 지급.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 설비 청소 중 센서 임의해제 방지를 위한 인터록 키 관리 체계 확립.
+7) 중대재해: 설비 청소 중 센서 임의해제 방지를 위한 인터록 키 관리 체계 확립.
 8) 설비조치: 노후 컨베이어 비상정지풀코드 스위치 전 구간 추가 증설 승인.
-9) 건강증진: 장시간 입식 작업자 피로예방 매트 교체 및 하지정맥류 예방 스트레칭 도입.`
+9) 기타: 장시간 입식 작업자 피로예방 매트 교체 및 하지정맥류 예방 스트레칭 도입.`
                     },
                     {
                         badge: '하절기 폭염대책',
@@ -941,11 +1078,11 @@
 2) 관리규정: 기상청 폭염특보 연계 단계별 휴식시간 부여(시간당 10~15분) 사규 반영.
 3) 안전교육: 전 직원 대상 온열질환 자가진단표 작성 및 이상 징후 발생 시 조치요령 교육.
 4) 작업환경: 옥외 하역장 그늘막 및 대형 냉풍기 4대 추가 설치 의결.
-5) 건강진단: 옥외근로자 혈압·맥박 매일 출근 시 체크 및 고위험군 작업 전환 배려.
+5) 건강관리: 옥외근로자 혈압·맥박 매일 출근 시 체크 및 고위험군 작업 전환 배려.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 배수로 토사 준설 및 강풍 대비 가설물 결속 보강 작업 완료 확인.
+7) 중대재해: 배수로 토사 준설 및 강풍 대비 가설물 결속 보강 작업 완료 확인.
 8) 설비조치: 우천 시 감전사고 예방을 위한 이동형 누전차단기 방수형 일괄 교체.
-9) 건강증진: 시원한 생수, 식염포도당 상시 비치 및 보냉 물병 전원 지급 완료.`
+9) 기타: 시원한 생수, 식염포도당 상시 비치 및 보냉 물병 전원 지급 완료.`
                     },
                     {
                         badge: '화학물질·MSDS',
@@ -954,11 +1091,11 @@
 2) 관리규정: 신규 화학물질 반입 전 MSDS(물질안전보건자료) 사전 검토 의무화.
 3) 안전교육: MSDS 경고표지 숙지 및 보호구 착용법 분기 2시간 집중 교육.
 4) 작업환경: 국소배기장치 제어풍속 법정기준 충족 여부 전수점검 및 필터 교체.
-5) 건강진단: 특정 화학물질 취급자 특수건강진단 조기 실시 및 유소견자 면담.
+5) 건강관리: 특정 화학물질 취급자 특수건강진단 조기 실시 및 유소견자 면담.
 6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 재발방지: 세척제 소분 용기 MSDS 경고표지 누락 방지를 위한 전용 용기 통일.
+7) 중대재해: 세척제 소분 용기 MSDS 경고표지 누락 방지를 위한 전용 용기 통일.
 8) 설비조치: 세안·세척설비 온수 공급장치 설치 및 방류턱 크랙 보수 공사 가결.
-9) 건강증진: 호흡기 보호를 위한 특급 방진·방독마스크 최신형 교체 지급.`
+9) 기타: 호흡기 보호를 위한 특급 방진·방독마스크 최신형 교체 지급.`
                     }
                 ];
 
@@ -1005,19 +1142,36 @@
                     showToast(`[${opt.title}] 의결사항이 적용되었습니다.`);
                 };
 
-                const downloadPDF = () => {
+                const printDoc = () => { window.print(); };
+                // html2pdf(약 0.9MB)는 처음 누를 때만 불러온다
+                const loadHtml2pdf = () => new Promise((resolve, reject) => {
+                    if (window.html2pdf) return resolve();
+                    const sc = document.createElement('script');
+                    sc.src = '../../assets/vendor/html2pdf-0.10.1.bundle.min.js';
+                    sc.onload = () => resolve(); sc.onerror = () => reject(new Error('load'));
+                    document.head.appendChild(sc);
+                });
+                const downloadPDF = async () => {
                     const element = document.getElementById('print-area');
                     if (!element) return;
 
                     isGeneratingPDF.value = true;
-                    showToast('PDF 문서를 렌더링하고 있습니다...', 'info');
+                    showToast('PDF를 만들고 있습니다…', 'info');
+                    try { await loadHtml2pdf(); } catch (e) {
+                        isGeneratingPDF.value = false;
+                        showToast("PDF 도구를 불러오지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
+                        return;
+                    }
+                    // 줄여 보이던 미리보기를 실제 크기로 돌려놓고 찍는다
+                    document.documentElement.style.setProperty('--pz', '1');
+                    await nextTick();
 
                     const docNameMap = {
                         minutes: '회의록',
                         notice: '개최공고',
                         report: '결과보고서'
                     };
-                    const fileName = `${formData.value.company || '사업장'}_${formData.value.year}년_${formData.value.quarter}분기_${docNameMap[formData.value.docType] || '문서'}.pdf`;
+                    const fileName = `${formData.value.company || '사업장'}_${formData.value.year}년_${formData.value.quarter}분기_${docNameMap[formData.value.docType] || '문서'}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
 
                     const opt = {
                         margin: 0,
@@ -1028,11 +1182,11 @@
                     };
 
                     html2pdf().set(opt).from(element).save().then(() => {
-                        isGeneratingPDF.value = false;
-                        showToast('PDF 다운로드가 완료되었습니다.');
+                        isGeneratingPDF.value = false; fitPreview();
+                        showToast('PDF 파일을 저장했습니다.');
                     }).catch(() => {
-                        isGeneratingPDF.value = false;
-                        showToast('PDF 생성 중 문제가 발생했습니다.', 'error');
+                        isGeneratingPDF.value = false; fitPreview();
+                        showToast("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
                     });
                 };
 
@@ -1068,7 +1222,8 @@
                     refreshResolutionsOptions,
                     selectAiOption,
                     selectResolutionOption,
-                    downloadPDF
+                    downloadPDF,
+                    printDoc, saveMsg, presentEmployer, presentEmployee, presentCount, balanced, quorumOk, titlePrefix
                 };
             }
         }).mount('#app');

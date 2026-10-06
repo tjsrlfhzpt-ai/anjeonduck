@@ -34,6 +34,7 @@
       <label class="field" data-show="supply" hidden><span class="label">발주자 제공 재료비 또는 완제품 가액</span><input class="money" id="supply" inputmode="numeric" placeholder="0">
         <span class="hint">위 대상액에 이 금액이 <b>포함되지 않은</b> 상태로 입력하세요. 포함해 계산한 값과, 빼고 계산한 값의 1.2배 중 작은 값을 적용합니다(제4조제1항 단서).</span></label>
       <p class="form-error" id="err" role="alert" hidden></p>
+      <p class="hint">입력한 금액은 이 브라우저에만 저장되어 다음에 열어도 남아 있습니다. <button type="button" class="btn btn-sm btn-ghost" id="clearBtn">입력 지우기</button></p>
     </form>
   </section>
   <aside class="col-side">
@@ -70,7 +71,19 @@
   var $ = function (id) { return document.getElementById(id); };
   var won = function (n) { return Math.floor(n).toLocaleString("ko-KR") + "원"; };
   var pct = function (n) { return n.toFixed(2) + "%"; };
-  function num(el) { var v = (el.value || "").replace(/[^\d]/g, ""); return v ? parseInt(v, 10) : 0; }
+  // 15자리(999조 원)까지만 받아 정수 계산이 정확한 범위를 넘지 않게 함
+  function num(el) { var v = (el.value || "").replace(/[^\d]/g, "").slice(0, 15); return v ? parseInt(v, 10) : 0; }
+  var KEY = "safetake.safetycost.v1", ready = false;
+  function save() {
+    if (!ready) return;
+    var o = { type: state.type, mode: state.mode, health: $("health").checked, hasSupply: $("hasSupply").checked };
+    ["dm", "im", "dl", "base", "total", "supply"].forEach(function (id) { o[id] = num($(id)); });
+    try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {}
+  }
+  function syncSeg() {
+    document.querySelectorAll("[data-seg]").forEach(function (g) { g.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.v === state[g.dataset.seg] ? "true" : "false"); }); });
+    document.querySelectorAll('[data-show="parts"],[data-show="direct"],[data-show="total"]').forEach(function (el) { el.hidden = el.dataset.show !== state.mode; });
+  }
 
   // 공사 종류 버튼, 요율표
   var segType = document.querySelector('[data-seg="type"]');
@@ -86,7 +99,7 @@
   // 금액 입력: 숫자만, 천 단위 쉼표
   document.querySelectorAll(".money").forEach(function (el) {
     el.addEventListener("input", function () {
-      var n = num(el); el.value = n ? n.toLocaleString("ko-KR") : ""; calc();
+      var n = num(el); el.value = n ? n.toLocaleString("ko-KR") : (/^0+$/.test(el.value.trim()) ? "0" : ""); calc();
     });
   });
   document.querySelectorAll("[data-seg]").forEach(function (g) {
@@ -113,6 +126,7 @@
 
   var lastText = "";
   function calc() {
+    save();
     $("err").hidden = true;
     var supplyOn = $("hasSupply").checked;
     document.querySelector('[data-show="supply"]').hidden = !supplyOn;
@@ -123,7 +137,9 @@
     else { base = Math.floor(num($("total")) * 0.7); basis = "총공사금액 × 7/10"; }
     var supply = supplyOn ? num($("supply")) : 0;
     var rows = [];
-    if (base <= 0 && supply <= 0) { $("rTotal").textContent = "—"; $("rDetail").innerHTML = ""; $("copyBtn").disabled = true; return; }
+    if (base <= 0 && supply <= 0) { $("rTotal").textContent = "—"; $("rDetail").innerHTML = "<div><dt>안내</dt><dd>금액을 넣으면 바로 계산합니다.</dd></div>"; $("copyBtn").disabled = true; return; }
+    // 총공사금액 2천만 원 미만은 고시 적용 대상이 아님(제3조) — 총공사금액을 직접 넣은 경우에만 알 수 있음
+    if (state.mode === "total" && num($("total")) < 20000000) { $("err").textContent = "총공사금액이 2천만 원 미만이면 이 고시의 적용 대상이 아닙니다(제3조). 아래 금액은 참고용입니다."; $("err").hidden = false; }
     var result, used;
     if (supply > 0) {
       var inc = costOf(base + supply, r, health), exc = costOf(base, r, health);
@@ -148,6 +164,23 @@
     function done(ok) { b.textContent = ok ? "복사했습니다" : "복사하지 못했습니다"; setTimeout(function () { b.textContent = "결과 복사"; }, 1600); }
     try { navigator.clipboard.writeText(lastText).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
   });
-  calc();
+  $("clearBtn").addEventListener("click", function () {
+    ["dm", "im", "dl", "base", "total", "supply"].forEach(function (id) { $(id).value = ""; });
+    $("health").checked = false; $("hasSupply").checked = false; state.type = "건축공사"; state.mode = "parts"; syncSeg();
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    ready = false; calc(); ready = true;
+  });
+  // 저장된 입력 복원
+  try {
+    var sv = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (sv && typeof sv === "object") {
+      if (RATES[sv.type]) state.type = sv.type;
+      if (["parts", "direct", "total"].indexOf(sv.mode) >= 0) state.mode = sv.mode;
+      $("health").checked = !!sv.health; $("hasSupply").checked = !!sv.hasSupply;
+      ["dm", "im", "dl", "base", "total", "supply"].forEach(function (id) { var n = Math.floor(Number(sv[id])); if (isFinite(n) && n > 0 && n < 1e15) $(id).value = n.toLocaleString("ko-KR"); });
+      syncSeg();
+    }
+  } catch (e) {}
+  ready = true; calc();
 })();
 </script>

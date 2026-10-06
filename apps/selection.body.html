@@ -41,6 +41,8 @@
     </form>
     <p class="sc-disc" role="note">이 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 관할 행정기관의 공식 해석·처분을 대체하지 않습니다.</p>
     <div class="sc-sum" id="sSum" aria-live="polite"></div>
+    <div class="btns no-print"><button type="button" class="btn btn-sm btn-ghost" id="sCopy">결과 요약 복사</button><button type="button" class="btn btn-sm btn-ghost" id="sPrint">결과 인쇄</button><button type="button" class="btn btn-sm btn-ghost" id="sClear">입력 지우기</button></div>
+    <p class="hint no-print">입력한 내용은 이 브라우저에만 저장되어 다음에 열어도 남아 있습니다.</p>
     <ul class="sc-warn" id="sWarn"></ul>
     <div class="table-wrap"><table class="dtable seltable"><thead><tr><th>구분</th><th>판정</th><th>인원</th><th>기준·선임방법</th></tr></thead><tbody id="sOut"></tbody></table></div>
     <details class="lawbox"><summary><strong>안전관리자 자격 (시행령 별표 4)</strong></summary><ol class="qlist" id="sQ4"></ol></details>
@@ -74,16 +76,30 @@
   $("sQ4").innerHTML = D.b4.items.map(function (q) { return '<li><strong>제' + esc(q.no) + "호</strong> " + esc(q.text) + "</li>"; }).join("");
   $("sQ6").innerHTML = D.b6.items.map(function (q) { return '<li><strong>제' + esc(q.no) + "호</strong> " + esc(q.text) + "</li>"; }).join("");
   function isCatchAll(r) { return /제외한 사업$/.test(r.name); }
+  // 업종 검색어 → 낱말. "제조업·서비스업·기타"처럼 여러 행에 공통으로 들어가는 말은 행을 특정하지 못하므로 뺀다
+  // (빼지 않으면 "식료품 제조업"이 별표 5·9에서 '제조업'이 들어간 첫 행으로 잘못 잡힌다).
+  var STOP = /^(제조업?|사업|서비스업?|기타|관련|그\s*밖의?|일반|업종?|및)$/;
+  function words(kw) {
+    return kw.split(/[\s,;·\/()]+/).map(function (w) { var c = w.replace(/(제조업|제조)$/, ""); return c.length >= 2 ? c : w; }).filter(function (w) { return w.length >= 2 && !STOP.test(w); });
+  }
+  var ambig = {};
   function autoPick(t, kw, con) {
-    var rows = D[t].rows;
+    var rows = D[t].rows; ambig[t] = null;
     if (con) { var c = rows.filter(function (r) { return r.name === "건설업"; })[0]; if (c) return c.no; }
-    var ws = kw.split(/[\s,]+/).filter(function (w) { return w.length >= 2; });
+    var ws = words(kw);
     if (ws.length) {
-      var best = null, bs = 0;
-      rows.forEach(function (r) { if (isCatchAll(r) || r.name === "건설업") return; var s = ws.filter(function (w) { return r.name.indexOf(w) >= 0; }).length; if (s > bs) { bs = s; best = r; } });
-      if (best) return best.no;
-      if (ws.some(function (w) { return /제조/.test(w); })) { var m = rows.filter(function (r) { return /사업을 제외한 제조업/.test(r.name); })[0]; if (m) return m.no; }
+      var best = [], bs = 0;
+      rows.forEach(function (r) { if (isCatchAll(r) || r.name === "건설업" || /제외한 제조업$/.test(r.name)) return; var s = ws.filter(function (w) { return r.name.indexOf(w) >= 0; }).length; if (s > bs) { bs = s; best = [r]; } else if (s && s === bs) best.push(r); });
+      if (best.length) {
+        // 낱말이 행 이름의 첫머리(또는 쉼표·공백 뒤)에서 시작하는 행을 우선 — "금속"이 "비금속"보다 "1차 금속"에 먼저 걸리도록
+        var lead = best.filter(function (r) { return ws.some(function (w) { return new RegExp("(^|[\\s,(])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(r.name); }); });
+        if (lead.length) best = lead;
+        var kinds = {}; best.forEach(function (r) { kinds[r.g + "/" + (r.min || "")] = 1; });
+        if (best.length > 1 && Object.keys(kinds).length > 1) ambig[t] = best;
+        return best[0].no;
+      }
     }
+    if (/제조/.test(kw)) { var m = rows.filter(function (r) { return /사업을 제외한 제조업$/.test(r.name); })[0]; if (m) return m.no; }
     var ca = rows.filter(isCatchAll)[0];
     return ca ? ca.no : "";
   }
@@ -191,7 +207,8 @@
     else if (shmInd && N >= 20 && N < 50) add("안전보건관리담당자", yes, "1명 이상", esc(D.shm.law) + " — " + esc(D.shm.industries.join(", ")) + ", 상시근로자 20명 이상 50명 미만. 해당 사업장 소속 근로자로서 안전관리자 또는 보건관리자 자격을 갖추거나 고용노동부장관이 정하는 안전보건교육을 이수한 사람");
     else add("안전보건관리담당자", no, "", esc(D.shm.law) + " — 대상 업종(" + esc(D.shm.industries.join(", ")) + ")의 상시근로자 20명 이상 50명 미만 사업장");
     // 산업보건의
-    add("산업보건의", hmRequired && N != null && N >= 50 ? '<span class="sv sv-cnd">조건부 · 원칙적 대상</span>' : no, hmRequired && N >= 50 ? "1명" : "", esc(D.doc.law) + " — " + esc(D.doc.text));
+    if (hmRequired && N == null) add("산업보건의", need, "", "상시근로자 수를 넣으세요. " + esc(D.doc.law) + " — " + esc(D.doc.text));
+    else add("산업보건의", hmRequired && N != null && N >= 50 ? '<span class="sv sv-cnd">조건부 · 원칙적 대상</span>' : no, hmRequired && N >= 50 ? "1명" : "", esc(D.doc.law) + " — " + esc(D.doc.text));
     grp("위원회 · 규정 · 이사회 보고 · 공시");
     // 산보위
     var r9 = row("b9");
@@ -214,7 +231,8 @@
       add("안전보건총괄책임자", (dn == null && da == null) ? need : okg ? '<span class="sv sv-yes">적용 · 지정 대상</span>' : no, okg ? "1명(보통 안전보건관리책임자)" : "", esc(D.gm.law) + " — " + esc(D.gm.text)); }
     grp("중대재해처벌법");
     var sap = N == null ? null : N >= 5;
-    add("중대재해처벌법 적용", sap == null ? need : sap ? Y : NO, "", "상시근로자 5명 미만 사업 또는 사업장의 사업주(개인사업주)·경영책임자등에게는 적용하지 않습니다(중처법 제3조). 50명 미만 사업장도 2024.1.27.부터 적용됩니다.");
+    var sapEnt = sap === false && NE != null && NE >= 5;
+    add("중대재해처벌법 적용", sap == null ? need : sap ? Y : sapEnt ? '<span class="sv sv-chk">확인 필요 · 회사 전체 인원</span>' : NO, "", (sapEnt ? "<strong>이 사업장은 5명 미만이지만 회사 전체 상시근로자는 " + NE + "명으로 입력했습니다.</strong> 제3조는 '사업 또는 사업장'의 상시근로자를 기준으로 하므로, 회사 전체 인원 기준으로 적용되는지 고용노동부 해석으로 확인하세요.<br>" : "") + "상시근로자 5명 미만 사업 또는 사업장의 사업주(개인사업주)·경영책임자등에게는 적용하지 않습니다(중처법 제3조). 50명 미만 사업장도 2024.1.27.부터 적용됩니다.");
     if (sap) {
       add("안전보건관리체계 구축·이행", Y, "", "경영책임자등이 직접 챙길 9가지: 목표·경영방침, 전담조직(요건 해당 시), 유해·위험요인 확인·개선 절차(반기 1회 점검), 예산 편성·집행, 책임자등 권한·예산 부여와 반기 1회 평가, 전문인력 배치, 종사자 의견청취(반기 1회 점검), 중대재해 대비 매뉴얼(반기 1회 점검), 도급·용역·위탁 기준·절차(반기 1회 점검) — 중처법 제4조제1항제1호 · 영 제4조. <a href=\"../forms/\">중처법 이행 서식 →</a>");
       var big = NE != null && NE >= 500;
@@ -225,7 +243,12 @@
       add("중대산업재해 시 처벌", CND, "", "사망 1명 이상 / 같은 사고로 6개월 이상 치료 부상자 2명 이상 / 같은 유해요인 직업성 질병자 1년 내 3명 이상. 사망: 1년 이상 징역 또는 10억원 이하 벌금(법인 50억원 이하), 부상·질병: 7년 이하 징역 또는 1억원 이하 벌금(법인 10억원 이하), 손해액 5배 이내 배상(중처법 제2·6·7·15조).");
     }
     $("sOut").innerHTML = out.join("");
+    save();
     var warn = [];
+    if (autoCon && con) warn.push("업종명에 '건설'이 있어 건설업(공사금액 기준)으로 계산합니다. 건설업이 아니면 '건설업(공사금액 기준)' 체크를 해제하세요.");
+    if (kw && !con && !words(kw).length) warn.push("'" + kw + "'만으로는 별표의 업종 행을 특정할 수 없어 '그 밖의 사업'(제조업은 '…을 제외한 제조업') 행으로 계산했습니다. 세부 업종(예: 식료품, 금속가공, 화학)을 넣거나 아래 '표마다 적용할 업종 행'에서 직접 고르세요.");
+    TABLES.forEach(function (t) { var a = ambig[t[0]]; if (a && !manual[t[0]] && !con) warn.push(t[1] + ": 입력한 업종명에 맞는 행이 " + a.length + "개이고 기준이 서로 다릅니다(" + a.map(function (r) { return r.no + ". " + r.name; }).join(" / ") + "). 지금은 첫 행으로 계산했으니 '표마다 적용할 업종 행'에서 맞는 행을 고르세요.");
+    });
     if (!kw && !con) warn.push("업종을 넣지 않아 각 별표의 '그 밖의 사업' 행을 기준으로 계산했습니다. 업종에 따라 기준 인원이 달라집니다.");
     if (EX.length) warn.push("시행령 별표 1 적용 제외를 반영했습니다: " + EX.map(function (x) { return "제" + x.no + "호"; }).join(", ") + ". " + D.b1.note);
     else warn.push("시행령 별표 1(법 일부 적용 제외 사업)에 해당하는지는 위 선택 항목으로 직접 확인해야 합니다. 고르지 않으면 제외가 없는 것으로 계산합니다.");
@@ -235,6 +258,28 @@
     var pos = N == null ? 0 : Math.min(100, Math.log10(Math.max(1, N)) / Math.log10(5000) * 100);
     $("sNow").style.width = pos + "%";
   }
+  var autoCon = false, autoShm = false;
+  function hint() {
+    var kw = $("sInd").value.trim();
+    var isCon = /건설(업|공사)?$|건설업|건설공사|종합건설|전문건설/.test(kw) && !/제조|임대|수리|기계|자재/.test(kw);
+    if (isCon && !$("sCon").checked) { $("sCon").checked = true; autoCon = true; manual = {}; }
+    else if (!isCon && autoCon) { $("sCon").checked = false; autoCon = false; manual = {}; }
+    // 담당자 대상 업종(영 제24조): 검색어 자체 또는 별표 2·3에서 찾은 행이 제조업 등인지로 미리 체크
+    var hitName = ["b2", "b3"].map(function (t) { var no = autoPick(t, kw, false), r = D[t].rows.filter(function (x) { return x.no === no; })[0]; return r && !isCatchAll(r) ? r.name : ""; }).join(" ");
+    var isShm = !isCon && kw !== "" && (/제조|임업|하수|폐수|분뇨|폐기물|환경\s*정화/.test(kw) || /제조업|폐기물 수집|환경 정화/.test(hitName));
+    if (isShm && !$("sShmInd").checked) { $("sShmInd").checked = true; autoShm = true; }
+    else if (!isShm && autoShm) { $("sShmInd").checked = false; autoShm = false; }
+  }
+  var SKEY = "safetake.selection.v1", ready = false;
+  var TXT = ["sInd", "sN", "sAmt", "sDoN", "sDoAmt", "sEnt", "sB1"], CHKS = ["sCon", "sCivil", "sSub", "sDo", "sDo50", "sShmInd", "sOffice", "sPub", "sChem", "sFor", "sCorp"];
+  function save() {
+    if (!ready) return;
+    var o = { v: {}, c: {}, pick: {}, autoCon: autoCon, autoShm: autoShm };
+    TXT.forEach(function (id) { o.v[id] = $(id).value; }); CHKS.forEach(function (id) { o.c[id] = $(id).checked; });
+    Object.keys(manual).forEach(function (t) { if (manual[t]) o.pick[t] = pick[t]; });
+    try { localStorage.setItem(SKEY, JSON.stringify(o)); } catch (e) {}
+  }
+  $("sForm").addEventListener("input", function (ev) { if (ev.target.id === "sInd") hint(); else if (ev.target.id === "sCon") autoCon = false; else if (ev.target.id === "sShmInd") autoShm = false; });
   $("sForm").addEventListener("input", function (ev) { if (ev.target.dataset && ev.target.dataset.t) { pick[ev.target.dataset.t] = ev.target.value; manual[ev.target.dataset.t] = true; } else if (ev.target.id === "sInd" || ev.target.id === "sCon") { manual = {}; } calc(); });
   $("sForm").addEventListener("change", function (ev) { if (ev.target.dataset && ev.target.dataset.t) { pick[ev.target.dataset.t] = ev.target.value; manual[ev.target.dataset.t] = true; } else if (ev.target.id === "sCon") manual = {}; calc(); });
   $("sSrc").textContent = "법적 근거 확인일 " + D.checked + " · " + [D.b1.law, D.b2.law, D.b3.law, D.b5.law, D.b9.law, D.r2.law].join(" / ") + " · " + D.verified_note;
@@ -242,9 +287,36 @@
   var TICKS = [[5, "중처법"], [20, "담당자"], [50, "선임"], [100, "규정"], [300, "전담"], [500, "공시"], [1000, ""]];
   $("sTicks").innerHTML = TICKS.map(function (t) { return '<span' + (t[0] === 300 || t[0] === 1000 ? ' class="minor"' : "") + ' style="left:' + (Math.log10(t[0]) / Math.log10(5000) * 100) + '%"><b>' + t[0] + "</b>" + (t[1] ? "<em>" + esc(t[1]) + "</em>" : "") + "</span>"; }).join("");
   $("sQuick").innerHTML = [4, 5, 19, 20, 49, 50, 99, 100, 299, 300, 499, 500, 1000].map(function (n) { return '<button type="button" class="chip" data-n="' + n + '">' + n + "명</button>"; }).join("");
-  (function () { var sp = new URLSearchParams(location.search); if (sp.get("ind")) $("sInd").value = sp.get("ind"); if (sp.get("n") && isFinite(+sp.get("n"))) $("sN").value = sp.get("n"); })();
+  (function () {
+    var sp = new URLSearchParams(location.search), fromUrl = sp.get("ind") || sp.get("n");
+    // 주소로 값이 넘어오지 않았을 때만 지난번 입력을 복원
+    if (!fromUrl) try {
+      var sv = JSON.parse(localStorage.getItem(SKEY) || "null");
+      if (sv && typeof sv === "object") {
+        TXT.forEach(function (id) { if (sv.v && typeof sv.v[id] === "string") $(id).value = sv.v[id]; });
+        CHKS.forEach(function (id) { if (sv.c) $(id).checked = !!sv.c[id]; });
+        autoCon = !!sv.autoCon && $("sCon").checked; autoShm = !!sv.autoShm && $("sShmInd").checked;
+        TABLES.forEach(function (t) { var no = sv.pick && sv.pick[t[0]]; if (typeof no === "string" && (no === "" || D[t[0]].rows.some(function (r) { return r.no === no; }))) { pick[t[0]] = no; manual[t[0]] = true; } });
+      }
+    } catch (e) {}
+    if (sp.get("ind")) $("sInd").value = sp.get("ind"); if (sp.get("n") && isFinite(+sp.get("n")) && +sp.get("n") >= 0) $("sN").value = Math.floor(+sp.get("n"));
+    if (fromUrl) hint();
+  })();
+  $("sClear").addEventListener("click", function () { $("sForm").reset(); manual = {}; autoCon = autoShm = false; try { localStorage.removeItem(SKEY); } catch (e) {} calc(); });
+  $("sCopy").addEventListener("click", function () {
+    var b = this, lines = ["[산안법·중처법 적용범위 판정] " + ($("sInd").value.trim() || "업종 미입력") + " · " + ($("sCon").checked ? "공사금액 " + ($("sAmt").value || "—") + "억원" : "상시근로자 " + ($("sN").value || "—") + "명")];
+    $("sOut").querySelectorAll("tr").forEach(function (tr) {
+      if (tr.classList.contains("sc-grp")) { lines.push("", "■ " + tr.textContent.trim()); return; }
+      var th = tr.querySelector("th"), v = tr.querySelector("td.v"), n = tr.querySelector("td.n");
+      lines.push("- " + th.textContent.trim() + ": " + v.textContent.trim() + (n.textContent.trim() ? " (" + n.textContent.trim() + ")" : ""));
+    });
+    lines.push("", "(자가진단 참고 결과 · 법적 근거 확인일 " + D.checked + ")");
+    function done(ok) { b.textContent = ok ? "복사했습니다" : "복사하지 못했습니다"; setTimeout(function () { b.textContent = "결과 요약 복사"; }, 1600); }
+    try { navigator.clipboard.writeText(lines.join("\n")).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+  $("sPrint").addEventListener("click", function () { window.print(); });
   $("sQuick").addEventListener("click", function (ev) { var b = ev.target.closest("[data-n]"); if (!b) return; $("sN").value = b.dataset.n; calc(); });
-  calc();
+  ready = true; calc();
 })();
 </script>
 <style>
@@ -277,5 +349,6 @@
 .sv-no{background:var(--line-2);color:var(--text-2)}
 .seltable tr.sc-grp th{background:var(--blue-50);color:var(--blue);font-size:13px;text-align:left;padding:8px 12px}
 .seltable td.txt a{white-space:nowrap}
+@media print{#sForm,.layout-detail .col-side,.no-print,.sc-strip{display:none!important}.sc-sum .sc-big{background:none!important;color:#000!important;border:1px solid #444}.sc-k b,.sc-k{color:#000!important}.sv{border:1px solid #666!important;background:none!important;color:#000!important}.seltable tr.sc-grp th{background:#eee!important;color:#000!important}}
 @media (max-width:640px){.sc-ticks em{display:none}.sc-ticks .minor{display:none}.sc-n{width:100%}}
 </style>

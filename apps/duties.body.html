@@ -9,7 +9,8 @@
       <div class="field"><span class="label">직무 선택</span>
         <div class="seg" role="radiogroup" aria-label="직무" id="dRoles"></div></div>
       <div class="field"><span class="label">본문 검색</span>
-        <input type="text" id="dq" placeholder="예: 위험성평가, 순회점검, 보호구" aria-label="본문 검색"></div>
+        <input type="text" id="dq" placeholder="예: 위험성평가, 순회점검, 보호구" aria-label="본문 검색">
+        <p class="hint" id="dqMsg" aria-live="polite" hidden></p></div>
     </div>
     <div id="dSummary"></div>
     <div id="dBody" class="stack"></div>
@@ -48,12 +49,17 @@
   var KEY = "safetake.duties";
   var saved = {};
   try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
+  if (typeof saved !== "object" || Array.isArray(saved)) saved = {};
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function art(ref) { var L = D.laws[ref[0]]; return L && L.articles[ref[1]] ? { law: L, text: L.articles[ref[1]], title: ref[1] } : null; }
+  // 원문에서 먼저 찾고 조각마다 이스케이프한다(이스케이프한 뒤 찾으면 '&lt;' 같은 문자 참조가 깨짐). 대소문자 구분 없음.
+  var hits = 0;
   function hl(text, q) {
-    var h = esc(text);
-    q.forEach(function (w) { if (w) h = h.split(esc(w)).join('<mark class="hit">' + esc(w) + "</mark>"); });
-    return h;
+    var ws = q.filter(Boolean).map(function (w) { return w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); });
+    if (!ws.length) return esc(text);
+    var re = new RegExp("(" + ws.join("|") + ")", "gi"), out = "", last = 0, m;
+    while ((m = re.exec(text))) { if (!m[0]) { re.lastIndex++; continue; } out += esc(text.slice(last, m.index)) + '<mark class="hit">' + esc(m[0]) + "</mark>"; last = m.index + m[0].length; hits++; }
+    return out + esc(text.slice(last));
   }
   // 첫 항(①)의 호·목만 뽑아 업무 목록으로 (② 이후는 선임·지원 규정)
   function dutyItems(ref) {
@@ -74,6 +80,7 @@
 
   function render() {
     var r = cur(), q = document.getElementById("dq").value.trim().split(/\s+/).filter(Boolean);
+    hits = 0;
     document.getElementById("dSummary").innerHTML = '<div class="note"><h2 class="h-sm">' + esc(r.name) + "</h2><p>" + esc(r.sum) + "</p></div>";
     document.getElementById("dBody").innerHTML = r.arts.map(function (ref) {
       var a = art(ref); if (!a) return "";
@@ -88,7 +95,17 @@
         '<select class="sort" id="dWork" style="width:100%">' + b2.items.map(function (it, i) { return '<option value="' + i + '">' + esc(it.work) + "</option>"; }).join("") + '</select><div id="dWorkOut" class="lawtext"></div></section>';
       var sel = document.getElementById("dWork");
       var show = function () { var it = b2.items[+sel.value]; document.getElementById("dWorkOut").innerHTML = hl(it.duties.join("\n"), q); };
-      sel.addEventListener("change", show); show();
+      sel.addEventListener("change", show);
+      // 검색어가 있으면 그 말이 나오는 첫 작업을 골라 준다.
+      if (q.length) { var lq = q.map(function (w) { return w.toLowerCase(); }); for (var wi = 0; wi < b2.items.length; wi++) { var hay = (b2.items[wi].work + " " + b2.items[wi].duties.join(" ")).toLowerCase(); if (lq.some(function (w) { return hay.indexOf(w) >= 0; })) { sel.value = String(wi); break; } } }
+      show();
+    }
+    var qm = document.getElementById("dqMsg");
+    qm.hidden = !q.length;
+    if (q.length) {
+      var others = ROLES.filter(function (o) { if (o === r) return false; var t = o.arts.map(function (ref) { var a = art(ref); return a ? a.text : ""; }).join(" ").toLowerCase(); return q.some(function (w) { return t.indexOf(w.toLowerCase()) >= 0; }); });
+      qm.innerHTML = (hits ? "이 직무의 조문에서 <strong>" + hits + "곳</strong>을 찾아 표시했습니다." : "이 직무의 조문에는 찾는 말이 없습니다.") +
+        (others.length ? " 다른 직무: " + others.map(function (o) { return '<button type="button" class="linkbtn" data-go="' + o.id + '">' + esc(o.name) + "</button>"; }).join(" · ") : "");
     }
   }
   roleBox.addEventListener("click", function (ev) {
@@ -97,8 +114,13 @@
     render();
   });
   document.getElementById("dq").addEventListener("input", render);
+  document.getElementById("dqMsg").addEventListener("click", function (ev) { var g = ev.target.closest("[data-go]"); if (g) roleBox.querySelector('[data-v="' + g.dataset.go + '"]').click(); });
 
   // 직무분장표
+  // 사업장 정보(서식 작성기에서 저장한 safetake.profile)에 담당자가 있으면 빈 칸에 미리 넣는다. 체크는 사용자가 한다.
+  var prof = {}; try { prof = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}; } catch (e) { prof = {}; }
+  var PMAP = { cso: "resp", sup: "sup", sm: "manager", hm: "health", ceo: "ceo" };
+  Object.keys(PMAP).forEach(function (rid) { var v = prof[PMAP[rid]]; if (typeof v === "string" && v.trim() && !(saved[rid] && saved[rid].name)) { saved[rid] = { on: !!(saved[rid] && saved[rid].on), name: v.trim() }; } });
   var pick = document.getElementById("dPick");
   pick.innerHTML = ROLES.filter(function (r) { return !r.nopick; }).map(function (r) {
     var s = saved[r.id] || {};
@@ -117,7 +139,7 @@
     store();
     var on = ROLES.filter(function (r) { return saved[r.id] && saved[r.id].on; });
     if (!on.length) { pick.querySelector("input").focus(); document.getElementById("dPrint").textContent = "직무를 하나 이상 고르세요"; setTimeout(function () { document.getElementById("dPrint").textContent = "직무분장표 인쇄 · PDF"; }, 1800); return; }
-    var co = ""; try { co = localStorage.getItem("safetake.company") || ""; } catch (e) {}
+    var co = (typeof prof.company === "string" && prof.company) || ""; try { co = co || localStorage.getItem("safetake.company") || ""; } catch (e) {}
     var rows = on.map(function (r) {
       var items = dutyItems(r.duty), a = art(r.duty);
       return "<tr><th>" + esc(r.name) + "</th><td>" + esc(saved[r.id].name) + '</td><td class="duty">' + esc(items.join("\n")) + '</td><td class="basis">' + esc(a.law.law.replace("산업안전보건법", "산안법").replace("중대재해 처벌 등에 관한 법률", "중처법") + " " + r.duty[1].replace(/\(.*$/, "")) + "</td></tr>";

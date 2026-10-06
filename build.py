@@ -194,14 +194,14 @@ LF_TOPICS = [("위험성평가·TBM", ["위험성평가", "TBM", "아차사고"]
              ("재해·중대재해", ["산업재해", "중대재해", "작업중지", "사고"]),
              ("표지", ["표지"]),
              ("교육", ["교육"]),
-             ("선임·관리체제", ["선임", "해임", "관리자", "관리 업무", "관리규정", "업무계약", "책임자", "위원회"]),
+             ("선임·관리체제", ["선임", "해임", "관리자", "관리 업무", "관리규정", "업무계약", "책임자", "위원회", "관리감독자"]),
              ("점검·작업허가", ["점검", "작업허가"]),
              ("작업계획서", ["작업계획"]),
              ("유해위험방지계획서", ["유해위험방지계획서", "공사 개요서", "자체심사"]),
-             ("도급·건설", ["도급", "공사", "건설", "설계변경", "기술지도", "관리비", "타워크레인", "대여"]),
+             ("도급·건설", ["도급", "공사", "건설", "설계변경", "기술지도", "관리비", "타워크레인", "대여", "비계", "굴착"]),
              ("기계·설비 인증·검사", ["안전인증", "자율안전", "안전검사", "자율검사", "제조업체", "제조사업", "합격표시", "방호조치", "기계ㆍ기구"]),
-             ("화학물질·석면", ["화학물질", "물질안전보건자료", "금지물질", "허가대상", "허가신청", "석면", "유해성", "위험물질"]),
-             ("작업환경·건강", ["작업환경", "건강진단", "건강관리", "휴게", "유해인자", "노출", "사후관리"]),
+             ("화학물질·석면", ["화학물질", "물질안전보건자료", "금지물질", "허가대상", "허가신청", "석면", "유해성", "위험물질", "화학설비", "유해물질", "안전거리"]),
+             ("작업환경·건강", ["작업환경", "건강진단", "건강관리", "휴게", "유해인자", "노출", "사후관리", "분진", "밀폐공간", "체감온도"]),
              ("평가·진단·행정", ["평가", "진단", "명령", "과징금", "과태료", "행정처분", "보증보험", "적용하지", "확인 결과", "확인결과", "심사결과"]),
              ("기관·지도사", ["지정", "지도사", "교육기관", "등록"])]
 WF_TOPIC = {"교육·회의": "교육", "점검·허가": "점검·작업허가", "작업계획서": "작업계획서", "조직·발령": "선임·관리체제",
@@ -233,6 +233,10 @@ def lawform_resources(existing):
             mr = re.search(r"\((제\d+조[^()]*?)\s*관련\)$", title)
             if mr:
                 rel, title = mr.group(1), title[:mr.start()].strip()
+            mp = re.match(r"^[(\[]([^()\[\]]{1,80})[)\]]\s*(.+)$", title)
+            if mp:
+                title = f"{mp.group(2).strip()}({re.sub(r', *', '·', mp.group(1).strip())})"
+            title = re.sub(r"\s*ㆍ\s*", "·", title)
             label = f"{kind} 제{no}호" + (f"의{br}" if br else "") + ("서식" if kind == "별지" else "")
             key = no + (f"-{br}" if br else "")
             inst = any(k in title for k in LF_INSTITUTION)
@@ -268,16 +272,24 @@ SITUATIONS = [
 CAT_RANK = {"무료 작성 도구": 0, "웹 작성 서식": 1, "법정 서식": 2, "고시·지침": 3, "법정 기준표(별표)": 4}
 
 
-def situation_cards(resources, rel):
+SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours"], "점검·작업허가": ["docmap", "inspect", "loto"],
+             "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["safety-cost", "hpp"], "기계·설비 인증·검사": ["machines", "inspect"],
+             "화학물질·석면": ["msds"], "작업환경·건강": ["heat", "cvd"]}
+
+
+def situation_cards(resources, rel, tools=None):
     out = []
+    by = {t["id"]: t for t in (tools or [])}
     for title, topic, sub in SITUATIONS:
         items = [r for r in resources if r.get("topic") == topic and r.get("category") in CAT_RANK]
-        if not items:
+        tl = [by[i] for i in SIT_TOOLS.get(topic, []) if i in by]
+        if not items and not tl:
             continue
         items.sort(key=lambda r: (0 if r.get("popular") else 1, CAT_RANK[r["category"]]))
         lis = "".join(
             f'<li><a href="{rel}{e(r["detail"]) if r.get("detail") else "tools/" + e(r.get("free_tool","")) + "/"}">{e(r["title"])}</a></li>'
-            for r in items[:4] if r.get("detail") or r.get("free_tool"))
+            for r in items[:max(1, 4 - len(tl))] if r.get("detail") or r.get("free_tool"))
+        lis = "".join(f'<li><a href="{rel}tools/{e(t["id"])}/">{e(t.get("menu") or t["name"])} <span class="sit-tool">도구</span></a></li>' for t in tl) + lis
         n = sum(1 for r in resources if r.get("topic") == topic)
         out.append(f'<section class="sit"><h3>{e(title)}</h3><p class="sit-sub">{e(sub)}</p><ul>{lis}</ul>'
                    f'<a class="sit-all" href="?topic={quote(topic)}" data-topic-go="{e(topic)}">{n}건 모두 보기 →</a></section>')
@@ -584,7 +596,7 @@ def nav_cols(site, rel):
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
         "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A")]),
-                  ("참여", [(f"{rel}board/account/", "로그인·회원가입"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
+                  ("회원·안내", [(f"{rel}board/account/", "로그인 · 마이페이지"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
     }
 
 
@@ -676,6 +688,16 @@ def operator_html(site, rel_root):
     return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}'
 
 
+def hd_auth(site, rel_root):
+    """헤더의 회원 영역. 게시판(Supabase)이 연결됐을 때만 나온다. 로그인 여부는 브라우저에 저장된 세션으로 판단한다."""
+    cm = site.get("community") or {}
+    m = re.match(r"^https://([a-z0-9]+)\.supabase\.co/?$", str(cm.get("supabase_url") or ""))
+    if not (m and cm.get("supabase_anon_key")):
+        return ""
+    return (f'<div class="hd-auth" id="hdAuth" data-key="sb-{m.group(1)}-auth-token" data-acct="{rel_root}board/account/">'
+            f'<a class="hd-auth-in" href="{rel_root}board/account/">로그인</a></div>')
+
+
 def page(site, rel_root, path, title, body, desc=None, active=""):
     base = (site.get("base_url") or "").rstrip("/")
     canonical = f"{base}/{path}" if base else ""
@@ -715,6 +737,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
   <div class="wrap hd-in">
     <a class="logo" href="{rel_root}" aria-label="{e(site['name'])} 홈">{LOGO_SVG}<span>{e(site['name'])}</span></a>
     <nav class="gnb" aria-label="주 메뉴">{nav}</nav>
+    {hd_auth(site, rel_root)}
     {f'<a class="btn btn-sm hd-cta" href="{e(tl)}"{ext}>Mallo 열기</a>' if safe_url(((site.get("tools") or [{}])[0]).get("url")) else ""}
   </div>
 </header>
@@ -937,7 +960,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
     if t["id"] in ("tbm", "committee"):
-        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#555;line-height:1.6">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — '
+        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')
         assert "</body>" in src
@@ -1531,7 +1554,7 @@ def build(out, today):
             "안전관리자·보건관리자가 현장 이야기와 실무 질문을 나누는 SafePlum 커뮤니티·Q&A 게시판.")
     cm_page("view/", "view", "글 보기", "게시판의 글과 답변은 회원 개인의 의견입니다.", "../../", "SafePlum 게시판 글 보기.")
     cm_page("write/", "write", "글쓰기", "제목과 내용을 적어 등록합니다. 개인·사업장을 알아볼 수 있는 정보는 적지 마세요.", "../../", "SafePlum 게시판 글쓰기.", wide=True)
-    cm_page("account/", "account", "로그인·회원가입", "이메일 인증만으로 가입합니다. 이름·전화번호는 받지 않습니다.", "../../", "SafePlum 게시판 로그인·회원가입.", wide=True)
+    cm_page("account/", "account", "로그인 · 마이페이지", "이메일 인증만으로 가입합니다. 이름·전화번호는 받지 않습니다.", "../../", "SafePlum 로그인·회원가입·마이페이지.", wide=True)
 
     op_line = operator_html(site, "../../")
     rules_body = f"""
@@ -1562,7 +1585,7 @@ def build(out, today):
   <p>내 권리(명예·사생활·저작권 등)를 침해하는 글을 발견하면 글의 '신고' 버튼 또는 아래 문의 창구로 알려 주세요. 회원이 아니어도 문의 창구로 요청할 수 있습니다. 확인한 뒤 가림·삭제 등 필요한 조치를 합니다.</p>
   <p>{op_line}</p>
   <h2>7. 탈퇴</h2>
-  <p>'내 계정'에서 언제든 탈퇴할 수 있습니다. 탈퇴하면 계정과 이메일은 바로 삭제되고, 쓴 글과 댓글은 작성자가 '탈퇴한 회원'으로 바뀐 채 남습니다. 남기고 싶지 않은 글은 탈퇴 전에 직접 삭제하세요.</p>
+  <p>'마이페이지'에서 언제든 탈퇴할 수 있습니다. 탈퇴하면 계정과 이메일은 바로 삭제되고, 쓴 글과 댓글은 작성자가 '탈퇴한 회원'으로 바뀐 채 남습니다. 남기고 싶지 않은 글은 탈퇴 전에 직접 삭제하세요.</p>
   <p class="src-note">시행일 {e(cmc.get("rules_effective") or today)}. 수칙이 바뀌면 이 페이지에 알립니다.</p>
 </div>"""
     write("board/rules/index.html", page(site, "../../", "board/rules/", "게시판 이용수칙", rules_body, desc="SafePlum 커뮤니티·Q&A 게시판 이용수칙.", active="board/"))
@@ -1596,7 +1619,7 @@ def build(out, today):
   </tbody></table></div>
   <p>위 사업자가 국외 법인이므로 개인정보가 국외에서 처리·보관될 수 있습니다. 법령에 따른 요청이 있는 경우를 빼고 제3자에게 제공하지 않습니다.</p>
   <h2>4. 회원의 권리</h2>
-  <p>'내 계정'에서 닉네임·비밀번호를 바꾸고 탈퇴(삭제)할 수 있습니다. 열람·정정·삭제·처리정지를 직접 하기 어려우면 아래 문의 창구로 요청하세요. 만 14세 미만은 가입할 수 없습니다.</p>
+  <p>'마이페이지'에서 닉네임·비밀번호를 바꾸고 탈퇴(삭제)할 수 있습니다. 열람·정정·삭제·처리정지를 직접 하기 어려우면 아래 문의 창구로 요청하세요. 만 14세 미만은 가입할 수 없습니다.</p>
   <h2>5. 안전 조치</h2>
   <p>비밀번호는 암호화해 저장하고, 전송 구간은 HTTPS로 암호화합니다. 이메일 주소는 다른 회원에게 공개되지 않으며, 데이터베이스는 본인 글만 고치거나 지울 수 있도록 행 단위 접근 규칙으로 보호합니다.</p>
   <h2>6. 개인정보 보호책임자·문의</h2>
@@ -1789,7 +1812,7 @@ def build(out, today):
 </section>
 <section class="wrap" style="padding-top:28px">
   {sec_head("상황별로 찾기", sub="지금 하려는 일을 고르면 필요한 법정 서식·기준표·작성 도구를 모아 보여줍니다.")}
-  <div class="sit-grid">{situation_cards(resources, "../")}</div>
+  <div class="sit-grid">{situation_cards(resources, "../", site.get("free_tools"))}</div>
 </section>
 <div class="wrap layout-list" id="res-list">
   <aside class="col-filter">

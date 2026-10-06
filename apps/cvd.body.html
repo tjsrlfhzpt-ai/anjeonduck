@@ -60,6 +60,7 @@
       <p class="hint">일반건강검진 결과표의 "심뇌혈관질환 위험 평가" 값을 넣으면 표 7에 따라 두 결과 중 높은 군으로 정합니다(지침 7.2(4)).</p>
       <h2 class="h-sm">현재 업무 (표 11 — 고위험군 이상일 때 작업전환 검토 대상)</h2>
       <div class="grid3" id="cWork"></div>
+      <ul class="form-error" id="cErr" role="alert" hidden style="padding-left:18px;list-style:disc"></ul>
       <div class="btns">
         <button type="button" class="btn btn-ghost btn-sm" id="cEx">지침 예시(45세 남성) 넣기</button>
         <button type="button" class="btn btn-ghost btn-sm" id="cReset">비우기</button>
@@ -79,7 +80,7 @@
     <div class="side-box"><h2 class="h-sm">판정 근거</h2><ul class="bul hint" id="rWhy"></ul></div>
     <div class="side-box"><h2 class="h-sm">꼭 알아 두기</h2><ul class="bul hint">
       <li><strong>본 도구는 입력된 기준을 이용한 참고용 계산 기능이며 의료적 진단이나 업무적합성 판정을 대신하지 않습니다.</strong></li>
-      <li>이 결과를 채용·배치·인사상 불이익의 근거로 쓰면 안 됩니다. 건강정보는 꼭 필요한 사람만 다루고, 이름 대신 관리번호를 쓰는 것이 안전합니다. 입력값은 이 브라우저에만 저장되며 푸터의 '작성 내용 백업'에서 삭제할 수 있습니다.</li>
+      <li>이 결과를 채용·배치·인사상 불이익의 근거로 쓰면 안 됩니다. 건강정보는 꼭 필요한 사람만 다루고, 이름 대신 관리번호를 쓰는 것이 안전합니다.</li>
       <li>이 결과는 지침의 분류 기준을 기계적으로 적용한 참고 결과입니다. 업무적합성 평가와 근무상 조치는 의사인 보건관리자(또는 직업환경의학전문의)가 판단합니다(지침 10.1).</li>
       <li>고위험군·최고위험군은 의사의 업무적합성 평가를 받아야 합니다(10.1(2)).</li>
       <li>평가 결과로 근로자에게 고용상 불이익을 주어서는 안 됩니다(10.3(1)).</li>
@@ -104,7 +105,7 @@
     this.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
     sex = b.dataset.v; calc();
   });
-  function num(id) { var v = parseFloat($(id).value); return isFinite(v) ? v : null; }
+  function num(id) { if (bad[id]) return null; var v = parseFloat($(id).value); return isFinite(v) ? v : null; }
   function on(id) { return $(id).checked; }
   var LV = ["저위험군", "중등도위험군", "고위험군", "최고위험군"];
 
@@ -117,7 +118,26 @@
   }
   var BPN = ["정상 혈압", "주의 혈압", "고혈압 전단계", "1기 고혈압", "2기 고혈압"];
 
+  // 입력 범위 점검 — 단위 착오·오타로 엉뚱한 군이 나오는 것을 막는다(범위를 벗어난 값은 계산에서 뺌)
+  var RANGE = { cAge: [15, 99, "연령"], cH: [100, 230, "신장(cm)"], cW: [20, 300, "체중(kg)"], cWaist: [40, 200, "허리둘레(cm)"], cSbp: [50, 300, "수축기 혈압"], cDbp: [20, 200, "이완기 혈압"],
+    cFbs: [20, 1000, "공복혈당"], cPp: [20, 1000, "식후 2시간 혈당"], cA1c: [2, 20, "당화혈색소(%)"], cTc: [30, 1000, "총콜레스테롤"], cHdl: [5, 200, "HDL 콜레스테롤"], cTg: [10, 5000, "중성지방"],
+    cLdl: [5, 800, "LDL"], cCr: [0.1, 20, "혈청 크레아티닌"], cGfr: [1, 250, "eGFR"], cNhis: [0, 100, "10년 발병위험도(%)"] };
+  var bad = {};
+  function validate() {
+    var msgs = []; bad = {};
+    Object.keys(RANGE).forEach(function (id) {
+      var el = $(id), r = RANGE[id], raw = el.value.trim(), v = parseFloat(raw);
+      var out = (raw !== "" && (!isFinite(v) || v < r[0] || v > r[1])) || (raw === "" && el.validity && el.validity.badInput);
+      el.setAttribute("aria-invalid", out ? "true" : "false");
+      if (out) { bad[id] = 1; msgs.push(r[2] + ": " + r[0] + "~" + r[1] + " 범위의 숫자로 넣으세요. 이 값은 계산에서 뺐습니다."); }
+    });
+    var s = parseFloat($("cSbp").value), d = parseFloat($("cDbp").value);
+    if (!bad.cSbp && !bad.cDbp && isFinite(s) && isFinite(d) && s <= d) { bad.cSbp = bad.cDbp = 1; msgs.push("수축기 혈압은 이완기 혈압보다 커야 합니다. 두 값을 확인하세요. 혈압은 계산에서 뺐습니다."); }
+    $("cErr").innerHTML = msgs.map(function (m) { return "<li>" + esc(m) + "</li>"; }).join(""); $("cErr").hidden = !msgs.length;
+  }
   function calc() {
+    validate();
+    $("cMeno").disabled = sex !== "f"; if (sex !== "f") $("cMeno").checked = false;
     var age = num("cAge"), h = num("cH"), w = num("cW"), waist = num("cWaist"), sbp = num("cSbp"), dbp = num("cDbp");
     var fbs = num("cFbs"), pp = num("cPp"), a1c = num("cA1c"), tc = num("cTc"), hdl = num("cHdl"), tg = num("cTg"), cr = num("cCr");
     var why = [], out = {};
@@ -176,13 +196,16 @@
       { care: "병가/휴직, 조건부근무", follow: "의사인 보건관리자의 적합성 평가 필수 — 근무상 조치 및 작업(환경) 개선 권고, 생활습관 개선과 약물치료", cyc: "건강진단기관 의사가 권고하는 시기" }
     ];
     out.mg = lv >= 0 ? MG[lv] : null;
-    $("rLevel").textContent = lv >= 0 ? LV[lv] : "혈압을 입력하세요";
+    // 혈압이 없으면 표 6을 적용하지 못하므로, 다른 항목만으로 나온 군은 '이상'으로만 표시
+    out.partial = lv >= 0 && bpc == null;
+    $("rLevel").textContent = lv >= 0 ? LV[lv] + (out.partial ? " 이상 (혈압 미입력)" : "") : "혈압을 입력하세요";
     $("rLevel").className = "result-big lv" + lv;
     $("rDl").innerHTML = [["혈압 분류", bpc == null ? "—" : BPN[bpc] + " (" + sbp + "/" + dbp + ")"], ["위험인자", nrf + "개" + (relief ? " (HDL≥60 1개 감함)" : "")], ["당뇨병", dm ? "해당" : "해당 없음"],
       ["eGFR", gfr == null ? "—" : gfr + (gfrCalc ? " (MDRD 계산)" : "")], ["BMI", bmi == null ? "—" : bmi], ["LDL", ldl == null ? "—" : ldl + (ldlCalc ? " (계산)" : "")],
       ["참고 결과 — 지침 표 10 분류(의료진 평가 필요)", out.mg ? out.mg.care + " · 업무적합성 평가 필요" : "—"], ["재평가", out.mg ? out.mg.cyc : "—"]].map(function (r) { return "<div><dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("");
     $("rWhy").innerHTML = (rf.length ? "<li>위험인자: " + esc(rf.join(", ")) + (relief ? " − HDL≥60(완화)" : "") + "</li>" : "<li>위험인자 없음</li>") + why.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
       (lv >= 2 && works.length ? '<li style="color:var(--red)">고위험군 이상 + 표 11 업무 종사 → 정밀 업무적합성 평가 대상: ' + esc(works.join(", ")) + "</li>" : "") +
+      (out.partial ? "<li>혈압이 입력되지 않아 표 6(혈압 단계 × 위험인자)을 적용하지 못했습니다. 위 군은 다른 항목만으로 본 최소 수준입니다.</li>" : "") +
       (bpc != null && bpc < 2 ? "<li>표 6에는 정상·주의혈압 열이 없어 고혈압 전단계 열로 분류했습니다(표 8 주석 준용).</li>" : "");
     window.__cvd = out;
     return out;
@@ -197,6 +220,8 @@
   }
   function printDoc(kind) {
     var o = calc(), age = v("cAge"), sx = sex === "m";
+    if (o.bpc == null) { alert("수축기·이완기 혈압을 넣어야 표 4·6 분류를 할 수 있습니다. 혈압을 입력한 뒤 인쇄하세요."); $("cSbp").focus(); return; }
+    if (!$("cErr").hidden) { alert("범위를 벗어난 입력값이 있습니다. 빨간 안내를 확인해 고친 뒤 인쇄하세요."); $("cErr").scrollIntoView({ block: "center" }); return; }
     var info = '<table class="ftab"><tr><th>성명</th><td>' + v("cName") + "</td><th>성별·연령</th><td>" + (sx ? "남" : "여") + " / " + age + "세" + (on("cMeno") ? " (폐경·수술)" : "") + "</td><th>평가일</th><td>" + v("cDate") + "</td></tr></table>";
     if (kind === "survey") {
       $("pSurvey").innerHTML = head("뇌심혈관질환 발병위험도평가자료 종합조사표") + info +
@@ -237,7 +262,9 @@
     Object.keys(EX).forEach(function (k) { $(k).value = EX[k]; });
     $("cInact").checked = true; $("cNhis").value = 4.2; calc();
   });
-  $("cReset").addEventListener("click", function () { $("cForm").reset(); sex = "m"; document.querySelectorAll('[data-seg="sex"] button').forEach(function (x, i) { x.setAttribute("aria-pressed", i === 0 ? "true" : "false"); }); var d = new Date(); $("cDate").value = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); calc(); });
+  // 사업장명만 저장된 사업장 정보에서 가져온다(건강정보는 읽지도 저장하지도 않음)
+  function fillCo() { try { var pf = JSON.parse(localStorage.getItem("safetake.profile") || "null"); if (pf && typeof pf.company === "string") $("cCo").value = pf.company; } catch (e) {} }
+  $("cReset").addEventListener("click", function () { $("cForm").reset(); fillCo(); sex = "m"; document.querySelectorAll('[data-seg="sex"] button').forEach(function (x, i) { x.setAttribute("aria-pressed", i === 0 ? "true" : "false"); }); var d = new Date(); $("cDate").value = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); calc(); });
   $("cReset").click();
 })();
 </script>

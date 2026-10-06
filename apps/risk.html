@@ -102,7 +102,7 @@
   .cfg summary{cursor:pointer;font-weight:700}
   .cfg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
   .cfg-grid label{display:flex;flex-direction:column;gap:3px;font-weight:600}
-  .cfg select,.cfg input{height:28px;border:1px solid #c7ccd4;border-radius:5px;padding:0 6px;font:inherit;width:100%}
+  .cfg select,.cfg input{box-sizing:border-box;height:28px;border:1px solid #c7ccd4;border-radius:5px;padding:0 6px;font:inherit;width:100%}
   .cfg-cuts{width:100%;margin:4px 0}.cfg-cuts th,.cfg-cuts td{padding:2px 4px;border:0;font-size:12px}
   .cfg-note{font-size:11.5px;color:#555;margin-top:4px}
   .law-check td label{display:inline-block;margin:1px 8px 1px 0;font-size:12px}
@@ -112,25 +112,58 @@
   @media print{.form-status{display:none !important}}
   #ra .ed{font-size:11.5px}#ra label.done{font-size:11px;white-space:nowrap}
   @media print{.photo-page:not(.has-photos){display:none !important}.photo-page{page-break-before:always}}
+  .ctrl-note:empty{display:none}
+  .btn-grey{background:#5b6b80;color:#fff}
+  .ra-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:-4px 0 0}
+  .ra-sum{margin:0;font-size:11px;color:#333;font-weight:700}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;justify-content:center;align-items:center}
+  .modal-content{background:#fff;width:min(640px,92vw);max-height:85%;padding:20px;border-radius:8px;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.4);border:1px solid #1b365d;box-sizing:border-box}
+  .modal-header{font-size:18px;font-weight:bold;margin-bottom:12px;color:#1b365d;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #2980b9;padding-bottom:8px}
+  .modal-close{cursor:pointer;font-size:26px;font-weight:bold;color:#aaa;background:none;border:0}
+  .modal-body{overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+  .doc-item{border:1px solid #d8dee8;border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .doc-meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13px;color:#2c3e50}
+  .doc-meta span{color:#5b6b80;font-size:12px}
+  .doc-meta .doc-cur{background:#27ae60;color:#fff;border-radius:3px;padding:0 5px;font-size:11px}
+  .doc-acts{display:flex;flex-wrap:wrap;gap:6px}.doc-acts .btn{font-size:12px;padding:5px 10px}
+  .doc-empty{font-size:13px;color:#5b6b80;line-height:1.6;margin:0}
+  /* 좁은 화면: A4 쪽을 화면 폭에 맞춰 줄여 보여 준다(값은 스크립트가 넣음). 인쇄에는 적용하지 않는다 */
+  @media screen{.page-container{zoom:var(--pz,1)}}
+  @media screen and (max-width:820px){.page-container{margin:6px auto}.control-panel{position:static;gap:8px;padding:10px}.sitebar{font-size:12px;padding:6px 10px}.btn{padding:7px 12px;font-size:13px}}
+  @media print{
+    .section-title{break-after:avoid;page-break-after:avoid}
+    .people,.law-check,.criteria-box{break-inside:avoid;page-break-inside:avoid}
+    .ra-foot{margin:0 0 4px}
+  }
 </style>
 </head>
 <body>
 
 <div class="sitebar no-print">
   <a href="../../">← SafePlum</a>
-  <span>입력 내용은 이 브라우저 안에서만 처리되고 서버로 전송되지 않습니다.</span>
+  <span>입력 내용은 이 기기 브라우저에만 저장되고 서버로 전송되지 않습니다.</span>
 </div>
 
 <div class="control-panel no-print">
   <div class="dept-select-wrap">
     <label for="globalWorkType">공종(부서)</label>
-    <select id="globalWorkType" onchange="applyAutoData()"></select>
+    <select id="globalWorkType" onchange="applyAutoData(false)"></select>
   </div>
-  <button class="btn btn-blue" onclick="applyAutoData()">🔄 기본 항목 다시 채우기</button>
+  <button class="btn btn-blue" onclick="applyAutoData(true)">🔄 기본 항목 다시 채우기</button>
+  <button class="btn btn-blue" id="docsBtn" onclick="openDocs()">📂 저장된 평가서</button>
+  <button class="btn btn-blue" onclick="newDoc()">＋ 새 평가서</button>
   <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">📷 사진 첨부</button>
   <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
   <button class="btn btn-red" onclick="resetForm()">↻ 초기화</button>
   <p class="ctrl-note">현재 위험성과 감소대책은 기본 목록으로 미리 채운 <b>SafePlum 추천값</b>입니다(법정 문구 아님). 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
+  <p class="ctrl-note" id="saveStatus" role="status" aria-live="polite"></p>
+</div>
+
+<div id="docsModal" class="modal-overlay no-print" onclick="if(event.target===this)closeDocs()">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="docsTitle">
+    <div class="modal-header"><span id="docsTitle">저장된 평가서</span><button type="button" class="modal-close" onclick="closeDocs()" aria-label="닫기">×</button></div>
+    <div id="docsList" class="modal-body"></div>
+  </div>
 </div>
 
 <div class="page-container" id="page1">
@@ -148,13 +181,13 @@
     <tbody>
       <tr>
         <th>평가일자</th><td><div class="ed" id="evalDate" contenteditable></div></td>
-        <th>작성자</th><td><div class="ed" contenteditable data-ph="성명"></div></td>
-        <th>사업장명</th><td><div class="ed" contenteditable data-ph="사업장명"></div></td>
+        <th>작성자</th><td><div class="ed" id="fWriter" contenteditable data-ph="성명"></div></td>
+        <th>사업장명</th><td><div class="ed" id="fSite" contenteditable data-ph="사업장명"></div></td>
       </tr>
       <tr>
         <th>평가대상(부서)</th><td><div id="dispDept" class="ed" contenteditable></div></td>
         <th>평가구분</th>
-        <td colspan="3" style="text-align:center;">
+        <td colspan="3" style="text-align:center;" id="fType">
           <label><input type="radio" name="type"> 최초</label> &nbsp;
           <label><input type="radio" name="type" checked> 정기</label> &nbsp;
           <label><input type="radio" name="type"> 수시</label> &nbsp;
@@ -194,8 +227,9 @@
     </thead>
     <tbody id="ra-tbody"></tbody>
   </table>
-  <div class="no-print" style="text-align:right;">
-    <button class="btn btn-blue" style="padding:4px 10px;font-size:12px;" onclick="addEmptyRow()">+ 빈 줄 추가</button>
+  <div class="ra-foot">
+    <p id="raSummary" class="ra-sum" aria-live="polite"></p>
+    <button class="btn btn-blue no-print" style="padding:4px 10px;font-size:12px;" onclick="addEmptyRow()">+ 빈 줄 추가</button>
   </div>
 
   <div class="section-title">4. 평가 참여자 (참여한 근로자·근로자대표)</div>
@@ -206,13 +240,13 @@
   </table>
 
   <div class="section-title">5. 근로자 참여 · 결과 공유 · 기록</div>
-  <table class="law-check">
+  <table class="law-check" id="lawCheck">
     <colgroup><col style="width:16%"><col style="width:54%"><col style="width:30%"></colgroup>
     <tbody>
       <tr><th>근로자 참여</th><td>
         <label><input type="checkbox"> 사업장 순회 점검에 근로자 참여</label>
         <label><input type="checkbox"> 설문조사</label> <label><input type="checkbox"> 면담</label> <label><input type="checkbox"> 그 밖의 의견 수렴</label>
-        <div class="ed left" contenteditable data-ph="순회 점검에 참여시킬 수 없는 특별한 사정이 있으면 적으세요"></div></td>
+        <div class="ed left" id="fWhy" contenteditable data-ph="순회 점검에 참여시킬 수 없는 특별한 사정이 있으면 적으세요"></div></td>
         <td class="law-ref">법 제36조제2항 · 규칙 제37조의2<br>근로자대표가 요구하면 근로자대표 참여(법 제36조제3항)</td></tr>
       <tr><th>결과 공유</th><td>
         <label><input type="checkbox"> 실시 전: 평가 일정을 알림</label>
@@ -221,7 +255,7 @@
         <td class="law-ref">법 제36조제4항 · 규칙 제37조의3</td></tr>
       <tr><th>기록·보존</th><td>
         <label><input type="checkbox"> 실시 시기·담당자</label> <label><input type="checkbox"> 참여 근로자·근로자대표</label> <label><input type="checkbox"> 요인·수준·대책·이행 결과</label><br>
-        보존 시작일 <span class="ed inline" contenteditable data-ph="YYYY-MM-DD"></span> — 3년간 보존</td>
+        보존 시작일 <span class="ed inline" id="fKeep" contenteditable data-ph="YYYY-MM-DD"></span> — 3년간 보존</td>
         <td class="law-ref">법 제36조제5항 · 규칙 제37조의4</td></tr>
     </tbody>
   </table>
@@ -265,7 +299,8 @@
   }
   // 기본 목록의 상/중/하 → 현재 위험성 추천값(가능성, 중대성). 단계 수가 바뀌면 비율로 맞춘다.
   function suggest(level) {
-    var r = level === "상" ? [0.8, 0.75] : level === "중" ? [0.6, 0.5] : level === "하" ? [0.4, 0.25] : null;
+    // 상 → 높은 등급(기본 5×4에서 4×4=16), 중 → 보통(3×3=9), 하 → 낮음(2×2=4)이 되도록 맞춘다
+    var r = level === "상" ? [0.8, 1] : level === "중" ? [0.6, 0.75] : level === "하" ? [0.4, 0.5] : null;
     return r ? { p: Math.max(1, Math.round(CFG.p * r[0])), c: Math.max(1, Math.round(CFG.c * r[1])) } : { p: 0, c: 0 };
   }
   function renderCfg() {
@@ -312,35 +347,69 @@
     for (var i = 1; i <= max; i++) h += '<option value="' + i + '"' + (i === val ? " selected" : "") + '>' + MARKS[i - 1] + '</option>';
     return h + '</select>';
   }
-  function appendRow(tbody, no, hazard, p, c, measure) {
+  function appendRow(tbody, no, r) {
+    r = r || {};
     var tr = document.createElement("tr"), op = CFG.mode === "add" ? " + " : " × ";
+    function cl(v, max) { v = parseInt(v, 10) || 0; return v > max ? max : v; }
     tr.innerHTML =
       '<td style="text-align:center;"><span class="row-num">' + no + '</span>' +
-        '<button type="button" class="del-btn no-print" onclick="this.closest(\'tr\').remove(); renumber();">삭제</button></td>' +
-      '<td><div class="ed left" contenteditable data-ph="유해·위험요인">' + esc(hazard) + '</div></td>' +
-      '<td><div class="ed left" contenteditable data-ph="지금 하고 있는 조치"></div></td>' +
-      '<td><div class="scoreSel">' + sel(p, CFG.p, "가능성") + op + sel(c, CFG.c, "중대성") + '<div class="score-badge"></div></div></td>' +
-      '<td><div class="ed left" contenteditable data-ph="추가 감소대책">' + esc(measure) + '</div></td>' +
-      '<td><div class="ed" contenteditable data-ph="담당자"></div><div class="ed" contenteditable data-ph="기한"></div></td>' +
-      '<td><div class="scoreSel">' + sel(0, CFG.p, "가능성") + op + sel(0, CFG.c, "중대성") + '<div class="score-badge"></div></div></td>' +
-      '<td style="text-align:center"><label class="done"><input type="checkbox" aria-label="개선 완료"> 완료</label><div class="ed" contenteditable data-ph="확인자"></div></td>';
+        '<button type="button" class="del-btn no-print" onclick="delRow(this)">삭제</button></td>' +
+      '<td><div class="ed left" contenteditable data-f="hazard" data-ph="유해·위험요인">' + esc(r.hazard) + '</div></td>' +
+      '<td><div class="ed left" contenteditable data-f="cur" data-ph="지금 하고 있는 조치">' + esc(r.cur) + '</div></td>' +
+      '<td><div class="scoreSel">' + sel(cl(r.p, CFG.p), CFG.p, "현재 가능성") + op + sel(cl(r.c, CFG.c), CFG.c, "현재 중대성") + '<div class="score-badge"></div></div></td>' +
+      '<td><div class="ed left" contenteditable data-f="measure" data-ph="추가 감소대책">' + esc(r.measure) + '</div></td>' +
+      '<td><div class="ed" contenteditable data-f="owner" data-ph="담당자">' + esc(r.owner) + '</div><div class="ed" contenteditable data-f="due" data-ph="기한">' + esc(r.due) + '</div></td>' +
+      '<td><div class="scoreSel">' + sel(cl(r.p2, CFG.p), CFG.p, "개선 후 가능성") + op + sel(cl(r.c2, CFG.c), CFG.c, "개선 후 중대성") + '<div class="score-badge"></div></div></td>' +
+      '<td style="text-align:center"><label class="done"><input type="checkbox" data-f="done" aria-label="개선 완료"' + (r.done ? " checked" : "") + '> 완료</label><div class="ed" contenteditable data-f="checker" data-ph="확인자">' + esc(r.checker) + '</div></td>';
     tbody.appendChild(tr);
   }
-  function applyAutoData() {
-    var dept = document.getElementById("globalWorkType").value;
-    document.getElementById("dispDept").innerText = dept;
+  function txt(el) { return el ? String(el.innerText || "").replace(/ /g, " ").replace(/\n+$/, "") : ""; }
+  function rowData(tr) {
+    var s = tr.querySelectorAll(".scoreSel select"), o = {};
+    ["hazard", "cur", "measure", "owner", "due", "checker"].forEach(function (f) { o[f] = txt(tr.querySelector('[data-f="' + f + '"]')); });
+    o.p = +s[0].value; o.c = +s[1].value; o.p2 = +s[2].value; o.c2 = +s[3].value;
+    o.done = tr.querySelector('[data-f="done"]').checked;
+    return o;
+  }
+  function defaultRows(dept) {
+    return itemsFor(dept, 6).map(function (it) { var s = suggest(it.level); return { hazard: it.risk, p: s.p, c: s.c, measure: it.measure }; });
+  }
+  // 기본 목록에서 채운 그대로가 아닌 줄(직접 적거나 고친 줄)이 있는지
+  function rowsEdited() {
+    return [].some.call(document.querySelectorAll("#ra-tbody tr"), function (tr) {
+      var r = rowData(tr);
+      if (r.cur || r.owner || r.due || r.checker || r.done || r.p2 || r.c2) return true;
+      if (!r.hazard && !r.measure) return false;
+      return !HAZARD_DB.items.some(function (i) { return i.risk === r.hazard && i.measure === r.measure; });
+    });
+  }
+  var lastDept = "";
+  function applyAutoData(fromButton) {
+    var gs = document.getElementById("globalWorkType"), dept = gs.value;
+    if (rowsEdited() && !confirm("3번 표를 '" + dept + "' 기본 항목으로 다시 채웁니다.\n직접 적은 유해·위험요인, 조치, 점수, 담당자는 지워집니다. 계속할까요?")) { gs.value = lastDept || gs.value; return; }
+    lastDept = dept;
+    // 평가대상(부서) 칸은 비어 있거나 공종 이름 그대로일 때만 바꾼다(직접 적은 부서명은 유지)
+    var dd = document.getElementById("dispDept"), cur = txt(dd);
+    if (!cur || HAZARD_DB.groups.indexOf(cur) >= 0) dd.innerText = dept;
+    fillRows(defaultRows(dept));
+    if (fromButton !== null) markTouched();
+  }
+  function fillRows(rows) {
     var tbody = document.getElementById("ra-tbody");
     tbody.innerHTML = "";
-    itemsFor(dept, 6).forEach(function (it, i) {
-      var s = suggest(it.level);
-      appendRow(tbody, i + 1, it.risk, s.p, s.c, it.measure);
-    });
+    rows.forEach(function (r, i) { appendRow(tbody, i + 1, r); });
     updateAll();
   }
   function addEmptyRow() {
     var tbody = document.getElementById("ra-tbody");
-    appendRow(tbody, tbody.children.length + 1, "", 0, 0, "");
-    updateAll();
+    appendRow(tbody, tbody.children.length + 1, {});
+    updateAll(); markTouched();
+    var ed = tbody.lastElementChild.querySelector('[data-f="hazard"]'); if (ed) ed.focus();
+  }
+  function delRow(btn) {
+    var tr = btn.closest("tr"), r = rowData(tr);
+    if ((r.hazard || r.cur || r.measure) && !confirm("이 줄을 삭제할까요?")) return;
+    tr.remove(); renumber(); updateSummary(); markTouched();
   }
   function updateScore(el) {
     var wrap = el.closest(".scoreSel");
@@ -351,30 +420,165 @@
     var badge = wrap.querySelector(".score-badge");
     badge.innerText = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
     badge.className = "score-badge " + info.cls;
+    updateSummary();
   }
-  function updateAll() { document.querySelectorAll(".scoreSel").forEach(function (w) { updateScore(w.querySelector("select")); }); }
+  function updateAll() { document.querySelectorAll(".scoreSel").forEach(function (w) { updateScore(w.querySelector("select")); }); updateSummary(); }
   function renumber() { document.querySelectorAll("#ra-tbody tr").forEach(function (tr, i) { tr.querySelector(".row-num").innerText = i + 1; }); }
-  function peopleRows() {
+  // 집계: 평가한 요인 수, 허용 기준을 넘는 요인 수, 개선 후에도 넘는 요인 수, 완료 수
+  function updateSummary() {
+    var el = document.getElementById("raSummary"); if (!el) return;
+    var n = 0, bad = 0, still = 0, done = 0, noPlan = 0;
+    document.querySelectorAll("#ra-tbody tr").forEach(function (tr) {
+      var r = rowData(tr), s1 = scoreOf(r.p, r.c), s2 = scoreOf(r.p2, r.c2);
+      if (!r.hazard && !s1) return;
+      n++;
+      if (s1 > +CFG.accept) { bad++; if (!r.measure) noPlan++; if (r.done) done++; if (s2 > +CFG.accept) still++; }
+    });
+    el.textContent = n ? "평가 " + n + "건 · 허용 기준(" + CFG.accept + "점) 초과 " + bad + "건" + (bad ? " (개선 완료 " + done + "건" + (still ? ", 개선 후에도 초과 " + still + "건" : "") + ")" : "") : "";
+    el.title = noPlan ? "허용 기준을 넘는데 추가 감소대책이 비어 있는 줄이 " + noPlan + "건 있습니다." : "";
+  }
+  function peopleRows(list) {
+    list = list || [];
+    function c(i, f) { return '<td><div class="ed" contenteditable data-pi="' + i + '" data-pf="' + f + '">' + esc((list[i] || {})[f]) + '</div></td>'; }
     var h = "";
-    for (var i = 1; i <= 3; i++) h += '<tr><td style="text-align:center">' + i + '</td><td><div class="ed" contenteditable></div></td><td><div class="ed" contenteditable></div></td><td></td>' +
-      '<td style="text-align:center">' + (i + 3) + '</td><td><div class="ed" contenteditable></div></td><td><div class="ed" contenteditable></div></td><td></td></tr>';
+    for (var i = 0; i < 3; i++) h += '<tr><td style="text-align:center">' + (i + 1) + '</td>' + c(i, "org") + c(i, "name") + '<td></td>' +
+      '<td style="text-align:center">' + (i + 4) + '</td>' + c(i + 3, "org") + c(i + 3, "name") + '<td></td></tr>';
     document.getElementById("people-tbody").innerHTML = h;
   }
+
+  // ---------- 저장·불러오기 (이 기기 브라우저) ----------
+  var DOCS_KEY = "safetake.risk.docs.v1", MAX_DOCS = 30, docId = "", touched = false, saveTimer = null;
+  function newId() { return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function profile() {
+    try {
+      var p = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {};
+      if (!p.company) p.company = localStorage.getItem("safetake.company") || "";
+      return p;
+    } catch (e) { return {}; }
+  }
+  function collect() {
+    var people = [];
+    document.querySelectorAll("#people-tbody [data-pi]").forEach(function (el) { var i = +el.dataset.pi; (people[i] = people[i] || { org: "", name: "" })[el.dataset.pf] = txt(el); });
+    return {
+      date: txt(document.getElementById("evalDate")), writer: txt(document.getElementById("fWriter")), site: txt(document.getElementById("fSite")),
+      dept: txt(document.getElementById("dispDept")), group: document.getElementById("globalWorkType").value,
+      type: [].map.call(document.querySelectorAll('#fType input'), function (r) { return r.checked; }).indexOf(true),
+      rows: [].map.call(document.querySelectorAll("#ra-tbody tr"), rowData), people: people,
+      checks: [].map.call(document.querySelectorAll("#lawCheck input[type=checkbox]"), function (c) { return c.checked; }),
+      why: txt(document.getElementById("fWhy")), keep: txt(document.getElementById("fKeep"))
+    };
+  }
+  function apply(d) {
+    d = d || {};
+    var gs = document.getElementById("globalWorkType");
+    gs.value = HAZARD_DB.groups.indexOf(d.group) >= 0 ? d.group : HAZARD_DB.groups[0]; lastDept = gs.value;
+    document.getElementById("evalDate").innerText = d.date || today();
+    document.getElementById("fWriter").innerText = d.writer || "";
+    document.getElementById("fSite").innerText = d.site || "";
+    document.getElementById("dispDept").innerText = d.dept || gs.value;
+    var radios = document.querySelectorAll("#fType input"), ti = d.type >= 0 && d.type < radios.length ? d.type : 1;
+    radios.forEach(function (r, i) { r.checked = i === ti; });
+    fillRows(Array.isArray(d.rows) ? d.rows : defaultRows(gs.value));
+    peopleRows(d.people);
+    document.querySelectorAll("#lawCheck input[type=checkbox]").forEach(function (c, i) { c.checked = !!(d.checks || [])[i]; });
+    document.getElementById("fWhy").innerText = d.why || "";
+    document.getElementById("fKeep").innerText = d.keep || "";
+  }
+  function blankDoc() {
+    var p = profile();
+    return { date: today(), writer: p.manager || "", site: p.company || "", group: HAZARD_DB.groups[0], type: 1 };
+  }
+  function loadDocs() {
+    try { var a = JSON.parse(localStorage.getItem(DOCS_KEY) || "[]"); return Array.isArray(a) ? a.filter(function (x) { return x && x.id && x.data; }) : []; } catch (e) { return []; }
+  }
+  function writeDocs(a) {
+    a.sort(function (x, y) { return (y.saved || 0) - (x.saved || 0); });
+    try { localStorage.setItem(DOCS_KEY, JSON.stringify(a.slice(0, MAX_DOCS))); return true; } catch (e) { return false; }
+  }
+  function setStatus(m, bad) { var el = document.getElementById("saveStatus"); if (el) { el.textContent = m; el.style.color = bad ? "#ffb4a9" : ""; } }
+  function updateDocsBtn() { var n = loadDocs().length, b = document.getElementById("docsBtn"); if (b) b.textContent = "📂 저장된 평가서" + (n ? " (" + n + ")" : ""); }
+  function saveNow() {
+    clearTimeout(saveTimer); saveTimer = null;
+    if (!touched) return;
+    var d = collect(), a = loadDocs().filter(function (x) { return x.id !== docId; });
+    a.push({ id: docId, saved: Date.now(), data: d });
+    var ok = writeDocs(a);
+    setStatus(ok ? "이 기기에 저장됨 · " + (d.dept || "부서 미입력") + " " + (d.date || "") : "저장하지 못했습니다(저장 공간 부족 또는 사생활 보호 모드). 인쇄는 할 수 있습니다.", !ok);
+    updateDocsBtn();
+  }
+  function markTouched() { touched = true; clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 500); }
+  function newDoc() {
+    saveNow();
+    docId = newId(); touched = false; apply(blankDoc());
+    setStatus("새 평가서를 시작했습니다. 이전 평가서는 '저장된 평가서'에 있습니다."); window.scrollTo(0, 0);
+  }
   function resetForm() {
-    if (confirm("입력한 내용을 지우고 처음 상태로 되돌릴까요?")) {
-      document.querySelectorAll(".page-container .ed").forEach(function (e) { e.innerHTML = ""; });
-      document.getElementById("evalDate").innerText = today();
-      document.getElementById("globalWorkType").value = HAZARD_DB.groups[0];
-      applyAutoData();
+    if (!confirm("지금 작성 중인 평가서를 지우고 처음 상태로 되돌릴까요?\n(저장된 다른 평가서는 지워지지 않습니다)")) return;
+    clearTimeout(saveTimer); saveTimer = null;
+    writeDocs(loadDocs().filter(function (x) { return x.id !== docId; }));
+    docId = newId(); touched = false; apply(blankDoc());
+    setStatus("처음 상태로 되돌렸습니다."); updateDocsBtn();
+  }
+  function closeDocs() { document.getElementById("docsModal").style.display = "none"; }
+  function openDocs() {
+    saveNow();
+    var a = loadDocs(), box = document.getElementById("docsList");
+    box.innerHTML = a.length ? a.map(function (x) {
+      var d = x.data, cur = x.id === docId, n = (d.rows || []).filter(function (r) { return r.hazard; }).length;
+      return '<div class="doc-item"><div class="doc-meta"><b>' + esc(d.dept || "부서 미입력") + '</b>' + (cur ? ' <span class="doc-cur">작성 중</span>' : "") +
+        '<span>평가일 ' + esc(d.date || "-") + " · " + esc(["최초", "정기", "수시", "상시"][d.type] || "") + " · 요인 " + n + "건" + (d.site ? " · " + esc(d.site) : "") + '</span></div>' +
+        '<div class="doc-acts">' + (cur ? "" : '<button type="button" class="btn btn-blue" data-doc="open" data-id="' + esc(x.id) + '">열기</button>') +
+        '<button type="button" class="btn btn-grey" data-doc="copy" data-id="' + esc(x.id) + '">복사해서 새 평가서</button>' +
+        (cur ? "" : '<button type="button" class="btn btn-red" data-doc="del" data-id="' + esc(x.id) + '">삭제</button>') + '</div></div>';
+    }).join("") : '<p class="doc-empty">아직 저장된 평가서가 없습니다. 내용을 적으면 자동으로 저장되고, 부서별로 여러 건을 보관할 수 있습니다(이 기기에 최근 ' + MAX_DOCS + '건).</p>';
+    document.getElementById("docsModal").style.display = "flex";
+  }
+  document.getElementById("docsList").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-doc]"); if (!b) return;
+    var a = loadDocs(), x = a.filter(function (y) { return y.id === b.dataset.id; })[0]; if (!x) return;
+    if (b.dataset.doc === "del") {
+      if (!confirm("'" + (x.data.dept || "부서 미입력") + " " + (x.data.date || "") + "' 평가서를 삭제할까요? 되돌릴 수 없습니다.")) return;
+      writeDocs(a.filter(function (y) { return y.id !== x.id; })); updateDocsBtn(); openDocs(); return;
     }
+    if (b.dataset.doc === "open") { docId = x.id; touched = true; apply(x.data); setStatus("'" + (x.data.dept || "부서 미입력") + " " + (x.data.date || "") + "' 평가서를 열었습니다."); }
+    else {
+      // 지난 평가서를 바탕으로 새로: 날짜는 오늘, 개선 후 위험성·완료 표시·참여자 확인란은 비운다
+      var d = JSON.parse(JSON.stringify(x.data)); d.date = today(); d.checks = []; d.keep = "";
+      (d.rows || []).forEach(function (r) { r.p2 = 0; r.c2 = 0; r.done = false; r.checker = ""; r.due = ""; });
+      docId = newId(); apply(d); touched = true; saveNow();
+      setStatus("복사해서 새 평가서를 만들었습니다. 평가일은 오늘로, 개선 후 위험성·기한·완료 표시는 비웠습니다.");
+    }
+    closeDocs(); window.scrollTo(0, 0);
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDocs(); });
+  function fitScreen() {
+    var w = document.documentElement.clientWidth, a4 = 210 * 96 / 25.4;
+    document.documentElement.style.setProperty("--pz", String(Math.min(1, Math.max(0.3, (w - 12) / a4))));
   }
   (function init() {
     var gs = document.getElementById("globalWorkType");
     gs.innerHTML = HAZARD_DB.groups.map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join("");
-    document.getElementById("evalDate").innerText = today();
-    peopleRows();
-    renderCfg();
-    applyAutoData();
+    renderCfg(); fitScreen();
+    // 가장 최근에 저장한 평가서를 이어서 연다. 없으면 새 평가서(사업장 정보가 있으면 사업장명·작성자를 채움)
+    var a = loadDocs();
+    a.sort(function (x, y) { return (y.saved || 0) - (x.saved || 0); });
+    if (a[0]) { docId = a[0].id; touched = true; apply(a[0].data); setStatus("마지막으로 작성하던 평가서를 이어서 엽니다 · " + (a[0].data.dept || "부서 미입력") + " " + (a[0].data.date || "")); }
+    else { docId = newId(); apply(blankDoc()); }
+    updateDocsBtn();
+    var page = document.getElementById("page1");
+    page.addEventListener("input", function (ev) { if (ev.target.closest("#cfgBox") || ev.target.closest("[data-appr]")) return; markTouched(); });
+    page.addEventListener("change", function (ev) { if (ev.target.closest("#cfgBox") || ev.target.closest("[data-appr]")) return; updateSummary(); markTouched(); });
+    // 붙여넣기는 서식 없이 글자만 넣는다(표가 깨지지 않게)
+    page.addEventListener("paste", function (ev) {
+      if (!ev.target.closest || !ev.target.closest(".ed")) return;
+      ev.preventDefault();
+      var t = (ev.clipboardData || window.clipboardData).getData("text");
+      document.execCommand("insertText", false, t);
+    });
+    window.addEventListener("resize", fitScreen);
+    window.addEventListener("pagehide", function () { if (saveTimer) saveNow(); });
+    document.addEventListener("visibilitychange", function () { if (document.hidden && saveTimer) saveNow(); });
+    window.addEventListener("beforeprint", function () { if (saveTimer) saveNow(); });
   })();
 </script>
 </body>

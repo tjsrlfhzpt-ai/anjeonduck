@@ -126,8 +126,29 @@
   .tool-btn b { color:#c0392b; margin-right:6px; }
   .tool-btn:hover b { color:#ffd27a; }
 
+  .btn-grey { background: #5b6b80; color: white; }
+  .ctrl-note:empty { display: none; }
+  .hist-empty { font-size: 13px; color: #5b6b80; line-height: 1.6; margin: 0; }
+  .hist-item { border: 1px solid #d8dee8; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .hist-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 13px; color: #2c3e50; }
+  .hist-meta span { color: #5b6b80; font-size: 12px; }
+  .hist-meta .hist-work { flex-basis: 100%; color: #2c3e50; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-meta .hist-cur { background: #27ae60; color: #fff; border-radius: 3px; padding: 0 5px; font-size: 11px; }
+  .hist-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .hist-acts .btn { font-size: 12px; padding: 5px 10px; }
+  .over-warn { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 6px 10px; background: #c0392b; color: #fff; font-size: 12px; font-weight: bold; text-align: center; }
+  .over-warn[hidden] { display: none; }
+  /* 빌드 때 붙는 안내문(.adk-note)이 어두운 바탕에서도 읽히게 */
+  .adk-note { color: #e3e8ef !important; }
+  .adk-note a { color: #a9cdfa; }
+  /* 좁은 화면: A4 쪽을 화면 폭에 맞춰 줄여 보여 준다(값은 스크립트가 넣음). 인쇄에는 적용하지 않는다 */
+  @media screen {
+    .page-container { zoom: var(--pz, 1); }
+  }
   @media screen and (max-width: 820px) {
-    .page-container { transform-origin: top left; }
+    .page-container { margin: 6px auto; }
+    .sitebar { font-size: 12px; padding: 6px 10px; }
+    .control-panel { position: static; gap: 8px; }
   }
 </style>
 <script src="../../assets/docs.js"></script>
@@ -157,16 +178,17 @@
     <select id="globalGroup" style="width:auto;background:#fff;color:#1b365d;padding:4px 6px;border-radius:4px;" onchange="applyGroupToAll(this.value)"></select>
   </div>
   <div class="ctrl-group">
-    <span>페이지 수:</span>
-    <button class="btn-circle" onclick="changeCount(-1)" aria-label="페이지 줄이기">－</button>
+    <span>쪽 수:</span>
+    <button class="btn-circle" onclick="changeCount(-1)" aria-label="쪽 줄이기">－</button>
     <span id="pageCount" class="page-count-display">1</span>
-    <button class="btn-circle" onclick="changeCount(1)" aria-label="페이지 늘리기">＋</button>
+    <button class="btn-circle" onclick="changeCount(1)" aria-label="쪽 늘리기">＋</button>
   </div>
-  <button class="btn btn-blue" onclick="generatePages()">📄 일지 다시 만들기</button>
+  <button class="btn btn-blue" id="histBtn" onclick="openHistory()">📂 지난 일지</button>
   <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">📷 사진 첨부</button>
   <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
   <button class="btn btn-red" onclick="resetData()">↻ 초기화</button>
   <p class="ctrl-note">위험요인은 선택한 공종의 기본 목록으로 채워집니다. 번호 칸을 누르면 다음 항목, 구분 칸을 누르면 목록에서 고를 수 있습니다. <b>오늘 작업에 맞는지 확인한 뒤 인쇄하세요.</b></p>
+  <p class="ctrl-note" id="saveStatus" role="status" aria-live="polite"></p>
 </div>
 
 <div id="toolModal" class="modal-overlay" onclick="closeModal(event)">
@@ -198,56 +220,55 @@
   if (!HAZARD_DB) HAZARD_DB = { groups: ["공통"], items: [] };
   var GROUPS = HAZARD_DB.groups;
   var ITEMS = HAZARD_DB.items;
-  var STORE_KEY = "safetake.tbm.v1";
+  var STORE_KEY = "safetake.tbm.v1";        // 머리글(회사·현장·공종·작업내용) — 기존 저장 형식 그대로
+  var DAYS_KEY = "safetake.tbm.days.v1";    // 날짜별 일지 보관(최근 MAX_DAYS건)
+  var MAX_DAYS = 31, ROWS = 5, WORKERS = 30, MAX_PAGES = 10;
   var EMPTY = { group: "", risk: "", type: "", level: "", measure: "" };
   var WEEK = ["일","월","화","수","목","금","토"];
+  var STATE_KEYS = ["headerCompany", "siteName", "group", "workArea", "majorPoints"];
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  function pad2(n) { return String(n).padStart(2, "0"); }
   function todayParts() {
     var d = new Date();
-    return { year: String(d.getFullYear()), month: String(d.getMonth() + 1).padStart(2, "0"),
-             day: String(d.getDate()).padStart(2, "0"), weekday: WEEK[d.getDay()] };
+    return { year: String(d.getFullYear()), month: pad2(d.getMonth() + 1), day: pad2(d.getDate()), weekday: WEEK[d.getDay()] };
+  }
+  function todayYmd() { var t = todayParts(); return t.year + "-" + t.month + "-" + t.day; }
+  // 사업장 정보(홈에서 저장한 값)가 있으면 회사명 기본값으로 쓴다
+  function profileCompany() {
+    try {
+      var p = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {};
+      return String(p.company || localStorage.getItem("safetake.company") || "");
+    } catch (e) { return ""; }
   }
   function defaultState() {
     var t = todayParts();
-    return { headerCompany: "", siteName: "", group: "공통",
+    return { headerCompany: profileCompany(), siteName: "", group: GROUPS[0],
              year: t.year, month: t.month, day: t.day, weekday: t.weekday,
              workArea: "", majorPoints: "개인보호구 착용, 위험성평가 항목 숙지, 이상 발견 시 즉시 작업중지·보고" };
   }
 
   var state = defaultState();
-  var count = 1;
-  var currentRow = null;
+  var doc = { id: "", pages: [] };   // 지금 작성 중인 일지(쪽별 위험요인·의견·명단)
+  var touched = false;               // 사용자가 손댄 일지만 날짜별 보관에 넣는다
+  var currentRow = null, saveTimer = null;
 
-  function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
-  function loadState() {
-    try {
-      var saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
-      if (saved && typeof saved === "object") {
-        var t = todayParts(), d = defaultState();
-        Object.keys(d).forEach(function (k) { if (typeof saved[k] === "string") state[k] = saved[k]; });
-        // 날짜는 저장값이 아니라 항상 오늘로 시작
-        state.year = t.year; state.month = t.month; state.day = t.day; state.weekday = t.weekday;
-      }
-    } catch (e) { state = defaultState(); }
-    if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+  function newId() { return "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function docYmd() {
+    var y = parseInt(state.year, 10), m = parseInt(state.month, 10), d = parseInt(state.day, 10);
+    if (!y || !m || !d) return "";
+    return y + "-" + pad2(m) + "-" + pad2(d);
   }
-  function resetData() {
-    if (confirm("입력한 내용을 모두 지우고 처음 상태로 되돌릴까요?")) {
-      state = defaultState(); saveState(); syncGroupSelect(); generatePages();
-    }
-  }
-  function changeCount(v) {
-    count = Math.max(1, Math.min(10, count + v));
-    document.getElementById("pageCount").innerText = count;
-  }
-  function updateGlobal(el, key) {
-    state[key] = el.value; saveState();
-    document.querySelectorAll('[data-global="' + key + '"]').forEach(function (i) { if (i !== el) i.value = el.value; });
+  function weekdayOf(y, m, d) {
+    y = parseInt(y, 10); m = parseInt(m, 10); d = parseInt(d, 10);
+    if (!(y > 1900 && m >= 1 && m <= 12 && d >= 1 && d <= 31)) return null;
+    var dt = new Date(y, m - 1, d);
+    return dt.getMonth() === m - 1 && dt.getDate() === d ? WEEK[dt.getDay()] : null;
   }
 
   // 선택한 공종 항목 먼저, 모자라면 공통 항목으로 채움 (무작위 아님)
@@ -259,19 +280,114 @@
   function pick(group, n) {
     var list = listFor(group).slice(0, n);
     while (list.length < n) list.push(EMPTY);
-    return list;
+    return list.map(function (it) { return { group: it.group, risk: it.risk, type: it.type, level: it.level, measure: it.measure }; });
+  }
+  function blankWorkers() { var a = []; for (var i = 0; i < WORKERS; i++) a.push({ org: "", name: "", note: "" }); return a; }
+  function newPage(group) { return { group: group, rows: pick(group, ROWS), opinion: "", workers: blankWorkers() }; }
+  // 저장된 값이 깨져 있어도 화면이 망가지지 않게 모양을 맞춘다
+  function normPage(p) {
+    p = p && typeof p === "object" ? p : {};
+    var g = GROUPS.indexOf(p.group) >= 0 ? p.group : GROUPS[0], rows = [], ws = [], i, r, w;
+    for (i = 0; i < ROWS; i++) { r = (p.rows || [])[i] || {}; rows.push({ group: String(r.group || ""), risk: String(r.risk || ""), type: String(r.type || ""), level: ["상","중","하"].indexOf(r.level) >= 0 ? r.level : "", measure: String(r.measure || "") }); }
+    for (i = 0; i < WORKERS; i++) { w = (p.workers || [])[i] || {}; ws.push({ org: String(w.org || ""), name: String(w.name || ""), note: String(w.note || "") }); }
+    return { group: g, rows: rows, opinion: String(p.opinion || ""), workers: ws };
+  }
+  function headCount(pages) {
+    var n = 0; (pages || []).forEach(function (p) { (p.workers || []).forEach(function (w) { if (w && String(w.name || "").trim()) n++; }); });
+    return n;
   }
 
+  // ---------- 저장 ----------
+  function loadDays() {
+    try {
+      var a = JSON.parse(localStorage.getItem(DAYS_KEY) || "[]");
+      return Array.isArray(a) ? a.filter(function (x) { return x && x.id && Array.isArray(x.pages); }) : [];
+    } catch (e) { return []; }
+  }
+  function writeDays(days) {
+    days.sort(function (a, b) { return (b.saved || 0) - (a.saved || 0); });
+    days = days.slice(0, MAX_DAYS);
+    try { localStorage.setItem(DAYS_KEY, JSON.stringify(days)); return true; } catch (e) { return false; }
+  }
+  function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); return true; } catch (e) { return false; } }
+  function saveNow() {
+    clearTimeout(saveTimer); saveTimer = null;
+    var ok = saveState();
+    if (touched) {
+      var days = loadDays().filter(function (x) { return x.id !== doc.id; }), st = {};
+      STATE_KEYS.forEach(function (k) { st[k] = state[k]; });
+      days.push({ id: doc.id, date: docYmd(), saved: Date.now(), state: st, pages: doc.pages });
+      ok = writeDays(days) && ok;
+    }
+    setStatus(ok ? (touched ? "이 기기에 저장됨 · " + (docYmd() || "날짜 없음") + " 일지" : "") : "저장하지 못했습니다(저장 공간 부족 또는 사생활 보호 모드). 인쇄는 할 수 있습니다.", !ok);
+    updateHistBtn();
+  }
+  function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
+  function markTouched() { touched = true; saveSoon(); }
+  function setStatus(msg, bad) {
+    var el = document.getElementById("saveStatus"); if (!el) return;
+    el.textContent = msg; el.style.color = bad ? "#ffb4a9" : "";
+  }
+  function updateHistBtn() {
+    var b = document.getElementById("histBtn"); if (!b) return;
+    var n = loadDays().length;
+    b.textContent = "📂 지난 일지" + (n ? " (" + n + ")" : "");
+  }
+  function loadState() {
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { saved = null; }
+    state = defaultState();
+    if (saved && typeof saved === "object") {
+      STATE_KEYS.forEach(function (k) { if (typeof saved[k] === "string") state[k] = saved[k]; });
+      // 날짜는 저장값이 아니라 항상 오늘로 시작. 회사명이 비어 있으면 사업장 정보에서 가져온다
+      if (!state.headerCompany) state.headerCompany = profileCompany();
+    }
+    if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+  }
+  // 결재 서명은 날짜가 찍혀 저장된다. 다른 날 서명이 오늘 일지에 그대로 인쇄되지 않게 지운다(칸 이름·성명은 유지)
+  function dropStaleSigns() {
+    try {
+      var k = "safetake.appr.tool.tbm", s = JSON.parse(localStorage.getItem(k) || "null"), ch = false, ymd = docYmd();
+      if (!s || !Array.isArray(s.signs)) return;
+      s.signs.forEach(function (sg, i) { if (sg && (s.dates || [])[i] !== ymd) { s.signs[i] = null; if (s.dates) s.dates[i] = null; ch = true; } });
+      if (ch) localStorage.setItem(k, JSON.stringify(s));
+    } catch (e) { /* 저장소를 못 쓰면 그대로 둔다 */ }
+  }
+
+  // ---------- 화면 → 모델 ----------
+  function readAll() {
+    document.querySelectorAll("#pages-wrapper .page-container").forEach(function (pg, pi) {
+      var p = doc.pages[pi]; if (!p) return;
+      p.group = pg.querySelector(".work-type-select").value;
+      pg.querySelectorAll(".risk-table tbody tr").forEach(function (tr, ri) {
+        var r = p.rows[ri]; if (!r) return;
+        ["group", "risk", "type", "level", "measure"].forEach(function (f) { r[f] = tr.querySelector('[data-type="' + f + '"]').value; });
+      });
+      p.opinion = pg.querySelector("[data-opinion]").value;
+      pg.querySelectorAll("[data-w]").forEach(function (el) { var w = p.workers[+el.dataset.w]; if (w) w[el.dataset.f] = el.value; });
+    });
+  }
+  function updateGlobal(el, key) {
+    state[key] = el.value;
+    document.querySelectorAll('[data-global="' + key + '"]').forEach(function (i) { if (i !== el) i.value = el.value; });
+    if (key === "year" || key === "month" || key === "day") {
+      // 날짜를 고치면 요일을 맞춘다(잘못된 날짜면 그대로 둠)
+      var wd = weekdayOf(state.year, state.month, state.day);
+      if (wd) { state.weekday = wd; document.querySelectorAll('[data-global="weekday"]').forEach(function (i) { i.value = wd; }); }
+    }
+  }
+
+  // ---------- 그리기 ----------
   function riskRowsHTML(items) {
     return items.map(function (it, idx) {
       return '<tr>' +
         '<td class="refresh-btn" onclick="nextItem(this)" title="누르면 같은 공종의 다음 항목으로 바뀝니다">' + (idx + 1) + '</td>' +
-        '<td><input type="text" class="tool-input" data-type="group" value="' + esc(it.group) + '" onclick="openToolModal(this)" readonly title="눌러서 목록에서 선택"></td>' +
-        '<td class="align-left"><textarea data-type="risk" rows="2">' + esc(it.risk) + '</textarea></td>' +
-        '<td><input type="text" data-type="type" value="' + esc(it.type) + '"></td>' +
-        '<td><select data-type="level">' + ["상","중","하",""].map(function (l) {
+        '<td><input type="text" class="tool-input" data-type="group" value="' + esc(it.group) + '" onclick="openToolModal(this)" readonly title="눌러서 목록에서 선택" aria-label="' + (idx + 1) + '번 구분 — 눌러서 목록에서 선택"></td>' +
+        '<td class="align-left"><textarea data-type="risk" rows="2" aria-label="' + (idx + 1) + '번 유해·위험요인">' + esc(it.risk) + '</textarea></td>' +
+        '<td><input type="text" data-type="type" value="' + esc(it.type) + '" aria-label="' + (idx + 1) + '번 재해형태"></td>' +
+        '<td><select data-type="level" aria-label="' + (idx + 1) + '번 위험 수준">' + ["상","중","하",""].map(function (l) {
           return '<option' + (it.level === l ? " selected" : "") + '>' + l + '</option>'; }).join("") + '</select></td>' +
-        '<td class="align-left"><textarea data-type="measure" rows="2">' + esc(it.measure) + '</textarea></td>' +
+        '<td class="align-left"><textarea data-type="measure" rows="2" aria-label="' + (idx + 1) + '번 감소대책">' + esc(it.measure) + '</textarea></td>' +
       '</tr>';
     }).join("");
   }
@@ -281,6 +397,7 @@
     row.querySelector('[data-type="type"]').value = it.type;
     row.querySelector('[data-type="measure"]').value = it.measure;
     row.querySelector('[data-type="level"]').value = ["상","중","하"].indexOf(it.level) >= 0 ? it.level : "";
+    readAll(); markTouched(); fitText(row.closest(".page-container"));
   }
   function nextItem(cell) {
     var page = cell.closest(".page-container");
@@ -296,18 +413,47 @@
       if (used.indexOf(cand.risk) < 0 || k === list.length) { setRow(row, cand); return; }
     }
   }
+  // 기본 목록에 없는 문구(직접 고친 줄)가 있는지
+  function rowsEdited(p) {
+    return p.rows.some(function (r) {
+      if (!r.risk && !r.measure) return false;
+      return !ITEMS.some(function (i) { return i.risk === r.risk && i.measure === r.measure; });
+    });
+  }
+  function pageIndex(el) { return Array.prototype.indexOf.call(document.querySelectorAll("#pages-wrapper .page-container"), el.closest(".page-container")); }
   function changeWorkType(sel) {
-    state.group = sel.value; saveState(); syncGroupSelect();
-    var page = sel.closest(".page-container");
-    page.querySelector(".risk-table tbody").innerHTML = riskRowsHTML(pick(sel.value, 5));
+    var pi = pageIndex(sel), p = doc.pages[pi], prev = p.group;
+    readAll(); p.group = prev;
+    if (rowsEdited(p) && !confirm("위험요인 표를 '" + sel.value + "' 기본 목록으로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) { sel.value = prev; return; }
+    p.group = sel.value; p.rows = pick(sel.value, ROWS);
+    if (pi === 0) { state.group = sel.value; syncGroupSelect(); }
+    sel.closest(".page-container").querySelector(".risk-table tbody").innerHTML = riskRowsHTML(p.rows);
+    fitText(sel.closest(".page-container")); markTouched();
   }
   function applyGroupToAll(g) {
-    state.group = g; saveState();
-    document.querySelectorAll(".work-type-select").forEach(function (s) { s.value = g; changeWorkType(s); });
+    readAll();
+    if (doc.pages.some(rowsEdited) && !confirm("모든 쪽의 위험요인 표를 '" + g + "' 기본 목록으로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) { syncGroupSelect(); return; }
+    state.group = g;
+    doc.pages.forEach(function (p) { p.group = g; p.rows = pick(g, ROWS); });
+    generatePages(); markTouched();
   }
   function syncGroupSelect() {
     var gs = document.getElementById("globalGroup");
     if (gs) gs.value = state.group;
+  }
+  function changeCount(v) {
+    readAll();
+    if (v > 0) {
+      if (doc.pages.length >= MAX_PAGES) return;
+      doc.pages.push(newPage(state.group));
+    } else {
+      if (doc.pages.length <= 1) return;
+      var last = doc.pages[doc.pages.length - 1];
+      if ((headCount([last]) || last.opinion || rowsEdited(last)) && !confirm("마지막 쪽에 적은 내용(명단·의견·위험요인)이 지워집니다. 쪽을 줄일까요?")) return;
+      doc.pages.pop();
+    }
+    generatePages(); markTouched();
+    if (v > 0) { var pgs = document.querySelectorAll("#pages-wrapper .page-container"); pgs[pgs.length - 1].scrollIntoView({ behavior: "smooth", block: "start" }); }
   }
 
   function openToolModal(input) {
@@ -326,6 +472,11 @@
         box.appendChild(b);
       });
     });
+    var c = document.createElement("button");
+    c.type = "button"; c.className = "tool-btn"; c.textContent = "이 줄 비우기 (직접 적기)";
+    c.onclick = function () { if (currentRow) setRow(currentRow, EMPTY); closeModal(); };
+    box.insertBefore(c, box.firstChild);
+    document.getElementById("toolModalTitle").textContent = "위험요인 선택";
     document.getElementById("toolModal").style.display = "flex";
   }
   function closeModal(ev) {
@@ -336,63 +487,184 @@
   function groupOptions(selected) {
     return GROUPS.map(function (g) { return '<option value="' + esc(g) + '"' + (g === selected ? " selected" : "") + '>' + esc(g) + '</option>'; }).join("");
   }
-  function workerRows() {
-    var html = "";
-    for (var i = 1; i <= 15; i++) {
-      html += '<tr><td>' + i + '</td><td><input type="text"></td><td><input type="text"></td><td></td><td><input type="text"></td>' +
-              '<td class="split">' + (i + 15) + '</td><td><input type="text"></td><td><input type="text"></td><td></td><td><input type="text"></td></tr>';
+  function workerRows(ws) {
+    function cell(i, f, label) { return '<td><input type="text" data-w="' + i + '" data-f="' + f + '" value="' + esc(ws[i][f]) + '" aria-label="' + (i + 1) + '번 ' + label + '"></td>'; }
+    var html = "", half = WORKERS / 2;
+    for (var i = 0; i < half; i++) {
+      html += '<tr><td>' + (i + 1) + '</td>' + cell(i, "org", "소속") + cell(i, "name", "성명") + '<td></td>' + cell(i, "note", "비고") +
+              '<td class="split">' + (i + 1 + half) + '</td>' + cell(i + half, "org", "소속") + cell(i + half, "name", "성명") + '<td></td>' + cell(i + half, "note", "비고") + '</tr>';
     }
     return html;
   }
-  function g(key, style) {
-    return '<input type="text" class="date-input" value="' + esc(state[key]) + '" style="' + style + '" data-global="' + key + '" oninput="updateGlobal(this, \'' + key + '\')">';
+  function g(key, style, label) {
+    return '<input type="text" class="date-input" value="' + esc(state[key]) + '" style="' + style + '" data-global="' + key + '" aria-label="' + label + '" oninput="updateGlobal(this, \'' + key + '\')">';
   }
 
   function generatePages() {
     var wrap = document.getElementById("pages-wrapper");
     var html = "";
-    for (var p = 0; p < count; p++) {
+    doc.pages.forEach(function (pg, p) {
       html += '<div class="page-container">' +
         '<div class="page-header-info">' +
-          '<input type="text" class="company-name-input" placeholder="회사명 입력" value="' + esc(state.headerCompany) + '" data-global="headerCompany" oninput="updateGlobal(this, \'headerCompany\')">' +
-          '<span class="contact-info no-print">SafePlum TBM 일지 작성기</span>' +
+          '<input type="text" class="company-name-input" placeholder="회사명 입력" aria-label="회사명" value="' + esc(state.headerCompany) + '" data-global="headerCompany" oninput="updateGlobal(this, \'headerCompany\')">' +
+          '<span class="contact-info no-print">SafePlum TBM 일지 작성기' + (doc.pages.length > 1 ? " · " + (p + 1) + "/" + doc.pages.length + "쪽" : "") + '</span>' +
         '</div>' +
         '<div class="main-title">T B M &nbsp; 일 지</div>' +
         '<table class="layout-wrapper"><colgroup><col style="width:73%"><col style="width:1%"><col style="width:26%"></colgroup><tr>' +
           '<td><table class="data-table info-table"><col style="width:20%"><col style="width:80%">' +
             '<tr><th colspan="2" class="th-blue">작 업 및 현 장 개 요</th></tr>' +
-            '<tr><th class="th-label th-blue">사업장/현장명</th><td class="align-left"><input type="text" placeholder="사업장 또는 현장명" value="' + esc(state.siteName) + '" data-global="siteName" oninput="updateGlobal(this, \'siteName\')"></td></tr>' +
-            '<tr><th class="th-label th-blue">공종(부서/팀)</th><td class="align-left"><select class="work-type-select" onchange="changeWorkType(this)">' + groupOptions(state.group) + '</select></td></tr>' +
-            '<tr><th class="th-label th-blue">일 자</th><td class="align-left">' + g("year", "width:38px") + '년 ' + g("month", "width:22px") + '월 ' + g("day", "width:22px") + '일 (' + g("weekday", "width:16px") + ')요일</td></tr>' +
+            '<tr><th class="th-label th-blue">사업장/현장명</th><td class="align-left"><input type="text" placeholder="사업장 또는 현장명" aria-label="사업장 또는 현장명" value="' + esc(state.siteName) + '" data-global="siteName" oninput="updateGlobal(this, \'siteName\')"></td></tr>' +
+            '<tr><th class="th-label th-blue">공종(부서/팀)</th><td class="align-left"><select class="work-type-select" aria-label="공종(부서·팀)" onchange="changeWorkType(this)">' + groupOptions(pg.group) + '</select></td></tr>' +
+            '<tr><th class="th-label th-blue">일 자</th><td class="align-left">' + g("year", "width:38px", "연도") + '년 ' + g("month", "width:22px", "월") + '월 ' + g("day", "width:22px", "일") + '일 (' + g("weekday", "width:16px", "요일") + ')요일</td></tr>' +
           '</table></td><td></td>' +
           '<td class="tbm-appr"><div data-appr="tool.tbm"></div><p class="approval-note">* 당일 작업 시작 전 작성</p></td>' +
         '</tr></table>' +
         '<table class="data-table work-table">' +
-          '<tr><th class="th-label th-blue">금일 작업구간<br>및 주요내용</th><td class="align-left"><textarea style="height:30px;font-weight:bold;" placeholder="예) 2라인 컨베이어 벨트 교체, 오전 9시~12시" data-global="workArea" oninput="updateGlobal(this, \'workArea\')">' + esc(state.workArea) + '</textarea></td></tr>' +
-          '<tr><th class="th-label th-blue">주요 전파사항</th><td class="align-left"><textarea style="height:25px;" data-global="majorPoints" oninput="updateGlobal(this, \'majorPoints\')">' + esc(state.majorPoints) + '</textarea></td></tr>' +
+          '<tr><th class="th-label th-blue">금일 작업구간<br>및 주요내용</th><td class="align-left"><textarea style="height:30px;font-weight:bold;" placeholder="예) 2라인 컨베이어 벨트 교체, 오전 9시~12시" aria-label="금일 작업구간 및 주요내용" data-global="workArea" oninput="updateGlobal(this, \'workArea\')">' + esc(state.workArea) + '</textarea></td></tr>' +
+          '<tr><th class="th-label th-blue">주요 전파사항</th><td class="align-left"><textarea style="height:25px;" aria-label="주요 전파사항" data-global="majorPoints" oninput="updateGlobal(this, \'majorPoints\')">' + esc(state.majorPoints) + '</textarea></td></tr>' +
         '</table>' +
         '<table class="data-table risk-table">' +
           '<col class="col-no"><col class="col-tool"><col class="col-risk"><col class="col-type"><col class="col-lvl"><col class="col-plan">' +
           '<thead><tr><th colspan="6" class="th-gold">당일 작업 위험성 평가 (유해·위험요인 및 감소대책)</th></tr>' +
           '<tr><th class="th-gold">No.</th><th class="th-gold">구분</th><th class="th-gold">유해·위험요인 및 위험성</th><th class="th-gold">재해형태</th><th class="th-gold">상/중/하</th><th class="th-gold">위험성 감소대책</th></tr></thead>' +
-          '<tbody>' + riskRowsHTML(pick(state.group, 5)) + '</tbody>' +
+          '<tbody>' + riskRowsHTML(pg.rows) + '</tbody>' +
         '</table>' +
         '<table class="data-table worker-table">' +
           '<col class="w-no"><col class="w-job"><col class="w-name"><col class="w-sign"><col class="w-note"><col class="w-no"><col class="w-job"><col class="w-name"><col class="w-sign"><col class="w-note">' +
-          '<thead><tr><th colspan="10" class="th-grey" style="text-align:left;padding-left:10px;">* 근로자 의견청취 및 건의사항 : <input type="text" style="width:72%;border-bottom:1px solid #ccc;text-align:left;"></th></tr>' +
+          '<thead><tr><th colspan="10" class="th-grey" style="text-align:left;padding-left:10px;">* 근로자 의견청취 및 건의사항 : <input type="text" data-opinion aria-label="근로자 의견청취 및 건의사항" value="' + esc(pg.opinion) + '" style="width:72%;border-bottom:1px solid #ccc;text-align:left;"></th></tr>' +
           '<tr><th class="th-grey">NO</th><th class="th-grey">소속</th><th class="th-grey">성명</th><th class="th-grey">서명</th><th class="th-grey">비고</th><th class="th-grey split">NO</th><th class="th-grey">소속</th><th class="th-grey">성명</th><th class="th-grey">서명</th><th class="th-grey">비고</th></tr></thead>' +
-          '<tbody>' + workerRows() + '</tbody>' +
+          '<tbody>' + workerRows(pg.workers) + '</tbody>' +
         '</table>' +
+        '<p class="over-warn no-print" hidden>내용이 A4 한 장을 넘어 아래쪽이 인쇄되지 않습니다. 문구를 줄이거나 쪽을 추가하세요.</p>' +
       '</div>';
-    }
+    });
     wrap.innerHTML = html;
+    document.getElementById("pageCount").innerText = doc.pages.length;
     if (window.ADoc) ADoc.mountAll(wrap);
+    fitText();
+  }
+  // 긴 문구가 칸에서 잘리지 않게 글상자 높이를 내용에 맞추고, A4 한 장을 넘으면 알린다
+  function fitText(root) {
+    var pages = root ? [root] : Array.prototype.slice.call(document.querySelectorAll("#pages-wrapper .page-container"));
+    pages.forEach(function (pg) {
+      pg.querySelectorAll("textarea").forEach(function (t) {
+        var base = t.dataset.base || (t.dataset.base = String(t.offsetHeight));
+        t.style.height = base + "px";
+        if (t.scrollHeight > t.clientHeight + 1) t.style.height = t.scrollHeight + "px";
+      });
+      var warn = pg.querySelector(".over-warn");
+      var last = pg.querySelector(".worker-table");
+      // 마지막 표가 쪽 아래 여백(약 4mm) 안쪽까지 내려오면 인쇄에서 잘린다
+      if (warn && last) warn.hidden = last.offsetTop + last.offsetHeight <= pg.clientHeight - 15;
+    });
+  }
+  // 좁은 화면에서는 A4 쪽을 화면 폭에 맞춰 줄여 보여 준다(인쇄에는 영향 없음)
+  function fitScreen() {
+    var w = document.documentElement.clientWidth, a4 = 210 * 96 / 25.4;
+    document.documentElement.style.setProperty("--pz", String(Math.min(1, Math.max(0.3, (w - 12) / a4))));
+  }
+
+  // ---------- 지난 일지 ----------
+  function dateLabel(ymd) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || ""); if (!m) return "날짜 없음";
+    var wd = weekdayOf(m[1], m[2], m[3]);
+    return m[1] + "." + m[2] + "." + m[3] + (wd ? " (" + wd + ")" : "");
+  }
+  function openHistory() {
+    saveNow();
+    var box = document.getElementById("tool-list"), days = loadDays();
+    days.sort(function (a, b) { return (b.date || "") < (a.date || "") ? -1 : (b.date || "") > (a.date || "") ? 1 : (b.saved || 0) - (a.saved || 0); });
+    document.getElementById("toolModalTitle").textContent = "지난 일지 (이 기기에 최근 " + MAX_DAYS + "건 보관)";
+    if (!days.length) {
+      box.innerHTML = '<p class="hist-empty">아직 보관된 일지가 없습니다. 일지를 작성하면 날짜별로 자동 보관되고, 다음 날 명단과 내용을 불러올 수 있습니다.</p>';
+    } else {
+      box.innerHTML = days.map(function (d) {
+        var st = d.state || {}, n = headCount(d.pages), cur = d.id === doc.id;
+        return '<div class="hist-item"><div class="hist-meta"><b>' + esc(dateLabel(d.date)) + '</b>' + (cur ? ' <span class="hist-cur">작성 중</span>' : "") +
+          '<span>' + esc((d.pages[0] && d.pages[0].group) || "") + " · 명단 " + n + "명" + (d.pages.length > 1 ? " · " + d.pages.length + "쪽" : "") + '</span>' +
+          '<span class="hist-work">' + esc(st.workArea || "(작업내용 없음)") + '</span></div>' +
+          '<div class="hist-acts">' + (cur ? "" :
+            '<button type="button" class="btn btn-blue" data-hist="copy" data-id="' + esc(d.id) + '">오늘 일지로 복사</button>' +
+            '<button type="button" class="btn btn-blue" data-hist="roster" data-id="' + esc(d.id) + '">명단만 복사</button>' +
+            '<button type="button" class="btn btn-grey" data-hist="open" data-id="' + esc(d.id) + '">그날 일지 열기</button>' +
+            '<button type="button" class="btn btn-red" data-hist="del" data-id="' + esc(d.id) + '">삭제</button>') + '</div></div>';
+      }).join("");
+    }
+    document.getElementById("toolModal").style.display = "flex";
+  }
+  document.getElementById("tool-list").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-hist]"); if (!b) return;
+    var days = loadDays(), d = days.filter(function (x) { return x.id === b.dataset.id; })[0]; if (!d) return;
+    var act = b.dataset.hist;
+    if (act === "del") {
+      if (!confirm(dateLabel(d.date) + " 일지를 보관함에서 삭제할까요? 되돌릴 수 없습니다.")) return;
+      writeDays(days.filter(function (x) { return x.id !== d.id; })); updateHistBtn(); openHistory(); return;
+    }
+    readAll();
+    if (act === "open") {
+      // 그날 일지를 그날 날짜 그대로 다시 연다(고치면 그 일지에 저장)
+      doc = { id: d.id, pages: d.pages.map(normPage) };
+      STATE_KEYS.forEach(function (k) { if (d.state && typeof d.state[k] === "string") state[k] = d.state[k]; });
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d.date || "");
+      if (m) { state.year = m[1]; state.month = m[2]; state.day = m[3]; state.weekday = weekdayOf(m[1], m[2], m[3]) || ""; }
+      touched = true;
+    } else if (act === "roster") {
+      if (headCount(doc.pages) && !confirm("지금 적은 명단을 " + dateLabel(d.date) + " 명단으로 바꿀까요?")) return;
+      while (doc.pages.length < d.pages.length && doc.pages.length < MAX_PAGES) doc.pages.push(newPage(state.group));
+      d.pages.forEach(function (p, i) { if (doc.pages[i]) doc.pages[i].workers = normPage(p).workers; });
+      touched = true;
+    } else {
+      if (touched && !confirm("지금 작성 중인 내용을 " + dateLabel(d.date) + " 일지 내용으로 바꿀까요? (날짜는 그대로 둡니다)")) return;
+      doc.pages = d.pages.map(normPage);
+      ["group", "workArea", "majorPoints", "siteName", "headerCompany"].forEach(function (k) { if (d.state && typeof d.state[k] === "string" && (d.state[k] || k === "workArea")) state[k] = d.state[k]; });
+      touched = true;
+    }
+    if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+    syncGroupSelect(); generatePages(); saveNow(); closeModal();
+    setStatus(act === "open" ? dateLabel(d.date) + " 일지를 열었습니다. 오늘 일지로 돌아가려면 새로 고침하세요." : dateLabel(d.date) + (act === "roster" ? " 명단을 불러왔습니다. 오늘 참석자에 맞게 고치세요." : " 내용을 불러왔습니다. 오늘 작업에 맞게 고치세요."));
+  });
+
+  function resetData() {
+    if (!confirm("지금 작성 중인 일지를 지우고 처음 상태로 되돌릴까요?\n(보관된 다른 날 일지는 지워지지 않습니다)")) return;
+    writeDays(loadDays().filter(function (x) { return x.id !== doc.id; }));
+    state = defaultState(); doc = { id: newId(), pages: [newPage(state.group)] }; touched = false;
+    saveState(); syncGroupSelect(); generatePages(); setStatus("처음 상태로 되돌렸습니다."); updateHistBtn();
   }
 
   (function init() {
     var gs = document.getElementById("globalGroup");
     gs.innerHTML = groupOptions("");
-    loadState(); syncGroupSelect(); generatePages();
+    loadState();
+    // 오늘 날짜로 보관된 일지가 있으면 이어서 쓴다
+    var today = todayYmd(), days = loadDays().filter(function (x) { return x.date === today; });
+    days.sort(function (a, b) { return (b.saved || 0) - (a.saved || 0); });
+    if (days[0]) {
+      doc = { id: days[0].id, pages: days[0].pages.map(normPage) };
+      STATE_KEYS.forEach(function (k) { if (days[0].state && typeof days[0].state[k] === "string") state[k] = days[0].state[k]; });
+      if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+      touched = true;
+    } else {
+      doc = { id: newId(), pages: [newPage(state.group)] };
+    }
+    if (!doc.pages.length) doc.pages = [newPage(state.group)];
+    dropStaleSigns();
+    fitScreen(); syncGroupSelect(); generatePages(); updateHistBtn();
+    var prev = loadDays().filter(function (x) { return x.id !== doc.id; });
+    if (touched) setStatus("오늘(" + dateLabel(today) + ") 작성하던 일지를 이어서 엽니다.");
+    else if (prev.length) setStatus("지난 일지 " + prev.length + "건이 보관되어 있습니다. '지난 일지'에서 명단·내용을 불러올 수 있습니다.");
+
+    var wrap = document.getElementById("pages-wrapper");
+    function onEdit(ev) {
+      if (!ev.target.closest(".page-container") || ev.target.closest("[data-appr]")) return;
+      if (ev.target.tagName === "TEXTAREA") fitText(ev.target.closest(".page-container"));
+      readAll(); markTouched();
+    }
+    wrap.addEventListener("input", onEdit);
+    wrap.addEventListener("change", function (ev) { if (ev.target.classList.contains("work-type-select")) return; onEdit(ev); });
+    window.addEventListener("resize", fitScreen);
+    window.addEventListener("pagehide", function () { if (saveTimer) { readAll(); saveNow(); } });
+    document.addEventListener("visibilitychange", function () { if (document.hidden && saveTimer) { readAll(); saveNow(); } });
+    window.addEventListener("beforeprint", function () { readAll(); if (saveTimer) saveNow(); });
   })();
 </script>
 </body>

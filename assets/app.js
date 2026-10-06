@@ -19,6 +19,20 @@
   }
   var isDate = function (s) { return /^\d{4}-\d{2}-\d{2}$/.test(s || ""); };
 
+  // 0) 헤더 회원 영역: 로그인돼 있으면 '마이페이지 · 로그아웃'으로 바꾼다.
+  //    세션은 게시판(Supabase)이 이 브라우저에 저장해 둔 값을 읽기만 한다. 로그아웃은 계정 화면에서 처리한다.
+  (function () {
+    var box = document.getElementById("hdAuth"); if (!box) return;
+    var ses = null;
+    try { ses = JSON.parse(localStorage.getItem(box.getAttribute("data-key")) || "null"); } catch (e) { ses = null; }
+    if (!ses || !ses.access_token || !ses.user) return;
+    var acct = box.getAttribute("data-acct");
+    box.textContent = "";
+    var my = document.createElement("a"); my.href = acct; my.textContent = "마이페이지"; my.className = "hd-auth-my";
+    var out = document.createElement("a"); out.href = acct + "?logout=1"; out.textContent = "로그아웃"; out.className = "hd-auth-out";
+    box.appendChild(my); box.appendChild(out);
+  })();
+
   // 1) 마감 상태를 방문 시점 기준으로 다시 계산 (사이트는 하루 1회만 빌드되므로)
   var today = todayStr();
   document.querySelectorAll("[data-deadline]").forEach(function (el) {

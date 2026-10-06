@@ -14,7 +14,7 @@
     <div class="sec-head"><div><h2>전체 자료</h2><p id="kmMeta"></p></div></div>
     <div class="km-bar">
       <div class="search-inline km-q"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input type="search" id="kmQ" placeholder="예: 지게차, 밀폐공간, 폭염, 외국인, TBM" aria-label="자료 검색"></div>
+        <input type="search" id="kmQ" placeholder="예: 지게차, 밀폐공간, 폭염, 외국인, TBM (태풍|강풍 = 둘 중 하나)" aria-label="자료 검색"></div>
       <select class="sort" id="kmSort" aria-label="정렬"><option value="dt">최신순</option><option value="h">많이 본 순</option></select>
     </div>
     <div class="km-filters">
@@ -40,6 +40,11 @@
       <tr><th>제3유형</th><td>필요</td><td>가능</td><td>불가</td><td>원본 그대로 게시·배포</td></tr>
       <tr><th>제4유형</th><td>필요</td><td>불가</td><td>불가</td><td>원본 그대로 사내 게시·교육(판매·수정 불가)</td></tr>
     </tbody></table></div>
+  </section>
+
+  <section class="stack" id="lbOursBox" hidden>
+    <div class="sec-head"><div><h2>SafePlum에서 바로 만들기</h2><p>내려받을 자료 대신 바로 작성·인쇄할 수 있는 도구입니다.</p></div></div>
+    <ul class="llist" id="lbOurs"></ul>
   </section>
 
   <section class="stack">
@@ -68,6 +73,10 @@
   var $ = function (id) { return document.getElementById(id); };
   if (D && D.official) {
     $("lbOfficial").innerHTML = D.official.map(function (o) { return '<li><a href="' + esc(o.url) + '" target="_blank" rel="noopener"><strong>' + esc(o.name) + '</strong><span class="muted" style="margin-left:8px;font-size:13px">' + esc(o.desc) + '</span><span class="arr" aria-hidden="true">↗</span></a></li>'; }).join("");
+  }
+  if (D && Array.isArray(D.ours) && D.ours.length) {
+    $("lbOurs").innerHTML = D.ours.map(function (o) { return '<li><a href="' + esc(ROOT + o.url) + '"><strong>' + esc(o.name) + '</strong><span class="muted" style="margin-left:8px;font-size:13px">' + esc(o.desc) + '</span><span class="arr" aria-hidden="true">→</span></a></li>'; }).join("");
+    $("lbOursBox").hidden = false;
   }
   var SEASONS = [
     { m: [12, 1, 2], t: "한파·한랭질환 대비", k: ["한파", "한랭", "동절기", "겨울철"] },
@@ -114,7 +123,8 @@
     if (st.edit && !(C.g[i] === 1 || C.g[i] === 2)) return false;
     if (terms.length) {
       var hay = (C.n[i] + " " + C.k[i] + " " + (C.la[i] >= 0 ? D2.langs[C.la[i]] : "") + " " + shapes[C.f[i]]).toLowerCase();
-      for (var j = 0; j < terms.length; j++) if (hay.indexOf(terms[j]) < 0) return false;
+      // 띄어 쓴 말은 모두 포함(AND), '|'로 이은 말은 하나만 포함(OR). 예: 태풍|강풍 포스터
+      for (var j = 0; j < terms.length; j++) { var alt = terms[j].split("|").filter(Boolean); if (alt.length && !alt.some(function (a) { return hay.indexOf(a) >= 0; })) return false; }
     }
     return true;
   }
@@ -142,27 +152,27 @@
     $("kmPager").innerHTML = btns.join("");
   }
 
-  function chips(el, list, key, counts) {
+  function chips(el, list, key, counts, map) {
     el.innerHTML = '<button type="button" class="chip" data-v="-1" aria-pressed="true">전체</button>' +
       list.map(function (x, i) { return counts[i] ? '<button type="button" class="chip" data-v="' + i + '" aria-pressed="false">' + esc(x) + ' <span class="n">' + counts[i].toLocaleString("ko-KR") + "</span></button>" : ""; }).join("");
     el.addEventListener("click", function (ev) {
       var c = ev.target.closest(".chip"); if (!c) return;
       el.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === c ? "true" : "false"); });
-      st[key] = +c.dataset.v; st.page = 1; render();
+      var v = +c.dataset.v; st[key] = v < 0 ? -1 : (map ? map[v] : v); st.page = 1; render();
     });
   }
 
   function season() {
     var m = new Date().getMonth() + 1, rows = [];
     SEASONS.filter(function (s) { return s.m.indexOf(m) >= 0; }).forEach(function (s) {
-      var hit = [];
-      for (var i = 0; i < N; i++) {
-        var hay = C.n[i] + " " + C.k[i];
-        if (s.k.some(function (k) { return hay.indexOf(k) >= 0; })) hit.push(i);
-      }
+      // 아래 '전체 자료' 검색과 같은 기준으로 세어, '모두 보기'를 눌렀을 때 건수가 같게 한다.
+      var hit = [], sq = s.k.join("|"), keep = st;
+      st = { q: sq, use: -1, shape: -1, topic: -1, foreign: false, edit: false };
+      for (var i = 0; i < N; i++) if (match(i, [sq.toLowerCase()])) hit.push(i);
+      st = keep;
       if (hit.length < 3) return;
       hit.sort(function (a, b) { return C.dt[b] < C.dt[a] ? -1 : C.dt[b] > C.dt[a] ? 1 : 0; });
-      rows.push('<div class="km-row"><div class="km-row-h"><h3>' + esc(s.t) + '</h3><button type="button" class="linkbtn" data-sq="' + esc(s.k[0]) + '">' + hit.length.toLocaleString("ko-KR") + "건 모두 보기 →</button></div>" +
+      rows.push('<div class="km-row"><div class="km-row-h"><h3>' + esc(s.t) + '</h3><button type="button" class="linkbtn" data-sq="' + esc(sq) + '">' + hit.length.toLocaleString("ko-KR") + "건 모두 보기 →</button></div>" +
         '<ul class="km-grid km-strip">' + hit.slice(0, 6).map(card).join("") + "</ul></div>");
     });
     if (rows.length) {
@@ -183,8 +193,7 @@
     for (var i = 0; i < N; i++) { sc[C.f[i]]++; C.t[i].forEach(function (t) { tc[t]++; }); }
     var order = shapes.map(function (_, i) { return i; }).sort(function (a, b) { return sc[b] - sc[a]; });
     var sList = order.map(function (i) { return shapes[i]; }), sCnt = order.map(function (i) { return sc[i]; });
-    chips($("kmShapes"), sList, "shapeIdx", sCnt);
-    $("kmShapes").addEventListener("click", function (ev) { var c = ev.target.closest(".chip"); if (!c) return; st.shape = +c.dataset.v < 0 ? -1 : order[+c.dataset.v]; st.page = 1; render(); });
+    chips($("kmShapes"), sList, "shape", sCnt, order);
     chips($("kmTopics"), topics, "topic", tc);
     var uc = USES.map(function () { return 0; });
     for (var q = 0; q < N; q++) uc[useOf[C.f[q]]]++;
@@ -208,7 +217,7 @@
   });
   document.addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-sq]"); if (!b) return;
-    st.q = b.dataset.sq; $("kmQ").value = st.q; st.page = 1; render(); $("kmAll").scrollIntoView({ behavior: "smooth", block: "start" });
+    var sq = b.dataset.sq; $("kmReset").click(); st.q = sq; $("kmQ").value = sq; st.page = 1; render(); $("kmAll").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
   var sc = document.createElement("script");

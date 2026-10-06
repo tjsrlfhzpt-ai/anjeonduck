@@ -15,6 +15,7 @@
     <p class="count" aria-live="polite">항목 <strong id="rCount">0</strong>건</p>
     <div id="rOut"></div>
     <div class="empty" id="rEmpty" hidden><p>검색 결과가 없습니다.</p></div>
+    <p class="hint" id="rOther" aria-live="polite" hidden></p>
     <details class="lawbox" id="rOrig"><summary><strong>조문 원문 보기</strong></summary><div id="rOrigBody" class="stack" style="margin-top:10px"></div></details>
   </section>
   <aside class="col-side stack">
@@ -48,6 +49,9 @@
     document.getElementById("rOut").innerHTML = n ? h : "";
     document.getElementById("rCount").textContent = n;
     document.getElementById("rEmpty").hidden = n > 0;
+    var on = tab === "ret" ? D.penalties.filter(function (p) { return hit(p.art + " " + p.penalty + " " + p.who + " " + (p.extra || "")); }).length : D.retention.filter(function (r) { return hit(r.join(" ")); }).length;
+    var ro = document.getElementById("rOther"); ro.hidden = !(q.length && on);
+    if (q.length && on) ro.innerHTML = "'" + esc(tab === "ret" ? "벌칙 (징역·벌금)" : "서류 보존기간") + "' 탭에도 " + on + '건이 있습니다. <button type="button" class="linkbtn" id="rSwitch">그 탭 보기</button>';
     var arts = tab === "ret" ? [["act", "제164조(서류의 보존)"], ["rule", "제241조(서류의 보존)"], ["krule", "제619조의2(산소 및 유해가스 농도의 측정 및 기록 등)"]]
       : [["act", "제167조(벌칙)"], ["act", "제168조(벌칙)"], ["act", "제169조(벌칙)"], ["act", "제170조(벌칙)"], ["act", "제170조의2(벌칙)"], ["act", "제171조(벌칙)"], ["act", "제172조(벌칙)"], ["act", "제173조(양벌규정)"]];
     document.getElementById("rOrigBody").innerHTML = L ? arts.map(function (a) { var law = L.laws[a[0]], t = law && law.articles[a[1]]; if (!t) return ""; return '<section><h3 class="h-sm">' + esc(law.law + " " + a[1]) + '</h3><p class="lawtext">' + esc(t.slice(a[1].length).trim()) + '</p><p class="src-line">' + esc(law.version) + ' · <a href="' + esc(law.url) + '" target="_blank" rel="noopener">원문 ↗</a></p></section>'; }).join("") : "";
@@ -58,6 +62,7 @@
     tab = b.dataset.v; render();
   });
   document.getElementById("rq").addEventListener("input", render);
+  document.getElementById("rOther").addEventListener("click", function (ev) { if (ev.target.id === "rSwitch") document.querySelector('[data-seg="tab"] [data-v="' + (tab === "ret" ? "pen" : "ret") + '"]').click(); });
   document.getElementById("rNotes").innerHTML = D.notes.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "<li>과태료(질서위반)는 벌칙과 별개입니다. 같은 위반이라도 결과(사망 여부 등)에 따라 적용 조문이 달라집니다.</li>";
   document.getElementById("rSrc").textContent = "법령 원문 확인일 " + D.checked + " · 국가법령정보센터";
   try { var t0 = new URLSearchParams(location.search).get("tab"); if (t0 === "pen") document.querySelector('[data-v="pen"]').click(); } catch (e) {}

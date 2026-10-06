@@ -66,7 +66,8 @@
     if (!isNum(v)) return null;
     var rate = DATA.scale[+scaleSel.value].rate, n = +v;
     if (rate >= 1 || n < 100) return n;
-    return Math.max(100, Math.floor(n * rate * 10) / 10);
+    // 부동소수점 오차(700 × 0.7 = 489.99…) 방지: 비율을 백분율 정수로 바꿔 계산
+    return Math.max(100, Math.floor(n * Math.round(rate * 100) / 10) / 10);
   }
   function cell(v, strong) {
     if (!v) return "<td>—</td>";
@@ -102,7 +103,13 @@
     render();
   });
   ["pq"].forEach(function (id) { document.getElementById(id).addEventListener("input", render); });
-  ["scale", "special"].forEach(function (id) { document.getElementById(id).addEventListener("change", render); });
+  // 사업장 규모·중대재해 선택은 다음 방문 때도 유지
+  var PKEY = "safetake.penalty.v1";
+  try { var sv = JSON.parse(localStorage.getItem(PKEY) || "null"); if (sv && typeof sv === "object") { if (DATA.scale[+sv.scale]) scaleSel.value = String(+sv.scale); document.getElementById("special").checked = !!sv.special; } } catch (e) {}
+  ["scale", "special"].forEach(function (id) { document.getElementById(id).addEventListener("change", function () {
+    try { localStorage.setItem(PKEY, JSON.stringify({ scale: +scaleSel.value, special: document.getElementById("special").checked })); } catch (e) {}
+    render();
+  }); });
   var fp = document.querySelector("[data-fpanel]");
   if (fp && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) fp.removeAttribute("open");
   try { var pq = new URLSearchParams(location.search).get("q"); if (pq) document.getElementById("pq").value = pq; } catch (e) {}

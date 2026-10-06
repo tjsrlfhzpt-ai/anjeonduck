@@ -327,7 +327,7 @@
         var h = '<div class="ad-ph-h"><h3>' + esc(opts.title || "사진 첨부") + (ps.length ? " (" + ps.length + "장)" : "") + '</h3><div class="ad-ph-acts">' +
           '<label class="ad-btn g"><input type="file" accept="image/*" multiple hidden data-f="1">사진 추가</label>' +
           '<label class="ad-btn g ad-mob"><input type="file" accept="image/*" capture="environment" hidden data-f="1">카메라</label>' +
-          '<label>한 줄에 <select data-cols aria-label="한 줄에 들어갈 사진 수">' + [1, 2, 3].map(function (n) { return "<option" + (n === cols ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select> 장</label></div></div>";
+          '<label style="white-space:nowrap">한 줄에 <select data-cols aria-label="한 줄에 들어갈 사진 수">' + [1, 2, 3].map(function (n) { return "<option" + (n === cols ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select> 장</label></div></div>";
         if (!ps.length) h += '<div class="ad-empty">현장 사진을 붙이면 사진마다 칸이 하나씩 생기고 설명·관련 항목·촬영일을 적을 수 있습니다. 인쇄하면 서식 뒤에 사진대지로 붙습니다.' + (opts.hint ? "<br>" + esc(opts.hint) : "") + "</div>";
         else {
           h += '<div class="ad-grid" style="--ad-cols:' + cols + ";--ad-h:" + (cols === 1 ? "360px" : cols === 3 ? "150px" : "230px") + '">';

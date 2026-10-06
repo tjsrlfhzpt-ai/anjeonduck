@@ -684,12 +684,7 @@
    "time": "10:00",
    "off": true,
    "klass": "확인 필요",
-   "links": [
-    {
-     "label": "산안법 제22조",
-     "href": "laws/act/#j22"
-    }
-   ]
+   "links": []
   }
  ],
  "klass_labels": {

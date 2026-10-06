@@ -30,7 +30,7 @@
       {"name": "MSDS 교육 기록", "basis": "법 제114조제3항 · 규칙 제169조", "href": "tools/msds/", "cond": "화학물질 취급"}
     ]},
     {"id": "inspect", "title": "점검·검사", "docs": [
-      {"name": "작업시작 전 점검표(별표 3 해당 기계·작업)", "basis": "기준규칙 제35조 · 별표 3", "href": "tools/forms/"},
+      {"name": "작업시작 전 점검표(별표 3 해당 기계·작업)", "basis": "기준규칙 제35조 · 별표 3", "href": "tools/forms/#pre"},
       {"name": "관리감독자·안전관리자 업무일지", "basis": "영 제15조 · 제18조제1항제9호", "href": "tools/forms/log-sup/"},
       {"name": "안전검사 합격증명·관리대장", "basis": "법 제93조 · 규칙 제126조", "href": "tools/inspect/", "cond": "검사대상 기계 보유"},
       {"name": "안전인증·자율안전확인 표시 확인(구입 기계·보호구)", "basis": "법 제87조·제92조", "href": "tools/machines/"},

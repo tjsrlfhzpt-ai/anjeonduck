@@ -30,8 +30,10 @@
         <h2 class="h-sm">건설공사 착공 <span class="muted">법 제42조제1항제3호 · 영 제42조제3항</span></h2>
         <div class="stack" id="hCon" style="gap:6px"></div>
       </div></div>
+      <p class="hint">입력한 내용은 이 브라우저에만 저장되어 다음에 열어도 남아 있습니다. <button type="button" class="btn btn-sm btn-ghost" id="hClear">입력 지우기</button></p>
     </form>
     <div class="hp-result" id="hOut" aria-live="polite"></div>
+    <div class="btns no-print"><button type="button" class="btn btn-sm btn-ghost" id="hCopy" disabled>결과 복사</button><button type="button" class="btn btn-sm btn-ghost" id="hPrint" disabled>결과 인쇄</button></div>
   </section>
   <aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">꼭 알아 두기</h2><ul class="bul hint">
@@ -67,6 +69,7 @@
 .hp-body li{font-size:14px;color:var(--text-2);padding:2px 0}
 .hp-body ol,.hp-body .hp-list{padding-left:20px;margin:0}.hp-body .hp-list{list-style:disc}
 @media (max-width:640px){.hp-eq{grid-template-columns:1fr}}
+@media print{#hForm,.layout-detail .col-side,.no-print{display:none!important}.hp-result{border:1px solid #444}.hp-verdict,.hp-verdict.yes{background:none!important}.hp-verdict b,.hp-body li,.hp-body .hint{color:#000!important}}
 </style>
 <script>
 (function () {
@@ -104,7 +107,8 @@
         else if (ck >= D.change_kw) hits.push({ t: "제1호 — " + D.industries[+ind] + ", 계약용량 " + kw + "kW, 주요 구조부분 변경(정격용량 합 " + ck + "kW ≥ 100kW)", g: "mfg1" });
         else notes.push("1번: 변경 설비 정격용량 합 " + ck + "kW — 고시상 주요 구조부분 변경(100kW 이상 증가·이설)에 못 미칩니다.");
       } else hits.push({ t: "제1호 — " + D.industries[+ind] + ", 계약용량 " + kw + "kW, " + (act === "new" ? "설치" : "이전"), g: "mfg1" });
-    } else if (ind === "" && act) notes.push("1번: 13개 업종이 아니면 제1호는 해당하지 않습니다(2번·3번은 업종과 상관없이 확인).");
+    } else if (ind !== "" && !act) need.push("1번: '하려는 일'(설치·이전·주요 구조부분 변경)을 고르세요.");
+    else if (ind === "" && act) notes.push("1번: 13개 업종이 아니면 제1호는 해당하지 않습니다(2번·3번은 업종과 상관없이 확인).");
     // 2호
     D.equip.forEach(function (q) {
       if (!$("hEqC_" + q.k).checked) return;
@@ -120,8 +124,9 @@
     // 3호
     [].forEach.call(document.querySelectorAll("[data-con]:checked"), function (c) { hits.push({ t: "제3호 — " + D.construction[+c.dataset.con], g: "con" }); });
 
+    save();
     var touched = act || ind !== "" || document.querySelector("#hEq input:checked, [data-con]:checked");
-    if (!touched) { $("hOut").innerHTML = '<div class="hp-verdict"><b>입력 대기</b><span class="hint">1~3번 중 해당하는 항목을 고르세요.</span></div>'; return; }
+    if (!touched) { $("hOut").innerHTML = '<div class="hp-verdict"><b>입력 대기</b><span class="hint">1~3번 중 해당하는 항목을 고르세요.</span></div>'; $("hCopy").disabled = $("hPrint").disabled = true; lastText = ""; return; }
     var yes = hits.length > 0, groups = {};
     hits.forEach(function (h) { groups[h.g] = 1; });
     var S = D.submit, P = D.penalty, body = "";
@@ -135,11 +140,45 @@
       }
       if (groups.con) body += "<h3>제출 — 건설공사</h3><p class=\"hint\">" + esc(S.con) + '</p><p class="hint" style="margin-top:6px">' + esc(P.con) + "</p>";
       body += "<h3>그 밖에</h3><ul class=\"hp-list\">" + (groups.mfg1 || groups.mfg2 ? "<li>" + esc(S.writer) + "</li>" : "") + (groups.mfg1 && groups.mfg2 ? "<li>" + esc(S.exempt) + "</li>" : "") + "<li>" + esc(S.psm) + "</li><li>" + esc(S.keep) + " — " + esc(P.keep) + "</li></ul>";
-    } else body += "<p class=\"hint\">입력한 내용으로는 제출 대상이 아닙니다. 계획이 바뀌거나 설비가 추가되면 다시 확인하세요.</p>";
+      body += '<p class="hint" style="margin-top:10px"><a href="../penalty/?q=' + encodeURIComponent("제42조") + '">과태료 부과기준에서 제42조 항목 보기 →</a></p>';
+    } else if (!need.length) body += "<p class=\"hint\">입력한 내용으로는 제출 대상이 아닙니다. 계획이 바뀌거나 설비가 추가되면 다시 확인하세요.</p>";
     if (need.length) body += "<h3>더 넣어야 할 값</h3><ul class=\"hp-list\">" + need.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
     if (notes.length) body += "<h3>참고</h3><ul class=\"hp-list\">" + notes.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+    var vText = yes ? "제출 대상" : need.length ? "판정 보류" : "대상 아님";
+    lastText = "[유해위험방지계획서 제출 대상 자가진단] " + vText + "\n" +
+      (yes ? "해당 근거:\n" + hits.map(function (h) { return "- " + h.t; }).join("\n") + "\n" + (groups.mfg1 || groups.mfg2 ? "제출(제조업 등): " + S.mfg + "\n" + P.mfg + "\n" : "") + (groups.con ? "제출(건설공사): " + S.con + "\n" + P.con + "\n" : "") : "") +
+      (need.length ? "더 넣어야 할 값:\n" + need.map(function (x) { return "- " + x; }).join("\n") + "\n" : "") +
+      (notes.length ? "참고:\n" + notes.map(function (x) { return "- " + x; }).join("\n") + "\n" : "") + "(자가진단 참고 결과 · 원문 확인 " + D.checked + ")";
+    $("hCopy").disabled = $("hPrint").disabled = false;
     $("hOut").innerHTML = '<div class="hp-verdict ' + (yes ? "yes" : need.length ? "" : "no") + '"><b>' + (yes ? "제출 대상" : need.length ? "판정 보류" : "대상 아님") + '</b><span class="hint">' + (yes ? hits.length + "개 근거에 해당" : need.length ? "값을 더 넣어 주세요" : "입력 기준") + '</span></div><div class="hp-body">' + body + "</div>";
   }
+  var KEY = "safetake.hpp.v1", ready = false, lastText = "";
+  function save() {
+    if (!ready) return;
+    var o = { ind: $("hInd").value, kw: $("hKw").value, act: $("hAct").value, chgKw: $("hChgKw").value, eq: {}, con: [] };
+    D.equip.forEach(function (q) { if (!$("hEqC_" + q.k).checked) return; o.eq[q.k] = { v: $("hEqV_" + q.k) ? $("hEqV_" + q.k).value : "", m: $("hEqM_" + q.k) ? $("hEqM_" + q.k).checked : false, a: $("hEqA_" + q.k) ? $("hEqA_" + q.k).checked : false }; });
+    [].forEach.call(document.querySelectorAll("[data-con]:checked"), function (c) { o.con.push(+c.dataset.con); });
+    try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {}
+  }
+  try {
+    var sv = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (sv && typeof sv === "object") {
+      if (D.industries[+sv.ind] && sv.ind !== "") $("hInd").value = String(+sv.ind);
+      if (["new", "move", "chg"].indexOf(sv.act) >= 0) $("hAct").value = sv.act;
+      if (isFinite(parseFloat(sv.kw))) $("hKw").value = parseFloat(sv.kw);
+      if (isFinite(parseFloat(sv.chgKw))) $("hChgKw").value = parseFloat(sv.chgKw);
+      D.equip.forEach(function (q) { var e = sv.eq && sv.eq[q.k]; if (!e) return; $("hEqC_" + q.k).checked = true; if ($("hEqV_" + q.k) && isFinite(parseFloat(e.v))) $("hEqV_" + q.k).value = parseFloat(e.v); if ($("hEqM_" + q.k)) $("hEqM_" + q.k).checked = !!e.m; if ($("hEqA_" + q.k)) $("hEqA_" + q.k).checked = !!e.a; });
+      (Array.isArray(sv.con) ? sv.con : []).forEach(function (i) { var c = document.querySelector('[data-con="' + (+i) + '"]'); if (c) c.checked = true; });
+    }
+  } catch (e) {}
+  ready = true;
+  $("hClear").addEventListener("click", function () { $("hForm").reset(); try { localStorage.removeItem(KEY); } catch (e) {} calc(); });
+  $("hCopy").addEventListener("click", function () {
+    var b = this;
+    function done(ok) { b.textContent = ok ? "복사했습니다" : "복사하지 못했습니다"; setTimeout(function () { b.textContent = "결과 복사"; }, 1600); }
+    try { navigator.clipboard.writeText(lastText).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+  $("hPrint").addEventListener("click", function () { window.print(); });
   $("hForm").addEventListener("input", calc);
   $("hForm").addEventListener("change", calc);
   calc();

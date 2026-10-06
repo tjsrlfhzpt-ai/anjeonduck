@@ -7,7 +7,7 @@
   <div class="calc" style="gap:12px">
     <div class="grid3">
       <label class="field"><span class="label">날짜</span><input type="date" id="hDate"></label>
-      <label class="field"><span class="label">측정 시각</span><input type="time" id="hTime" value="14:00"></label>
+      <label class="field"><span class="label">측정 시각</span><input type="time" id="hTime"></label>
       <label class="field"><span class="label">장소·작업</span><input type="text" id="hPlace" placeholder="예: 옥외 야적장 하역"></label>
       <label class="field"><span class="label">체감온도 (℃)</span><input type="number" id="hTemp" step="0.1" inputmode="decimal" placeholder="예: 32.5"></label>
       <label class="field"><span class="label">측정 방법</span><select class="sort" id="hHow" style="width:100%"><option>온습도계 측정</option><option>기상청 체감온도</option></select></label>
@@ -17,7 +17,7 @@
     <fieldset class="heat-acts"><legend class="label">이날 한 조치 (해당하는 것 모두)</legend><div id="hActs"></div>
       <label class="field" style="margin-top:6px"><span class="label">휴식 부여 내용·기타</span><input type="text" id="hMemo" placeholder="예: 13~15시 옥외작업 중지, 매 2시간 20분 휴식"></label></fieldset>
     <div class="appr-panel"><p class="appr-panel-l">인쇄할 결재란 <span class="muted">— 칸 이름·성명을 고치고, 서명 칸을 눌러 서명하세요</span></p><div data-appr="tool.heat"></div></div>
-    <div class="btns"><button type="button" class="btn" id="hAdd">기록 추가</button><span class="grow"></span><button type="button" class="btn btn-ghost" id="hCsv">CSV 저장</button><button type="button" class="btn btn-ghost" id="hPrint">기록부 인쇄</button></div>
+    <div class="btns"><button type="button" class="btn" id="hAdd">기록 추가</button><button type="button" class="btn btn-ghost" id="hCancel" hidden>수정 취소</button><span class="grow"></span><button type="button" class="btn btn-ghost" id="hCsv">CSV 저장</button><button type="button" class="btn btn-ghost" id="hPrint">기록부 인쇄</button></div>
   </div>
   <div class="listbar"><div class="chips" role="group" aria-label="연도" id="hYears"></div><span class="grow"></span><span class="muted" id="hSum"></span></div>
   <div class="table-wrap"><table class="dtable htable"><thead><tr><th>날짜·시각</th><th>장소·작업</th><th>체감온도</th><th>판정</th><th>조치</th><th>기록자</th><th></th></tr></thead><tbody id="hRows"></tbody></table></div>
@@ -62,6 +62,19 @@
   $("hActs").innerHTML = ACTS.map(function (a) { return '<label class="check"><input type="checkbox" data-a="' + a.k + '"><span>' + esc(a.t) + "</span></label>"; }).join("");
   $("hLaw").innerHTML = LAW.map(function (l) { return "<dt>" + esc(l[0]) + "</dt><dd>" + esc(l[1]) + "</dd>"; }).join("");
   $("hDate").value = ymd(new Date());
+  (function () { var n = new Date(); $("hTime").value = ("0" + n.getHours()).slice(-2) + ":" + ("0" + n.getMinutes()).slice(-2); })();
+  function setActs(a) { $("hActs").querySelectorAll("input").forEach(function (c) { c.checked = !!(a && a[c.dataset.a]); }); }
+  // 매일 쓰는 기록이라 장소·측정 방법·기록자·조치는 가장 최근 기록에서 미리 채운다(체감온도는 매번 직접 입력)
+  (function () {
+    var last = list.slice().sort(function (a, b) { return (a.date + a.time) < (b.date + b.time) ? 1 : -1; })[0];
+    if (!last) return;
+    $("hPlace").value = last.place || ""; $("hBy").value = last.by || ""; setActs(last.acts);
+    if ([].some.call($("hHow").options, function (o) { return o.value === last.how; })) $("hHow").value = last.how;
+  })();
+  var editIdx = -1;
+  function setEdit(i) {
+    editIdx = i; $("hAdd").textContent = i >= 0 ? "수정 저장" : "기록 추가"; $("hCancel").hidden = i < 0;
+  }
   function curActs() { var o = {}; $("hActs").querySelectorAll("input").forEach(function (c) { if (c.checked) o[c.dataset.a] = true; }); return o; }
   function showJudge() {
     var v = $("hTemp").value, j = judge(v === "" ? null : +v, curActs()), el = $("hJudge");
@@ -81,7 +94,7 @@
     $("hSum").textContent = year + "년 기록 " + rs.length + "건 · 폭염작업 " + hot + "건 · 보존기한 " + year + "-12-31";
     $("hRows").innerHTML = rs.map(function (p) {
       var r = p[0], j = judge(r.temp, r.acts);
-      return '<tr class="' + (j.miss.length ? "late" : "") + '"><td>' + esc(r.date) + " " + esc(r.time) + "</td><td>" + esc(r.place) + "</td><td><strong>" + esc(r.temp) + "℃</strong><span class=\"muted\" style=\"display:block;font-size:12px\">" + esc(r.how) + '</span></td><td><span class="badge heat-b lv' + j.lvl + '">' + esc(j.label) + "</span>" + (j.miss.length ? '<span style="display:block;font-size:12px;color:var(--red)">누락: ' + esc(j.miss.join(" / ")) + "</span>" : "") + "</td><td>" + esc(actText(r)) + "</td><td>" + esc(r.by) + '</td><td><button type="button" class="linkbtn" data-del="' + p[1] + '" style="color:var(--red)">삭제</button></td></tr>';
+      return '<tr class="' + (j.miss.length ? "late" : "") + '"><td>' + esc(r.date) + " " + esc(r.time) + "</td><td>" + esc(r.place) + "</td><td><strong>" + esc(r.temp) + "℃</strong><span class=\"muted\" style=\"display:block;font-size:12px\">" + esc(r.how) + '</span></td><td><span class="badge heat-b lv' + j.lvl + '">' + esc(j.label) + "</span>" + (j.miss.length ? '<span style="display:block;font-size:12px;color:var(--red)">누락: ' + esc(j.miss.join(" / ")) + "</span>" : "") + "</td><td>" + esc(actText(r)) + "</td><td>" + esc(r.by) + '</td><td><button type="button" class="linkbtn" data-edit="' + p[1] + '">수정</button> <button type="button" class="linkbtn" data-del="' + p[1] + '" style="color:var(--red)">삭제</button></td></tr>';
     }).join("");
     $("hEmpty").hidden = rs.length > 0;
   }
@@ -90,13 +103,27 @@
     var v = $("hTemp").value;
     if (!$("hDate").value) { $("hDate").focus(); return; }
     if (v === "" || isNaN(+v) || +v < -30 || +v > 60) { $("hTemp").focus(); $("hJudge").className = "heat-judge lv2"; $("hJudge").textContent = "체감온도를 -30~60 사이 숫자로 넣으세요."; return; }
-    list.push({ date: $("hDate").value, time: $("hTime").value, place: $("hPlace").value.trim(), temp: Math.round(+v * 10) / 10, how: $("hHow").value, by: $("hBy").value.trim(), acts: curActs(), memo: $("hMemo").value.trim() });
+    var rec = { date: $("hDate").value, time: $("hTime").value, place: $("hPlace").value.trim(), temp: Math.round(+v * 10) / 10, how: $("hHow").value, by: $("hBy").value.trim(), acts: curActs(), memo: $("hMemo").value.trim() };
+    var was = editIdx >= 0 && list[editIdx], jj = judge(rec.temp, rec.acts);
+    if (was) list[editIdx] = rec; else list.push(rec);
+    setEdit(-1);
     save(); year = $("hDate").value.slice(0, 4); render();
     $("hTemp").value = ""; $("hMemo").value = ""; showJudge();
+    $("hJudge").className = "heat-judge lv" + (jj.miss.length ? jj.lvl : 0);
+    $("hJudge").textContent = rec.date + " " + rec.time + " " + rec.temp + "℃ 기록을 " + (was ? "고쳤습니다." : "추가했습니다.") + (jj.miss.length ? " 체크 안 된 필수 조치: " + jj.miss.join(" / ") : "");
   });
   $("hRows").addEventListener("click", function (ev) {
+    var e = ev.target.closest("button[data-edit]");
+    if (e) {
+      var r = list[+e.dataset.edit]; if (!r) return;
+      $("hDate").value = r.date; $("hTime").value = r.time; $("hPlace").value = r.place || ""; $("hTemp").value = r.temp; $("hBy").value = r.by || ""; $("hMemo").value = r.memo || ""; setActs(r.acts);
+      if ([].some.call($("hHow").options, function (o) { return o.value === r.how; })) $("hHow").value = r.how;
+      setEdit(+e.dataset.edit); showJudge(); $("hTemp").focus(); return;
+    }
     var b = ev.target.closest("button[data-del]"); if (!b) return;
-    list.splice(+b.dataset.del, 1); save(); render();
+    var d = list[+b.dataset.del]; if (!d) return;
+    if (!window.confirm(d.date + " " + d.time + " " + d.temp + "℃ 기록을 삭제할까요? 되돌릴 수 없습니다.")) return;
+    list.splice(+b.dataset.del, 1); setEdit(-1); save(); render();
   });
   $("hCsv").addEventListener("click", function () {
     var q = function (s) { return '"' + String(s == null ? "" : s).replace(/"/g, '""') + '"'; };
@@ -112,6 +139,7 @@
       '</tbody></table><p class="paper-note">' + esc(LAW.map(function (l) { return "· " + l[0] + ": " + l[1]; }).join("\n")) + '</p><p class="paper-foot">근거: 산업안전보건기준에 관한 규칙 제559조·제560조·제562조, 별표 13의2 · 보존: ' + year + '년 12월 31일까지</p>';
     document.body.classList.add("pr-heat"); window.print(); setTimeout(function () { document.body.classList.remove("pr-heat"); }, 500);
   });
+  $("hCancel").addEventListener("click", function () { setEdit(-1); $("hTemp").value = ""; $("hMemo").value = ""; showJudge(); });
   showJudge(); render();
 })();
 </script>

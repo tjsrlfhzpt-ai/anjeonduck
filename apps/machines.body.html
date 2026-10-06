@@ -60,6 +60,8 @@
 .mx-dot.n{color:var(--line);font-weight:400}
 .mx-star{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
 .mx-star[aria-pressed="true"]{background:#FFF6D6;border-color:#F2C94C;color:#B7860B}
+:root[data-theme="dark"] .mx-star[aria-pressed="true"]{background:#3A2C0B;border-color:#8A6A12;color:#FBBF24}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mx-star[aria-pressed="true"]{background:#3A2C0B;border-color:#8A6A12;color:#FBBF24}}
 .mx-drow>td{background:var(--blue-50);padding:0 10px 12px!important}
 .mx-detail{background:var(--surface);border:1px solid var(--blue-100);border-radius:var(--r);padding:16px 20px}
 .mx-detail h2{font-size:20px}
@@ -144,11 +146,13 @@
     var items = D.items.filter(function (it) { return names.indexOf(it.name) >= 0; });
     if (!items.length) { alert("표에서 ☆을 눌러 우리 사업장 기계를 먼저 고르세요."); return; }
     var rows = items.map(function (it) {
-      return obligations(it).map(function (o, i, arr) {
-        return "<tr>" + (i === 0 ? '<td rowspan="' + arr.length + '"><strong>' + esc(it.name) + "</strong></td>" : "") + "<td>" + esc(o.label) + "</td><td>" + o.what.replace(/<a [^>]*>|<\/a>/g, "") + "<br><small>" + esc(o.law) + "</small></td><td>" + esc(o.user) + '</td><td style="width:22mm"></td></tr>';
+      // 인쇄물에는 작업계획서 작성 의무도 한 줄로 넣는다(화면 상세와 같은 내용)
+      return obligations(it).concat(it.plan ? [{ k: "plan", label: "작업계획서", law: "", what: it.plan[1], user: "작업 전에 작업계획서를 작성하고 그 계획에 따라 작업합니다." }] : []).map(function (o, i, arr) {
+        return "<tr>" + (i === 0 ? '<td rowspan="' + arr.length + '"><strong>' + esc(it.name) + "</strong></td>" : "") + "<td>" + esc(o.label) + "</td><td>" + (o.k === "plan" ? esc(o.what) : o.k === "pre" ? "작업시작 전 점검 실시" : o.what) + (o.law ? "<br><small>" + esc(o.law) + "</small>" : "") + "</td><td>" + esc(o.user) + '</td><td style="width:22mm"></td></tr>';
       }).join("") || '<tr><td><strong>' + esc(it.name) + '</strong></td><td colspan="4">표의 다섯 의무 해당 없음</td></tr>';
     }).join("");
-    $("mSheet").innerHTML = "<h1>우리 사업장 기계·기구 법정 의무 점검표</h1><p>작성일 " + new Date().toLocaleDateString("ko-KR") + " · 기준 " + esc(D.checked) + " 원문 대조</p>" +
+    var co = ""; try { var pf = JSON.parse(localStorage.getItem("safetake.profile") || "null"); if (pf && typeof pf.company === "string") co = pf.company.trim(); } catch (e) {}
+    $("mSheet").innerHTML = "<h1>" + (co ? esc(co) + " " : "우리 사업장 ") + "기계·기구 법정 의무 점검표</h1><p>작성일 " + new Date().toLocaleDateString("ko-KR") + " · 기준 " + esc(D.checked) + " 원문 대조</p>" +
       "<table><thead><tr><th>기계·기구</th><th>의무</th><th>내용·근거</th><th>사용하는 쪽이 확인할 것</th><th>확인</th></tr></thead><tbody>" + rows + "</tbody></table>";
     window.print();
   });
@@ -157,7 +161,7 @@
   $("mPpe").innerHTML = lists(D.ppe);
   $("mGen").textContent = D.general_guard;
   $("mSrc").textContent = "원문 확인 " + D.checked + " · " + D.source;
-  var pq = new URLSearchParams(location.search).get("q"); if (pq) $("mQ").value = pq;
+  try { var pq = new URLSearchParams(location.search).get("q"); if (pq) $("mQ").value = pq; } catch (e) {}
   render();
 })();
 </script>

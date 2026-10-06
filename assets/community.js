@@ -102,7 +102,7 @@
   }
   function userBar() {
     var bar = h("div", { class: "cm-user" });
-    if (ME) add(bar, [h("span", null, h("b", null, ME.nickname), " 님"), h("a", { href: url("account") }, "내 계정"),
+    if (ME) add(bar, [h("span", null, h("b", null, ME.nickname), " 님"), h("a", { href: url("account") }, "마이페이지"),
       h("button", { type: "button", class: "linkbtn", onclick: function () { sb.auth.signOut().then(function () { location.href = url(""); }); } }, "로그아웃")]);
     else add(bar, [h("a", { href: url("account", { next: location.pathname + location.search }) }, "로그인"), h("a", { href: url("account", { mode: "join" }) }, "회원가입")]);
     return bar;
@@ -287,14 +287,14 @@
         h("p", { class: "cm-note cm-ok" }, "이메일 인증이 끝났습니다. ", h("b", null, ME.nickname), " 님으로 로그인되어 있어 다시 로그인할 필요가 없습니다."),
         h("p", { class: "btns" }, h("a", { class: "btn btn-block", href: url("") }, "게시판 둘러보기")),
         h("p", { class: "btns" }, h("a", { class: "btn btn-ghost btn-block", href: url("write") }, "첫 글 쓰기")),
-        h("p", { class: "cm-alt" }, h("a", { href: url("account") }, "내 계정(닉네임·비밀번호 변경)"))));
+        h("p", { class: "cm-alt" }, h("a", { href: url("account") }, "마이페이지(닉네임·비밀번호 변경)"))));
     }
     if (ME) {
       var nn = h("input", { type: "text", maxlength: "12", required: true, value: ME.nickname }), o1 = h("p", { hidden: true }), b1 = h("button", { type: "submit", class: "btn btn-ghost" }, "닉네임 변경");
       var pw = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o2 = h("p", { hidden: true }), b2 = h("button", { type: "submit", class: "btn btn-ghost" }, "비밀번호 변경");
       var o3 = h("p", { hidden: true });
       return show(h("div", { class: "cm-auth" },
-        h("h2", { class: "h-sm" }, "내 계정"), h("p", { class: "cm-note" }, "이메일 ", h("b", null, ME.email), " · 이메일은 다른 회원에게 보이지 않습니다."),
+        h("h2", { class: "h-sm" }, "마이페이지"), h("p", { class: "cm-note" }, "이메일 ", h("b", null, ME.email), " · 이메일은 다른 회원에게 보이지 않습니다."),
         h("form", { class: "cm-form", onsubmit: function (ev) {
           ev.preventDefault(); busy(b1, true);
           sb.rpc("set_nickname", { p: nn.value.trim() }).then(function (r) { busy(b1, false); result(o1, r.error ? msg(r.error) : "닉네임을 바꿨습니다.", !r.error); });
@@ -364,5 +364,10 @@
   var ROUTES = { list: pageList, view: pageView, write: pageWrite, account: pageAccount };
   sb.auth.onAuthStateChange(function (ev) { if (ev === "PASSWORD_RECOVERY") { RECOVERY = true; if (PAGE === "account") pageAccount(); } });
   loading();
+  if (qs("logout") && PAGE === "account") {   // 헤더의 '로그아웃'
+    var bye = function () { location.replace(url("")); };
+    sb.auth.signOut().then(bye, bye);
+    return;
+  }
   loadMe().then(function () { (ROUTES[PAGE] || pageList)(); }, function (e) { show(note(msg(e), "err")); });
 })();

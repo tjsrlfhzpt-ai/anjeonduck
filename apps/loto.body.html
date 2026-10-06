@@ -13,7 +13,7 @@
         <label class="field"><span class="label">잠근 사람(소속·성명)</span><input type="text" id="lWho" data-k="who"></label>
         <label class="field"><span class="label">연락처</span><input type="text" id="lTel" data-k="tel" inputmode="tel"></label>
         <label class="field"><span class="label">하단 문구 (선택)</span><input type="text" id="lFoot" data-k="foot" placeholder="비우면 인쇄되지 않습니다 · 예: 무단 해제 금지"></label>
-        <label class="field"><span class="label">잠금 일시</span><input type="datetime-local" id="lAt" data-k="at"></label>
+        <label class="field"><span class="label">잠금 일시 <button type="button" class="linkbtn" id="lNow" style="font-size:12px;margin-left:6px">지금 시각 넣기</button></span><input type="datetime-local" id="lAt" data-k="at"></label>
       </div>
       <div class="grid3">
         <label class="field"><span class="label">태그 색</span><select class="sort" id="lColor" data-k="color" style="width:100%"><option value="red">빨강 — 위험(조작 금지)</option><option value="orange">주황 — 경고(점검 중)</option></select></label>
@@ -63,7 +63,7 @@
 .lt-rows{flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:3mm 4mm 3mm}
 .lt-row{display:flex;align-items:flex-end;gap:2mm;border-bottom:0.3mm solid #555;min-height:12mm;padding-bottom:1mm;font-size:9.5pt}
 .lt-row span{flex:none;width:19mm;font-weight:700;color:#333}
-.lt-row b{flex:1;font-size:10.5pt;font-weight:700;color:#000;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lt-row b{flex:1;min-width:0;font-size:10.5pt;font-weight:700;line-height:1.2;color:#000;overflow:hidden;max-height:2.4em;word-break:break-all}
 .lt-foot{font-size:7.5pt;color:#444;text-align:center;padding:2mm 3mm 3mm}
 .lt-back .lt-head{padding:16mm 3mm 3mm}
 .lt-back .lt-head .ko{font-size:17pt;line-height:1.25;margin:0}
@@ -99,11 +99,19 @@
   try { st = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { st = {}; }
   var F = [].slice.call(document.querySelectorAll("#lForm [data-k]"));
   F.forEach(function (el) { if (st[el.dataset.k] != null) el.value = st[el.dataset.k]; });
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function nowLocal() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  // 회사·현장명이 비어 있으면 저장해 둔 사업장 정보에서 가져온다(고쳐 쓸 수 있음)
+  if (!$("lCo").value) {
+    try { var pf = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}; $("lCo").value = pf.company || localStorage.getItem("safetake.company") || ""; } catch (e) { /* 저장소를 못 쓰는 환경 */ }
+  }
+  // 지난번에 쓴 잠금 일시가 오늘이 아니면 지운다 — 지난 날짜가 찍힌 태그가 그대로 인쇄되지 않게
+  if ($("lAt").value && $("lAt").value.slice(0, 10) !== nowLocal().slice(0, 10)) $("lAt").value = "";
   function save() { F.forEach(function (el) { st[el.dataset.k] = el.value; }); try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* 저장 못 해도 인쇄는 가능 */ } }
   function fmtAt(v) { if (!v) return ""; var d = new Date(v); if (isNaN(d)) return v; return d.getFullYear() + ". " + (d.getMonth() + 1) + ". " + d.getDate() + ". " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }
   function vals(i) {
     var same = st.same || "all", use = same === "all" || (same === "first" && i === 0);
-    return use ? { co: st.co, eq: st.eq, job: st.job, who: st.who, tel: st.tel, at: fmtAt(st.at) } : {};
+    return use ? { co: st.co, eq: st.eq, job: st.job, who: st.who, tel: st.tel, at: fmtAt(st.at), foot: st.foot } : {};
   }
   function color() { return st.color === "orange" ? "#E06A00" : "#C8102E"; }
   function front(v) {
@@ -142,6 +150,7 @@
   $("lForm").addEventListener("change", render);
   window.addEventListener("resize", render);
   $("lPrint").addEventListener("click", function () { render(); window.print(); });
+  $("lNow").addEventListener("click", function (ev) { ev.preventDefault(); $("lAt").value = nowLocal(); render(); });
   $("lReset").addEventListener("click", function () { F.forEach(function (el) { if (el.tagName === "INPUT") el.value = ""; }); render(); });
   render();
 })();

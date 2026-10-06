@@ -81,6 +81,8 @@
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var KEY = "safetake.docmap", st = {}, filt = "";
   try { st = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { st = {}; }
+  if (typeof st !== "object" || Array.isArray(st)) st = {};
+  function company() { try { return (JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}).company || localStorage.getItem("safetake.company") || ""; } catch (e) { return ""; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { alert("이 브라우저에 저장하지 못했습니다. 체크 상태는 새로고침하면 사라집니다."); } }
   function id(g, i) { return g.id + "." + i; }
   function href(h) { return "../../" + h; }
@@ -114,8 +116,10 @@
   $("dReset").addEventListener("click", function () { if (confirm("체크한 내용을 모두 지울까요?")) { st = {}; save(); render(); } });
   $("dPrint").addEventListener("click", function () {
     var L = { ok: "보유", na: "해당 없음", "": "" };
-    $("dSheet").innerHTML = "<h1>안전보건 서류 자가점검표</h1><p>점검일 " + new Date().toLocaleDateString("ko-KR") + " · 준비율 " + $("dPct").textContent + "</p><table><thead><tr><th style=\"width:16%\">업무</th><th>서류</th><th style=\"width:30%\">근거</th><th style=\"width:12%\">상태</th></tr></thead><tbody>" +
-      D.groups.map(function (g) { return g.docs.map(function (d, i) { return "<tr>" + (i === 0 ? '<td rowspan="' + g.docs.length + '">' + esc(g.title) + "</td>" : "") + "<td>" + esc(d.name) + (d.cond ? " <small>(" + esc(d.cond) + ")</small>" : "") + "</td><td>" + esc(d.basis) + "</td><td>" + L[st[id(g, i)] || ""] + "</td></tr>"; }).join(""); }).join("") + "</tbody></table>";
+    var co = company(), miss = 0, okN = 0, naN = 0;
+    D.groups.forEach(function (g) { g.docs.forEach(function (d, i) { var v = st[id(g, i)]; if (v === "ok") okN++; else if (v === "na") naN++; else miss++; }); });
+    $("dSheet").innerHTML = "<h1>안전보건 서류 자가점검표</h1><p>" + (co ? "사업장 " + esc(co) + " · " : "") + "점검일 " + new Date().toLocaleDateString("ko-KR") + " · 준비율 " + $("dPct").textContent + " (보유 " + okN + "건 · 미보유 " + miss + "건 · 해당 없음 " + naN + "건)</p><table><thead><tr><th style=\"width:16%\">업무</th><th>서류</th><th style=\"width:30%\">근거</th><th style=\"width:12%\">상태</th></tr></thead><tbody>" +
+      D.groups.map(function (g) { return g.docs.map(function (d, i) { return "<tr>" + (i === 0 ? '<td rowspan="' + g.docs.length + '">' + esc(g.title) + "</td>" : "") + "<td>" + esc(d.name) + (d.cond ? " <small>(" + esc(d.cond) + ")</small>" : "") + "</td><td>" + esc(d.basis) + "</td><td>" + (L[st[id(g, i)] || ""] || "미보유") + "</td></tr>"; }).join(""); }).join("") + "</tbody></table><p style=\"margin-top:3mm;font-size:9pt\">상태가 '미보유'인 서류는 보유하지 않았거나 아직 확인하지 않은 서류입니다. " + esc(D.note) + "</p>";
     window.print();
   });
   $("dSrc").textContent = "정리 " + D.checked + " · " + D.note;

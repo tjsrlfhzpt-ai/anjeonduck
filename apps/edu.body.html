@@ -50,6 +50,8 @@
   };
   var NOTE = {
     office: "정기교육은 반기마다 받아야 하고, 채용 시·작업내용 변경 시·특별교육은 해당 사유가 생길 때 받습니다.",
+    sup: "관리감독자 정기교육은 연간 16시간 이상이고, 채용 시·작업내용 변경 시·특별교육은 해당 사유가 생길 때 받습니다(별표 4 제1호의2).",
+    stw: "특수형태근로종사자는 최초 노무제공 시 교육과 특별교육이 대상입니다. 특별교육을 실시한 경우 최초 노무제공 시 교육은 면제됩니다(별표 4 제3호). 2분의 1 적용은 해당하지 않습니다.",
     day: "일용근로자가 채용 시(나목) 또는 특별교육(라목)을 받은 날 이후 1주일 동안 같은 사업장에서 같은 업무의 일용근로자로 다시 종사하면 이미 받은 교육을 면제합니다(비고 2). 건설 일용근로자는 기초안전·보건교육 4시간도 해당합니다.",
     month: "정기교육은 사무직·판매·그 밖의 근로자 구분을 따릅니다.",
     duty: "신규교육: 선임 후 3개월(의사인 보건관리자 1년) 이내 / 보수교육: 신규교육 이수 후 매 2년이 되는 날 기준 전후 6개월 사이(시행규칙 제29조제1항). 목록 외 대상(전문기관 종사자 등)은 아래 전체 표를 보세요."
@@ -75,7 +77,8 @@
   function render() {
     var parts = MAP[who].map(function (x) { var s = sec[x[0]]; return '<section class="lawbox"><h3>' + esc(s.title) + ' <span class="muted" style="font-weight:500;font-size:13px">' + esc(s.basis) + "</span></h3>" + table(s, x[1]) + "</section>"; }).join("");
     var n = NOTE[who] || NOTE.office;
-    document.getElementById("eOut").innerHTML = parts + '<div class="note"><p>' + esc(n) + "</p></div>";
+    var halfOn = document.getElementById("eHalf").checked, halfNA = halfOn && !MAP[who].some(function (x) { return halfable[x[0]]; });
+    document.getElementById("eOut").innerHTML = parts + '<div class="note"><p>' + esc(n) + "</p>" + (halfNA ? "<p><strong>2분의 1 적용은 근로자·관리감독자 교육(가~라목)에만 해당해 이 대상의 시간은 줄지 않습니다.</strong></p>" : "") + "</div>";
     document.getElementById("eAll").innerHTML = '<h2 class="h-sm" style="margin-top:8px">별표 4 전체</h2>' + D.sections.map(function (s) {
       return '<details class="lawbox"><summary><strong>' + esc(s.title) + "</strong></summary>" + table(s) + (s.notes.length ? '<ul class="bul hint" style="margin-top:8px">' + s.notes.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") + "</details>";
     }).join("");
@@ -85,7 +88,18 @@
     this.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
     who = b.dataset.v; render();
   });
-  document.getElementById("eHalf").addEventListener("change", render);
+  // 고른 대상·2분의 1 적용 여부는 다음 방문 때도 유지
+  var EKEY = "safetake.eduhours.v1";
+  function save() { try { localStorage.setItem(EKEY, JSON.stringify({ who: who, half: document.getElementById("eHalf").checked })); } catch (e) {} }
+  document.querySelector('[data-seg="who"]').addEventListener("click", save);
+  document.getElementById("eHalf").addEventListener("change", function () { save(); render(); });
+  try {
+    var sv = JSON.parse(localStorage.getItem(EKEY) || "null");
+    if (sv && typeof sv === "object") {
+      if (MAP[sv.who]) { who = sv.who; document.querySelectorAll('[data-seg="who"] button').forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.v === who ? "true" : "false"); }); }
+      document.getElementById("eHalf").checked = !!sv.half;
+    }
+  } catch (e) {}
   document.getElementById("eSrc").textContent = D.source + " · 원문 확인 " + D.checked;
   render();
 })();

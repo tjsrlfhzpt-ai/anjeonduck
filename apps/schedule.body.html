@@ -30,6 +30,7 @@
         <button type="button" class="btn btn-sm" id="sAdd">+ 업무 추가</button>
       </div>
     </div>
+    <section class="sc-now" id="sNow" aria-label="오늘 기준 할 일"></section>
     <div id="sMonthNav" class="month-nav" hidden>
       <button type="button" class="btn btn-sm btn-ghost" id="sPrev" aria-label="이전 달">‹</button>
       <strong id="sMonthLabel"></strong>
@@ -55,6 +56,7 @@
         <button type="button" class="btn btn-sm btn-ghost" id="sExport">설정 백업(.json)</button>
         <label class="btn btn-sm btn-ghost" style="cursor:pointer">설정 불러오기<input type="file" id="sImport" accept="application/json,.json" hidden></label>
       </div>
+      <p class="hint" id="sMsg" role="status" aria-live="polite" style="margin-top:8px" hidden></p>
       <p class="hint" style="margin-top:8px"><button type="button" class="linkbtn" id="sReset">기본값으로 되돌리기</button></p>
     </div>
     <div class="side-box">
@@ -70,6 +72,28 @@
   </aside>
 </div>
 
+<style>
+.sc-now{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px}
+.sc-now:empty{display:none}
+.sc-now-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-bottom:10px}
+.sc-now-h h2{margin:0}
+.sc-now-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sc-col{min-width:0;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px}
+.sc-col h3{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--text-2);margin:0 0 6px}
+.sc-col h3 b{font-size:18px;color:var(--navy)}
+.sc-col.late{border-color:var(--red)}
+.sc-col.late h3,.sc-col.late h3 b{color:var(--red)}
+.sc-col ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.sc-col li label{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;padding:5px 0;font-size:13.5px;line-height:1.4;cursor:pointer;color:var(--text)}
+.sc-col li input{margin:3px 0 0}
+.sc-col li .d{font-size:12.5px;font-weight:700;color:var(--text-2);white-space:nowrap}
+.sc-col.late li .d{color:var(--red)}
+.sc-col .none{font-size:13px;color:var(--muted);margin:0}
+.sc-now-f{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+@media (max-width:760px){.sc-now-g{grid-template-columns:1fr}}
+.sc-yhead{display:none}
+@media print{.sc-now,.month-nav{display:none!important}.sc-yhead{display:block;margin-bottom:3mm}.sc-yhead p{font-size:10pt;margin:0;color:#000}.sc-yhead h2{font-size:15pt;margin:0;color:#000}}
+</style>
 <dialog id="sDlg" class="dlg" aria-labelledby="sDlgT">
   <form method="dialog" id="sForm" class="calc" style="box-shadow:none;border:0">
     <h2 id="sDlgT">업무 설정</h2>
@@ -102,7 +126,20 @@
   if (!D) return;
   var KEY = "safetake.schedule";
   var S = { ov: {}, custom: [], done: {}, since: "" };
-  function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || "null"); if (x && typeof x === "object") S = { ov: x.ov || {}, custom: x.custom || [], done: x.done || {}, since: x.since || "" }; } catch (e) {} }
+  var FREQS = ["daily", "every2", "weekly", "monthly", "bimonthly", "quarterly", "semiannual", "yearly"];
+  function isObj(x) { return !!x && typeof x === "object" && !Array.isArray(x); }
+  // 저장·불러온 값이 깨져 있어도 화면이 멈추지 않게 모양만 바로잡는다(키·구조는 그대로).
+  function clean(x) {
+    var ov = {}, done = {}, custom = [], seen = {};
+    if (isObj(x.ov)) Object.keys(x.ov).forEach(function (k) { if (isObj(x.ov[k])) { var o = x.ov[k]; if (o.freq != null && FREQS.indexOf(o.freq) < 0) delete o.freq; ov[k] = o; } });
+    if (isObj(x.done)) Object.keys(x.done).forEach(function (k) { if (x.done[k]) done[k] = x.done[k]; });
+    if (Array.isArray(x.custom)) x.custom.forEach(function (c) {
+      if (!isObj(c) || typeof c.key !== "string" || !c.key || seen[c.key] || FREQS.indexOf(c.freq) < 0) return;
+      seen[c.key] = 1; c.title = String(c.title == null ? "" : c.title).slice(0, 80) || "이름 없는 업무"; custom.push(c);
+    });
+    return { ov: ov, custom: custom, done: done, since: /^\d{4}-\d{2}-\d{2}$/.test(x.since) ? x.since : "" };
+  }
+  function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || "null"); if (isObj(x)) S = clean(x); } catch (e) {} }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   load();
   if (!S.since) { var _t = new Date(); S.since = _t.getFullYear() + "-" + ("0" + (_t.getMonth() + 1)).slice(-2) + "-" + ("0" + _t.getDate()).slice(-2); save(); }
@@ -114,7 +151,14 @@
   function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
   function today() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   function lastDay(y, m) { return new Date(y, m + 1, 0).getDate(); }
-  function dayIn(y, m, day) { return new Date(y, m, Math.min(day || 1, lastDay(y, m))); }
+  function dayIn(y, m, day) { var f = new Date(y, m, 1); return new Date(f.getFullYear(), f.getMonth(), Math.min(+day || 1, lastDay(f.getFullYear(), f.getMonth()))); }
+  // 요일 0(일)~6(토). 0을 '없음'으로 읽어 월요일로 바꾸지 않도록 따로 처리한다.
+  function wdOf(t) { var w = t.weekday; if (w === 0 || w === "0") return 0; w = +w; return w >= 1 && w <= 6 ? w : 1; }
+  function allDays(t) { return t.work === false || t.work === "0" || t.work === 0; }
+  // 격일 업무의 기준일. 해마다 1월 1일로 다시 맞추면 12/31과 1/1이 연달아 잡히므로 고정한다.
+  function anchorOf(t) { var a = /^\d{4}-\d{2}-\d{2}$/.test(t.anchor || "") ? new Date(t.anchor + "T00:00:00") : null; return a && !isNaN(a) ? a : new Date(2026, 0, 1); }
+  function dayDiff(a, b) { return Math.round((Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 864e5); }
+  function hhmm(t) { var m = /^(\d{1,2}):(\d{2})$/.exec(t.time || ""); return m && +m[1] < 24 && +m[2] < 60 ? pad(+m[1]) + ":" + m[2] : ""; }
 
   function tasks() {
     var base = D.tasks.map(function (t) {
@@ -130,10 +174,10 @@
     var y = ref.getFullYear(), m = ref.getMonth();
     switch (t.freq) {
       case "daily": return { id: ymd(ref), due: ref };
-      case "every2": { var a = t.anchor ? new Date(t.anchor + "T00:00:00") : new Date(y, 0, 1); var diff = Math.round((ref - a) / 864e5); var s = new Date(ref); s.setDate(s.getDate() - (((diff % 2) + 2) % 2)); var e = new Date(s); e.setDate(e.getDate() + 1); return { id: ymd(s), due: e }; }
-      case "weekly": { var st = new Date(ref); st.setDate(st.getDate() - ((st.getDay() + 6) % 7)); var du = new Date(st); du.setDate(du.getDate() + (((+t.weekday || 1) + 6) % 7)); return { id: "W" + ymd(st), due: du }; }
+      case "every2": { var diff = dayDiff(ref, anchorOf(t)); var s = new Date(ref); s.setDate(s.getDate() - (((diff % 2) + 2) % 2)); var e = new Date(s); e.setDate(e.getDate() + 1); return { id: ymd(s), due: e }; }
+      case "weekly": { var st = new Date(ref); st.setDate(st.getDate() - ((st.getDay() + 6) % 7)); var du = new Date(st); du.setDate(du.getDate() + ((wdOf(t) + 6) % 7)); return { id: "W" + ymd(st), due: du }; }
       case "monthly": return { id: y + "-" + pad(m + 1), due: dayIn(y, m, t.day) };
-      case "bimonthly": { var m0 = ((+t.m0 || 1) - 1) % 2; var b = m - (((m - m0) % 2) + 2) % 2; return { id: y + "-B" + b, due: dayIn(y, b, t.day) }; }
+      case "bimonthly": { var m0 = ((+t.m0 || 1) - 1) % 2; var b = m - (((m - m0) % 2) + 2) % 2; var by = y; if (b < 0) { b += 12; by -= 1; } return { id: by + "-B" + b, due: dayIn(by, b, t.day) }; }
       case "quarterly": { var q = Math.floor(m / 3); return { id: y + "-Q" + (q + 1), due: dayIn(y, q * 3 + ((+t.qmonth || 1) - 1), t.day) }; }
       case "semiannual": { var h = m < 6 ? 0 : 1; return { id: y + "-H" + (h + 1), due: dayIn(y, h * 6 + ((+t.hmonth || 6) - 1), t.day) }; }
       default: return { id: String(y), due: dayIn(y, (+t.month || 1) - 1, t.day) };
@@ -142,21 +186,20 @@
   function when(t) {
     var d = t.day >= 29 ? "말일" : (t.day || 1) + "일";
     switch (t.freq) {
-      case "daily": return t.work === false || t.work === "0" ? "매일" : "작업일(월~금) 매일";
+      case "daily": return allDays(t) ? "매일" : "작업일(월~금) 매일";
       case "every2": return "2일에 1회";
-      case "weekly": return "매주 " + WD[+t.weekday || 1] + "요일";
+      case "weekly": return "매주 " + WD[wdOf(t)] + "요일";
       case "monthly": return "매월 " + d;
       case "bimonthly": return "2개월마다(" + ((+t.m0 || 1) === 1 ? "홀수 달" : "짝수 달") + ") " + d;
-      case "quarterly": return "분기 " + (+t.qmonth || 1) + "번째 달 " + d;
+      case "quarterly": { var qm = +t.qmonth || 1; return "분기 " + qm + "번째 달 " + d + " (" + [0, 3, 6, 9].map(function (x) { return x + qm; }).join("·") + "월)"; }
       case "semiannual": return "반기 " + (+t.hmonth || 6) + "번째 달 " + d + " (" + (+t.hmonth || 6) + "월·" + ((+t.hmonth || 6) + 6) + "월)";
       default: return "매년 " + (+t.month || 1) + "월 " + d;
     }
   }
   function occursOn(t, d) {
     switch (t.freq) {
-      case "daily": return (t.work === false || t.work === "0") ? true : (d.getDay() > 0 && d.getDay() < 6);
-      case "every2": { var a = t.anchor ? new Date(t.anchor + "T00:00:00") : new Date(d.getFullYear(), 0, 1); return Math.round((d - a) / 864e5) % 2 === 0; }
-      case "weekly": return d.getDay() === (+t.weekday || 1) % 7;
+      case "daily": return allDays(t) ? true : (d.getDay() > 0 && d.getDay() < 6);
+      case "weekly": return d.getDay() === wdOf(t);
       default: return ymd(period(t, d).due) === ymd(d);
     }
   }
@@ -164,7 +207,7 @@
   var KLASS = { "법정 주기": ["lst lst-cur", "법정 주기"], "법정 의무지만 특정 주기가 아님": ["lst lst-next", "의무 · 주기는 법정 아님"], "권장 운영": ["lst lst-rec", "권장 운영"], "사업장 자체업무": ["lst lst-rec", "사업장 자체업무"], "확인 필요": ["lst-chk", "확인 필요"] };
   var BADGE = { verified: ["badge-green", "원문 확인"], check: ["badge-orange", "확인 필요"], practice: ["badge-line", "권장"], custom: ["badge-navy", "직접 추가"] };
 
-  var view = "list", freqF = "", cur = new Date(today().getFullYear(), today().getMonth(), 1);
+  var view = "list", freqF = "", cur = new Date(today().getFullYear(), today().getMonth(), 1), yr = today().getFullYear();
   function filtered() {
     var st = document.getElementById("sStatus").value, only = document.getElementById("sOnlyOn").checked;
     return tasks().filter(function (t) {
@@ -188,9 +231,10 @@
       (t.cond ? '<p class="task-cond">대상: ' + esc(t.cond) + "</p>" : "") +
       (t.memo ? '<p class="task-memo">' + esc(t.memo) + "</p>" : "") +
       '<p class="task-links">' + links + '<button type="button" class="linkbtn" data-edit="' + esc(t.key) + '">설정 바꾸기</button></p></div>' +
-      (t.on && t.freq !== "daily" ? '<label class="task-done' + (late ? " late" : unsure ? " unsure" : "") + '"><input type="checkbox" data-done="' + esc(t.key) + '" data-p="' + esc(p.id) + '"' + (done ? " checked" : "") + '><span>' + (done ? "이번 회차 완료" : (late ? "기한 지남 " : unsure ? "했는지 확인 " : "이번 기한 ") + (p.due.getMonth() + 1) + "/" + p.due.getDate()) + "</span></label>" : "") +
+      (t.on && t.freq !== "daily" ? '<label class="task-done' + (late ? " late" : unsure ? " unsure" : "") + '"><input type="checkbox" data-done="' + esc(t.key) + '" data-p="' + esc(p.id) + '"' + (done ? " checked" : "") + '><span>' + (done ? "이번 회차 완료" + doneOn(t.key + "|" + p.id) : (late ? "기한 지남 " : unsure ? "했는지 확인 " : "이번 기한 ") + (p.due.getMonth() + 1) + "/" + p.due.getDate()) + "</span></label>" : "") +
       "</div></li>";
   }
+  function doneOn(k) { var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(S.done[k] || ""); return m ? " (" + (+m[1]) + "/" + (+m[2]) + ")" : ""; }
   function renderList() {
     var list = filtered(), groups = {};
     list.forEach(function (t) { var g = t.freq === "every2" ? "daily" : t.freq === "bimonthly" ? "monthly" : t.freq; (groups[g] = groups[g] || []).push(t); });
@@ -214,45 +258,74 @@
     document.getElementById("sOut").innerHTML = (daily.length ? '<p class="hint" style="margin-bottom:8px">매일 업무 ' + daily.length + "건(" + daily.map(function (t) { return esc(t.title.replace(/\s*\(.*?\)\s*$/, "")); }).join(", ") + ")은 달력에서 뺐습니다.</p>" : "") +
       '<div class="cal"><div class="cal-h">' + WD.map(function (w) { return "<span>" + w + "</span>"; }).join("") + '</div><div class="cal-g">' + cells.join("") + "</div></div>";
   }
-  function yearRows() {
-    var y = today().getFullYear();
+  function yearRows(y) {
     return filtered().filter(function (t) { return ["daily", "every2", "weekly"].indexOf(t.freq) < 0; }).map(function (t) {
       var ms = []; for (var m = 0; m < 12; m++) { var hit = []; for (var d = 1; d <= lastDay(y, m); d++) if (occursOn(t, new Date(y, m, d))) hit.push(d); ms.push(hit.length ? hit.join(",") : ""); }
       return { t: t, ms: ms };
     });
   }
   function renderYear() {
-    var rows = yearRows(), y = today().getFullYear();
-    document.getElementById("sOut").innerHTML = '<p class="hint" style="margin-bottom:8px">' + y + "년 · 칸의 숫자는 기한일입니다. 매일·격일·주간 업무는 표에서 뺐습니다.</p>" +
+    var y = yr, rows = yearRows(y);
+    document.getElementById("sMonthLabel").textContent = y + "년";
+    var co = ""; try { co = (JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}).company || localStorage.getItem("safetake.company") || ""; } catch (e) {}
+    document.getElementById("sOut").innerHTML = '<div class="sc-yhead"><p>' + esc(co) + "</p><h2>" + y + "년 안전보건 주기업무 연간 일정표</h2></div>" +
+      '<p class="hint" style="margin-bottom:8px">' + y + "년 · 칸의 숫자는 기한일입니다. 매일·격일·주간 업무는 표에서 뺐습니다.</p>" +
       '<div class="table-wrap"><table class="dtable ytable"><thead><tr><th>업무</th>' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (m) { return "<th>" + m + "월</th>"; }).join("") + "</tr></thead><tbody>" +
-      rows.map(function (r) { return '<tr><td class="yt">' + esc(r.t.title) + "</td>" + r.ms.map(function (x) { return "<td" + (x ? ' class="on"' : "") + ">" + x + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>";
+      (rows.length ? rows.map(function (r) { return '<tr><td class="yt">' + esc(r.t.title) + "</td>" + r.ms.map(function (x) { return "<td" + (x ? ' class="on"' : "") + ">" + x + "</td>"; }).join("") + "</tr>"; }).join("") : '<tr><td colspan="13" class="yt">조건에 맞는 업무가 없습니다.</td></tr>') + "</tbody></table></div>";
   }
-  function renderDue() {
-    var t0 = today(), in30 = new Date(t0); in30.setDate(in30.getDate() + 30);
-    var list = tasks().filter(function (t) { return t.on && t.freq !== "daily"; }).map(function (t) {
-      var p = period(t, t0), done = !!S.done[t.key + "|" + p.id];
-      if (!done && p.due < t0) return { t: t, d: p.due, k: ymd(p.due) < S.since ? "unsure" : "late" };
-      var n = p.due >= t0 ? p : period(t, nextRef(t, t0));
-      return S.done[t.key + "|" + n.id] ? null : { t: t, d: n.due, k: "next" };
-    }).filter(Boolean);
-    var late = list.filter(function (x) { return x.k === "late"; }), unsure = list.filter(function (x) { return x.k === "unsure"; }),
-      soon = list.filter(function (x) { return x.k === "next" && x.d <= in30; }).sort(function (a, b) { return a.d - b.d; });
-    document.getElementById("sDueN").textContent = "30일 안 " + soon.length + "건";
-    var row = function (x, color) { return "<div><dt>" + esc(x.t.title.replace(/\s*\(.*?\)\s*$/, "")) + "</dt><dd" + (color ? ' style="color:' + color + '"' : "") + ">" + (x.d.getMonth() + 1) + "/" + x.d.getDate() + "</dd></div>"; };
-    document.getElementById("sDue").innerHTML = late.map(function (x) { return row(x, "var(--red)"); }).join("") + soon.slice(0, 10).map(function (x) { return row(x); }).join("") +
-      (unsure.length ? '<div><dt>처음 쓰기 전 기한이 지난 업무 — 했는지 확인</dt><dd style="color:var(--orange)">' + unsure.length + "건</dd></div>" : "");
-  }
+  // 다음 회차 안의 하루. 월 단위 주기는 1일로 맞춰 31일에서 한 달을 건너뛰지 않게 한다.
   function nextRef(t, d) {
     var n = new Date(d);
-    if (t.freq === "every2") n.setDate(n.getDate() + 2); else if (t.freq === "weekly") n.setDate(n.getDate() + 7);
+    if (t.freq === "daily") n.setDate(n.getDate() + 1); else if (t.freq === "every2") n.setDate(n.getDate() + 2); else if (t.freq === "weekly") n.setDate(n.getDate() + 7);
     else n.setMonth(n.getMonth() + ({ monthly: 1, bimonthly: 2, quarterly: 3, semiannual: 6, yearly: 12 }[t.freq] || 1), 1);
     return n;
   }
+  // 켠 업무마다 '지금 챙길 한 건': 이번 회차가 지났는데 미완료면 그 회차, 아니면 아직 완료하지 않은 가장 가까운 회차.
+  function agenda() {
+    var t0 = today();
+    return tasks().filter(function (t) { return t.on && t.freq !== "daily"; }).map(function (t) {
+      var p = period(t, t0);
+      if (!S.done[t.key + "|" + p.id] && p.due < t0) return { t: t, p: p, d: p.due, k: ymd(p.due) < S.since ? "unsure" : "late" };
+      var n = p, guard = 0;
+      while ((S.done[t.key + "|" + n.id] || n.due < t0) && guard++ < 6) n = period(t, nextRef(t, n.due));
+      return { t: t, p: n, d: n.due, k: "next" };
+    });
+  }
+  function short(t) { return t.title.replace(/\s*\(.*?\)\s*$/, "") || t.title; }
+  function md(d) { return (d.getMonth() + 1) + "/" + d.getDate(); }
+  function renderDue(list) {
+    var t0 = today(), in30 = new Date(t0); in30.setDate(in30.getDate() + 30);
+    var byD = function (a, b) { return a.d - b.d; };
+    var late = list.filter(function (x) { return x.k === "late"; }).sort(byD), unsure = list.filter(function (x) { return x.k === "unsure"; }),
+      soon = list.filter(function (x) { return x.k === "next" && x.d <= in30; }).sort(byD);
+    document.getElementById("sDueN").textContent = "30일 안 " + soon.length + "건";
+    var row = function (x, color) { return "<div><dt>" + esc(short(x.t)) + "</dt><dd style=\"white-space:nowrap" + (color ? ";color:" + color : "") + '">' + md(x.d) + "</dd></div>"; };
+    document.getElementById("sDue").innerHTML = late.map(function (x) { return row(x, "var(--red)"); }).join("") + soon.slice(0, 10).map(function (x) { return row(x); }).join("") +
+      (soon.length > 10 ? "<div><dt>그 밖에</dt><dd>" + (soon.length - 10) + "건</dd></div>" : "") +
+      (unsure.length ? '<div><dt>처음 쓰기 전 기한이 지난 업무 — 했는지 확인</dt><dd style="color:var(--orange)">' + unsure.length + "건</dd></div>" : "") +
+      (!late.length && !soon.length && !unsure.length ? "<div><dt>30일 안에 기한이 오는 업무가 없습니다.</dt><dd></dd></div>" : "");
+  }
+  function renderNow(list) {
+    var t0 = today(), wkEnd = new Date(t0); wkEnd.setDate(wkEnd.getDate() + ((7 - wkEnd.getDay()) % 7));
+    var moEnd = new Date(t0.getFullYear(), t0.getMonth() + 1, 0), byD = function (a, b) { return a.d - b.d; };
+    var late = list.filter(function (x) { return x.k === "late"; }).sort(byD), unsure = list.filter(function (x) { return x.k === "unsure"; }),
+      week = list.filter(function (x) { return x.k === "next" && x.d <= wkEnd; }).sort(byD),
+      month = list.filter(function (x) { return x.k === "next" && x.d > wkEnd && x.d <= moEnd; }).sort(byD);
+    var nDaily = tasks().filter(function (t) { return t.on && t.freq === "daily"; }).length;
+    var li = function (x) { return '<li><label><input type="checkbox" data-done="' + esc(x.t.key) + '" data-p="' + esc(x.p.id) + '"><span>' + esc(short(x.t)) + '</span><span class="d">' + md(x.d) + " (" + WD[x.d.getDay()] + ")</span></label></li>"; };
+    var col = function (cls, label, arr, none) { return '<div class="sc-col' + cls + '"><h3>' + label + " <b>" + arr.length + "건</b></h3>" + (arr.length ? "<ul>" + arr.map(li).join("") + "</ul>" : '<p class="none">' + none + "</p>") + "</div>"; };
+    document.getElementById("sNow").innerHTML = '<div class="sc-now-h"><h2 class="h-sm">오늘 기준 할 일</h2><span class="muted">' + t0.getFullYear() + ". " + (t0.getMonth() + 1) + ". " + t0.getDate() + ". (" + WD[t0.getDay()] + ") · 끝낸 업무는 체크하면 다음 회차로 넘어갑니다</span></div>" +
+      '<div class="sc-now-g">' + col(late.length ? " late" : "", "기한 지남", late, "없습니다.") + col("", "이번 주 (~" + md(wkEnd) + ")", week, "없습니다.") + col("", "이번 달 남은 기간 (~" + md(moEnd) + ")", month, wkEnd >= moEnd ? "이번 주에 포함됩니다." : "없습니다.") + "</div>" +
+      (unsure.length || nDaily ? '<p class="sc-now-f">' + [unsure.length ? "이 달력을 쓰기 전에 기한이 지난 업무 " + unsure.length + "건은 아래 목록에서 '했는지 확인'으로 표시됩니다." : "", nDaily ? "매일 하는 업무 " + nDaily + "건은 여기에 넣지 않았습니다." : ""].filter(Boolean).join(" ") + "</p>" : "");
+  }
   function render() {
     document.querySelectorAll("[data-for=list]").forEach(function (el) { el.hidden = view !== "list"; });
-    document.getElementById("sMonthNav").hidden = view !== "month";
+    document.getElementById("sMonthNav").hidden = view === "list";
+    document.getElementById("sPrev").setAttribute("aria-label", view === "year" ? "이전 해" : "이전 달");
+    document.getElementById("sNext").setAttribute("aria-label", view === "year" ? "다음 해" : "다음 달");
+    document.getElementById("sToday").textContent = view === "year" ? "올해" : "이번 달";
     if (view === "list") renderList(); else if (view === "month") renderMonth(); else renderYear();
-    renderDue();
+    var ag = agenda(); renderDue(ag); renderNow(ag);
   }
 
   // 세그먼트
@@ -266,15 +339,17 @@
   });
   document.getElementById("sOnlyOn").addEventListener("change", render);
   document.getElementById("sStatus").addEventListener("change", render);
-  document.getElementById("sPrev").addEventListener("click", function () { cur = new Date(cur.getFullYear(), cur.getMonth() - 1, 1); render(); });
-  document.getElementById("sNext").addEventListener("click", function () { cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1); render(); });
-  document.getElementById("sToday").addEventListener("click", function () { cur = new Date(today().getFullYear(), today().getMonth(), 1); render(); });
+  document.getElementById("sPrev").addEventListener("click", function () { if (view === "year") yr = Math.max(2000, yr - 1); else cur = new Date(cur.getFullYear(), cur.getMonth() - 1, 1); render(); });
+  document.getElementById("sNext").addEventListener("click", function () { if (view === "year") yr = Math.min(2100, yr + 1); else cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1); render(); });
+  document.getElementById("sToday").addEventListener("click", function () { if (view === "year") yr = today().getFullYear(); else cur = new Date(today().getFullYear(), today().getMonth(), 1); render(); });
   var out = document.getElementById("sOut");
-  out.addEventListener("change", function (ev) {
+  document.getElementById("sNow").addEventListener("change", onChange);
+  out.addEventListener("change", onChange);
+  function onChange(ev) {
     var t = ev.target;
     if (t.dataset.on) { var cst = S.custom.filter(function (c) { return c.key === t.dataset.on; })[0]; if (cst) cst.on = t.checked; else { S.ov[t.dataset.on] = S.ov[t.dataset.on] || {}; S.ov[t.dataset.on].on = t.checked; } save(); render(); }
     if (t.dataset.done) { var k = t.dataset.done + "|" + t.dataset.p; if (t.checked) S.done[k] = ymd(today()); else delete S.done[k]; save(); render(); }
-  });
+  }
   document.querySelector(".sched").addEventListener("click", function (ev) { var b = ev.target.closest("[data-edit]"); if (b) openDlg(b.dataset.edit); });
 
   // 편집 대화상자
@@ -297,11 +372,11 @@
     document.getElementById("sDlgT").textContent = key ? "업무 설정 바꾸기" : "업무 추가";
     document.getElementById("fTitle").value = t.title;
     document.getElementById("fFreq").value = t.freq; syncFields();
-    document.getElementById("fWeekday").value = String((+t.weekday || 1) % 7);
+    document.getElementById("fWeekday").value = String(wdOf(t));
     fMonth.value = String(t.freq === "yearly" ? (t.month || 1) : t.freq === "quarterly" ? (t.qmonth || 1) : t.freq === "semiannual" ? (t.hmonth || 6) : (t.m0 || 1));
     fDay.value = String(t.day >= 29 ? 31 : (t.day || 1));
     document.getElementById("fTime").value = t.time || "";
-    document.getElementById("fWork").value = (t.work === false || t.work === "0") ? "0" : "1";
+    document.getElementById("fWork").value = allDays(t) ? "0" : "1";
     document.getElementById("fMemo").value = t.memo || "";
     document.getElementById("fBasis").textContent = t.basis ? "근거: " + t.basis + (t.custom ? "" : " — 이름·날짜를 바꿔도 근거와 원래 주기 표시는 남습니다.") : "";
     document.getElementById("fDel").textContent = t.custom ? "삭제" : "기본값으로";
@@ -318,13 +393,14 @@
     var f = document.getElementById("fFreq").value, mv = +fMonth.value;
     var v = { title: title, freq: f, day: +fDay.value, time: document.getElementById("fTime").value, memo: document.getElementById("fMemo").value.trim(), weekday: +document.getElementById("fWeekday").value, work: document.getElementById("fWork").value };
     if (f === "yearly") v.month = mv; else if (f === "quarterly") v.qmonth = mv; else if (f === "semiannual") v.hmonth = mv; else if (f === "bimonthly") v.m0 = mv;
-    if (f === "every2") v.anchor = ymd(today());
+    // 격일 기준일은 처음 격일로 정할 때만 잡는다(저장할 때마다 바꾸면 완료 표시가 어긋남).
+    if (f === "every2") v.anchor = editing.freq === "every2" && editing.anchor ? editing.anchor : ymd(today());
     if (editing.custom) {
       if (editing.key) { var c = S.custom.filter(function (x) { return x.key === editing.key; })[0]; Object.keys(v).forEach(function (k) { c[k] = v[k]; }); }
       else { v.key = "u" + Date.now().toString(36); v.on = true; S.custom.push(v); }
     } else {
       var o = S.ov[editing.key] || {}; var base = D.tasks.filter(function (x) { return x.key === editing.key; })[0];
-      Object.keys(v).forEach(function (k) { if ((k === "anchor" && base.freq === "every2" && !o.anchor) || (k === "m0" && base[k] == null && v[k] === 1)) { delete o[k]; return; } if (String(base[k] == null ? "" : base[k]) !== String(v[k]) && !(k === "work" && v[k] === "1" && base.work == null) && !(k === "weekday" && base.freq !== "weekly" && f !== "weekly")) o[k] = v[k]; else delete o[k]; });
+      Object.keys(v).forEach(function (k) { if ((k === "anchor" && base.freq === "every2" && !o.anchor) || (k === "m0" && base[k] == null && v[k] === 1)) { delete o[k]; return; } if (String(base[k] == null ? "" : base[k]) !== String(v[k]) && !(k === "work" && v[k] === "1" && base.work == null) && !(k === "weekday" && base.freq !== "weekly" && f !== "weekly") && !(k === "day" && v[k] === 31 && base.day >= 29) && !(k === "day" && base.day == null && ["daily", "every2", "weekly"].indexOf(f) >= 0)) o[k] = v[k]; else delete o[k]; });
       S.ov[editing.key] = o;
     }
     save(); render();
@@ -341,13 +417,26 @@
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: type })); a.download = name;
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
-  function icsEsc(s) { return String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
+  var msgT = 0;
+  function say(text, bad) { var m = document.getElementById("sMsg"); m.textContent = text; m.hidden = !text; m.style.color = bad ? "var(--red)" : ""; clearTimeout(msgT); if (text) msgT = setTimeout(function () { m.hidden = true; }, 8000); }
+  function icsEsc(s) { return String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\r\n|\r|\n/g, "\\n"); }
+  // RFC 5545: 한 줄은 75옥텟 이하. 한글은 3바이트라 글자 수가 아닌 UTF-8 바이트로 접는다.
+  function fold(line) {
+    var out = "", n = 0;
+    for (var i = 0; i < line.length; i++) {
+      var c = line.charCodeAt(i), ch = line.charAt(i), w = c < 0x80 ? 1 : c < 0x800 ? 2 : 3;
+      if (c >= 0xD800 && c <= 0xDBFF && i + 1 < line.length) { ch += line.charAt(++i); w = 4; }
+      if (n + w > 75) { out += "\r\n "; n = 1; }
+      out += ch; n += w;
+    }
+    return out;
+  }
   function rrule(t) {
-    var md = t.day >= 29 ? -1 : (t.day || 1);
+    var md = t.day >= 29 ? -1 : (+t.day || 1);
     switch (t.freq) {
-      case "daily": return (t.work === false || t.work === "0") ? "FREQ=DAILY" : "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR";
+      case "daily": return allDays(t) ? "FREQ=DAILY" : "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR";
       case "every2": return "FREQ=DAILY;INTERVAL=2";
-      case "weekly": return "FREQ=WEEKLY;BYDAY=" + ["SU", "MO", "TU", "WE", "TH", "FR", "SA"][(+t.weekday || 1) % 7];
+      case "weekly": return "FREQ=WEEKLY;BYDAY=" + ["SU", "MO", "TU", "WE", "TH", "FR", "SA"][wdOf(t)];
       case "monthly": return "FREQ=MONTHLY;BYMONTHDAY=" + md;
       case "bimonthly": return "FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=" + md;
       case "quarterly": return "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=" + md;
@@ -355,38 +444,57 @@
       default: return "FREQ=YEARLY;BYMONTH=" + (+t.month || 1) + ";BYMONTHDAY=" + md;
     }
   }
+  // 반복 일정의 첫 날: 오늘 이후 처음 돌아오는 기한일. 시작일이 반복 규칙과 어긋나면 캘린더 앱이 엉뚱한 날을 하나 더 만든다.
   function firstDate(t) {
-    var t0 = today();
-    if (t.freq === "daily" || t.freq === "every2") return t0;
-    if (t.freq === "weekly") { var d = new Date(t0); while (d.getDay() !== (+t.weekday || 1) % 7) d.setDate(d.getDate() + 1); return d; }
-    var p = period(t, t0).due; if (p < t0) { var n = new Date(t0); n.setMonth(n.getMonth() + ({ monthly: 1, bimonthly: 2, quarterly: 3, semiannual: 6, yearly: 12 }[t.freq])); p = period(t, n).due; }
-    return p;
+    var t0 = today(), d = new Date(t0);
+    if (t.freq === "daily") { if (!allDays(t)) while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); return d; }
+    if (t.freq === "weekly") { while (d.getDay() !== wdOf(t)) d.setDate(d.getDate() + 1); return d; }
+    var p = period(t, t0), guard = 0;
+    while (p.due < t0 && guard++ < 6) p = period(t, nextRef(t, p.due));
+    return p.due;
+  }
+  function buildIcs(list, now) {
+    var stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//safetake//schedule//KO", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:안전보건 주기업무", "X-WR-TIMEZONE:Asia/Seoul",
+      "BEGIN:VTIMEZONE", "TZID:Asia/Seoul", "X-LIC-LOCATION:Asia/Seoul", "BEGIN:STANDARD", "DTSTART:19700101T000000", "TZOFFSETFROM:+0900", "TZOFFSETTO:+0900", "TZNAME:KST", "END:STANDARD", "END:VTIMEZONE"];
+    list.forEach(function (t) {
+      var d = firstDate(t), hm = (hhmm(t) || "09:00").split(":"), ds = ymd(d).replace(/-/g, "");
+      lines.push("BEGIN:VEVENT", "UID:" + String(t.key).replace(/[^A-Za-z0-9_.-]/g, "_") + "@safetake", "DTSTAMP:" + stamp, "DTSTART;TZID=Asia/Seoul:" + ds + "T" + hm[0] + hm[1] + "00", "DURATION:PT1H",
+        "RRULE:" + rrule(t), "SUMMARY:" + icsEsc(t.title), "DESCRIPTION:" + icsEsc([t.basis ? "근거: " + t.basis : "", t.cond ? "대상: " + t.cond : "", t.memo || ""].filter(Boolean).join("\n")), "END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    return lines.map(fold).join("\r\n") + "\r\n";
   }
   document.getElementById("sIcs").addEventListener("click", function () {
-    var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
-    var ev = tasks().filter(function (t) { return t.on; }).map(function (t) {
-      var d = firstDate(t), hm = (t.time || "09:00").split(":"), ds = ymd(d).replace(/-/g, "");
-      return ["BEGIN:VEVENT", "UID:" + t.key + "@safetake", "DTSTAMP:" + stamp, "DTSTART;TZID=Asia/Seoul:" + ds + "T" + pad(+hm[0]) + pad(+hm[1] || 0) + "00", "DURATION:PT1H",
-        "RRULE:" + rrule(t), "SUMMARY:" + icsEsc(t.title), "DESCRIPTION:" + icsEsc([t.basis ? "근거: " + t.basis : "", t.memo || ""].filter(Boolean).join("\n")), "END:VEVENT"].join("\r\n");
-    });
-    dl("SafePlum_주기업무.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//safetake//schedule//KO", "CALSCALE:GREGORIAN", "X-WR-CALNAME:안전보건 주기업무", "X-WR-TIMEZONE:Asia/Seoul"].concat(ev).concat(["END:VCALENDAR"]).join("\r\n"), "text/calendar;charset=utf-8");
+    var list = tasks().filter(function (t) { return t.on; });
+    if (!list.length) { say("켠 업무가 없어 내보낼 일정이 없습니다. 목록에서 업무를 켜세요.", true); return; }
+    dl("SafePlum_주기업무.ics", buildIcs(list, new Date()), "text/calendar;charset=utf-8");
+    say("반복 일정 " + list.length + "건을 내려받았습니다. 캘린더 앱의 '가져오기'로 여세요. 같은 파일을 다시 가져오면 일정이 겹칠 수 있으니 전용 캘린더를 따로 만들어 넣기를 권합니다.");
   });
   document.getElementById("sPrint").addEventListener("click", function () {
-    var old = view; view = "year"; render(); document.body.classList.add("printing-sched"); window.print();
+    var old = view; view = "year"; render(); say(""); document.body.classList.add("printing-sched"); window.print();
     setTimeout(function () { document.body.classList.remove("printing-sched"); view = old; render(); }, 400);
   });
   document.getElementById("sExport").addEventListener("click", function () { dl("SafePlum_주기업무_설정.json", JSON.stringify({ app: "safetake.schedule", v: 1, data: S }, null, 1), "application/json"); });
   document.getElementById("sImport").addEventListener("change", function (ev) {
     var f = ev.target.files[0]; if (!f) return;
     var r = new FileReader();
-    r.onload = function () { try { var x = JSON.parse(r.result); if (!x || x.app !== "safetake.schedule" || !x.data) throw 0; S = { ov: x.data.ov || {}, custom: x.data.custom || [], done: x.data.done || {}, since: x.data.since || S.since }; save(); render(); } catch (e) { document.getElementById("sDueN").textContent = "불러올 수 없는 파일"; } };
+    r.onload = function () {
+      try {
+        var x = JSON.parse(r.result); if (!isObj(x) || x.app !== "safetake.schedule" || !isObj(x.data)) throw 0;
+        var n = clean(x.data); if (!n.since) n.since = S.since;
+        S = n; save(); render(); say("설정을 불러왔습니다. 직접 추가한 업무 " + S.custom.length + "건, 완료 표시 " + Object.keys(S.done).length + "건.");
+      } catch (e) { say("불러올 수 없는 파일입니다. 이 화면의 '설정 백업(.json)'으로 받은 파일을 고르세요.", true); }
+    };
+    r.onerror = function () { say("파일을 읽지 못했습니다.", true); };
     r.readAsText(f); ev.target.value = "";
   });
   document.getElementById("sReset").addEventListener("click", function () {
     if (!window.confirm("켜고 끈 설정, 바꾼 날짜, 직접 추가한 업무, 완료 표시를 모두 지울까요?")) return;
-    S = { ov: {}, custom: [], done: {}, since: S.since }; save(); render();
+    S = { ov: {}, custom: [], done: {}, since: S.since }; save(); render(); say("기본값으로 되돌렸습니다.");
   });
   document.getElementById("sSrc").textContent = "법령 대조일 " + D.checked + " · " + D.source;
+  window.__sched = { buildIcs: buildIcs, period: period, firstDate: firstDate, rrule: rrule, occursOn: occursOn, agenda: agenda };
   render();
 })();
 </script>

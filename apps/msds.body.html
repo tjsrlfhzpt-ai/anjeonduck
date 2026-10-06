@@ -36,7 +36,7 @@
       <ul class="bul">
         <li><b>게시·비치</b> — 취급 작업공정이 있는 장소, 근로자가 가장 보기 쉬운 장소 또는 쉽게 접근할 수 있는 전산장비에 MSDS를 항상 게시하거나 갖추어 둡니다(시행규칙 제167조).</li>
         <li><b>관리요령 게시</b> — 작업공정별로 제품명·유해성·취급주의·보호구·응급조치를 담은 관리요령을 게시합니다(제168조). 유해성이 비슷한 물질은 묶어서 작성할 수 있습니다.</li>
-        <li><b>교육</b> — 배치할 때, 새 물질 도입 시, 유해성·위험성 정보가 바뀐 때 별표 5 제6호 내용을 교육하고 시간·내용을 기록·보존합니다(제169조). 교육 시간은 정기교육 시간으로 인정됩니다.</li>
+        <li><b>교육</b> — 배치할 때, 새 물질 도입 시, 유해성·위험성 정보가 바뀐 때 별표 5 제6호 내용을 교육하고 시간·내용을 기록·보존합니다(제169조). 교육한 시간만큼 법 제29조에 따른 안전보건교육을 한 것으로 봅니다.</li>
         <li><b>경고표시</b> — 사업장에서 쓰는 용기에 경고표지를 붙입니다. 공급자가 이미 붙인 용기와 옮겨 담기 위해 일시적으로 쓰는 용기는 예외입니다(법 제115조제2항, 시행규칙 제170조제4항).</li>
       </ul>
       <p class="src-line"><a href="../../laws/act/#j114">법 제114조</a> · <a href="../../laws/act/#j115">제115조</a> · <a href="../../laws/rule/#j167">시행규칙 제167조~제170조</a> 원문 보기</p>
@@ -132,7 +132,7 @@
       </section>
       <section class="ms-out">
         <h3>MSDS 교육 기록</h3>
-        <p class="hint">시행규칙 제169조 · 별표 5 제6호 교육 내용을 채운 기록지입니다. 교육한 시간만큼 정기 안전보건교육으로 인정됩니다.</p>
+        <p class="hint">시행규칙 제169조 · 별표 5 제6호 교육 내용을 채운 기록지입니다. 교육한 시간만큼 법 제29조에 따른 안전보건교육을 한 것으로 봅니다(제169조제1항).</p>
         <div class="ms-grid">
           <label class="field"><span class="label">교육일</span><input type="date" id="eDate"></label>
           <label class="field"><span class="label">교육 시간</span><input type="text" id="eHours" placeholder="예: 1시간"></label>
@@ -169,6 +169,13 @@
   </section>
 </div>
 
+<style>
+/* 미리보기: 표지 높이가 정해져 있지 않아 문구 칸이 0으로 접히던 것을 편다 */
+.ms-preview .lb-body{flex:none;overflow:visible}
+/* 인쇄 카드 안의 입력 칸은 2열(좁은 카드에서 4열이면 글자가 잘림) */
+.ms-out .ms-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:640px){.ms-out .ms-grid{grid-template-columns:1fr}}
+</style>
 <article class="paper print-doc ms-print" id="mPaper"></article>
 
 <script>
@@ -395,6 +402,8 @@
     $("mGuidePick").innerHTML = S.items.map(function (it) { return '<label class="check"><input type="checkbox" value="' + it.id + '"' + (cur && it.id === cur.id ? " checked" : "") + "><span>" + esc(it.name) + "</span></label>"; }).join("") || '<p class="hint">등록한 물질이 없습니다.</p>';
     $("eWhy").innerHTML = D.edu_when.map(function (w) { return "<option>" + esc(w) + "</option>"; }).join("");
     if (!$("eDate").value) $("eDate").value = ymd();
+    // 교육자는 저장해 둔 사업장 정보의 안전관리자 이름으로 미리 채운다(고쳐 쓸 수 있음)
+    if (!$("eWho").value) { try { $("eWho").value = (JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}).manager || ""; } catch (e) { /* 저장소를 못 쓰는 환경 */ } }
     preview();
   }
   $("mPick").addEventListener("change", function () { cur = S.items.filter(function (x) { return x.id === $("mPick").value; })[0] || null; drawOut(); });
@@ -403,7 +412,7 @@
   function qrSvg(text, cb) {
     if (QR) return cb(QR);
     if (qrLoading) return; qrLoading = true;
-    var s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
+    var s = document.createElement("script"); s.src = ROOT + "assets/vendor/qrcode-generator-1.4.4.js"; // 사이트에 함께 올린 파일(외부 CDN 사용 안 함)
     s.onload = function () { QR = window.qrcode; cb(QR); }; s.onerror = function () { qrLoading = false; cb(null); };
     document.head.appendChild(s);
   }
