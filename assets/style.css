@@ -1236,7 +1236,7 @@ p.asof b{font-weight:700;color:var(--text-2)}
 .gnb a[aria-current="page"]{color:var(--navy)}
 .gnb a[aria-current="page"]::after{background:var(--accent);height:3px}
 .mega-col:first-child .mega-h{color:var(--muted)}
-.hero2{background:var(--navy);color:#fff}
+.hero2{background:#0F172A;color:#fff}
 .hero2-in{padding-top:44px;padding-bottom:40px;text-align:center;max-width:820px}
 .hero2-eye{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.02em;margin:0 0 8px}
 .hero2 h1{font-size:clamp(26px,4.2vw,40px);line-height:1.2;margin:0 0 22px;color:#fff;letter-spacing:-.03em}
@@ -1463,3 +1463,4 @@ img.logo-mark{width:36px;height:36px;object-fit:contain;border-radius:0}
 .hc-i:has(img){background:transparent}
 .hc-i img{width:44px;height:44px}
 .hub-links a img{border-radius:5px}
+.cm-empty-i{display:block;margin:0 auto 8px}

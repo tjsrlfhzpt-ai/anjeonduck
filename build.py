@@ -1148,7 +1148,7 @@ def build(out, today):
     job_chips = "".join(
         f'<a class="jchip" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])}{EXT}<span class="sr">(새 창)</span></a>'
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
-    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/plum/search.webp" width="96" height="96" alt=""></div>'
+    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/plum/basic.webp" width="96" height="96" alt=""></div>'
                   f'<p class="jempty-t">채용 플랫폼의 안전·보건 공고로 바로 연결합니다.</p>'
                   f'<p class="jempty-d">아래 채용 플랫폼에서 안전·보건 직무의 실시간 공고를 바로 확인하세요.</p>'
                   f'<div class="jchips">{job_chips}</div></div>')
@@ -1433,7 +1433,7 @@ def build(out, today):
   </section>
   <aside class="home2-side">
     {month_box}
-    <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/plum/laptop.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
+    <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/plum/basic.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
 {home_js}"""
@@ -1971,7 +1971,7 @@ def build(out, today):
     base = (site.get("base_url") or "").rstrip("/")
     base_js = ("<script>document.write('<base href=\"'+(/\\.github\\.io$/.test(location.hostname)?'/'+location.pathname.split('/')[1]+'/':'/')+'\">')</script>")
     nf = page(site, "", "404.html", "페이지를 찾을 수 없습니다",
-        '<section class="phead"><div class="wrap"><img src="assets/img/plum/warn.webp" width="110" height="110" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
+        '<section class="phead"><div class="wrap"><img src="assets/img/plum/st-slip.webp" width="120" height="120" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
     (out / "404.html").write_text(nf.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + base_js, 1), encoding="utf-8")
 
     if base:

@@ -136,7 +136,7 @@
           h("span", { class: "cm-t" }, x.title, b !== "qna" && x.comment_count ? h("em", { "aria-label": "댓글 " + x.comment_count + "개" }, " [" + x.comment_count + "]") : null),
           state, h("span", { class: "cm-meta" }, nick(x), " · ", h("time", { datetime: x.created_at }, when(x.created_at)))));
       }));
-      var empty = !rows.length ? h("div", { class: "empty" }, h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
+      var empty = !rows.length ? h("div", { class: "empty" }, kw || cat ? null : h("img", { class: "cm-empty-i", src: REL + "assets/img/plum/wave.webp", width: "96", height: "96", alt: "" }), h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
       var pager = pages > 1 ? h("nav", { class: "cm-pager", "aria-label": "페이지" },
         p > 1 ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p - 1 }) }, "← 이전") : null,
         h("span", null, p + " / " + pages), p < pages ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p + 1 }) }, "다음 →") : null) : null;
