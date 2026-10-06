@@ -6,8 +6,8 @@
   "contact_email": "",
   "operator": {
     "name": "SafePlum 운영팀",
-    "contact_url": "",
-    "contact_label": "문의하기",
+    "contact_url": "https://open.kakao.com/o/gbg3K3Qi",
+    "contact_label": "카카오톡 오픈채팅",
     "_comment": "contact_url 에 카카오톡 오픈채팅·구글 폼 주소 또는 mailto:공용메일 을 넣으면 푸터·안내 페이지에 문의 링크가 나타납니다. 개인 이메일은 넣지 마세요."
   },
   "tools": [
@@ -294,8 +294,8 @@
     "penalty"
   ],
   "community": {
-    "supabase_url": "",
-    "supabase_anon_key": "",
+    "supabase_url": "https://gzbtavyzuuinkboonybo.supabase.co",
+    "supabase_anon_key": "sb_publishable_e3Jgbq3bcoXk_ffNmhcv1w_ZxYtRrQ_",
     "_comment": "게시판(커뮤니티·Q&A) 백엔드. Supabase 프로젝트의 Project URL 과 anon(publishable) 키를 넣으면 게시판이 열립니다. 비어 있으면 '준비 중'으로 표시됩니다. anon 키는 공개돼도 되는 값이지만 service_role(secret) 키는 절대 넣지 마세요 — 넣으면 빌드가 멈춥니다. 설정 순서는 README '게시판 열기'.",
     "categories": {
       "free": [
@@ -316,12 +316,12 @@
         "기타 실무"
       ]
     },
-    "rules_effective": "",
+    "rules_effective": "2026-10-06",
     "privacy": {
-      "effective": "",
-      "db_region": "",
-      "mail_provider": "",
-      "deleted_retention": "",
+      "effective": "2026-10-06",
+      "db_region": "대한민국(AWS 서울 리전)",
+      "mail_provider": "Supabase 기본 메일 발송(Supabase Inc.)",
+      "deleted_retention": "삭제일부터 3개월",
       "_comment": "개인정보 처리방침에 그대로 나가는 값. 비어 있으면 '확인 필요'로 표시됩니다. 예) db_region: 대한민국(서울 리전), mail_provider: Resend(미국), deleted_retention: 삭제일부터 3개월, effective: 2026-10-15"
     }
   },

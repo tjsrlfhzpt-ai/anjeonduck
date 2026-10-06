@@ -247,7 +247,7 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 ### 순서
 
 1. supabase.com 에서 프로젝트를 만듭니다. Region 은 Seoul 을 권장합니다.
-2. SQL Editor 에 `supabase/schema.sql` 전체를 붙여 실행합니다(다시 실행해도 글은 지워지지 않습니다).
+2. SQL Editor 에 `supabase/schema.sql` 전체를 붙여 실행합니다(다시 실행해도 글은 지워지지 않습니다). 이어서 `supabase/purge.sql` 을 실행합니다(삭제한 글을 3개월 뒤 자동 파기하는 예약 작업).
 3. Authentication 설정
    - Email 로그인: 켜기, **Confirm email: 켜기**(이게 꺼져 있으면 인증 없이 가입됩니다), 비밀번호 최소 8자.
    - URL Configuration: Site URL 에 사이트 주소, Redirect URLs 에 `https://도메인/board/account/` 를 추가합니다.
