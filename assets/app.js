@@ -124,6 +124,7 @@
       if (ok) shown++;
       it.hidden = !ok || (pageSize > 0 && shown > limit);
     });
+    facets(terms, sel);
     if (countEl) countEl.textContent = shown;
     if (moreWrap) {
       moreWrap.hidden = !(pageSize > 0 && shown > limit);
@@ -137,6 +138,29 @@
         ? "아직 즐겨찾기한 자료가 없습니다. 목록 오른쪽 ☆를 눌러 추가하세요."
         : p.getAttribute("data-default");
     }
+  }
+
+  // 눌러도 결과가 0건인 선택지는 숨긴다(다른 필터·검색어 조건은 그대로 둔 채, 그 선택지를 골랐을 때의 건수로 판단)
+  function facets(terms, sel) {
+    var items = Array.prototype.slice.call(list.querySelectorAll("[data-item]")).map(function (it) {
+      var text = (it.getAttribute("data-text") || "").toLowerCase();
+      var base = terms.every(function (t) { return text.indexOf(t) >= 0; });
+      if (base && hideClosed && hideClosed.checked && it.classList.contains("closed")) base = false;
+      if (base && onlyFav && onlyFav.checked && favs.indexOf(it.getAttribute("data-id")) < 0) base = false;
+      return base ? it : null;
+    }).filter(Boolean);
+    function has(it, k, v) { var x = it.getAttribute(ATTR[k]) || ""; return k === "job" ? x.split("|").indexOf(v) >= 0 : x === v; }
+    document.querySelectorAll("[data-filter]").forEach(function (g) {
+      var k = g.getAttribute("data-filter"); if (!ATTR[k]) return;
+      var rest = items.filter(function (it) { return Object.keys(sel).every(function (o) { return o === k || !sel[o] || has(it, o, sel[o]); }); });
+      g.querySelectorAll(".chip").forEach(function (c) {
+        var v = c.getAttribute("data-value"), cn = c.querySelector(".n");
+        if (!v) { if (cn) cn.textContent = rest.length; return; }
+        var n = rest.filter(function (it) { return has(it, k, v); }).length;
+        if (cn) cn.textContent = n;
+        c.hidden = n === 0 && c.getAttribute("aria-pressed") !== "true";
+      });
+    });
   }
 
   function sortList() {
