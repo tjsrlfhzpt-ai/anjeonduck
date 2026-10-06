@@ -1558,3 +1558,11 @@ button.mc-d.today:not(.sel){outline:2px solid var(--navy);outline-offset:-2px}
   .job-member .btn{margin-left:0}
   .cm-form input[type=date],.cm-form input[type=url]{font-size:16px}
 }
+
+/* 로고 타일·아이콘 컷 */
+img.logo-mark{width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:#fff}
+.logo-ft img.logo-mark{width:32px;height:32px;border-radius:8px}
+.dx-card .i img{width:40px;height:40px;display:block}
+.tcard{position:relative}
+.tcard-i{position:absolute;right:16px;top:44px;width:52px;height:52px}
+.tcard:has(.tcard-i) .tcard-t,.tcard:has(.tcard-i) .tcard-d{padding-right:60px}

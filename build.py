@@ -626,7 +626,7 @@ def dock_html(rel, active):
 def _asset_ver():
     import hashlib
     h = hashlib.sha1()
-    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/favicon.png", "assets/img/plum/logo.webp"):
+    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/favicon.png", "assets/img/plum/logo-tile.webp", "assets/img/ico/tbm.webp"):
         h.update((ROOT / f).read_bytes())
     return h.hexdigest()[:8]
 
@@ -786,7 +786,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <script src="{rel_root}assets/app.js?v={ASSET_VER}" defer></script>
 </body>
 </html>
-""".replace("@LOGO@", f'<img class="logo-mark" alt="" width="36" height="36" src="{rel_root}assets/img/plum/logo.webp?v={ASSET_VER}">')
+""".replace("@LOGO@", f'<img class="logo-mark" alt="" width="40" height="40" src="{rel_root}assets/img/plum/logo-tile.webp?v={ASSET_VER}">')
 
 
 # ---------------------------------------------------------------- 컴포넌트
@@ -932,11 +932,12 @@ TOOL_KINDS = [("작성기", "k-write", "바로 작성해 A4로 인쇄·PDF 저�
 ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
 
 
-def tool_card(href, kind, name, desc, law="", sub=""):
+def tool_card(href, kind, name, desc, law="", sub="", ico=""):
     cls = next((c for k, c, _ in TOOL_KINDS if k == kind), "k-write")
+    pic = f'<img class="tcard-i" src="{ico}" width="52" height="52" alt="" loading="lazy">' if ico else ""
     return (f'<a class="tcard {cls}" href="{href}"><span class="tcard-top"><span class="tbadge">{e(kind)}</span>'
             f'{f"<span class=tcard-sub>{e(sub)}</span>" if sub else ""}</span>'
-            f'<strong class="tcard-t">{e(name)}</strong><span class="tcard-d">{e(desc)}</span>'
+            f'{pic}<strong class="tcard-t">{e(name)}</strong><span class="tcard-d">{e(desc)}</span>'
             f'<span class="tcard-f"><span class="tcard-law">{e(law) or "&nbsp;"}</span>{ARROW}</span></a>')
 
 
@@ -945,7 +946,7 @@ def free_tool_cards(site, rel_root, group=None, limit=None, ids=None, kind=None)
     if ids:
         by = {t["id"]: t for t in tools}
         tools = [by[i] for i in ids if i in by]
-    return "".join(tool_card(f'{rel_root}tools/{e(t["id"])}/', t.get("cat", "작성기"), t["name"], t.get("desc", ""), t.get("law", ""), t.get("tag", ""))
+    return "".join(tool_card(f'{rel_root}tools/{e(t["id"])}/', t.get("cat", "작성기"), t["name"], t.get("desc", ""), t.get("law", ""), t.get("tag", ""), ico=(f'{rel_root}assets/img/ico/{TOOL_DUCKS[t["id"]]}.webp' if t["id"] in TOOL_DUCKS else ""))
                    for t in tools[:limit])
 
 
@@ -1191,7 +1192,7 @@ def build(out, today):
     job_chips = "".join(
         f'<a class="jchip" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])}{EXT}<span class="sr">(새 창)</span></a>'
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
-    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/plum/basic.webp" width="96" height="96" alt=""></div>'
+    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/ico/helmet.webp" width="96" height="96" alt=""></div>'
                   f'<p class="jempty-t">채용 플랫폼의 안전·보건 공고로 바로 연결합니다.</p>'
                   f'<p class="jempty-d">아래 채용 플랫폼에서 안전·보건 직무의 실시간 공고를 바로 확인하세요.</p>'
                   f'<div class="jchips">{job_chips}</div></div>')
@@ -1217,9 +1218,9 @@ def build(out, today):
       <p class="dx-sub">공통 의무·선임·위원회·공시·도급·중대재해처벌법까지 근거 조문과 함께 적용·조건부·확인 필요·적용 제외로 보여 주는 자가진단입니다.</p>
     </form>
     <div class="dx-cards">
-      <a class="dx-card" href="tools/hpp/"><span class="i" aria-hidden="true">🏭</span><span><b>유해위험방지계획서, 내야 하나?</b><span>공장 설치·증설 300kW·100kW, 위험 설비, 건설공사</span></span><span class="arr" aria-hidden="true">→</span></a>
-      <a class="dx-card" href="tools/machines/"><span class="i" aria-hidden="true">⚙️</span><span><b>이 기계, 무슨 의무가 있지?</b><span>안전인증·자율안전확인·안전검사·방호조치 31종</span></span><span class="arr" aria-hidden="true">→</span></a>
-      <a class="dx-card" href="tools/docmap/"><span class="i" aria-hidden="true">🗂️</span><span><b>감독 오면 서류 다 있나?</b><span>업무 12가지 서류 자가점검 · 준비율 계산</span></span><span class="arr" aria-hidden="true">→</span></a>
+      <a class="dx-card" href="tools/hpp/"><span class="i" aria-hidden="true"><img src="assets/img/ico/bell.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>유해위험방지계획서, 내야 하나?</b><span>공장 설치·증설 300kW·100kW, 위험 설비, 건설공사</span></span><span class="arr" aria-hidden="true">→</span></a>
+      <a class="dx-card" href="tools/machines/"><span class="i" aria-hidden="true"><img src="assets/img/ico/process.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>이 기계, 무슨 의무가 있지?</b><span>안전인증·자율안전확인·안전검사·방호조치 31종</span></span><span class="arr" aria-hidden="true">→</span></a>
+      <a class="dx-card" href="tools/docmap/"><span class="i" aria-hidden="true"><img src="assets/img/ico/audit.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>감독 오면 서류 다 있나?</b><span>업무 12가지 서류 자가점검 · 준비율 계산</span></span><span class="arr" aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>"""
@@ -1462,7 +1463,7 @@ def build(out, today):
   <aside class="home2-side">
     {month_box}
     {chat_banner("cm-chat-side")}
-    <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/plum/basic.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
+    <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/ico/write.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
 {home_js}"""
@@ -1975,7 +1976,7 @@ def build(out, today):
     kind_secs = ""
     for k, c, sub in TOOL_KINDS:
         extra = (tool_card("forms/", "작성기", f"서식 작성기 {len(forms)}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식까지. 결재·서명·사진 첨부.",
-                           "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진") if k == "작성기" else "")
+                           "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진", ico="../assets/img/ico/write.webp") if k == "작성기" else "")
         kind_secs += f'<section class="wrap ftools-page" id="{c}">{sec_head(k, sub=sub)}<div class="tgrid">{free_tool_cards(site, "../", kind=k)}{extra}</div></section>'
     tools_body = f"""
 <section class="phead"><div class="wrap">
@@ -2012,7 +2013,7 @@ def build(out, today):
     base = (site.get("base_url") or "").rstrip("/")
     base_js = ("<script>document.write('<base href=\"'+(/\\.github\\.io$/.test(location.hostname)?'/'+location.pathname.split('/')[1]+'/':'/')+'\">')</script>")
     nf = page(site, "", "404.html", "페이지를 찾을 수 없습니다",
-        '<section class="phead"><div class="wrap"><img src="assets/img/plum/st-slip.webp" width="120" height="120" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
+        '<section class="phead"><div class="wrap"><img src="assets/img/ico/fix.webp" width="120" height="120" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
     (out / "404.html").write_text(nf.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + base_js, 1), encoding="utf-8")
 
     if base:
