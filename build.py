@@ -578,7 +578,7 @@ CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hou
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
-NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", JOB_HOME), ("board", "게시판", "board/")]
+NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "board/?b=job"), ("board", "게시판", "board/")]
 ACTIVE_GROUP = {"tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
 
 
@@ -592,13 +592,21 @@ def nav_cols(site, rel):
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")])],
         "brief": [],
-        "jobs": [("SafePlum 채용", [(f"{rel}jobs/", "채용정보 모음"), (f"{rel}board/?b=job", "회원 채용공고 · 등록")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
-                 ("채용 사이트로 바로 이동", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
+        "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록 (회원 무료)")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
+                 ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
-        "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A"), (f"{rel}board/?b=job", "채용공고")]),
+        "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A")]),
                   ("회원·안내", [(f"{rel}board/account/", "로그인 · 마이페이지"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
     }
+
+
+CHK_SVG = '<svg class="chk-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3 2.5 20h19z" fill="#D92D20" stroke="#D92D20" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.25" fill="#fff"/></svg>'
+
+
+def chk_icon(tip):
+    """'확인 필요' 표시: 빨간 경고 삼각형만 보이고, 마우스를 올리거나 누르면(포커스) 설명이 뜬다."""
+    return f'<span class="chk-i" tabindex="0" role="img" aria-label="{e(tip)}" data-tip="{e(tip)}">{CHK_SVG}</span>'
 
 
 def gnb_html(site, rel, active):
@@ -1471,10 +1479,10 @@ def build(out, today):
 
     # ---- 브리핑·소식 게시판
     def board_row(x):
-        chk = f' <span class="lst lst-chk">확인 필요</span>' if x.get("verify") else ""
+        chk = f' {chk_icon("확인 필요 · " + x["verify"])}' if x.get("verify") else ""
         per = f'<p><b>기간</b> {e(x["period"])}</p>' if x.get("period") else ""
         ot = f'<p class="muted">공식 제목: {e(x["official_title"])}</p>' if x.get("official_title") else ""
-        vf = f'<p class="lst-note"><span class="lst lst-chk">확인 필요</span> {e(x["verify"])}</p>' if x.get("verify") else ""
+        vf = f'<p class="lst-note">{CHK_SVG} <b>확인 필요</b> {e(x["verify"])}</p>' if x.get("verify") else ""
         more = f' · <a href="{e(x["href"])}">브리핑 전문</a>' if x.get("href") else ""
         return (f'<details class="nb-row" data-cat="{e(x["cat"])}"><summary><time datetime="{e(x["date"])}">{e(x["date"][2:].replace("-", "."))}</time><span class="nb-cat nb-{e(x["cat"])}">{e(x["cat"])}</span>'
                 f'<span class="nb-t">{e(x["title"])}{chk}</span><span class="nb-a">{e(x.get("agency", ""))}</span></summary>'

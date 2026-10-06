@@ -1578,3 +1578,18 @@ button.mc-d.today:not(.sel){outline:2px solid var(--navy);outline-offset:-2px}
 .cm-imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:14px 0}
 .cm-imgs a{display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
 .cm-imgs img{display:block;width:100%;max-height:420px;object-fit:contain;min-height:80px}
+.cm-more{margin:14px 0 0;font-size:14px;font-weight:700}
+
+/* 확인 필요 — 아이콘 + 풍선 설명 */
+.chk-svg{vertical-align:-4px;flex:none}
+.chk-i{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;vertical-align:-6px;cursor:help;border-radius:6px}
+.chk-i .chk-svg{vertical-align:0}
+.chk-i:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.chk-i::after{content:attr(data-tip);position:absolute;z-index:30;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:max-content;max-width:min(280px,70vw);padding:8px 10px;border-radius:8px;background:#1F2937;color:#fff;font-size:12.5px;font-weight:600;line-height:1.5;white-space:normal;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,.22);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .12s}
+.chk-i:hover::after,.chk-i:focus::after{opacity:1;visibility:visible}
+.nb-list{overflow:visible}
+.nb-row:first-child summary{border-radius:var(--r-lg) var(--r-lg) 0 0}
+.nb-row:last-child:not([open]) summary{border-radius:0 0 var(--r-lg) var(--r-lg)}
+.nb-row:last-child .nb-body{border-radius:0 0 var(--r-lg) var(--r-lg)}
+.chk-i::after{bottom:auto;top:calc(100% + 6px)}
+@media (max-width:720px){.chk-i::after{left:auto;right:-12px;transform:none;max-width:min(260px,64vw)}}

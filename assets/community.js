@@ -120,6 +120,19 @@
     if (n < 0) return { cls: "cm-st-wait", text: "마감", closed: true };
     return { cls: n <= 3 ? "cm-st-hot" : "cm-st-ok", text: n === 0 ? "오늘 마감" : "D-" + n, closed: false };
   }
+  // 채용공고 화면에서는 상단 메뉴의 '채용'을 현재 위치로 표시한다(페이지는 게시판과 같은 파일을 쓴다)
+  var NAV_JOB = false;
+  document.addEventListener("DOMContentLoaded", function () { navJob(NAV_JOB); });  // 하단 메뉴는 이 스크립트보다 뒤에 있다
+  function navJob(on) {
+    NAV_JOB = on;
+    [".gnb-item > a", ".dock a"].forEach(function (sel) {
+      Array.prototype.forEach.call(document.querySelectorAll(sel), function (a) {
+        var href = a.getAttribute("href") || "", isJob = /board\/(index\.html)?\?b=job$/.test(href), isBoard = /board\/(index\.html)?$/.test(href);
+        if (isJob) { if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); }
+        if (isBoard) { if (on) a.removeAttribute("aria-current"); else a.setAttribute("aria-current", "page"); }
+      });
+    });
+  }
   function chatBox() {
     var c = CFG.chat; if (!c || !/^https:\/\/open\.kakao\.com\//.test(c.url || "")) return null;
     return h("a", { class: "cm-chat", href: c.url, target: "_blank", rel: "noopener" }, h("span", { class: "cm-chat-t" }, c.title || "오픈채팅방"), h("span", { class: "cm-chat-d" }, c.desc || ""), h("span", { class: "cm-chat-go" }, "카카오톡으로 참여 ↗"));
@@ -179,6 +192,7 @@
   function pageList() {
     var b = BOARDS[qs("b")] ? qs("b") : "free", cat = qs("c"), kw = qs("q").slice(0, 40), p = Math.max(1, parseInt(qs("p"), 10) || 1);
     document.title = BOARDS[b] + " | " + document.title.split(" | ").pop();
+    navJob(b === "job");
     loading();
     var job = b === "job";
     var q = sb.from("posts").select("id,board,category,title,created_at,comment_count,accepted_comment_id,notice," + (job ? "meta," : "") + "author:profiles(nickname)", { count: "exact" })
@@ -215,6 +229,7 @@
         p > 1 ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p - 1 }) }, "← 이전") : null,
         h("span", null, p + " / " + pages), p < pages ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p + 1 }) }, "다음 →") : null) : null;
       show(tabs(b), job ? chatBox() : null, filter, empty || list, pager,
+        job ? h("p", { class: "cm-more" }, h("a", { href: REL + "jobs/" }, "고용24·사람인 등 다른 채용 사이트에서 더 찾기 →")) : null,
         job ? h("p", { class: "src-note" }, "채용공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않으며, 조건·마감일은 공고를 올린 회사에 확인하세요. 금전·개인 금융정보를 요구하는 공고는 신고해 주세요.") : null);
     }, function (e) { show(tabs(b), note(msg(e), "err")); });
   }
@@ -231,7 +246,7 @@
       var post = rs[0].data, err = rs[0].error || rs[1].error;
       if (err) return show(note(msg(err), "err"));
       if (!post) return show(h("div", { class: "empty" }, h("p", null, "삭제되었거나 없는 글입니다."), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "목록으로"))));
-      var job = post.board === "job", jm = (job && post.meta) || {}, jst = job ? jobState(jm) : null;
+      var job = post.board === "job", jm = (job && post.meta) || {}, jst = job ? jobState(jm) : null; navJob(job);
       var qna = post.board === "qna", cms = rs[1].data || [], mine = ME && ME.id === post.author_id, admin = ME && ME.role === "admin", word = qna ? "답변" : "댓글";
       document.title = post.title + " | " + document.title.split(" | ").pop();
       function rpc(name, args, confirmText, after) {
@@ -359,7 +374,7 @@
         title.placeholder = on ? "공고 제목 (예: 안전관리자 경력직 채용)" : "제목 (2~80자)";
         body.placeholder = on ? "상세 내용 (5~5,000자)\n\n· 담당 업무, 자격 요건, 근무 조건, 전형 절차를 적어 주세요.\n· 주민등록번호·통장 사본 등 채용과 무관한 개인정보를 요구하는 내용은 올릴 수 없습니다." : "내용 (5~5,000자)\n\n· 사람 이름·연락처·사업장명 등 개인이나 회사를 알아볼 수 있는 정보는 적지 마세요.\n· 사고 사례는 누구인지 알 수 없게 적어 주세요.";
       }
-      selB.addEventListener("change", syncJob); syncJob();
+      selB.addEventListener("change", syncJob); syncJob(); navJob(selB.value === "job"); selB.addEventListener("change", function () { navJob(selB.value === "job"); });
       function tick() { cnt.textContent = body.value.length.toLocaleString() + " / 5,000자"; var dm = jmeta(); dm.images = imgs.slice(); draft(key, { title: title.value, body: body.value, category: selC.value, meta: dm }); }
       [title, body, selC].concat(Object.keys(J).map(function (k) { return J[k]; })).forEach(function (el) { el.addEventListener("input", tick); el.addEventListener("change", tick); }); drawImgs(); tick();
       show(h("form", { class: "cm-form cm-write", onsubmit: function (ev) {
