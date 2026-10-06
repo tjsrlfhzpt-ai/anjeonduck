@@ -62,7 +62,8 @@ def fmt_date(d):
 
 # 브리핑·법령 근거로 쓸 수 있는 공식 1차 출처(도메인 끝). 그 밖의 주소는 '참고 보도'로만 표시하고 근거로 세지 않는다.
 OFFICIAL_HOSTS = ("law.go.kr", "moel.go.kr", "kosha.or.kr", "korea.kr", "assembly.go.kr", "moleg.go.kr", "lawmaking.go.kr", "gwanbo.go.kr",
-                  "comwel.or.kr", "me.go.kr", "nfa.go.kr", "mois.go.kr", "molit.go.kr", "kgs.or.kr", "data.go.kr", "work24.go.kr", "opinion.lawmaking.go.kr")
+                  "comwel.or.kr", "me.go.kr", "nfa.go.kr", "mois.go.kr", "molit.go.kr", "kgs.or.kr", "data.go.kr", "work24.go.kr", "opinion.lawmaking.go.kr",
+                  "kdi.re.kr")  # kdi.re.kr: KDI 경제정책정보센터가 부처 보도자료 원문을 그대로 게재(국책연구기관)
 
 
 def is_official(url):
@@ -1487,7 +1488,7 @@ def build(out, today):
         return (f'<details class="nb-row" data-cat="{e(x["cat"])}"><summary><time datetime="{e(x["date"])}">{e(x["date"][2:].replace("-", "."))}</time><span class="nb-cat nb-{e(x["cat"])}">{e(x["cat"])}</span>'
                 f'<span class="nb-t">{e(x["title"])}{chk}</span><span class="nb-a">{e(x.get("agency", ""))}</span></summary>'
                 f'<div class="nb-body">{ot}<p>{e(x["summary"])}</p>{per}<p><b>실무 포인트</b> {e(x.get("point", ""))}</p>{vf}'
-                f'<p><a class="link-ext" href="{e(x["url"])}" target="_blank" rel="noopener">공식 출처 ↗</a>{more}</p></div></details>')
+                f'<p><a class="link-ext" href="{e(x["url"])}" target="_blank" rel="noopener">{e(x.get("src_label") or "공식 출처")} ↗</a>{more}</p></div></details>')
     cats = ["입법예고", "점검", "감독", "지원사업", "법령", "정책", "통계", "사고", "자료"]
     cat_btns = '<button type="button" data-c="" aria-pressed="true">전체</button>' + "".join(f'<button type="button" data-c="{c}" aria-pressed="false">{c} {sum(1 for x in BOARD if x["cat"] == c)}</button>' for c in cats if any(x["cat"] == c for x in BOARD))
     board_html = f"""<div class="nb"><div class="seg nb-filter" id="nbF" role="group" aria-label="분류">{cat_btns}</div>

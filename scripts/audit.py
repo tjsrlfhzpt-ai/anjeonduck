@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ERR, WARN = [], []
-OFFICIAL = ("law.go.kr", "moel.go.kr", "kosha.or.kr", "korea.kr", "assembly.go.kr", "moleg.go.kr", "nfa.go.kr", "me.go.kr", "data.go.kr", "opinion.lawmaking.go.kr", "lawmaking.go.kr", "gwanbo.go.kr")
+OFFICIAL = ("law.go.kr", "moel.go.kr", "kosha.or.kr", "korea.kr", "assembly.go.kr", "moleg.go.kr", "nfa.go.kr", "me.go.kr", "data.go.kr", "opinion.lawmaking.go.kr", "lawmaking.go.kr", "gwanbo.go.kr", "kdi.re.kr")
 
 
 def load(p):
