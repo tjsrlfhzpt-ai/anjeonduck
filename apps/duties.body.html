@@ -45,7 +45,7 @@
     { id: "ceo", name: "경영책임자 (중대재해처벌법)", sum: "안전보건관리체계 구축·이행(시행령 제4조 9개 항목)과 안전·보건 관계 법령에 따른 의무이행 관리(제5조).", arts: [["sapa_dec", "제4조(안전보건관리체계의 구축 및 이행 조치)"], ["sapa_dec", "제5조(안전ㆍ보건 관계 법령에 따른 의무이행에 필요한 관리상의 조치)"]], duty: ["sapa_dec", "제4조(안전보건관리체계의 구축 및 이행 조치)"] },
     { id: "edu", name: "직무교육", sum: "안전보건관리책임자·안전관리자·보건관리자·안전보건관리담당자 등은 선임 후 신규교육과 2년마다 보수교육을 받아야 합니다.", arts: [["rule", "제29조(안전보건관리책임자 등에 대한 직무교육)"]], nopick: true }
   ];
-  var KEY = "anjeonduck.duties";
+  var KEY = "safetake.duties";
   var saved = {};
   try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -117,7 +117,7 @@
     store();
     var on = ROLES.filter(function (r) { return saved[r.id] && saved[r.id].on; });
     if (!on.length) { pick.querySelector("input").focus(); document.getElementById("dPrint").textContent = "직무를 하나 이상 고르세요"; setTimeout(function () { document.getElementById("dPrint").textContent = "직무분장표 인쇄 · PDF"; }, 1800); return; }
-    var co = ""; try { co = localStorage.getItem("anjeonduck.company") || ""; } catch (e) {}
+    var co = ""; try { co = localStorage.getItem("safetake.company") || ""; } catch (e) {}
     var rows = on.map(function (r) {
       var items = dutyItems(r.duty), a = art(r.duty);
       return "<tr><th>" + esc(r.name) + "</th><td>" + esc(saved[r.id].name) + '</td><td class="duty">' + esc(items.join("\n")) + '</td><td class="basis">' + esc(a.law.law.replace("산업안전보건법", "산안법").replace("중대재해 처벌 등에 관한 법률", "중처법") + " " + r.duty[1].replace(/\(.*$/, "")) + "</td></tr>";

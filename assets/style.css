@@ -1,5 +1,5 @@
 /* ==========================================================
-   안전duck — 디자인 시스템
+   SafeTake — 디자인 시스템
    색: 안전 파랑(주요 동작) · 남색(제목·신뢰) · 주황(마감·강조, 아껴 씀)
    간격: 4 · 8 · 12 · 16 · 20 · 24 · 32 · 48 · 64
    ========================================================== */
@@ -906,7 +906,7 @@ details.lawbox summary{cursor:pointer}
 .rowbtns{display:flex;flex-wrap:wrap;gap:6px}
 .rowbtns .btn{white-space:normal;height:auto;min-height:34px;padding-top:6px;padding-bottom:6px;line-height:1.3;text-align:left}
 @media (max-width:560px){.jchips{contain:paint}}
-/* ---------- 마스코트·안전duck 게시물 (v2.2) ---------- */
+/* ---------- 마스코트·SafeTake 게시물 (v2.2) ---------- */
 .hero-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center}
 .hero-duck{display:block;width:260px;border-radius:28px;overflow:hidden;background:#FFD600;box-shadow:0 18px 40px rgba(16,36,70,.14);transform:rotate(2deg);transition:transform .25s ease}
 .hero-duck:hover{transform:rotate(0) translateY(-4px)}
@@ -1368,3 +1368,5 @@ img.logo-mark{width:36px;height:36px;object-fit:contain;border-radius:0}
 .paper-foot[contenteditable]:hover,.paper-foot[contenteditable]:focus{background:var(--accent-50)}
 .paper-foot[contenteditable]:empty::before{content:attr(data-ph);color:#aaa}
 @media print{.paper-foot:empty{display:none}.paper-foot[contenteditable]{background:none!important}}
+
+.ft-disc{grid-column:1/-1;font-size:12px;color:var(--muted);margin:0}

@@ -100,7 +100,7 @@
   "use strict";
   var D = /*@DATA@*/null;
   if (!D) return;
-  var KEY = "anjeonduck.schedule";
+  var KEY = "safetake.schedule";
   var S = { ov: {}, custom: [], done: {}, since: "" };
   function load() { try { var x = JSON.parse(localStorage.getItem(KEY) || "null"); if (x && typeof x === "object") S = { ov: x.ov || {}, custom: x.custom || [], done: x.done || {}, since: x.since || "" }; } catch (e) {} }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -366,20 +366,20 @@
     var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
     var ev = tasks().filter(function (t) { return t.on; }).map(function (t) {
       var d = firstDate(t), hm = (t.time || "09:00").split(":"), ds = ymd(d).replace(/-/g, "");
-      return ["BEGIN:VEVENT", "UID:" + t.key + "@anjeonduck", "DTSTAMP:" + stamp, "DTSTART;TZID=Asia/Seoul:" + ds + "T" + pad(+hm[0]) + pad(+hm[1] || 0) + "00", "DURATION:PT1H",
+      return ["BEGIN:VEVENT", "UID:" + t.key + "@safetake", "DTSTAMP:" + stamp, "DTSTART;TZID=Asia/Seoul:" + ds + "T" + pad(+hm[0]) + pad(+hm[1] || 0) + "00", "DURATION:PT1H",
         "RRULE:" + rrule(t), "SUMMARY:" + icsEsc(t.title), "DESCRIPTION:" + icsEsc([t.basis ? "근거: " + t.basis : "", t.memo || ""].filter(Boolean).join("\n")), "END:VEVENT"].join("\r\n");
     });
-    dl("안전duck_주기업무.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//anjeonduck//schedule//KO", "CALSCALE:GREGORIAN", "X-WR-CALNAME:안전보건 주기업무", "X-WR-TIMEZONE:Asia/Seoul"].concat(ev).concat(["END:VCALENDAR"]).join("\r\n"), "text/calendar;charset=utf-8");
+    dl("SafeTake_주기업무.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//safetake//schedule//KO", "CALSCALE:GREGORIAN", "X-WR-CALNAME:안전보건 주기업무", "X-WR-TIMEZONE:Asia/Seoul"].concat(ev).concat(["END:VCALENDAR"]).join("\r\n"), "text/calendar;charset=utf-8");
   });
   document.getElementById("sPrint").addEventListener("click", function () {
     var old = view; view = "year"; render(); document.body.classList.add("printing-sched"); window.print();
     setTimeout(function () { document.body.classList.remove("printing-sched"); view = old; render(); }, 400);
   });
-  document.getElementById("sExport").addEventListener("click", function () { dl("안전duck_주기업무_설정.json", JSON.stringify({ app: "anjeonduck.schedule", v: 1, data: S }, null, 1), "application/json"); });
+  document.getElementById("sExport").addEventListener("click", function () { dl("SafeTake_주기업무_설정.json", JSON.stringify({ app: "safetake.schedule", v: 1, data: S }, null, 1), "application/json"); });
   document.getElementById("sImport").addEventListener("change", function (ev) {
     var f = ev.target.files[0]; if (!f) return;
     var r = new FileReader();
-    r.onload = function () { try { var x = JSON.parse(r.result); if (!x || x.app !== "anjeonduck.schedule" || !x.data) throw 0; S = { ov: x.data.ov || {}, custom: x.data.custom || [], done: x.data.done || {}, since: x.data.since || S.since }; save(); render(); } catch (e) { document.getElementById("sDueN").textContent = "불러올 수 없는 파일"; } };
+    r.onload = function () { try { var x = JSON.parse(r.result); if (!x || x.app !== "safetake.schedule" || !x.data) throw 0; S = { ov: x.data.ov || {}, custom: x.data.custom || [], done: x.data.done || {}, since: x.data.since || S.since }; save(); render(); } catch (e) { document.getElementById("sDueN").textContent = "불러올 수 없는 파일"; } };
     r.readAsText(f); ev.target.value = "";
   });
   document.getElementById("sReset").addEventListener("click", function () {

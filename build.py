@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""안전duck 정적 사이트 생성기.
+"""SafeTake 정적 사이트 생성기.
 
 data/*.json + config/site.json 을 읽어 _site/ 에 완성된 HTML을 만든다.
 서버 코드가 없으므로 GitHub Pages·Cloudflare Pages 어디에나 그대로 올릴 수 있다.
@@ -136,7 +136,7 @@ def brief_article(b, rel):
     lead = f'<p class="br-lead">{e(b["lead"])}</p>' if b.get("lead") else ""
     todo_sec = f'<section class="br-todo"><h3>이번 주 챙길 일</h3><ul class="bul">{todo}</ul></section>' if todo else ""
     return (f'{lead}{"".join(item(it) for it in b["items"])}{todo_sec}'
-            f'<p class="src-note">{BRIEF_PENDING if b.get("review") != "verified" else ""}안전duck이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
+            f'<p class="src-note">{BRIEF_PENDING if b.get("review") != "verified" else ""}SafeTake이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
             f'국회 통과안·입법예고는 현행 법령이 아닙니다. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
 
 
@@ -349,9 +349,9 @@ def resource_detail(r, all_res, idx, files, site):
                  for i, (k, v) in enumerate(sorted(fl.get("files", {}).items(), key=lambda kv: kv[0] != "hwp")))
     tool = ""
     if r.get("free_tool"):
-        tool = f'<a class="btn btn-block btn-green" href="{rel_root}tools/{e(r["free_tool"])}/">안전duck 도구로 바로 계산·작성</a>'
+        tool = f'<a class="btn btn-block btn-green" href="{rel_root}tools/{e(r["free_tool"])}/">SafeTake 도구로 바로 계산·작성</a>'
     if r.get("page_link"):
-        tool = f'<a class="btn btn-block btn-green" href="{rel_root}{e(r["page_link"])}">안전duck에서 바로 보기</a>'
+        tool = f'<a class="btn btn-block btn-green" href="{rel_root}{e(r["page_link"])}">SafeTake에서 바로 보기</a>'
     same = [x for x in all_res if x is not r and x.get("topic") == r.get("topic") and x.get("category") not in ("기관·행정용",)][:8]
     def rel_href(x):
         return rel_root + (x["detail"] if x.get("detail") else "tools/" + x.get("free_tool", "") + "/")
@@ -365,12 +365,12 @@ def resource_detail(r, all_res, idx, files, site):
     else:
         arts, arts_note = "", ""
     if missing:
-        arts += (f'<p class="hint">{e(", ".join(missing))} 원문은 아직 안전duck에 수록하지 않았습니다. '
+        arts += (f'<p class="hint">{e(", ".join(missing))} 원문은 아직 SafeTake에 수록하지 않았습니다. '
                  f'<a href="{e(law_url(r["law"]))}" target="_blank" rel="noopener">국가법령정보센터에서 {e(r["law"])} 보기 ↗</a></p>')
     elif not hits:
         full = r.get("law") in idx and len(idx[r["law"]]) > 50
         msg = (f'{r["law"]} 본문에는 이 {kind}를 직접 언급한 조문이 없습니다. 고용노동부 고시 등 다른 규정에서 쓰도록 정한 {kind}일 수 있습니다.'
-               if full else "관련 조문 원문은 아직 안전duck에 수록하지 않았습니다.")
+               if full else "관련 조문 원문은 아직 SafeTake에 수록하지 않았습니다.")
         arts += (f'<p class="hint">{e(msg)} '
                  f'<a href="{e(law_url(r["law"]))}" target="_blank" rel="noopener">국가법령정보센터에서 {e(r["law"])} 보기 ↗</a></p>')
     meta = [("법령", r["law"]), ("번호", r.get("form_no", "")), ("분류", r.get("category", "")), ("주제", r.get("topic", ""))]
@@ -661,34 +661,29 @@ def lawver_html(tool_id, rel_root, fallback=""):
     warn_s = ' <span class="stale">· 확인일이 오래되었습니다 — 공식 원문 재확인 필요</span>' if stale(oldest) else ""
     return (f'<aside class="wrap"><p class="lawver"><b>법적 근거 확인일</b> {e(oldest)}{warn_s}<br><b>적용 법령 버전</b> ' + " / ".join(rows)
             + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#versions">법령 버전·시행 예정 보기</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a>'
-            + '<br>이 화면의 판정·계산·예시 문구는 안전duck이 정리한 참고 자료이며 법령 원문이 아닙니다.</p></aside>')
+            + '<br>이 화면의 판정·계산·예시 문구는 SafeTake이 정리한 참고 자료이며 법령 원문이 아닙니다.</p></aside>')
 
 
 def operator_html(site, rel_root):
+    """운영 주체와 문의 링크. 개인 연락처는 싣지 않는다 — config/site.json 의 operator.contact_url(오픈채팅·폼·공용 메일)만 쓴다."""
     op = site.get("operator") or {}
-    iss = safe_url(op.get("issues_url"))
-    mail = site.get("contact_email", "")
-    def issue(title, label):
-        return f'<a href="{e(iss)}?title={quote(title)}" target="_blank" rel="noopener">{label}</a>' if iss else label
-    parts = [f'운영 주체: {e(op.get("name") or site["name"])}']
-    parts.append("문의: " + (f'<a href="mailto:{e(mail)}">{e(mail)}</a>' if mail else issue("[문의] ", "GitHub 이슈로 접수")))
-    parts.append(issue("[개인정보] ", "개인정보 문의"))
-    parts.append(issue("[삭제 요청] ", "게시물 삭제·수정 요청"))
-    parts.append(issue("[법령 오류] ", "법령 오류 신고"))
-    return " · ".join(parts)
+    url = op.get("contact_url") or ""
+    ok = url.startswith("mailto:") or safe_url(url)
+    link = f'<a href="{e(url)}"{"" if url.startswith("mailto:") else " target=_blank rel=noopener"}>{e(op.get("contact_label") or "문의하기")}</a>' if ok else "문의 채널 준비 중"
+    return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}'
 
 
 def page(site, rel_root, path, title, body, desc=None, active=""):
-    base = site["base_url"].rstrip("/")
-    canonical = f"{base}/{path}"
-    full_title = f"{title} | {site['name']}" if title != site["name"] else f"{site['name']} — {site['tagline']}"
+    base = (site.get("base_url") or "").rstrip("/")
+    canonical = f"{base}/{path}" if base else ""
+    canon_tags = f'<link rel="canonical" href="{e(canonical)}">\n<meta property="og:url" content="{e(canonical)}">' if canonical else ""
+    full_title = f"{title} | {site['name']}" if title != site["name"] else f"{site['name']} | {site['tagline']}"
     cur = ' aria-current="page"'
     on_news = (site.get("features") or {}).get("public_api", False)
     nav = gnb_html(site, rel_root, active)
     tl = tool_link(site, rel_root)
     ext = ' target="_blank" rel="noopener"' if tl.startswith("http") else ""
-    contact = site.get("contact_email", "")
-    contact_html = f'<a href="mailto:{e(contact)}">{e(contact)}</a>' if contact else ""
+    contact_html = ""
     d = e(desc or site["description"])
     return f"""<!doctype html>
 <html lang="ko">
@@ -697,12 +692,11 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{e(full_title)}</title>
 <meta name="description" content="{d}">
-<link rel="canonical" href="{e(canonical)}">
+{canon_tags}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{e(site['name'])}">
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{d}">
-<meta property="og:url" content="{e(canonical)}">
 <meta property="og:locale" content="ko_KR">
 <meta name="theme-color" content="#0F172A">
 <link rel="icon" href="{rel_root}assets/favicon.png?v={ASSET_VER}" type="image/png">
@@ -733,10 +727,11 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     <ul class="ft-notes">
       <li>서식·법령은 국가법령정보센터 등 기관 원본으로 연결됩니다.</li>
       <li>채용 조건과 마감일은 공고 원문이 우선합니다.</li>
-      <li>작성 도구는 입력한 문서 내용을 안전duck 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
+      <li>작성 도구는 입력한 문서 내용을 SafeTake 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
       <li>판정·계산 결과는 자가진단용 참고 자료이며 행정기관의 공식 해석·처분을 대체하지 않습니다. <a href="{rel_root}legal/">법령정보·면책 안내</a></li>
     </ul>
     <p class="ft-op">{operator_html(site, rel_root)}</p>
+    <p class="ft-disc">Disclaimer: SafeTake에서 제공하는 안전보건 정보 및 문서 양식은 현장 참고용이며, 실제 적용 시 발생하는 법적 책임은 지지 않습니다.</p>
     <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''}{' · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button>' if path.startswith("tools/") and path != "tools/" else ""} · <a href="{rel_root}legal/">법령 데이터 기준일 {e(manifest().get("checked_at", ""))}</a></p>
   </div>
 </footer>
@@ -938,7 +933,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
     if t["id"] in ("tbm", "committee"):
-        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#555;line-height:1.6">안전duck 자체 제공 양식 · 법정 지정서식이 아님 — '
+        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#555;line-height:1.6">SafeTake 자체 제공 양식 · 법정 지정서식이 아님 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')
         assert "</body>" in src
@@ -1047,7 +1042,7 @@ def empty_box(msg, extra=""):
 
 
 def duck_signs_html(site, write):
-    """안전duck 자체 제작 현장 안내 게시물 — 목록(표지 페이지 상단) + 한 장씩 A4 인쇄 페이지."""
+    """SafeTake 자체 제작 현장 안내 게시물 — 목록(표지 페이지 상단) + 한 장씩 A4 인쇄 페이지."""
     d = load("data/duck_signs.json")
     cards = []
     for it in d["items"]:
@@ -1057,17 +1052,17 @@ def duck_signs_html(site, write):
         body = f"""
 <section class="phead no-print"><div class="wrap">
   <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">서식·자료</a><span>/</span><a href="../#duck">안전보건표지</a><span>/</span>{e(it["title"])}</p>
-  <h1>{e(it["title"])} <span class="muted" style="font-size:.6em">안전duck 안내 게시물</span></h1>
+  <h1>{e(it["title"])} <span class="muted" style="font-size:.6em">SafeTake 안내 게시물</span></h1>
   <p>{e(it.get("desc", ""))}</p>
   <p class="btns" style="margin-top:14px"><button type="button" class="btn" onclick="window.print()">A4 인쇄 · PDF 저장</button>
-  <a class="btn btn-ghost" href="../../../{e(it["print"])}" download="안전duck_{e(it["title"])}.png">원본 이미지 내려받기</a>
+  <a class="btn btn-ghost" href="../../../{e(it["print"])}" download="SafeTake_{e(it["title"])}.png">원본 이미지 내려받기</a>
   {f'<a class="btn btn-ghost" href="../../../{e(it["law_href"])}">근거 조문 보기</a>' if it.get("law_href") else ""}</p>
   <p class="hint" style="margin-top:10px">근거: {e(it.get("basis", ""))} · 법정 안전보건표지(시행규칙 별표 6)가 아니라 현장 안내용 게시물입니다.</p>
 </div></section>
 <div class="dk-sheet"><img src="../../../{e(it["print"])}" alt="{e(it["title"])} 안내 게시물"></div>"""
         write(f"{pid}index.html", page(site, "../../../", pid, f'{it["title"]} 안내 게시물', body, desc=it.get("desc"), active="resources/"))
-    return (f'<section class="dk-sec" id="duck"><div class="dk-head"><div><h2>안전duck 현장 안내 게시물</h2>'
-            f'<p>안전duck이 자체 제작·자체 번역한 다국어 안내 게시물입니다(공식 번역 아님). 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
+    return (f'<section class="dk-sec" id="duck"><div class="dk-head"><div><h2>SafeTake 현장 안내 게시물</h2>'
+            f'<p>SafeTake이 자체 제작·자체 번역한 다국어 안내 게시물입니다(공식 번역 아님). 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
             f'<ul class="dk-grid">{"".join(cards)}</ul></section>')
 
 
@@ -1116,8 +1111,10 @@ def build(out, today):
     hazards = {"groups": hazards["groups"], "items": hazards["items"]}
     penalties = load("data/penalties.json")
 
-    if not safe_url(site.get("base_url")):
+    if site.get("base_url") and not safe_url(site.get("base_url")):
         sys.exit("config/site.json 의 base_url 이 https 주소가 아닙니다.")
+    if not site.get("base_url"):
+        warn("base_url 이 비어 있음 → canonical·og:url·sitemap 을 만들지 않음(도메인이 정해지면 config/site.json 에 입력)")
     for t in site.get("tools", []):
         if not safe_url(t.get("url")):
             warn(f"도구 '{t.get('name')}' 주소가 비어 있음 → '준비 중'으로 표시")
@@ -1276,7 +1273,7 @@ def build(out, today):
     bd_res = board("자주 찾는 법정 서식", "resources/", "".join(bd_row(f"resources/{r['detail']}" if r.get("detail") else "resources/", r["title"], "", "서식" if r.get("category") == "법정 서식" else "고시") for r in popular[:6]))
     lib = load("data/library.json")
     bd_lib = board("안전보건 자료실", "resources/library/", "".join(bd_row(safe_url(x["url"]), x["name"], "", "공식", ext=True) for x in lib.get("official", [])[:3] if safe_url(x.get("url")))
-                   + bd_row("resources/signs/", "안전보건표지 40종 · 안전duck 현장 안내 게시물", "", "표지") + bd_row("tools/docmap/", "감독 대비 서류 자가점검", "", "점검"))
+                   + bd_row("resources/signs/", "안전보건표지 40종 · SafeTake 현장 안내 게시물", "", "표지") + bd_row("tools/docmap/", "감독 대비 서류 자가점검", "", "점검"))
     quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로 신청·신고</span>' + "".join(
         f'<a class="qs-go" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}">{e(x["name"])} ↗</a>' for x in sites.get("civil", []) if safe_url(x.get("url"))) + '<span class="qs-l qs-l2">기관</span>' + "".join(
         f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url"))) + "</div></section>")
@@ -1363,13 +1360,13 @@ def build(out, today):
   function show(id, focus) {
     tabs.forEach(function (t) { var on = t.dataset.tab === id; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; if (on && focus) t.focus(); });
     panes.forEach(function (p) { p.hidden = p.dataset.pane !== id; });
-    try { sessionStorage.setItem("anjeonduck.hometab", id); } catch (e) {}
+    try { sessionStorage.setItem("safetake.hometab", id); } catch (e) {}
   }
   tabs.forEach(function (t, i) {
     t.addEventListener("click", function () { show(t.dataset.tab); });
     t.addEventListener("keydown", function (ev) { if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") { ev.preventDefault(); show(tabs[(i + (ev.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length].dataset.tab, true); } });
   });
-  var want = (location.hash || "").replace("#tab-", ""), saved = ""; try { saved = sessionStorage.getItem("anjeonduck.hometab") || ""; } catch (e) {}
+  var want = (location.hash || "").replace("#tab-", ""), saved = ""; try { saved = sessionStorage.getItem("safetake.hometab") || ""; } catch (e) {}
   var ids = tabs.map(function (t) { return t.dataset.tab; });
   show(ids.indexOf(want) >= 0 ? want : ids.indexOf(saved) >= 0 ? saved : ids[0]);
   // 서식 필터
@@ -1381,8 +1378,8 @@ def build(out, today):
     home = f"""
 <section class="hero2">
   <div class="wrap hero2-in">
-    <img class="hero2-duck" src="assets/img/duck/wave.webp" width="150" height="150" alt="손을 흔드는 안전duck 캐릭터" fetchpriority="high">
-    <p class="hero2-eye">안전관리자·보건관리자를 위한 무료 업무 도구</p>
+    <img class="hero2-duck" src="assets/img/duck/wave.webp" width="150" height="150" alt="손을 흔드는 SafeTake 캐릭터" fetchpriority="high">
+    <p class="hero2-eye">SafeTake · 현장 안전지식 공유 커뮤니티</p>
     <h1>안전관리 서류, 여기서 바로</h1>
     <div class="uq" role="search">
       <label for="uq" class="sr">통합 검색</label>
@@ -1450,7 +1447,7 @@ def build(out, today):
     cat_btns = '<button type="button" data-c="" aria-pressed="true">전체</button>' + "".join(f'<button type="button" data-c="{c}" aria-pressed="false">{c} {sum(1 for x in BOARD if x["cat"] == c)}</button>' for c in cats if any(x["cat"] == c for x in BOARD))
     board_html = f"""<div class="nb"><div class="seg nb-filter" id="nbF" role="group" aria-label="분류">{cat_btns}</div>
 <div class="nb-list" id="nbL">{"".join(board_row(x) for x in BOARD)}</div>
-<p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 안전duck이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
+<p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafeTake이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
 <script>(function(){{var f=document.getElementById("nbF"),l=document.getElementById("nbL");f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});[].forEach.call(l.children,function(r){{r.hidden=!!b.dataset.c&&r.dataset.cat!==b.dataset.c;}});}});}})();</script>"""
     if briefs:
         b0 = briefs[0]
@@ -1469,7 +1466,7 @@ def build(out, today):
     <div class="side-box"><h2 class="h-sm">원문 보러 가기</h2><ul class="bul">
       <li><a href="https://www.moel.go.kr/news/enews/report/enewsList.do" target="_blank" rel="noopener">고용노동부 보도자료 ↗</a></li>
       <li><a href="https://www.moel.go.kr/info/lawinfo/instruction/list.do" target="_blank" rel="noopener">고용노동부 훈령·예규·고시 ↗</a></li>
-      <li><a href="../laws/#updates">안전duck 법령 개정 소식</a></li>
+      <li><a href="../laws/#updates">SafeTake 법령 개정 소식</a></li>
     </ul></div></aside>"""
     brief_head = """
 <section class="phead"><div class="wrap">
@@ -1479,7 +1476,7 @@ def build(out, today):
 </div></section>"""
     write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
           brief_head.format(up="../", crumb="안전 브리핑") + f'<div class="wrap layout-detail"><section class="col-main">{brief_main}</section>{brief_side}</div>',
-          desc="산업안전 법령·정책·감독·사고 소식을 매일 요약하고 실무 포인트를 정리한 안전duck 브리핑.", active="brief/"))
+          desc="산업안전 법령·정책·감독·사고 소식을 매일 요약하고 실무 포인트를 정리한 SafeTake 브리핑.", active="brief/"))
     for b in briefs:
         body = (brief_head.format(up="../../", crumb='<a href="../">안전 브리핑</a><span>/</span>' + fmt_date(b["date"]))
                 + f'<div class="wrap layout-detail"><section class="col-main"><article class="br"><p class="br-date">{fmt_date(b["date"])} 브리핑</p><h2 class="br-title">{e(b["title"])}</h2>{brief_article(b, "../../")}</article></section>'
@@ -1500,30 +1497,30 @@ def build(out, today):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>법령정보·면책 안내</p>
   <h1>법령정보·면책 안내</h1>
-  <p>안전duck이 보여 주는 법령 정보, 판정·계산 결과, 양식이 어떤 성격의 자료인지 정리했습니다. 법령 데이터 기준일 {e(man.get("checked_at", ""))}.</p>
+  <p>SafeTake이 보여 주는 법령 정보, 판정·계산 결과, 양식이 어떤 성격의 자료인지 정리했습니다. 법령 데이터 기준일 {e(man.get("checked_at", ""))}.</p>
 </div></section>
 <div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
   <h2 id="info">1. 법령정보 안내</h2>
-  <p>안전duck의 법령 본문·별표·서식은 국가법령정보센터에 공개된 원문을 옮겨 실은 것이고, 그 밖의 요약·분류·판정 기준·계산식·예시 문구는 안전duck이 정리한 참고 자료입니다. 두 가지는 화면에서 구분해 표시합니다. 현재 시행 중인 내용, 공포되었지만 아직 시행 전인 내용, 국회를 통과했거나 입법예고 중인 내용은 서로 다른 상태로 나누어 보여 줍니다.</p>
+  <p>SafeTake의 법령 본문·별표·서식은 국가법령정보센터에 공개된 원문을 옮겨 실은 것이고, 그 밖의 요약·분류·판정 기준·계산식·예시 문구는 SafeTake이 정리한 참고 자료입니다. 두 가지는 화면에서 구분해 표시합니다. 현재 시행 중인 내용, 공포되었지만 아직 시행 전인 내용, 국회를 통과했거나 입법예고 중인 내용은 서로 다른 상태로 나누어 보여 줍니다.</p>
   <p>상태 표시: <span class="lst lst-cur">현재 시행</span> <span class="lst lst-next">시행 예정</span> <span class="lst lst-bill">법안·입법 동향</span> <span class="lst lst-rec">권장사항</span> <span class="lst lst-chk">확인 필요</span></p>
   <h2 id="source">2. 법령 원문 출처</h2>
-  <div class="table-wrap"><table class="lvt"><thead><tr><th>법령·고시</th><th>안전duck이 쓰는 버전</th><th>공식 확인일</th><th>원문</th></tr></thead><tbody>{src_rows}</tbody></table></div>
+  <div class="table-wrap"><table class="lvt"><thead><tr><th>법령·고시</th><th>SafeTake이 쓰는 버전</th><th>공식 확인일</th><th>원문</th></tr></thead><tbody>{src_rows}</tbody></table></div>
   <p>법적 근거로는 국가법령정보센터, 고용노동부, 한국산업안전보건공단 등 공식 기관의 자료만 사용합니다. 언론 보도는 '참고 보도'로만 표시하며 법령·정책의 근거로 쓰지 않습니다. 확인일로부터 {int(man.get("stale_after_days", 45))}일이 지나면 화면에 '공식 원문 재확인 필요'가 표시됩니다.</p>
   <h2 id="limit">3. 자가진단 도구의 한계</h2>
   <p>적용범위 판정, 유해위험방지계획서 대상 확인, 기계·설비 의무 조회 등의 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 관할 행정기관의 공식 해석·처분을 대체하지 않습니다. 업종 분류, 상시근로자 수 산정, 도급 관계처럼 사실관계 판단이 필요한 부분은 도구가 대신 판단할 수 없습니다. 결과는 적용 · 조건부 · 확인 필요 · 적용 제외 네 단계로만 표시합니다.</p>
-  <h2 id="calc">4. 안전duck 계산 결과의 성격</h2>
-  <p>과태료, 산업안전보건관리비, 상시근로자 수, 교육시간, 체감온도 등의 계산 결과는 참고 계산입니다. 과태료의 최종 처분 금액은 실제 위반사실과 감경·가중사유를 기준으로 관할 행정기관이 판단합니다. 상시근로자 수 산정방법은 적용 법령별로 별도 확인이 필요합니다. 위험성평가의 가능성·중대성 척도와 등급 구간은 '안전duck 기본 위험성평가 예시 기준'이며 사업장이 정한 방법으로 바꿔 쓸 수 있습니다.</p>
+  <h2 id="calc">4. SafeTake 계산 결과의 성격</h2>
+  <p>과태료, 산업안전보건관리비, 상시근로자 수, 교육시간, 체감온도 등의 계산 결과는 참고 계산입니다. 과태료의 최종 처분 금액은 실제 위반사실과 감경·가중사유를 기준으로 관할 행정기관이 판단합니다. 상시근로자 수 산정방법은 적용 법령별로 별도 확인이 필요합니다. 위험성평가의 가능성·중대성 척도와 등급 구간은 'SafeTake 기본 위험성평가 예시 기준'이며 사업장이 정한 방법으로 바꿔 쓸 수 있습니다.</p>
   <h2 id="health">5. 건강정보 도구 안내</h2>
   <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 참고용이며 의학적 진단이 아닙니다. 업무 적합성과 사후관리 판단은 의사 등 보건의료 전문가의 평가가 필요하고, 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
-  <h2 id="forms">6. 안전duck 자체 양식의 법적 지위</h2>
-  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">안전duck 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 법정 지정서식이 아니며, 관련 조문을 참고해 만든 보조양식입니다. <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 그대로 쓰는 것이 아니라 실제 내용으로 바꿔야 하는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
+  <h2 id="forms">6. SafeTake 자체 양식의 법적 지위</h2>
+  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafeTake 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 법정 지정서식이 아니며, 관련 조문을 참고해 만든 보조양식입니다. <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 그대로 쓰는 것이 아니라 실제 내용으로 바꿔야 하는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
   <p>결재란의 서명은 인쇄용 서명 이미지이며, 모든 법정 전자서명 또는 전자문서 제출 요건을 충족한다는 의미가 아닙니다.</p>
   <h2 id="links">7. 외부 링크 책임범위</h2>
-  <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, 안전duck은 외부 사이트의 내용을 보증하지 않습니다.</p>
+  <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, SafeTake은 외부 사이트의 내용을 보증하지 않습니다.</p>
   <h2 id="jobs">8. 채용공고 책임범위</h2>
-  <p>채용정보는 외부 채용 플랫폼과 공공 채용 사이트로 연결합니다. 안전duck은 공고를 직접 받거나 게시하지 않으며, 채용 조건·마감일은 각 플랫폼의 공고 원문과 채용 기업이 책임집니다.</p>
+  <p>채용정보는 외부 채용 플랫폼과 공공 채용 사이트로 연결합니다. SafeTake은 공고를 직접 받거나 게시하지 않으며, 채용 조건·마감일은 각 플랫폼의 공고 원문과 채용 기업이 책임집니다.</p>
   <h2 id="data">9. 데이터 저장 방식</h2>
-  <p>작성 도구에 입력한 내용, 서명 이미지, 첨부 사진은 안전duck 서버로 전송하지 않고 사용 중인 브라우저(localStorage·IndexedDB)에 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 사라지므로 필요하면 화면 아래 '작성 내용 백업'으로 파일을 내려받아 두세요. 다만 사이트는 GitHub Pages에서 제공되고 글꼴 등 일부 자원을 외부 CDN에서 불러오므로, 접속 기록(IP 주소 등)에는 해당 제공자의 정책이 적용됩니다. </p>
+  <p>작성 도구에 입력한 내용, 서명 이미지, 첨부 사진은 SafeTake 서버로 전송하지 않고 사용 중인 브라우저(localStorage·IndexedDB)에 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 사라지므로 필요하면 화면 아래 '작성 내용 백업'으로 파일을 내려받아 두세요. 다만 사이트는 GitHub Pages에서 제공되고 글꼴 등 일부 자원을 외부 CDN에서 불러오므로, 접속 기록(IP 주소 등)에는 해당 제공자의 정책이 적용됩니다. </p>
   <h2 id="report">10. 오류 신고 방법</h2>
   <p>법령 내용·시행일·판정 결과·계산식의 오류를 발견하면 알려 주세요. 해당 화면 주소와 근거 조문을 함께 적어 주시면 확인이 빠릅니다.</p>
   <p>{op_html}</p>
@@ -1531,10 +1528,10 @@ def build(out, today):
   <p>공식 원문으로 다시 확인하지 못해 임의로 고치지 않고 표시만 해 둔 항목입니다.</p>
   <ul class="bul">{need_html}</ul>
   <h2 id="priority">11. 국가법령정보센터 원문 우선 원칙</h2>
-  <p>안전duck의 내용과 법령 원문이 다르면 언제나 <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a>의 현행 원문이 우선합니다. 실제 적용 여부와 해석은 관할 지방고용노동관서 등 행정기관에 확인하시기 바랍니다.</p>
+  <p>SafeTake의 내용과 법령 원문이 다르면 언제나 <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a>의 현행 원문이 우선합니다. 실제 적용 여부와 해석은 관할 지방고용노동관서 등 행정기관에 확인하시기 바랍니다.</p>
 </div>"""
     write("legal/index.html", page(site, "../", "legal/", "법령정보·면책 안내", legal_body,
-          desc="안전duck 법령 정보의 출처와 기준일, 자가진단·계산 결과의 한계, 자체 양식의 법적 지위, 데이터 저장 방식, 오류 신고 방법."))
+          desc="SafeTake 법령 정보의 출처와 기준일, 자가진단·계산 결과의 한계, 자체 양식의 법적 지위, 데이터 저장 방식, 오류 신고 방법."))
 
     # ---- 채용 목록
     def vals(key, split=False):
@@ -1627,7 +1624,7 @@ def build(out, today):
     <section class="block"><h2>모집 조건</h2><dl class="dl-grid">{table}</dl></section>
     {f'<section class="block"><h2>주요 업무</h2><ul class="bul">{duties}</ul></section>' if duties else ''}
     {f'<section class="block"><h2>자격 요건</h2><ul class="bul">{reqs}</ul></section>' if reqs else ''}
-    {'<p class="src-note">이 공고는 채용 기업이 안전duck에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
+    {'<p class="src-note">이 공고는 채용 기업이 SafeTake에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
     <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''} · 조건과 일정은 원문이 우선합니다.</p>
   </article>
   <aside class="col-side">
@@ -1744,7 +1741,7 @@ def build(out, today):
   </section>
   <aside class="col-side">
     <section class="side-box">{sec_head("사고사망 속보")}{acc_list}</section>
-    <section class="side-box"><p class="hint">안전duck은 기사 본문을 옮기지 않습니다. 제목·부제·부처·날짜만 싣고 원문으로 연결합니다. 민간 언론사 기사와 다른 사이트의 게시물은 싣지 않습니다.</p></section>
+    <section class="side-box"><p class="hint">SafeTake은 기사 본문을 옮기지 않습니다. 제목·부제·부처·날짜만 싣고 원문으로 연결합니다. 민간 언론사 기사와 다른 사이트의 게시물은 싣지 않습니다.</p></section>
   </aside>
 </div>"""
     if (site.get("features") or {}).get("public_api", False):
@@ -1848,15 +1845,17 @@ def build(out, today):
             sys.exit(f"config/site.json 도구 {t['id']}: 본문 조각인데 kind가 'page'가 아닙니다")
         write(f"tools/{t['id']}/index.html", render_free_tool(t, hazards, site, penalties))
 
-    # ---- 404 (어느 경로에서 열려도 되도록 절대 주소 사용)
-    base = site["base_url"].rstrip("/")
-    (out / "404.html").write_text(page(site, base + "/", "404.html", "페이지를 찾을 수 없습니다",
-        f'<section class="phead"><div class="wrap"><img src="{e(base)}/assets/img/duck/surprised.webp" width="110" height="110" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>마감되어 내려간 공고이거나 주소가 바뀌었을 수 있습니다.</p><p class="btns"><a class="btn" href="{e(base)}/">홈으로</a></p></div></section>'),
-        encoding="utf-8")
+    # ---- 404 (어느 깊이의 주소에서 열려도 되도록 <base> 를 사이트 루트로 맞춘다)
+    base = (site.get("base_url") or "").rstrip("/")
+    base_js = ("<script>document.write('<base href=\"'+(/\\.github\\.io$/.test(location.hostname)?'/'+location.pathname.split('/')[1]+'/':'/')+'\">')</script>")
+    nf = page(site, "", "404.html", "페이지를 찾을 수 없습니다",
+        '<section class="phead"><div class="wrap"><img src="assets/img/duck/surprised.webp" width="110" height="110" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
+    (out / "404.html").write_text(nf.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + base_js, 1), encoding="utf-8")
 
-    sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc><lastmod>{today}</lastmod></url>" for u in urls)
-    (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>', encoding="utf-8")
-    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n", encoding="utf-8")
+    if base:
+        sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc><lastmod>{today}</lastmod></url>" for u in urls)
+        (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>', encoding="utf-8")
+    (out / "robots.txt").write_text("User-agent: *\nAllow: /\n" + (f"Sitemap: {base}/sitemap.xml\n" if base else ""), encoding="utf-8")
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     total = sum(f.stat().st_size for f in out.rglob("*") if f.is_file())

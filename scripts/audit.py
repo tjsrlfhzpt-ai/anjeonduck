@@ -186,7 +186,7 @@ def check_site(site_dir):
         "tools/safety-cost/index.html": ["법정 최소 계상액의 참고 계산"],
         "tools/msds/index.html": ["자동 추출값 — 원문 확인 필요"],
         "tools/loto/index.html": ["보조양식"],
-        "tools/risk/index.html": ["안전duck 기본 위험성평가 예시 기준"],
+        "tools/risk/index.html": ["SafeTake 기본 위험성평가 예시 기준"],
         "legal/index.html": ["국가법령정보센터", "오류 신고"],
         "index.html": ["법령 데이터 기준일"],
     }
@@ -235,7 +235,7 @@ def check_online(m):
             continue
         url = f"https://www.law.go.kr/LSW/lsHstListR.do?lsId={l['lsId']}&chrClsCd=010202"
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (anjeonduck audit)"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (safetake audit)"})
             html = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", "replace")
         except Exception as ex:
             WARN.append(f"online {l['key']}: 연혁 접속 실패({type(ex).__name__}) — 수동 확인 필요")

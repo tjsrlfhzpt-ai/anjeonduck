@@ -79,7 +79,7 @@
   if (!D) return;
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  var KEY = "anjeonduck.docmap", st = {}, filt = "";
+  var KEY = "safetake.docmap", st = {}, filt = "";
   try { st = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { st = {}; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { alert("이 브라우저에 저장하지 못했습니다. 체크 상태는 새로고침하면 사라집니다."); } }
   function id(g, i) { return g.id + "." + i; }

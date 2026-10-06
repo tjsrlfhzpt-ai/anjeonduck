@@ -1,13 +1,14 @@
 {
-  "name": "안전duck",
-  "tagline": "안전관리 서류 작성부터 채용·법령까지",
-  "description": "안전관리자·보건관리자 채용정보, 산업안전보건 법정 서식, 법령 개정 소식을 모았습니다. 서식은 국가법령정보센터 원본으로 연결됩니다.",
-  "base_url": "https://tjsrlfhzpt-ai.github.io/anjeonduck",
+  "name": "SafeTake",
+  "tagline": "현장 안전지식 공유 커뮤니티",
+  "description": "SafeTake(세이프테이크)는 현장 안전관리자가 함께 쓰는 안전지식 공유 커뮤니티입니다. 안전보건 서류 작성 도구, 법령·서식 자료, 점검·지원사업 소식을 모았습니다.",
+  "base_url": "",
   "contact_email": "",
   "operator": {
-    "name": "안전duck 운영자 (개인 운영)",
-    "issues_url": "https://github.com/tjsrlfhzpt-ai/anjeonduck/issues/new",
-    "_comment": "문의 이메일은 contact_email 에 넣으면 푸터·법령정보 안내·채용 등록 페이지에 함께 표시됩니다. 비어 있으면 GitHub 이슈 접수만 안내합니다."
+    "name": "SafeTake 운영팀",
+    "contact_url": "",
+    "contact_label": "문의하기",
+    "_comment": "contact_url 에 카카오톡 오픈채팅·구글 폼 주소 또는 mailto:공용메일 을 넣으면 푸터·안내 페이지에 문의 링크가 나타납니다. 개인 이메일은 넣지 마세요."
   },
   "tools": [
     {
@@ -295,5 +296,6 @@
   "features": {
     "public_api": false,
     "_comment": "public_api: 공공데이터포털(정책뉴스·공공기관 채용·사고사망 속보) 수집·안전뉴스 메뉴. 켜려면 true + 저장소 변수 PUBLIC_API=true"
-  }
+  },
+  "_base_url_comment": "커스텀 도메인이 정해지면 https://도메인 을 넣습니다. 비어 있으면 canonical·og:url·sitemap 을 만들지 않고 모든 링크를 상대 경로로 둡니다."
 }

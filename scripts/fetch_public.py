@@ -68,7 +68,7 @@ def get(url, params, timeout=30):
     # serviceKey 는 공공데이터포털이 '인코딩된 키'를 그대로 요구하는 경우가 있어 따로 붙인다
     q = urllib.parse.urlencode(params)
     full = f"{url}?serviceKey={KEY if '%' in KEY else urllib.parse.quote(KEY, safe='')}&{q}"
-    req = urllib.request.Request(full, headers={"User-Agent": "Mozilla/5.0 (anjeonduck-fetch/1.0)"})
+    req = urllib.request.Request(full, headers={"User-Agent": "Mozilla/5.0 (safetake-fetch/1.0)"})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             raw = r.read().decode("utf-8", "replace")

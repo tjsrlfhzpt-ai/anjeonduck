@@ -34,7 +34,7 @@
   var LAW = ["1. 크레인(이동식 크레인은 제외한다), 리프트(이삿짐운반용 리프트는 제외한다) 및 곤돌라: 사업장에 설치가 끝난 날부터 3년 이내에 최초 안전검사를 실시하되, 그 이후부터 2년마다(건설현장에서 사용하는 것은 최초로 설치한 날부터 6개월마다)",
     "2. 이동식 크레인, 이삿짐운반용 리프트 및 고소작업대: 「자동차관리법」 제8조에 따른 신규등록 이후 3년 이내에 최초 안전검사를 실시하되, 그 이후부터 2년마다",
     "3. 프레스, 전단기, 압력용기, 국소 배기장치, 원심기, 롤러기, 사출성형기, 컨베이어, 산업용 로봇, 혼합기, 파쇄기 또는 분쇄기: 사업장에 설치가 끝난 날부터 3년 이내에 최초 안전검사를 실시하되, 그 이후부터 2년마다(공정안전보고서를 제출하여 확인을 받은 압력용기는 4년마다)"];
-  var KEY = "anjeonduck.inspect", list = [];
+  var KEY = "safetake.inspect", list = [];
   try { list = JSON.parse(localStorage.getItem(KEY) || "[]") || []; } catch (e) { list = []; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
@@ -82,7 +82,7 @@
     save(); render();
   });
   $("iPrint").addEventListener("click", function () {
-    var co = ""; try { co = localStorage.getItem("anjeonduck.company") || ""; } catch (e) {}
+    var co = ""; try { co = localStorage.getItem("safetake.company") || ""; } catch (e) {}
     $("iPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">안전검사 대상 기계 관리대장</h2>' + (window.ADoc ? ADoc.apprHTML("tool.inspect") : "") + '</header>' +
       '<table class="gtab"><thead><tr><th style="width:6%">번호</th><th>기계</th><th>종류</th><th>기준일</th><th>마지막 검사</th><th>다음 검사 기한</th><th style="width:14%">비고</th></tr></thead><tbody>' +
       list.map(function (it, i) { var u = due(it); return '<tr><td class="num">' + (i + 1) + "</td><td>" + esc(it.name) + "</td><td>" + esc(TYPES[it.t].k) + "</td><td>" + esc(it.base) + "</td><td>" + esc(it.last || "") + "</td><td>" + (u ? ymd(u.date) : "") + "</td><td></td></tr>"; }).join("") +

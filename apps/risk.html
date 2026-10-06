@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>위험성평가서 작성기 | 안전duck</title>
+<title>위험성평가서 작성기 | SafeTake</title>
 <meta name="description" content="빈도×강도(5×4) 방식 위험성평가서를 업종별 위험요인으로 빠르게 작성하고 A4로 인쇄하세요. 무료, 회원가입 없음.">
 <link rel="icon" href="../../assets/favicon.png" type="image/png">
 <style>
@@ -117,7 +117,7 @@
 <body>
 
 <div class="sitebar no-print">
-  <a href="../../">← 안전duck</a>
+  <a href="../../">← SafeTake</a>
   <span>입력 내용은 이 브라우저 안에서만 처리되고 서버로 전송되지 않습니다.</span>
 </div>
 
@@ -130,7 +130,7 @@
   <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">📷 사진 첨부</button>
   <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
   <button class="btn btn-red" onclick="resetForm()">↻ 초기화</button>
-  <p class="ctrl-note">현재 위험성과 감소대책은 기본 목록으로 미리 채운 <b>안전duck 추천값</b>입니다(법정 문구 아님). 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
+  <p class="ctrl-note">현재 위험성과 감소대책은 기본 목록으로 미리 채운 <b>SafeTake 추천값</b>입니다(법정 문구 아님). 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
 </div>
 
 <div class="page-container" id="page1">
@@ -164,7 +164,7 @@
     </tbody>
   </table>
 
-  <div class="section-title">2. 위험성 평가기준 <span class="sec-note">안전duck 기본 위험성평가 예시 기준 — 평가기법은 사업장의 위험성평가 방법에 맞게 설정</span></div>
+  <div class="section-title">2. 위험성 평가기준 <span class="sec-note">SafeTake 기본 위험성평가 예시 기준 — 평가기법은 사업장의 위험성평가 방법에 맞게 설정</span></div>
   <div class="cfg no-print" id="cfgBox">
     <details><summary>평가기준 바꾸기 (단계 수·계산 방식·등급 구간·허용 기준)</summary>
       <div class="cfg-grid">
@@ -174,7 +174,7 @@
         <label>허용 가능한 최대 점수 <input type="number" id="cfgA" min="1" value="6"></label>
       </div>
       <table class="cfg-cuts"><thead><tr><th>등급 이름</th><th>이 점수 이상</th><th>관리기준</th></tr></thead><tbody id="cfgCuts"></tbody></table>
-      <p class="cfg-note">법령은 특정 점수표를 정하고 있지 않습니다. 사업장 위험성평가 실시 규정에서 정한 방법(빈도·강도법, 체크리스트, 3단계 판단법, 핵심요인 기술법 등)에 맞게 고쳐 쓰세요. <button type="button" class="btn btn-blue" style="padding:3px 10px;font-size:12px" onclick="resetCfg()">안전duck 기본 예시로 되돌리기</button></p>
+      <p class="cfg-note">법령은 특정 점수표를 정하고 있지 않습니다. 사업장 위험성평가 실시 규정에서 정한 방법(빈도·강도법, 체크리스트, 3단계 판단법, 핵심요인 기술법 등)에 맞게 고쳐 쓰세요. <button type="button" class="btn btn-blue" style="padding:3px 10px;font-size:12px" onclick="resetCfg()">SafeTake 기본 예시로 되돌리기</button></p>
     </details>
   </div>
   <div class="criteria-box">
@@ -225,7 +225,7 @@
         <td class="law-ref">법 제36조제5항 · 규칙 제37조의4</td></tr>
     </tbody>
   </table>
-  <p class="form-status">안전duck 자체 제공 양식 · 법정 지정서식이 아님 — 위험성평가 결과에 적어야 할 사항(규칙 제37조의4)을 담은 보조 양식입니다. 근거 확인일 2026-10-05(고용노동부령 제477호).</p>
+  <p class="form-status">SafeTake 자체 제공 양식 · 법정 지정서식이 아님 — 위험성평가 결과에 적어야 할 사항(규칙 제37조의4)을 담은 보조 양식입니다. 근거 확인일 2026-10-05(고용노동부령 제477호).</p>
 </div>
 
 <div class="page-container photo-page" id="riskPhotosPage"><div id="riskPhotos"></div></div>
@@ -254,7 +254,7 @@
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
   var DEF_CFG = { p: 5, c: 4, mode: "mul", accept: 6, cuts: [["매우높음", 16, "즉시개선"], ["높음", 15, "즉시개선"], ["보통", 8, "개선"], ["낮음", 4, "현상유지"], ["매우낮음", 1, "현상유지"]] };
-  var CLS = ["risk20", "risk15", "risk9", "risk4", "risk1"], CFG_KEY = "anjeonduck.risk.cfg", CFG;
+  var CLS = ["risk20", "risk15", "risk9", "risk4", "risk1"], CFG_KEY = "safetake.risk.cfg", CFG;
   try { CFG = JSON.parse(localStorage.getItem(CFG_KEY) || "null"); } catch (e) { CFG = null; }
   if (!CFG || !CFG.cuts || CFG.cuts.length !== 5) CFG = JSON.parse(JSON.stringify(DEF_CFG));
   function scoreOf(p, c) { return p && c ? (CFG.mode === "add" ? p + c : p * c) : 0; }

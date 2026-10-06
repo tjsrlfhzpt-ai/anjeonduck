@@ -21,7 +21,7 @@ FORCE = "--force" in sys.argv
 
 
 def fetch_csv(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "anjeonduck-sync"})
+    req = urllib.request.Request(url, headers={"User-Agent": "safetake-sync"})
     with urllib.request.urlopen(req, timeout=30) as r:
         raw = r.read().decode("utf-8-sig")
     if raw.lstrip().startswith("<"):

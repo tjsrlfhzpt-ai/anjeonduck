@@ -1,5 +1,5 @@
 {
- "_comment": "안전duck이 쓰는 법령의 현재 시행본·시행 예정본. 모든 도구·서식·달력이 이 파일의 버전을 기준으로 삼는다. 법령이 바뀌면 여기를 먼저 고치고 data/lawraw → parse_lawtext.py 순서로 갱신.",
+ "_comment": "SafeTake이 쓰는 법령의 현재 시행본·시행 예정본. 모든 도구·서식·달력이 이 파일의 버전을 기준으로 삼는다. 법령이 바뀌면 여기를 먼저 고치고 data/lawraw → parse_lawtext.py 순서로 갱신.",
  "checked_at": "2026-10-05",
  "stale_after_days": 45,
  "source": "국가법령정보센터 연혁 목록(lsHstListR.do)·본문·부칙",

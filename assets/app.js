@@ -1,7 +1,7 @@
-/* 안전duck — 검색·필터·정렬·즐겨찾기. 서버 호출 없음. */
+/* SafeTake — 검색·필터·정렬·즐겨찾기. 서버 호출 없음. */
 (function () {
   "use strict";
-  var FAV_KEY = "anjeonduck.fav.v1";
+  var FAV_KEY = "safetake.fav.v1";
 
   function readFav() {
     try { var v = JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); return Array.isArray(v) ? v : []; }

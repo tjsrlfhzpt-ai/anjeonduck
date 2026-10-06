@@ -4,7 +4,7 @@ data/lawtext/*.json (scripts/parse_lawtext.py 로 국가법령정보센터 본�
 - 편·장·절 목차, 조문 앵커(#j38, #j619-2), 이 법령 안 검색
 - 조문 속 인용(「산업안전보건법」 제17조, 법 제29조, 영 제16조, 제38조)을 해당 조문으로 연결
 - 하위 법령이 이 조문을 인용한 곳(시행령·시행규칙) 역참조
-- 별표·별지 서식 언급을 안전duck 서식 상세 페이지로 연결
+- 별표·별지 서식 언급을 SafeTake 서식 상세 페이지로 연결
 을 만든다. 조문 원문은 저작권 보호 대상이 아니다(저작권법 제7조).
 """
 import html
@@ -258,7 +258,7 @@ def law_page(k, laws, rev, byl_href, law_url, manifest=None, today=""):
         add_html = f'<section class="ladds" id="addenda"><h2 class="lhead lh1">최근 부칙 (시행일·적용례)</h2><p class="hint">2025년 이후 공포분만 실었습니다. 조문별 시행일이 다를 때는 부칙이 기준입니다.</p>{blocks}</section>'
     ver_box = (f'<section class="lver" id="versions"><div class="lver-h"><h2 class="h-sm">법령 버전 · 기준일</h2>'
                f'<label class="lasof">기준일 <input type="date" id="lAsof" value="{e(today)}" min="{e(mf["current"]["effective"])}"></label></div>'
-               f'<div class="table-wrap"><table class="lvt"><thead><tr><th>상태</th><th>시행일</th><th>공포</th><th>안전duck 수록</th><th>출처</th></tr></thead><tbody>{ver_rows}</tbody></table></div>'
+               f'<div class="table-wrap"><table class="lvt"><thead><tr><th>상태</th><th>시행일</th><th>공포</th><th>SafeTake 수록</th><th>출처</th></tr></thead><tbody>{ver_rows}</tbody></table></div>'
                f'<p class="hint" id="lAsofMsg">기준일을 바꾸면 그날 적용되는 조문으로 본문이 바뀝니다. 이전 연혁은 <a href="{e(mf.get("history_url") or d["url"])}" target="_blank" rel="noopener">국가법령정보센터 연혁 ↗</a>에서 확인하세요. 마지막 공식 확인일 {e(mf["checked_at"])}.</p></section>') if mf else ""
     body_html = f"""
 <section class="phead lphead"><div class="wrap">
@@ -452,7 +452,7 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html, m
 <section class="phead lhero"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>법령</p>
   <h1>산업안전 법령</h1>
-  <p>산업안전보건법령 4종과 중대재해처벌법령 2종의 현행 전문 {total:,}개 조문을 안전duck 안에서 바로 읽고 찾습니다. 조문 속 인용 번호를 누르면 해당 조문으로 이동하고, 법률 조문마다 그 조문을 인용한 시행령·시행규칙이 함께 표시됩니다.</p>
+  <p>산업안전보건법령 4종과 중대재해처벌법령 2종의 현행 전문 {total:,}개 조문을 SafeTake 안에서 바로 읽고 찾습니다. 조문 속 인용 번호를 누르면 해당 조문으로 이동하고, 법률 조문마다 그 조문을 인용한 시행령·시행규칙이 함께 표시됩니다.</p>
   <div class="lsearch" data-lsearch>
     <div class="hsearch-box">
       <label for="lsq" class="sr">법령 전체 검색</label>
@@ -486,7 +486,7 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html, m
     <div class="empty" data-empty hidden><p>검색 결과가 없습니다.</p></div>
   </section>
   <aside class="col-side">
-    <section class="side-box" id="past"><div class="sec-head"><div><h2>D · 과거 법령</h2></div></div><p>개정 전 조문과 연혁은 안전duck에 싣지 않습니다. 각 법령 페이지의 '국가법령정보센터 연혁'에서 시행일별 본문을 확인하세요.</p></section>
+    <section class="side-box" id="past"><div class="sec-head"><div><h2>D · 과거 법령</h2></div></div><p>개정 전 조문과 연혁은 SafeTake에 싣지 않습니다. 각 법령 페이지의 '국가법령정보센터 연혁'에서 시행일별 본문을 확인하세요.</p></section>
     <section class="side-box" id="statutes"><div class="sec-head"><div><h2>고시·관련 법령 원문</h2></div></div><ul class="llist">{statutes_html}</ul></section>
   </aside>
 </div>

@@ -1,4 +1,4 @@
-# 안전duck
+# SafeTake
 
 안전관리자를 위한 채용·서식·법령 포털. **서버 없음, 운영비 0원**인 정적 사이트입니다.
 
@@ -84,7 +84,7 @@ templates/*.csv       구글 시트 머리글 서식
 {"date": "2026-10-05", "title": "…", "lead": "…",
  "items": [{"cat": "법령|정책|감독|사고|화학물질|보건|자료", "date": "2026-10-01", "title": "…", "summary": "직접 쓴 요약", "point": "실무 포인트",
             "sources": [{"name": "경향신문", "url": "https://…"}]}],
- "todo": [{"text": "…", "href": "tools/risk/"}], "by": "안전duck 리포터", "checked": "2026-10-05"}
+ "todo": [{"text": "…", "href": "tools/risk/"}], "by": "SafeTake 리포터", "checked": "2026-10-05"}
 ```
 원칙: 기사·보도자료 문장을 옮겨 적지 않고 직접 요약, 출처 링크 필수, 사진 없음, 확인 안 된 숫자는 쓰지 않음.
 
@@ -112,7 +112,7 @@ templates/*.csv       구글 시트 머리글 서식
 
 ## 처음 올리기 (GitHub Pages)
 
-1. GitHub에 새 저장소 `anjeonduck`(공개)를 만들고 이 폴더 전체를 올립니다.
+1. GitHub에 새 저장소 `safetake`(공개)를 만들고 이 폴더 전체를 올립니다.
 2. 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 바꿉니다.
 3. `config/site.json`에서 `base_url`을 실제 주소로, `tools[0].url`을 Mallo 주소로 바꿉니다.
 4. Actions 탭에서 "빌드·배포"가 끝나면 사이트가 열립니다.
@@ -141,7 +141,7 @@ templates/*.csv       구글 시트 머리글 서식
 
 | 기능 | 적용 서식 | 데이터 |
 |---|---|---|
-| 사업장 정보(회사·대표자·책임자·안전/보건관리자·관리감독자) 한 번 입력 → 모든 서식 자동 기입 | 전 서식(해당 칸) | 브라우저 localStorage `anjeonduck.profile` |
+| 사업장 정보(회사·대표자·책임자·안전/보건관리자·관리감독자) 한 번 입력 → 모든 서식 자동 기입 | 전 서식(해당 칸) | 브라우저 localStorage `safetake.profile` |
 | 교육과정 선택 → 법정 교육시간·교육내용, 특별교육 39개 작업 개별내용 | 교육일지 | `data/edu_contents.json`(규칙 별표 5, HWP 원본 추출), `data/edu_hours.json`(별표 4) |
 | 작업 종류 선택 → 법정 확인 항목 | 작업허가서(화기·밀폐·고소·전기·굴착·중장비) | `data/form_auto.json` (기준규칙 조문) |
 | 예방대책·작업방법 자동 기입 | 작업계획서 4종 | `data/form_auto.json` |
@@ -158,10 +158,10 @@ templates/*.csv       구글 시트 머리글 서식
 
 | 기능 | 저장 위치 | 쓰는 곳 |
 |---|---|---|
-| 결재란(기본 담당·검토·승인, 칸 이름·칸 수·성명 수정) | localStorage `anjeonduck.appr.<문서>` / 기본값 `anjeonduck.appr.default` | 서식 작성기 42종, TBM, 위험성평가, 직무분장표, 폭염 기록부, 안전검사 관리대장 |
+| 결재란(기본 담당·검토·승인, 칸 이름·칸 수·성명 수정) | localStorage `safetake.appr.<문서>` / 기본값 `safetake.appr.default` | 서식 작성기 42종, TBM, 위험성평가, 직무분장표, 폭염 기록부, 안전검사 관리대장 |
 | 인쇄용 서명 이미지(손글씨·성명 도장, 서명일 표시) | 결재란과 같은 곳(PNG, 240×100 이하로 축소) | 결재란 서명 칸 |
-| 사진 첨부(사진마다 개별 칸, 설명·관련 항목·촬영일, 인쇄 시 사진대지) | IndexedDB `anjeonduck`/`photos` (긴 변 1600px JPEG로 축소) | 서식 작성기(점검 항목별 📷 포함), TBM, 위험성평가 |
-| 내 데이터 관리(JSON 내보내기·불러오기) | `anjeonduck.*` localStorage 전부 + 사진 | 상단 알림바·푸터 버튼 |
+| 사진 첨부(사진마다 개별 칸, 설명·관련 항목·촬영일, 인쇄 시 사진대지) | IndexedDB `safetake`/`photos` (긴 변 1600px JPEG로 축소) | 서식 작성기(점검 항목별 📷 포함), TBM, 위험성평가 |
+| 내 데이터 관리(JSON 내보내기·불러오기) | `safetake.*` localStorage 전부 + 사진 | 상단 알림바·푸터 버튼 |
 
 ## 법령 전문 (lawpages.py)
 
@@ -169,7 +169,7 @@ templates/*.csv       구글 시트 머리글 서식
 빌드하면 `laws/<key>/`(act·yeong·rule·krule·sapa·sapa_dec) 전문 페이지와 `assets/data/lawidx.js`(법령 홈 전체 검색 색인)가 생깁니다.
 법령이 개정되면 본문 페이지 텍스트를 다시 받아 lawraw 파일을 바꾸고 파서를 다시 돌리세요(lsiSeq는 parse_lawtext.py 의 LAWS).
 
-## 안전duck 안내 게시물 (data/duck_signs.json)
+## SafeTake 안내 게시물 (data/duck_signs.json)
 
 이미지를 `assets/img/`에 넣고 `data/duck_signs.json`의 items에 한 줄 추가하면 표지 페이지 상단 목록과 A4 인쇄 페이지(`resources/signs/duck-<id>/`)가 생깁니다. 웹용은 WebP(1000px), 인쇄용은 PNG 원본을 씁니다.
 
@@ -217,7 +217,7 @@ python3 build.py --local --out _preview  # 더블클릭으로 여는 미리보�
 | 조문별 시행일 | `scripts/parse_lawtext.py` 가 본문의 `[시행일: …]` 표기를 읽어 현행 문언과 시행 예정 문언(`pending`)을 분리. 법령 페이지에서 기준일을 고르면 적용 문언이 바뀜 |
 | 판정 | 적용범위 판정은 적용·조건부·확인 필요·적용 제외 4단계 + 시행령 별표 1(일부 적용 제외) 반영 |
 | 표기 | 도구·서식 하단에 법적 근거 확인일·적용 법령 버전·원문 링크(`build.py` `lawver_html`), 홈 최상단에 법령 데이터 기준일 |
-| 양식 지위 | 웹 서식·TBM·산보위·위험성평가·LOTO 는 "안전duck 자체 제공 양식 · 법정 지정서식이 아님" |
+| 양식 지위 | 웹 서식·TBM·산보위·위험성평가·LOTO 는 "SafeTake 자체 제공 양식 · 법정 지정서식이 아님" |
 | MSDS | 자동 추출 → 원문 대조 → 확인 체크 후에만 경고표지 인쇄 |
 | 브리핑 | 공식 1차 출처가 없는 항목은 빌드에서 제외. 예약 작업은 초안을 PR로만 올리고 사람이 확인 후 병합 |
 | 안내 | `/legal/` 법령정보·면책 안내, 푸터 운영·신고 채널(`config/site.json` 의 `operator`, `contact_email`) |

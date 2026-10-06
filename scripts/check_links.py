@@ -24,7 +24,7 @@ for f in SITE.rglob("*.html"):
 
 def check(u):
     try:
-        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 anjeonduck-linkcheck"})
+        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 safetake-linkcheck"})
         with urllib.request.urlopen(req, timeout=20) as r:
             body = r.read(200000).decode("utf-8", "ignore")
             # 법령정보센터는 없는 주소도 200으로 오류 안내를 돌려준다

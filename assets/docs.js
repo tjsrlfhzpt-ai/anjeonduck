@@ -1,12 +1,22 @@
-/* 안전duck 문서 공통 모듈 — 결재란 · 인쇄용 서명 이미지 · 사진 첨부 · 내 데이터 백업
+/* SafeTake 문서 공통 모듈 — 결재란 · 인쇄용 서명 이미지 · 사진 첨부 · 내 데이터 백업
    서버 없이 이 기기(브라우저)에만 저장한다.
-   - 결재란/서명: localStorage "anjeonduck.appr.*"
-   - 사진: IndexedDB "anjeonduck" / store "photos" (용량이 커서 localStorage 대신)
-   - 백업: "anjeonduck." 로 시작하는 localStorage 전부 + 사진을 JSON 하나로 내보내고 불러온다. */
+   - 결재란/서명: localStorage "safetake.appr.*"
+   - 사진: IndexedDB "safetake" / store "photos" (용량이 커서 localStorage 대신)
+   - 백업: "safetake." 로 시작하는 localStorage 전부 + 사진을 JSON 하나로 내보내고 불러온다. */
 (function () {
   "use strict";
   if (window.ADoc) return;
-  var P = "anjeonduck.";
+  var P = "safetake.";
+  // 예전 이름으로 저장된 입력값을 새 이름으로 한 번 옮긴다(같은 키가 이미 있으면 건드리지 않음)
+  try {
+    var OLD = ["anjeon", "duck."].join("");
+    if (!localStorage.getItem(P + "migrated")) {
+      var mv = [];
+      for (var mi = 0; mi < localStorage.length; mi++) { var mk = localStorage.key(mi); if (mk && mk.indexOf(OLD) === 0) mv.push(mk); }
+      mv.forEach(function (k) { var nk = P + k.slice(OLD.length); if (localStorage.getItem(nk) === null) localStorage.setItem(nk, localStorage.getItem(k)); localStorage.removeItem(k); });
+      localStorage.setItem(P + "migrated", "1");
+    }
+  } catch (e) { /* 저장소를 못 쓰는 환경 */ }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function lget(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
   function lset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { toast("이 브라우저에 저장하지 못했습니다(저장 공간 부족 또는 사생활 보호 모드)."); return false; } }
@@ -230,7 +240,7 @@
     if (dbp) return dbp;
     dbp = new Promise(function (res, rej) {
       if (!window.indexedDB) { rej(new Error("이 브라우저는 사진 저장(IndexedDB)을 지원하지 않습니다.")); return; }
-      var r = indexedDB.open("anjeonduck", 1);
+      var r = indexedDB.open("safetake", 1);
       r.onupgradeneeded = function () { var d = r.result; if (!d.objectStoreNames.contains("photos")) { var st = d.createObjectStore("photos", { keyPath: "id" }); st.createIndex("doc", "doc"); } };
       r.onsuccess = function () { res(r.result); };
       r.onerror = function () { rej(r.error || new Error("사진 저장소를 열 수 없습니다.")); };
@@ -382,13 +392,13 @@
   function clearPhotos(doc) { return listPhotos(doc).then(function (ps) { return Promise.all(ps.map(function (p) { return delPhoto(p.id); })); }).then(function () { changed(doc); }).catch(function () {}); }
 
   // =====================================================================
-  // 내 데이터 백업 — localStorage("anjeonduck.*") + 사진을 JSON 하나로
+  // 내 데이터 백업 — localStorage("safetake.*") + 사진을 JSON 하나로
   // =====================================================================
   function localKeys() { var ks = []; try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf(P) === 0) ks.push(k); } } catch (e) {} return ks.sort(); }
   function summary() {
     var ks = localKeys(), bytes = 0;
     ks.forEach(function (k) { try { bytes += (localStorage.getItem(k) || "").length * 2; } catch (e) {} });
-    var forms = ks.filter(function (k) { return /^anjeonduck\.form\./.test(k); }).length;
+    var forms = ks.filter(function (k) { return /^safetake\.form\./.test(k); }).length;
     return allPhotos().then(function (ps) { ps.forEach(function (p) { bytes += (p.data || "").length; }); return { keys: ks.length, forms: forms, photos: ps.length, bytes: bytes }; })
       .catch(function () { return { keys: ks.length, forms: forms, photos: 0, bytes: bytes }; });
   }
@@ -396,11 +406,11 @@
     var data = {};
     localKeys().forEach(function (k) { try { data[k] = localStorage.getItem(k); } catch (e) {} });
     return allPhotos().catch(function () { return []; }).then(function (ps) {
-      var out = { app: "안전duck", format: "anjeonduck-backup", version: 1, exported: new Date().toISOString(), origin: location.origin, localStorage: data, photos: ps };
+      var out = { app: "SafeTake", format: "safetake-backup", version: 1, exported: new Date().toISOString(), origin: location.origin, localStorage: data, photos: ps };
       var blob = new Blob([JSON.stringify(out)], { type: "application/json" });
       var a = document.createElement("a"), d = new Date();
       a.href = URL.createObjectURL(blob);
-      a.download = "안전duck_백업_" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "_" + pad(d.getHours()) + pad(d.getMinutes()) + ".json";
+      a.download = "SafeTake_백업_" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "_" + pad(d.getHours()) + pad(d.getMinutes()) + ".json";
       document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
       return { keys: Object.keys(data).length, photos: ps.length };
     });
@@ -413,11 +423,12 @@
       r.onload = function () {
         var d;
         try { d = JSON.parse(r.result); } catch (e) { rej(new Error("백업 파일(JSON)을 읽을 수 없습니다.")); return; }
-        if (!d || d.format !== "anjeonduck-backup" || typeof d.localStorage !== "object") { rej(new Error("안전duck 백업 파일이 아닙니다.")); return; }
+        if (!d || (d.format !== "safetake-backup" && d.format !== ["anjeon", "duck-backup"].join("")) || typeof d.localStorage !== "object") { rej(new Error("SafeTake 백업 파일이 아닙니다.")); return; }
         var n = 0, bad = 0;
         Object.keys(d.localStorage).forEach(function (k) {
-          if (k.indexOf(P) !== 0 || typeof d.localStorage[k] !== "string") { bad++; return; }
-          try { localStorage.setItem(k, d.localStorage[k]); n++; } catch (e) { bad++; }
+          var ok0 = ["anjeon", "duck."].join(""), nk = k.indexOf(ok0) === 0 ? P + k.slice(ok0.length) : k;
+          if (nk.indexOf(P) !== 0 || typeof d.localStorage[k] !== "string") { bad++; return; }
+          try { localStorage.setItem(nk, d.localStorage[k]); n++; } catch (e) { bad++; }
         });
         var ps = Array.isArray(d.photos) ? d.photos.filter(function (p) { return p && typeof p.id === "string" && typeof p.doc === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(p.data || ""); }) : [];
         (ps.length ? tx("readwrite", function (st) { ps.forEach(function (p) { st.put({ id: p.id, doc: p.doc, data: p.data, caption: String(p.caption || ""), rel: String(p.rel || ""), taken: String(p.taken || ""), ord: +p.ord || 0, added: String(p.added || "") }); }); }) : Promise.resolve())
@@ -432,11 +443,11 @@
     var m = document.createElement("div");
     m.className = "ad-modal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "adDataT");
     m.innerHTML = '<div class="ad-box"><h2 id="adDataT">작성 내용 백업 · 삭제</h2>' +
-      '<p>안전duck 작성 도구는 입력한 내용을 안전duck 서버로 보내지 않고 <b>이 기기의 이 브라우저</b>에 저장합니다. 브라우저 기록을 지우거나 다른 기기로 옮기면 보이지 않습니다.</p>' +
+      '<p>SafeTake 작성 도구는 입력한 내용을 SafeTake 서버로 보내지 않고 <b>이 기기의 이 브라우저</b>에 저장합니다. 브라우저 기록을 지우거나 다른 기기로 옮기면 보이지 않습니다.</p>' +
       '<ul style="font-size:13px;line-height:1.6;margin:8px 0 10px 18px;list-style:disc"><li><b>저장 위치</b> — 서식·도구 입력값, 결재란 이름, 인쇄용 서명 이미지: localStorage / 첨부 사진: IndexedDB</li><li><b>백업 파일(JSON)에 들어가는 것</b> — 위 항목 전부(사진·서명 이미지 포함). 파일을 받은 사람은 내용을 모두 볼 수 있습니다.</li><li><b>건강정보</b> — 건강진단 결과·질병명 등은 꼭 필요한 만큼만 적고, 이름 대신 관리번호를 쓰세요.</li><li><b>공용 PC</b> — 다른 사람도 같은 브라우저에서 내용을 볼 수 있습니다. 쓰고 나면 아래에서 삭제하세요.</li></ul>' +
       '<p data-sum>저장된 내용을 세는 중…</p>' +
       '<div class="ad-row" style="justify-content:flex-start"><button type="button" class="ad-btn" data-b="exp">백업 파일 내보내기 (JSON)</button>' +
-      '<label class="ad-btn g"><input type="file" accept="application/json,.json" hidden data-imp>백업 불러오기</label><button type="button" class="ad-btn r" data-b="wipe">이 브라우저의 안전duck 데이터 모두 삭제</button></div>' +
+      '<label class="ad-btn g"><input type="file" accept="application/json,.json" hidden data-imp>백업 불러오기</label><button type="button" class="ad-btn r" data-b="wipe">이 브라우저의 SafeTake 데이터 모두 삭제</button></div>' +
       '<p style="margin-top:12px;font-size:12.5px">불러오기는 같은 이름의 항목을 파일 내용으로 덮어씁니다. 파일에는 입력한 내용이 그대로 들어 있으니 안전한 곳에 보관하세요. 서버로는 아무것도 보내지 않습니다.</p>' +
       '<div class="ad-row"><button type="button" class="ad-btn g" data-b="close">닫기</button></div></div>';
     document.body.appendChild(m);
@@ -451,11 +462,11 @@
       var b = ev.target.closest("[data-b]"); if (!b) return;
       if (b.dataset.b === "close") close();
       if (b.dataset.b === "wipe") {
-        if (!window.confirm("이 브라우저에 저장된 안전duck 서식·도구 입력값, 서명 이미지, 사진을 모두 지웁니다. 되돌릴 수 없습니다. 계속할까요?")) return;
-        var ks = []; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("anjeonduck.") === 0) ks.push(k); }
+        if (!window.confirm("이 브라우저에 저장된 SafeTake 서식·도구 입력값, 서명 이미지, 사진을 모두 지웁니다. 되돌릴 수 없습니다. 계속할까요?")) return;
+        var ks = []; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("safetake.") === 0) ks.push(k); }
         ks.forEach(function (k) { localStorage.removeItem(k); });
         var done = function () { toast("삭제했습니다 — 항목 " + ks.length + "개와 사진. 새로고침합니다."); setTimeout(function () { location.reload(); }, 900); };
-        try { var rq = indexedDB.deleteDatabase("anjeonduck"); rq.onsuccess = done; rq.onerror = done; rq.onblocked = done; } catch (e) { done(); }
+        try { var rq = indexedDB.deleteDatabase("safetake"); rq.onsuccess = done; rq.onerror = done; rq.onblocked = done; } catch (e) { done(); }
       }
       if (b.dataset.b === "exp") { b.disabled = true; exportAll().then(function (r) { toast("백업 파일을 내려받았습니다 — 항목 " + r.keys + "개, 사진 " + r.photos + "장"); }).catch(function (e) { toast("내보내지 못했습니다: " + (e.message || e)); }).then(function () { b.disabled = false; }); }
     });

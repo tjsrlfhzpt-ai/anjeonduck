@@ -89,7 +89,7 @@
   if (!D) return;
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  var KEY = "anjeonduck.machines.mine", mine = {};
+  var KEY = "safetake.machines.mine", mine = {};
   try { mine = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { mine = {}; }
   function saveMine() { try { localStorage.setItem(KEY, JSON.stringify(mine)); return true; } catch (e) { alert("이 브라우저에 저장하지 못했습니다(저장 공간 또는 개인정보 보호 설정). 인쇄는 그대로 할 수 있습니다."); return false; } }
   var KINDS = ["cert", "self", "insp", "guard", "pre"], kindF = "", sel = null;

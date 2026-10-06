@@ -46,7 +46,7 @@
     ["측정·기록", "온도·습도계 비치, 작업 전 예방 안내, 폭염작업 날마다 체감온도와 조치 기록 → 그 해 12월 31일까지 보존 (제562조제2항)"],
     ["응급", "온열질환 의심 증상이 있으면 즉시 119 신고 등 조치 (제562조제3항)"]
   ];
-  var KEY = "anjeonduck.heat", list = [];
+  var KEY = "safetake.heat", list = [];
   try { list = JSON.parse(localStorage.getItem(KEY) || "[]") || []; } catch (e) { list = []; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
@@ -104,7 +104,7 @@
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv" })); a.download = "폭염작업_체감온도_기록_" + year + ".csv"; document.body.appendChild(a); a.click(); a.remove();
   });
   $("hPrint").addEventListener("click", function () {
-    var co = ""; try { co = localStorage.getItem("anjeonduck.company") || ""; } catch (e) {}
+    var co = ""; try { co = localStorage.getItem("safetake.company") || ""; } catch (e) {}
     var rs = rowsOf(year);
     $("hPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">폭염작업 체감온도 및 조치 기록부 (' + year + '년)</h2>' + (window.ADoc ? ADoc.apprHTML("tool.heat") : "") + '</header>' +
       '<table class="gtab"><thead><tr><th style="width:15%">날짜·시각</th><th style="width:16%">장소·작업</th><th style="width:9%">체감온도</th><th style="width:12%">판정</th><th>조치 내용</th><th style="width:9%">기록자</th></tr></thead><tbody>' +
