@@ -9,7 +9,9 @@
   var BOARDS = { free: "커뮤니티", qna: "Q&A", job: "채용공고" };
   var ERR = {
     LOGIN_REQUIRED: "로그인이 필요합니다.", RATE_LIMIT: "너무 빠르게 연속으로 등록했습니다. 잠시 뒤 다시 시도하세요.",
-    DAILY_LIMIT: "하루 등록 한도를 넘었습니다. 내일 다시 시도하세요.", NOT_ALLOWED: "권한이 없거나 이미 삭제된 글입니다.",
+    DAILY_LIMIT: "하루 등록 한도를 넘었습니다. 내일 다시 시도하세요.", SUSPENDED: "글쓰기가 정지된 계정입니다. 마이페이지에서 기간과 사유를 확인할 수 있습니다.", ADMIN_ONLY: "운영자만 쓸 수 있는 기능입니다.",
+    CANNOT_SUSPEND_ADMIN: "운영자 계정과 자기 자신은 정지할 수 없습니다.", REASON_REQUIRED: "사유를 2자 이상 적어 주세요.", BAD_DAYS: "기간은 1~3650일 사이로 정하세요.", USER_NOT_FOUND: "회원을 찾을 수 없습니다.", NOT_FOUND: "대상을 찾을 수 없습니다. 이미 처리되었을 수 있습니다.",
+    NOT_ALLOWED: "권한이 없거나 이미 삭제된 글입니다.",
     POST_NOT_FOUND: "삭제되었거나 없는 글입니다.", NICKNAME_INVALID: "닉네임은 한글·영문·숫자·밑줄 2~12자이며 운영자를 연상시키는 이름은 쓸 수 없습니다.",
     NICKNAME_TAKEN: "이미 쓰고 있는 닉네임입니다.", NICKNAME_COOLDOWN: "닉네임은 7일에 한 번만 바꿀 수 있습니다.",
     JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", IMAGES_INVALID: "사진은 3장까지, 이 화면에서 올린 사진만 붙일 수 있습니다.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.",
@@ -103,7 +105,7 @@
   }
   function userBar() {
     var bar = h("div", { class: "cm-user" });
-    if (ME) add(bar, [h("span", null, h("b", null, ME.nickname), " 님"), h("a", { href: url("account") }, "마이페이지"),
+    if (ME) add(bar, [h("span", null, h("b", null, ME.nickname), " 님"), h("a", { href: url("account") }, "마이페이지"), ME.role === "admin" ? h("a", { class: "cm-adm", href: url("admin") }, "운영 관리") : null,
       h("button", { type: "button", class: "linkbtn", onclick: function () { sb.auth.signOut().then(function () { location.href = url(""); }); } }, "로그아웃")]);
     else add(bar, [h("a", { href: url("account", { next: location.pathname + location.search }) }, "로그인"), h("a", { href: url("account", { mode: "join" }) }, "회원가입")]);
     return bar;
@@ -186,6 +188,44 @@
       return h("a", { href: imgUrl(p), target: "_blank", rel: "noopener" }, h("img", { src: imgUrl(p), alt: "첨부 사진 " + (i + 1), loading: "lazy" }));
     }));
   }
+  // ---- 채용공고 공유 카드: 회사명·마감일이 들어간 정사각형 이미지를 브라우저에서 그려 저장한다(서버를 쓰지 않는다)
+  function jobCard(post, m) {
+    return new Promise(function (ok, no) {
+      var W = 800, c = document.createElement("canvas"); c.width = W; c.height = W;
+      var x = c.getContext("2d"), F = '"Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif';
+      function rr(X, Y, w, h, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
+      function fit(text, max, size, min, weight) { do { x.font = weight + " " + size + "px " + F; if (x.measureText(text).width <= max) break; size -= 4; } while (size > min); return size; }
+      function wrap(text, max) {   // 두 줄까지. 띄어쓰기에서 먼저 나누고, 안 되면 글자 단위로 나눈다
+        if (x.measureText(text).width <= max) return [text];
+        var cut = -1, i;
+        for (i = 1; i < text.length; i++) if (text.charAt(i) === " " && x.measureText(text.slice(0, i)).width <= max) cut = i;
+        if (cut < 0) for (i = 1; i < text.length; i++) if (x.measureText(text.slice(0, i)).width <= max) cut = i;
+        var a = text.slice(0, cut).trim(), b = text.slice(cut).trim();
+        while (b.length > 1 && x.measureText(b).width > max) b = b.slice(0, -2) + "…";
+        return [a, b];
+      }
+      x.fillStyle = "#EDE4F6"; x.fillRect(0, 0, W, W);
+      x.fillStyle = "#5B2A86"; x.textAlign = "center"; x.textBaseline = "middle";
+      x.font = "800 40px " + F; x.fillText("SafePlum 안전·보건 채용공고", W / 2, 110);
+      x.fillStyle = "#fff"; x.shadowColor = "rgba(60,20,90,.18)"; x.shadowBlur = 24; x.shadowOffsetY = 8; rr(60, 190, W - 120, 330, 28); x.fill();
+      x.shadowColor = "transparent"; x.shadowBlur = 0; x.shadowOffsetY = 0;
+      var co = String(m.company || post.title || "").trim().slice(0, 60), dl = /^\d{4}-\d{2}-\d{2}$/.test(m.deadline || "") ? "(~" + (+m.deadline.slice(5, 7)) + "/" + (+m.deadline.slice(8, 10)) + ")" : "(상시 채용)";
+      x.fillStyle = "#111827"; var size = fit(co, W - 200, 84, 52, "800"), lines = wrap(co, W - 200);
+      if (lines.length > 1) size = Math.min(size, 60); x.font = "800 " + size + "px " + F; lines = wrap(co, W - 200);
+      var y0 = 330 - (lines.length - 1) * (size * 0.62);
+      lines.forEach(function (t, i) { x.fillText(t, W / 2, y0 + i * size * 1.24); });
+      x.font = "800 64px " + F; x.fillStyle = "#5B2A86"; x.fillText(dl, W / 2, 460);
+      x.textAlign = "left"; x.fillStyle = "#3B1B5A"; x.font = "800 44px " + F;
+      var tag = String(post.category || "").trim(); x.fillText(tag ? tag + " 채용" : "안전·보건 채용", 330, 610);
+      x.font = "600 30px " + F; x.fillStyle = "#5B2A86"; x.fillText(String(m.region || "").slice(0, 16) || "공고 원문에서 조건 확인", 330, 668);
+      x.font = "800 34px " + F; x.fillStyle = "#111827"; x.fillText("safeplum.com", 330, 730);
+      var im = new Image();
+      function done() { c.toBlob(function (b) { b ? ok(b) : no(new Error("CARD")); }, "image/png"); }
+      im.onload = function () { x.drawImage(im, 70, 540, 230, 230); done(); };
+      im.onerror = done;
+      im.src = REL + "assets/img/plum/hero.webp";
+    });
+  }
   function busy(btn, on, label) { btn.disabled = on; if (label) btn.textContent = label; }
 
   // ---------------------------------------------------------------- 목록
@@ -267,7 +307,9 @@
       var acts = h("p", { class: "cm-acts" },
         mine ? h("a", { href: url("write", { id: post.id }) }, "수정") : null,
         mine || admin ? h("button", { type: "button", class: "linkbtn", onclick: rpc("delete_post", { p_id: post.id }, "이 글을 삭제할까요?", function () { location.href = url("", { b: post.board }); }) }, admin && !mine ? "삭제(운영자)" : "삭제") : null,
-        !mine ? h("button", { type: "button", class: "linkbtn", onclick: report("post", post.id) }, "신고") : null);
+        !mine ? h("button", { type: "button", class: "linkbtn", onclick: report("post", post.id) }, "신고") : null,
+        admin ? h("button", { type: "button", class: "linkbtn", onclick: rpc("admin_set_notice", { p_id: post.id, p_on: !post.notice }, post.notice ? "공지를 해제할까요?" : "이 글을 공지로 올릴까요?", pageView) }, post.notice ? "공지 해제" : "공지 지정") : null,
+        admin && !mine && post.author ? h("a", { class: "linkbtn", href: url("admin", { tab: "members", q: post.author.nickname }) }, "작성자 관리") : null);
       var art = h("article", { class: "cm-post" },
         h("p", { class: "cm-post-cat" }, h("a", { href: url("", { b: post.board }) }, BOARDS[post.board]), post.category ? " · " + post.category : "", post.notice ? " · 공지" : ""),
         h("h2", { class: "cm-post-t" }, post.title),
@@ -275,6 +317,21 @@
         job ? h("dl", { class: "cm-job" }, [["회사", jm.company], ["근무지", jm.region], ["직무", post.category], ["경력", jm.career], ["고용형태", jm.employment], ["마감", (jm.deadline || "상시 채용") + (jst.closed ? " (마감됨)" : "")]].filter(function (x) { return x[1]; }).map(function (x) { return [h("dt", null, x[0]), h("dd", null, x[1])]; })) : null,
         h("div", { class: "cm-body" }, rich(post.body)),
         gallery(post.meta),
+        job ? h("p", { class: "cm-share" },
+          h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () {
+            var b = this; busy(b, true, "만드는 중…");
+            (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { return jobCard(post, jm); }).then(function (blob) {
+              var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "SafePlum_채용_" + String(jm.company || "공고").replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 30) + ".png";
+              document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000); busy(b, false, "공유 카드 저장");
+            }, function () { busy(b, false, "공유 카드 저장"); window.alert("카드를 만들지 못했습니다."); });
+          } }, "공유 카드 저장"),
+          h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () {
+            var b = this, t = (jm.company ? jm.company + " " : "") + post.title + (jm.deadline ? " (~" + (+jm.deadline.slice(5, 7)) + "/" + (+jm.deadline.slice(8, 10)) + ")" : "") + "\n" + location.href;
+            var fin = function () { b.textContent = "복사했습니다"; setTimeout(function () { b.textContent = "제목·링크 복사"; }, 1600); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(fin, function () { window.prompt("아래 내용을 복사하세요", t); });
+            else window.prompt("아래 내용을 복사하세요", t);
+          } }, "제목·링크 복사"),
+          h("span", { class: "hint" }, "오픈채팅·메신저에 올릴 때 쓰세요.")) : null,
         job ? h("div", { class: "cm-apply" }, h("b", null, "지원 방법"), /^https:\/\/\S+$/.test(jm.apply || "") ? h("a", { class: "btn" + (jst.closed ? " btn-ghost" : ""), href: jm.apply, target: "_blank", rel: "nofollow ugc noopener" }, "지원 페이지 열기 ↗") : h("span", null, rich(jm.apply || ""))) : null,
         acts);
       var clist = h("ul", { class: "cm-cms" }, cms.map(function (c) {
@@ -456,9 +513,14 @@
     if (ME) {
       var nn = h("input", { type: "text", maxlength: "12", required: true, value: ME.nickname }), o1 = h("p", { hidden: true }), b1 = h("button", { type: "submit", class: "btn btn-ghost" }, "닉네임 변경");
       var pw = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o2 = h("p", { hidden: true }), b2 = h("button", { type: "submit", class: "btn btn-ghost" }, "비밀번호 변경"), c2 = pwConfirm(pw);
-      var o3 = h("p", { hidden: true });
+      var o3 = h("p", { hidden: true }), susBox = h("p", { class: "cm-note cm-err", role: "status", hidden: true });
+      sb.from("suspensions").select("until,reason").eq("user_id", ME.id).maybeSingle().then(function (r) {
+        var x = r && r.data; if (!x || (x.until && new Date(x.until) <= new Date())) return;
+        susBox.textContent = "글쓰기가 정지된 상태입니다. 기간: " + (x.until ? when(x.until, true) + "까지" : "기한 없음") + " · 사유: " + x.reason + " — 이의가 있으면 문의 창구로 알려 주세요.";
+        susBox.hidden = false;
+      }, function () {});
       return show(h("div", { class: "cm-auth" },
-        h("h2", { class: "h-sm" }, "마이페이지"), h("p", { class: "cm-note" }, "이메일 ", h("b", null, ME.email), " · 이메일은 다른 회원에게 보이지 않습니다."),
+        h("h2", { class: "h-sm" }, "마이페이지"), susBox, h("p", { class: "cm-note" }, "이메일 ", h("b", null, ME.email), " · 이메일은 다른 회원에게 보이지 않습니다."),
         h("form", { class: "cm-form", onsubmit: function (ev) {
           ev.preventDefault(); busy(b1, true);
           sb.rpc("set_nickname", { p: nn.value.trim() }).then(function (r) { busy(b1, false); result(o1, r.error ? msg(r.error) : "닉네임을 바꿨습니다.", !r.error); });
@@ -477,6 +539,15 @@
     }
 
     var mode = qs("mode") === "join" ? "join" : qs("mode") === "reset" ? "reset" : "login";
+    // 어디서 넘어왔는지에 맞춰 왜 로그인이 필요한지 한 줄로 알려 준다
+    function why() {
+      var n = qs("next"), t = "";
+      if (/board\/write\/.*b=job/.test(n)) t = "채용공고는 회원이면 누구나 무료로 등록할 수 있습니다. 로그인하거나 무료로 가입해 주세요.";
+      else if (/board\/write\/.*b=qna/.test(n)) t = "질문은 회원이면 누구나 올릴 수 있습니다. 로그인하거나 무료로 가입해 주세요.";
+      else if (/board\/write\//.test(n)) t = "글쓰기는 회원이면 누구나 할 수 있습니다. 로그인하거나 무료로 가입해 주세요.";
+      else if (/board\/view\//.test(n)) t = "댓글·신고는 로그인한 뒤에 할 수 있습니다.";
+      return t ? h("p", { class: "cm-why" }, t) : null;
+    }
     function sw(m, text) { return h("a", { href: url("account", { mode: m === "login" ? "" : m, next: qs("next") }) }, text); }
     var email = h("input", { type: "email", autocomplete: "email", required: true, maxlength: "120" }), out = h("p", { hidden: true });
     if (ARRIVE === "error") {   // 만료됐거나 이미 쓴 인증 링크
@@ -489,8 +560,10 @@
       return show(h("form", { class: "cm-form cm-auth", onsubmit: function (ev) {
         ev.preventDefault(); busy(bl, true); out.hidden = true;
         sb.auth.signInWithPassword({ email: email.value.trim(), password: pw1.value }).then(function (r) { if (r.error) { busy(bl, false); return result(out, msg(r.error)); } goNext(); });
-      } }, h("h2", { class: "h-sm" }, "로그인"), field("이메일", email), field("비밀번호", pw1), out, h("p", { class: "btns" }, bl),
-        h("p", { class: "cm-alt" }, sw("join", "회원가입"), " · ", sw("reset", "비밀번호 찾기"))));
+      } }, why(), h("h2", { class: "h-sm" }, "로그인"), field("이메일", email), field("비밀번호", pw1), out, h("p", { class: "btns" }, bl),
+        h("p", { class: "cm-alt" }, sw("reset", "비밀번호 찾기")),
+        h("div", { class: "cm-joinbox" }, h("p", null, h("b", null, "아직 회원이 아니신가요?"), " 가입은 무료이고 1분이면 됩니다. 이메일 인증만 하면 되고 이름·전화번호는 받지 않습니다."),
+          h("a", { class: "btn btn-ghost btn-block", href: url("account", { mode: "join", next: qs("next") }) }, "무료 회원가입"))));
     }
     if (mode === "reset") {
       var br = h("button", { type: "submit", class: "btn btn-block" }, "재설정 메일 보내기");
@@ -518,15 +591,122 @@
         if (r.data && r.data.session) return goNext();
         result(out, "인증 메일을 보냈습니다. 메일의 링크를 누르면 가입이 끝납니다. 메일이 안 보이면 스팸함을 확인하세요. 이미 가입한 이메일이라면 메일이 가지 않으니 로그인하거나 비밀번호 찾기를 이용하세요.", true);
       }).catch(function (e) { busy(bj, false); result(out, msg(e)); });
-    } }, h("h2", { class: "h-sm" }, "회원가입"),
-      h("p", { class: "hint" }, "이름·전화번호는 받지 않습니다. 이메일 인증만 하면 됩니다."),
+    } }, why(), h("h2", { class: "h-sm" }, "무료 회원가입"),
+      h("p", { class: "hint" }, "누구나 무료로 가입합니다. 이름·전화번호는 받지 않고 이메일 인증만 하면 됩니다."),
       field("이메일", email, "인증 메일을 받을 주소 · 다른 회원에게 보이지 않습니다"), field("비밀번호", pw2, "8자 이상"), cj.el, field("닉네임", nk, "한글·영문·숫자·밑줄 2~12자 · 글에 공개됩니다"),
       h("label", { class: "cm-chk" }, ag1, h("span", null, h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "과 ", h("a", { href: REL + "privacy/", target: "_blank" }, "개인정보 처리방침"), "을 읽었고 동의합니다. (필수)")),
       h("label", { class: "cm-chk" }, ag2, h("span", null, "만 14세 이상입니다. (필수)")),
       out, h("p", { class: "btns" }, bj), h("p", { class: "cm-alt" }, "이미 회원이면 ", sw("login", "로그인"))));
   }
 
-  var ROUTES = { list: pageList, view: pageView, write: pageWrite, account: pageAccount };
+  // ---------------------------------------------------------------- 운영 관리 (운영자 전용 · 권한은 서버 함수가 다시 확인한다)
+  function pageAdmin() {
+    document.title = "운영 관리 | " + document.title.split(" | ").pop();
+    if (!ME) { location.href = url("account", { next: location.pathname + location.search }); return; }
+    if (ME.role !== "admin") return show(note("운영자만 볼 수 있는 화면입니다.", "err"), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "게시판으로")));
+    var TABS = [["reports", "신고"], ["members", "회원"], ["deleted", "삭제한 글"], ["log", "처리 기록"]];
+    var tab = TABS.some(function (t) { return t[0] === qs("tab"); }) ? qs("tab") : "reports", box = h("div", { class: "cm-adm-body" });
+    function go(t, extra) { var p = { tab: t }; for (var k in extra || {}) p[k] = extra[k]; history.replaceState(null, "", url("admin", p)); tab = t; draw(); }
+    function head() {
+      return h("div", { class: "cm-top" }, h("div", { class: "seg cm-tabs", role: "group", "aria-label": "운영 관리" },
+        TABS.map(function (t) { return h("button", { type: "button", class: "cm-tab", "aria-pressed": String(t[0] === tab), onclick: function () { go(t[0]); } }, t[1]); })), userBar());
+    }
+    function fail(e) {
+      var m = String((e && e.message) || "");
+      box.textContent = "";
+      add(box, /could not find the function|does not exist|schema cache/i.test(m)
+        ? note("운영 관리 기능을 준비하고 있습니다. Supabase SQL Editor 에서 supabase/admin.sql 을 한 번 실행해야 합니다.", "err") : note(msg(e), "err"));
+    }
+    function call(name, args, confirmText, after) {
+      if (confirmText && !window.confirm(confirmText)) return;
+      sb.rpc(name, args || {}).then(function (r) { if (r.error) window.alert(msg(r.error)); else (after || draw)(); }, function (e) { window.alert(msg(e)); });
+    }
+    function table(heads, rows, empty) {
+      if (!rows.length) return h("div", { class: "empty" }, h("p", null, empty));
+      return h("div", { class: "cm-tblw" }, h("table", { class: "cm-tbl cm-adm-t" }, h("thead", null, h("tr", null, heads.map(function (x) { return h("th", { scope: "col" }, x); }))), h("tbody", null, rows)));
+    }
+    function link(r) { return r.post_id ? h("a", { href: url("view", { id: r.post_id }), target: "_blank", rel: "noopener" }, r.title || "(제목 없음)") : (r.title || "(삭제되어 볼 수 없음)"); }
+    function load(name, args, render) {
+      box.textContent = ""; add(box, h("p", { class: "cm-load", role: "status" }, "불러오는 중…"));
+      sb.rpc(name, args || {}).then(function (r) { if (r.error) return fail(r.error); box.textContent = ""; add(box, render(r.data || [])); }, fail);
+    }
+    function drawReports() {
+      var open = qs("done") !== "1";
+      load("admin_reports", { p_open: open }, function (rows) {
+        return [h("p", { class: "cm-adm-bar" }, h("button", { type: "button", class: "chip", "aria-pressed": String(open), onclick: function () { go("reports"); } }, "처리 전"),
+          h("button", { type: "button", class: "chip", "aria-pressed": String(!open), onclick: function () { go("reports", { done: "1" }); } }, "처리 완료"),
+          h("span", { class: "hint" }, "같은 글·댓글에 들어온 신고는 한 줄로 묶어 보여 줍니다.")),
+          table(["대상", "신고 사유", "작성자", "신고", open ? "조치" : "처리"], rows.map(function (r) {
+            var kind = r.target_type === "post" ? "글" : "댓글";
+            return h("tr", null,
+              h("td", null, h("span", { class: "cm-cat" }, kind), " ", link(r), r.gone ? h("span", { class: "cm-st cm-st-wait" }, "삭제됨") : null, h("p", { class: "cm-adm-snip" }, r.snippet || "")),
+              h("td", null, r.reasons), h("td", null, r.author || "탈퇴한 회원"),
+              h("td", { class: "cm-meta" }, r.n + "건 · ", h("time", { datetime: r.last_at }, when(r.last_at))),
+              open ? h("td", { class: "cm-adm-acts" },
+                !r.gone ? h("button", { type: "button", class: "btn btn-sm", onclick: function () {
+                  call(r.target_type === "post" ? "delete_post" : "delete_comment", { p_id: r.target_id }, "이 " + kind + "을 삭제할까요? (3개월 안에는 복구할 수 있습니다)", function () { call("admin_handle_report", { p_type: r.target_type, p_id: r.target_id, p_note: "삭제" }); });
+                } }, "삭제") : null,
+                h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () {
+                  var n = window.prompt("처리 메모 (예: 문제없음, 경고함)", r.gone ? "삭제됨" : "문제없음"); if (n == null) return;
+                  call("admin_handle_report", { p_type: r.target_type, p_id: r.target_id, p_note: n });
+                } }, r.gone ? "처리 완료" : "문제없음"),
+                r.author_id ? h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { go("members", { q: r.author }); } }, "작성자 관리") : null)
+              : h("td", { class: "cm-meta" }, (r.handled_note || "") + " · ", h("time", { datetime: r.handled_at }, when(r.handled_at))));
+          }), open ? "처리할 신고가 없습니다." : "처리한 신고가 없습니다.")];
+      });
+    }
+    function suspend(m) {
+      var d = window.prompt(m.nickname + " 님의 글쓰기를 며칠 동안 정지할까요?\n숫자(예: 7, 30)를 적거나, 기한 없이 정지하려면 0을 적으세요.", "7");
+      if (d == null) return;
+      d = parseInt(d, 10); if (isNaN(d) || d < 0 || d > 3650) return window.alert(ERR.BAD_DAYS);
+      var why = window.prompt("정지 사유 (회원 본인에게 보입니다 · 2~200자)", ""); if (why == null) return;
+      if (why.trim().length < 2) return window.alert(ERR.REASON_REQUIRED);
+      call("admin_suspend", { p_user: m.id, p_days: d === 0 ? null : d, p_reason: why.trim() });
+    }
+    function drawMembers() {
+      var q = qs("q").slice(0, 20), only = qs("sus") === "1";
+      load("admin_members", { p_q: q, p_only_suspended: only }, function (rows) {
+        var inp = h("input", { type: "search", name: "q", value: q, placeholder: "닉네임 검색", "aria-label": "닉네임 검색", maxlength: "20" });
+        return [h("div", { class: "cm-adm-bar" },
+          h("form", { class: "cm-search", role: "search", onsubmit: function (ev) { ev.preventDefault(); go("members", { q: inp.value.trim(), sus: only ? "1" : "" }); } }, inp, h("button", { type: "submit", class: "btn btn-sm btn-ghost" }, "검색")),
+          h("button", { type: "button", class: "chip", "aria-pressed": String(only), onclick: function () { go("members", { q: q, sus: only ? "" : "1" }); } }, "정지 중인 회원만"),
+          h("span", { class: "hint" }, "가입일 최신순 200명까지. 이메일은 여기에 표시하지 않습니다.")),
+          table(["닉네임", "가입일", "글·댓글", "신고 받음", "상태", "조치"], rows.map(function (m) {
+            return h("tr", null,
+              h("td", null, h("b", null, m.nickname), m.role === "admin" ? h("span", { class: "cm-st cm-st-ans" }, "운영자") : null),
+              h("td", { class: "cm-meta" }, h("time", { datetime: m.created_at }, when(m.created_at, true).slice(0, 10))),
+              h("td", { class: "cm-meta" }, m.posts + " · " + m.comments), h("td", { class: "cm-meta" }, String(m.reported)),
+              h("td", null, m.suspended ? [h("span", { class: "cm-st cm-st-hot" }, "정지"), " ", h("span", { class: "cm-meta" }, (m.until ? when(m.until, true) + "까지" : "기한 없음")), h("p", { class: "cm-adm-snip" }, m.reason || "")] : "정상"),
+              h("td", { class: "cm-adm-acts" }, m.role === "admin" ? null : m.suspended
+                ? h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { call("admin_unsuspend", { p_user: m.id }, m.nickname + " 님의 정지를 해제할까요?"); } }, "정지 해제")
+                : h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { suspend(m); } }, "글쓰기 정지")));
+          }), q || only ? "조건에 맞는 회원이 없습니다." : "회원이 없습니다."),
+          h("p", { class: "src-note" }, "정지된 회원은 글·댓글을 새로 쓰거나 고칠 수 없고, 읽기·자기 글 삭제·신고는 할 수 있습니다. 계정 자체를 없애거나 로그인을 막으려면 Supabase 대시보드(Authentication → Users)에서 처리하세요.")];
+      });
+    }
+    function drawDeleted() {
+      load("admin_deleted", {}, function (rows) {
+        return [table(["종류", "내용", "작성자", "삭제", "조치"], rows.map(function (r) {
+          return h("tr", null, h("td", null, h("span", { class: "cm-cat" }, r.kind === "post" ? "글" : "댓글")),
+            h("td", null, h("b", null, r.title || ""), h("p", { class: "cm-adm-snip" }, r.snippet || "")), h("td", null, r.author || "탈퇴한 회원"),
+            h("td", { class: "cm-meta" }, h("time", { datetime: r.deleted_at }, when(r.deleted_at, true)), " · " + (r.by_self ? "본인" : "운영자")),
+            h("td", { class: "cm-adm-acts" }, h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { call("admin_restore", { p_kind: r.kind, p_id: r.id }, "이 " + (r.kind === "post" ? "글" : "댓글") + "을 다시 보이게 할까요?"); } }, "복구")));
+        }), "삭제한 글·댓글이 없습니다."),
+        h("p", { class: "src-note" }, "삭제한 글은 3개월 동안 운영자만 볼 수 있게 보관한 뒤 완전히 지워집니다. 본인이 지운 글을 복구할 때는 신중하게 판단하세요.")];
+      });
+    }
+    function drawLog() {
+      load("admin_logs", {}, function (rows) {
+        return table(["일시", "운영자", "조치", "대상", "메모"], rows.map(function (r) {
+          return h("tr", null, h("td", { class: "cm-meta" }, h("time", { datetime: r.created_at }, when(r.created_at, true))), h("td", null, r.admin || ""), h("td", null, h("b", null, r.action)), h("td", null, r.target), h("td", null, r.note));
+        }), "아직 처리 기록이 없습니다.");
+      });
+    }
+    function draw() { show(head(), box); ({ reports: drawReports, members: drawMembers, deleted: drawDeleted, log: drawLog })[tab](); }
+    draw();
+  }
+
+  var ROUTES = { list: pageList, view: pageView, write: pageWrite, account: pageAccount, admin: pageAdmin };
   sb.auth.onAuthStateChange(function (ev) { if (ev === "PASSWORD_RECOVERY") { RECOVERY = true; if (PAGE === "account") pageAccount(); } });
   loading();
   if (qs("logout") && PAGE === "account") {   // 헤더의 '로그아웃'

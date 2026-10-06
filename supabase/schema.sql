@@ -391,5 +391,235 @@ drop policy if exists "post_images_delete" on storage.objects;
 create policy "post_images_delete" on storage.objects for delete to authenticated
   using (bucket_id = 'post-images' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));
 
+
+-- ============================================================ 운영자 관리 기능 (admin.sql 과 같은 내용)
+
+-- ------------------------------------------------------------ 글쓰기 정지
+-- profiles 는 누구나 읽을 수 있으므로 정지 사유는 별도 표에 둔다(본인과 운영자만 읽는다).
+create table if not exists public.suspensions (
+  user_id uuid primary key references public.profiles (id) on delete cascade,
+  until timestamptz,                    -- null = 기한 없음
+  reason text not null check (char_length(btrim(reason)) between 2 and 200),
+  by_admin uuid,
+  created_at timestamptz not null default now()
+);
+alter table public.suspensions enable row level security;
+drop policy if exists suspensions_read on public.suspensions;
+create policy suspensions_read on public.suspensions for select to authenticated using (user_id = auth.uid() or public.is_admin());
+revoke all on public.suspensions from anon, authenticated;
+grant select on public.suspensions to authenticated;
+
+create or replace function public.is_suspended(p uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.suspensions where user_id = p and (until is null or until > now()));
+$$;
+
+-- 정지된 회원은 글·댓글을 새로 쓰거나 고칠 수 없다(읽기, 자기 글 삭제, 신고는 가능).
+create or replace function public.guard_suspended() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if coalesce(current_setting('app.sys', true), '') = '1' then return new; end if;
+  if auth.uid() is not null and public.is_suspended(auth.uid()) then raise exception 'SUSPENDED'; end if;
+  return new;
+end $$;
+drop trigger if exists posts_guard_suspended on public.posts;
+create trigger posts_guard_suspended before insert or update on public.posts for each row execute function public.guard_suspended();
+drop trigger if exists comments_guard_suspended on public.comments;
+create trigger comments_guard_suspended before insert on public.comments for each row execute function public.guard_suspended();
+
+-- ------------------------------------------------------------ 처리 기록
+create table if not exists public.admin_log (
+  id bigint generated always as identity primary key,
+  admin_id uuid,
+  action text not null,
+  target text not null default '',
+  note text not null default '',
+  created_at timestamptz not null default now()
+);
+create index if not exists admin_log_created on public.admin_log (created_at desc);
+alter table public.admin_log enable row level security;
+revoke all on public.admin_log from anon, authenticated;   -- 읽기도 함수(admin_logs)로만
+
+create or replace function public.admin_only() returns void
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  if not public.is_admin() then raise exception 'ADMIN_ONLY'; end if;
+end $$;
+
+create or replace function public.admin_note(p_action text, p_target text, p_note text) returns void
+language sql security definer set search_path = public as $$
+  insert into public.admin_log (admin_id, action, target, note) values (auth.uid(), p_action, coalesce(p_target, ''), left(coalesce(p_note, ''), 300));
+$$;
+revoke execute on function public.admin_note(text, text, text) from public, anon, authenticated;
+
+-- ------------------------------------------------------------ 신고
+-- 같은 글·댓글에 들어온 신고를 한 줄로 묶어 보여 준다.
+create or replace function public.admin_reports(p_open boolean default true)
+returns table (target_type text, target_id bigint, post_id bigint, n bigint, reasons text, first_at timestamptz, last_at timestamptz,
+               handled_at timestamptz, handled_note text, title text, snippet text, author_id uuid, author text, gone boolean)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  perform public.admin_only();
+  return query
+  select g.target_type, g.target_id,
+         case when g.target_type = 'post' then g.target_id else c.post_id end,
+         g.n, g.reasons, g.first_at, g.last_at, g.handled_at, g.handled_note,
+         coalesce(p.title, pc.title), left(coalesce(c.body, p.body, ''), 300),
+         coalesce(c.author_id, p.author_id), pr.nickname,
+         case when g.target_type = 'post' then (p.id is null or p.deleted_at is not null) else (c.id is null or c.deleted_at is not null) end
+    from (select r.target_type, r.target_id, count(*) n, string_agg(r.reason, ' / ' order by r.created_at) reasons,
+                 min(r.created_at) first_at, max(r.created_at) last_at, max(r.handled_at) handled_at, max(r.handled_note) handled_note,
+                 bool_and(r.handled_at is not null) done
+            from public.reports r group by r.target_type, r.target_id) g
+    left join public.posts p on g.target_type = 'post' and p.id = g.target_id
+    left join public.comments c on g.target_type = 'comment' and c.id = g.target_id
+    left join public.posts pc on pc.id = c.post_id
+    left join public.profiles pr on pr.id = coalesce(c.author_id, p.author_id)
+   where g.done = not p_open
+   order by g.last_at desc limit 200;
+end $$;
+
+-- 신고 처리 완료 표시(글을 지웠든 문제없다고 봤든 결과를 메모로 남긴다)
+create or replace function public.admin_handle_report(p_type text, p_id bigint, p_note text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  perform public.admin_only();
+  update public.reports set handled_at = now(), handled_note = left(btrim(coalesce(p_note, '')), 200)
+   where target_type = p_type and target_id = p_id and handled_at is null;
+  perform public.admin_note('신고 처리', p_type || ' #' || p_id, p_note);
+end $$;
+
+-- ------------------------------------------------------------ 회원
+-- 이메일은 내보내지 않는다(필요하면 Supabase 대시보드에서 확인).
+create or replace function public.admin_members(p_q text default '', p_only_suspended boolean default false)
+returns table (id uuid, nickname text, role text, created_at timestamptz, posts bigint, comments bigint, reported bigint,
+               suspended boolean, until timestamptz, reason text)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  perform public.admin_only();
+  return query
+  select pr.id, pr.nickname, pr.role, pr.created_at,
+         (select count(*) from public.posts x where x.author_id = pr.id and x.deleted_at is null),
+         (select count(*) from public.comments x where x.author_id = pr.id and x.deleted_at is null),
+         (select count(*) from public.reports r
+            where (r.target_type = 'post' and exists (select 1 from public.posts x where x.id = r.target_id and x.author_id = pr.id))
+               or (r.target_type = 'comment' and exists (select 1 from public.comments x where x.id = r.target_id and x.author_id = pr.id))),
+         (s.user_id is not null and (s.until is null or s.until > now())), s.until, s.reason
+    from public.profiles pr left join public.suspensions s on s.user_id = pr.id
+   where (coalesce(btrim(p_q), '') = '' or pr.nickname ilike '%' || replace(replace(replace(btrim(p_q), '\', '\\'), '%', '\%'), '_', '\_') || '%')
+     and (not p_only_suspended or (s.user_id is not null and (s.until is null or s.until > now())))
+   order by pr.created_at desc limit 200;
+end $$;
+
+-- p_days: 1~3650 또는 null(기한 없음). 운영자와 자기 자신은 정지할 수 없다.
+create or replace function public.admin_suspend(p_user uuid, p_days int, p_reason text) returns void
+language plpgsql security definer set search_path = public as $$
+declare nick text; rl text;
+begin
+  perform public.admin_only();
+  select nickname, role into nick, rl from public.profiles where id = p_user;
+  if nick is null then raise exception 'USER_NOT_FOUND'; end if;
+  if p_user = auth.uid() or rl = 'admin' then raise exception 'CANNOT_SUSPEND_ADMIN'; end if;
+  if p_days is not null and (p_days < 1 or p_days > 3650) then raise exception 'BAD_DAYS'; end if;
+  if char_length(btrim(coalesce(p_reason, ''))) < 2 then raise exception 'REASON_REQUIRED'; end if;
+  insert into public.suspensions (user_id, until, reason, by_admin, created_at)
+  values (p_user, case when p_days is null then null else now() + make_interval(days => p_days) end, left(btrim(p_reason), 200), auth.uid(), now())
+  on conflict (user_id) do update set until = excluded.until, reason = excluded.reason, by_admin = excluded.by_admin, created_at = now();
+  perform public.admin_note('글쓰기 정지', nick, coalesce(p_days::text || '일', '기한 없음') || ' · ' || btrim(p_reason));
+end $$;
+
+create or replace function public.admin_unsuspend(p_user uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare nick text;
+begin
+  perform public.admin_only();
+  select nickname into nick from public.profiles where id = p_user;
+  delete from public.suspensions where user_id = p_user;
+  if found then perform public.admin_note('정지 해제', coalesce(nick, ''), ''); end if;
+end $$;
+
+-- ------------------------------------------------------------ 삭제한 글·댓글 (복구)
+create or replace function public.admin_deleted()
+returns table (kind text, id bigint, post_id bigint, title text, snippet text, author text, deleted_at timestamptz, by_self boolean)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  perform public.admin_only();
+  return query
+  select * from (
+    select 'post'::text, p.id, p.id, p.title, left(p.body, 200), pr.nickname, p.deleted_at, (p.deleted_by is not distinct from p.author_id)
+      from public.posts p left join public.profiles pr on pr.id = p.author_id where p.deleted_at is not null
+    union all
+    select 'comment'::text, c.id, c.post_id, pp.title, left(c.body, 200), pr.nickname, c.deleted_at, (c.deleted_by is not distinct from c.author_id)
+      from public.comments c left join public.posts pp on pp.id = c.post_id left join public.profiles pr on pr.id = c.author_id where c.deleted_at is not null
+  ) t order by 7 desc limit 200;
+end $$;
+
+create or replace function public.admin_restore(p_kind text, p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+declare pid bigint;
+begin
+  perform public.admin_only();
+  perform set_config('app.sys', '1', true);
+  if p_kind = 'post' then
+    update public.posts set deleted_at = null, deleted_by = null where id = p_id and deleted_at is not null;
+    if not found then perform set_config('app.sys', '', true); raise exception 'NOT_FOUND'; end if;
+  elsif p_kind = 'comment' then
+    update public.comments set deleted_at = null, deleted_by = null where id = p_id and deleted_at is not null returning post_id into pid;
+    if pid is null then perform set_config('app.sys', '', true); raise exception 'NOT_FOUND'; end if;
+    update public.posts set comment_count = comment_count + 1 where id = pid;
+  else
+    perform set_config('app.sys', '', true); raise exception 'NOT_FOUND';
+  end if;
+  perform set_config('app.sys', '', true);
+  perform public.admin_note('복구', p_kind || ' #' || p_id, '');
+end $$;
+
+-- 공지 지정·해제
+create or replace function public.admin_set_notice(p_id bigint, p_on boolean) returns void
+language plpgsql security definer set search_path = public as $$
+declare n int;
+begin
+  perform public.admin_only();
+  perform set_config('app.sys', '1', true);
+  update public.posts set notice = coalesce(p_on, false) where id = p_id and deleted_at is null;
+  get diagnostics n = row_count;
+  perform set_config('app.sys', '', true);
+  if n = 0 then raise exception 'NOT_FOUND'; end if;
+  perform public.admin_note(case when p_on then '공지 지정' else '공지 해제' end, 'post #' || p_id, '');
+end $$;
+
+-- 운영자가 남의 글·댓글을 지우면 기록에 남긴다(기존 삭제 함수는 그대로 두고 기록만 덧붙인다).
+create or replace function public.log_admin_delete() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if old.deleted_at is null and new.deleted_at is not null and new.deleted_by is not null and new.deleted_by is distinct from old.author_id then
+    insert into public.admin_log (admin_id, action, target, note)
+    values (new.deleted_by, '삭제', tg_argv[0] || ' #' || old.id, left(case when tg_argv[0] = 'post' then (to_jsonb(old) ->> 'title') else (to_jsonb(old) ->> 'body') end, 80));
+  end if;
+  return new;
+end $$;
+drop trigger if exists posts_log_admin_delete on public.posts;
+create trigger posts_log_admin_delete after update on public.posts for each row execute function public.log_admin_delete('post');
+drop trigger if exists comments_log_admin_delete on public.comments;
+create trigger comments_log_admin_delete after update on public.comments for each row execute function public.log_admin_delete('comment');
+
+create or replace function public.admin_logs()
+returns table (id bigint, created_at timestamptz, admin text, action text, target text, note text)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  perform public.admin_only();
+  return query select l.id, l.created_at, pr.nickname, l.action, l.target, l.note
+    from public.admin_log l left join public.profiles pr on pr.id = l.admin_id order by l.created_at desc, l.id desc limit 200;
+end $$;
+
+revoke execute on function public.admin_reports(boolean), public.admin_handle_report(text, bigint, text), public.admin_members(text, boolean),
+  public.admin_suspend(uuid, int, text), public.admin_unsuspend(uuid), public.admin_deleted(), public.admin_restore(text, bigint),
+  public.admin_set_notice(bigint, boolean), public.admin_logs(), public.admin_only(), public.guard_suspended(), public.log_admin_delete() from public, anon;
+grant execute on function public.admin_reports(boolean), public.admin_handle_report(text, bigint, text), public.admin_members(text, boolean),
+  public.admin_suspend(uuid, int, text), public.admin_unsuspend(uuid), public.admin_deleted(), public.admin_restore(text, bigint),
+  public.admin_set_notice(bigint, boolean), public.admin_logs() to authenticated;
+grant execute on function public.is_suspended(uuid) to authenticated;
+
 -- ------------------------------------------------------------ 운영자 지정 (가입한 뒤 한 번만, 이메일을 바꿔서 따로 실행)
 -- update public.profiles set role = 'admin' where id = (select id from auth.users where email = '운영자 이메일');

@@ -593,7 +593,7 @@ def nav_cols(site, rel):
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")])],
         "brief": [],
-        "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록 (회원 무료)")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
+        "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
@@ -1571,7 +1571,8 @@ def build(out, today):
             "안전관리자·보건관리자가 현장 이야기와 실무 질문을 나누는 SafePlum 커뮤니티·Q&A 게시판.")
     cm_page("view/", "view", "글 보기", "게시판의 글과 답변은 회원 개인의 의견입니다.", "../../", "SafePlum 게시판 글 보기.")
     cm_page("write/", "write", "글쓰기", "제목과 내용을 적어 등록합니다. 개인·사업장을 알아볼 수 있는 정보는 적지 마세요.", "../../", "SafePlum 게시판 글쓰기.", wide=True)
-    cm_page("account/", "account", "로그인 · 마이페이지", "이메일 인증만으로 가입합니다. 이름·전화번호는 받지 않습니다.", "../../", "SafePlum 로그인·회원가입·마이페이지.", wide=True)
+    cm_page("admin/", "admin", "운영 관리", "신고 처리, 회원 글쓰기 정지, 삭제한 글 복구, 처리 기록. 운영자 계정으로 로그인해야 보입니다.", "../../", "SafePlum 게시판 운영 관리(운영자 전용).", wide=True)
+    cm_page("account/", "account", "로그인 · 마이페이지", "누구나 무료로 가입합니다. 이메일 인증만 하면 되고 이름·전화번호는 받지 않습니다.", "../../", "SafePlum 로그인·회원가입·마이페이지.", wide=True)
 
     op_line = operator_html(site, "../../")
     rules_body = f"""

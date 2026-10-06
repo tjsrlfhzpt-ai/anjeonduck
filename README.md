@@ -277,3 +277,7 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 게시판을 이미 연 프로젝트라면 Supabase → SQL Editor 에 `supabase/jobs.sql` 을 한 번 붙여 넣고 Run 합니다(기존 글·회원은 그대로, 여러 번 실행해도 안전). 새로 만드는 프로젝트는 `supabase/schema.sql` 에 이미 들어 있습니다. 같은 파일이 사진 첨부용 저장소(Storage 버킷 `post-images`, 공개 읽기·본인 폴더만 쓰기·한 장 1MB·JPEG)도 만듭니다. 실행 전에는 사진 첨부가 "준비하고 있습니다"로 안내되고, '채용공고' 탭이 "준비하고 있습니다"로 표시됩니다.
 
 홍보용 오픈채팅방 배너는 `config/site.json` 의 `community.openchat.url` 로 켜고 끕니다(문의 창구 `operator.contact_url` 과 별개).
+
+## 운영 관리 화면 열기
+
+게시판을 이미 연 프로젝트라면 SQL Editor 에 `supabase/admin.sql` 을 한 번 실행합니다. 운영자(admin) 계정으로 로그인하면 게시판 오른쪽 위에 "운영 관리"가 보입니다(`/board/admin/`). 신고 처리, 회원 글쓰기 정지·해제, 삭제한 글 복구, 처리 기록을 다룹니다. 모든 관리 기능은 서버 함수가 운영자인지 다시 확인합니다.
