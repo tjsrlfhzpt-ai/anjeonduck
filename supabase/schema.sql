@@ -302,6 +302,18 @@ language sql immutable as $$
      and char_length(coalesce(m ->> 'employment', '')) <= 20;
 $$;
 
+-- 사진 첨부(모든 게시판): meta.images 는 최대 3장, 자기 폴더(<회원 id>/파일.jpg)에 올린 것만 붙일 수 있다.
+create or replace function public.post_images_ok(m jsonb, owner uuid) returns boolean
+language sql immutable as $$
+  select case when not (m ? 'images') then true
+              when jsonb_typeof(m -> 'images') <> 'array' then false
+              else jsonb_array_length(m -> 'images') <= 3
+               and not exists (select 1 from jsonb_array_elements(m -> 'images') x
+                               where jsonb_typeof(x) <> 'string'
+                                  or (x #>> '{}') !~ '^[0-9a-f-]{36}/[0-9a-z]{6,40}\.jpg$'
+                                  or split_part(x #>> '{}', '/', 1) is distinct from owner::text) end;
+$$;
+
 create or replace function public.posts_before_insert() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
@@ -313,8 +325,10 @@ begin
   if new.board = 'job' then
     if not public.job_meta_ok(new.meta) then raise exception 'JOB_META_INVALID'; end if;
   else
-    new.meta := '{}'::jsonb;
+    -- 커뮤니티·Q&A 는 사진 목록만 남긴다
+    new.meta := case when jsonb_typeof(new.meta -> 'images') = 'array' and jsonb_array_length(new.meta -> 'images') > 0 then jsonb_build_object('images', new.meta -> 'images') else '{}'::jsonb end;
   end if;
+  if not public.post_images_ok(new.meta, auth.uid()) then raise exception 'IMAGES_INVALID'; end if;
   if not public.is_admin() then
     new.notice := false;
     if exists (select 1 from public.posts where author_id = auth.uid() and created_at > now() - interval '30 seconds') then
@@ -346,8 +360,10 @@ begin
   if old.board = 'job' then
     if not public.job_meta_ok(new.meta) then raise exception 'JOB_META_INVALID'; end if;
   else
-    new.meta := '{}'::jsonb;
+    -- 커뮤니티·Q&A 는 사진 목록만 남긴다
+    new.meta := case when jsonb_typeof(new.meta -> 'images') = 'array' and jsonb_array_length(new.meta -> 'images') > 0 then jsonb_build_object('images', new.meta -> 'images') else '{}'::jsonb end;
   end if;
+  if new.meta is distinct from old.meta and not public.post_images_ok(new.meta, old.author_id) then raise exception 'IMAGES_INVALID'; end if;
   new.updated_at := now();
   return new;
 end $$;
@@ -356,6 +372,24 @@ grant insert (meta) on public.posts to authenticated;
 grant update (meta) on public.posts to authenticated;
 
 create index if not exists posts_job_open on public.posts (created_at desc) where board = 'job' and deleted_at is null;
+
+
+-- ---------------------------------------------------------------- 게시판 사진 첨부 (Storage)
+-- 공개 버킷 post-images: 누구나 볼 수 있고, 올리기·지우기는 로그인 회원이 자기 폴더(<회원 id>/)에만 할 수 있다.
+-- 파일은 브라우저에서 JPEG로 줄여 올린다. 한 장 1MB, JPEG만 받는다(서버에서 제한).
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('post-images', 'post-images', true, 1048576, array['image/jpeg'])
+on conflict (id) do update set public = true, file_size_limit = 1048576, allowed_mime_types = array['image/jpeg'];
+
+drop policy if exists "post_images_insert" on storage.objects;
+create policy "post_images_insert" on storage.objects for insert to authenticated
+  with check (bucket_id = 'post-images' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "post_images_select_own" on storage.objects;
+create policy "post_images_select_own" on storage.objects for select to authenticated
+  using (bucket_id = 'post-images' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "post_images_delete" on storage.objects;
+create policy "post_images_delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'post-images' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));
 
 -- ------------------------------------------------------------ 운영자 지정 (가입한 뒤 한 번만, 이메일을 바꿔서 따로 실행)
 -- update public.profiles set role = 'admin' where id = (select id from auth.users where email = '운영자 이메일');

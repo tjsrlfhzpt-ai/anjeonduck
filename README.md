@@ -271,8 +271,8 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 - 검색엔진 노출: 글은 브라우저에서 불러오므로 검색엔진에 잘 잡히지 않습니다. 필요해지면 빌드 때 글 목록을 정적 페이지로 함께 만드는 방식으로 보완할 수 있습니다.
 - 자동 스팸 차단(캡차). 가입 남용이 보이면 Supabase Auth 의 CAPTCHA 설정을 켭니다.
 
-## 회원 채용공고 게시판 열기
+## 회원 채용공고 게시판 · 사진 첨부 열기
 
-게시판을 이미 연 프로젝트라면 Supabase → SQL Editor 에 `supabase/jobs.sql` 을 한 번 붙여 넣고 Run 합니다(기존 글·회원은 그대로, 여러 번 실행해도 안전). 새로 만드는 프로젝트는 `supabase/schema.sql` 에 이미 들어 있습니다. 실행 전에는 '채용공고' 탭이 "준비하고 있습니다"로 표시됩니다.
+게시판을 이미 연 프로젝트라면 Supabase → SQL Editor 에 `supabase/jobs.sql` 을 한 번 붙여 넣고 Run 합니다(기존 글·회원은 그대로, 여러 번 실행해도 안전). 새로 만드는 프로젝트는 `supabase/schema.sql` 에 이미 들어 있습니다. 같은 파일이 사진 첨부용 저장소(Storage 버킷 `post-images`, 공개 읽기·본인 폴더만 쓰기·한 장 1MB·JPEG)도 만듭니다. 실행 전에는 사진 첨부가 "준비하고 있습니다"로 안내되고, '채용공고' 탭이 "준비하고 있습니다"로 표시됩니다.
 
 홍보용 오픈채팅방 배너는 `config/site.json` 의 `community.openchat.url` 로 켜고 끕니다(문의 창구 `operator.contact_url` 과 별개).

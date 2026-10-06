@@ -1564,3 +1564,17 @@ button.mc-d.today:not(.sel){outline:2px solid var(--navy);outline-offset:-2px}
 .tcard{position:relative}
 .tcard-i{position:absolute;right:16px;top:44px;width:52px;height:52px}
 .tcard:has(.tcard-i) .tcard-t,.tcard:has(.tcard-i) .tcard-d{padding-right:60px}
+
+/* 게시판 사진 첨부 */
+.cm-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.cm-imgf{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;position:relative}
+.cm-imgf-h{display:flex;align-items:center;gap:10px;margin:0}
+.cm-thumbs{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.cm-thumbs[hidden]{display:none}
+.cm-thumbs li{position:relative;width:96px;height:96px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.cm-thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.cm-thumb-x{position:absolute;top:2px;right:2px;width:32px;height:32px;border:0;border-radius:50%;background:rgba(15,23,42,.78);color:#fff;font-size:18px;line-height:1;cursor:pointer}
+.cm-thumb-x:focus-visible{outline:2px solid #fff;outline-offset:-3px}
+.cm-imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:14px 0}
+.cm-imgs a{display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.cm-imgs img{display:block;width:100%;max-height:420px;object-fit:contain;min-height:80px}

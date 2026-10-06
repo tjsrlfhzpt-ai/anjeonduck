@@ -12,7 +12,7 @@
     DAILY_LIMIT: "하루 등록 한도를 넘었습니다. 내일 다시 시도하세요.", NOT_ALLOWED: "권한이 없거나 이미 삭제된 글입니다.",
     POST_NOT_FOUND: "삭제되었거나 없는 글입니다.", NICKNAME_INVALID: "닉네임은 한글·영문·숫자·밑줄 2~12자이며 운영자를 연상시키는 이름은 쓸 수 없습니다.",
     NICKNAME_TAKEN: "이미 쓰고 있는 닉네임입니다.", NICKNAME_COOLDOWN: "닉네임은 7일에 한 번만 바꿀 수 있습니다.",
-    JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.",
+    JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", IMAGES_INVALID: "사진은 3장까지, 이 화면에서 올린 사진만 붙일 수 있습니다.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.",
     "Invalid login credentials": "이메일 또는 비밀번호가 맞지 않습니다.", "Email not confirmed": "이메일 인증이 끝나지 않았습니다. 받은 메일의 인증 링크를 눌러 주세요.",
     "rate limit": "요청이 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도하세요.", "posts_title_check": "제목은 2~80자로 적어 주세요.",
     "posts_body_check": "본문은 5~5,000자로 적어 주세요.", "comments_body_check": "댓글은 1~2,000자로 적어 주세요.",
@@ -124,6 +124,55 @@
     var c = CFG.chat; if (!c || !/^https:\/\/open\.kakao\.com\//.test(c.url || "")) return null;
     return h("a", { class: "cm-chat", href: c.url, target: "_blank", rel: "noopener" }, h("span", { class: "cm-chat-t" }, c.title || "오픈채팅방"), h("span", { class: "cm-chat-d" }, c.desc || ""), h("span", { class: "cm-chat-go" }, "카카오톡으로 참여 ↗"));
   }
+  // ---- 사진 첨부: 브라우저에서 JPEG로 줄여(긴 변 1600px, 1MB 이하) 자기 폴더에 올린다. 다시 인코딩하므로 촬영 위치 등 EXIF 정보는 빠진다.
+  var IMG_BUCKET = "post-images", IMG_MAX = 3, IMG_RE = /^[0-9a-f-]{36}\/[0-9a-z]{6,40}\.jpg$/;
+  function imgUrl(path) { return CFG.url.replace(/\/+$/, "") + "/storage/v1/object/public/" + IMG_BUCKET + "/" + path; }
+  function imgList(m) { return (m && Array.isArray(m.images) ? m.images : []).filter(function (x) { return typeof x === "string" && IMG_RE.test(x); }).slice(0, IMG_MAX); }
+  function shrink(file) {
+    return new Promise(function (ok, no) {
+      if (!/^image\//.test(file.type || "")) return no(new Error("IMG_TYPE"));
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        URL.revokeObjectURL(u);
+        var side = 1600, q = 0.85, tries = 0;
+        (function go() {
+          var k = Math.min(1, side / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
+          var x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height);
+          c.toBlob(function (b) {
+            if (!b) return no(new Error("IMG_TYPE"));
+            if (b.size <= 1000000 || tries >= 5) return b.size <= 1000000 ? ok(b) : no(new Error("IMG_BIG"));
+            tries++; q = Math.max(0.6, q - 0.1); side = Math.round(side * 0.8); go();
+          }, "image/jpeg", q);
+        })();
+      };
+      im.onerror = function () { URL.revokeObjectURL(u); no(new Error("IMG_TYPE")); };
+      im.src = u;
+    });
+  }
+  function upload(file) {
+    return shrink(file).then(function (blob) {
+      var path = ME.id + "/" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10) + ".jpg";
+      return sb.storage.from(IMG_BUCKET).upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000", upsert: false }).then(function (r) {
+        if (r.error) throw r.error;
+        return path;
+      });
+    });
+  }
+  function imgErr(e) {
+    var m = String((e && e.message) || e || "");
+    if (/IMG_TYPE/.test(m)) return "사진 파일(JPG·PNG 등)만 올릴 수 있습니다.";
+    if (/IMG_BIG/.test(m)) return "사진이 너무 큽니다. 더 작은 사진으로 올려 주세요.";
+    if (/not found/i.test(m)) return "사진 첨부 기능을 준비하고 있습니다. 사진 없이 등록해 주세요.";
+    if (/row-level security|unauthorized|jwt/i.test(m)) return "사진을 올릴 권한이 없습니다. 다시 로그인해 주세요.";
+    return "사진을 올리지 못했습니다. 잠시 뒤 다시 시도해 주세요.";
+  }
+  function gallery(m) {
+    var a = imgList(m); if (!a.length) return null;
+    return h("div", { class: "cm-imgs" }, a.map(function (p, i) {
+      return h("a", { href: imgUrl(p), target: "_blank", rel: "noopener" }, h("img", { src: imgUrl(p), alt: "첨부 사진 " + (i + 1), loading: "lazy" }));
+    }));
+  }
   function busy(btn, on, label) { btn.disabled = on; if (label) btn.textContent = label; }
 
   // ---------------------------------------------------------------- 목록
@@ -210,6 +259,7 @@
         h("p", { class: "cm-post-meta" }, nick(post), " · ", h("time", { datetime: post.created_at }, when(post.created_at, true)), post.updated_at ? " · 수정됨" : ""),
         job ? h("dl", { class: "cm-job" }, [["회사", jm.company], ["근무지", jm.region], ["직무", post.category], ["경력", jm.career], ["고용형태", jm.employment], ["마감", (jm.deadline || "상시 채용") + (jst.closed ? " (마감됨)" : "")]].filter(function (x) { return x[1]; }).map(function (x) { return [h("dt", null, x[0]), h("dd", null, x[1])]; })) : null,
         h("div", { class: "cm-body" }, rich(post.body)),
+        gallery(post.meta),
         job ? h("div", { class: "cm-apply" }, h("b", null, "지원 방법"), /^https:\/\/\S+$/.test(jm.apply || "") ? h("a", { class: "btn" + (jst.closed ? " btn-ghost" : ""), href: jm.apply, target: "_blank", rel: "nofollow ugc noopener" }, "지원 페이지 열기 ↗") : h("span", null, rich(jm.apply || ""))) : null,
         acts);
       var clist = h("ul", { class: "cm-cms" }, cms.map(function (c) {
@@ -278,14 +328,40 @@
       function jmeta() { var o = {}; Object.keys(J).forEach(function (k) { o[k] = J[k].value.trim(); }); return o; }
       var jbox = h("div", { class: "cm-jobf" }, h("div", { class: "cm-row2 cm-row2e" }, J.company, J.region), h("div", { class: "cm-row3" }, J.career, J.employment, h("label", { class: "cm-dl" }, h("span", null, "마감일"), J.deadline)),
         J.apply, h("p", { class: "hint" }, "마감일을 비워 두면 '상시 채용'으로 표시됩니다. 회사명과 지원 방법은 공고를 보는 사람이 확인할 수 있게 정확히 적어 주세요."));
+      // 사진 첨부(모든 게시판)
+      var imgs = imgList(saved.meta && saved.meta.images ? saved.meta : pm), imgs0 = imgList(pm);
+      var pick = h("input", { type: "file", accept: "image/*", multiple: true, class: "cm-file", "aria-label": "사진 선택" });
+      var pickBtn = h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { pick.click(); } }, "사진 첨부");
+      var thumbs = h("ul", { class: "cm-thumbs" }), pst = h("span", { class: "hint", role: "status" });
+      function drawImgs() {
+        thumbs.textContent = "";
+        imgs.forEach(function (p, i) {
+          thumbs.appendChild(h("li", null, h("img", { src: imgUrl(p), alt: "첨부 사진 " + (i + 1) }),
+            h("button", { type: "button", class: "cm-thumb-x", "aria-label": "첨부 사진 " + (i + 1) + " 빼기", onclick: function () { imgs.splice(i, 1); drawImgs(); tick(); } }, "×")));
+        });
+        thumbs.hidden = !imgs.length; pickBtn.disabled = imgs.length >= IMG_MAX;
+        pst.textContent = imgs.length + " / " + IMG_MAX + "장";
+      }
+      pick.addEventListener("change", function () {
+        var files = Array.prototype.slice.call(pick.files || []); pick.value = "";
+        if (!files.length) return;
+        var room = IMG_MAX - imgs.length, over = files.length > room; files = files.slice(0, room);
+        out.hidden = true; pickBtn.disabled = true; btn.disabled = true; pst.textContent = "사진을 올리는 중…";
+        files.reduce(function (pr, f) { return pr.then(function () { return upload(f).then(function (path) { imgs.push(path); drawImgs(); pst.textContent = "사진을 올리는 중…"; }); }); }, Promise.resolve())
+          .then(function () { if (over) { out.textContent = "사진은 " + IMG_MAX + "장까지 붙일 수 있어 나머지는 올리지 않았습니다."; out.hidden = false; } },
+                function (e) { console.error("[게시판] 사진", e); out.textContent = imgErr(e); out.hidden = false; })
+          .then(function () { btn.disabled = false; drawImgs(); tick(); });
+      });
+      var imgBox = h("div", { class: "cm-imgf" }, h("p", { class: "cm-imgf-h" }, pickBtn, pst, pick), thumbs,
+        h("p", { class: "hint" }, "최대 3장. 올릴 때 자동으로 줄여 저장합니다. 얼굴·명찰·차량번호·사업장명이 보이는 사진은 가리고 올려 주세요."));
       function syncJob() {
         var on = selB.value === "job"; jbox.hidden = !on;
         title.placeholder = on ? "공고 제목 (예: 안전관리자 경력직 채용)" : "제목 (2~80자)";
         body.placeholder = on ? "상세 내용 (5~5,000자)\n\n· 담당 업무, 자격 요건, 근무 조건, 전형 절차를 적어 주세요.\n· 주민등록번호·통장 사본 등 채용과 무관한 개인정보를 요구하는 내용은 올릴 수 없습니다." : "내용 (5~5,000자)\n\n· 사람 이름·연락처·사업장명 등 개인이나 회사를 알아볼 수 있는 정보는 적지 마세요.\n· 사고 사례는 누구인지 알 수 없게 적어 주세요.";
       }
       selB.addEventListener("change", syncJob); syncJob();
-      function tick() { cnt.textContent = body.value.length.toLocaleString() + " / 5,000자"; draft(key, { title: title.value, body: body.value, category: selC.value, meta: jmeta() }); }
-      [title, body, selC].concat(Object.keys(J).map(function (k) { return J[k]; })).forEach(function (el) { el.addEventListener("input", tick); el.addEventListener("change", tick); }); tick();
+      function tick() { cnt.textContent = body.value.length.toLocaleString() + " / 5,000자"; var dm = jmeta(); dm.images = imgs.slice(); draft(key, { title: title.value, body: body.value, category: selC.value, meta: dm }); }
+      [title, body, selC].concat(Object.keys(J).map(function (k) { return J[k]; })).forEach(function (el) { el.addEventListener("input", tick); el.addEventListener("change", tick); }); drawImgs(); tick();
       show(h("form", { class: "cm-form cm-write", onsubmit: function (ev) {
         ev.preventDefault();
         var t = title.value.trim(), bd = body.value.trim();
@@ -296,15 +372,22 @@
         if (isJob && /^http:\/\//i.test(mt.apply)) { out.textContent = "지원 페이지 주소는 https:// 로 시작해야 합니다."; out.hidden = false; J.apply.focus(); return; }
         busy(btn, true, "저장 중…"); out.hidden = true;
         var rowU = { title: t, body: bd, category: selC.value }, rowI = { board: selB.value, category: selC.value, title: t, body: bd, author_id: ME.id };
-        if (isJob) { rowU.meta = mt; rowI.meta = mt; }
+        var metaOut = isJob ? mt : {};
+        if (imgs.length) metaOut.images = imgs.slice();
+        // 사진이 없고 원래도 없던 일반 글은 meta 를 보내지 않는다(예전 DB에서도 그대로 동작)
+        if (isJob || imgs.length || imgs0.length) { rowU.meta = metaOut; rowI.meta = metaOut; }
         var req = post ? sb.from("posts").update(rowU).eq("id", post.id).select("id") : sb.from("posts").insert(rowI).select("id");
         req.then(function (r) {
           var row = r.data && r.data[0];
           if (r.error || !row) { out.textContent = r.error ? msg(r.error) : ERR.NOT_ALLOWED; out.hidden = false; busy(btn, false, post ? "수정 저장" : "등록"); return; }
-          draft(key, null); location.href = url("view", { id: row.id });
+          draft(key, null);
+          // 수정하면서 뺀 사진은 저장이 끝난 뒤에 지운다(실패해도 글은 이미 저장됨)
+          var gone = imgs0.filter(function (x) { return imgs.indexOf(x) < 0; });
+          var done = function () { location.href = url("view", { id: row.id }); };
+          if (gone.length) sb.storage.from(IMG_BUCKET).remove(gone).then(done, done); else done();
         }, function (e) { out.textContent = msg(e) + " 작성하던 내용은 이 브라우저에 임시 저장되어 있습니다."; out.hidden = false; busy(btn, false, post ? "수정 저장" : "등록"); });
       } },
-        h("div", { class: "cm-row2" }, selB, selC), jbox, title, body, h("p", { class: "cm-cnt" }, cnt, h("span", { class: "hint" }, "작성 중인 내용은 이 브라우저에 임시 저장됩니다.")), out,
+        h("div", { class: "cm-row2" }, selB, selC), jbox, title, body, imgBox, h("p", { class: "cm-cnt" }, cnt, h("span", { class: "hint" }, "작성 중인 내용은 이 브라우저에 임시 저장됩니다.")), out,
         h("p", { class: "hint" }, "등록하면 ", h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "에 동의한 것으로 봅니다. 닉네임 ", h("b", null, ME.nickname), "(으)로 공개됩니다."),
         h("p", { class: "btns" }, btn, h("a", { class: "btn btn-ghost", href: post ? url("view", { id: post.id }) : url("", { b: b }) }, "취소"))));
     }
