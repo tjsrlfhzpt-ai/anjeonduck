@@ -153,13 +153,25 @@
     document.querySelectorAll("[data-filter]").forEach(function (g) {
       var k = g.getAttribute("data-filter"); if (!ATTR[k]) return;
       var rest = items.filter(function (it) { return Object.keys(sel).every(function (o) { return o === k || !sel[o] || has(it, o, sel[o]); }); });
+      var zero = 0;
       g.querySelectorAll(".chip").forEach(function (c) {
         var v = c.getAttribute("data-value"), cn = c.querySelector(".n");
         if (!v) { if (cn) cn.textContent = rest.length; return; }
         var n = rest.filter(function (it) { return has(it, k, v); }).length;
         if (cn) cn.textContent = n;
-        c.hidden = n === 0 && c.getAttribute("aria-pressed") !== "true";
+        var z = n === 0 && c.getAttribute("aria-pressed") !== "true";
+        c.classList.toggle("chip-zero", z); if (z) zero++;
       });
+      // 0건인 선택지는 접어 두고 '더보기'로 펼친다
+      var mb = g.querySelector(".chip-more");
+      if (!mb) {
+        mb = document.createElement("button"); mb.type = "button"; mb.className = "chip-more";
+        mb.addEventListener("click", function () { g.classList.toggle("show-zero"); apply(); });
+        g.appendChild(mb);
+      }
+      var open = g.classList.contains("show-zero");
+      mb.hidden = zero === 0; mb.setAttribute("aria-expanded", String(open));
+      mb.textContent = open ? "접기" : "더보기 +" + zero;
     });
   }
 
@@ -203,6 +215,7 @@
       return;
     }
     if (ev.target.closest("[data-reset]")) {
+      document.querySelectorAll("[data-filter].show-zero").forEach(function (g) { g.classList.remove("show-zero"); });
       document.querySelectorAll("[data-filter]").forEach(function (g) {
         g.querySelectorAll(".chip").forEach(function (x) {
           x.setAttribute("aria-pressed", x.getAttribute("data-value") === "" ? "true" : "false");
