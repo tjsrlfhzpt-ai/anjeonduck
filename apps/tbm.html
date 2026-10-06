@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TBM 일지 작성기 | SafeTake</title>
+<title>TBM 일지 작성기 | SafePlum</title>
 <meta name="description" content="업종별 위험요인을 골라 TBM(작업 전 안전점검 회의) 일지를 만들고 A4로 인쇄하거나 PDF로 저장하세요. 무료, 회원가입 없음.">
 <link rel="icon" href="../../assets/favicon.png" type="image/png">
 <style>
@@ -25,7 +25,7 @@
     select { appearance: none; -webkit-appearance: none; }
   }
 
-  /* SafeTake 상단 바 */
+  /* SafePlum 상단 바 */
   .sitebar { background:#fff; border-bottom:1px solid #d8dee8; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
   .sitebar a { color:#1F6FD1; text-decoration:none; font-weight:700; }
   .sitebar span { color:#5b6b80; }
@@ -147,7 +147,7 @@
 <body>
 
 <div class="sitebar no-print">
-  <a href="../../">← SafeTake</a>
+  <a href="../../">← SafePlum</a>
   <span>입력 내용은 이 기기 브라우저에만 저장되고 서버로 전송되지 않습니다.</span>
 </div>
 
@@ -193,7 +193,7 @@
 </script>
 
 <script>
-  // 위험요인 목록: SafeTake 빌드 때 data/hazards.json 이 들어간다
+  // 위험요인 목록: SafePlum 빌드 때 data/hazards.json 이 들어간다
   var HAZARD_DB = /*@HAZARDS@*/null;
   if (!HAZARD_DB) HAZARD_DB = { groups: ["공통"], items: [] };
   var GROUPS = HAZARD_DB.groups;
@@ -355,7 +355,7 @@
       html += '<div class="page-container">' +
         '<div class="page-header-info">' +
           '<input type="text" class="company-name-input" placeholder="회사명 입력" value="' + esc(state.headerCompany) + '" data-global="headerCompany" oninput="updateGlobal(this, \'headerCompany\')">' +
-          '<span class="contact-info no-print">SafeTake TBM 일지 작성기</span>' +
+          '<span class="contact-info no-print">SafePlum TBM 일지 작성기</span>' +
         '</div>' +
         '<div class="main-title">T B M &nbsp; 일 지</div>' +
         '<table class="layout-wrapper"><colgroup><col style="width:73%"><col style="width:1%"><col style="width:26%"></colgroup><tr>' +

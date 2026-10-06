@@ -186,7 +186,7 @@ def check_site(site_dir):
         "tools/safety-cost/index.html": ["법정 최소 계상액의 참고 계산"],
         "tools/msds/index.html": ["자동 추출값 — 원문 확인 필요"],
         "tools/loto/index.html": ["보조양식"],
-        "tools/risk/index.html": ["SafeTake 기본 위험성평가 예시 기준"],
+        "tools/risk/index.html": ["SafePlum 기본 위험성평가 예시 기준"],
         "legal/index.html": ["국가법령정보센터", "오류 신고"],
         "index.html": ["법령 데이터 기준일"],
     }

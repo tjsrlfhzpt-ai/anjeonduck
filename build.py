@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SafeTake 정적 사이트 생성기.
+"""SafePlum 정적 사이트 생성기.
 
 data/*.json + config/site.json 을 읽어 _site/ 에 완성된 HTML을 만든다.
 서버 코드가 없으므로 GitHub Pages·Cloudflare Pages 어디에나 그대로 올릴 수 있다.
@@ -136,7 +136,7 @@ def brief_article(b, rel):
     lead = f'<p class="br-lead">{e(b["lead"])}</p>' if b.get("lead") else ""
     todo_sec = f'<section class="br-todo"><h3>이번 주 챙길 일</h3><ul class="bul">{todo}</ul></section>' if todo else ""
     return (f'{lead}{"".join(item(it) for it in b["items"])}{todo_sec}'
-            f'<p class="src-note">{BRIEF_PENDING if b.get("review") != "verified" else ""}SafeTake이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
+            f'<p class="src-note">{BRIEF_PENDING if b.get("review") != "verified" else ""}SafePlum이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
             f'국회 통과안·입법예고는 현행 법령이 아닙니다. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
 
 
@@ -349,9 +349,9 @@ def resource_detail(r, all_res, idx, files, site):
                  for i, (k, v) in enumerate(sorted(fl.get("files", {}).items(), key=lambda kv: kv[0] != "hwp")))
     tool = ""
     if r.get("free_tool"):
-        tool = f'<a class="btn btn-block btn-green" href="{rel_root}tools/{e(r["free_tool"])}/">SafeTake 도구로 바로 계산·작성</a>'
+        tool = f'<a class="btn btn-block btn-green" href="{rel_root}tools/{e(r["free_tool"])}/">SafePlum 도구로 바로 계산·작성</a>'
     if r.get("page_link"):
-        tool = f'<a class="btn btn-block btn-green" href="{rel_root}{e(r["page_link"])}">SafeTake에서 바로 보기</a>'
+        tool = f'<a class="btn btn-block btn-green" href="{rel_root}{e(r["page_link"])}">SafePlum에서 바로 보기</a>'
     same = [x for x in all_res if x is not r and x.get("topic") == r.get("topic") and x.get("category") not in ("기관·행정용",)][:8]
     def rel_href(x):
         return rel_root + (x["detail"] if x.get("detail") else "tools/" + x.get("free_tool", "") + "/")
@@ -365,12 +365,12 @@ def resource_detail(r, all_res, idx, files, site):
     else:
         arts, arts_note = "", ""
     if missing:
-        arts += (f'<p class="hint">{e(", ".join(missing))} 원문은 아직 SafeTake에 수록하지 않았습니다. '
+        arts += (f'<p class="hint">{e(", ".join(missing))} 원문은 아직 SafePlum에 수록하지 않았습니다. '
                  f'<a href="{e(law_url(r["law"]))}" target="_blank" rel="noopener">국가법령정보센터에서 {e(r["law"])} 보기 ↗</a></p>')
     elif not hits:
         full = r.get("law") in idx and len(idx[r["law"]]) > 50
         msg = (f'{r["law"]} 본문에는 이 {kind}를 직접 언급한 조문이 없습니다. 고용노동부 고시 등 다른 규정에서 쓰도록 정한 {kind}일 수 있습니다.'
-               if full else "관련 조문 원문은 아직 SafeTake에 수록하지 않았습니다.")
+               if full else "관련 조문 원문은 아직 SafePlum에 수록하지 않았습니다.")
         arts += (f'<p class="hint">{e(msg)} '
                  f'<a href="{e(law_url(r["law"]))}" target="_blank" rel="noopener">국가법령정보센터에서 {e(r["law"])} 보기 ↗</a></p>')
     meta = [("법령", r["law"]), ("번호", r.get("form_no", "")), ("분류", r.get("category", "")), ("주제", r.get("topic", ""))]
@@ -557,16 +557,17 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
 TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
-TOOL_DUCKS = {"tbm": "clipboard", "risk": "warning", "committee": "help", "msds": "gloves", "loto": "stop", "heat": "think",
-              "selection": "v-check", "penalty": "surprised", "hpp": "v-sign", "machines": "stop", "safety-cost": "thumb", "edu-hours": "ic-edu", "headcount": "wave", "cvd": "v-aid",
-              "schedule": "ic-star", "duties": "ic-shield", "retention": "ic-lock", "inspect": "ic-ok", "docmap": "v-search"}
+# 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
+TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "msds": "msds", "loto": "loto", "heat": "heat",
+              "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
+              "schedule": "calendar", "duties": "briefcase", "retention": "folder", "inspect": "search", "docmap": "audit"}
 WRITE_TOOLS = ["tbm", "risk", "committee", "msds", "loto", "heat"]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
-NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", JOB_HOME)]
-ACTIVE_GROUP = {"tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs"}
+NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", JOB_HOME), ("board", "게시판", "board/")]
+ACTIVE_GROUP = {"tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
 
 
 def nav_cols(site, rel):
@@ -582,6 +583,8 @@ def nav_cols(site, rel):
         "jobs": [("채용 사이트로 바로 이동", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
+        "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A")]),
+                  ("참여", [(f"{rel}board/account/", "로그인·회원가입"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
     }
 
 
@@ -602,7 +605,7 @@ def gnb_html(site, rel, active):
 
 def dock_html(rel, active):
     grp = ACTIVE_GROUP.get(active, "")
-    items = [("", "🏠", "홈", "home")] + [(href, ic, label.replace("안전 ", ""), key) for (key, label, href), ic in zip(NAV4, ["🗂️", "⚖️", "📰", "💼"])]
+    items = [("", "🏠", "홈", "home")] + [(href, ic, label.replace("안전 ", "").replace("브리핑·소식", "소식"), key) for (key, label, href), ic in zip(NAV4, ["🗂️", "⚖️", "📰", "💼", "💬"])]
     return '<nav class="dock" aria-label="빠른 이동">' + "".join(
         f'<a href="{e(href if href.startswith("http") else rel + href)}"{" target=_blank rel=noopener" if href.startswith("http") else ""}{" aria-current=" + chr(34) + "page" + chr(34) if key == grp else ""}><span aria-hidden="true">{ic}</span>{e(label)}</a>' for href, ic, label, key in items) + "</nav>"
 
@@ -610,7 +613,7 @@ def dock_html(rel, active):
 def _asset_ver():
     import hashlib
     h = hashlib.sha1()
-    for f in ("assets/style.css", "assets/docs.js", "assets/app.js"):
+    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/favicon.png", "assets/img/plum/logo.webp"):
         h.update((ROOT / f).read_bytes())
     return h.hexdigest()[:8]
 
@@ -661,7 +664,7 @@ def lawver_html(tool_id, rel_root, fallback=""):
     warn_s = ' <span class="stale">· 확인일이 오래되었습니다 — 공식 원문 재확인 필요</span>' if stale(oldest) else ""
     return (f'<aside class="wrap"><p class="lawver"><b>법적 근거 확인일</b> {e(oldest)}{warn_s}<br><b>적용 법령 버전</b> ' + " / ".join(rows)
             + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#versions">법령 버전·시행 예정 보기</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a>'
-            + '<br>이 화면의 판정·계산·예시 문구는 SafeTake이 정리한 참고 자료이며 법령 원문이 아닙니다.</p></aside>')
+            + '<br>이 화면의 판정·계산·예시 문구는 SafePlum이 정리한 참고 자료이며 법령 원문이 아닙니다.</p></aside>')
 
 
 def operator_html(site, rel_root):
@@ -727,11 +730,12 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     <ul class="ft-notes">
       <li>서식·법령은 국가법령정보센터 등 기관 원본으로 연결됩니다.</li>
       <li>채용 조건과 마감일은 공고 원문이 우선합니다.</li>
-      <li>작성 도구는 입력한 문서 내용을 SafeTake 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
+      <li>게시판의 글과 답변은 회원 개인의 의견이며 SafePlum의 공식 견해나 법령 해석이 아닙니다. <a href="{rel_root}board/rules/">이용수칙</a> · <a href="{rel_root}privacy/">개인정보 처리방침</a></li>
+      <li>작성 도구는 입력한 문서 내용을 SafePlum 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
       <li>판정·계산 결과는 자가진단용 참고 자료이며 행정기관의 공식 해석·처분을 대체하지 않습니다. <a href="{rel_root}legal/">법령정보·면책 안내</a></li>
     </ul>
     <p class="ft-op">{operator_html(site, rel_root)}</p>
-    <p class="ft-disc">Disclaimer: SafeTake에서 제공하는 안전보건 정보 및 문서 양식은 현장 참고용이며, 실제 적용 시 발생하는 법적 책임은 지지 않습니다.</p>
+    <p class="ft-disc">Disclaimer: SafePlum에서 제공하는 안전보건 정보 및 문서 양식은 현장 참고용이며, 실제 적용 시 발생하는 법적 책임은 지지 않습니다.</p>
     <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''}{' · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button>' if path.startswith("tools/") and path != "tools/" else ""} · <a href="{rel_root}legal/">법령 데이터 기준일 {e(manifest().get("checked_at", ""))}</a></p>
   </div>
 </footer>
@@ -739,7 +743,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <script src="{rel_root}assets/app.js?v={ASSET_VER}" defer></script>
 </body>
 </html>
-""".replace("@LOGO@", f'<img class="logo-mark" alt="" width="36" height="36" src="{rel_root}assets/img/duck/logo.webp">')
+""".replace("@LOGO@", f'<img class="logo-mark" alt="" width="36" height="36" src="{rel_root}assets/img/plum/logo.webp?v={ASSET_VER}">')
 
 
 # ---------------------------------------------------------------- 컴포넌트
@@ -933,7 +937,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
     if t["id"] in ("tbm", "committee"):
-        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#555;line-height:1.6">SafeTake 자체 제공 양식 · 법정 지정서식이 아님 — '
+        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#555;line-height:1.6">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')
         assert "</body>" in src
@@ -1042,7 +1046,7 @@ def empty_box(msg, extra=""):
 
 
 def duck_signs_html(site, write):
-    """SafeTake 자체 제작 현장 안내 게시물 — 목록(표지 페이지 상단) + 한 장씩 A4 인쇄 페이지."""
+    """SafePlum 자체 제작 현장 안내 게시물 — 목록(표지 페이지 상단) + 한 장씩 A4 인쇄 페이지."""
     d = load("data/duck_signs.json")
     cards = []
     for it in d["items"]:
@@ -1052,17 +1056,17 @@ def duck_signs_html(site, write):
         body = f"""
 <section class="phead no-print"><div class="wrap">
   <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">서식·자료</a><span>/</span><a href="../#duck">안전보건표지</a><span>/</span>{e(it["title"])}</p>
-  <h1>{e(it["title"])} <span class="muted" style="font-size:.6em">SafeTake 안내 게시물</span></h1>
+  <h1>{e(it["title"])} <span class="muted" style="font-size:.6em">SafePlum 안내 게시물</span></h1>
   <p>{e(it.get("desc", ""))}</p>
   <p class="btns" style="margin-top:14px"><button type="button" class="btn" onclick="window.print()">A4 인쇄 · PDF 저장</button>
-  <a class="btn btn-ghost" href="../../../{e(it["print"])}" download="SafeTake_{e(it["title"])}.png">원본 이미지 내려받기</a>
+  <a class="btn btn-ghost" href="../../../{e(it["print"])}" download="SafePlum_{e(it["title"])}.png">원본 이미지 내려받기</a>
   {f'<a class="btn btn-ghost" href="../../../{e(it["law_href"])}">근거 조문 보기</a>' if it.get("law_href") else ""}</p>
   <p class="hint" style="margin-top:10px">근거: {e(it.get("basis", ""))} · 법정 안전보건표지(시행규칙 별표 6)가 아니라 현장 안내용 게시물입니다.</p>
 </div></section>
 <div class="dk-sheet"><img src="../../../{e(it["print"])}" alt="{e(it["title"])} 안내 게시물"></div>"""
         write(f"{pid}index.html", page(site, "../../../", pid, f'{it["title"]} 안내 게시물', body, desc=it.get("desc"), active="resources/"))
-    return (f'<section class="dk-sec" id="duck"><div class="dk-head"><div><h2>SafeTake 현장 안내 게시물</h2>'
-            f'<p>SafeTake이 자체 제작·자체 번역한 다국어 안내 게시물입니다(공식 번역 아님). 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
+    return (f'<section class="dk-sec" id="duck"><div class="dk-head"><div><h2>SafePlum 현장 안내 게시물</h2>'
+            f'<p>SafePlum이 자체 제작·자체 번역한 다국어 안내 게시물입니다(공식 번역 아님). 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
             f'<ul class="dk-grid">{"".join(cards)}</ul></section>')
 
 
@@ -1144,7 +1148,7 @@ def build(out, today):
     job_chips = "".join(
         f'<a class="jchip" href="{e(safe_url(s["url"]))}" target="_blank" rel="noopener">{e(s["name"])}{EXT}<span class="sr">(새 창)</span></a>'
         for s in sites.get("job_search", []) if safe_url(s.get("url")))
-    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/duck/v-search.webp" width="96" height="96" alt=""></div>'
+    jobs_empty = (f'<div class="jempty"><div class="jempty-ico" aria-hidden="true"><img src="../assets/img/plum/search.webp" width="96" height="96" alt=""></div>'
                   f'<p class="jempty-t">채용 플랫폼의 안전·보건 공고로 바로 연결합니다.</p>'
                   f'<p class="jempty-d">아래 채용 플랫폼에서 안전·보건 직무의 실시간 공고를 바로 확인하세요.</p>'
                   f'<div class="jchips">{job_chips}</div></div>')
@@ -1273,7 +1277,7 @@ def build(out, today):
     bd_res = board("자주 찾는 법정 서식", "resources/", "".join(bd_row(f"resources/{r['detail']}" if r.get("detail") else "resources/", r["title"], "", "서식" if r.get("category") == "법정 서식" else "고시") for r in popular[:6]))
     lib = load("data/library.json")
     bd_lib = board("안전보건 자료실", "resources/library/", "".join(bd_row(safe_url(x["url"]), x["name"], "", "공식", ext=True) for x in lib.get("official", [])[:3] if safe_url(x.get("url")))
-                   + bd_row("resources/signs/", "안전보건표지 40종 · SafeTake 현장 안내 게시물", "", "표지") + bd_row("tools/docmap/", "감독 대비 서류 자가점검", "", "점검"))
+                   + bd_row("resources/signs/", "안전보건표지 40종 · SafePlum 현장 안내 게시물", "", "표지") + bd_row("tools/docmap/", "감독 대비 서류 자가점검", "", "점검"))
     quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로 신청·신고</span>' + "".join(
         f'<a class="qs-go" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}">{e(x["name"])} ↗</a>' for x in sites.get("civil", []) if safe_url(x.get("url"))) + '<span class="qs-l qs-l2">기관</span>' + "".join(
         f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url"))) + "</div></section>")
@@ -1285,10 +1289,10 @@ def build(out, today):
         return (f'<a class="hc" href="{e(href)}"><span class="hc-i" aria-hidden="true">{icon}</span><span class="hc-b"><strong>{e(title)}</strong>'
                 f'<span class="hc-d">{e(desc)}</span></span><span class="hc-g">{e(badge)}</span></a>')
     def tcards(ids):
-        return "".join(mcard(f"tools/{i}/", (f'<img src="assets/img/duck/{TOOL_DUCKS[i]}.webp" width="44" height="44" alt="" loading="lazy">' if i in TOOL_DUCKS else TOOL_ICONS.get(i, "📄")), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
+        return "".join(mcard(f"tools/{i}/", (f'<img src="assets/img/ico/{TOOL_DUCKS[i]}.webp" width="44" height="44" alt="" loading="lazy">' if i in TOOL_DUCKS else TOOL_ICONS.get(i, "📄")), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
     tab1 = tcards(WRITE_TOOLS)
     tab2 = tcards(CALC_TOOLS)
-    look = "".join(f'<a href="tools/{i}/"><img src="assets/img/duck/{TOOL_DUCKS[i]}.webp" width="20" height="20" alt="" loading="lazy"> {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
+    look = "".join(f'<a href="tools/{i}/"><img src="assets/img/ico/{TOOL_DUCKS[i]}.webp" width="20" height="20" alt="" loading="lazy"> {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
     form_rows = "".join(f'<li data-s="{e((f["title"] + " " + f.get("group", "")).lower())}"><a href="tools/forms/{e(f["id"])}/"><span class="fl-g">{e(f.get("group", "")[:10])}</span>{e(f["title"])}</a><span class="fkind fkind-b">웹 작성</span></li>' for f in _forms)
     form_rows += "".join(f'<li data-s="{e((r["title"] + " " + (r.get("form_no") or "")).lower())}"><a href="{e(r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]))}"><span class="fl-g">{e((r.get("form_no") or "원본")[:10])}</span>{e(r["title"])}</a><span class="fkind fkind-a">법령 원본</span></li>' for r in popular)
     _bd = load("data/board.json")
@@ -1321,9 +1325,10 @@ def build(out, today):
     idx += [{"t": r["title"], "k": "서식·자료", "h": r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]), "d": (r.get("form_no") or "") + " " + " ".join(r.get("tags") or [])}
             for r in resources if r.get("category") != "웹 작성 서식"]
     idx += [{"t": "안전보건표지 40종", "k": "자료", "h": "resources/signs/", "d": "표지 금지 경고 지시 안내"}, {"t": "오늘의 안전 브리핑", "k": "소식", "h": "brief/", "d": "뉴스 리포트"},
-            {"t": "채용정보", "k": "소식", "h": "jobs/", "d": "안전관리자 보건관리자 채용"}, {"t": "법령 개정 소식·시행 예정", "k": "법령", "h": "laws/#upcoming", "d": "개정"}]
+            {"t": "채용정보", "k": "소식", "h": "jobs/", "d": "안전관리자 보건관리자 채용"},
+            {"t": "커뮤니티 게시판", "k": "게시판", "h": "board/?b=free", "d": "자유 현장 이야기 정보 공유"}, {"t": "Q&A 질문·답변", "k": "게시판", "h": "board/?b=qna", "d": "질문 답변 법령 실무"}, {"t": "법령 개정 소식·시행 예정", "k": "법령", "h": "laws/#upcoming", "d": "개정"}]
     idx_json = json.dumps(idx, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    civil = "".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}">{e(x["name"])} <span aria-hidden="true">↗</span></a></li>' for x in sites.get("civil", []) if safe_url(x.get("url")))
+    civil = "".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}"><span>{e(x["name"])}{f'<em class="go-bdg">{e(x["badge"])}</em>' if x.get("badge") else ""}</span> <span aria-hidden="true">↗</span></a></li>' for x in sites.get("civil", []) if safe_url(x.get("url")))
     orgs = "".join(f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url")))
     chips = "".join(f'<a class="qk" href="{h}">{e(k)}</a>' for k, h in [("TBM 일지", "tools/tbm/"), ("위험성평가", "tools/risk/"), ("적용범위 판정", "tools/selection/"), ("과태료", "tools/penalty/"), ("산업재해조사표", "resources/?q=" + quote("산업재해조사표")), ("MSDS 경고표지", "tools/msds/")])
     home_js = """<script>
@@ -1378,8 +1383,8 @@ def build(out, today):
     home = f"""
 <section class="hero2">
   <div class="wrap hero2-in">
-    <img class="hero2-duck" src="assets/img/duck/wave.webp" width="150" height="150" alt="손을 흔드는 SafeTake 캐릭터" fetchpriority="high">
-    <p class="hero2-eye">SafeTake · 현장 안전지식 공유 커뮤니티</p>
+    <img class="hero2-duck" src="assets/img/plum/wave.webp" width="150" height="150" alt="손을 흔드는 SafePlum 캐릭터" fetchpriority="high">
+    <p class="hero2-eye">SafePlum · 현장 안전지식 공유 커뮤니티</p>
     <h1>안전관리 서류, 여기서 바로</h1>
     <div class="uq" role="search">
       <label for="uq" class="sr">통합 검색</label>
@@ -1421,12 +1426,12 @@ def build(out, today):
         <section><div class="bd-h"><h2>브리핑·소식</h2><a class="more" href="brief/">전체 {len(BOARD)}건 →</a></div><ul class="bd-list">{brief_rows}</ul></section>
         <section><div class="bd-h"><h2>법령 동향</h2><a class="more" href="laws/">더보기 →</a></div><ul class="bd-list">{law_rows}</ul></section>
       </div>
-      <p class="hub-links"><span>더 보기</span><a href="jobs/">채용정보</a><a href="laws/act/">산업안전보건법</a><a href="laws/sapa/">중대재해처벌법</a></p>
+      <p class="hub-links"><span>더 보기</span><a href="board/?b=free">커뮤니티</a><a href="board/?b=qna">Q&amp;A</a><a href="jobs/">채용정보</a><a href="laws/act/">산업안전보건법</a><a href="laws/sapa/">중대재해처벌법</a></p>
     </div>
   </section>
   <aside class="home2-side">
     {month_box}
-    <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/duck/call.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
+    <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/plum/laptop.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
 {home_js}"""
@@ -1443,11 +1448,11 @@ def build(out, today):
                 f'<span class="nb-t">{e(x["title"])}{chk}</span><span class="nb-a">{e(x.get("agency", ""))}</span></summary>'
                 f'<div class="nb-body">{ot}<p>{e(x["summary"])}</p>{per}<p><b>실무 포인트</b> {e(x.get("point", ""))}</p>{vf}'
                 f'<p><a class="link-ext" href="{e(x["url"])}" target="_blank" rel="noopener">공식 출처 ↗</a>{more}</p></div></details>')
-    cats = ["점검", "감독", "지원사업", "법령", "정책", "통계", "사고", "자료"]
+    cats = ["입법예고", "점검", "감독", "지원사업", "법령", "정책", "통계", "사고", "자료"]
     cat_btns = '<button type="button" data-c="" aria-pressed="true">전체</button>' + "".join(f'<button type="button" data-c="{c}" aria-pressed="false">{c} {sum(1 for x in BOARD if x["cat"] == c)}</button>' for c in cats if any(x["cat"] == c for x in BOARD))
     board_html = f"""<div class="nb"><div class="seg nb-filter" id="nbF" role="group" aria-label="분류">{cat_btns}</div>
 <div class="nb-list" id="nbL">{"".join(board_row(x) for x in BOARD)}</div>
-<p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafeTake이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
+<p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
 <script>(function(){{var f=document.getElementById("nbF"),l=document.getElementById("nbL");f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});[].forEach.call(l.children,function(r){{r.hidden=!!b.dataset.c&&r.dataset.cat!==b.dataset.c;}});}});}})();</script>"""
     if briefs:
         b0 = briefs[0]
@@ -1466,7 +1471,7 @@ def build(out, today):
     <div class="side-box"><h2 class="h-sm">원문 보러 가기</h2><ul class="bul">
       <li><a href="https://www.moel.go.kr/news/enews/report/enewsList.do" target="_blank" rel="noopener">고용노동부 보도자료 ↗</a></li>
       <li><a href="https://www.moel.go.kr/info/lawinfo/instruction/list.do" target="_blank" rel="noopener">고용노동부 훈령·예규·고시 ↗</a></li>
-      <li><a href="../laws/#updates">SafeTake 법령 개정 소식</a></li>
+      <li><a href="../laws/#updates">SafePlum 법령 개정 소식</a></li>
     </ul></div></aside>"""
     brief_head = """
 <section class="phead"><div class="wrap">
@@ -1476,13 +1481,128 @@ def build(out, today):
 </div></section>"""
     write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
           brief_head.format(up="../", crumb="안전 브리핑") + f'<div class="wrap layout-detail"><section class="col-main">{brief_main}</section>{brief_side}</div>',
-          desc="산업안전 법령·정책·감독·사고 소식을 매일 요약하고 실무 포인트를 정리한 SafeTake 브리핑.", active="brief/"))
+          desc="산업안전 법령·정책·감독·사고 소식을 매일 요약하고 실무 포인트를 정리한 SafePlum 브리핑.", active="brief/"))
     for b in briefs:
         body = (brief_head.format(up="../../", crumb='<a href="../">안전 브리핑</a><span>/</span>' + fmt_date(b["date"]))
                 + f'<div class="wrap layout-detail"><section class="col-main"><article class="br"><p class="br-date">{fmt_date(b["date"])} 브리핑</p><h2 class="br-title">{e(b["title"])}</h2>{brief_article(b, "../../")}</article></section>'
                 + brief_side.replace('href="../laws/', 'href="../../laws/').replace('<a href="20', '<a href="../20') + "</div>")
         write(f"brief/{b['date']}/index.html", page(site, "../../", f"brief/{b['date']}/", f'{fmt_date(b["date"])} 안전 브리핑 — {b["title"]}', body,
               desc=(b.get("lead") or b["title"])[:150], active="brief/"))
+
+
+    # ---- 게시판(커뮤니티 · Q&A): 글·회원은 Supabase 에 있고, 여기서는 빈 화면 틀만 만든다(assets/community.js 가 채운다)
+    cmc = site.get("community") or {}
+    cm_url, cm_key = safe_url(cmc.get("supabase_url")), str(cmc.get("supabase_anon_key") or "").strip()
+    cm_on = bool(cm_url and cm_key)
+    if not cm_on:
+        warn("community.supabase_url / supabase_anon_key 가 비어 있음 → 게시판은 '준비 중'으로 표시(README '게시판 열기' 참고)")
+    elif not ((site.get("operator") or {}).get("contact_url")):
+        warn("게시판이 켜졌는데 operator.contact_url 이 비어 있음 → 개인정보 처리방침·삭제 요청 창구가 '준비 중'으로 나감. 회원을 받기 전에 반드시 입력")
+    if "service_role" in cm_key or cm_key.startswith("sb_secret_"):
+        sys.exit("config/site.json community.supabase_anon_key 에 비밀 키(service_role/secret)가 들어 있습니다. 브라우저에 공개되는 값이므로 anon(publishable) 키만 넣으세요.")
+    cm_cats = cmc.get("categories") or {}
+
+    def cm_page(sub, kind, title, lead, rel, desc, wide=False):
+        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats}, ensure_ascii=False).replace("</", "<\\/")
+        crumb = f'<a href="{rel}board/">게시판</a><span>/</span>{e(title)}' if sub else "게시판"
+        side = f"""<aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint">
+      <li><b>커뮤니티</b> — 현장 이야기, 정보 공유, 자료 요청.</li>
+      <li><b>Q&amp;A</b> — 실무·법령 질문과 답변. 질문자가 답변을 채택할 수 있습니다.</li>
+      <li>읽기는 누구나, 쓰기는 이메일 인증을 마친 회원만 할 수 있습니다. 이름·전화번호는 받지 않습니다.</li>
+      <li>개인·사업장을 알아볼 수 있는 정보는 적지 마세요.</li>
+    </ul><p class="btns" style="margin-top:12px"><a class="btn btn-sm btn-ghost" href="{rel}board/rules/">이용수칙</a></p></div>
+    <div class="side-box"><h2 class="h-sm">답변을 볼 때</h2><p>게시판의 답변은 회원 개인의 의견입니다. 법 적용 여부는 <a href="{rel}laws/">법령 원문</a>과 소관 기관에서 확인하세요.</p></div></aside>"""
+        body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="{rel}">홈</a><span>/</span>{crumb}</p>
+  <h1>{e(title)}</h1>
+  <p>{e(lead)}</p>
+</div></section>
+<div class="wrap {'cm-narrow' if wide else 'layout-detail cm-layout'}"><section class="col-main"><div id="cm" class="cm" data-page="{kind}"><noscript><p class="cm-note">게시판을 보려면 자바스크립트를 켜야 합니다.</p></noscript></div></section>{'' if wide else side}</div>
+<script>window.ST_CM={conf};</script>
+{f'<script src="{rel}assets/vendor/supabase.js?v={ASSET_VER}"></script>' if cm_on else ''}
+<script src="{rel}assets/community.js?v={ASSET_VER}"></script>"""
+        write(f"board/{sub}index.html", page(site, rel, f"board/{sub}", title, body, desc=desc, active="board/"))
+
+    cm_page("", "list", "게시판", "안전·보건 일을 하는 사람들이 묻고 답하고 나누는 곳입니다. 커뮤니티와 Q&A 두 게시판이 있습니다.", "../",
+            "안전관리자·보건관리자가 현장 이야기와 실무 질문을 나누는 SafePlum 커뮤니티·Q&A 게시판.")
+    cm_page("view/", "view", "글 보기", "게시판의 글과 답변은 회원 개인의 의견입니다.", "../../", "SafePlum 게시판 글 보기.")
+    cm_page("write/", "write", "글쓰기", "제목과 내용을 적어 등록합니다. 개인·사업장을 알아볼 수 있는 정보는 적지 마세요.", "../../", "SafePlum 게시판 글쓰기.", wide=True)
+    cm_page("account/", "account", "로그인·회원가입", "이메일 인증만으로 가입합니다. 이름·전화번호는 받지 않습니다.", "../../", "SafePlum 게시판 로그인·회원가입.", wide=True)
+
+    op_line = operator_html(site, "../../")
+    rules_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">게시판</a><span>/</span>이용수칙</p>
+  <h1>게시판 이용수칙</h1>
+  <p>SafePlum 게시판(커뮤니티 · Q&amp;A)을 쓰는 모든 회원에게 적용됩니다. 글을 등록하면 이 수칙에 동의한 것으로 봅니다.</p>
+</div></section>
+<div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
+  <h2>1. 가입과 계정</h2>
+  <p>이메일 인증을 마치면 가입됩니다. 이름·전화번호는 받지 않으며, 글에는 닉네임만 공개됩니다. 만 14세 이상만 가입할 수 있습니다. 계정은 본인만 쓰고 다른 사람에게 넘기지 않습니다.</p>
+  <h2>2. 올리면 안 되는 글</h2>
+  <ul class="bul">
+    <li>사람 이름·연락처·주민등록번호·얼굴 사진 등 개인을 알아볼 수 있는 정보(본인 것 포함)</li>
+    <li>특정 사업장·회사·개인을 알아볼 수 있게 적은 사고·위반 사례, 근거 없는 비방, 명예를 훼손하는 글</li>
+    <li>재해자·환자의 건강정보 등 민감한 정보</li>
+    <li>광고·홍보·도배, 같은 내용의 반복 등록</li>
+    <li>다른 사람의 저작물(유료 교재·기사 전문·타 사이트 자료 등)을 허락 없이 옮긴 글. 필요한 만큼만 인용하고 출처를 적어 주세요.</li>
+    <li>욕설·혐오·차별 표현, 음란물, 불법 행위를 권하거나 법 위반을 숨기는 방법을 알려 주는 글</li>
+  </ul>
+  <h2>3. 질문과 답변</h2>
+  <p>Q&amp;A의 답변은 회원 개인의 경험과 의견이며, SafePlum의 공식 견해나 법령 해석이 아닙니다. 답변할 때는 근거(법 조문·고시·공식 자료)를 함께 적어 주세요. 법 적용 여부와 행정 처분에 관한 판단은 법령 원문과 고용노동부 등 소관 기관에서 확인해야 합니다.</p>
+  <h2>4. 글의 책임과 권리</h2>
+  <p>글의 내용에 대한 책임은 글을 쓴 회원에게 있습니다. 글의 저작권은 쓴 회원에게 있으며, SafePlum은 게시판 운영에 필요한 범위(게시·검색·목록 표시)에서 글을 보여 줍니다.</p>
+  <h2>5. 삭제·이용 제한</h2>
+  <p>이 수칙에 어긋나거나 신고가 들어온 글은 운영자가 확인한 뒤 알리지 않고 가리거나 삭제할 수 있습니다. 위반이 반복되면 글쓰기를 제한하거나 계정을 정지할 수 있습니다. 회원은 자기 글과 댓글을 언제든 삭제할 수 있습니다.</p>
+  <h2>6. 권리 침해 신고</h2>
+  <p>내 권리(명예·사생활·저작권 등)를 침해하는 글을 발견하면 글의 '신고' 버튼 또는 아래 문의 창구로 알려 주세요. 회원이 아니어도 문의 창구로 요청할 수 있습니다. 확인한 뒤 가림·삭제 등 필요한 조치를 합니다.</p>
+  <p>{op_line}</p>
+  <h2>7. 탈퇴</h2>
+  <p>'내 계정'에서 언제든 탈퇴할 수 있습니다. 탈퇴하면 계정과 이메일은 바로 삭제되고, 쓴 글과 댓글은 작성자가 '탈퇴한 회원'으로 바뀐 채 남습니다. 남기고 싶지 않은 글은 탈퇴 전에 직접 삭제하세요.</p>
+  <p class="src-note">시행일 {e(cmc.get("rules_effective") or today)}. 수칙이 바뀌면 이 페이지에 알립니다.</p>
+</div>"""
+    write("board/rules/index.html", page(site, "../../", "board/rules/", "게시판 이용수칙", rules_body, desc="SafePlum 커뮤니티·Q&A 게시판 이용수칙.", active="board/"))
+
+    pv = cmc.get("privacy") or {}
+    def pv_val(k):
+        return e(pv[k]) if pv.get(k) else '<span class="lst lst-chk">확인 필요</span> 운영자가 아직 입력하지 않았습니다'
+    privacy_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../">홈</a><span>/</span>개인정보 처리방침</p>
+  <h1>개인정보 처리방침</h1>
+  <p>SafePlum이 게시판 회원가입과 운영을 위해 어떤 개인정보를 어떻게 다루는지 알립니다. 작성 도구에 입력한 문서 내용은 서버로 보내지 않으며 이 방침의 수집 항목에 들어가지 않습니다.</p>
+</div></section>
+<div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
+  <h2>1. 수집하는 항목과 목적</h2>
+  <div class="cm-tblw"><table class="cm-tbl"><thead><tr><th>항목</th><th>목적</th><th>수집 시점</th></tr></thead><tbody>
+    <tr><th>이메일 주소</th><td>본인 확인(인증 메일), 로그인, 비밀번호 재설정</td><td>회원가입</td></tr>
+    <tr><th>비밀번호</th><td>로그인. 원문이 아닌 암호화(해시)된 값으로 저장됩니다.</td><td>회원가입</td></tr>
+    <tr><th>닉네임</th><td>글·댓글의 작성자 표시(공개)</td><td>회원가입</td></tr>
+    <tr><th>글·댓글·신고 내용</th><td>게시판 제공, 신고 처리</td><td>작성할 때</td></tr>
+    <tr><th>접속 기록(접속 일시·IP 주소 등)</th><td>부정 이용 방지, 장애 대응. 인증·호스팅 서비스가 자동으로 남깁니다.</td><td>이용할 때 자동</td></tr>
+  </tbody></table></div>
+  <p>이름·전화번호·주민등록번호 등은 받지 않습니다. 광고·분석용 추적 도구는 현재 쓰지 않습니다.</p>
+  <h2>2. 보유 기간</h2>
+  <p>회원 정보(이메일·비밀번호·닉네임)는 탈퇴할 때까지 보유하고, 탈퇴하면 바로 삭제합니다. 글과 댓글은 회원이 삭제하거나 탈퇴할 때 작성자 정보와의 연결이 끊어집니다. 삭제한 글은 화면에서 바로 사라지며, 분쟁·신고 대응을 위해 운영자만 볼 수 있는 상태로 보관한 뒤 파기합니다. 보관 기간: {pv_val("deleted_retention")}.</p>
+  <h2>3. 처리 위탁과 보관 위치</h2>
+  <div class="cm-tblw"><table class="cm-tbl"><thead><tr><th>맡기는 곳</th><th>맡기는 일</th><th>보관 위치</th></tr></thead><tbody>
+    <tr><th>Supabase Inc.</th><td>회원 인증, 게시판 데이터베이스 운영</td><td>{pv_val("db_region")}</td></tr>
+    <tr><th>인증 메일 발송 서비스</th><td>가입 인증·비밀번호 재설정 메일 발송</td><td>{pv_val("mail_provider")}</td></tr>
+    <tr><th>GitHub, Inc. (GitHub Pages)</th><td>웹사이트 파일 호스팅(접속 기록)</td><td>해당 사업자 정책에 따름</td></tr>
+  </tbody></table></div>
+  <p>위 사업자가 국외 법인이므로 개인정보가 국외에서 처리·보관될 수 있습니다. 법령에 따른 요청이 있는 경우를 빼고 제3자에게 제공하지 않습니다.</p>
+  <h2>4. 회원의 권리</h2>
+  <p>'내 계정'에서 닉네임·비밀번호를 바꾸고 탈퇴(삭제)할 수 있습니다. 열람·정정·삭제·처리정지를 직접 하기 어려우면 아래 문의 창구로 요청하세요. 만 14세 미만은 가입할 수 없습니다.</p>
+  <h2>5. 안전 조치</h2>
+  <p>비밀번호는 암호화해 저장하고, 전송 구간은 HTTPS로 암호화합니다. 이메일 주소는 다른 회원에게 공개되지 않으며, 데이터베이스는 본인 글만 고치거나 지울 수 있도록 행 단위 접근 규칙으로 보호합니다.</p>
+  <h2>6. 개인정보 보호책임자·문의</h2>
+  <p>{operator_html(site, "../")}</p>
+  <p>개인정보 침해에 대한 상담은 개인정보침해신고센터(privacy.kisa.or.kr, 국번 없이 118), 개인정보분쟁조정위원회(kopico.go.kr)에서도 받을 수 있습니다.</p>
+  <p class="src-note">시행일 {pv_val("effective")}. 내용이 바뀌면 이 페이지에 알립니다.</p>
+</div>"""
+    write("privacy/index.html", page(site, "../", "privacy/", "개인정보 처리방침", privacy_body, desc="SafePlum 개인정보 처리방침."))
 
     # ---- 법령정보·면책 안내
     man = manifest()
@@ -1497,30 +1617,30 @@ def build(out, today):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>법령정보·면책 안내</p>
   <h1>법령정보·면책 안내</h1>
-  <p>SafeTake이 보여 주는 법령 정보, 판정·계산 결과, 양식이 어떤 성격의 자료인지 정리했습니다. 법령 데이터 기준일 {e(man.get("checked_at", ""))}.</p>
+  <p>SafePlum이 보여 주는 법령 정보, 판정·계산 결과, 양식이 어떤 성격의 자료인지 정리했습니다. 법령 데이터 기준일 {e(man.get("checked_at", ""))}.</p>
 </div></section>
 <div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
   <h2 id="info">1. 법령정보 안내</h2>
-  <p>SafeTake의 법령 본문·별표·서식은 국가법령정보센터에 공개된 원문을 옮겨 실은 것이고, 그 밖의 요약·분류·판정 기준·계산식·예시 문구는 SafeTake이 정리한 참고 자료입니다. 두 가지는 화면에서 구분해 표시합니다. 현재 시행 중인 내용, 공포되었지만 아직 시행 전인 내용, 국회를 통과했거나 입법예고 중인 내용은 서로 다른 상태로 나누어 보여 줍니다.</p>
+  <p>SafePlum의 법령 본문·별표·서식은 국가법령정보센터에 공개된 원문을 옮겨 실은 것이고, 그 밖의 요약·분류·판정 기준·계산식·예시 문구는 SafePlum이 정리한 참고 자료입니다. 두 가지는 화면에서 구분해 표시합니다. 현재 시행 중인 내용, 공포되었지만 아직 시행 전인 내용, 국회를 통과했거나 입법예고 중인 내용은 서로 다른 상태로 나누어 보여 줍니다.</p>
   <p>상태 표시: <span class="lst lst-cur">현재 시행</span> <span class="lst lst-next">시행 예정</span> <span class="lst lst-bill">법안·입법 동향</span> <span class="lst lst-rec">권장사항</span> <span class="lst lst-chk">확인 필요</span></p>
   <h2 id="source">2. 법령 원문 출처</h2>
-  <div class="table-wrap"><table class="lvt"><thead><tr><th>법령·고시</th><th>SafeTake이 쓰는 버전</th><th>공식 확인일</th><th>원문</th></tr></thead><tbody>{src_rows}</tbody></table></div>
+  <div class="table-wrap"><table class="lvt"><thead><tr><th>법령·고시</th><th>SafePlum이 쓰는 버전</th><th>공식 확인일</th><th>원문</th></tr></thead><tbody>{src_rows}</tbody></table></div>
   <p>법적 근거로는 국가법령정보센터, 고용노동부, 한국산업안전보건공단 등 공식 기관의 자료만 사용합니다. 언론 보도는 '참고 보도'로만 표시하며 법령·정책의 근거로 쓰지 않습니다. 확인일로부터 {int(man.get("stale_after_days", 45))}일이 지나면 화면에 '공식 원문 재확인 필요'가 표시됩니다.</p>
   <h2 id="limit">3. 자가진단 도구의 한계</h2>
   <p>적용범위 판정, 유해위험방지계획서 대상 확인, 기계·설비 의무 조회 등의 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 관할 행정기관의 공식 해석·처분을 대체하지 않습니다. 업종 분류, 상시근로자 수 산정, 도급 관계처럼 사실관계 판단이 필요한 부분은 도구가 대신 판단할 수 없습니다. 결과는 적용 · 조건부 · 확인 필요 · 적용 제외 네 단계로만 표시합니다.</p>
-  <h2 id="calc">4. SafeTake 계산 결과의 성격</h2>
-  <p>과태료, 산업안전보건관리비, 상시근로자 수, 교육시간, 체감온도 등의 계산 결과는 참고 계산입니다. 과태료의 최종 처분 금액은 실제 위반사실과 감경·가중사유를 기준으로 관할 행정기관이 판단합니다. 상시근로자 수 산정방법은 적용 법령별로 별도 확인이 필요합니다. 위험성평가의 가능성·중대성 척도와 등급 구간은 'SafeTake 기본 위험성평가 예시 기준'이며 사업장이 정한 방법으로 바꿔 쓸 수 있습니다.</p>
+  <h2 id="calc">4. SafePlum 계산 결과의 성격</h2>
+  <p>과태료, 산업안전보건관리비, 상시근로자 수, 교육시간, 체감온도 등의 계산 결과는 참고 계산입니다. 과태료의 최종 처분 금액은 실제 위반사실과 감경·가중사유를 기준으로 관할 행정기관이 판단합니다. 상시근로자 수 산정방법은 적용 법령별로 별도 확인이 필요합니다. 위험성평가의 가능성·중대성 척도와 등급 구간은 'SafePlum 기본 위험성평가 예시 기준'이며 사업장이 정한 방법으로 바꿔 쓸 수 있습니다.</p>
   <h2 id="health">5. 건강정보 도구 안내</h2>
   <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 참고용이며 의학적 진단이 아닙니다. 업무 적합성과 사후관리 판단은 의사 등 보건의료 전문가의 평가가 필요하고, 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
-  <h2 id="forms">6. SafeTake 자체 양식의 법적 지위</h2>
-  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafeTake 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 법정 지정서식이 아니며, 관련 조문을 참고해 만든 보조양식입니다. <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 그대로 쓰는 것이 아니라 실제 내용으로 바꿔야 하는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
+  <h2 id="forms">6. SafePlum 자체 양식의 법적 지위</h2>
+  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafePlum 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 법정 지정서식이 아니며, 관련 조문을 참고해 만든 보조양식입니다. <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 그대로 쓰는 것이 아니라 실제 내용으로 바꿔야 하는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
   <p>결재란의 서명은 인쇄용 서명 이미지이며, 모든 법정 전자서명 또는 전자문서 제출 요건을 충족한다는 의미가 아닙니다.</p>
   <h2 id="links">7. 외부 링크 책임범위</h2>
-  <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, SafeTake은 외부 사이트의 내용을 보증하지 않습니다.</p>
+  <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, SafePlum은 외부 사이트의 내용을 보증하지 않습니다.</p>
   <h2 id="jobs">8. 채용공고 책임범위</h2>
-  <p>채용정보는 외부 채용 플랫폼과 공공 채용 사이트로 연결합니다. SafeTake은 공고를 직접 받거나 게시하지 않으며, 채용 조건·마감일은 각 플랫폼의 공고 원문과 채용 기업이 책임집니다.</p>
+  <p>채용정보는 외부 채용 플랫폼과 공공 채용 사이트로 연결합니다. SafePlum은 공고를 직접 받거나 게시하지 않으며, 채용 조건·마감일은 각 플랫폼의 공고 원문과 채용 기업이 책임집니다.</p>
   <h2 id="data">9. 데이터 저장 방식</h2>
-  <p>작성 도구에 입력한 내용, 서명 이미지, 첨부 사진은 SafeTake 서버로 전송하지 않고 사용 중인 브라우저(localStorage·IndexedDB)에 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 사라지므로 필요하면 화면 아래 '작성 내용 백업'으로 파일을 내려받아 두세요. 다만 사이트는 GitHub Pages에서 제공되고 글꼴 등 일부 자원을 외부 CDN에서 불러오므로, 접속 기록(IP 주소 등)에는 해당 제공자의 정책이 적용됩니다. </p>
+  <p>작성 도구에 입력한 내용, 서명 이미지, 첨부 사진은 SafePlum 서버로 전송하지 않고 사용 중인 브라우저(localStorage·IndexedDB)에 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 사라지므로 필요하면 화면 아래 '작성 내용 백업'으로 파일을 내려받아 두세요. 다만 사이트는 GitHub Pages에서 제공되고 글꼴 등 일부 자원을 외부 CDN에서 불러오므로, 접속 기록(IP 주소 등)에는 해당 제공자의 정책이 적용됩니다. </p>
   <h2 id="report">10. 오류 신고 방법</h2>
   <p>법령 내용·시행일·판정 결과·계산식의 오류를 발견하면 알려 주세요. 해당 화면 주소와 근거 조문을 함께 적어 주시면 확인이 빠릅니다.</p>
   <p>{op_html}</p>
@@ -1528,10 +1648,10 @@ def build(out, today):
   <p>공식 원문으로 다시 확인하지 못해 임의로 고치지 않고 표시만 해 둔 항목입니다.</p>
   <ul class="bul">{need_html}</ul>
   <h2 id="priority">11. 국가법령정보센터 원문 우선 원칙</h2>
-  <p>SafeTake의 내용과 법령 원문이 다르면 언제나 <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a>의 현행 원문이 우선합니다. 실제 적용 여부와 해석은 관할 지방고용노동관서 등 행정기관에 확인하시기 바랍니다.</p>
+  <p>SafePlum의 내용과 법령 원문이 다르면 언제나 <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a>의 현행 원문이 우선합니다. 실제 적용 여부와 해석은 관할 지방고용노동관서 등 행정기관에 확인하시기 바랍니다.</p>
 </div>"""
     write("legal/index.html", page(site, "../", "legal/", "법령정보·면책 안내", legal_body,
-          desc="SafeTake 법령 정보의 출처와 기준일, 자가진단·계산 결과의 한계, 자체 양식의 법적 지위, 데이터 저장 방식, 오류 신고 방법."))
+          desc="SafePlum 법령 정보의 출처와 기준일, 자가진단·계산 결과의 한계, 자체 양식의 법적 지위, 데이터 저장 방식, 오류 신고 방법."))
 
     # ---- 채용 목록
     def vals(key, split=False):
@@ -1624,7 +1744,7 @@ def build(out, today):
     <section class="block"><h2>모집 조건</h2><dl class="dl-grid">{table}</dl></section>
     {f'<section class="block"><h2>주요 업무</h2><ul class="bul">{duties}</ul></section>' if duties else ''}
     {f'<section class="block"><h2>자격 요건</h2><ul class="bul">{reqs}</ul></section>' if reqs else ''}
-    {'<p class="src-note">이 공고는 채용 기업이 SafeTake에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
+    {'<p class="src-note">이 공고는 채용 기업이 SafePlum에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
     <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''} · 조건과 일정은 원문이 우선합니다.</p>
   </article>
   <aside class="col-side">
@@ -1741,7 +1861,7 @@ def build(out, today):
   </section>
   <aside class="col-side">
     <section class="side-box">{sec_head("사고사망 속보")}{acc_list}</section>
-    <section class="side-box"><p class="hint">SafeTake은 기사 본문을 옮기지 않습니다. 제목·부제·부처·날짜만 싣고 원문으로 연결합니다. 민간 언론사 기사와 다른 사이트의 게시물은 싣지 않습니다.</p></section>
+    <section class="side-box"><p class="hint">SafePlum은 기사 본문을 옮기지 않습니다. 제목·부제·부처·날짜만 싣고 원문으로 연결합니다. 민간 언론사 기사와 다른 사이트의 게시물은 싣지 않습니다.</p></section>
   </aside>
 </div>"""
     if (site.get("features") or {}).get("public_api", False):
@@ -1849,7 +1969,7 @@ def build(out, today):
     base = (site.get("base_url") or "").rstrip("/")
     base_js = ("<script>document.write('<base href=\"'+(/\\.github\\.io$/.test(location.hostname)?'/'+location.pathname.split('/')[1]+'/':'/')+'\">')</script>")
     nf = page(site, "", "404.html", "페이지를 찾을 수 없습니다",
-        '<section class="phead"><div class="wrap"><img src="assets/img/duck/surprised.webp" width="110" height="110" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
+        '<section class="phead"><div class="wrap"><img src="assets/img/plum/warn.webp" width="110" height="110" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
     (out / "404.html").write_text(nf.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + base_js, 1), encoding="utf-8")
 
     if base:

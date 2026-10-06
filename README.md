@@ -1,4 +1,4 @@
-# SafeTake
+# SafePlum
 
 안전관리자를 위한 채용·서식·법령 포털. **서버 없음, 운영비 0원**인 정적 사이트입니다.
 
@@ -84,7 +84,7 @@ templates/*.csv       구글 시트 머리글 서식
 {"date": "2026-10-05", "title": "…", "lead": "…",
  "items": [{"cat": "법령|정책|감독|사고|화학물질|보건|자료", "date": "2026-10-01", "title": "…", "summary": "직접 쓴 요약", "point": "실무 포인트",
             "sources": [{"name": "경향신문", "url": "https://…"}]}],
- "todo": [{"text": "…", "href": "tools/risk/"}], "by": "SafeTake 리포터", "checked": "2026-10-05"}
+ "todo": [{"text": "…", "href": "tools/risk/"}], "by": "SafePlum 리포터", "checked": "2026-10-05"}
 ```
 원칙: 기사·보도자료 문장을 옮겨 적지 않고 직접 요약, 출처 링크 필수, 사진 없음, 확인 안 된 숫자는 쓰지 않음.
 
@@ -169,7 +169,7 @@ templates/*.csv       구글 시트 머리글 서식
 빌드하면 `laws/<key>/`(act·yeong·rule·krule·sapa·sapa_dec) 전문 페이지와 `assets/data/lawidx.js`(법령 홈 전체 검색 색인)가 생깁니다.
 법령이 개정되면 본문 페이지 텍스트를 다시 받아 lawraw 파일을 바꾸고 파서를 다시 돌리세요(lsiSeq는 parse_lawtext.py 의 LAWS).
 
-## SafeTake 안내 게시물 (data/duck_signs.json)
+## SafePlum 안내 게시물 (data/duck_signs.json)
 
 이미지를 `assets/img/`에 넣고 `data/duck_signs.json`의 items에 한 줄 추가하면 표지 페이지 상단 목록과 A4 인쇄 페이지(`resources/signs/duck-<id>/`)가 생깁니다. 웹용은 WebP(1000px), 인쇄용은 PNG 원본을 씁니다.
 
@@ -217,7 +217,7 @@ python3 build.py --local --out _preview  # 더블클릭으로 여는 미리보�
 | 조문별 시행일 | `scripts/parse_lawtext.py` 가 본문의 `[시행일: …]` 표기를 읽어 현행 문언과 시행 예정 문언(`pending`)을 분리. 법령 페이지에서 기준일을 고르면 적용 문언이 바뀜 |
 | 판정 | 적용범위 판정은 적용·조건부·확인 필요·적용 제외 4단계 + 시행령 별표 1(일부 적용 제외) 반영 |
 | 표기 | 도구·서식 하단에 법적 근거 확인일·적용 법령 버전·원문 링크(`build.py` `lawver_html`), 홈 최상단에 법령 데이터 기준일 |
-| 양식 지위 | 웹 서식·TBM·산보위·위험성평가·LOTO 는 "SafeTake 자체 제공 양식 · 법정 지정서식이 아님" |
+| 양식 지위 | 웹 서식·TBM·산보위·위험성평가·LOTO 는 "SafePlum 자체 제공 양식 · 법정 지정서식이 아님" |
 | MSDS | 자동 추출 → 원문 대조 → 확인 체크 후에만 경고표지 인쇄 |
 | 브리핑 | 공식 1차 출처가 없는 항목은 빌드에서 제외. 예약 작업은 초안을 PR로만 올리고 사람이 확인 후 병합 |
 | 안내 | `/legal/` 법령정보·면책 안내, 푸터 운영·신고 채널(`config/site.json` 의 `operator`, `contact_email`) |
@@ -232,3 +232,41 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 
 법령이 개정되면: ① `data/lawraw/*.txt` 교체 → `scripts/parse_lawtext.py` ② `data/law_manifest.json` 의 current/upcoming/checked_at 갱신 ③ 영향받는 도구 데이터(`used_by`) 재대조 ④ `audit.py` 통과 확인. 확인일이 `stale_after_days`(45일)를 넘기면 화면에 "공식 원문 재확인 필요"가 표시됩니다.
 
+
+## 게시판 열기 (커뮤니티 · Q&A, 이메일 인증 회원가입)
+
+글·회원은 정적 사이트에 저장할 수 없어 Supabase(인증 + Postgres)를 씁니다. 사이트는 그대로 GitHub Pages 에 있고, 게시판 화면(`assets/community.js`)만 브라우저에서 Supabase 로 직접 연결합니다. 설정 전에는 게시판이 "준비 중"으로 표시됩니다.
+
+| 파일 | 역할 |
+|---|---|
+| `supabase/schema.sql` | 테이블·권한 규칙(RLS)·기능 함수. 누가 무엇을 쓸 수 있는지는 전부 여기서 결정 |
+| `assets/community.js` | 목록·글 보기·글쓰기·로그인/가입/내 계정 화면 |
+| `assets/vendor/supabase.js` | supabase-js 2.117.2 (MIT). CDN 이 아니라 사이트 안에 둠 |
+| `config/site.json` → `community` | Supabase 주소·anon 키, 게시판 분류, 처리방침에 나가는 값 |
+
+### 순서
+
+1. supabase.com 에서 프로젝트를 만듭니다. Region 은 Seoul 을 권장합니다.
+2. SQL Editor 에 `supabase/schema.sql` 전체를 붙여 실행합니다(다시 실행해도 글은 지워지지 않습니다).
+3. Authentication 설정
+   - Email 로그인: 켜기, **Confirm email: 켜기**(이게 꺼져 있으면 인증 없이 가입됩니다), 비밀번호 최소 8자.
+   - URL Configuration: Site URL 에 사이트 주소, Redirect URLs 에 `https://도메인/board/account/` 를 추가합니다.
+   - SMTP: Supabase 기본 발송은 시험용이라 발송 한도가 매우 낮습니다. 실제 회원을 받으려면 직접 연결한 SMTP(메일 발송 서비스)가 필요하고, 보통 발신 도메인 인증이 필요합니다 → 도메인을 먼저 정해야 합니다.
+   - 메일 문구(Templates)를 한국어로 바꿉니다.
+4. `config/site.json` 의 `community.supabase_url`, `community.supabase_anon_key` 를 채웁니다. **anon(publishable) 키만** 넣습니다. service_role(secret) 키를 넣으면 빌드가 멈춥니다.
+5. `operator.contact_url`(문의·삭제 요청 창구)과 `community.privacy` 값(시행일, DB 리전, 메일 발송 서비스, 삭제 글 보관 기간)을 채웁니다. 비어 있으면 처리방침에 "확인 필요"로 나갑니다. 회원을 받기 전에 반드시 채우세요.
+6. 직접 가입한 뒤 SQL Editor 에서 운영자로 지정합니다: `update public.profiles set role = 'admin' where id = (select id from auth.users where email = '운영자 이메일');`
+
+### 운영
+
+- 신고 확인: Table Editor → `reports`. 조치했으면 `handled_at`, `handled_note` 를 적습니다.
+- 글·댓글 삭제: 운영자 계정으로 로그인하면 모든 글에 "삭제(운영자)"가 보입니다. 삭제는 `deleted_at` 만 찍는 방식이라 복구하려면 그 값을 지우면 됩니다.
+- 공지: Table Editor 에서 해당 글의 `notice` 를 true 로 바꾸면 목록 맨 위에 고정됩니다.
+- 이용 정지: Authentication → Users 에서 해당 회원을 Ban 합니다.
+- 제한값(글 30초 간격·하루 30건, 댓글 10초 간격·하루 100건, 닉네임 7일 1회)은 `schema.sql` 의 트리거·함수에 있습니다.
+
+### 아직 없는 것
+
+- 글 본문 검색(지금은 제목만), 이미지·파일 첨부, 댓글 수정, 추천·조회수, 알림, 운영자 전용 관리 화면(신고 처리는 Supabase 대시보드에서).
+- 검색엔진 노출: 글은 브라우저에서 불러오므로 검색엔진에 잘 잡히지 않습니다. 필요해지면 빌드 때 글 목록을 정적 페이지로 함께 만드는 방식으로 보완할 수 있습니다.
+- 자동 스팸 차단(캡차). 가입 남용이 보이면 Supabase Auth 의 CAPTCHA 설정을 켭니다.

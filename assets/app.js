@@ -1,4 +1,4 @@
-/* SafeTake — 검색·필터·정렬·즐겨찾기. 서버 호출 없음. */
+/* SafePlum — 검색·필터·정렬·즐겨찾기. 서버 호출 없음. */
 (function () {
   "use strict";
   var FAV_KEY = "safetake.fav.v1";

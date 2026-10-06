@@ -369,13 +369,13 @@
       return ["BEGIN:VEVENT", "UID:" + t.key + "@safetake", "DTSTAMP:" + stamp, "DTSTART;TZID=Asia/Seoul:" + ds + "T" + pad(+hm[0]) + pad(+hm[1] || 0) + "00", "DURATION:PT1H",
         "RRULE:" + rrule(t), "SUMMARY:" + icsEsc(t.title), "DESCRIPTION:" + icsEsc([t.basis ? "근거: " + t.basis : "", t.memo || ""].filter(Boolean).join("\n")), "END:VEVENT"].join("\r\n");
     });
-    dl("SafeTake_주기업무.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//safetake//schedule//KO", "CALSCALE:GREGORIAN", "X-WR-CALNAME:안전보건 주기업무", "X-WR-TIMEZONE:Asia/Seoul"].concat(ev).concat(["END:VCALENDAR"]).join("\r\n"), "text/calendar;charset=utf-8");
+    dl("SafePlum_주기업무.ics", ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//safetake//schedule//KO", "CALSCALE:GREGORIAN", "X-WR-CALNAME:안전보건 주기업무", "X-WR-TIMEZONE:Asia/Seoul"].concat(ev).concat(["END:VCALENDAR"]).join("\r\n"), "text/calendar;charset=utf-8");
   });
   document.getElementById("sPrint").addEventListener("click", function () {
     var old = view; view = "year"; render(); document.body.classList.add("printing-sched"); window.print();
     setTimeout(function () { document.body.classList.remove("printing-sched"); view = old; render(); }, 400);
   });
-  document.getElementById("sExport").addEventListener("click", function () { dl("SafeTake_주기업무_설정.json", JSON.stringify({ app: "safetake.schedule", v: 1, data: S }, null, 1), "application/json"); });
+  document.getElementById("sExport").addEventListener("click", function () { dl("SafePlum_주기업무_설정.json", JSON.stringify({ app: "safetake.schedule", v: 1, data: S }, null, 1), "application/json"); });
   document.getElementById("sImport").addEventListener("change", function (ev) {
     var f = ev.target.files[0]; if (!f) return;
     var r = new FileReader();

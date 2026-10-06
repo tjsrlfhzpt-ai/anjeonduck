@@ -1,0 +1,282 @@
+-- SafePlum 게시판(커뮤니티 · Q&A) 데이터베이스
+-- Supabase 대시보드 → SQL Editor 에 통째로 붙여 넣고 한 번 실행합니다. 다시 실행해도 기존 글은 지워지지 않습니다.
+--
+-- 원칙
+--  · 권한은 화면이 아니라 여기(RLS·함수)에서 검증한다. 브라우저에 들어가는 anon 키로는 아래 정책이 허용한 일만 할 수 있다.
+--  · 이메일은 auth.users 에만 있고 공개 테이블(profiles)에는 닉네임만 둔다.
+--  · 글·댓글 삭제는 지우지 않고 deleted_at 을 찍는다(분쟁·신고 대응용 이력). 탈퇴하면 계정과 이메일은 지워지고 글의 작성자는 비워진다.
+
+-- ------------------------------------------------------------ 회원 프로필
+create table if not exists public.profiles (
+  id uuid primary key references auth.users (id) on delete cascade,
+  nickname text not null,
+  role text not null default 'member' check (role in ('member', 'admin')),
+  created_at timestamptz not null default now(),
+  nickname_changed_at timestamptz,
+  constraint profiles_nickname_len check (char_length(nickname) between 2 and 12),
+  constraint profiles_nickname_chars check (nickname ~ '^[0-9A-Za-z가-힣_]+$')
+);
+create unique index if not exists profiles_nickname_key on public.profiles (lower(nickname));
+
+create or replace function public.is_admin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
+$$;
+
+create or replace function public.nickname_ok(p text) returns boolean
+language sql immutable as $$
+  select p is not null and char_length(p) between 2 and 12 and p ~ '^[0-9A-Za-z가-힣_]+$'
+     and lower(p) not in ('운영자', '운영팀', '관리자', 'admin', 'safetake', '세이프테이크', 'safeplum', '세이프플럼');
+$$;
+
+-- 가입 전 닉네임 중복 확인(비로그인도 호출 가능)
+create or replace function public.nickname_available(p text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select public.nickname_ok(p) and not exists (select 1 from public.profiles where lower(nickname) = lower(p));
+$$;
+
+-- 가입하면 프로필을 자동으로 만든다. 닉네임이 규칙에 안 맞거나 그사이 선점되면 임시 닉네임을 준다(가입 자체는 막지 않는다).
+create or replace function public.handle_new_user() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare n text := btrim(coalesce(new.raw_user_meta_data ->> 'nickname', ''));
+begin
+  if not public.nickname_ok(n) or exists (select 1 from public.profiles where lower(nickname) = lower(n)) then
+    n := '안전인' || substr(md5(new.id::text), 1, 6);
+  end if;
+  insert into public.profiles (id, nickname) values (new.id, n) on conflict (id) do nothing;
+  return new;
+end $$;
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();
+
+-- ------------------------------------------------------------ 글
+create table if not exists public.posts (
+  id bigint generated always as identity primary key,
+  board text not null check (board in ('free', 'qna')),
+  category text not null default '' check (char_length(category) <= 20),
+  title text not null check (char_length(btrim(title)) between 2 and 80),
+  body text not null check (char_length(btrim(body)) between 5 and 5000),
+  author_id uuid references public.profiles (id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz,
+  deleted_at timestamptz,
+  deleted_by uuid,
+  comment_count integer not null default 0,
+  accepted_comment_id bigint,
+  notice boolean not null default false
+);
+create index if not exists posts_board_created on public.posts (board, created_at desc) where deleted_at is null;
+create index if not exists posts_author on public.posts (author_id, created_at desc);
+
+-- ------------------------------------------------------------ 댓글(Q&A에서는 답변)
+create table if not exists public.comments (
+  id bigint generated always as identity primary key,
+  post_id bigint not null references public.posts (id) on delete cascade,
+  body text not null check (char_length(btrim(body)) between 1 and 2000),
+  author_id uuid references public.profiles (id) on delete set null,
+  created_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  deleted_by uuid
+);
+create index if not exists comments_post on public.comments (post_id, created_at) where deleted_at is null;
+create index if not exists comments_author on public.comments (author_id, created_at desc);
+
+-- ------------------------------------------------------------ 신고
+create table if not exists public.reports (
+  id bigint generated always as identity primary key,
+  target_type text not null check (target_type in ('post', 'comment')),
+  target_id bigint not null,
+  reporter_id uuid references public.profiles (id) on delete set null,
+  reason text not null check (char_length(btrim(reason)) between 2 and 300),
+  created_at timestamptz not null default now(),
+  handled_at timestamptz,
+  handled_note text,
+  unique (target_type, target_id, reporter_id)
+);
+
+-- ------------------------------------------------------------ 쓰기 규칙(트리거)
+-- app.sys = '1' 은 아래 함수들이 내부에서만 켜는 표시다. 브라우저(PostgREST)에서는 켤 수 없다.
+create or replace function public.posts_before_insert() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  new.author_id := auth.uid();
+  new.created_at := now(); new.updated_at := null; new.deleted_at := null; new.deleted_by := null;
+  new.comment_count := 0; new.accepted_comment_id := null;
+  new.title := btrim(new.title); new.category := btrim(coalesce(new.category, ''));
+  if not public.is_admin() then
+    new.notice := false;
+    if exists (select 1 from public.posts where author_id = auth.uid() and created_at > now() - interval '30 seconds') then
+      raise exception 'RATE_LIMIT';
+    end if;
+    if (select count(*) from public.posts where author_id = auth.uid() and created_at > now() - interval '1 day') >= 30 then
+      raise exception 'DAILY_LIMIT';
+    end if;
+  end if;
+  return new;
+end $$;
+drop trigger if exists posts_bi on public.posts;
+create trigger posts_bi before insert on public.posts for each row execute function public.posts_before_insert();
+
+create or replace function public.posts_before_update() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if coalesce(current_setting('app.sys', true), '') = '1' then return new; end if;
+  -- 본인 수정으로 바꿀 수 있는 것은 분류·제목·본문뿐이다. 나머지는 원래 값으로 되돌린다.
+  -- author_id 가 비워지는 것은 탈퇴(on delete set null)뿐이므로 그대로 둔다. 브라우저에는 author_id 수정 권한이 없다.
+  new.id := old.id; new.board := old.board; new.created_at := old.created_at;
+  if new.author_id is not null then new.author_id := old.author_id; end if;
+  new.deleted_at := old.deleted_at; new.deleted_by := old.deleted_by;
+  new.comment_count := old.comment_count; new.accepted_comment_id := old.accepted_comment_id;
+  if not public.is_admin() then new.notice := old.notice; end if;
+  new.title := btrim(new.title); new.category := btrim(coalesce(new.category, ''));
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists posts_bu on public.posts;
+create trigger posts_bu before update on public.posts for each row execute function public.posts_before_update();
+
+create or replace function public.comments_before_insert() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  new.author_id := auth.uid(); new.created_at := now(); new.deleted_at := null; new.deleted_by := null;
+  if not exists (select 1 from public.posts where id = new.post_id and deleted_at is null) then raise exception 'POST_NOT_FOUND'; end if;
+  if not public.is_admin() then
+    if exists (select 1 from public.comments where author_id = auth.uid() and created_at > now() - interval '10 seconds') then
+      raise exception 'RATE_LIMIT';
+    end if;
+    if (select count(*) from public.comments where author_id = auth.uid() and created_at > now() - interval '1 day') >= 100 then
+      raise exception 'DAILY_LIMIT';
+    end if;
+  end if;
+  return new;
+end $$;
+drop trigger if exists comments_bi on public.comments;
+create trigger comments_bi before insert on public.comments for each row execute function public.comments_before_insert();
+
+create or replace function public.comments_after_insert() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  perform set_config('app.sys', '1', true);
+  update public.posts set comment_count = comment_count + 1 where id = new.post_id;
+  perform set_config('app.sys', '', true);
+  return null;
+end $$;
+drop trigger if exists comments_ai on public.comments;
+create trigger comments_ai after insert on public.comments for each row execute function public.comments_after_insert();
+
+-- ------------------------------------------------------------ 행 수준 보안(RLS)
+alter table public.profiles enable row level security;
+alter table public.posts enable row level security;
+alter table public.comments enable row level security;
+alter table public.reports enable row level security;
+
+drop policy if exists profiles_read on public.profiles;
+create policy profiles_read on public.profiles for select using (true);
+-- profiles 는 직접 수정 정책이 없다 → 닉네임은 set_nickname(), 등급(role)은 운영자가 대시보드에서만 바꾼다.
+
+drop policy if exists posts_read on public.posts;
+create policy posts_read on public.posts for select using (deleted_at is null or public.is_admin());
+drop policy if exists posts_insert on public.posts;
+create policy posts_insert on public.posts for insert to authenticated with check (author_id = auth.uid());
+drop policy if exists posts_update on public.posts;
+create policy posts_update on public.posts for update to authenticated
+  using ((author_id = auth.uid() or public.is_admin()) and deleted_at is null)
+  with check ((author_id = auth.uid() or public.is_admin()) and deleted_at is null);
+
+drop policy if exists comments_read on public.comments;
+create policy comments_read on public.comments for select using (deleted_at is null or public.is_admin());
+drop policy if exists comments_insert on public.comments;
+create policy comments_insert on public.comments for insert to authenticated with check (author_id = auth.uid());
+
+drop policy if exists reports_admin on public.reports;
+create policy reports_admin on public.reports for select to authenticated using (public.is_admin());
+
+revoke all on public.profiles, public.posts, public.comments, public.reports from anon, authenticated;
+grant select on public.profiles, public.posts, public.comments to anon, authenticated;
+grant insert (board, category, title, body, author_id, notice) on public.posts to authenticated;
+grant update (category, title, body, notice) on public.posts to authenticated;
+grant insert (post_id, body, author_id) on public.comments to authenticated;
+grant select on public.reports to authenticated;
+
+-- ------------------------------------------------------------ 기능 함수(RPC)
+create or replace function public.delete_post(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  perform set_config('app.sys', '1', true);
+  update public.posts set deleted_at = now(), deleted_by = auth.uid()
+   where id = p_id and deleted_at is null and (author_id = auth.uid() or public.is_admin());
+  if not found then perform set_config('app.sys', '', true); raise exception 'NOT_ALLOWED'; end if;
+  perform set_config('app.sys', '', true);
+end $$;
+
+create or replace function public.delete_comment(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+declare pid bigint;
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  update public.comments set deleted_at = now(), deleted_by = auth.uid()
+   where id = p_id and deleted_at is null and (author_id = auth.uid() or public.is_admin())
+   returning post_id into pid;
+  if pid is null then raise exception 'NOT_ALLOWED'; end if;
+  perform set_config('app.sys', '1', true);
+  update public.posts set comment_count = greatest(comment_count - 1, 0),
+         accepted_comment_id = case when accepted_comment_id = p_id then null else accepted_comment_id end
+   where id = pid;
+  perform set_config('app.sys', '', true);
+end $$;
+
+-- Q&A: 질문 작성자가 답변 하나를 채택한다(같은 답변을 다시 누르면 채택 취소).
+create or replace function public.accept_answer(p_comment bigint) returns void
+language plpgsql security definer set search_path = public as $$
+declare pid bigint;
+begin
+  select c.post_id into pid from public.comments c join public.posts p on p.id = c.post_id
+   where c.id = p_comment and c.deleted_at is null and p.deleted_at is null and p.board = 'qna'
+     and (p.author_id = auth.uid() or public.is_admin());
+  if pid is null then raise exception 'NOT_ALLOWED'; end if;
+  perform set_config('app.sys', '1', true);
+  update public.posts set accepted_comment_id = case when accepted_comment_id = p_comment then null else p_comment end where id = pid;
+  perform set_config('app.sys', '', true);
+end $$;
+
+create or replace function public.set_nickname(p text) returns void
+language plpgsql security definer set search_path = public as $$
+declare cur record;
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  p := btrim(p);
+  if not public.nickname_ok(p) then raise exception 'NICKNAME_INVALID'; end if;
+  select * into cur from public.profiles where id = auth.uid();
+  if cur.nickname_changed_at is not null and cur.nickname_changed_at > now() - interval '7 days' then raise exception 'NICKNAME_COOLDOWN'; end if;
+  if exists (select 1 from public.profiles where lower(nickname) = lower(p) and id <> auth.uid()) then raise exception 'NICKNAME_TAKEN'; end if;
+  update public.profiles set nickname = p, nickname_changed_at = now() where id = auth.uid();
+end $$;
+
+create or replace function public.report_content(p_type text, p_id bigint, p_reason text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  if (select count(*) from public.reports where reporter_id = auth.uid() and created_at > now() - interval '1 day') >= 20 then raise exception 'DAILY_LIMIT'; end if;
+  insert into public.reports (target_type, target_id, reporter_id, reason) values (p_type, p_id, auth.uid(), btrim(p_reason))
+  on conflict (target_type, target_id, reporter_id) do nothing;
+end $$;
+
+-- 탈퇴: 계정(이메일 포함)을 지운다. 프로필은 함께 지워지고, 쓴 글·댓글은 작성자가 비워진 채 남는다.
+create or replace function public.delete_my_account() returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'LOGIN_REQUIRED'; end if;
+  delete from auth.users where id = auth.uid();
+end $$;
+
+revoke execute on function public.delete_post(bigint), public.delete_comment(bigint), public.accept_answer(bigint),
+  public.set_nickname(text), public.report_content(text, bigint, text), public.delete_my_account() from public, anon;
+grant execute on function public.delete_post(bigint), public.delete_comment(bigint), public.accept_answer(bigint),
+  public.set_nickname(text), public.report_content(text, bigint, text), public.delete_my_account() to authenticated;
+grant execute on function public.nickname_available(text), public.is_admin() to anon, authenticated;
+
+-- ------------------------------------------------------------ 운영자 지정 (가입한 뒤 한 번만, 이메일을 바꿔서 따로 실행)
+-- update public.profiles set role = 'admin' where id = (select id from auth.users where email = '운영자 이메일');

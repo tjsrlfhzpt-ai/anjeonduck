@@ -1,11 +1,11 @@
 {
-  "name": "SafeTake",
+  "name": "SafePlum",
   "tagline": "현장 안전지식 공유 커뮤니티",
-  "description": "SafeTake(세이프테이크)는 현장 안전관리자가 함께 쓰는 안전지식 공유 커뮤니티입니다. 안전보건 서류 작성 도구, 법령·서식 자료, 점검·지원사업 소식을 모았습니다.",
-  "base_url": "",
+  "description": "SafePlum(세이프플럼)은 현장 안전관리자가 함께 쓰는 안전지식 공유 커뮤니티입니다. 안전보건 서류 작성 도구, 법령·서식 자료, 점검·지원사업 소식을 모았습니다.",
+  "base_url": "https://safeplum.com",
   "contact_email": "",
   "operator": {
-    "name": "SafeTake 운영팀",
+    "name": "SafePlum 운영팀",
     "contact_url": "",
     "contact_label": "문의하기",
     "_comment": "contact_url 에 카카오톡 오픈채팅·구글 폼 주소 또는 mailto:공용메일 을 넣으면 푸터·안내 페이지에 문의 링크가 나타납니다. 개인 이메일은 넣지 마세요."
@@ -293,6 +293,38 @@
     "safety-cost",
     "penalty"
   ],
+  "community": {
+    "supabase_url": "",
+    "supabase_anon_key": "",
+    "_comment": "게시판(커뮤니티·Q&A) 백엔드. Supabase 프로젝트의 Project URL 과 anon(publishable) 키를 넣으면 게시판이 열립니다. 비어 있으면 '준비 중'으로 표시됩니다. anon 키는 공개돼도 되는 값이지만 service_role(secret) 키는 절대 넣지 마세요 — 넣으면 빌드가 멈춥니다. 설정 순서는 README '게시판 열기'.",
+    "categories": {
+      "free": [
+        "현장 이야기",
+        "정보 공유",
+        "자료 요청",
+        "자격·교육",
+        "이직·진로",
+        "잡담"
+      ],
+      "qna": [
+        "산업안전보건법",
+        "중대재해처벌법",
+        "위험성평가",
+        "안전보건교육",
+        "선임·신고",
+        "보건·건강검진",
+        "기타 실무"
+      ]
+    },
+    "rules_effective": "",
+    "privacy": {
+      "effective": "",
+      "db_region": "",
+      "mail_provider": "",
+      "deleted_retention": "",
+      "_comment": "개인정보 처리방침에 그대로 나가는 값. 비어 있으면 '확인 필요'로 표시됩니다. 예) db_region: 대한민국(서울 리전), mail_provider: Resend(미국), deleted_retention: 삭제일부터 3개월, effective: 2026-10-15"
+    }
+  },
   "features": {
     "public_api": false,
     "_comment": "public_api: 공공데이터포털(정책뉴스·공공기관 채용·사고사망 속보) 수집·안전뉴스 메뉴. 켜려면 true + 저장소 변수 PUBLIC_API=true"

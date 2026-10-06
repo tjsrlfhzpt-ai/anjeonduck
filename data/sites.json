@@ -113,6 +113,12 @@
       "name": "안전보건교육 신청",
       "url": "https://edu.kosha.or.kr/headquater/",
       "desc": "안전보건공단 안전보건교육포털"
+    },
+    {
+      "name": "외국인 기초안전보건교육 수강신청",
+      "url": "https://kosha.step.or.kr/usrs/eduRegMgnt/crsRegListForm.do?p_crstype=ON",
+      "desc": "안전보건공단 외국인 기초안전보건교육(STEP) · 채용 시 이수 의무는 2027. 1. 8. 시행 예정(산업안전보건법 제31조의2)",
+      "badge": "2027.1.8 시행 예정"
     }
   ]
 }
