@@ -1464,3 +1464,6 @@ img.logo-mark{width:36px;height:36px;object-fit:contain;border-radius:0}
 .hc-i img{width:44px;height:44px}
 .hub-links a img{border-radius:5px}
 .cm-empty-i{display:block;margin:0 auto 8px}
+.cm-welcome{text-align:center}
+.cm-welcome img{display:block;margin:0 auto 6px}
+.cm-welcome .btns{margin-top:10px}

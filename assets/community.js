@@ -85,6 +85,9 @@
       h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: REL + "board/rules/" }, "이용수칙 미리 보기"))));
     return;
   }
+  // 인증 메일의 링크로 들어왔는지는 주소의 # 뒤에 적혀 있다. 클라이언트가 읽고 지우기 전에 먼저 봐 둔다.
+  var HASH = location.hash || "";
+  var ARRIVE = /type=signup/.test(HASH) ? "signup" : /error_code=|error=/.test(HASH) ? "error" : "";
   var sb = window.supabase.createClient(CFG.url, CFG.key), ME = null, RECOVERY = false;
 
   function loadMe() {
@@ -276,6 +279,16 @@
       } }, h("h2", { class: "h-sm" }, "새 비밀번호 설정"), field("새 비밀번호", np, "8자 이상"), o0, h("p", { class: "btns" }, b0)));
     }
 
+    if (ARRIVE === "signup" && ME) {
+      ARRIVE = "";
+      return show(h("div", { class: "cm-auth cm-welcome" },
+        h("img", { src: REL + "assets/img/plum/wave.webp", width: "96", height: "96", alt: "" }),
+        h("h2", { class: "h-sm" }, "가입이 완료되었습니다"),
+        h("p", { class: "cm-note cm-ok" }, "이메일 인증이 끝났습니다. ", h("b", null, ME.nickname), " 님으로 로그인되어 있어 다시 로그인할 필요가 없습니다."),
+        h("p", { class: "btns" }, h("a", { class: "btn btn-block", href: url("") }, "게시판 둘러보기")),
+        h("p", { class: "btns" }, h("a", { class: "btn btn-ghost btn-block", href: url("write") }, "첫 글 쓰기")),
+        h("p", { class: "cm-alt" }, h("a", { href: url("account") }, "내 계정(닉네임·비밀번호 변경)"))));
+    }
     if (ME) {
       var nn = h("input", { type: "text", maxlength: "12", required: true, value: ME.nickname }), o1 = h("p", { hidden: true }), b1 = h("button", { type: "submit", class: "btn btn-ghost" }, "닉네임 변경");
       var pw = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o2 = h("p", { hidden: true }), b2 = h("button", { type: "submit", class: "btn btn-ghost" }, "비밀번호 변경");
@@ -302,6 +315,11 @@
     var mode = qs("mode") === "join" ? "join" : qs("mode") === "reset" ? "reset" : "login";
     function sw(m, text) { return h("a", { href: url("account", { mode: m === "login" ? "" : m, next: qs("next") }) }, text); }
     var email = h("input", { type: "email", autocomplete: "email", required: true, maxlength: "120" }), out = h("p", { hidden: true });
+    if (ARRIVE === "error") {   // 만료됐거나 이미 쓴 인증 링크
+      ARRIVE = ""; mode = "login";
+      out.textContent = "인증 링크가 만료되었거나 이미 사용된 링크입니다. 인증을 이미 마쳤다면 아래에서 로그인하세요. 로그인이 안 되면 회원가입을 다시 하면 인증 메일을 새로 받을 수 있습니다.";
+      out.className = "cm-note cm-err"; out.hidden = false;
+    }
     if (mode === "login") {
       var pw1 = h("input", { type: "password", autocomplete: "current-password", required: true }), bl = h("button", { type: "submit", class: "btn btn-block" }, "로그인");
       return show(h("form", { class: "cm-form cm-auth", onsubmit: function (ev) {
