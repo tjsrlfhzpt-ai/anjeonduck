@@ -17,7 +17,7 @@
     {"id": "rule", "title": "규정·위원회", "docs": [
       {"name": "안전보건관리규정", "basis": "법 제25조 · 규칙 별표 2·3", "href": "resources/?q=안전보건관리규정", "cond": "업종별 100명(일부 300명) 이상"},
       {"name": "산업안전보건위원회 회의록(분기 1회 정기회의)", "basis": "법 제24조 · 영 제37조", "href": "tools/committee/", "cond": "업종별 50·100·300명 이상"},
-      {"name": "안전 및 보건에 관한 협의체 회의록(매월)", "basis": "법 제64조제1항제1호 · 규칙 제79조", "href": "tools/forms/council/", "cond": "도급 시"}
+      {"name": "안전 및 보건에 관한 협의체 회의록(매월)", "basis": "법 제64조제1항제1호 · 규칙 제79조", "href": "tools/council/", "cond": "도급 시"}
     ]},
     {"id": "risk", "title": "위험성평가", "docs": [
       {"name": "위험성평가 실시 규정(절차)", "basis": "사업장 위험성평가에 관한 지침", "href": "resources/?q=위험성평가"},

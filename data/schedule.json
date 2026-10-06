@@ -96,7 +96,7 @@
    "status": "verified",
    "memo": "도급인 및 그의 수급인 전원으로 구성하고 결과를 기록·보존합니다.",
    "cond": "도급인 사업장에서 관계수급인이 작업하는 경우",
-   "form": "council",
+   "tool": "council",
    "day": 5,
    "time": "10:00",
    "klass": "법정 주기",

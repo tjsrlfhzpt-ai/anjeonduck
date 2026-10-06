@@ -858,7 +858,13 @@
                     const a4 = 210 * 96 / 25.4;
                     document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
                 };
-                onMounted(() => { fitPreview(); window.addEventListener('resize', fitPreview); });
+                onMounted(() => {
+                    fitPreview(); window.addEventListener('resize', fitPreview);
+                    // 처음 그릴 때는 칸 너비가 아직 0일 수 있어, 배치가 끝난 뒤와 칸 크기가 바뀔 때 다시 맞춘다
+                    requestAnimationFrame(fitPreview); setTimeout(fitPreview, 300);
+                    const col = document.getElementById('preview-col');
+                    if (col && window.ResizeObserver) new ResizeObserver(fitPreview).observe(col);
+                });
 
                 const photoDataUrl = ref(null);
                 const isGeneratingPDF = ref(false);

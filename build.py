@@ -273,7 +273,7 @@ CAT_RANK = {"무료 작성 도구": 0, "웹 작성 서식": 1, "법정 서식": 
 
 
 SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours"], "점검·작업허가": ["docmap", "inspect", "loto"],
-             "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["safety-cost", "hpp"], "기계·설비 인증·검사": ["machines", "inspect"],
+             "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["council", "safety-cost", "hpp"], "기계·설비 인증·검사": ["machines", "inspect"],
              "화학물질·석면": ["msds"], "작업환경·건강": ["heat", "cvd"]}
 
 
@@ -566,14 +566,14 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
             ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
 
 
-TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "selection": "⚖️", "hpp": "🏭",
+TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
-TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "msds": "msds", "loto": "loto", "heat": "heat",
+TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "msds": "msds", "loto": "loto", "heat": "heat",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
               "schedule": "calendar", "duties": "briefcase", "retention": "folder", "inspect": "search", "docmap": "audit"}
-WRITE_TOOLS = ["tbm", "risk", "committee", "msds", "loto", "heat"]
+WRITE_TOOLS = ["tbm", "risk", "committee", "council", "msds", "loto", "heat"]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
@@ -988,7 +988,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         css = (ROOT / t["css"]).read_text(encoding="utf-8").replace("</style", "<\\/style")
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
-    if t["id"] in ("tbm", "committee"):
+    if t["id"] in ("tbm", "committee", "council"):
         note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')

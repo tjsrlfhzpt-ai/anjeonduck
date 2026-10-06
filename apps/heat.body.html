@@ -1,7 +1,7 @@
 <section class="phead no-print"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>폭염작업 체감온도 기록</p>
   <h1>폭염작업 체감온도 · 조치 기록부</h1>
-  <p>작업장에서 잰 체감온도(또는 기상청 체감온도)를 넣으면 폭염작업(31도 이상)·33도 이상 여부를 바로 표시하고, 그날 한 조치를 함께 기록합니다. 기준규칙 제562조제2항에 따라 폭염작업을 한 날마다 체감온도와 조치 내용을 기록하고 <strong>그 해 12월 31일까지</strong> 보존해야 합니다.</p>
+  <p>작업장에서 잰 기온·습도를 넣으면 체감온도를 자동으로 계산하고(기상청 체감온도를 바로 넣어도 됩니다) 폭염작업(31도 이상)·33도 이상 여부를 바로 표시하고, 그날 한 조치를 함께 기록합니다. 기준규칙 제562조제2항에 따라 폭염작업을 한 날마다 체감온도와 조치 내용을 기록하고 <strong>그 해 12월 31일까지</strong> 보존해야 합니다.</p>
 </div></section>
 <div class="wrap stack no-print" style="padding-top:8px;padding-bottom:40px">
   <div class="calc" style="gap:12px">
@@ -9,7 +9,9 @@
       <label class="field"><span class="label">날짜</span><input type="date" id="hDate"></label>
       <label class="field"><span class="label">측정 시각</span><input type="time" id="hTime"></label>
       <label class="field"><span class="label">장소·작업</span><input type="text" id="hPlace" placeholder="예: 옥외 야적장 하역"></label>
-      <label class="field"><span class="label">체감온도 (℃)</span><input type="number" id="hTemp" step="0.1" inputmode="decimal" placeholder="예: 32.5"></label>
+      <label class="field"><span class="label">기온 (℃) <span class="muted">— 온도계 값</span></span><input type="number" id="hTa" step="0.1" inputmode="decimal" placeholder="예: 31.0"></label>
+      <label class="field"><span class="label">상대습도 (%) <span class="muted">— 습도계 값</span></span><input type="number" id="hRh" step="1" min="0" max="100" inputmode="numeric" placeholder="예: 70"></label>
+      <label class="field"><span class="label">체감온도 (℃) <span class="muted" id="hAuto"></span></span><input type="number" id="hTemp" step="0.1" inputmode="decimal" placeholder="기온·습도를 넣으면 자동 계산"></label>
       <label class="field"><span class="label">측정 방법</span><select class="sort" id="hHow" style="width:100%"><option>온습도계 측정</option><option>기상청 체감온도</option></select></label>
       <label class="field"><span class="label">기록자</span><input type="text" id="hBy" placeholder="이름"></label>
     </div>
@@ -23,7 +25,7 @@
   <div class="table-wrap"><table class="dtable htable"><thead><tr><th>날짜·시각</th><th>장소·작업</th><th>체감온도</th><th>판정</th><th>조치</th><th>기록자</th><th></th></tr></thead><tbody id="hRows"></tbody></table></div>
   <p class="empty" id="hEmpty">아직 기록이 없습니다.</p>
   <section class="lawbox"><h3>법령 기준 (산업안전보건기준에 관한 규칙)</h3><dl class="kv" id="hLaw"></dl>
-    <p class="src-line">체감온도는 이 도구가 계산하지 않습니다. 작업장소 바닥에서 1.2~1.5m 높이에서 잰 값을 넣고, 옥외 이동 작업은 기상청 체감온도를 쓸 수 있습니다(별표 13의2). 기록은 이 브라우저에만 저장되니 CSV로도 보관하세요.</p></section>
+    <p class="src-line">기온과 상대습도를 넣으면 기상청 여름철(5~9월) 체감온도 산출식으로 자동 계산합니다: 체감온도 = −0.2442 + 0.55399·Tw + 0.45535·Ta − 0.0022·Tw² + 0.00278·Tw·Ta + 3.0 (Tw는 Stull 추정식으로 구한 습구온도, Ta 기온, RH 상대습도). 출처: <a href="https://data.kma.go.kr/climate/windChill/selectWindChillChart.do" target="_blank" rel="noopener">기상청 기상자료개방포털 체감온도 ↗</a> · 산출식 확인 2026-10-06. 온도·습도는 작업장소에서 직접 재고(측정 위치·방법은 별표 13의2 원문을 따르세요), 기상청이 발표한 체감온도를 쓸 때는 체감온도 칸에 바로 적으면 됩니다. 직접 적은 값이 있으면 자동 계산값보다 그 값을 씁니다. 기록은 이 브라우저에만 저장되니 CSV로도 보관하세요.</p></section>
 </div>
 <article class="paper print-doc" id="hPaper"></article>
 <script>
@@ -63,6 +65,19 @@
   $("hLaw").innerHTML = LAW.map(function (l) { return "<dt>" + esc(l[0]) + "</dt><dd>" + esc(l[1]) + "</dd>"; }).join("");
   $("hDate").value = ymd(new Date());
   (function () { var n = new Date(); $("hTime").value = ("0" + n.getHours()).slice(-2) + ":" + ("0" + n.getMinutes()).slice(-2); })();
+  // 기상청 여름철 체감온도(2022. 6. 2.~, 5~9월 적용). Tw: Stull(2011) 습구온도 추정식
+  function feels(ta, rh) {
+    if (ta == null || rh == null || isNaN(ta) || isNaN(rh) || rh < 0 || rh > 100 || ta < -30 || ta > 60) return null;
+    var tw = ta * Math.atan(0.151977 * Math.sqrt(rh + 8.313659)) + Math.atan(ta + rh) - Math.atan(rh - 1.67633) + 0.00391838 * Math.pow(rh, 1.5) * Math.atan(0.023101 * rh) - 4.686035;
+    return -0.2442 + 0.55399 * tw + 0.45535 * ta - 0.0022 * tw * tw + 0.00278 * tw * ta + 3.0;
+  }
+  window.__heatFeels = feels;
+  var autoOn = true;  // 체감온도 칸을 직접 고치면 자동 계산을 멈춘다(기온·습도를 다시 고치면 재개)
+  function calcAuto() {
+    var a = $("hTa").value, r = $("hRh").value, f = a === "" || r === "" ? null : feels(+a, +r);
+    if (f == null) { $("hAuto").textContent = ""; return; }
+    autoOn = true; $("hTemp").value = (Math.round(f * 10) / 10).toFixed(1); $("hAuto").textContent = "— 자동 계산됨"; $("hHow").value = "온습도계 측정"; showJudge();
+  }
   function setActs(a) { $("hActs").querySelectorAll("input").forEach(function (c) { c.checked = !!(a && a[c.dataset.a]); }); }
   // 매일 쓰는 기록이라 장소·측정 방법·기록자·조치는 가장 최근 기록에서 미리 채운다(체감온도는 매번 직접 입력)
   (function () {
@@ -82,11 +97,13 @@
     el.className = "heat-judge lv" + j.lvl;
     el.innerHTML = "<strong>" + esc(j.label) + "</strong>" + (j.lvl === 0 ? " · 폭염작업 기록 의무 대상은 아니지만 남겨 두어도 됩니다." : j.miss.length ? " · 아직 체크 안 된 필수 조치: " + esc(j.miss.join(" / ")) : " · 필수 조치가 체크되었습니다.");
   }
-  ["hTemp"].forEach(function (id) { $(id).addEventListener("input", showJudge); });
+  $("hTemp").addEventListener("input", function () { autoOn = false; $("hAuto").textContent = $("hTa").value !== "" && $("hRh").value !== "" ? "— 직접 입력" : ""; showJudge(); });
+  ["hTa", "hRh"].forEach(function (id) { $(id).addEventListener("input", calcAuto); });
   $("hActs").addEventListener("change", showJudge);
   var year = String(new Date().getFullYear());
   function years() { var s = {}; s[String(new Date().getFullYear())] = 1; list.forEach(function (r) { s[r.date.slice(0, 4)] = 1; }); return Object.keys(s).sort().reverse(); }
   function rowsOf(y) { return list.map(function (r, i) { return [r, i]; }).filter(function (p) { return p[0].date.slice(0, 4) === y; }).sort(function (a, b) { return (a[0].date + a[0].time) < (b[0].date + b[0].time) ? -1 : 1; }); }
+  function src(r) { return r.ta != null && r.rh != null ? "기온 " + r.ta + "℃ · 습도 " + r.rh + "%" + (r.auto ? " (자동 계산)" : "") : (r.how || ""); }
   function actText(r) { return ACTS.filter(function (a) { return r.acts && r.acts[a.k]; }).map(function (a) { return a.t.replace(/\s*\(.*\)$/, ""); }).concat(r.memo ? [r.memo] : []).join(", "); }
   function render() {
     $("hYears").innerHTML = years().map(function (y) { return '<button type="button" class="chip" data-y="' + y + '" aria-pressed="' + (y === year) + '">' + y + "년</button>"; }).join("");
@@ -94,7 +111,7 @@
     $("hSum").textContent = year + "년 기록 " + rs.length + "건 · 폭염작업 " + hot + "건 · 보존기한 " + year + "-12-31";
     $("hRows").innerHTML = rs.map(function (p) {
       var r = p[0], j = judge(r.temp, r.acts);
-      return '<tr class="' + (j.miss.length ? "late" : "") + '"><td>' + esc(r.date) + " " + esc(r.time) + "</td><td>" + esc(r.place) + "</td><td><strong>" + esc(r.temp) + "℃</strong><span class=\"muted\" style=\"display:block;font-size:12px\">" + esc(r.how) + '</span></td><td><span class="badge heat-b lv' + j.lvl + '">' + esc(j.label) + "</span>" + (j.miss.length ? '<span style="display:block;font-size:12px;color:var(--red)">누락: ' + esc(j.miss.join(" / ")) + "</span>" : "") + "</td><td>" + esc(actText(r)) + "</td><td>" + esc(r.by) + '</td><td><button type="button" class="linkbtn" data-edit="' + p[1] + '">수정</button> <button type="button" class="linkbtn" data-del="' + p[1] + '" style="color:var(--red)">삭제</button></td></tr>';
+      return '<tr class="' + (j.miss.length ? "late" : "") + '"><td>' + esc(r.date) + " " + esc(r.time) + "</td><td>" + esc(r.place) + "</td><td><strong>" + esc(r.temp) + "℃</strong><span class=\"muted\" style=\"display:block;font-size:12px\">" + esc(src(r)) + '</span></td><td><span class="badge heat-b lv' + j.lvl + '">' + esc(j.label) + "</span>" + (j.miss.length ? '<span style="display:block;font-size:12px;color:var(--red)">누락: ' + esc(j.miss.join(" / ")) + "</span>" : "") + "</td><td>" + esc(actText(r)) + "</td><td>" + esc(r.by) + '</td><td><button type="button" class="linkbtn" data-edit="' + p[1] + '">수정</button> <button type="button" class="linkbtn" data-del="' + p[1] + '" style="color:var(--red)">삭제</button></td></tr>';
     }).join("");
     $("hEmpty").hidden = rs.length > 0;
   }
@@ -103,12 +120,12 @@
     var v = $("hTemp").value;
     if (!$("hDate").value) { $("hDate").focus(); return; }
     if (v === "" || isNaN(+v) || +v < -30 || +v > 60) { $("hTemp").focus(); $("hJudge").className = "heat-judge lv2"; $("hJudge").textContent = "체감온도를 -30~60 사이 숫자로 넣으세요."; return; }
-    var rec = { date: $("hDate").value, time: $("hTime").value, place: $("hPlace").value.trim(), temp: Math.round(+v * 10) / 10, how: $("hHow").value, by: $("hBy").value.trim(), acts: curActs(), memo: $("hMemo").value.trim() };
+    var rec = { date: $("hDate").value, time: $("hTime").value, place: $("hPlace").value.trim(), temp: Math.round(+v * 10) / 10, ta: $("hTa").value === "" ? null : Math.round(+$("hTa").value * 10) / 10, rh: $("hRh").value === "" ? null : Math.round(+$("hRh").value), auto: autoOn && $("hTa").value !== "" && $("hRh").value !== "", how: $("hHow").value, by: $("hBy").value.trim(), acts: curActs(), memo: $("hMemo").value.trim() };
     var was = editIdx >= 0 && list[editIdx], jj = judge(rec.temp, rec.acts);
     if (was) list[editIdx] = rec; else list.push(rec);
     setEdit(-1);
     save(); year = $("hDate").value.slice(0, 4); render();
-    $("hTemp").value = ""; $("hMemo").value = ""; showJudge();
+    $("hTemp").value = ""; $("hTa").value = ""; $("hRh").value = ""; $("hAuto").textContent = ""; $("hMemo").value = ""; showJudge();
     $("hJudge").className = "heat-judge lv" + (jj.miss.length ? jj.lvl : 0);
     $("hJudge").textContent = rec.date + " " + rec.time + " " + rec.temp + "℃ 기록을 " + (was ? "고쳤습니다." : "추가했습니다.") + (jj.miss.length ? " 체크 안 된 필수 조치: " + jj.miss.join(" / ") : "");
   });
@@ -116,7 +133,7 @@
     var e = ev.target.closest("button[data-edit]");
     if (e) {
       var r = list[+e.dataset.edit]; if (!r) return;
-      $("hDate").value = r.date; $("hTime").value = r.time; $("hPlace").value = r.place || ""; $("hTemp").value = r.temp; $("hBy").value = r.by || ""; $("hMemo").value = r.memo || ""; setActs(r.acts);
+      $("hDate").value = r.date; $("hTime").value = r.time; $("hPlace").value = r.place || ""; $("hTemp").value = r.temp; $("hTa").value = r.ta == null ? "" : r.ta; $("hRh").value = r.rh == null ? "" : r.rh; $("hAuto").textContent = r.auto ? "— 자동 계산됨" : ""; autoOn = !!r.auto; $("hBy").value = r.by || ""; $("hMemo").value = r.memo || ""; setActs(r.acts);
       if ([].some.call($("hHow").options, function (o) { return o.value === r.how; })) $("hHow").value = r.how;
       setEdit(+e.dataset.edit); showJudge(); $("hTemp").focus(); return;
     }
@@ -127,19 +144,19 @@
   });
   $("hCsv").addEventListener("click", function () {
     var q = function (s) { return '"' + String(s == null ? "" : s).replace(/"/g, '""') + '"'; };
-    var lines = [["날짜", "시각", "장소·작업", "체감온도", "측정방법", "판정", "조치", "기록자"].map(q).join(",")].concat(rowsOf(year).map(function (p) { var r = p[0]; return [r.date, r.time, r.place, r.temp, r.how, judge(r.temp, r.acts).label, actText(r), r.by].map(q).join(","); }));
+    var lines = [["날짜", "시각", "장소·작업", "기온", "습도", "체감온도", "측정방법", "판정", "조치", "기록자"].map(q).join(",")].concat(rowsOf(year).map(function (p) { var r = p[0]; return [r.date, r.time, r.place, r.ta == null ? "" : r.ta, r.rh == null ? "" : r.rh, r.temp, r.how + (r.auto ? "(자동 계산)" : ""), judge(r.temp, r.acts).label, actText(r), r.by].map(q).join(","); }));
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv" })); a.download = "폭염작업_체감온도_기록_" + year + ".csv"; document.body.appendChild(a); a.click(); a.remove();
   });
   $("hPrint").addEventListener("click", function () {
     var co = ""; try { co = localStorage.getItem("safetake.company") || ""; } catch (e) {}
     var rs = rowsOf(year);
     $("hPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">폭염작업 체감온도 및 조치 기록부 (' + year + '년)</h2>' + (window.ADoc ? ADoc.apprHTML("tool.heat") : "") + '</header>' +
-      '<table class="gtab"><thead><tr><th style="width:15%">날짜·시각</th><th style="width:16%">장소·작업</th><th style="width:9%">체감온도</th><th style="width:12%">판정</th><th>조치 내용</th><th style="width:9%">기록자</th></tr></thead><tbody>' +
-      (rs.length ? rs : [null, null, null, null, null]).map(function (p) { if (!p) return "<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>"; var r = p[0]; return "<tr><td>" + esc(r.date + " " + r.time) + "</td><td>" + esc(r.place) + '</td><td class="num">' + esc(r.temp) + "℃</td><td>" + esc(judge(r.temp, r.acts).label) + "</td><td>" + esc(actText(r)) + "</td><td>" + esc(r.by) + "</td></tr>"; }).join("") +
+      '<table class="gtab"><thead><tr><th style="width:15%">날짜·시각</th><th style="width:16%">장소·작업</th><th style="width:9%">기온·습도</th><th style="width:9%">체감온도</th><th style="width:11%">판정</th><th>조치 내용</th><th style="width:9%">기록자</th></tr></thead><tbody>' +
+      (rs.length ? rs : [null, null, null, null, null]).map(function (p) { if (!p) return "<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>"; var r = p[0]; return "<tr><td>" + esc(r.date + " " + r.time) + "</td><td>" + esc(r.place) + '</td><td class="num">' + (r.ta != null && r.rh != null ? esc(r.ta) + "℃ · " + esc(r.rh) + "%" : "") + '</td><td class="num">' + esc(r.temp) + "℃</td><td>" + esc(judge(r.temp, r.acts).label) + "</td><td>" + esc(actText(r)) + "</td><td>" + esc(r.by) + "</td></tr>"; }).join("") +
       '</tbody></table><p class="paper-note">' + esc(LAW.map(function (l) { return "· " + l[0] + ": " + l[1]; }).join("\n")) + '</p><p class="paper-foot">근거: 산업안전보건기준에 관한 규칙 제559조·제560조·제562조, 별표 13의2 · 보존: ' + year + '년 12월 31일까지</p>';
     document.body.classList.add("pr-heat"); window.print(); setTimeout(function () { document.body.classList.remove("pr-heat"); }, 500);
   });
-  $("hCancel").addEventListener("click", function () { setEdit(-1); $("hTemp").value = ""; $("hMemo").value = ""; showJudge(); });
+  $("hCancel").addEventListener("click", function () { setEdit(-1); $("hTemp").value = ""; $("hTa").value = ""; $("hRh").value = ""; $("hAuto").textContent = ""; $("hMemo").value = ""; showJudge(); });
   showJudge(); render();
 })();
 </script>

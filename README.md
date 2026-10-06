@@ -26,6 +26,7 @@ templates/*.csv       구글 시트 머리글 서식
 | `/tools/tbm/` TBM 일지 | `apps/tbm.html` | `data/hazards.json` (위험요인 목록) |
 | `/tools/risk/` 위험성평가서 | `apps/risk.html` | `data/hazards.json` |
 | `/tools/committee/` 산보위 회의록·공고·결과보고 | `apps/committee.html` | `apps/committee.tailwind.css` |
+| `/tools/council/` 협의체 회의록·개최 통보·결과보고 | `apps/council.html` | `apps/committee.tailwind.css` (산보위와 같이 씀 — 없는 모양은 파일 안 `<style>`에 일반 CSS로) |
 | `/tools/safety-cost/` 산업안전보건관리비 계산기 | `apps/safety-cost.body.html` | 사이트 공통 틀(헤더·푸터) |
 | `/tools/penalty/` 과태료 부과기준 조회 | `apps/penalty.body.html` | `data/penalties.json` + 공통 틀 |
 | `/tools/headcount/` 상시근로자 수 계산기 | `apps/headcount.body.html` | 공통 틀 |

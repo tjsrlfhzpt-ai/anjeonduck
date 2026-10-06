@@ -509,6 +509,16 @@
   document.getElementById("fTitle").textContent = F.title;
   document.getElementById("fCrumb").textContent = F.short || F.title;
   document.getElementById("fDesc").textContent = F.desc || "";
+  // 전용 작성기가 따로 생긴 서식은 그쪽으로 안내한다(이 서식과 저장값은 그대로 둔다)
+  if (F.moved && /^\.\.\/[\w\-./]*$/.test(F.moved.href || "")) {
+    var mv = document.createElement("p");
+    mv.className = "no-print"; mv.id = "fMoved";
+    mv.style.cssText = "margin:10px 0 0;padding:10px 12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:10px;font-size:14px;line-height:1.6";
+    mv.appendChild(document.createTextNode((F.moved.text || "") + " "));
+    var ma = document.createElement("a"); ma.href = F.moved.href; ma.textContent = (F.moved.label || "전용 작성기") + " 열기 →"; ma.style.fontWeight = "700";
+    mv.appendChild(ma);
+    document.getElementById("fDesc").insertAdjacentElement("afterend", mv);
+  }
   document.getElementById("fBasis").textContent = F.law ? "근거: " + F.law + (F.checked ? " · 원문 확인 " + F.checked : "") : "";
   var src = document.getElementById("fSrc");
   if (F.source_url) src.innerHTML = '법령 원문: <a href="' + esc(F.source_url) + '" target="_blank" rel="noopener">국가법령정보센터 ↗</a>';
