@@ -31,6 +31,7 @@
       <li>인쇄 창에서 대상을 "PDF로 저장"으로 바꾸면 파일로 남길 수 있습니다. 여백은 "기본", 배율은 100%를 권장합니다.</li>
       <li>이 양식은 법령 별지로 정해진 서식이 아니라 안전duck이 만든 보조양식입니다. 관련 조문을 참고해 항목을 구성했지만, 이 양식을 채운 것만으로 해당 의무를 이행했다고 볼 수는 없습니다. 사업장 상황에 맞게 고쳐 쓰세요.</li>
       <li>"예시로 채우기"와 자동 입력 문구는 사업장 예시입니다. 실제 내용으로 바꿔 쓰세요.</li>
+      <li>서식 맨 아래의 근거 문구는 눌러서 고치거나 지울 수 있습니다. 비워 두면 인쇄되지 않습니다. 안전duck 표시는 인쇄물에 들어가지 않습니다.</li>
     </ul>
     <p class="muted" style="margin-top:10px" id="fSrc"></p>
   </section>
@@ -215,8 +216,13 @@
       else if (s.type === "list") h += t + '<ol class="paper-list">' + s.items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol>";
     });
     (A.next || []).forEach(function (n, i) { h += '<p class="paper-next" id="fNext' + i + '"></p>'; });
-    if (F.footer !== false) h += '<p class="paper-foot">' + esc(F.law ? "관련 근거: " + F.law + " · " : "") + "안전duck 자체 제공 양식(법정 지정서식이 아님)</p>";
+    if (F.footer !== false) {
+      var fk = "anjeonduck.foot." + F.id, fv = null; try { fv = localStorage.getItem(fk); } catch (e) {}
+      h += '<p class="paper-foot" id="fFoot" contenteditable="true" spellcheck="false" data-ph="하단 문구 — 눌러서 입력(비우면 인쇄되지 않음)" title="눌러서 고치거나 지울 수 있습니다">' + esc(fv === null ? (F.law ? "관련 근거: " + F.law : "") : fv) + "</p>";
+    }
     document.getElementById("paper").innerHTML = h;
+    var ff = document.getElementById("fFoot");
+    if (ff) ff.addEventListener("input", function () { if (!ff.textContent.trim()) ff.innerHTML = ""; try { localStorage.setItem("anjeonduck.foot." + F.id, ff.textContent.trim()); } catch (e) {} });
     if (window.ADoc) ADoc.mountApproval(document.getElementById("fAppr"), DOC);
     runCalc();
   }

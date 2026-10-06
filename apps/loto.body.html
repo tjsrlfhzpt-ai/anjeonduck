@@ -12,6 +12,7 @@
         <label class="field"><span class="label">작업 내용</span><input type="text" id="lJob" data-k="job" placeholder="예: 벨트 교체"></label>
         <label class="field"><span class="label">잠근 사람(소속·성명)</span><input type="text" id="lWho" data-k="who"></label>
         <label class="field"><span class="label">연락처</span><input type="text" id="lTel" data-k="tel" inputmode="tel"></label>
+        <label class="field"><span class="label">하단 문구 (선택)</span><input type="text" id="lFoot" data-k="foot" placeholder="비우면 인쇄되지 않습니다 · 예: 무단 해제 금지"></label>
         <label class="field"><span class="label">잠금 일시</span><input type="datetime-local" id="lAt" data-k="at"></label>
       </div>
       <div class="grid3">
@@ -111,7 +112,7 @@
       '<div class="lt-head"><div class="en">' + (warn ? "WARNING" : "DANGER") + '</div><div class="ko">' + (warn ? "경 고" : "위 험") + "</div></div>" +
       '<div class="lt-big"><div class="k">' + (warn ? "점검 중<br>조작 금지" : "작업 중<br>조작 금지") + '</div><div class="e">DO NOT OPERATE</div><div class="s">이 잠금장치와 꼬리표는<br>건 사람만 풀 수 있습니다.</div></div>' +
       '<div class="lt-rows">' + [["설비", v.eq], ["작업 내용", v.job], ["잠근 사람", v.who], ["연락처", v.tel], ["잠금 일시", v.at]].map(function (r) { return '<div class="lt-row"><span>' + r[0] + "</span><b>" + esc(r[1] || "") + "</b></div>"; }).join("") + "</div>" +
-      '<div class="lt-foot">' + (v.co ? esc(v.co) + " · " : "") + "안전duck 보조양식 · 근거 조치: 기준규칙 제92조·제319조</div></div>";
+      '<div class="lt-foot">' + esc([v.co, v.foot].filter(Boolean).join(" · ")) + "</div></div>";
   }
   function back() {
     return '<div class="lt-tag lt-back" style="--lt:' + color() + '"><span class="lt-hole">⊕</span>' +
