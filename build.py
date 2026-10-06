@@ -1385,7 +1385,7 @@ def build(out, today):
     home = f"""
 <section class="hero2">
   <div class="wrap hero2-in">
-    <img class="hero2-duck" src="assets/img/plum/wave.webp" width="150" height="150" alt="손을 흔드는 SafePlum 캐릭터" fetchpriority="high">
+    <img class="hero2-duck" src="assets/img/plum/hero.webp" width="150" height="150" alt="손을 흔드는 SafePlum 캐릭터" fetchpriority="high">
     <p class="hero2-eye">SafePlum · 현장 안전지식 공유 커뮤니티</p>
     <h1>안전관리 서류, 여기서 바로</h1>
     <div class="uq" role="search">
