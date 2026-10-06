@@ -65,7 +65,7 @@
         <li><span class="lst lst-cur">법정 주기</span> 법령에 주기가 적혀 있고 원문과 대조한 업무. 달력의 날짜 자체는 예시입니다.</li>
         <li><span class="lst lst-next">의무 · 주기는 법정 아님</span> 의무는 법령에 있지만 '매월·매년' 같은 주기는 정해져 있지 않음</li>
         <li><span class="lst lst-rec">권장 운영</span> <span class="lst lst-rec">사업장 자체업무</span> 법정 주기가 아닌 운영 제안</li>
-        <li><span class="lst-chk">확인 필요</span> 공식 원문과 대조하지 못한 업무</li>
+        <li><span class="lst-chk" tabindex="0">확인 필요</span> 공식 원문과 대조하지 못한 업무</li>
       </ul>
       <p class="src-line" id="sSrc"></p>
     </div>
@@ -205,7 +205,7 @@
   }
   var LINK = { form: function (id) { return "../forms/" + id + "/"; }, tool: function (id) { return "../" + id + "/"; } };
   var KLASS = { "법정 주기": ["lst lst-cur", "법정 주기"], "법정 의무지만 특정 주기가 아님": ["lst lst-next", "의무 · 주기는 법정 아님"], "권장 운영": ["lst lst-rec", "권장 운영"], "사업장 자체업무": ["lst lst-rec", "사업장 자체업무"], "확인 필요": ["lst-chk", "확인 필요"] };
-  var BADGE = { verified: ["badge-green", "원문 확인"], check: ["badge-orange", "확인 필요"], practice: ["badge-line", "권장"], custom: ["badge-navy", "직접 추가"] };
+  var BADGE = { verified: ["badge-green", "원문 확인"], check: ["lst-chk", "확인 필요"], practice: ["badge-line", "권장"], custom: ["badge-navy", "직접 추가"] };
 
   var view = "list", freqF = "", cur = new Date(today().getFullYear(), today().getMonth(), 1), yr = today().getFullYear();
   function filtered() {
@@ -225,7 +225,7 @@
     var links = (t.form ? '<a href="' + LINK.form(t.form) + '">서식 작성 →</a>' : "") + (t.tool ? '<a href="' + LINK.tool(t.tool) + '">도구 열기 →</a>' : "");
     return '<li class="task' + (t.on ? "" : " off") + '">' +
       '<div class="task-top"><label class="switch" title="우리 사업장 해당"><input type="checkbox" data-on="' + esc(t.key) + '"' + (t.on ? " checked" : "") + '><span class="sr">사용</span></label>' +
-      '<div class="task-main"><p class="task-when">' + esc(when(t)) + (t.time ? " · " + esc(t.time) : "") + ' <span class="' + (/^lst/.test(b[0]) ? b[0] : "badge " + b[0]) + '">' + b[1] + "</span>" + (t.edited ? ' <span class="badge badge-line">수정함</span>' : "") + "</p>" +
+      '<div class="task-main"><p class="task-when">' + esc(when(t)) + (t.time ? " · " + esc(t.time) : "") + ' <span class="' + (/^lst/.test(b[0]) ? b[0] : "badge " + b[0]) + '"' + (b[0] === "lst-chk" ? ' tabindex="0"' : "") + '>' + b[1] + "</span>" + (t.edited ? ' <span class="badge badge-line">수정함</span>' : "") + "</p>" +
       '<h3 class="task-title">' + esc(t.title) + "</h3>" +
       (t.basis ? '<p class="task-basis">' + esc(t.basis) + (laws ? ' <span class="task-laws">조문 ' + laws + "</span>" : "") + "</p>" : "") +
       (t.cond ? '<p class="task-cond">대상: ' + esc(t.cond) + "</p>" : "") +

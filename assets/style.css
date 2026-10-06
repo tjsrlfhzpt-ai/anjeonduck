@@ -1593,3 +1593,10 @@ button.mc-d.today:not(.sel){outline:2px solid var(--navy);outline-offset:-2px}
 .nb-row:last-child .nb-body{border-radius:0 0 var(--r-lg) var(--r-lg)}
 .chk-i::after{bottom:auto;top:calc(100% + 6px)}
 @media (max-width:720px){.chk-i::after{left:auto;right:-12px;transform:none;max-width:min(260px,64vw)}}
+
+/* '확인 필요' 알약 → 경고 삼각형 아이콘. 마우스를 올리거나 누르면 '확인 필요'가 풍선으로 뜬다. 글자는 화면낭독기용으로 그대로 둔다. */
+.lst-chk:not(.lst-keep){position:relative;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;gap:0;border:0;background:none;font-size:0;vertical-align:-5px;cursor:help;overflow:visible}
+.lst-chk:not(.lst-keep)::before{content:"";width:18px;height:18px;border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3 2.5 20h19z' fill='%23D92D20' stroke='%23D92D20' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12 10v4.5' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='17.3' r='1.25' fill='%23fff'/%3E%3C/svg%3E") center/contain no-repeat}
+.lst-chk:not(.lst-keep)::after{content:"확인 필요";position:absolute;z-index:30;left:50%;top:calc(100% + 6px);transform:translateX(-50%);padding:6px 10px;border-radius:8px;background:#1F2937;color:#fff;font-size:12.5px;font-weight:700;line-height:1.4;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.22);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .12s}
+.lst-chk:not(.lst-keep):hover::after,.lst-chk:not(.lst-keep):focus::after{opacity:1;visibility:visible}
+@media print{.lst-chk:not(.lst-keep){width:auto;font-size:11px;color:#B3261E}.lst-chk:not(.lst-keep)::before,.lst-chk:not(.lst-keep)::after{display:none}}

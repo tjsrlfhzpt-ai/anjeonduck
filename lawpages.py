@@ -373,7 +373,7 @@ def status_panel(laws, manifest, today, rel=""):
         n_up += len(ups)
         chk = "확인 필요" if "확인 필요" in (l.get("note") or "") else ""
         n_chk += 1 if chk else 0
-        chk_html = f'<br><span class="lst-chk">확인 필요</span> <span class="muted">{e(l["note"])}</span>' if chk else ""
+        chk_html = f'<br><span class="lst-chk" tabindex="0">확인 필요</span> <span class="muted">{e(l["note"])}</span>' if chk else ""
         up_txt = "<br>".join(f'<span class="lst lst-next">시행 예정</span> {e(kdate(u["effective"]))} {e(u["no"])}' for u in sorted(ups, key=lambda x: x["effective"])) or '<span class="muted">확인된 시행 예정 없음</span>'
         rows += (f'<tr><th><a href="{rel}{l["key"]}/">{e(l["name"])}</a></th><td><span class="lst lst-cur">현재 시행</span> {e(kdate(c["effective"]))}<br><span class="muted">{e(c["no"])} · {e(kdate(c["promulgated"]))} {e(c["kind"])}</span></td>'
                  f'<td>{up_txt}{chk_html}</td><td>{e(l["checked_at"])}</td></tr>')
@@ -402,7 +402,7 @@ def bills_html(manifest):
     out = ""
     for b in manifest.get("bills", []):
         steps = "".join(f'<span class="lstage{" on" if st == b.get("stage") else ""}">{e(st)}</span>' for st in STAGES)
-        src = f'<a class="link-ext" href="{e(b["source_url"])}" target="_blank" rel="noopener">{e(b.get("source_name") or "출처")} ↗</a>' if str(b.get("source_url", "")).startswith("https://") else '<span class="lst-chk">공식 출처 확인 필요</span>'
+        src = f'<a class="link-ext" href="{e(b["source_url"])}" target="_blank" rel="noopener">{e(b.get("source_name") or "출처")} ↗</a>' if str(b.get("source_url", "")).startswith("https://") else '<span class="lst-chk" tabindex="0">확인 필요</span> <span class="muted">공식 출처</span>'
         out += (f'<li class="lup"><div class="lup-d"><span class="lst lst-bill">입법 동향</span><b>{e(kdate(b["stage_date"]))}</b></div><div><p class="lup-t">{e(b["title"])}</p><p class="lstages">{steps}</p>'
                 f'<p>{e(b.get("summary", ""))}</p><p class="urow-foot">{src}<span>{e(b.get("note", ""))}</span></p></div></li>')
     return out
