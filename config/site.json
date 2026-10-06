@@ -314,6 +314,14 @@
         "선임·신고",
         "보건·건강검진",
         "기타 실무"
+      ],
+      "job": [
+        "안전관리자",
+        "보건관리자",
+        "EHS·환경",
+        "소방·방재",
+        "건설안전",
+        "기타"
       ]
     },
     "rules_effective": "2026-10-06",
@@ -323,6 +331,12 @@
       "mail_provider": "Supabase 기본 메일 발송(Supabase Inc.)",
       "deleted_retention": "삭제일부터 3개월",
       "_comment": "개인정보 처리방침에 그대로 나가는 값. 비어 있으면 '확인 필요'로 표시됩니다. 예) db_region: 대한민국(서울 리전), mail_provider: Resend(미국), deleted_retention: 삭제일부터 3개월, effective: 2026-10-15"
+    },
+    "openchat": {
+      "url": "https://open.kakao.com/o/glnqB5Qi",
+      "title": "안전·보건관리자 실무·취업 오픈채팅방",
+      "desc": "채용정보가 매일매일 올라옵니다. 실무 고민과 이직 이야기도 편하게 나눠요.",
+      "_comment": "홍보용 오픈채팅방(문의 창구 operator.contact_url 과 다름). url 을 비우면 배너가 사라집니다."
     }
   },
   "features": {

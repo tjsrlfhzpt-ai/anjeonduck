@@ -592,10 +592,11 @@ def nav_cols(site, rel):
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")])],
         "brief": [],
-        "jobs": [("채용 사이트로 바로 이동", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
+        "jobs": [("SafePlum 채용", [(f"{rel}jobs/", "채용정보 모음"), (f"{rel}board/?b=job", "회원 채용공고 · 등록")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
+                 ("채용 사이트로 바로 이동", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
-        "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A")]),
+        "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A"), (f"{rel}board/?b=job", "채용공고")]),
                   ("회원·안내", [(f"{rel}board/account/", "로그인 · 마이페이지"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
     }
 
@@ -625,9 +626,28 @@ def dock_html(rel, active):
 def _asset_ver():
     import hashlib
     h = hashlib.sha1()
-    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/favicon.png", "assets/img/plum/logo.webp"):
+    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/favicon.png", "assets/img/plum/logo.webp"):
         h.update((ROOT / f).read_bytes())
     return h.hexdigest()[:8]
+
+
+def _openchat():
+    c = (json.loads((ROOT / "config/site.json").read_text(encoding="utf-8")).get("community") or {}).get("openchat") or {}
+    u = str(c.get("url") or "")
+    if not u.startswith("https://open.kakao.com/"):
+        return None
+    return {"url": u, "title": str(c.get("title") or "오픈채팅방"), "desc": str(c.get("desc") or "")}
+
+
+OPENCHAT = _openchat()  # 홍보용 카카오톡 오픈채팅방. 주소가 없으면 배너·메뉴에서 모두 빠진다
+
+
+def chat_banner(cls=""):
+    if not OPENCHAT:
+        return ""
+    return (f'<a class="cm-chat {cls}" href="{html.escape(OPENCHAT["url"])}" target="_blank" rel="noopener">'
+            f'<span class="cm-chat-t">{html.escape(OPENCHAT["title"])}</span><span class="cm-chat-d">{html.escape(OPENCHAT["desc"])}</span>'
+            f'<span class="cm-chat-go">카카오톡으로 참여 ↗</span></a>')
 
 
 ASSET_VER = _asset_ver()  # 스타일·스크립트가 바뀌면 주소가 바뀌어 브라우저가 예전 파일을 쓰지 않는다
@@ -1204,34 +1224,19 @@ def build(out, today):
   </div>
 </section>"""
     sched = load("data/schedule.json")
-    mo_tasks = [{"t": t["title"], "f": t["freq"], "m": t.get("month"), "d": t.get("day"), "tool": t.get("tool"), "form": t.get("form")}
-                for t in sched["tasks"] if t["freq"] in ("monthly", "yearly")]
+    MO_KEYS = ("key", "title", "freq", "month", "day", "weekday", "qmonth", "hmonth", "m0", "anchor", "work", "time", "tool", "form", "off")
+    mo_tasks = [{k: t[k] for k in MO_KEYS if k in t} for t in sched["tasks"]]
     mo_json = json.dumps(mo_tasks, ensure_ascii=False).replace("</", "<\\/")
     month_box = f"""<section class="side-box" id="moBox">
       {sec_head("이번 달 안전보건 달력", "tools/schedule/", more="전체 달력")}
-      <div class="mc" id="moCal" aria-hidden="true"></div>
+      <div class="mc" id="moCal"></div>
+      <h3 class="mo-day" id="moDay" aria-live="polite"></h3>
       <ul class="mo-list" id="moList"><li>달력을 불러오는 중…</li></ul>
-      <p class="hint" style="margin-top:8px">날짜는 권장 기준일입니다. 분기·반기·매일 업무는 <a href="tools/schedule/">법정 주기업무 달력</a>에서 사업장에 맞게 정하세요.</p>
-      <script>
-      (function () {{
-        var T = {mo_json}, now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1, el = document.getElementById("moList"), cal = document.getElementById("moCal");
-        var L = T.filter(function (t) {{ return t.f === "monthly" || t.m === m; }}).sort(function (a, b) {{ return (a.d || 0) - (b.d || 0); }});
-        function esc(s) {{ return String(s).replace(/[&<>"]/g, function (c) {{ return {{ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }}[c]; }}); }}
-        var marks = {{}}; L.forEach(function (t) {{ var d = t.d || 1; (marks[d] = marks[d] || []).push(t.t); }});
-        var first = new Date(y, m - 1, 1).getDay(), days = new Date(y, m, 0).getDate(), h = '<div class="mc-h">' + y + "년 " + m + "월</div><div class=\\"mc-g\\">";
-        ["일", "월", "화", "수", "목", "금", "토"].forEach(function (w, i) {{ h += '<span class="mc-w' + (i === 0 ? " sun" : "") + '">' + w + "</span>"; }});
-        for (var i = 0; i < first; i++) h += "<span></span>";
-        for (var d = 1; d <= days; d++) {{
-          var c = "mc-d" + (d === now.getDate() ? " today" : "") + (marks[d] ? " on" : "") + ((first + d - 1) % 7 === 0 ? " sun" : "");
-          h += '<span class="' + c + '"' + (marks[d] ? ' title="' + esc(marks[d].join(" / ")) + '"' : "") + ">" + d + "</span>";
-        }}
-        cal.innerHTML = h + "</div>";
-        el.innerHTML = L.map(function (t) {{
-          var href = t.form ? "tools/forms/" + t.form + "/" : t.tool ? "tools/" + t.tool + "/" : "tools/schedule/";
-          return '<li><span class="mo-d' + (t.f === "yearly" ? " y" : "") + '">' + m + "/" + (t.d || 1) + '</span><a href="' + href + '">' + esc(t.t) + "</a></li>";
-        }}).join("") || "<li>이번 달 기준일이 정해진 업무가 없습니다.</li>";
-      }})();
-      </script>
+      <p class="hint" id="moMine" hidden style="margin-top:8px">이 브라우저에서 바꾼 주기업무 설정을 반영했습니다.</p>
+      <p class="hint" style="margin-top:8px">날짜를 누르면 그날 업무가 바뀝니다. 날짜는 권장 기준일이며 <a href="tools/schedule/">법정 주기업무 달력</a>에서 사업장에 맞게 바꿀 수 있습니다.</p>
+      <noscript><p class="hint">달력을 보려면 자바스크립트를 켜야 합니다.</p></noscript>
+      <script>window.ST_MO={mo_json};</script>
+      <script src="assets/home-cal.js?v={ASSET_VER}"></script>
     </section>"""
     # ---- 홈
     quick = "".join(f'<a class="qk" href="resources/?q={quote(k)}">{e(k)}</a>' for k in QUICK_KEYWORDS)
@@ -1451,11 +1456,12 @@ def build(out, today):
         <section><div class="bd-h"><h2>브리핑·소식</h2><a class="more" href="brief/">전체 {len(BOARD)}건 →</a></div><ul class="bd-list">{brief_rows}</ul></section>
         <section><div class="bd-h"><h2>법령 동향</h2><a class="more" href="laws/">더보기 →</a></div><ul class="bd-list">{law_rows}</ul></section>
       </div>
-      <p class="hub-links"><span>더 보기</span><a href="board/?b=free">커뮤니티</a><a href="board/?b=qna">Q&amp;A</a><a href="jobs/">채용정보</a><a href="laws/act/">산업안전보건법</a><a href="laws/sapa/">중대재해처벌법</a></p>
+      <p class="hub-links"><span>더 보기</span><a href="board/?b=free">커뮤니티</a><a href="board/?b=qna">Q&amp;A</a><a href="jobs/">채용정보</a><a href="board/?b=job">회원 채용공고</a><a href="laws/act/">산업안전보건법</a><a href="laws/sapa/">중대재해처벌법</a></p>
     </div>
   </section>
   <aside class="home2-side">
     {month_box}
+    {chat_banner("cm-chat-side")}
     <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/plum/basic.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
@@ -1528,12 +1534,13 @@ def build(out, today):
     cm_cats = cmc.get("categories") or {}
 
     def cm_page(sub, kind, title, lead, rel, desc, wide=False):
-        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats}, ensure_ascii=False).replace("</", "<\\/")
+        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT}, ensure_ascii=False).replace("</", "<\\/")
         crumb = f'<a href="{rel}board/">게시판</a><span>/</span>{e(title)}' if sub else "게시판"
         side = f"""<aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint">
       <li><b>커뮤니티</b> — 현장 이야기, 정보 공유, 자료 요청.</li>
       <li><b>Q&amp;A</b> — 실무·법령 질문과 답변. 질문자가 답변을 채택할 수 있습니다.</li>
+      <li><b>채용공고</b> — 회원이 직접 올리는 안전·보건 직무 공고. 하루 5건까지.</li>
       <li>읽기는 누구나, 쓰기는 이메일 인증을 마친 회원만 할 수 있습니다. 이름·전화번호는 받지 않습니다.</li>
       <li>개인·사업장을 알아볼 수 있는 정보는 적지 마세요.</li>
     </ul><p class="btns" style="margin-top:12px"><a class="btn btn-sm btn-ghost" href="{rel}board/rules/">이용수칙</a></p></div>
@@ -1561,7 +1568,7 @@ def build(out, today):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">게시판</a><span>/</span>이용수칙</p>
   <h1>게시판 이용수칙</h1>
-  <p>SafePlum 게시판(커뮤니티 · Q&amp;A)을 쓰는 모든 회원에게 적용됩니다. 글을 등록하면 이 수칙에 동의한 것으로 봅니다.</p>
+  <p>SafePlum 게시판(커뮤니티 · Q&amp;A · 채용공고)을 쓰는 모든 회원에게 적용됩니다. 글을 등록하면 이 수칙에 동의한 것으로 봅니다.</p>
 </div></section>
 <div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
   <h2>1. 가입과 계정</h2>
@@ -1577,18 +1584,27 @@ def build(out, today):
   </ul>
   <h2>3. 질문과 답변</h2>
   <p>Q&amp;A의 답변은 회원 개인의 경험과 의견이며, SafePlum의 공식 견해나 법령 해석이 아닙니다. 답변할 때는 근거(법 조문·고시·공식 자료)를 함께 적어 주세요. 법 적용 여부와 행정 처분에 관한 판단은 법령 원문과 고용노동부 등 소관 기관에서 확인해야 합니다.</p>
-  <h2>4. 글의 책임과 권리</h2>
+  <h2>4. 채용공고</h2>
+  <p>채용공고 게시판에는 회원이 자기 회사(또는 채용을 맡은 회사)의 안전·보건 직무 공고를 직접 올립니다. SafePlum은 구인자와 구직자를 소개·알선하지 않으며, 공고 내용의 사실 여부를 보증하지 않습니다.</p>
+  <ul class="bul">
+    <li>회사명, 지원 방법(채용 페이지 주소 등)을 반드시 적고, 근무 조건은 사실대로 적습니다. 거짓·과장 공고는 삭제합니다.</li>
+    <li>성별·나이·출신 지역·신체 조건·혼인 여부 등 직무와 관계없는 조건으로 차별하는 공고는 올릴 수 없습니다.</li>
+    <li>구직자에게 돈(교육비·보증금·물품 구입 등)이나 통장·카드·비밀번호를 요구하는 공고, 다단계·대출·명의 대여 모집은 올릴 수 없습니다.</li>
+    <li>공고 글에 지원자의 주민등록번호·가족 관계 등 직무와 관계없는 개인정보를 내라고 적지 않습니다.</li>
+    <li>같은 공고를 반복해 올리지 않습니다. 한 계정은 하루 5건까지 등록할 수 있습니다. 채용이 끝나면 공고를 고치거나 삭제해 주세요.</li>
+  </ul>
+  <h2>5. 글의 책임과 권리</h2>
   <p>글의 내용에 대한 책임은 글을 쓴 회원에게 있습니다. 글의 저작권은 쓴 회원에게 있으며, SafePlum은 게시판 운영에 필요한 범위(게시·검색·목록 표시)에서 글을 보여 줍니다.</p>
-  <h2>5. 삭제·이용 제한</h2>
+  <h2>6. 삭제·이용 제한</h2>
   <p>이 수칙에 어긋나거나 신고가 들어온 글은 운영자가 확인한 뒤 알리지 않고 가리거나 삭제할 수 있습니다. 위반이 반복되면 글쓰기를 제한하거나 계정을 정지할 수 있습니다. 회원은 자기 글과 댓글을 언제든 삭제할 수 있습니다.</p>
-  <h2>6. 권리 침해 신고</h2>
+  <h2>7. 권리 침해 신고</h2>
   <p>내 권리(명예·사생활·저작권 등)를 침해하는 글을 발견하면 글의 '신고' 버튼 또는 아래 문의 창구로 알려 주세요. 회원이 아니어도 문의 창구로 요청할 수 있습니다. 확인한 뒤 가림·삭제 등 필요한 조치를 합니다.</p>
   <p>{op_line}</p>
-  <h2>7. 탈퇴</h2>
+  <h2>8. 탈퇴</h2>
   <p>'마이페이지'에서 언제든 탈퇴할 수 있습니다. 탈퇴하면 계정과 이메일은 바로 삭제되고, 쓴 글과 댓글은 작성자가 '탈퇴한 회원'으로 바뀐 채 남습니다. 남기고 싶지 않은 글은 탈퇴 전에 직접 삭제하세요.</p>
   <p class="src-note">시행일 {e(cmc.get("rules_effective") or today)}. 수칙이 바뀌면 이 페이지에 알립니다.</p>
 </div>"""
-    write("board/rules/index.html", page(site, "../../", "board/rules/", "게시판 이용수칙", rules_body, desc="SafePlum 커뮤니티·Q&A 게시판 이용수칙.", active="board/"))
+    write("board/rules/index.html", page(site, "../../", "board/rules/", "게시판 이용수칙", rules_body, desc="SafePlum 커뮤니티·Q&A·채용공고 게시판 이용수칙.", active="board/"))
 
     pv = cmc.get("privacy") or {}
     def pv_val(k):
@@ -1721,7 +1737,9 @@ def build(out, today):
 </div></section>
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
-  <section class="col-list">{main}
+  <section class="col-list">{chat_banner()}
+    <p class="job-member"><b>우리 회사 공고를 직접 올릴 수 있습니다.</b> 회원이면 누구나 무료로 등록합니다. <a class="btn btn-sm" href="../board/?b=job">회원 채용공고 보기 · 등록</a></p>
+    {main}
     {f'<div class="more-box"><p>다른 채용 사이트에서 더 찾기</p><div class="jchips">{job_chips}</div></div>' if jobs else ''}
   </section>
 </div>"""

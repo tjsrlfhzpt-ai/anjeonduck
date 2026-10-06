@@ -6,12 +6,13 @@
   var CFG = window.ST_CM || {}, root = document.getElementById("cm");
   if (!root) return;
   var PAGE = root.dataset.page, REL = CFG.root || "../", PER = 20;
-  var BOARDS = { free: "커뮤니티", qna: "Q&A" };
+  var BOARDS = { free: "커뮤니티", qna: "Q&A", job: "채용공고" };
   var ERR = {
     LOGIN_REQUIRED: "로그인이 필요합니다.", RATE_LIMIT: "너무 빠르게 연속으로 등록했습니다. 잠시 뒤 다시 시도하세요.",
     DAILY_LIMIT: "하루 등록 한도를 넘었습니다. 내일 다시 시도하세요.", NOT_ALLOWED: "권한이 없거나 이미 삭제된 글입니다.",
     POST_NOT_FOUND: "삭제되었거나 없는 글입니다.", NICKNAME_INVALID: "닉네임은 한글·영문·숫자·밑줄 2~12자이며 운영자를 연상시키는 이름은 쓸 수 없습니다.",
     NICKNAME_TAKEN: "이미 쓰고 있는 닉네임입니다.", NICKNAME_COOLDOWN: "닉네임은 7일에 한 번만 바꿀 수 있습니다.",
+    JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.",
     "Invalid login credentials": "이메일 또는 비밀번호가 맞지 않습니다.", "Email not confirmed": "이메일 인증이 끝나지 않았습니다. 받은 메일의 인증 링크를 눌러 주세요.",
     "rate limit": "요청이 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도하세요.", "posts_title_check": "제목은 2~80자로 적어 주세요.",
     "posts_body_check": "본문은 5~5,000자로 적어 주세요.", "comments_body_check": "댓글은 1~2,000자로 적어 주세요.",
@@ -111,6 +112,18 @@
     return h("div", { class: "cm-top" }, h("div", { class: "seg cm-tabs", role: "group", "aria-label": "게시판" },
       Object.keys(BOARDS).map(function (b) { return h("a", { class: "cm-tab", href: url("", { b: b }), "aria-current": b === cur ? "page" : null }, BOARDS[b]); })), userBar());
   }
+  // 채용공고 마감 상태: 마감일이 없으면 상시, 지났으면 마감
+  function jobState(m) {
+    var d = m && /^\d{4}-\d{2}-\d{2}$/.test(m.deadline || "") ? m.deadline : "";
+    if (!d) return { cls: "cm-st-ans", text: "상시", closed: false };
+    var n = Math.round((Date.parse(d + "T00:00:00") - new Date(new Date().toDateString()).getTime()) / 864e5);
+    if (n < 0) return { cls: "cm-st-wait", text: "마감", closed: true };
+    return { cls: n <= 3 ? "cm-st-hot" : "cm-st-ok", text: n === 0 ? "오늘 마감" : "D-" + n, closed: false };
+  }
+  function chatBox() {
+    var c = CFG.chat; if (!c || !/^https:\/\/open\.kakao\.com\//.test(c.url || "")) return null;
+    return h("a", { class: "cm-chat", href: c.url, target: "_blank", rel: "noopener" }, h("span", { class: "cm-chat-t" }, c.title || "오픈채팅방"), h("span", { class: "cm-chat-d" }, c.desc || ""), h("span", { class: "cm-chat-go" }, "카카오톡으로 참여 ↗"));
+  }
   function busy(btn, on, label) { btn.disabled = on; if (label) btn.textContent = label; }
 
   // ---------------------------------------------------------------- 목록
@@ -118,11 +131,13 @@
     var b = BOARDS[qs("b")] ? qs("b") : "free", cat = qs("c"), kw = qs("q").slice(0, 40), p = Math.max(1, parseInt(qs("p"), 10) || 1);
     document.title = BOARDS[b] + " | " + document.title.split(" | ").pop();
     loading();
-    var q = sb.from("posts").select("id,board,category,title,created_at,comment_count,accepted_comment_id,notice,author:profiles(nickname)", { count: "exact" })
+    var job = b === "job";
+    var q = sb.from("posts").select("id,board,category,title,created_at,comment_count,accepted_comment_id,notice," + (job ? "meta," : "") + "author:profiles(nickname)", { count: "exact" })
       .eq("board", b).order("notice", { ascending: false }).order("created_at", { ascending: false }).range((p - 1) * PER, p * PER - 1);
     if (cat) q = q.eq("category", cat);
     if (kw) q = q.ilike("title", "%" + kw.replace(/[\\%_]/g, "\\$&") + "%");
     q.then(function (r) {
+      if (r.error && job && /meta/.test(String(r.error.message || ""))) return show(tabs(b), chatBox(), h("div", { class: "empty" }, h("p", { class: "cm-empty-t" }, "채용공고 게시판을 준비하고 있습니다"), h("p", null, "곧 회원이 직접 채용공고를 올릴 수 있게 됩니다.")));
       if (r.error) return show(tabs(b), note(msg(r.error), "err"), h("p", { class: "btns" }, h("button", { type: "button", class: "btn btn-ghost", onclick: pageList }, "다시 시도")));
       var rows = r.data || [], total = r.count || 0, pages = Math.max(1, Math.ceil(total / PER));
       var cats = (CFG.cats && CFG.cats[b]) || [];
@@ -131,19 +146,27 @@
           cats.map(function (c) { return h("a", { class: "chip", href: url("", { b: b, c: c, q: kw }), "aria-current": c === cat ? "true" : null }, c); }))),
         h("form", { class: "cm-search", role: "search", onsubmit: function (ev) { ev.preventDefault(); location.href = url("", { b: b, c: cat, q: this.q.value.trim() }); } },
           h("input", { type: "search", name: "q", value: kw, placeholder: "제목 검색", "aria-label": "제목 검색", maxlength: "40" }), h("button", { type: "submit", class: "btn btn-sm btn-ghost" }, "검색")),
-        h("a", { class: "btn btn-sm", href: ME ? url("write", { b: b }) : url("account", { next: url("write", { b: b }) }) }, b === "qna" ? "질문하기" : "글쓰기"));
+        h("a", { class: "btn btn-sm", href: ME ? url("write", { b: b }) : url("account", { next: url("write", { b: b }) }) }, b === "qna" ? "질문하기" : job ? "공고 등록" : "글쓰기"));
       var list = h("ul", { class: "cm-list" }, rows.map(function (x) {
         var state = b === "qna" ? h("span", { class: "cm-st " + (x.accepted_comment_id ? "cm-st-ok" : x.comment_count ? "cm-st-ans" : "cm-st-wait") }, x.accepted_comment_id ? "채택 완료" : x.comment_count ? "답변 " + x.comment_count : "답변 대기") : null;
+        if (job && !x.notice) {
+          var m = x.meta || {}, js = jobState(m);
+          return h("li", { class: js.closed ? "cm-closed" : null }, h("a", { href: url("view", { id: x.id }) },
+            h("span", { class: "cm-cat" }, x.category || "채용"),
+            h("span", { class: "cm-t" }, h("b", { class: "cm-co" }, m.company || ""), " ", x.title, m.region ? h("span", { class: "cm-rg" }, " · " + m.region) : null),
+            h("span", { class: "cm-st " + js.cls }, js.text), h("span", { class: "cm-meta" }, h("time", { datetime: x.created_at }, when(x.created_at)))));
+        }
         return h("li", { class: x.notice ? "cm-notice" : null }, h("a", { href: url("view", { id: x.id }) },
           h("span", { class: "cm-cat" }, x.notice ? "공지" : (x.category || BOARDS[b])),
           h("span", { class: "cm-t" }, x.title, b !== "qna" && x.comment_count ? h("em", { "aria-label": "댓글 " + x.comment_count + "개" }, " [" + x.comment_count + "]") : null),
           state, h("span", { class: "cm-meta" }, nick(x), " · ", h("time", { datetime: x.created_at }, when(x.created_at)))));
       }));
-      var empty = !rows.length ? h("div", { class: "empty" }, kw || cat ? null : h("img", { class: "cm-empty-i", src: REL + "assets/img/plum/wave.webp", width: "96", height: "96", alt: "" }), h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
+      var empty = !rows.length ? h("div", { class: "empty" }, kw || cat ? null : h("img", { class: "cm-empty-i", src: REL + "assets/img/plum/wave.webp", width: "96", height: "96", alt: "" }), h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : job ? "아직 등록된 채용공고가 없습니다. 회원이면 누구나 공고를 올릴 수 있습니다." : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
       var pager = pages > 1 ? h("nav", { class: "cm-pager", "aria-label": "페이지" },
         p > 1 ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p - 1 }) }, "← 이전") : null,
         h("span", null, p + " / " + pages), p < pages ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p + 1 }) }, "다음 →") : null) : null;
-      show(tabs(b), filter, empty || list, pager);
+      show(tabs(b), job ? chatBox() : null, filter, empty || list, pager,
+        job ? h("p", { class: "src-note" }, "채용공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않으며, 조건·마감일은 공고를 올린 회사에 확인하세요. 금전·개인 금융정보를 요구하는 공고는 신고해 주세요.") : null);
     }, function (e) { show(tabs(b), note(msg(e), "err")); });
   }
 
@@ -153,12 +176,13 @@
     if (!id) return show(note("주소가 올바르지 않습니다.", "err"), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "목록으로")));
     loading();
     Promise.all([
-      sb.from("posts").select("id,board,category,title,body,created_at,updated_at,author_id,comment_count,accepted_comment_id,notice,author:profiles(nickname)").eq("id", id).maybeSingle(),
+      sb.from("posts").select("*,author:profiles(nickname)").eq("id", id).maybeSingle(),
       sb.from("comments").select("id,body,created_at,author_id,author:profiles(nickname)").eq("post_id", id).order("created_at", { ascending: true }).limit(500)
     ]).then(function (rs) {
       var post = rs[0].data, err = rs[0].error || rs[1].error;
       if (err) return show(note(msg(err), "err"));
       if (!post) return show(h("div", { class: "empty" }, h("p", null, "삭제되었거나 없는 글입니다."), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "목록으로"))));
+      var job = post.board === "job", jm = (job && post.meta) || {}, jst = job ? jobState(jm) : null;
       var qna = post.board === "qna", cms = rs[1].data || [], mine = ME && ME.id === post.author_id, admin = ME && ME.role === "admin", word = qna ? "답변" : "댓글";
       document.title = post.title + " | " + document.title.split(" | ").pop();
       function rpc(name, args, confirmText, after) {
@@ -184,7 +208,10 @@
         h("p", { class: "cm-post-cat" }, h("a", { href: url("", { b: post.board }) }, BOARDS[post.board]), post.category ? " · " + post.category : "", post.notice ? " · 공지" : ""),
         h("h2", { class: "cm-post-t" }, post.title),
         h("p", { class: "cm-post-meta" }, nick(post), " · ", h("time", { datetime: post.created_at }, when(post.created_at, true)), post.updated_at ? " · 수정됨" : ""),
-        h("div", { class: "cm-body" }, rich(post.body)), acts);
+        job ? h("dl", { class: "cm-job" }, [["회사", jm.company], ["근무지", jm.region], ["직무", post.category], ["경력", jm.career], ["고용형태", jm.employment], ["마감", (jm.deadline || "상시 채용") + (jst.closed ? " (마감됨)" : "")]].filter(function (x) { return x[1]; }).map(function (x) { return [h("dt", null, x[0]), h("dd", null, x[1])]; })) : null,
+        h("div", { class: "cm-body" }, rich(post.body)),
+        job ? h("div", { class: "cm-apply" }, h("b", null, "지원 방법"), /^https:\/\/\S+$/.test(jm.apply || "") ? h("a", { class: "btn" + (jst.closed ? " btn-ghost" : ""), href: jm.apply, target: "_blank", rel: "nofollow ugc noopener" }, "지원 페이지 열기 ↗") : h("span", null, rich(jm.apply || ""))) : null,
+        acts);
       var clist = h("ul", { class: "cm-cms" }, cms.map(function (c) {
         var cmine = ME && ME.id === c.author_id, picked = post.accepted_comment_id === c.id;
         return h("li", { class: picked ? "cm-picked" : null },
@@ -210,6 +237,7 @@
         } }, ta, out, h("p", { class: "btns" }, btn));
       } else form = h("p", { class: "cm-note" }, word + "을 쓰려면 ", h("a", { href: url("account", { next: location.pathname + location.search }) }, "로그인"), "이 필요합니다.");
       show(tabs(post.board), art, h("h3", { class: "h-sm cm-cms-h" }, word + " " + cms.length), cms.length ? clist : h("p", { class: "hint" }, "아직 " + word + "이 없습니다."), form,
+        job ? h("p", { class: "src-note" }, "이 공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않습니다. 지원 전 회사와 조건을 직접 확인하고, 금전이나 통장·비밀번호를 요구하면 응하지 말고 신고해 주세요.") : null,
         qna ? h("p", { class: "src-note" }, "답변은 회원 개인의 의견이며 법령 해석이나 공식 답변이 아닙니다. 법 적용 여부는 법령 원문과 고용노동부 등 소관 기관에서 확인하세요.") : null,
         h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("", { b: post.board }) }, "목록으로")));
     }, function (e) { show(note(msg(e), "err")); });
@@ -235,29 +263,54 @@
       var body = h("textarea", { name: "body", rows: "14", maxlength: "5000", required: true, "aria-label": "본문", placeholder: "내용 (5~5,000자)\n\n· 사람 이름·연락처·사업장명 등 개인이나 회사를 알아볼 수 있는 정보는 적지 마세요.\n· 사고 사례는 누구인지 알 수 없게 적어 주세요." });
       body.value = (saved.body != null ? saved.body : (post && post.body)) || "";
       var cnt = h("span", { class: "hint" }), out = h("p", { class: "cm-note cm-err", role: "alert", hidden: true }), btn = h("button", { type: "submit", class: "btn" }, post ? "수정 저장" : "등록");
-      function tick() { cnt.textContent = body.value.length.toLocaleString() + " / 5,000자"; draft(key, { title: title.value, body: body.value, category: selC.value }); }
-      [title, body, selC].forEach(function (el) { el.addEventListener("input", tick); }); tick();
+      // 채용공고 전용 칸
+      var pm = (post && post.meta) || {}, sm = saved.meta || {};
+      function jv(k) { return sm[k] != null ? sm[k] : (pm[k] || ""); }
+      var J = {
+        company: h("input", { type: "text", maxlength: "60", placeholder: "회사명 (필수)", "aria-label": "회사명", value: jv("company") }),
+        region: h("input", { type: "text", maxlength: "40", placeholder: "근무지 (예: 경기 화성)", "aria-label": "근무지", value: jv("region") }),
+        career: h("input", { type: "text", maxlength: "40", placeholder: "경력 (예: 신입·경력 3년 이상)", "aria-label": "경력", value: jv("career") }),
+        employment: h("select", { "aria-label": "고용형태" }, ["", "정규직", "계약직", "파견·도급", "인턴", "기타"].map(function (v) { return h("option", { value: v }, v || "고용형태 선택"); })),
+        deadline: h("input", { type: "date", "aria-label": "마감일" }),
+        apply: h("input", { type: "text", maxlength: "300", placeholder: "지원 방법 (필수) — 채용 페이지 주소(https://…) 또는 접수 방법", "aria-label": "지원 방법", value: jv("apply") })
+      };
+      J.employment.value = jv("employment"); J.deadline.value = jv("deadline");
+      function jmeta() { var o = {}; Object.keys(J).forEach(function (k) { o[k] = J[k].value.trim(); }); return o; }
+      var jbox = h("div", { class: "cm-jobf" }, h("div", { class: "cm-row2 cm-row2e" }, J.company, J.region), h("div", { class: "cm-row3" }, J.career, J.employment, h("label", { class: "cm-dl" }, h("span", null, "마감일"), J.deadline)),
+        J.apply, h("p", { class: "hint" }, "마감일을 비워 두면 '상시 채용'으로 표시됩니다. 회사명과 지원 방법은 공고를 보는 사람이 확인할 수 있게 정확히 적어 주세요."));
+      function syncJob() {
+        var on = selB.value === "job"; jbox.hidden = !on;
+        title.placeholder = on ? "공고 제목 (예: 안전관리자 경력직 채용)" : "제목 (2~80자)";
+        body.placeholder = on ? "상세 내용 (5~5,000자)\n\n· 담당 업무, 자격 요건, 근무 조건, 전형 절차를 적어 주세요.\n· 주민등록번호·통장 사본 등 채용과 무관한 개인정보를 요구하는 내용은 올릴 수 없습니다." : "내용 (5~5,000자)\n\n· 사람 이름·연락처·사업장명 등 개인이나 회사를 알아볼 수 있는 정보는 적지 마세요.\n· 사고 사례는 누구인지 알 수 없게 적어 주세요.";
+      }
+      selB.addEventListener("change", syncJob); syncJob();
+      function tick() { cnt.textContent = body.value.length.toLocaleString() + " / 5,000자"; draft(key, { title: title.value, body: body.value, category: selC.value, meta: jmeta() }); }
+      [title, body, selC].concat(Object.keys(J).map(function (k) { return J[k]; })).forEach(function (el) { el.addEventListener("input", tick); el.addEventListener("change", tick); }); tick();
       show(h("form", { class: "cm-form cm-write", onsubmit: function (ev) {
         ev.preventDefault();
         var t = title.value.trim(), bd = body.value.trim();
         if (t.length < 2) { out.textContent = ERR.posts_title_check; out.hidden = false; title.focus(); return; }
         if (bd.length < 5) { out.textContent = ERR.posts_body_check; out.hidden = false; body.focus(); return; }
+        var isJob = selB.value === "job", mt = isJob ? jmeta() : null;
+        if (isJob && (mt.company.length < 2 || mt.apply.length < 5)) { out.textContent = ERR.JOB_META_INVALID; out.hidden = false; (mt.company.length < 2 ? J.company : J.apply).focus(); return; }
+        if (isJob && /^http:\/\//i.test(mt.apply)) { out.textContent = "지원 페이지 주소는 https:// 로 시작해야 합니다."; out.hidden = false; J.apply.focus(); return; }
         busy(btn, true, "저장 중…"); out.hidden = true;
-        var req = post ? sb.from("posts").update({ title: t, body: bd, category: selC.value }).eq("id", post.id).select("id")
-                       : sb.from("posts").insert({ board: selB.value, category: selC.value, title: t, body: bd, author_id: ME.id }).select("id");
+        var rowU = { title: t, body: bd, category: selC.value }, rowI = { board: selB.value, category: selC.value, title: t, body: bd, author_id: ME.id };
+        if (isJob) { rowU.meta = mt; rowI.meta = mt; }
+        var req = post ? sb.from("posts").update(rowU).eq("id", post.id).select("id") : sb.from("posts").insert(rowI).select("id");
         req.then(function (r) {
           var row = r.data && r.data[0];
           if (r.error || !row) { out.textContent = r.error ? msg(r.error) : ERR.NOT_ALLOWED; out.hidden = false; busy(btn, false, post ? "수정 저장" : "등록"); return; }
           draft(key, null); location.href = url("view", { id: row.id });
         }, function (e) { out.textContent = msg(e) + " 작성하던 내용은 이 브라우저에 임시 저장되어 있습니다."; out.hidden = false; busy(btn, false, post ? "수정 저장" : "등록"); });
       } },
-        h("div", { class: "cm-row2" }, selB, selC), title, body, h("p", { class: "cm-cnt" }, cnt, h("span", { class: "hint" }, "작성 중인 내용은 이 브라우저에 임시 저장됩니다.")), out,
+        h("div", { class: "cm-row2" }, selB, selC), jbox, title, body, h("p", { class: "cm-cnt" }, cnt, h("span", { class: "hint" }, "작성 중인 내용은 이 브라우저에 임시 저장됩니다.")), out,
         h("p", { class: "hint" }, "등록하면 ", h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "에 동의한 것으로 봅니다. 닉네임 ", h("b", null, ME.nickname), "(으)로 공개됩니다."),
         h("p", { class: "btns" }, btn, h("a", { class: "btn btn-ghost", href: post ? url("view", { id: post.id }) : url("", { b: b }) }, "취소"))));
     }
     if (!id) return form(null);
     loading();
-    sb.from("posts").select("id,board,category,title,body,author_id").eq("id", id).maybeSingle().then(function (r) {
+    sb.from("posts").select("*").eq("id", id).maybeSingle().then(function (r) {
       if (r.error) return show(note(msg(r.error), "err"));
       if (!r.data || r.data.author_id !== ME.id) return show(note("본인이 쓴 글만 수정할 수 있습니다.", "err"), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "목록으로")));
       form(r.data);
