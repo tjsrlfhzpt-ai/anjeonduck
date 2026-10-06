@@ -1467,3 +1467,8 @@ img.logo-mark{width:36px;height:36px;object-fit:contain;border-radius:0}
 .cm-welcome{text-align:center}
 .cm-welcome img{display:block;margin:0 auto 6px}
 .cm-welcome .btns{margin-top:10px}
+.ms-tipl{list-style:none;margin:10px 0 12px;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px 10px}
+.ms-tipl li{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:13px;line-height:1.45;color:var(--text-2)}
+.ms-tipl img{width:88px;height:88px}
+@media (max-width:720px){.ms-tipl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{.ms-tips{display:none}}
