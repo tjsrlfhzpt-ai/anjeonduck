@@ -1328,7 +1328,9 @@ def build(out, today):
             {"t": "채용정보", "k": "소식", "h": "jobs/", "d": "안전관리자 보건관리자 채용"},
             {"t": "커뮤니티 게시판", "k": "게시판", "h": "board/?b=free", "d": "자유 현장 이야기 정보 공유"}, {"t": "Q&A 질문·답변", "k": "게시판", "h": "board/?b=qna", "d": "질문 답변 법령 실무"}, {"t": "법령 개정 소식·시행 예정", "k": "법령", "h": "laws/#upcoming", "d": "개정"}]
     idx_json = json.dumps(idx, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    civil = "".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}"><span>{e(x["name"])}{f'<em class="go-bdg">{e(x["badge"])}</em>' if x.get("badge") else ""}</span> <span aria-hidden="true">↗</span></a></li>' for x in sites.get("civil", []) if safe_url(x.get("url")))
+    def go_badge(x):
+        return f'<em class="go-bdg">{e(x["badge"])}</em>' if x.get("badge") else ""
+    civil = "".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}"><span>{e(x["name"])}{go_badge(x)}</span> <span aria-hidden="true">↗</span></a></li>' for x in sites.get("civil", []) if safe_url(x.get("url")))
     orgs = "".join(f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url")))
     chips = "".join(f'<a class="qk" href="{h}">{e(k)}</a>' for k, h in [("TBM 일지", "tools/tbm/"), ("위험성평가", "tools/risk/"), ("적용범위 판정", "tools/selection/"), ("과태료", "tools/penalty/"), ("산업재해조사표", "resources/?q=" + quote("산업재해조사표")), ("MSDS 경고표지", "tools/msds/")])
     home_js = """<script>
