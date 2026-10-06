@@ -417,17 +417,30 @@
 
   // ---------------------------------------------------------------- 로그인·가입·내 계정
   function field(label, input, hint) { return h("label", { class: "cm-f" }, h("span", null, label), input, hint ? h("small", { class: "hint" }, hint) : null); }
+  // 비밀번호 확인 칸: 두 번 입력해 오타를 막는다. 다르면 칸 아래에 바로 알려 주고 제출을 막는다.
+  function pwConfirm(pw) {
+    var c = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), m = h("small", { class: "cm-pwm", "aria-live": "polite" });
+    function chk() {
+      var same = c.value === pw.value;
+      c.setCustomValidity(c.value && !same ? "비밀번호가 서로 다릅니다." : "");
+      m.textContent = !c.value ? "" : same ? "비밀번호가 일치합니다." : "비밀번호가 서로 다릅니다.";
+      m.className = "cm-pwm" + (c.value ? (same ? " ok" : " no") : "");
+      return same;
+    }
+    pw.addEventListener("input", chk); c.addEventListener("input", chk);
+    return { el: h("label", { class: "cm-f" }, h("span", null, "비밀번호 확인"), c, m), same: chk, input: c };
+  }
   function pageAccount() {
     var here = location.origin + location.pathname;
     function result(out, text, ok) { out.textContent = text; out.className = "cm-note " + (ok ? "cm-ok" : "cm-err"); out.hidden = false; }
     function goNext() { var n = qs("next"); location.href = n && n.charAt(0) === "/" && n.charAt(1) !== "/" ? n : url(""); }
 
     if (RECOVERY) {
-      var np = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o0 = h("p", { hidden: true }), b0 = h("button", { type: "submit", class: "btn" }, "비밀번호 변경");
+      var np = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o0 = h("p", { hidden: true }), b0 = h("button", { type: "submit", class: "btn" }, "비밀번호 변경"), c0 = pwConfirm(np);
       return show(h("form", { class: "cm-form cm-auth", onsubmit: function (ev) {
-        ev.preventDefault(); busy(b0, true);
+        ev.preventDefault(); if (!c0.same()) { c0.input.focus(); return result(o0, "비밀번호가 서로 다릅니다. 다시 확인해 주세요."); } busy(b0, true);
         sb.auth.updateUser({ password: np.value }).then(function (r) { busy(b0, false); if (r.error) return result(o0, msg(r.error)); RECOVERY = false; result(o0, "비밀번호를 바꿨습니다.", true); setTimeout(function () { location.href = url(""); }, 900); });
-      } }, h("h2", { class: "h-sm" }, "새 비밀번호 설정"), field("새 비밀번호", np, "8자 이상"), o0, h("p", { class: "btns" }, b0)));
+      } }, h("h2", { class: "h-sm" }, "새 비밀번호 설정"), field("새 비밀번호", np, "8자 이상"), c0.el, o0, h("p", { class: "btns" }, b0)));
     }
 
     if (ARRIVE === "signup" && ME) {
@@ -442,7 +455,7 @@
     }
     if (ME) {
       var nn = h("input", { type: "text", maxlength: "12", required: true, value: ME.nickname }), o1 = h("p", { hidden: true }), b1 = h("button", { type: "submit", class: "btn btn-ghost" }, "닉네임 변경");
-      var pw = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o2 = h("p", { hidden: true }), b2 = h("button", { type: "submit", class: "btn btn-ghost" }, "비밀번호 변경");
+      var pw = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o2 = h("p", { hidden: true }), b2 = h("button", { type: "submit", class: "btn btn-ghost" }, "비밀번호 변경"), c2 = pwConfirm(pw);
       var o3 = h("p", { hidden: true });
       return show(h("div", { class: "cm-auth" },
         h("h2", { class: "h-sm" }, "마이페이지"), h("p", { class: "cm-note" }, "이메일 ", h("b", null, ME.email), " · 이메일은 다른 회원에게 보이지 않습니다."),
@@ -451,9 +464,9 @@
           sb.rpc("set_nickname", { p: nn.value.trim() }).then(function (r) { busy(b1, false); result(o1, r.error ? msg(r.error) : "닉네임을 바꿨습니다.", !r.error); });
         } }, field("닉네임", nn, "한글·영문·숫자·밑줄 2~12자 · 7일에 한 번 변경"), o1, h("p", { class: "btns" }, b1)),
         h("form", { class: "cm-form", onsubmit: function (ev) {
-          ev.preventDefault(); busy(b2, true);
-          sb.auth.updateUser({ password: pw.value }).then(function (r) { busy(b2, false); if (!r.error) pw.value = ""; result(o2, r.error ? msg(r.error) : "비밀번호를 바꿨습니다.", !r.error); });
-        } }, field("새 비밀번호", pw, "8자 이상"), o2, h("p", { class: "btns" }, b2)),
+          ev.preventDefault(); if (!c2.same()) { c2.input.focus(); return result(o2, "비밀번호가 서로 다릅니다. 다시 확인해 주세요."); } busy(b2, true);
+          sb.auth.updateUser({ password: pw.value }).then(function (r) { busy(b2, false); if (!r.error) { pw.value = ""; c2.input.value = ""; c2.same(); } result(o2, r.error ? msg(r.error) : "비밀번호를 바꿨습니다.", !r.error); });
+        } }, field("새 비밀번호", pw, "8자 이상"), c2.el, o2, h("p", { class: "btns" }, b2)),
         h("div", { class: "cm-form cm-danger" }, h("h3", { class: "h-sm" }, "회원 탈퇴"),
           h("p", { class: "hint" }, "탈퇴하면 계정과 이메일이 바로 삭제되며 되돌릴 수 없습니다. 쓴 글과 댓글은 지워지지 않고 작성자가 '탈퇴한 회원'으로 바뀝니다. 지우고 싶은 글은 탈퇴 전에 직접 삭제하세요."), o3,
           h("p", { class: "btns" }, h("button", { type: "button", class: "btn btn-ghost", onclick: function () {
@@ -487,9 +500,10 @@
       } }, h("h2", { class: "h-sm" }, "비밀번호 찾기"), field("가입한 이메일", email), out, h("p", { class: "btns" }, br), h("p", { class: "cm-alt" }, sw("login", "로그인으로"))));
     }
     var nk = h("input", { type: "text", maxlength: "12", required: true, autocomplete: "nickname" }), pw2 = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true });
-    var ag1 = h("input", { type: "checkbox", required: true }), ag2 = h("input", { type: "checkbox", required: true }), bj = h("button", { type: "submit", class: "btn btn-block" }, "인증 메일 받기");
+    var ag1 = h("input", { type: "checkbox", required: true }), ag2 = h("input", { type: "checkbox", required: true }), bj = h("button", { type: "submit", class: "btn btn-block" }, "인증 메일 받기"), cj = pwConfirm(pw2);
     show(h("form", { class: "cm-form cm-auth", onsubmit: function (ev) {
       ev.preventDefault(); out.hidden = true;
+      if (!cj.same()) { cj.input.focus(); return result(out, "비밀번호가 서로 다릅니다. 다시 확인해 주세요."); }
       var n = nk.value.trim();
       if (!/^[0-9A-Za-z가-힣_]{2,12}$/.test(n)) return result(out, ERR.NICKNAME_INVALID);
       busy(bj, true);
@@ -506,7 +520,7 @@
       }).catch(function (e) { busy(bj, false); result(out, msg(e)); });
     } }, h("h2", { class: "h-sm" }, "회원가입"),
       h("p", { class: "hint" }, "이름·전화번호는 받지 않습니다. 이메일 인증만 하면 됩니다."),
-      field("이메일", email, "인증 메일을 받을 주소 · 다른 회원에게 보이지 않습니다"), field("비밀번호", pw2, "8자 이상"), field("닉네임", nk, "한글·영문·숫자·밑줄 2~12자 · 글에 공개됩니다"),
+      field("이메일", email, "인증 메일을 받을 주소 · 다른 회원에게 보이지 않습니다"), field("비밀번호", pw2, "8자 이상"), cj.el, field("닉네임", nk, "한글·영문·숫자·밑줄 2~12자 · 글에 공개됩니다"),
       h("label", { class: "cm-chk" }, ag1, h("span", null, h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "과 ", h("a", { href: REL + "privacy/", target: "_blank" }, "개인정보 처리방침"), "을 읽었고 동의합니다. (필수)")),
       h("label", { class: "cm-chk" }, ag2, h("span", null, "만 14세 이상입니다. (필수)")),
       out, h("p", { class: "btns" }, bj), h("p", { class: "cm-alt" }, "이미 회원이면 ", sw("login", "로그인"))));

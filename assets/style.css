@@ -1606,3 +1606,4 @@ button.mc-d.today:not(.sel){outline:2px solid var(--navy);outline-offset:-2px}
 .chip-more:hover{background:var(--blue-50)}
 .chip-more:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .chip-more[hidden]{display:none}
+.cm-pwm{font-size:12.5px;font-weight:600;min-height:1em}.cm-pwm.ok{color:var(--green)}.cm-pwm.no{color:#B3261E}
