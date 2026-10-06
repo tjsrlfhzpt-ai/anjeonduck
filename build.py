@@ -626,7 +626,7 @@ def dock_html(rel, active):
 def _asset_ver():
     import hashlib
     h = hashlib.sha1()
-    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/favicon.png", "assets/img/plum/logo-tile.webp", "assets/img/ico/tbm.webp"):
+    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/favicon.png", "assets/img/plum/logo.webp", "assets/img/plum/hero.webp", "assets/img/ico/tbm.webp"):
         h.update((ROOT / f).read_bytes())
     return h.hexdigest()[:8]
 
@@ -786,7 +786,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <script src="{rel_root}assets/app.js?v={ASSET_VER}" defer></script>
 </body>
 </html>
-""".replace("@LOGO@", f'<img class="logo-mark" alt="" width="40" height="40" src="{rel_root}assets/img/plum/logo-tile.webp?v={ASSET_VER}">')
+""".replace("@LOGO@", f'<img class="logo-mark" alt="" width="36" height="36" src="{rel_root}assets/img/plum/logo.webp?v={ASSET_VER}">')
 
 
 # ---------------------------------------------------------------- 컴포넌트
