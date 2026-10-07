@@ -1002,6 +1002,18 @@ def inject_data(src, names, where):
     return src
 
 
+def tool_ld(t, site):
+    """도구 화면의 구조화 데이터(무료 웹 도구). 검색엔진이 '무엇을 하는 페이지인지' 읽는 정보."""
+    base = (site.get("base_url") or "").rstrip("/")
+    if not base:
+        return ""
+    ld = {"@context": "https://schema.org", "@type": "WebApplication", "name": t["name"], "url": f"{base}/tools/{t['id']}/",
+          "description": t.get("desc", ""), "applicationCategory": "BusinessApplication", "operatingSystem": "All", "inLanguage": "ko",
+          "isAccessibleForFree": True, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"},
+          "publisher": {"@type": "Organization", "name": site["name"], "url": base + "/"}}
+    return '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + "</script>"
+
+
 def render_free_tool(t, hazards, site=None, penalties=None):
     src = (ROOT / t["src"]).read_text(encoding="utf-8")
     if t.get("kind") == "page":
@@ -1012,8 +1024,8 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         elif t.get("inject"):
             names = t["inject"] if isinstance(t["inject"], list) else [t["inject"]]
             src = inject_data(src, names, t["src"])
-        src += lawver_html(t["id"], "../../", t.get("law", ""))
-        return page(site, "../../", f"tools/{t['id']}/", t["name"], src, desc=t.get("desc"), active="tools/")
+        src += lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
+        return page(site, "../../", f"tools/{t['id']}/", t["name"] + (" · 무료 양식" if t.get("cat") == "작성기" else ""), src, desc=t.get("desc"), active="tools/")
     if t.get("inject") == "hazards":
         payload = json.dumps(hazards, ensure_ascii=False).replace("</", "<\\/")
         assert "/*@HAZARDS@*/null" in src, t["src"]
@@ -1022,10 +1034,10 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         css = (ROOT / t["css"]).read_text(encoding="utf-8").replace("</style", "<\\/style")
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
-    if site.get("name_ko") and f"| {site['name']}</title>" in src:   # 단독 화면 제목에도 한글 이름
-        src = src.replace(f"| {site['name']}</title>", f"| {site['name_ko']} {site['name']}</title>", 1)
+    if site.get("name_ko") and f" | {site['name']}</title>" in src:   # 단독 화면 제목에도 한글 이름
+        src = src.replace(f" | {site['name']}</title>", f"{' · 무료 양식' if t.get('cat') == '작성기' else ''} | {site['name_ko']} {site['name']}</title>", 1)
     if "og:image" not in src and "</head>" in src:
-        src = src.replace("</head>", og_image_tags(site) + "\n</head>", 1)
+        src = src.replace("</head>", og_image_tags(site) + "\n" + tool_ld(t, site) + "\n</head>", 1)
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
