@@ -248,25 +248,61 @@ def acc_date(text, extra="", today=None):
     return ""
 
 
-def fetch_accidents(rows=60):
-    url = "https://apis.data.go.kr/B552468/news_api02/getNews_api02"
-    raw = get(url, {"callApiId": "1040", "pageNo": 1, "numOfRows": rows})
+def acc_rows(raw):
+    """사고사망 게시판 응답(JSON 또는 XML)에서 게시물 목록을 꺼낸다 → [{항목: 값}]."""
+    raw = raw.strip()
+    if raw[:1] in "{[":
+        data = json.loads(raw)
+        hdr = json.dumps(data, ensure_ascii=False)[:400]
+        m = re.search(r'"resultCode"\s*:\s*"?(\w+)', hdr)
+        if m and m.group(1) not in ("0", "00", "200"):
+            raise RuntimeError(f"resultCode={m.group(1)} — 응답: {snippet(raw, 200)}")
+
+        def find(o):  # 사전들의 목록 가운데 가장 긴 것을 게시물 목록으로 본다
+            best = []
+            if isinstance(o, list):
+                if o and all(isinstance(x, dict) for x in o):
+                    best = o
+                for x in o:
+                    c = find(x)
+                    best = c if len(c) > len(best) else best
+            elif isinstance(o, dict):
+                for v in o.values():
+                    c = find(v)
+                    best = c if len(c) > len(best) else best
+            return best
+        rows = find(data)
+        if not rows:  # 한 건뿐이면 목록이 아니라 사전 하나로 오는 경우
+            item = (((data.get("body") or data.get("response", {}).get("body") or {}).get("items") or {}) if isinstance(data, dict) else {})
+            item = item.get("item") if isinstance(item, dict) else None
+            rows = [item] if isinstance(item, dict) else []
+        return rows
     root = ET.fromstring(raw)
     code = (root.findtext(".//resultCode") or "").strip()
     if code and code not in ("0", "00", "200"):
         raise RuntimeError(f"resultCode={code} {root.findtext('.//resultMsg')}")
+    return [{c.tag: (c.text or "") for c in it} for it in root.iter("item")]
+
+
+def fetch_accidents(rows=60):
+    url = "https://apis.data.go.kr/B552468/news_api02/getNews_api02"
+    raw = get(url, {"callApiId": "1040", "pageNo": 1, "numOfRows": rows})
+    rows_ = acc_rows(raw)
     out = []
-    for i, it in enumerate(root.iter("item")):
-        g = lambda k: (it.findtext(k) or "").strip()
-        if i == 0:  # 응답 구조가 바뀌면 로그에서 바로 알 수 있게 항목 이름만 남긴다
-            print("  사고사망 속보 응답 항목:", ", ".join(f"{c.tag}({len((c.text or '').strip())}자)" for c in it))
-        text = re.sub(r"\s+", " ", g("keyword"))
+    for i, it in enumerate(rows_):
+        g = lambda k: str(it.get(k) or "").strip()
+        if i == 0:  # 응답 구조가 바뀌면 로그에서 바로 알 수 있게 항목 이름과 첫 건 앞부분만 남긴다
+            print("  사고사망 속보 응답 항목:", ", ".join(f"{k}({len(str(v or '').strip())}자)" for k, v in it.items()))
+            print("  첫 건:", snippet(json.dumps(it, ensure_ascii=False), 300))
+        text = re.sub(r"\s+", " ", g("keyword") or g("title") or g("subject"))
         if not text:
             continue
         # API에 날짜 항목이 따로 있으면 그것을 먼저, 없으면 문장 속 날짜를 쓴다
         extra = next((g(k) for k in ("occrrncDe", "acdntDe", "occurDate", "date") if g(k)), "")
         out.append({"id": g("arno"), "text": text, "date": acc_date(text, extra), "type": acc_type(text),
                     "image": g("contents") if g("contents").startswith("https://") else ""})
+    if not rows_:
+        raise RuntimeError(f"항목을 찾지 못함 — 응답: {snippet(raw, 300)}")
     dated = sum(1 for o in out if o["date"])
     print(f"  사고사망 속보: 발생일 인식 {dated}/{len(out)}건, 유형 '기타' {sum(1 for o in out if o['type'] == '기타')}건")
     if out:
