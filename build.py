@@ -1586,6 +1586,13 @@ def build(out, today):
     cm_page("account/", "account", "로그인 · 마이페이지", "누구나 무료로 가입합니다. 이메일 인증만 하면 되고 이름·전화번호는 받지 않습니다.", "../../", "SafePlum 로그인·회원가입·마이페이지.", wide=True)
 
     op_line = operator_html(site, "../../")
+    _po = (site.get("operator") or {}).get("privacy_officer") or {}
+    _po_mail = str(_po.get("email") or "").strip()
+    if cm_on and not re.match(r"^[^@\s<>\"']+@[^@\s<>\"']+\.[a-z]{2,}$", _po_mail):
+        warn("operator.privacy_officer.email 이 비어 있거나 형식이 틀림 → 개인정보 처리방침에 보호책임자 연락처가 빠짐")
+        _po_mail = ""
+    po_html = (f'<p><b>개인정보 보호책임자</b>: {e(_po.get("title") or "운영자")} · 이메일 <a href="mailto:{e(_po_mail)}">{e(_po_mail)}</a><br>'
+               '개인정보 열람·정정·삭제·처리정지 요청과 불만 처리는 위 이메일로 접수합니다.</p>') if _po_mail else ""
     rules_body = f"""
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">게시판</a><span>/</span>이용수칙</p>
@@ -1673,6 +1680,7 @@ def build(out, today):
   <h2>5. 안전 조치</h2>
   <p>비밀번호는 암호화해 저장하고, 전송 구간은 HTTPS로 암호화합니다. 운영자가 회원 정보를 조회하거나 계정을 삭제한 기록(일시·접속 IP·한 일)은 따로 남겨 보관합니다. 이메일 주소는 다른 회원에게 공개되지 않으며, 데이터베이스는 본인 글만 고치거나 지울 수 있도록 행 단위 접근 규칙으로 보호합니다.</p>
   <h2>6. 개인정보 보호책임자·문의</h2>
+  {po_html}
   <p>{operator_html(site, "../")}</p>
   <p>개인정보 침해에 대한 상담은 개인정보침해신고센터(privacy.kisa.or.kr, 국번 없이 118), 개인정보분쟁조정위원회(kopico.go.kr)에서도 받을 수 있습니다.</p>
   <p class="src-note">시행일 {pv_val("effective")}. 내용이 바뀌면 이 페이지에 알립니다.</p>

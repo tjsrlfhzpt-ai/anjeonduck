@@ -8,7 +8,12 @@
     "name": "SafePlum 운영팀",
     "contact_url": "https://open.kakao.com/o/gbg3K3Qi",
     "contact_label": "카카오톡 오픈채팅",
-    "_comment": "contact_url 에 카카오톡 오픈채팅·구글 폼 주소 또는 mailto:공용메일 을 넣으면 푸터·안내 페이지에 문의 링크가 나타납니다. 개인 이메일은 넣지 마세요."
+    "_comment": "contact_url 에 카카오톡 오픈채팅·구글 폼 주소 또는 mailto:공용메일 을 넣으면 푸터·안내 페이지에 문의 링크가 나타납니다. 개인 이메일은 넣지 마세요.",
+    "privacy_officer": {
+      "title": "SafePlum 운영자",
+      "email": "qwerfw@naver.com",
+      "_comment": "개인정보 처리방침 6번에 공개되는 보호책임자 연락처. 주소를 바꾸면 처리방침에 그대로 반영됩니다."
+    }
   },
   "tools": [
     {
