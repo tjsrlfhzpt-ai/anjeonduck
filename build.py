@@ -961,15 +961,26 @@ def acc_trend_html(auto_acc, today, days=7):
         t = a.get("type") or "기타"
         by_day[a["date"]][t] += 1
         total[t] += 1
-    cnt = lambda c: " · ".join(f"{e(k)} {v}건" for k, v in c.most_common())
+    WD = "월화수목금토일"
     if recent:
-        rows = "".join(f'<li><time datetime="{e(d)}">{int(d[5:7])}월 {int(d[8:10])}일</time> — {cnt(by_day[d])}</li>' for d in sorted(by_day, reverse=True))
-        body = f'<ul class="alist">{rows}</ul><p class="hint">최근 {days}일 합계 {len(recent)}건: {cnt(total)}</p>'
+        top = max(total.values())
+        bars = "".join(
+            f'<li><span class="acc-k">{e(k)}</span><span class="acc-bar" aria-hidden="true"><i style="width:{round(v / top * 100)}%"></i></span><span class="acc-n">{v}건</span></li>'
+            for k, v in total.most_common())
+        days_html = "".join(
+            f'<li><time datetime="{e(d)}">{int(d[5:7])}.{int(d[8:10])} <span>{WD[_dt.date.fromisoformat(d).weekday()]}</span></time>'
+            f'<span class="acc-tags">{"".join(f"""<span class="tag">{e(k)}{f" {v}건" if v > 1 else ""}</span>""" for k, v in by_day[d].most_common())}</span></li>'
+            for d in sorted(by_day, reverse=True))
+        body = (f'<ul class="acc-sum" aria-label="최근 {days}일 재해유형별 건수">{bars}</ul>'
+                f'<h3 class="acc-h">날짜별</h3><ul class="acc-days">{days_html}</ul>')
+        badge = f'<span class="badge badge-red">최근 {days}일 {len(recent)}건</span>'
     else:
         body = f'<p class="hint">최근 {days}일 동안 게시된 사고사망 속보가 없습니다.</p>'
-    return (f'<div class="side-box"><h2 class="h-sm">사고사망 속보 동향</h2>{body}'
-            f'<p class="src-line">출처: 한국산업안전보건공단 사고사망 속보(공공데이터포털 API) · 수집일 {e(auto_acc.get("fetched", ""))}. '
-            f'공단이 속보로 게시한 건을 발생일·재해유형으로 자동 분류한 것으로, 공식 산업재해 통계가 아니며 누락·분류 오류가 있을 수 있습니다.</p></div>')
+        badge = f'<span class="badge badge-muted">최근 {days}일 0건</span>'
+    return (f'<div class="side-box acc-box"><div class="acc-head"><h2 class="h-sm">사고사망 속보 동향</h2>{badge}</div>{body}'
+            f'<details class="acc-src"><summary>공단 속보 기준 · 자동 분류 · 공식 통계 아님</summary>'
+            f'<p>출처: 한국산업안전보건공단 사고사망 속보(공공데이터포털 API) · 수집일 {e(auto_acc.get("fetched", ""))}. '
+            f'공단이 속보로 게시한 건을 발생일·재해유형으로 자동 분류한 것으로, 공식 산업재해 통계가 아니며 누락·분류 오류가 있을 수 있습니다.</p></details></div>')
 
 
 def sec_head(title, href=None, more="전체 보기", sub=None):
