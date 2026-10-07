@@ -1632,3 +1632,7 @@ button.cm-tile{cursor:pointer}button.cm-tile:hover{border-color:var(--blue-100);
 @media (max-width:720px){.cm-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .cm-consent{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:12.5px;color:var(--text-2);line-height:1.55}
 .cm-consent ul{margin:4px 0 4px 16px;padding:0}.cm-consent p{margin:0}
+.hd-auth-adm{color:var(--blue)!important;font-weight:800}
+.cm-admbox{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin:0 0 12px;border:1px solid var(--blue-100);border-radius:12px;background:var(--blue-50);font-size:14px}
+.cm-admbox-s{margin:2px 0 0;font-size:13px;color:var(--text-2)}
+@media (max-width:720px){.hd-auth{gap:8px;font-size:13px}.hd-auth-my{padding:6px 9px}}

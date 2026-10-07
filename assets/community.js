@@ -97,9 +97,11 @@
   function loadMe() {
     return sb.auth.getSession().then(function (r) {
       var s = r.data && r.data.session;
-      if (!s) { ME = null; return null; }
+      if (!s) { ME = null; try { localStorage.removeItem("safetake.adm"); } catch (e) {} return null; }
       return sb.from("profiles").select("id,nickname,role,nickname_changed_at").eq("id", s.user.id).maybeSingle().then(function (p) {
         ME = { id: s.user.id, email: s.user.email, nickname: (p.data && p.data.nickname) || "회원", role: (p.data && p.data.role) || "member" };
+        // 헤더(모든 화면)에 '운영 관리' 링크를 보여 주기 위한 표시일 뿐이다. 실제 권한은 서버가 확인한다.
+        try { if (ME.role === "admin") localStorage.setItem("safetake.adm", ME.id); else localStorage.removeItem("safetake.adm"); } catch (e) {}
         return ME;
       });
     });
@@ -515,13 +517,22 @@
       var nn = h("input", { type: "text", maxlength: "12", required: true, value: ME.nickname }), o1 = h("p", { hidden: true }), b1 = h("button", { type: "submit", class: "btn btn-ghost" }, "닉네임 변경");
       var pw = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true }), o2 = h("p", { hidden: true }), b2 = h("button", { type: "submit", class: "btn btn-ghost" }, "비밀번호 변경"), c2 = pwConfirm(pw);
       var o3 = h("p", { hidden: true }), susBox = h("p", { class: "cm-note cm-err", role: "status", hidden: true });
+      var admBox = null;
+      if (ME.role === "admin") {
+        var admSum = h("p", { class: "cm-admbox-s" }, "오늘 현황을 불러오는 중…");
+        admBox = h("div", { class: "cm-admbox" }, h("div", null, h("b", null, "운영자 계정입니다"), admSum), h("a", { class: "btn btn-sm", href: url("admin") }, "운영 관리 열기"));
+        sb.rpc("admin_stats", {}).then(function (r) {
+          var x = r && r.data;
+          admSum.textContent = x ? "오늘 방문자 " + x.visitors_today + "명 · 가입 " + x.joins_today + "명 · 처리할 신고 " + x.open_reports + "건" : "방문자 수, 가입자, 신고, 회원 정지·강제 탈퇴를 관리합니다.";
+        }, function () { admSum.textContent = "방문자 수, 가입자, 신고, 회원 정지·강제 탈퇴를 관리합니다."; });
+      }
       sb.from("suspensions").select("until,reason").eq("user_id", ME.id).maybeSingle().then(function (r) {
         var x = r && r.data; if (!x || (x.until && new Date(x.until) <= new Date())) return;
         susBox.textContent = "글쓰기가 정지된 상태입니다. 기간: " + (x.until ? when(x.until, true) + "까지" : "기한 없음") + " · 사유: " + x.reason + " — 이의가 있으면 문의 창구로 알려 주세요.";
         susBox.hidden = false;
       }, function () {});
       return show(h("div", { class: "cm-auth" },
-        h("h2", { class: "h-sm" }, "마이페이지"), susBox, h("p", { class: "cm-note" }, "이메일 ", h("b", null, ME.email), " · 이메일은 다른 회원에게 보이지 않습니다."),
+        h("h2", { class: "h-sm" }, "마이페이지"), susBox, admBox, h("p", { class: "cm-note" }, "이메일 ", h("b", null, ME.email), " · 이메일은 다른 회원에게 보이지 않습니다."),
         h("form", { class: "cm-form", onsubmit: function (ev) {
           ev.preventDefault(); busy(b1, true);
           sb.rpc("set_nickname", { p: nn.value.trim() }).then(function (r) { busy(b1, false); result(o1, r.error ? msg(r.error) : "닉네임을 바꿨습니다.", !r.error); });

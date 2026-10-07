@@ -30,6 +30,8 @@
     box.textContent = "";
     var my = document.createElement("a"); my.href = acct; my.textContent = "마이페이지"; my.className = "hd-auth-my";
     var out = document.createElement("a"); out.href = acct + "?logout=1"; out.textContent = "로그아웃"; out.className = "hd-auth-out";
+    var isAdm = false; try { isAdm = localStorage.getItem("safetake.adm") === ses.user.id; } catch (e) {}
+    if (isAdm) { var ad = document.createElement("a"); ad.href = acct.replace(/account\/$/, "admin/"); ad.textContent = "운영 관리"; ad.className = "hd-auth-adm"; box.appendChild(ad); }
     box.appendChild(my); box.appendChild(out);
   })();
 
