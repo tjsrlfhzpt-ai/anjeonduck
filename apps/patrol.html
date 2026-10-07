@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도급 작업장 순회점검 일지 작성기 | SafePlum</title>
+    <meta name="description" content="도급인의 작업장 순회점검 일지·주간/월간 집계표·시정 요구서를 작성해 PDF로 저장하세요. 업종별 순회 주기 자동 판정, 미조치 지적사항 자동 이월. 무료, 회원가입 없음.">
+    <link rel="icon" href="../../assets/favicon.png" type="image/png">
+    <!-- Tailwind: 빌드 때 미리 만든 CSS (런타임 CDN 사용 안 함) -->
+    <style>/*@TAILWIND@*/</style>
+    <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
+    <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
+    <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
+    <style>
+        [v-cloak] { display: none; }
+        /* Phosphor Icons 2.1 (MIT) — 쓰는 아이콘만 CSS 마스크로 넣음(외부 CDN 사용 안 함) */
+        .ph-bold,.ph-fill{display:inline-block;width:1em;height:1em;vertical-align:-0.125em;background-color:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat;flex:none}
+        .ph-bold.ph-arrow-counter-clockwise{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,128a100,100,0,0,1-98.66,100H128a99.39,99.39,0,0,1-68.62-27.29,12,12,0,0,1,16.48-17.45,76,76,0,1,0-1.57-109c-.13.13-.25.25-.39.37L54.89,92H72a12,12,0,0,1,0,24H24a12,12,0,0,1-12-12V56a12,12,0,0,1,24,0V76.72L57.48,57.06A100,100,0,0,1,228,128Z%22/></svg>")}
+        .ph-bold.ph-arrow-right{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z%22/></svg>")}
+        .ph-bold.ph-arrows-clockwise{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,48V96a12,12,0,0,1-12,12H168a12,12,0,0,1,0-24h19l-7.8-7.8a75.55,75.55,0,0,0-53.32-22.26h-.43A75.49,75.49,0,0,0,72.39,75.57,12,12,0,1,1,55.61,58.41a99.38,99.38,0,0,1,69.87-28.47H126A99.42,99.42,0,0,1,196.2,59.23L204,67V48a12,12,0,0,1,24,0ZM183.61,180.43a75.49,75.49,0,0,1-53.09,21.63h-.43A75.55,75.55,0,0,1,76.77,179.8L69,172H88a12,12,0,0,0,0-24H40a12,12,0,0,0-12,12v48a12,12,0,0,0,24,0V189l7.8,7.8A99.42,99.42,0,0,0,130,226.06h.56a99.38,99.38,0,0,0,69.87-28.47,12,12,0,0,0-16.78-17.16Z%22/></svg>")}
+        .ph-bold.ph-check{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z%22/></svg>")}
+        .ph-bold.ph-file-pdf{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M200,164v8h12a12,12,0,0,1,0,24H200v12a12,12,0,0,1-24,0V152a12,12,0,0,1,12-12h32a12,12,0,0,1,0,24ZM92,172a32,32,0,0,1-32,32H56v4a12,12,0,0,1-24,0V152a12,12,0,0,1,12-12H60A32,32,0,0,1,92,172Zm-24,0a8,8,0,0,0-8-8H56v16h4A8,8,0,0,0,68,172Zm100,8a40,40,0,0,1-40,40H112a12,12,0,0,1-12-12V152a12,12,0,0,1,12-12h16A40,40,0,0,1,168,180Zm-24,0a16,16,0,0,0-16-16h-4v32h4A16,16,0,0,0,144,180ZM36,108V40A20,20,0,0,1,56,20h96a12,12,0,0,1,8.49,3.52l56,56A12,12,0,0,1,220,88v20a12,12,0,0,1-24,0v-4H148a12,12,0,0,1-12-12V44H60v64a12,12,0,0,1-24,0ZM160,57V80h23Z%22/></svg>")}
+        .ph-bold.ph-file-text{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M216.49,79.52l-56-56A12,12,0,0,0,152,20H56A20,20,0,0,0,36,40V216a20,20,0,0,0,20,20H200a20,20,0,0,0,20-20V88A12,12,0,0,0,216.49,79.52ZM160,57l23,23H160ZM60,212V44h76V92a12,12,0,0,0,12,12h48V212Zm112-80a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,132Zm0,40a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,172Z%22/></svg>")}
+        .ph-bold.ph-floppy-disk{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M222.14,69.17,186.83,33.86A19.86,19.86,0,0,0,172.69,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V83.31A19.86,19.86,0,0,0,222.14,69.17ZM164,204H92V160h72Zm40,0H188V156a20,20,0,0,0-20-20H88a20,20,0,0,0-20,20v48H52V52H171l33,33ZM164,84a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h56A12,12,0,0,1,164,84Z%22/></svg>")}
+        .ph-bold.ph-lightbulb{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M180,232a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h80A12,12,0,0,1,180,232Zm40-128a91.51,91.51,0,0,1-35.17,72.35A12.26,12.26,0,0,0,180,186v2a20,20,0,0,1-20,20H96a20,20,0,0,1-20-20v-2a12,12,0,0,0-4.7-9.51A91.57,91.57,0,0,1,36,104.52C35.73,54.69,76,13.2,125.79,12A92,92,0,0,1,220,104Zm-24,0a68,68,0,0,0-69.65-68C89.56,36.88,59.8,67.55,60,104.38a67.71,67.71,0,0,0,26.1,53.19A35.87,35.87,0,0,1,100,184h56.1A36.13,36.13,0,0,1,170,157.49,67.68,67.68,0,0,0,196,104Zm-20.07-5.32a48.5,48.5,0,0,0-31.91-40,12,12,0,0,0-8,22.62,24.31,24.31,0,0,1,16.09,20,12,12,0,0,0,23.86-2.64Z%22/></svg>")}
+        .ph-bold.ph-magic-wand{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M252,152a12,12,0,0,1-12,12H228v12a12,12,0,0,1-24,0V164H192a12,12,0,0,1,0-24h12V128a12,12,0,0,1,24,0v12h12A12,12,0,0,1,252,152ZM56,76H68V88a12,12,0,0,0,24,0V76h12a12,12,0,1,0,0-24H92V40a12,12,0,0,0-24,0V52H56a12,12,0,0,0,0,24ZM184,188h-4v-4a12,12,0,0,0-24,0v4h-4a12,12,0,0,0,0,24h4v4a12,12,0,0,0,24,0v-4h4a12,12,0,0,0,0-24ZM222.14,82.83,82.82,222.14a20,20,0,0,1-28.28,0L33.85,201.46a20,20,0,0,1,0-28.29L173.17,33.86a20,20,0,0,1,28.28,0l20.69,20.68A20,20,0,0,1,222.14,82.83ZM159,112,144,97,53.65,187.31l15,15Zm43.31-43.31-15-15L161,80l15,15Z%22/></svg>")}
+        .ph-bold.ph-megaphone{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M252,120a52.06,52.06,0,0,0-52-52H160.32c-3.44-.21-52.6-4-99.46-43.3A20,20,0,0,0,28,40V200a19.8,19.8,0,0,0,11.54,18.12,19.86,19.86,0,0,0,21.32-2.81A192.92,192.92,0,0,1,144,174.47v26.2a20,20,0,0,0,8.9,16.64,11.35,11.35,0,0,0,1.39.8l14.44,7.06A20,20,0,0,0,198.37,213l11.09-41.82A52.07,52.07,0,0,0,252,120ZM52,191.63V48.4c36.17,28.07,72.17,38.1,92,41.66V150C124.17,153.52,88.17,163.55,52,191.63ZM176.39,202.2,168,198.1V172h16.4ZM200,148H168V92h32a28,28,0,1,1,0,56Z%22/></svg>")}
+        .ph-bold.ph-plus-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm52-84a12,12,0,0,1-12,12H140v28a12,12,0,0,1-24,0V140H88a12,12,0,0,1,0-24h28V88a12,12,0,0,1,24,0v28h28A12,12,0,0,1,180,128Z%22/></svg>")}
+        .ph-bold.ph-printer{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M214.67,68H204V40a12,12,0,0,0-12-12H64A12,12,0,0,0,52,40V68H41.33C25.16,68,12,80.56,12,96v80a12,12,0,0,0,12,12H52v28a12,12,0,0,0,12,12H192a12,12,0,0,0,12-12V188h28a12,12,0,0,0,12-12V96C244,80.56,230.84,68,214.67,68ZM76,52H180V68H76ZM180,204H76V172H180Zm40-40H204v-4a12,12,0,0,0-12-12H64a12,12,0,0,0-12,12v4H36V96c0-2.17,2.44-4,5.33-4H214.67c2.89,0,5.33,1.83,5.33,4Zm-16-44a16,16,0,1,1-16-16A16,16,0,0,1,204,120Z%22/></svg>")}
+        .ph-bold.ph-shield-check{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,36H48A20,20,0,0,0,28,56v56c0,54.29,26.32,87.22,48.4,105.29,23.71,19.39,47.44,26,48.44,26.29a12.1,12.1,0,0,0,6.32,0c1-.28,24.73-6.9,48.44-26.29,22.08-18.07,48.4-51,48.4-105.29V56A20,20,0,0,0,208,36Zm-4,76c0,35.71-13.09,64.69-38.91,86.15A126.28,126.28,0,0,1,128,219.38a126.14,126.14,0,0,1-37.09-21.23C65.09,176.69,52,147.71,52,112V60H204ZM79.51,144.49a12,12,0,1,1,17-17L112,143l47.51-47.52a12,12,0,0,1,17,17l-56,56a12,12,0,0,1-17,0Z%22/></svg>")}
+        .ph-bold.ph-spinner{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M140,32V64a12,12,0,0,1-24,0V32a12,12,0,0,1,24,0Zm33.25,62.75a12,12,0,0,0,8.49-3.52L204.37,68.6a12,12,0,0,0-17-17L164.77,74.26a12,12,0,0,0,8.48,20.49ZM224,116H192a12,12,0,0,0,0,24h32a12,12,0,0,0,0-24Zm-42.26,48.77a12,12,0,1,0-17,17l22.63,22.63a12,12,0,0,0,17-17ZM128,180a12,12,0,0,0-12,12v32a12,12,0,0,0,24,0V192A12,12,0,0,0,128,180ZM74.26,164.77,51.63,187.4a12,12,0,0,0,17,17l22.63-22.63a12,12,0,1,0-17-17ZM76,128a12,12,0,0,0-12-12H32a12,12,0,0,0,0,24H64A12,12,0,0,0,76,128ZM68.6,51.63a12,12,0,1,0-17,17L74.26,91.23a12,12,0,0,0,17-17Z%22/></svg>")}
+        .ph-bold.ph-upload-simple{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0ZM96.49,80.49,116,61v83a12,12,0,0,0,24,0V61l19.51,19.52a12,12,0,1,0,17-17l-40-40a12,12,0,0,0-17,0l-40,40a12,12,0,1,0,17,17Z%22/></svg>")}
+        .ph-bold.ph-users{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M125.18,156.94a64,64,0,1,0-82.36,0,100.23,100.23,0,0,0-39.49,32,12,12,0,0,0,19.35,14.2,76,76,0,0,1,122.64,0,12,12,0,0,0,19.36-14.2A100.33,100.33,0,0,0,125.18,156.94ZM44,108a40,40,0,1,1,40,40A40,40,0,0,1,44,108Zm206.1,97.67a12,12,0,0,1-16.78-2.57A76.31,76.31,0,0,0,172,172a12,12,0,0,1,0-24,40,40,0,1,0-10.3-78.67,12,12,0,1,1-6.16-23.19,64,64,0,0,1,57.64,110.8,100.23,100.23,0,0,1,39.49,32A12,12,0,0,1,250.1,205.67Z%22/></svg>")}
+        .ph-bold.ph-warning{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M240.26,186.1,152.81,34.23h0a28.74,28.74,0,0,0-49.62,0L15.74,186.1a27.45,27.45,0,0,0,0,27.71A28.31,28.31,0,0,0,40.55,228h174.9a28.31,28.31,0,0,0,24.79-14.19A27.45,27.45,0,0,0,240.26,186.1Zm-20.8,15.7a4.46,4.46,0,0,1-4,2.2H40.55a4.46,4.46,0,0,1-4-2.2,3.56,3.56,0,0,1,0-3.73L124,46.2a4.77,4.77,0,0,1,8,0l87.44,151.87A3.56,3.56,0,0,1,219.46,201.8ZM116,136V104a12,12,0,0,1,24,0v32a12,12,0,0,1-24,0Zm28,40a16,16,0,1,1-16-16A16,16,0,0,1,144,176Z%22/></svg>")}
+        .ph-bold.ph-x{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z%22/></svg>")}
+        .ph-fill.ph-camera{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-44,76a36,36,0,1,1-36-36A36,36,0,0,1,164,132Z%22/></svg>")}
+        .ph-fill.ph-check-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z%22/></svg>")}
+        .ph-fill.ph-info{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z%22/></svg>")}
+        .ph-fill.ph-lightbulb{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-32.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z%22/></svg>")}
+        .ph-fill.ph-magic-wand{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M248,152a8,8,0,0,1-8,8H224v16a8,8,0,0,1-16,0V160H192a8,8,0,0,1,0-16h16V128a8,8,0,0,1,16,0v16h16A8,8,0,0,1,248,152ZM56,72H72V88a8,8,0,0,0,16,0V72h16a8,8,0,0,0,0-16H88V40a8,8,0,0,0-16,0V56H56a8,8,0,0,0,0,16ZM184,192h-8v-8a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0v-8h8a8,8,0,0,0,0-16ZM219.31,80,80,219.31a16,16,0,0,1-22.62,0L36.68,198.63a16,16,0,0,1,0-22.63L176,36.69a16,16,0,0,1,22.63,0l20.68,20.68A16,16,0,0,1,219.31,80ZM208,68.69,187.31,48l-32,32L176,100.69Z%22/></svg>")}
+        .ph-fill.ph-sparkle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,144a15.78,15.78,0,0,1-10.42,14.94L146,178l-19,51.62a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.62a15.92,15.92,0,0,1,29.88,0L146,110l51.62,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z%22/></svg>")}
+        .ph-fill.ph-users-three{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z%22/></svg>")}
+        .ph-fill.ph-warning-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z%22/></svg>")}
+
+        .cm-warn { font-size: 11px; line-height: 1.5; color: #b45309; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 6px 8px; margin: 0; }
+        .cm-ok { font-size: 11px; line-height: 1.5; color: #047857; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 6px 8px; margin: 0; }
+        .cm-law { font-size: 11px; line-height: 1.6; color: #475569; margin: 0; padding-left: 14px; list-style: disc; }
+        .cm-save { font-size: 11px; color: #94a3b8; }
+        .cm-fail { margin: 40px auto; max-width: 520px; padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; line-height: 1.7; }
+        /* 화면에서는 A4 미리보기를 칸 너비에 맞춰 줄여 보여 준다(값은 스크립트가 넣음). 인쇄·PDF에는 적용하지 않는다 */
+        @media screen { .cm-zoom { zoom: var(--pz, 1); } }
+        .adk-note { padding-bottom: 16px !important; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f1f5f9; }
+
+        .a4-container {
+            width: 210mm; min-height: 297mm; background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin: 0 auto; box-sizing: border-box; position: relative;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .a4-container { box-shadow: none; margin: 0; width: 100%; min-height: 0; border: 0 !important; padding: 0 !important; }
+            #app { min-height: 0 !important; display: block !important; }
+            main { display: block !important; padding: 0 !important; max-width: none !important; }
+            tr, img, .pt-keep { break-inside: avoid; page-break-inside: avoid; }
+            thead { display: table-header-group; }
+            h4 { break-after: avoid; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+        @page { size: A4; margin: 14mm 13mm; }
+
+        /* 순회점검 작성기 전용(미리 만든 Tailwind CSS에 없는 모양은 여기 일반 CSS로 둔다) */
+        .pt-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+        .pt-card > * + * { margin-top: 12px; }
+        .pt-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .pt-h h3 { margin: 0; font-size: 14px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+        .pt-lab { display: block; font-size: 12px; font-weight: 500; color: #475569; margin-bottom: 4px; }
+        .pt-in { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 8px; font-size: 13px; line-height: 1.4; background: #f8fafc; color: #1e293b; outline: none; font-family: inherit; }
+        .pt-in:focus { background: #fff; border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,.25); }
+        textarea.pt-in { resize: vertical; }
+        textarea.pt-auto { field-sizing: content; min-height: 0; resize: none; }
+        @media (max-width: 420px) { .pt-zone .pt-g2 { grid-template-columns: 1fr; } }
+        .pt-g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .pt-g3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+        .pt-g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+        .pt-span2 { grid-column: span 2; }
+        .pt-box { border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px; background: #fff; }
+        .pt-box > * + * { margin-top: 6px; }
+        .pt-box-warn { border-color: #fdba74; background: #fff7ed; }
+        .pt-rowhead { display: flex; align-items: center; gap: 6px; }
+        .pt-no { flex: none; min-width: 22px; height: 22px; padding: 0 4px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .pt-x { flex: none; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; color: #94a3b8; background: none; border: 0; border-radius: 8px; cursor: pointer; }
+        .pt-x:hover { color: #f43f5e; background: #fff1f2; }
+        .pt-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .pt-btn { font-size: 12px; font-weight: 700; color: #334155; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 11px; cursor: pointer; font-family: inherit; line-height: 1.3; }
+        .pt-btn:hover { background: #e2e8f0; }
+        .pt-btn-pri { color: #fff; background: #059669; border-color: #059669; }
+        .pt-btn-pri:hover { background: #047857; }
+        .pt-btn-big { font-size: 14px; padding: 12px 14px; width: 100%; }
+        .pt-add { font-size: 12px; font-weight: 700; color: #047857; background: none; border: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 6px 4px; font-family: inherit; }
+        .pt-add:hover { color: #065f46; }
+        .pt-hint { font-size: 11px; line-height: 1.55; color: #64748b; margin: 0; }
+        .pt-hint-red { color: #be123c; }
+        .pt-doc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .pt-docbtn { padding: 9px 6px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-family: inherit; line-height: 1.3; text-align: center; }
+        .pt-docbtn[aria-pressed="true"] { background: #ecfdf5; border-color: #10b981; color: #047857; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+        .pt-cycle { border: 1px solid #a7f3d0; background: #ecfdf5; border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.6; color: #065f46; }
+        .pt-cycle b { font-size: 15px; }
+        .pt-cycle-none { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
+        .pt-grp { font-size: 12px; font-weight: 700; color: #0f172a; background: #f1f5f9; border-radius: 6px; padding: 5px 8px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        .pt-item { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
+        .pt-item-t { flex: 1 1 220px; min-width: 0; }
+        .pt-seg { display: inline-flex; flex: none; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+        .pt-seg button { font-family: inherit; font-size: 12px; font-weight: 700; padding: 7px 10px; background: #fff; color: #475569; border: 0; border-left: 1px solid #cbd5e1; cursor: pointer; min-width: 48px; }
+        .pt-seg button:first-child { border-left: 0; }
+        .pt-seg button[aria-pressed="true"].pt-good { background: #059669; color: #fff; }
+        .pt-seg button[aria-pressed="true"].pt-bad { background: #dc2626; color: #fff; }
+        .pt-seg button[aria-pressed="true"].pt-na { background: #64748b; color: #fff; }
+        .pt-chip { font-size: 11px; font-weight: 700; color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca; border-radius: 999px; padding: 4px 9px; cursor: pointer; font-family: inherit; }
+        .pt-ck { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #334155; white-space: nowrap; }
+        .pt-ck input { width: 18px; height: 18px; }
+        .pt-old { font-size: 12px; line-height: 1.6; color: #1e3a8a; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; }
+        .pt-old p { margin: 0 0 8px; }
+        .pt-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 360px; overflow-y: auto; }
+        .pt-hist li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; }
+        .pt-hist-t { flex: 1 1 150px; min-width: 0; font-size: 12px; font-weight: 700; color: #1e293b; }
+        .pt-hist-t small { display: block; font-size: 11px; font-weight: 400; color: #64748b; overflow-wrap: anywhere; }
+        .pt-a { color: #1d4ed8; text-decoration: underline; }
+        .pt-opt { display: block; width: 100%; text-align: left; background: #fff; font-family: inherit; }
+        .pt-opt > span { display: block; }
+        .pt-opt > span:first-child { display: flex; }
+        .pt-photos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .pt-photos img { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; display: block; }
+        button:focus-visible, a:focus-visible, .pt-in:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
+
+        /* A4 문서 */
+        .pd-t { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin-bottom: 14px; }
+        .pd-t th, .pd-t td { border: 1px solid #1e293b; padding: 5px 6px; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
+        .pd-t th { background: #f1f5f9; font-weight: 700; text-align: center; }
+        .pd-t .pd-sub th { background: #f8fafc; font-size: 11px; color: #475569; font-weight: 600; padding: 4px; }
+        .pd-t td.c { text-align: center; }
+        .pd-t td.s { font-size: 11px; }
+        .pd-t td.pre { white-space: pre-wrap; }
+        .pd-t td.grp { background: #f8fafc; font-weight: 700; font-size: 11px; }
+        .pd-t td.sign { color: #cbd5e1; font-size: 10px; text-align: center; }
+        .pd-t td.wk { color: #94a3b8; }
+        .pd-title { text-align: center; font-size: 24px; font-weight: 900; letter-spacing: .04em; margin: 0; padding-bottom: 10px; border-bottom: 2px solid #0f172a; }
+        .pd-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .pd-head > div:first-child { flex: 1; min-width: 0; }
+        .pd-appr { border-collapse: collapse; font-size: 11px; flex: none; }
+        .pd-appr th, .pd-appr td { border: 1px solid #1e293b; width: 62px; text-align: center; }
+        .pd-appr th { background: #f1f5f9; padding: 3px 2px; font-weight: 700; }
+        .pd-appr td { height: 46px; font-size: 10px; color: #475569; vertical-align: bottom; padding: 2px; overflow-wrap: anywhere; }
+        .pd-foot { font-size: 10.5px; line-height: 1.6; color: #475569; margin: 0; }
+        .pd-h4 { font-size: 12px; font-weight: 700; color: #1e293b; margin: 0 0 6px; display: flex; align-items: center; gap: 5px; }
+        .pd-h4::before { content: ""; width: 6px; height: 6px; background: #1e293b; display: inline-block; flex: none; }
+        .pd-stat { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid #1e293b; margin-bottom: 14px; }
+        .pd-stat div { padding: 7px 4px; text-align: center; font-size: 11px; color: #475569; border-left: 1px solid #1e293b; }
+        .pd-stat div:first-child { border-left: 0; }
+        .pd-stat b { display: block; font-size: 17px; color: #0f172a; }
+        .pd-photos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; border: 1px solid #1e293b; padding: 8px; margin-bottom: 14px; }
+        .pd-photos figure { margin: 0; text-align: center; }
+        .pd-photos img { max-width: 100%; max-height: 190px; object-fit: contain; border: 1px solid #cbd5e1; }
+        .pd-photos figcaption { font-size: 10.5px; color: #334155; margin-top: 3px; overflow-wrap: anywhere; }
+        .pd-reply { border: 1px solid #1e293b; padding: 12px 14px; font-size: 12px; line-height: 1.9; }
+
+        @media (max-width: 640px) {
+            .pt-in { font-size: 16px; padding: 10px; min-height: 44px; }
+            .pt-btn { padding: 11px 13px; font-size: 13px; }
+            .pt-seg { width: 100%; }
+            .pt-seg button { flex: 1; padding: 11px 4px; font-size: 14px; }
+            .pt-item-t { flex-basis: 100%; }
+            .pt-g3, .pt-g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .pt-x { width: 40px; height: 40px; }
+            .pt-card { padding: 12px; }
+            .pt-top { position: static !important; padding: 10px 12px !important; }
+            .pt-top-btns { width: 100%; }
+            .pt-top-btns button { flex: 1 1 auto; justify-content: center; padding-top: 10px; padding-bottom: 10px; }
+            .pt-add { padding: 10px 6px; font-size: 13px; }
+            .pt-docbtn { padding: 12px 4px; }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div id="app" class="min-h-screen flex flex-col" v-cloak>
+        <header class="pt-top bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center space-x-3" style="min-width:0">
+                    <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold mr-1" style="white-space:nowrap">← SafePlum</a>
+                    <span class="bg-emerald-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-black">
+                        <i class="ph-bold ph-shield-check text-xl"></i>
+                    </span>
+                    <div style="min-width:0">
+                        <h1 class="text-base font-bold tracking-tight">도급 작업장 순회점검 일지 작성기</h1>
+                        <p class="text-[11px] text-slate-400">산업안전보건법 제64조제1항제2호 · 시행규칙 제80조 · 일지 / 집계표 / 시정 요구서</p>
+                    </div>
+                </div>
+                <div class="pt-top-btns flex flex-wrap items-center gap-2">
+                    <span class="cm-save" role="status" aria-live="polite">{{ saveMsg }}</span>
+                    <button type="button" @click="resetResults" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                        <i class="ph-bold ph-arrow-counter-clockwise"></i> 점검 결과 비우기
+                    </button>
+                    <button type="button" @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
+                    </button>
+                    <button type="button" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                        <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
+                        <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
+                        <span>{{ isGeneratingPDF ? 'PDF 만드는 중…' : 'PDF 파일로 받기' }}</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- 입력 -->
+            <div class="lg:col-span-5 space-y-5 no-print" style="min-width:0">
+                <div v-if="oldFormAvailable" class="pt-old">
+                    <p>예전 <b>순회점검표 서식</b>에 적어 둔 내용이 이 기기에 남아 있습니다. 여기로 가져올 수 있습니다(예전 내용은 지워지지 않습니다).</p>
+                    <div class="pt-row">
+                        <button type="button" id="importOld" class="pt-btn pt-btn-pri" @click="importOldForm">가져오기</button>
+                        <button type="button" class="pt-btn" @click="dismissOld">닫기</button>
+                    </div>
+                </div>
+
+                <!-- 문서 종류 -->
+                <div class="pt-card">
+                    <span class="pt-lab" style="font-weight:700">문서 종류 선택</span>
+                    <div class="pt-doc">
+                        <button v-for="item in docTypes" :key="item.value" type="button" class="pt-docbtn" :data-doc="item.value" @click="changeDocType(item.value)" :aria-pressed="formData.docType === item.value ? 'true' : 'false'">
+                            <i :class="[item.icon, 'text-base']"></i>
+                            <span>{{ item.label }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. 기본 정보·주기 -->
+                <div class="pt-card">
+                    <div class="pt-h"><h3><i class="ph-fill ph-info text-blue-500"></i> 1. 사업장 · 순회 주기</h3></div>
+                    <div class="pt-g2">
+                        <div>
+                            <label class="pt-lab" for="pCompany">도급인(회사)명</label>
+                            <input id="pCompany" v-model="formData.company" type="text" placeholder="예: (주)한국산업안전" class="pt-in">
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pSite">사업장·현장명 (선택)</label>
+                            <input id="pSite" v-model="formData.siteName" type="text" placeholder="예: 1공장" class="pt-in">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="pt-lab" for="pInd">도급인 사업의 업종 (순회 주기 판정)</label>
+                        <select id="pInd" v-model="formData.industry" class="pt-in">
+                            <option value="">업종을 선택하세요</option>
+                            <option v-for="o in INDUSTRIES" :key="o.key" :value="o.key">{{ o.label }}</option>
+                        </select>
+                    </div>
+                    <div id="cycleBox" :class="['pt-cycle', cycle.days ? '' : 'pt-cycle-none']">
+                        <template v-if="cycle.days">
+                            순회점검 주기: <b>{{ cycle.text }}</b><br>
+                            근거: {{ cycle.basis }}<br>
+                            <span v-if="nextDue">이번 점검일 기준 다음 순회 기한: <b style="font-size:13px">{{ fmtDay(nextDue) }}</b> 까지</span>
+                        </template>
+                        <template v-else>업종을 고르면 순회점검 주기(2일에 1회 이상 / 1주일에 1회 이상)를 시행규칙 제80조제1항에 따라 판정합니다.</template>
+                    </div>
+                    <p class="pt-hint">업종은 통계청 한국표준산업분류 기준으로 사업장이 스스로 판단해야 합니다. 휴무일을 주기 계산에서 빼는지는 조문에 나와 있지 않습니다.</p>
+                </div>
+
+                <!-- 집계표 설정 -->
+                <div v-if="formData.docType === 'summary'" class="pt-card">
+                    <div class="pt-h"><h3><i class="ph-bold ph-file-text text-slate-600"></i> 2. 집계 기간</h3></div>
+                    <div class="pt-g2">
+                        <div>
+                            <label class="pt-lab" for="pSumMode">집계 단위</label>
+                            <select id="pSumMode" v-model="formData.sumMode" class="pt-in">
+                                <option value="week">주간 (월~일)</option>
+                                <option value="month">월간</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pSumAnchor">기준일 (이 날이 든 주·달)</label>
+                            <input id="pSumAnchor" v-model="formData.sumAnchor" type="date" class="pt-in">
+                        </div>
+                    </div>
+                    <div class="pt-row">
+                        <button type="button" class="pt-btn" @click="shiftPeriod(-1)">← 이전</button>
+                        <span class="text-xs font-bold text-slate-700">{{ period.label }}</span>
+                        <button type="button" class="pt-btn" @click="shiftPeriod(1)">다음 →</button>
+                    </div>
+                    <div>
+                        <label class="pt-lab" for="pSumNote">비고 (휴무일·작업 없는 날 등)</label>
+                        <textarea id="pSumNote" v-model="formData.sumNote" rows="2" placeholder="예: 10/3(토)·10/4(일) 휴무로 관계수급인 작업 없음" class="pt-in"></textarea>
+                    </div>
+                    <p class="pt-hint">집계표는 아래 "지난 순회 기록"에 보관한 일지와 지금 작성 중인 일지를 모아서 만듭니다. 이 기기에 보관하지 않은 날은 "기록 없음"으로 나오므로, 다른 곳에 기록이 있으면 비고에 적어 두세요.</p>
+                </div>
+
+                <!-- 시정 요구서 설정 -->
+                <div v-if="formData.docType === 'demand'" class="pt-card">
+                    <div class="pt-h"><h3><i class="ph-bold ph-megaphone text-slate-600"></i> 2. 시정 요구서 설정</h3></div>
+                    <div class="pt-g2">
+                        <div>
+                            <label class="pt-lab" for="pDemTo">수신 (관계수급인)</label>
+                            <select id="pDemTo" v-model="formData.demandTo" class="pt-in">
+                                <option value="">전체 업체 (한 장에 모두)</option>
+                                <option v-for="n in demandOwners" :key="n" :value="n">{{ n }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pDemNo">문서 번호 (선택)</label>
+                            <input id="pDemNo" v-model="formData.demandNo" type="text" placeholder="예: 안전-2026-015" class="pt-in">
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pDemDate">발행일</label>
+                            <input id="pDemDate" v-model="formData.demandDate" type="date" class="pt-in">
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pDemFoot">발신 명의</label>
+                            <input id="pDemFoot" v-model="formData.demandFooter" type="text" placeholder="예: 안전보건총괄책임자" class="pt-in">
+                        </div>
+                    </div>
+                    <label class="pt-ck"><input type="checkbox" v-model="formData.demandAll"> 조치 완료된 지적사항도 함께 싣기</label>
+                    <p class="pt-hint">시정 요구서에는 아래 "지적사항"과 "지난 지적사항 이행 확인" 중 담당 업체가 수신 업체와 같은 건이 들어갑니다. 지금 {{ demandRows.length }}건.</p>
+                </div>
+
+                <!-- 2. 점검 개요 -->
+                <div class="pt-card">
+                    <div class="pt-h"><h3><i class="ph-fill ph-users-three text-emerald-600"></i> {{ formData.docType === 'log' ? '2' : '3' }}. 순회 일시 · 점검자</h3></div>
+                    <div class="pt-g3">
+                        <div class="pt-span2" style="grid-column:1/-1">
+                            <label class="pt-lab" for="pDate">점검일</label>
+                            <div class="pt-row" style="flex-wrap:nowrap">
+                                <input id="pDate" v-model="formData.date" type="date" class="pt-in" style="flex:1">
+                                <button type="button" class="pt-btn" style="flex:none" @click="setToday">오늘</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pT1">시작</label>
+                            <input id="pT1" v-model="formData.timeFrom" type="time" class="pt-in">
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pT2">종료</label>
+                            <input id="pT2" v-model="formData.timeTo" type="time" class="pt-in">
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pWeather">날씨 (선택)</label>
+                            <input id="pWeather" v-model="formData.weather" type="text" placeholder="맑음" class="pt-in">
+                        </div>
+                    </div>
+                    <div class="pt-g2">
+                        <div>
+                            <label class="pt-lab" for="pInspDept">점검자 소속·직책</label>
+                            <input id="pInspDept" v-model="formData.inspDept" type="text" placeholder="예: 안전환경팀 안전관리자" class="pt-in">
+                        </div>
+                        <div>
+                            <label class="pt-lab" for="pInsp">점검자 성명</label>
+                            <input id="pInsp" v-model="formData.inspector" type="text" placeholder="성명" class="pt-in">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. 순회 구역 -->
+                <div class="pt-card">
+                    <div class="pt-h">
+                        <h3><i class="ph-bold ph-users text-emerald-600"></i> {{ formData.docType === 'log' ? '3' : '4' }}. 순회 구역 · 관계수급인</h3>
+                        <span class="text-[11px] text-slate-400">{{ zones.length }}곳 · 작업 인원 {{ totalWorkers }}명</span>
+                    </div>
+                    <p v-if="!zones.length" class="pt-hint">순회한 구역이 없습니다. "구역 추가"를 눌러 관계수급인이 작업하는 장소를 넣으세요.</p>
+                    <div v-for="(z, idx) in zones" :key="'z-' + idx" class="pt-box pt-zone">
+                        <div class="pt-rowhead">
+                            <span class="pt-no">{{ idx + 1 }}</span>
+                            <input v-model="z.zone" type="text" placeholder="구역·공정 (예: A동 2층 배관)" aria-label="구역·공정" class="pt-in" style="flex:1;font-weight:700">
+                            <button type="button" class="pt-x" @click="removeZone(idx)" aria-label="이 구역 삭제"><i class="ph-bold ph-x"></i></button>
+                        </div>
+                        <div class="pt-g2">
+                            <input v-model="z.company" type="text" placeholder="관계수급인 업체명" aria-label="관계수급인 업체명" class="pt-in">
+                            <input v-model="z.work" type="text" placeholder="작업 내용 (예: 배관 보수)" aria-label="작업 내용" class="pt-in">
+                            <input v-model="z.workers" type="text" inputmode="numeric" placeholder="작업 인원(명)" aria-label="작업 인원" class="pt-in">
+                            <input v-model="z.companion" type="text" placeholder="동행·확인자 (수급인 관리감독자)" aria-label="동행·확인자" class="pt-in">
+                        </div>
+                    </div>
+                    <button type="button" id="addZone" class="pt-add" @click="addZone"><i class="ph-bold ph-plus-circle"></i> 구역 추가</button>
+                </div>
+
+                <!-- 자동 확인 -->
+                <div class="space-y-2" id="checks" style="margin-top:-8px">
+                    <p v-for="(c, i) in checks" :key="'chk-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                </div>
+
+                <!-- 4. 지난 지적사항 이행 확인 -->
+                <div v-if="formData.docType !== 'summary'" class="pt-card">
+                    <div class="pt-h">
+                        <h3><i class="ph-bold ph-arrows-clockwise text-slate-600"></i> {{ formData.docType === 'log' ? '4' : '5' }}. 지난 지적사항 이행 확인</h3>
+                        <button type="button" id="addPrev" class="pt-add" @click="addPrev"><i class="ph-bold ph-plus-circle"></i> 추가</button>
+                    </div>
+                    <p v-if="!prev.length" class="pt-hint">조치가 끝나지 않은 지적사항은 "보관하고 다음 순회 작성"을 누르면 여기로 자동으로 넘어옵니다.</p>
+                    <div v-for="(p, idx) in prev" :key="'pv-' + idx" class="pt-box pt-prev">
+                        <div class="pt-rowhead">
+                            <span class="pt-no">{{ idx + 1 }}</span>
+                            <input v-model="p.hazard" type="text" placeholder="지난 지적사항" aria-label="지난 지적사항" class="pt-in" style="flex:1">
+                            <button type="button" class="pt-x" @click="prev.splice(idx, 1)" aria-label="이 이행 확인 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                        </div>
+                        <p v-if="p.demand || p.zone || p.found" class="pt-hint">{{ [p.found ? '지적일 ' + p.found : '', p.zone, p.demand ? '요구: ' + p.demand : ''].filter(Boolean).join(' · ') }}</p>
+                        <div class="pt-g3">
+                            <input v-model="p.owner" type="text" list="ptOwners" placeholder="담당 업체" aria-label="담당 업체" class="pt-in">
+                            <input v-model="p.due" type="date" aria-label="조치 기한" class="pt-in">
+                            <select v-model="p.result" aria-label="이행 결과" class="pt-in">
+                                <option value="">확인 전</option><option value="조치 완료">조치 완료</option><option value="조치 중">조치 중</option><option value="미조치">미조치</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. 점검 항목 -->
+                <div v-if="formData.docType === 'log'" class="pt-card" id="itemsCard">
+                    <div class="pt-h">
+                        <h3><i class="ph-bold ph-check text-emerald-600"></i> 5. 점검 항목</h3>
+                        <button type="button" id="openEx" @click="openExModal" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                            <i class="ph-fill ph-magic-wand"></i> 업종별 예시 항목
+                        </button>
+                    </div>
+                    <div class="pt-row">
+                        <span class="text-[11px] text-slate-500">양호 {{ tally.good }} · 미흡 {{ tally.bad }} · 해당없음 {{ tally.na }} · 미확인 {{ tally.none }}</span>
+                        <button v-if="tally.none" type="button" id="fillGood" class="pt-btn" style="margin-left:auto" @click="fillGood">남은 {{ tally.none }}개 모두 양호</button>
+                    </div>
+                    <p class="pt-hint pt-hint-red">직접 확인한 항목만 표시하세요. 점검 항목은 법령에 정해진 것이 아니라 사업장에 맞게 고쳐 쓰는 예시입니다.</p>
+                    <template v-for="(g, gi) in groups" :key="'g-' + gi">
+                        <div class="pt-grp">
+                            <span>{{ g.name || '(분류 없음)' }}</span>
+                            <button type="button" class="pt-add" style="padding:0 2px" @click="addItem(g.name)" :aria-label="(g.name || '분류 없음') + ' 항목 추가'"><i class="ph-bold ph-plus-circle"></i> 항목</button>
+                        </div>
+                        <div v-for="it in g.rows" :key="'it-' + it.i" class="pt-item">
+                            <div class="pt-item-t pt-rowhead">
+                                <textarea v-model="items[it.i].text" rows="2" placeholder="점검 항목" aria-label="점검 항목" class="pt-in pt-auto"></textarea>
+                                <button type="button" class="pt-x" @click="removeItem(it.i)" aria-label="이 점검 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                            </div>
+                            <div class="pt-seg" role="group" :aria-label="(items[it.i].text || '항목') + ' 점검 결과'">
+                                <button type="button" class="pt-good" :aria-pressed="items[it.i].result === '양호' ? 'true' : 'false'" @click="setResult(it.i, '양호')">양호</button>
+                                <button type="button" class="pt-bad" :aria-pressed="items[it.i].result === '미흡' ? 'true' : 'false'" @click="setResult(it.i, '미흡')">미흡</button>
+                                <button type="button" class="pt-na" :aria-pressed="items[it.i].result === '해당없음' ? 'true' : 'false'" @click="setResult(it.i, '해당없음')">해당없음</button>
+                            </div>
+                            <button v-if="items[it.i].result === '미흡' && !hasFindingFor(items[it.i].text)" type="button" class="pt-chip" @click="findingFromItem(it.i)">+ 지적사항으로 옮기기</button>
+                        </div>
+                    </template>
+                    <div class="pt-row">
+                        <input v-model="newGroup" type="text" placeholder="새 분류 이름 (예: 밀폐공간)" aria-label="새 분류 이름" class="pt-in" style="flex:1 1 140px">
+                        <button type="button" id="addGroup" class="pt-btn" @click="addGroup">분류 추가</button>
+                    </div>
+                </div>
+
+                <!-- 6. 지적사항 -->
+                <div v-if="formData.docType !== 'summary'" class="pt-card">
+                    <div class="pt-h">
+                        <h3><i class="ph-bold ph-warning" style="color:#d97706"></i> {{ formData.docType === 'log' ? '6' : '6' }}. 지적사항 · 시정 요구</h3>
+                        <button type="button" id="addFinding" class="pt-add" @click="addFinding()"><i class="ph-bold ph-plus-circle"></i> 추가</button>
+                    </div>
+                    <p v-if="!findings.length" class="pt-hint">지적사항이 없으면 비워 두세요. 일지에는 "지적사항 없음"으로 나옵니다.</p>
+                    <div v-for="(f, idx) in findings" :key="f.fid" :class="['pt-box', 'pt-finding', f.status !== '조치 완료' ? 'pt-box-warn' : '']">
+                        <div class="pt-rowhead">
+                            <span class="pt-no">{{ idx + 1 }}</span>
+                            <input v-model="f.zone" type="text" list="ptZones" placeholder="위치·구역" aria-label="지적 위치" class="pt-in" style="flex:1">
+                            <button type="button" class="pt-x" @click="removeFinding(idx)" aria-label="이 지적사항 삭제"><i class="ph-bold ph-x"></i></button>
+                        </div>
+                        <textarea v-model="f.hazard" rows="2" placeholder="지적사항 (위험요인) — 예: 2층 개구부 덮개가 열린 채 방치됨" aria-label="지적사항" class="pt-in"></textarea>
+                        <textarea v-model="f.demand" rows="2" placeholder="시정 요구 내용 — 예: 덮개 고정 및 '추락주의' 표지 부착" aria-label="시정 요구 내용" class="pt-in"></textarea>
+                        <div class="pt-g3">
+                            <input v-model="f.owner" type="text" list="ptOwners" placeholder="담당 업체" aria-label="담당 업체" class="pt-in">
+                            <input v-model="f.due" type="date" aria-label="조치 기한" class="pt-in">
+                            <select v-model="f.status" aria-label="조치 상태" class="pt-in" @change="onStatus(f)">
+                                <option value="시정 요구">시정 요구</option><option value="조치 중">조치 중</option><option value="조치 완료">조치 완료</option>
+                            </select>
+                        </div>
+                        <label class="pt-ck"><input type="checkbox" v-model="f.immediate" @change="onImmediate(f)"> 현장에서 즉시 조치함</label>
+                    </div>
+                    <datalist id="ptOwners"><option v-for="n in ownerNames" :key="n" :value="n"></option></datalist>
+                    <datalist id="ptZones"><option v-for="n in zoneNames" :key="n" :value="n"></option></datalist>
+                </div>
+
+                <!-- 7. 종합 의견·다음 순회 -->
+                <div v-if="formData.docType === 'log'" class="pt-card">
+                    <div class="pt-h"><h3><i class="ph-fill ph-sparkle text-purple-600"></i> 7. 특이사항 · 다음 순회</h3></div>
+                    <div>
+                        <label class="pt-lab" for="pNote">특이사항 · 종합 의견</label>
+                        <textarea id="pNote" v-model="formData.note" rows="3" placeholder="예: 3층 혼재작업 구간 작업 시간 조정을 협의체 안건으로 올리기로 함" class="pt-in"></textarea>
+                    </div>
+                    <div>
+                        <label class="pt-lab" for="pNext">다음 순회 예정일</label>
+                        <div class="pt-row" style="flex-wrap:nowrap">
+                            <input id="pNext" v-model="formData.nextDate" type="date" class="pt-in" style="flex:1">
+                            <button type="button" id="suggestNext" class="pt-btn" style="flex:none" @click="suggestNext">주기에 맞춰 넣기</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. 사진 -->
+                <div v-if="formData.docType !== 'summary'" class="pt-card">
+                    <div class="pt-h"><h3><i class="ph-fill ph-camera text-slate-600"></i> {{ formData.docType === 'log' ? '8' : '7' }}. 현장 사진 첨부 (최대 {{ PHOTO_MAX }}장)</h3></div>
+                    <div class="pt-row">
+                        <input type="file" accept="image/*" multiple @change="handleFileUpload" id="photo-input" class="hidden">
+                        <label for="photo-input" class="pt-btn" style="display:inline-flex;align-items:center;gap:6px"><i class="ph-bold ph-upload-simple"></i> 사진 선택·촬영</label>
+                        <span class="text-xs text-slate-500">{{ photos.length ? photos.length + '장 첨부됨' : '선택된 사진 없음' }}</span>
+                    </div>
+                    <div v-if="photos.length" class="pt-photos">
+                        <div v-for="(ph, i) in photos" :key="'ph-' + i">
+                            <img :src="ph.url" alt="첨부한 현장 사진">
+                            <div class="pt-rowhead" style="margin-top:4px">
+                                <input v-model="ph.cap" type="text" placeholder="사진 설명" aria-label="사진 설명" class="pt-in">
+                                <button type="button" class="pt-x" @click="photos.splice(i, 1)" aria-label="이 사진 삭제"><i class="ph-bold ph-x"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="pt-hint">사진은 이 기기에 저장되지 않습니다. 화면을 닫거나 다음 순회로 넘어가면 사라지므로, 인쇄·PDF 저장을 먼저 하세요.</p>
+                </div>
+
+                <!-- 보관·이어 쓰기 -->
+                <div class="pt-card">
+                    <div class="pt-h"><h3><i class="ph-bold ph-floppy-disk text-slate-600"></i> 다음 순회 이어 쓰기 · 지난 순회 기록</h3></div>
+                    <button type="button" id="archiveNext" class="pt-btn pt-btn-pri pt-btn-big" @click="archiveAndNext">보관하고 다음 순회 작성</button>
+                    <div class="pt-row">
+                        <button type="button" id="archiveOnly" class="pt-btn" @click="archiveOnly">지금 내용만 보관</button>
+                        <label class="pt-ck"><input type="checkbox" v-model="formData.keepResults"> 점검 결과(양호·미흡)도 복사</label>
+                    </div>
+                    <p class="pt-hint">"보관하고 다음 순회 작성"을 누르면 이번 일지가 아래 목록에 남고, 순회 구역·업체·점검 항목은 그대로 둔 채 점검일만 다음 순회일로 바뀝니다. 조치가 끝나지 않은 지적사항은 "이행 확인"으로 옮겨집니다. 이 기기에 최대 {{ HIST_MAX }}건까지 보관합니다.</p>
+                    <ul v-if="history.length" class="pt-hist">
+                        <li v-for="h in history" :key="h.id">
+                            <span class="pt-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
+                            <button type="button" class="pt-btn" @click="openHistory(h.id)">열기</button>
+                            <button type="button" class="pt-btn" @click="copyHistory(h.id)" :aria-label="h.title + ' 기록을 복사해 새로 작성'">복사</button>
+                            <button type="button" class="pt-btn" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
+                        </li>
+                    </ul>
+                    <p v-else class="pt-hint">보관한 순회 기록이 아직 없습니다.</p>
+                </div>
+
+                <div class="pt-card">
+                    <div class="pt-h"><h3>법령 메모</h3></div>
+                    <ul class="cm-law">
+                        <li>도급인은 관계수급인 근로자가 도급인의 사업장에서 작업을 하는 경우 작업장 순회점검을 이행하여야 합니다(<a class="pt-a" href="../../laws/act/#j64">법 제64조제1항제2호</a>).</li>
+                        <li>순회점검 주기(<a class="pt-a" href="../../laws/rule/#j80">시행규칙 제80조제1항</a>): ① 건설업, 제조업, 토사석 광업, 서적, 잡지 및 기타 인쇄물 출판업, 음악 및 기타 오디오물 출판업, 금속 및 비금속 원료 재생업 — 2일에 1회 이상 ② 위 사업을 제외한 사업 — 1주일에 1회 이상.</li>
+                        <li>관계수급인은 도급인이 실시하는 순회점검을 거부·방해 또는 기피해서는 안 되며 점검 결과 도급인의 시정요구가 있으면 이에 따라야 합니다(시행규칙 제80조제2항).</li>
+                        <li>법 제64조제1항제2호를 위반하면 500만원 이하의 벌금에 처합니다(<a class="pt-a" href="../../laws/act/#j172">법 제172조</a>).</li>
+                        <li>시행규칙 제80조는 순회점검의 주기만 정하고 있습니다. 점검 항목·기록 서식·보존기간은 이 조문에 정해져 있지 않으므로, 실시 사실을 확인할 수 있게 사내 기준을 정해 기록·보관하세요.</li>
+                    </ul>
+                    <p class="pt-hint" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
+                </div>
+            </div>
+
+            <!-- 미리보기 -->
+            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
+                <div class="w-full flex justify-between items-center mb-3 no-print">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-xs font-bold text-slate-600">A4 실시간 미리보기</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400">A4 (210mm × 297mm)</span>
+                </div>
+
+                <div id="print-area" class="a4-container cm-zoom p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm">
+
+                    <!-- [DOC 1] 순회점검 일지 -->
+                    <div v-if="formData.docType === 'log'">
+                        <div class="pd-head">
+                            <div><h2 class="pd-title">도급 작업장 순회점검 일지</h2></div>
+                            <table class="pd-appr">
+                                <tr><th>점검자</th><th>검토</th><th>승인</th></tr>
+                                <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
+                            </table>
+                        </div>
+
+                        <table class="pd-t">
+                            <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
+                            <tr><th>사업장</th><td>{{ siteLabel }}</td><th>점검 일시</th><td>{{ dateLabel }}</td></tr>
+                            <tr><th>점검자</th><td>{{ inspLabel }}</td><th>날씨</th><td>{{ formData.weather }}</td></tr>
+                            <tr><th>점검 주기</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '(업종 미선택)' }}</td></tr>
+                        </table>
+
+                        <table class="pd-t">
+                            <colgroup><col style="width:6%"><col style="width:23%"><col style="width:20%"><col><col style="width:8%"><col style="width:19%"></colgroup>
+                            <thead>
+                                <tr><th colspan="6">순회 구역 및 관계수급인</th></tr>
+                                <tr class="pd-sub"><th>번호</th><th>구역·공정</th><th>관계수급인</th><th>작업 내용</th><th>인원</th><th>동행·확인자 (서명)</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(z, i) in zoneRows" :key="'dz-' + i">
+                                    <td class="c">{{ i + 1 }}</td><td>{{ z.zone }}</td><td>{{ z.company }}</td><td class="s">{{ z.work }}</td><td class="c">{{ z.workers }}</td>
+                                    <td class="c s">{{ z.companion }} <span style="color:#cbd5e1">(서명)</span></td>
+                                </tr>
+                                <tr v-if="!zoneRows.length"><td colspan="6" class="c" style="color:#64748b">순회 구역을 입력하세요</td></tr>
+                            </tbody>
+                        </table>
+
+                        <table v-if="prevRows.length" class="pd-t" id="docPrev">
+                            <colgroup><col style="width:6%"><col style="width:13%"><col><col style="width:26%"><col style="width:14%"><col style="width:12%"><col style="width:11%"></colgroup>
+                            <thead>
+                                <tr><th colspan="7">지난 지적사항 이행 확인</th></tr>
+                                <tr class="pd-sub"><th>번호</th><th>지적일</th><th>지적사항</th><th>시정 요구 내용</th><th>담당</th><th>기한</th><th>결과</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(p, i) in prevRows" :key="'dp-' + i">
+                                    <td class="c">{{ i + 1 }}</td><td class="c s">{{ p.found }}</td><td class="pre">{{ p.hazard }}</td><td class="s pre">{{ p.demand }}</td><td class="c s">{{ p.owner }}</td><td class="c s">{{ p.due }}</td><td class="c s">{{ p.result || '확인 전' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="pd-t" id="docItems">
+                            <colgroup><col style="width:6%"><col><col style="width:9%"><col style="width:9%"><col style="width:11%"></colgroup>
+                            <thead>
+                                <tr><th>번호</th><th>점검 항목</th><th>양호</th><th>미흡</th><th>해당없음</th></tr>
+                            </thead>
+                            <tbody>
+                                <template v-for="(g, gi) in docGroups" :key="'dg-' + gi">
+                                    <tr v-if="g.name"><td colspan="5" class="grp">{{ g.name }}</td></tr>
+                                    <tr v-for="it in g.rows" :key="'di-' + it.i">
+                                        <td class="c">{{ it.no }}</td><td>{{ it.text }}</td>
+                                        <td class="c">{{ it.result === '양호' ? '○' : '' }}</td><td class="c">{{ it.result === '미흡' ? '○' : '' }}</td><td class="c">{{ it.result === '해당없음' ? '○' : '' }}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <table class="pd-t" id="docFindings">
+                            <colgroup><col style="width:6%"><col style="width:14%"><col><col style="width:25%"><col style="width:13%"><col style="width:12%"><col style="width:11%"></colgroup>
+                            <thead>
+                                <tr><th colspan="7">지적사항 및 시정 요구</th></tr>
+                                <tr class="pd-sub"><th>번호</th><th>위치</th><th>지적사항 (위험요인)</th><th>시정 요구 내용</th><th>담당</th><th>기한</th><th>상태</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(f, i) in findingRows" :key="'df-' + i">
+                                    <td class="c">{{ i + 1 }}</td><td class="s">{{ f.zone }}</td><td class="pre">{{ f.hazard }}</td><td class="s pre">{{ f.demand }}</td><td class="c s">{{ f.owner }}</td>
+                                    <td class="c s">{{ f.immediate ? '즉시' : f.due }}</td><td class="c s">{{ f.immediate ? '즉시 조치' : f.status }}</td>
+                                </tr>
+                                <tr v-if="!findingRows.length"><td colspan="7" class="c" style="color:#475569">지적사항 없음</td></tr>
+                            </tbody>
+                        </table>
+
+                        <table v-if="formData.note || formData.nextDate" class="pd-t">
+                            <colgroup><col style="width:15%"><col></colgroup>
+                            <tr v-if="formData.note"><th>특이사항</th><td class="pre">{{ formData.note }}</td></tr>
+                            <tr v-if="formData.nextDate"><th>다음 순회</th><td>{{ fmtDay(formData.nextDate) }}</td></tr>
+                        </table>
+
+                        <div v-if="photos.length" class="pd-photos pt-keep">
+                            <figure v-for="(ph, i) in photos" :key="'dph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption>{{ ph.cap || '현장 사진 ' + (i + 1) }}</figcaption></figure>
+                        </div>
+
+                        <table class="pd-t pt-keep" style="margin-bottom:8px">
+                            <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
+                            <tr><th>점검자</th><td style="height:34px">{{ inspLabel }} <span style="color:#cbd5e1;float:right">(서명)</span></td><th>확인<br><span style="font-weight:400;font-size:10px">안전보건총괄책임자</span></th><td><span style="color:#cbd5e1;float:right">(서명)</span></td></tr>
+                        </table>
+                        <p class="pd-foot">※ 관계수급인은 도급인이 실시하는 순회점검을 거부·방해 또는 기피해서는 안 되며 점검 결과 도급인의 시정요구가 있으면 이에 따라야 합니다(산업안전보건법 시행규칙 제80조제2항).</p>
+                    </div>
+
+                    <!-- [DOC 2] 집계표 -->
+                    <div v-else-if="formData.docType === 'summary'">
+                        <div class="pd-head">
+                            <div><h2 class="pd-title">{{ formData.sumMode === 'month' ? '월간' : '주간' }} 순회점검 집계표</h2></div>
+                            <table class="pd-appr">
+                                <tr><th>작성</th><th>검토</th><th>승인</th></tr>
+                                <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
+                            </table>
+                        </div>
+                        <table class="pd-t">
+                            <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
+                            <tr><th>사업장</th><td>{{ siteLabel }}</td><th>집계 기간</th><td>{{ period.label }}</td></tr>
+                            <tr><th>점검 주기</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '(업종 미선택)' }}</td></tr>
+                        </table>
+                        <div class="pd-stat" id="sumStat">
+                            <div><b>{{ summary.days }}</b>순회 실시 일수</div>
+                            <div><b>{{ summary.found }}</b>지적 건수</div>
+                            <div><b>{{ summary.done }}</b>조치 완료</div>
+                            <div><b>{{ summary.open }}</b>미조치</div>
+                            <div><b>{{ cycle.days ? summary.gaps : '–' }}</b>주기 초과 횟수</div>
+                        </div>
+                        <table class="pd-t" id="sumTable">
+                            <colgroup><col style="width:15%"><col style="width:8%"><col style="width:14%"><col><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:19%"></colgroup>
+                            <thead>
+                                <tr><th>날짜</th><th>실시</th><th>점검자</th><th>순회 구역 (관계수급인)</th><th>지적</th><th>완료</th><th>미조치</th><th>비고</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="d in summary.rows" :key="d.date">
+                                    <td :class="['c', 's', d.weekend ? 'wk' : '']">{{ d.label }}</td>
+                                    <td class="c">{{ d.n ? (d.n > 1 ? '○ ' + d.n + '회' : '○') : '' }}</td>
+                                    <td class="c s">{{ d.inspector }}</td>
+                                    <td class="s">{{ d.zones }}</td>
+                                    <td class="c">{{ d.n ? d.found : '' }}</td><td class="c">{{ d.n ? d.done : '' }}</td><td class="c">{{ d.n ? d.open : '' }}</td>
+                                    <td class="s">{{ d.remark }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div v-if="summary.openList.length" style="margin-bottom:14px">
+                            <h4 class="pd-h4">미조치 지적사항 (집계 기간에 지적된 건)</h4>
+                            <table class="pd-t" id="sumOpen" style="margin-bottom:0">
+                                <colgroup><col style="width:13%"><col style="width:15%"><col><col style="width:16%"><col style="width:13%"><col style="width:12%"></colgroup>
+                                <thead><tr class="pd-sub"><th>지적일</th><th>위치</th><th>지적사항</th><th>담당</th><th>기한</th><th>현재 상태</th></tr></thead>
+                                <tbody>
+                                    <tr v-for="(o, i) in summary.openList" :key="'so-' + i">
+                                        <td class="c s">{{ o.found }}</td><td class="s">{{ o.zone }}</td><td class="pre">{{ o.hazard }}</td><td class="c s">{{ o.owner }}</td><td class="c s">{{ o.due }}</td><td class="c s">{{ o.state }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <table v-if="formData.sumNote" class="pd-t">
+                            <colgroup><col style="width:15%"><col></colgroup>
+                            <tr><th>비고</th><td class="pre">{{ formData.sumNote }}</td></tr>
+                        </table>
+                        <p class="pd-foot">※ 이 집계표는 작성기에 보관된 순회점검 일지 {{ summary.recN }}건을 모은 것입니다. "완료·미조치"는 그날 지적된 건의 현재(가장 최근 기록) 조치 상태입니다. 주기 초과는 직전 순회일과의 간격이 주기(일수)를 넘은 경우를 단순 계산한 것으로, 휴무일은 고려하지 않았습니다.</p>
+                    </div>
+
+                    <!-- [DOC 3] 시정 요구서 -->
+                    <div v-else-if="formData.docType === 'demand'">
+                        <div style="text-align:center;margin-bottom:18px">
+                            <h2 class="pd-title">순회점검 지적사항 시정 요구서</h2>
+                        </div>
+                        <table class="pd-t">
+                            <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
+                            <tr><th>수신</th><td>{{ formData.demandTo || '관계수급인 각 업체' }} 귀중</td><th>문서 번호</th><td>{{ formData.demandNo }}</td></tr>
+                            <tr><th>발신</th><td>{{ siteLabel }}</td><th>발행일</th><td>{{ fmtDay(formData.demandDate || formData.date) }}</td></tr>
+                            <tr><th>점검 일시</th><td>{{ dateLabel }}</td><th>점검자</th><td>{{ inspLabel }}</td></tr>
+                        </table>
+                        <p style="font-size:12.5px;line-height:1.9;margin:0 0 12px">
+                            산업안전보건법 제64조제1항제2호 및 같은 법 시행규칙 제80조에 따라 실시한 작업장 순회점검 결과, 아래와 같은 지적사항이 확인되어 시정을 요구하오니
+                            조치 기한까지 조치하고 그 결과를 알려 주시기 바랍니다.
+                        </p>
+                        <table class="pd-t" id="demTable">
+                            <colgroup><col style="width:6%"><col style="width:13%"><col><col style="width:22%"><col style="width:11%"><col style="width:20%"></colgroup>
+                            <thead>
+                                <tr><th>번호</th><th>위치</th><th>지적사항 (위험요인)</th><th>시정 요구 내용</th><th>조치 기한</th><th>조치 결과<br><span style="font-weight:400;font-size:10px">(조치 내용·조치일)</span></th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(r, i) in demandRows" :key="'dm-' + i">
+                                    <td class="c">{{ i + 1 }}</td>
+                                    <td class="s">{{ r.zone }}<div v-if="!formData.demandTo && r.owner" style="color:#475569">[{{ r.owner }}]</div></td>
+                                    <td class="pre">{{ r.hazard }}<div v-if="r.carried" class="s" style="color:#b45309">※ {{ r.found }} 지적 · 이월</div></td>
+                                    <td class="s pre">{{ r.demand }}</td>
+                                    <td class="c s">{{ r.immediate ? '즉시 조치' : (r.due || '즉시') }}</td>
+                                    <td class="s" style="height:46px">{{ r.done ? '조치 완료' : '' }}</td>
+                                </tr>
+                                <tr v-if="!demandRows.length"><td colspan="6" class="c" style="color:#475569">시정을 요구할 지적사항이 없습니다</td></tr>
+                            </tbody>
+                        </table>
+                        <div v-if="photos.length" class="pd-photos pt-keep">
+                            <figure v-for="(ph, i) in photos" :key="'mph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption>{{ ph.cap || '현장 사진 ' + (i + 1) }}</figcaption></figure>
+                        </div>
+                        <p class="pd-foot" style="margin-bottom:16px">※ 관계수급인은 도급인이 실시하는 순회점검을 거부·방해 또는 기피해서는 안 되며 점검 결과 도급인의 시정요구가 있으면 이에 따라야 합니다(산업안전보건법 시행규칙 제80조제2항).</p>
+                        <div style="text-align:center;margin:22px 0 26px">
+                            <p style="font-size:13px;color:#475569;margin:0 0 8px">{{ fmtDay(formData.demandDate || formData.date) }}</p>
+                            <p style="font-size:17px;font-weight:900;margin:0">{{ formData.company || '(도급인명)' }} {{ formData.demandFooter || '안전보건총괄책임자' }} <span style="font-size:12px;font-weight:400;color:#64748b">(직인생략)</span></p>
+                        </div>
+                        <div class="pd-reply pt-keep">
+                            <b>[ 조치 결과 확인 ]</b><br>
+                            위 시정 요구 사항에 대하여 조치를 마쳤음을 알립니다.<br>
+                            조치 완료일: 　　　　년 　　월 　　일　　　　관계수급인: {{ formData.demandTo || '　　　　　　　　' }}　　현장책임자: 　　　　　　　(서명)<br>
+                            도급인 확인: 　　　　년 　　월 　　일　　　　확인자: 　　　　　　　(서명)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 예시 세트 모달 -->
+        <div v-if="isExModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print" role="dialog" aria-modal="true" aria-labelledby="exTitle" @keydown.esc="isExModalOpen = false">
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 border border-slate-200">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="bg-purple-100 text-purple-700 p-1.5 rounded-lg"><i class="ph-bold ph-magic-wand text-lg"></i></div>
+                        <div>
+                            <h3 id="exTitle" class="font-bold text-base text-slate-900">업종별 점검 항목 예시</h3>
+                            <p class="text-xs text-slate-500">법정 항목이 아닌 예시입니다. 적용한 뒤 사업장 작업에 맞게 고쳐 쓰세요.</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="isExModalOpen = false" aria-label="닫기" class="text-slate-400 hover:text-slate-700 p-1"><i class="ph-bold ph-x text-lg"></i></button>
+                </div>
+                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <button type="button" v-for="(opt, idx) in exPool" :key="'ex-' + idx" @click="selectEx(opt)" class="pt-opt pt-exopt p-4 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/40 cursor-pointer transition space-y-2 group">
+                        <span class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
+                            <span class="text-xs text-slate-400 group-hover:text-purple-600 font-bold flex items-center gap-1">적용하기 <i class="ph-bold ph-arrow-right"></i></span>
+                        </span>
+                        <span class="block font-bold text-sm text-slate-800">{{ opt.title }}</span>
+                        <span class="block text-xs text-slate-500">{{ opt.description }} · {{ opt.count }}개 항목</span>
+                    </button>
+                </div>
+                <div class="flex justify-between items-center mt-5 pt-3 border-t border-slate-100" style="justify-content:flex-end">
+                    <button type="button" @click="isExModalOpen = false" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold">닫기</button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="toast.visible" role="status" class="no-print fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-300" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'" style="max-width:calc(100vw - 32px)">
+            <i :class="toast.type === 'error' ? 'ph-fill ph-warning-circle text-base' : 'ph-fill ph-check-circle text-base'"></i>
+            <span>{{ toast.message }}</span>
+        </div>
+    </div>
+
+    <script>
+        // Vue 파일을 못 불러오면 빈 화면 대신 안내를 보여 준다
+        if (!window.Vue) {
+            document.getElementById('app').removeAttribute('v-cloak');
+            document.getElementById('app').innerHTML = '<div class="cm-fail"><b>화면을 불러오지 못했습니다.</b><br>새로 고침(F5)해 보세요. 계속 안 되면 브라우저의 확장 프로그램·보안 프로그램이 스크립트를 막고 있는지 확인하세요.<br><a href="../../">← SafePlum으로 돌아가기</a></div>';
+            throw new Error('Vue not loaded');
+        }
+        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        const STORE_KEY = 'safetake.patrol.v1';
+        const OLD_FORM_KEY = 'safetake.form.patrol';   // 예전 일반 서식(tools/forms/patrol/)의 저장값 — 읽기만 하고 지우지 않는다
+        const HIST_MAX = 120;                           // 2일에 1회 사업장 기준 약 8개월분
+        const PHOTO_MAX = 4;
+        function readProfile() {
+            try {
+                const p = JSON.parse(localStorage.getItem('safetake.profile') || '{}') || {};
+                if (!p.company) p.company = localStorage.getItem('safetake.company') || '';
+                return p;
+            } catch (e) { return {}; }
+        }
+        function readJson(key) {
+            try { const v = JSON.parse(localStorage.getItem(key) || 'null'); return v && typeof v === 'object' && !Array.isArray(v) ? v : null; } catch (e) { return null; }
+        }
+        const pad = (x) => String(x).padStart(2, '0');
+        const str = (v) => (typeof v === 'string' ? v : v == null || typeof v === 'object' ? '' : String(v));
+        // 날짜는 모두 브라우저 현지 기준 'YYYY-MM-DD' 문자열로 다룬다(toISOString은 UTC라 한국에서 하루 어긋날 수 있음)
+        const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+        const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        const parseDay = (s) => { if (!DAY_RE.test(str(s))) return null; const d = new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)); return isNaN(d.getTime()) ? null : d; };
+        const isDay = (s) => !!parseDay(s);
+        const addDays = (s, n) => { const d = parseDay(s); if (!d) return ''; d.setDate(d.getDate() + n); return ymd(d); };
+        const dayNum = (s) => Math.round(Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 86400000);
+        const diffDays = (a, b) => dayNum(b) - dayNum(a);
+        const WD = ['일', '월', '화', '수', '목', '금', '토'];
+        const fmtDay = (s) => { const d = parseDay(s); return d ? `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일(${WD[d.getDay()]})` : ''; };
+
+        // 시행규칙 제80조제1항 (조문 문구 그대로)
+        const INDUSTRIES = [
+            { key: 'construction', label: '건설업', mok: '가' },
+            { key: 'manufacturing', label: '제조업', mok: '나' },
+            { key: 'mining', label: '토사석 광업', mok: '다' },
+            { key: 'print', label: '서적, 잡지 및 기타 인쇄물 출판업', mok: '라' },
+            { key: 'audio', label: '음악 및 기타 오디오물 출판업', mok: '마' },
+            { key: 'recycle', label: '금속 및 비금속 원료 재생업', mok: '바' },
+            { key: 'other', label: '그 밖의 사업 (위 6개 사업을 제외한 사업)', mok: '' }
+        ];
+        // 기본 점검 항목(예전 순회점검표 서식의 항목을 그대로 옮김 — 법정 항목이 아니라 예시)
+        const BASE_ITEMS = [
+            ['작업 일반', ['작업 전 안전점검 및 TBM을 실시했는가', '작업장 정리정돈 및 통로가 확보되어 있는가', '보호구(안전모·안전대·안전화 등)를 올바르게 착용했는가', '위험성평가 결과의 감소대책이 현장에 이행되고 있는가']],
+            ['추락·낙하·붕괴', ['개구부·단부에 안전난간 또는 덮개가 설치되어 있는가', '비계·작업발판이 견고하게 설치되어 있는가', '낙하물 방지망·출입통제 등 낙하 위험 조치가 되어 있는가']],
+            ['기계·전기·화재', ['기계·기구의 방호장치가 정상 작동하는가', '전기 분전반·배선의 누전차단기와 외함 접지가 양호한가', '화기작업 시 소화기 비치·불티 비산방지 조치가 되어 있는가']],
+            ['혼재작업·기타', ['같은 장소 혼재작업의 작업시기·내용이 조정되어 있는가', '위생시설(휴게·세면·화장실 등) 이용이 가능한가']]
+        ];
+        const flatItems = (sets) => sets.reduce((a, g) => a.concat(g[1].map(t => ({ group: g[0], text: t, result: '' }))), []);
+        const RESULTS = ['', '양호', '미흡', '해당없음'];
+        const F_STATUS = ['시정 요구', '조치 중', '조치 완료'];
+        const P_RESULT = ['', '조치 완료', '조치 중', '미조치'];
+
+        createApp({
+            setup() {
+                const docTypes = [
+                    { label: '순회점검 일지', value: 'log', icon: 'ph-bold ph-shield-check' },
+                    { label: '주간·월간 집계표', value: 'summary', icon: 'ph-bold ph-file-text' },
+                    { label: '시정 요구서', value: 'demand', icon: 'ph-bold ph-megaphone' }
+                ];
+                const profile = readProfile();
+                const saved = readJson(STORE_KEY);
+                const today = ymd(new Date());
+                const newId = (p) => (p || 'p') + Date.now().toString(36) + Math.floor(Math.random() * 1e9).toString(36);
+                const freshForm = () => ({
+                    mid: newId('p'),
+                    docType: 'log',
+                    company: str(profile.company),
+                    siteName: '',
+                    industry: '',
+                    date: today,
+                    timeFrom: '',
+                    timeTo: '',
+                    weather: '',
+                    inspDept: '',
+                    inspector: str(profile.manager),
+                    note: '',
+                    nextDate: '',
+                    sumMode: 'week',
+                    sumAnchor: '',
+                    sumNote: '',
+                    demandTo: '',
+                    demandNo: '',
+                    demandDate: '',
+                    demandFooter: '안전보건총괄책임자',
+                    demandAll: false,
+                    keepResults: false,
+                    oldDismissed: false
+                });
+                const freshZones = () => [{ zone: '', company: '', work: '', workers: '', companion: '' }];
+                const freshItems = () => flatItems(BASE_ITEMS);
+
+                // ---- 저장값 정리(모양이 어긋난 값이 들어와도 화면이 깨지지 않게)
+                const obj = (r) => (r && typeof r === 'object' ? r : {});
+                const cleanForm = (f) => {
+                    const base = freshForm();
+                    if (f && typeof f === 'object') Object.keys(base).forEach(k => { if (typeof f[k] === typeof base[k]) base[k] = f[k]; });
+                    if (!docTypes.some(d => d.value === base.docType)) base.docType = 'log';
+                    if (!INDUSTRIES.some(o => o.key === base.industry)) base.industry = '';
+                    if (!['week', 'month'].includes(base.sumMode)) base.sumMode = 'week';
+                    ['date', 'nextDate', 'sumAnchor', 'demandDate'].forEach(k => { if (base[k] && !isDay(base[k])) base[k] = ''; });
+                    if (!base.date) base.date = today;
+                    if (!base.mid) base.mid = newId('p');
+                    return base;
+                };
+                const cleanZones = (a) => Array.isArray(a) ? a.slice(0, 200).map(r => { r = obj(r); return { zone: str(r.zone), company: str(r.company), work: str(r.work), workers: str(r.workers), companion: str(r.companion) }; }) : null;
+                const cleanItems = (a) => Array.isArray(a) ? a.slice(0, 300).map(r => { r = obj(r); return { group: str(r.group), text: str(r.text), result: RESULTS.includes(r.result) ? r.result : '' }; }) : null;
+                const cleanFindings = (a) => Array.isArray(a) ? a.slice(0, 300).map(r => { r = obj(r); return { fid: str(r.fid) || newId('f'), zone: str(r.zone), hazard: str(r.hazard), demand: str(r.demand), owner: str(r.owner), due: isDay(r.due) ? r.due : '', immediate: !!r.immediate, status: F_STATUS.includes(r.status) ? r.status : '시정 요구' }; }) : [];
+                const cleanPrev = (a) => Array.isArray(a) ? a.slice(0, 300).map(r => { r = obj(r); return { fid: str(r.fid) || newId('f'), found: isDay(r.found) ? r.found : '', zone: str(r.zone), hazard: str(r.hazard), demand: str(r.demand), owner: str(r.owner), due: isDay(r.due) ? r.due : '', result: P_RESULT.includes(r.result) ? r.result : '' }; }) : [];
+                const cleanSnap = (s) => {
+                    s = obj(s);
+                    return { formData: cleanForm(s.formData), zones: cleanZones(s.zones) || freshZones(), items: cleanItems(s.items) || freshItems(), findings: cleanFindings(s.findings), prev: cleanPrev(s.prev) };
+                };
+
+                const init = cleanSnap(saved);
+                const formData = ref(init.formData);
+                const zones = ref(init.zones);
+                const items = ref(init.items);
+                const findings = ref(init.findings);
+                const prev = ref(init.prev);
+                const history = ref(Array.isArray(saved && saved.history)
+                    ? saved.history.filter(h => h && typeof h === 'object' && h.snap && typeof h.snap === 'object').slice(0, HIST_MAX).map(h => { const s = cleanSnap(h.snap); return { id: str(h.id) || s.formData.mid, saved: Number(h.saved) || 0, snap: s }; })
+                    : []);
+                const restored = !!saved;
+                if (restored && !formData.value.company && profile.company) formData.value.company = str(profile.company);
+                const newGroup = ref('');
+
+                // ---- 저장
+                const saveMsg = ref(restored ? '지난번 내용을 이어서 엽니다' : '');
+                let saveTimer = null;
+                const snapshot = () => JSON.parse(JSON.stringify({ formData: formData.value, zones: zones.value, items: items.value, findings: findings.value, prev: prev.value }));
+                const persist = () => {
+                    saveTimer = null;
+                    try {
+                        localStorage.setItem(STORE_KEY, JSON.stringify(Object.assign({ saved: Date.now() }, snapshot(), { history: history.value.map(h => ({ id: h.id, saved: h.saved, snap: h.snap })) })));
+                        saveMsg.value = '이 기기에 저장됨';
+                        return true;
+                    } catch (e) { saveMsg.value = '저장하지 못했습니다(저장 공간 부족)'; return false; }
+                };
+                watch([formData, zones, items, findings, prev], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
+                window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); persist(); } });
+
+                // ---- 주기 판정 (시행규칙 제80조제1항)
+                const cycle = computed(() => {
+                    const o = INDUSTRIES.find(x => x.key === formData.value.industry);
+                    if (!o) return { days: 0, text: '', basis: '' };
+                    if (o.key === 'other') return { days: 7, text: '1주일에 1회 이상', basis: '시행규칙 제80조제1항제2호(제1호 각 목의 사업을 제외한 사업)' };
+                    return { days: 2, text: '2일에 1회 이상', basis: `시행규칙 제80조제1항제1호${o.mok}목(${o.label})` };
+                });
+                const nextDue = computed(() => (cycle.value.days && isDay(formData.value.date) ? addDays(formData.value.date, cycle.value.days) : ''));
+
+                // ---- 계산값
+                const zoneRows = computed(() => zones.value.filter(z => z.zone.trim() || z.company.trim() || z.work.trim()));
+                const totalWorkers = computed(() => zones.value.reduce((n, z) => n + (parseInt(z.workers, 10) > 0 ? parseInt(z.workers, 10) : 0), 0));
+                const findingRows = computed(() => findings.value.filter(f => f.hazard.trim() || f.demand.trim()));
+                const prevRows = computed(() => prev.value.filter(p => p.hazard.trim()));
+                const uniq = (a) => Array.from(new Set(a.map(x => str(x).trim()).filter(Boolean)));
+                const ownerNames = computed(() => uniq(zones.value.map(z => z.company).concat([formData.value.company])));
+                const zoneNames = computed(() => uniq(zones.value.map(z => z.zone)));
+                const groups = computed(() => {
+                    const out = [];
+                    items.value.forEach((it, i) => {
+                        let g = out.find(x => x.name === it.group);
+                        if (!g) { g = { name: it.group, rows: [] }; out.push(g); }
+                        g.rows.push({ i });
+                    });
+                    return out;
+                });
+                const docGroups = computed(() => {
+                    let no = 0;
+                    return groups.value.map(g => ({ name: g.name, rows: g.rows.map(r => items.value[r.i]).filter(it => it.text.trim()).map(it => ({ i: ++no, no, text: it.text, result: it.result })) })).filter(g => g.rows.length);
+                });
+                const tally = computed(() => {
+                    const t = { good: 0, bad: 0, na: 0, none: 0 };
+                    items.value.forEach(it => { if (!it.text.trim()) return; if (it.result === '양호') t.good++; else if (it.result === '미흡') t.bad++; else if (it.result === '해당없음') t.na++; else t.none++; });
+                    return t;
+                });
+                const siteLabel = computed(() => [formData.value.company || '(도급인명)', formData.value.siteName].filter(Boolean).join(' '));
+                const inspLabel = computed(() => [formData.value.inspDept, formData.value.inspector].filter(x => str(x).trim()).join(' '));
+                const dateLabel = computed(() => {
+                    const f = formData.value;
+                    const t = [f.timeFrom, f.timeTo].filter(Boolean).join(' ~ ');
+                    return [fmtDay(f.date) || '미정', t].filter(Boolean).join(' ');
+                });
+
+                // ---- 보관 기록 + 지금 작성 중인 일지를 날짜순으로
+                const records = computed(() => {
+                    const cur = { id: formData.value.mid, snap: { formData: formData.value, zones: zones.value, items: items.value, findings: findings.value, prev: prev.value }, current: true };
+                    return history.value.filter(h => h.id !== cur.id).concat([cur]).filter(r => isDay(r.snap.formData.date))
+                        .sort((a, b) => a.snap.formData.date.localeCompare(b.snap.formData.date) || (a.current ? 1 : 0) - (b.current ? 1 : 0));
+                });
+                // 지적사항별 현재 상태(가장 최근 기록 기준)
+                const latestState = computed(() => {
+                    const m = {};
+                    records.value.forEach(r => {
+                        r.snap.findings.forEach(f => { if (f.hazard.trim() || f.demand.trim()) m[f.fid] = f.status; });
+                        r.snap.prev.forEach(p => { if (p.result) m[p.fid] = p.result; });
+                    });
+                    return m;
+                });
+
+                // ---- 집계표
+                const period = computed(() => {
+                    const f = formData.value;
+                    const a = parseDay(f.sumAnchor) || parseDay(f.date) || new Date();
+                    let from, to, label;
+                    if (f.sumMode === 'month') {
+                        from = new Date(a.getFullYear(), a.getMonth(), 1); to = new Date(a.getFullYear(), a.getMonth() + 1, 0);
+                        label = `${a.getFullYear()}년 ${a.getMonth() + 1}월 (${from.getMonth() + 1}.${from.getDate()} ~ ${to.getMonth() + 1}.${to.getDate()})`;
+                    } else {
+                        from = new Date(a.getFullYear(), a.getMonth(), a.getDate() - ((a.getDay() + 6) % 7)); to = new Date(from.getFullYear(), from.getMonth(), from.getDate() + 6);
+                        label = `${from.getFullYear()}년 ${from.getMonth() + 1}월 ${from.getDate()}일(월) ~ ${to.getMonth() + 1}월 ${to.getDate()}일(일)`;
+                    }
+                    return { from: ymd(from), to: ymd(to), label };
+                });
+                const summary = computed(() => {
+                    const p = period.value, st = latestState.value, cd = cycle.value.days;
+                    const byDay = {};
+                    records.value.forEach(r => { (byDay[r.snap.formData.date] = byDay[r.snap.formData.date] || []).push(r); });
+                    const allDays = Object.keys(byDay).sort();
+                    const rows = [], openList = [];
+                    let days = 0, found = 0, done = 0, gaps = 0, recN = 0;
+                    for (let d = p.from; d && d <= p.to; d = addDays(d, 1)) {
+                        const rs = byDay[d] || [];
+                        const dt = parseDay(d);
+                        const row = { date: d, label: `${dt.getMonth() + 1}/${dt.getDate()} (${WD[dt.getDay()]})`, weekend: dt.getDay() === 0 || dt.getDay() === 6, n: rs.length, inspector: '', zones: '', found: 0, done: 0, open: 0, remark: '' };
+                        if (rs.length) {
+                            days++; recN += rs.length;
+                            row.inspector = uniq(rs.map(r => r.snap.formData.inspector)).join(', ');
+                            row.zones = uniq(rs.reduce((a, r) => a.concat(r.snap.zones.map(z => [z.zone.trim(), z.company.trim() ? `(${z.company.trim()})` : ''].filter(Boolean).join(' '))), [])).join(', ');
+                            rs.forEach(r => r.snap.findings.forEach(f => {
+                                if (!f.hazard.trim() && !f.demand.trim()) return;
+                                row.found++;
+                                const s = st[f.fid] || f.status;
+                                if (s === '조치 완료') row.done++;
+                                else { row.open++; openList.push({ found: d, zone: f.zone, hazard: f.hazard, owner: f.owner, due: f.due, state: s }); }
+                            }));
+                            found += row.found; done += row.done;
+                            const before = allDays.filter(x => x < d);
+                            if (cd && before.length) {
+                                const g = diffDays(before[before.length - 1], d);
+                                if (g > cd) { gaps++; row.remark = `주기 초과 (직전 순회 ${before[before.length - 1].slice(5).replace('-', '/')} 이후 ${g}일)`; }
+                            }
+                            if (rs.some(r => r.current)) row.remark = [row.remark, '작성 중'].filter(Boolean).join(' · ');
+                        } else if (d <= today) row.remark = '기록 없음';
+                        rows.push(row);
+                    }
+                    return { rows, days, found, done, open: found - done, gaps, openList, recN };
+                });
+                const shiftPeriod = (dir) => {
+                    const f = formData.value;
+                    const a = parseDay(f.sumAnchor) || parseDay(f.date) || new Date();
+                    if (f.sumMode === 'month') f.sumAnchor = ymd(new Date(a.getFullYear(), a.getMonth() + dir, 1));
+                    else f.sumAnchor = addDays(ymd(a), 7 * dir);
+                };
+
+                // ---- 시정 요구서
+                const demandOwners = computed(() => uniq(findings.value.map(f => f.owner).concat(prev.value.map(p => p.owner)).concat(zones.value.map(z => z.company))));
+                const demandRows = computed(() => {
+                    const to = formData.value.demandTo.trim(), all = formData.value.demandAll;
+                    const hit = (o) => !to || str(o).trim() === to;
+                    const rows = [];
+                    prevRows.value.forEach(p => { const dn = p.result === '조치 완료'; if (hit(p.owner) && (all || !dn)) rows.push({ zone: p.zone, hazard: p.hazard, demand: p.demand, owner: p.owner, due: p.due, immediate: false, done: dn, carried: true, found: p.found }); });
+                    findingRows.value.forEach(f => { const dn = f.status === '조치 완료'; if (hit(f.owner) && (all || !dn)) rows.push({ zone: f.zone, hazard: f.hazard, demand: f.demand, owner: f.owner, due: f.due, immediate: f.immediate, done: dn, carried: false, found: '' }); });
+                    return rows;
+                });
+                // 수신 업체가 목록에서 사라지면(업체명 수정 등) 전체로 되돌린다
+                watch(demandOwners, (v) => { if (formData.value.demandTo && !v.includes(formData.value.demandTo)) formData.value.demandTo = ''; });
+
+                // ---- 자동 확인(법령 문구는 시행규칙 제80조 그대로. 조문에 없는 내용은 요건으로 표시하지 않는다)
+                const checks = computed(() => {
+                    const out = [], f = formData.value, cd = cycle.value.days;
+                    if (!cd) out.push({ ok: false, text: '업종을 선택하지 않아 순회점검 주기를 판정하지 못했습니다(시행규칙 제80조제1항).' });
+                    if (cd && isDay(f.date)) {
+                        const before = history.value.filter(h => h.id !== f.mid).map(h => h.snap.formData.date).filter(d => isDay(d) && d < f.date).sort();
+                        if (before.length) {
+                            const last = before[before.length - 1], g = diffDays(last, f.date);
+                            if (g > cd) out.push({ ok: false, text: `주기 공백: 보관된 직전 순회(${fmtDay(last)}) 이후 ${g}일 만의 점검입니다 — ${cycle.value.text} 실시해야 합니다(${cycle.value.basis}). 그 사이 관계수급인 작업이 없었거나 다른 곳에 기록이 있다면 무시하세요.` });
+                            else out.push({ ok: true, text: `직전 순회(${fmtDay(last)}) 이후 ${g}일 — 주기(${cycle.value.text}) 안입니다.` });
+                        }
+                        if (f.date < today && diffDays(f.date, today) > cd && !history.value.some(h => h.snap.formData.date > f.date)) out.push({ ok: false, text: `점검일이 ${diffDays(f.date, today)}일 전입니다. 오늘 순회라면 점검일의 "오늘"을 누르세요.` });
+                    }
+                    if (f.docType === 'summary') {
+                        if (cd && summary.value.gaps) out.push({ ok: false, text: `집계 기간에 주기를 넘긴 간격이 ${summary.value.gaps}번 있습니다. 휴무 등 사유가 있으면 비고에 적어 두세요.` });
+                        if (!summary.value.days) out.push({ ok: false, text: '집계 기간에 보관된 순회 기록이 없습니다. 기준일을 확인하세요.' });
+                        return out;
+                    }
+                    if (!str(f.inspector).trim()) out.push({ ok: false, text: '점검자 성명이 비어 있습니다.' });
+                    if (!zoneRows.value.length) out.push({ ok: false, text: '순회 구역이 없습니다 — 관계수급인 근로자가 작업하는 장소를 넣으세요.' });
+                    else {
+                        const noCo = zoneRows.value.filter(z => !z.company.trim()).length;
+                        if (noCo) out.push({ ok: false, text: `관계수급인 업체명이 빠진 구역이 ${noCo}곳 있습니다.` });
+                    }
+                    if (f.docType === 'log') {
+                        const t = tally.value;
+                        if (t.none) out.push({ ok: false, text: `점검 결과를 표시하지 않은 항목이 ${t.none}개 있습니다.` });
+                        else if (t.good + t.bad + t.na) out.push({ ok: true, text: `점검 항목 ${t.good + t.bad + t.na}개를 모두 확인했습니다(양호 ${t.good} · 미흡 ${t.bad} · 해당없음 ${t.na}).` });
+                        if (t.bad && !findingRows.value.length) out.push({ ok: false, text: `미흡 항목이 ${t.bad}개인데 지적사항이 없습니다. "지적사항으로 옮기기"를 눌러 시정 요구 내용을 적으세요.` });
+                        if (f.nextDate && isDay(f.date)) {
+                            if (f.nextDate <= f.date) out.push({ ok: false, text: '다음 순회 예정일이 이번 점검일과 같거나 앞서 있습니다.' });
+                            else if (cd && diffDays(f.date, f.nextDate) > cd) out.push({ ok: false, text: `다음 순회 예정일이 ${diffDays(f.date, f.nextDate)}일 뒤입니다 — ${cycle.value.text} 실시해야 합니다(${cycle.value.basis}).` });
+                        }
+                    }
+                    const open = findingRows.value.filter(x => x.status !== '조치 완료');
+                    const noOwner = open.filter(x => !x.owner.trim() || !x.due).length;
+                    if (noOwner) out.push({ ok: false, text: `담당 업체나 조치 기한이 빠진 지적사항이 ${noOwner}건 있습니다.` });
+                    const unchecked = prevRows.value.filter(p => !p.result).length;
+                    if (unchecked) out.push({ ok: false, text: `지난 지적사항 ${unchecked}건의 이행 결과를 아직 확인하지 않았습니다.` });
+                    const overdue = prevRows.value.filter(p => p.result !== '조치 완료' && p.due && isDay(f.date) && p.due < f.date).length + open.filter(x => x.due && isDay(f.date) && x.due < f.date).length;
+                    if (overdue) out.push({ ok: false, text: `조치 기한이 지난 미조치 지적사항이 ${overdue}건 있습니다 — 관계수급인은 시정요구에 따라야 합니다(시행규칙 제80조제2항).` });
+                    if (f.docType === 'demand' && !demandRows.value.length) out.push({ ok: false, text: '시정 요구서에 실을 지적사항이 없습니다. 수신 업체와 지적사항의 담당 업체를 확인하세요.' });
+                    return out;
+                });
+
+                // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
+                const fitPreview = () => {
+                    const col = document.getElementById('preview-col');
+                    if (!col) return;
+                    const a4 = 210 * 96 / 25.4;
+                    document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
+                };
+                onMounted(() => {
+                    fitPreview(); window.addEventListener('resize', fitPreview);
+                    requestAnimationFrame(fitPreview); setTimeout(fitPreview, 300);
+                    const col = document.getElementById('preview-col');
+                    if (col && window.ResizeObserver) new ResizeObserver(fitPreview).observe(col);
+                });
+
+                const photos = ref([]);
+                const isGeneratingPDF = ref(false);
+                const toast = ref({ visible: false, message: '', type: 'success' });
+                let toastTimer = null;
+                const showToast = (message, type = 'success') => {
+                    toast.value = { visible: true, message, type };
+                    clearTimeout(toastTimer);
+                    toastTimer = setTimeout(() => { toast.value.visible = false; }, 2800);
+                };
+
+                // ---- 구역·항목·지적사항
+                const setToday = () => { formData.value.date = today; };
+                const addZone = () => zones.value.push({ zone: '', company: '', work: '', workers: '', companion: '' });
+                const removeZone = (i) => {
+                    const z = zones.value[i];
+                    if ((z.zone || z.company || z.work) && !window.confirm(`"${z.zone || z.company || '구역 ' + (i + 1)}" 구역을 뺄까요?`)) return;
+                    zones.value.splice(i, 1);
+                };
+                const addItem = (group) => {
+                    let at = -1;
+                    items.value.forEach((it, i) => { if (it.group === group) at = i; });
+                    items.value.splice(at + 1 || items.value.length, 0, { group, text: '', result: '' });
+                };
+                const removeItem = (i) => { items.value.splice(i, 1); };
+                const addGroup = () => {
+                    const g = newGroup.value.trim();
+                    if (!g) { showToast('분류 이름을 입력하세요.', 'error'); return; }
+                    items.value.push({ group: g, text: '', result: '' });
+                    newGroup.value = '';
+                };
+                const setResult = (i, v) => { const it = items.value[i]; it.result = it.result === v ? '' : v; };
+                const fillGood = () => {
+                    let n = 0;
+                    items.value.forEach(it => { if (it.text.trim() && !it.result) { it.result = '양호'; n++; } });
+                    showToast(`표시하지 않은 ${n}개 항목을 양호로 표시했습니다. 직접 확인한 항목인지 다시 보세요.`);
+                };
+                const blankFinding = () => ({ fid: newId('f'), zone: '', hazard: '', demand: '', owner: '', due: '', immediate: false, status: '시정 요구' });
+                const addFinding = (init) => { findings.value.push(Object.assign(blankFinding(), init || {})); };
+                const itemMark = (t) => `[미흡] ${t.trim()}`;
+                const hasFindingFor = (t) => !!t.trim() && findings.value.some(f => f.hazard.indexOf(itemMark(t)) === 0);
+                const findingFromItem = (i) => {
+                    const it = items.value[i];
+                    const single = zoneRows.value.length === 1 ? zoneRows.value[0] : null;
+                    addFinding({ hazard: itemMark(it.text), zone: single ? single.zone : '', owner: single ? single.company : '' });
+                    showToast('지적사항에 넣었습니다. 위험요인과 시정 요구 내용을 구체적으로 고쳐 쓰세요.');
+                };
+                const removeFinding = (i) => {
+                    const f = findings.value[i];
+                    if ((f.hazard || f.demand) && !window.confirm('이 지적사항을 지울까요?')) return;
+                    findings.value.splice(i, 1);
+                };
+                const onImmediate = (f) => { if (f.immediate) f.status = '조치 완료'; };
+                const onStatus = (f) => { if (f.status !== '조치 완료') f.immediate = false; };
+                const addPrev = () => prev.value.push({ fid: newId('f'), found: '', zone: '', hazard: '', demand: '', owner: '', due: '', result: '' });
+                const suggestNext = () => {
+                    if (!nextDue.value) { showToast('업종과 점검일을 먼저 입력하세요.', 'error'); return; }
+                    formData.value.nextDate = nextDue.value;
+                    showToast(`다음 순회 예정일을 ${fmtDay(nextDue.value)}로 넣었습니다(${cycle.value.text}).`);
+                };
+                const changeDocType = (type) => {
+                    formData.value.docType = type;
+                    if (type === 'summary' && !formData.value.sumAnchor) formData.value.sumAnchor = formData.value.date;
+                    if (type === 'demand' && !formData.value.demandDate) formData.value.demandDate = today;
+                    showToast(`${docTypes.find(d => d.value === type).label} 양식으로 전환되었습니다.`);
+                };
+
+                // ---- 사진(저장하지 않음)
+                const handleFileUpload = (e) => {
+                    const files = Array.from(e.target.files || []);
+                    e.target.value = '';
+                    let room = PHOTO_MAX - photos.value.length;
+                    if (!files.length) return;
+                    if (room <= 0) { showToast(`사진은 ${PHOTO_MAX}장까지 첨부할 수 있습니다.`, 'error'); return; }
+                    files.forEach(file => {
+                        if (room <= 0) return;
+                        if (!/^image\//.test(file.type)) { showToast('사진(이미지) 파일만 첨부할 수 있습니다.', 'error'); return; }
+                        if (file.size > 8 * 1024 * 1024) { showToast('사진 한 장은 8MB 이하여야 합니다.', 'error'); return; }
+                        room--;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => { if (photos.value.length < PHOTO_MAX) photos.value.push({ url: ev.target.result, cap: '' }); };
+                        reader.onerror = () => showToast('사진을 읽지 못했습니다.', 'error');
+                        reader.readAsDataURL(file);
+                    });
+                };
+
+                // ---- 되돌리기
+                const resetResults = () => {
+                    if (!window.confirm('점검 결과(양호·미흡 표시), 지적사항, 특이사항을 비울까요?\n(순회 구역, 점검 항목 문구, 지난 지적사항 이행 확인은 그대로 둡니다)')) return;
+                    items.value.forEach(it => { it.result = ''; });
+                    findings.value = [];
+                    formData.value.note = '';
+                    showToast('점검 결과를 비웠습니다.');
+                };
+
+                // ---- 업종별 예시 항목(법령 문구가 아니라 작성 요령을 보여 주는 예시)
+                const exSets = [
+                    { badge: '기본', title: '공통 기본 항목 (12개)', description: '작업 일반·추락·기계·전기·화재·혼재작업을 고루 보는 기본 세트', sets: BASE_ITEMS },
+                    { badge: '제조업 예시', title: '제조 공장 사내 협력업체', description: '설비 보전·물류·청소 등 상주 협력업체가 있는 공장', sets: [
+                        ['작업 일반', ['작업 전 TBM을 실시하고 그날 작업의 위험요인을 공유했는가', '작업허가 대상 작업(화기·밀폐·고소·정전)은 허가서를 받고 하는가', '보호구(안전모·안전화·보안경·귀마개 등)를 작업에 맞게 착용했는가', '통로·비상구·소화기 앞에 물건이 쌓여 있지 않은가']],
+                        ['기계·설비', ['회전부·협착점에 덮개·방호장치가 붙어 있고 임의로 해제하지 않았는가', '정비·청소·점검 작업 시 전원을 차단하고 잠금·표지(LOTO)를 했는가', '비상정지장치가 작동하고 손이 닿는 곳에 있는가']],
+                        ['운반·하역', ['지게차 운행 경로와 보행 통로가 구분되어 있고 유도자가 배치되었는가', '크레인·호이스트의 훅 해지장치와 줄걸이 용구 상태가 양호한가', '적재물이 무너지지 않게 쌓여 있는가']],
+                        ['전기·화재·화학물질', ['임시 배선·이동전선의 피복 손상이 없고 누전차단기를 거쳐 쓰는가', '화기작업 장소에 소화기·불티 비산방지포·화재감시자가 있는가', '화학물질 용기에 경고표지가 붙어 있고 MSDS를 볼 수 있는가']],
+                        ['혼재작업·기타', ['같은 장소의 생산·정비 작업 시간과 순서가 조정되어 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
+                    ] },
+                    { badge: '건설업 예시', title: '건설 현장 공종별 협력업체', description: '여러 공종이 같은 구역에서 겹치는 건설 현장', sets: [
+                        ['작업 일반', ['작업 전 TBM을 실시하고 신규 투입자를 확인했는가', '안전모·안전대·안전화를 착용하고 턱끈·안전대 고리를 체결했는가', '작업계획서 대상 작업(굴착·양중·해체 등)은 계획서대로 하는가', '자재 정리정돈 및 통로가 확보되어 있는가']],
+                        ['추락·낙하', ['개구부·단부에 안전난간 또는 덮개가 설치되어 있는가', '비계·작업발판이 견고하고 벽이음·발판 고정 상태가 양호한가', '이동식 비계·사다리의 전도방지 조치와 아웃트리거 설치가 되어 있는가', '낙하물 방지망·수직보호망·하부 출입통제가 되어 있는가']],
+                        ['굴착·붕괴·장비', ['굴착면 기울기·흙막이 지보공 상태에 이상이 없는가', '건설기계 작업 반경 안 출입을 통제하고 유도자·신호수를 배치했는가', '양중 작업 시 줄걸이 상태와 인양물 하부 통제가 되어 있는가']],
+                        ['전기·화재', ['임시 분전반의 누전차단기·외함 접지·잠금 상태가 양호한가', '용접·용단 작업 시 소화기 비치·불티 비산방지·화재감시자 배치가 되어 있는가']],
+                        ['혼재작업·기타', ['같은 장소 공종 간 작업 시기·내용이 조정되어 있는가', '휴게시설·화장실 등 위생시설을 이용할 수 있는가']]
+                    ] },
+                    { badge: '물류·운수 예시', title: '물류센터·창고 하역·분류 협력업체', description: '상하차·분류·지게차 작업이 많은 물류 사업장', sets: [
+                        ['작업 일반', ['작업 전 TBM을 실시하고 작업 구역·동선을 공유했는가', '안전화·안전모(상하차)·방한·보냉 장구 등을 작업에 맞게 착용했는가', '통로·비상구·소화설비 앞에 화물이 쌓여 있지 않은가']],
+                        ['지게차·차량', ['지게차 운전자가 자격을 갖추고 좌석안전띠를 착용하는가', '지게차 전조등·후미등·후진경보기·헤드가드가 정상인가', '도크·상하차장에서 차량 고임목 설치와 보행자 분리가 되어 있는가', '차량 유도자가 배치되고 후진 시 신호가 지켜지는가']],
+                        ['컨베이어·적재', ['컨베이어 비상정지장치·덮개가 정상이고 끼임 위험 부위가 방호되어 있는가', '랙·파렛트 적재 높이·하중이 기준 안이고 무너질 위험이 없는가', '롤테이너·대차 운반 시 과적·시야 가림이 없는가']],
+                        ['근골격계·온열·기타', ['중량물 취급 시 보조기구 사용 또는 2인 1조 작업이 지켜지는가', '폭염·한파 시 물·휴식·보냉(방한) 조치가 되어 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
+                    ] },
+                    { badge: '시설관리 예시', title: '건물 시설관리·미화·경비 용역', description: '기계실·전기실·외벽·청소 작업이 있는 건물', sets: [
+                        ['작업 일반', ['작업 전 그날 작업 내용과 위험요인을 공유했는가', '작업에 맞는 보호구(안전모·절연장갑·미끄럼방지화 등)를 착용했는가', '작업 구역에 안내 표지·출입통제(이용자 동선 분리)가 되어 있는가']],
+                        ['고소·사다리', ['사다리 작업 시 2인 1조·전도방지·안전모 착용이 지켜지는가', '외벽·유리창 청소 시 달비계 로프·구명줄·안전대 체결 상태가 양호한가', '고소작업대 사용 시 안전난간·아웃트리거·과상승방지장치가 정상인가']],
+                        ['전기·기계실', ['전기실·분전반 작업 시 정전·잠금·검전 절차를 지키는가', '기계실 회전체(펌프·팬) 덮개와 배관 보온·누수 상태가 양호한가', '정화조·저수조·맨홀 등 밀폐공간 작업 전 산소·유해가스 농도를 측정하고 환기하는가']],
+                        ['미화·화학물질', ['세정제·소독제 용기에 경고표지가 있고 섞어 쓰지 않는가', '바닥 물청소 시 미끄럼 주의 표지를 세우는가']],
+                        ['기타', ['야간·단독 작업자의 연락 체계가 정해져 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
+                    ] }
+                ];
+                const exPool = exSets.map(s => Object.assign({ count: s.sets.reduce((n, g) => n + g[1].length, 0) }, s));
+                const isExModalOpen = ref(false);
+                const openExModal = () => { isExModalOpen.value = true; };
+                const selectEx = (opt) => {
+                    const touched = items.value.some(it => it.result) || JSON.stringify(items.value.map(it => [it.group, it.text])) !== JSON.stringify(freshItems().map(it => [it.group, it.text]));
+                    if (touched && !window.confirm('지금 점검 항목과 표시해 둔 결과를 지우고 예시 항목으로 바꿉니다. 계속할까요?')) return;
+                    items.value = flatItems(opt.sets);
+                    isExModalOpen.value = false;
+                    showToast(`[${opt.title}] 예시 항목을 넣었습니다. 사업장에 맞게 고쳐 쓰세요.`);
+                };
+
+                // ---- 보관·이어 쓰기
+                const histInfo = (s) => {
+                    const fr = s.findings.filter(f => f.hazard.trim() || f.demand.trim());
+                    const open = fr.filter(f => f.status !== '조치 완료').length;
+                    return { title: fmtDay(s.formData.date) || '(날짜 없음)', sub: `${[s.formData.inspector, `구역 ${s.zones.filter(z => z.zone.trim() || z.company.trim()).length}곳`, `지적 ${fr.length}건${open ? ` (미조치 ${open})` : ''}`].filter(Boolean).join(' · ')}` };
+                };
+                const historyView = computed(() => history.value.map(h => Object.assign({ id: h.id }, histInfo(h.snap))));
+                const putHistory = () => {
+                    const snap = snapshot();
+                    const item = { id: snap.formData.mid, saved: Date.now(), snap };
+                    const rest = history.value.filter(h => h.id !== item.id);
+                    const next = [item].concat(rest).sort((a, b) => (b.snap.formData.date || '').localeCompare(a.snap.formData.date || '') || b.saved - a.saved);
+                    const dropped = next.length > HIST_MAX;
+                    const before = history.value;
+                    history.value = next.slice(0, HIST_MAX);
+                    clearTimeout(saveTimer);
+                    if (!persist()) { history.value = before; showToast('저장 공간이 부족해 보관하지 못했습니다. 지난 기록을 일부 지워 주세요.', 'error'); return null; }
+                    return { dropped };
+                };
+                const archiveOnly = () => {
+                    const r = putHistory();
+                    if (r) showToast(r.dropped ? `보관했습니다. ${HIST_MAX}건을 넘어 가장 오래된 기록이 지워졌습니다.` : '이번 순회를 지난 순회 기록에 보관했습니다.');
+                };
+                // 끝나지 않은 지적사항을 다음 순회의 "이행 확인"으로 넘긴다
+                const carryFrom = (s) => {
+                    const a = s.prev.filter(p => p.hazard.trim() && p.result !== '조치 완료').map(p => ({ fid: p.fid, found: p.found, zone: p.zone, hazard: p.hazard, demand: p.demand, owner: p.owner, due: p.due, result: '' }));
+                    const b = s.findings.filter(f => (f.hazard.trim() || f.demand.trim()) && f.status !== '조치 완료').map(f => ({ fid: f.fid, found: s.formData.date, zone: f.zone, hazard: f.hazard, demand: f.demand, owner: f.owner, due: f.due, result: '' }));
+                    return a.concat(b);
+                };
+                const startNext = (s, date) => {
+                    const f = s.formData;
+                    formData.value = Object.assign({}, formData.value, {
+                        mid: newId('p'), docType: 'log', company: f.company, siteName: f.siteName, industry: f.industry, inspDept: f.inspDept, inspector: f.inspector,
+                        date, timeFrom: '', timeTo: '', weather: '', note: '', nextDate: '', demandNo: '', demandDate: '', demandTo: ''
+                    });
+                    zones.value = s.zones.map(z => Object.assign({}, z));
+                    items.value = s.items.map(it => ({ group: it.group, text: it.text, result: formData.value.keepResults ? it.result : '' }));
+                    prev.value = carryFrom(s);
+                    findings.value = [];
+                    photos.value = [];
+                    window.scrollTo(0, 0);
+                };
+                const archiveAndNext = () => {
+                    const f = formData.value;
+                    const nd = today > f.date ? today : (f.nextDate && f.nextDate > f.date ? f.nextDate : (nextDue.value || addDays(f.date, 1)));
+                    if (!window.confirm(`이번 순회(${fmtDay(f.date)})를 보관하고 ${fmtDay(nd)} 순회 일지를 새로 열까요?\n(구역·업체·점검 항목은 그대로, 조치가 끝나지 않은 지적사항은 "이행 확인"으로 옮깁니다)`)) return;
+                    const r = putHistory();
+                    if (!r) return;
+                    startNext(snapshot(), nd);
+                    showToast(prev.value.length ? `${fmtDay(nd)} 순회를 열었습니다. 미조치 지적사항 ${prev.value.length}건을 이행 확인으로 옮겼습니다.` : `${fmtDay(nd)} 순회를 열었습니다.`);
+                };
+                const applySnap = (s) => { formData.value = s.formData; zones.value = s.zones; items.value = s.items; findings.value = s.findings; prev.value = s.prev; photos.value = []; };
+                const openHistory = (id) => {
+                    const h = history.value.find(x => x.id === id);
+                    if (!h) return;
+                    if (h.id !== formData.value.mid && !window.confirm('지금 작성 중인 내용을 이 기록으로 바꿉니다.\n지금 내용을 남기려면 취소하고 "지금 내용만 보관"을 먼저 누르세요. 계속할까요?')) return;
+                    applySnap(cleanSnap(JSON.parse(JSON.stringify(h.snap))));
+                    window.scrollTo(0, 0);
+                    showToast('보관한 순회 기록을 열었습니다.');
+                };
+                const copyHistory = (id) => {
+                    const h = history.value.find(x => x.id === id);
+                    if (!h) return;
+                    if (!window.confirm(`${fmtDay(h.snap.formData.date)} 기록의 구역·업체·점검 항목을 복사해 오늘(${fmtDay(today)}) 일지를 새로 엽니다.\n지금 작성 중인 내용은 보관하지 않으면 사라집니다. 계속할까요?`)) return;
+                    startNext(cleanSnap(JSON.parse(JSON.stringify(h.snap))), today);
+                    showToast('복사해서 오늘 일지를 열었습니다.');
+                };
+                const deleteHistory = (id) => {
+                    if (!window.confirm('이 순회 기록을 지울까요? 되돌릴 수 없습니다.')) return;
+                    history.value = history.value.filter(h => h.id !== id);
+                    clearTimeout(saveTimer); persist();
+                    showToast('기록을 지웠습니다.');
+                };
+
+                // ---- 예전 일반 서식(tools/forms/patrol/)에 적어 둔 내용 가져오기
+                const oldState = readJson(OLD_FORM_KEY);
+                const oldHas = !!oldState && Object.keys(oldState).some(k => /^(f\.(place|sub|time|sub_who)|c\.chk\.\d+(\.r)?|ci\.chk\.\d+|t\.fix\.\d+\.[1-4])$/.test(k) && str(oldState[k]).trim());
+                const oldFormAvailable = computed(() => oldHas && !formData.value.oldDismissed);
+                const dismissOld = () => { formData.value.oldDismissed = true; };
+                const importOldForm = () => {
+                    const o = oldState || {};
+                    const g = (k) => str(o[k]).trim();
+                    const busy = zoneRows.value.length || findingRows.value.length || items.value.some(it => it.result);
+                    if (busy && !window.confirm('지금 적어 둔 순회 구역·점검 결과·지적사항을 예전 서식의 내용으로 바꿉니다. 계속할까요?')) return;
+                    const f = formData.value;
+                    if (isDay(g('f.date'))) f.date = g('f.date');
+                    if (/2일/.test(g('f.cycle')) && !f.industry) showToast('예전 서식의 주기는 "2일에 1회 이상"이었습니다. 업종을 선택해 주세요.', 'info');
+                    else if (/1주일/.test(g('f.cycle')) && !f.industry) f.industry = 'other';
+                    if (g('f.inspector')) { f.inspector = g('f.inspector'); f.inspDept = ''; }
+                    const tm = g('f.time').match(/(\d{1,2}):(\d{2})\s*[~\-–]\s*(\d{1,2}):(\d{2})/);
+                    if (tm) { f.timeFrom = `${pad(tm[1])}:${tm[2]}`; f.timeTo = `${pad(tm[3])}:${tm[4]}`; }
+                    if (g('f.place') || g('f.sub') || g('f.sub_who')) zones.value = [{ zone: g('f.place'), company: g('f.sub'), work: '', workers: '', companion: g('f.sub_who') }];
+                    // 점검 항목: 예전 서식은 분류 제목까지 한 줄로 세었다(c.chk.<줄번호>)
+                    const oldList = [];
+                    BASE_ITEMS.forEach(grp => { oldList.push({ group: grp[0] }); grp[1].forEach(t => oldList.push(t)); });
+                    const out = []; let group = '';
+                    const map = { '양호': '양호', '불량': '미흡', '해당없음': '해당없음' };
+                    const remarks = [];
+                    const maxI = Object.keys(o).reduce((m, k) => { const x = k.match(/^ci?\.chk\.(\d+)/); return x ? Math.max(m, +x[1]) : m; }, oldList.length - 1);
+                    for (let i = 0; i <= Math.min(maxI, 200); i++) {
+                        const base = oldList[i];
+                        if (base && typeof base === 'object') { group = base.group; continue; }
+                        const text = Object.prototype.hasOwnProperty.call(o, `ci.chk.${i}`) ? g(`ci.chk.${i}`) : (base || '');
+                        if (!text) continue;
+                        const result = map[g(`c.chk.${i}`)] || '';
+                        out.push({ group, text, result });
+                        if (g(`c.chk.${i}.r`)) remarks.push(`${text}: ${g(`c.chk.${i}.r`)}`);
+                    }
+                    if (out.length) items.value = out;
+                    const rows = Math.min(Number(o['n.fix']) > 0 ? Number(o['n.fix']) : 4, 100);
+                    const fs = [];
+                    for (let r = 0; r < rows; r++) {
+                        const hz = g(`t.fix.${r}.1`), dm = g(`t.fix.${r}.2`), du = g(`t.fix.${r}.3`), cf = g(`t.fix.${r}.4`);
+                        if (!hz && !dm) continue;
+                        fs.push(Object.assign(blankFinding(), { zone: g('f.place'), hazard: hz, demand: [dm, !isDay(du) && du ? `(기한: ${du})` : ''].filter(Boolean).join(' '), owner: g('f.sub'), due: isDay(du) ? du : '', status: cf ? '조치 완료' : '시정 요구' }));
+                    }
+                    findings.value = fs;
+                    if (remarks.length) f.note = [f.note, remarks.join('\n')].filter(Boolean).join('\n');
+                    f.oldDismissed = true;
+                    showToast('예전 서식의 내용을 가져왔습니다. "확인" 칸에 내용이 있던 지적사항은 조치 완료로 넣었으니 확인하세요.');
+                };
+
+                // ---- 인쇄·PDF
+                const printDoc = () => { window.print(); };
+                // html2pdf(약 0.9MB)는 처음 누를 때만 불러온다
+                const loadHtml2pdf = () => new Promise((resolve, reject) => {
+                    if (window.html2pdf) return resolve();
+                    const sc = document.createElement('script');
+                    sc.src = '../../assets/vendor/html2pdf-0.10.1.bundle.min.js';
+                    sc.onload = () => resolve(); sc.onerror = () => reject(new Error('load'));
+                    document.head.appendChild(sc);
+                });
+                const downloadPDF = async () => {
+                    const element = document.getElementById('print-area');
+                    if (!element) return;
+                    isGeneratingPDF.value = true;
+                    showToast('PDF를 만들고 있습니다…', 'info');
+                    try { await loadHtml2pdf(); } catch (e) {
+                        isGeneratingPDF.value = false;
+                        showToast("PDF 도구를 불러오지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
+                        return;
+                    }
+                    // 줄여 보이던 미리보기를 실제 크기로 돌려놓고 찍는다
+                    document.documentElement.style.setProperty('--pz', '1');
+                    await nextTick();
+                    const f = formData.value;
+                    const tail = f.docType === 'summary' ? `${period.value.from}_순회점검_집계표` : `${f.date}_${f.docType === 'demand' ? '순회점검_시정요구서' : '순회점검_일지'}`;
+                    const fileName = `${f.company || '사업장'}_${tail}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
+                    const opt = {
+                        margin: 0, filename: fileName,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
+                    };
+                    window.html2pdf().set(opt).from(element).save().then(() => {
+                        isGeneratingPDF.value = false; fitPreview();
+                        showToast('PDF 파일을 저장했습니다.');
+                    }).catch(() => {
+                        isGeneratingPDF.value = false; fitPreview();
+                        showToast("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
+                    });
+                };
+
+                return {
+                    HIST_MAX, PHOTO_MAX, INDUSTRIES, docTypes, formData, zones, items, findings, prev, history: historyView, newGroup,
+                    photos, isGeneratingPDF, toast, saveMsg, fmtDay,
+                    cycle, nextDue, zoneRows, totalWorkers, findingRows, prevRows, ownerNames, zoneNames, groups, docGroups, tally,
+                    siteLabel, inspLabel, dateLabel, period, summary, shiftPeriod, demandOwners, demandRows, checks,
+                    setToday, addZone, removeZone, addItem, removeItem, addGroup, setResult, fillGood, addFinding, hasFindingFor, findingFromItem, removeFinding,
+                    onImmediate, onStatus, addPrev, suggestNext, changeDocType, handleFileUpload, resetResults,
+                    exPool, isExModalOpen, openExModal, selectEx,
+                    archiveOnly, archiveAndNext, openHistory, copyHistory, deleteHistory,
+                    oldFormAvailable, dismissOld, importOldForm,
+                    printDoc, downloadPDF
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

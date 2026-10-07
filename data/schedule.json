@@ -50,7 +50,6 @@
    "status": "verified",
    "memo": "건설업, 제조업, 토사석 광업, 서적·잡지 및 기타 인쇄물 출판업, 음악 및 기타 오디오물 출판업, 금속 및 비금속 원료 재생업.",
    "cond": "도급인 사업장에서 관계수급인이 작업하는 경우 · 위 업종",
-   "form": "patrol",
    "time": "13:00",
    "klass": "법정 주기",
    "links": [
@@ -62,7 +61,8 @@
      "label": "산안법 시행규칙 제80조",
      "href": "laws/rule/#j80"
     }
-   ]
+   ],
+   "tool": "patrol"
   },
   {
    "key": "patrol7",
@@ -72,7 +72,6 @@
    "status": "verified",
    "memo": "2일에 1회 대상 업종을 제외한 사업.",
    "cond": "도급인 사업장에서 관계수급인이 작업하는 경우 · 그 밖의 업종",
-   "form": "patrol",
    "weekday": 1,
    "time": "13:00",
    "off": true,
@@ -86,7 +85,8 @@
      "label": "산안법 시행규칙 제80조",
      "href": "laws/rule/#j80"
     }
-   ]
+   ],
+   "tool": "patrol"
   },
   {
    "key": "council",
@@ -177,7 +177,6 @@
    "status": "verified",
    "memo": "점검반: 도급인, 관계수급인, 도급인 및 관계수급인의 근로자 각 1명.",
    "cond": "도급 사업 · 건설업·선박 및 보트 건조업 외",
-   "form": "joint",
    "qmonth": 2,
    "day": 10,
    "time": "10:00",
@@ -191,7 +190,8 @@
      "label": "산안법 시행규칙 제82조",
      "href": "laws/rule/#j82"
     }
-   ]
+   ],
+   "tool": "joint"
   },
   {
    "key": "stat",
@@ -219,7 +219,6 @@
    "status": "verified",
    "memo": "건설업, 선박 및 보트 건조업.",
    "cond": "도급 사업 · 건설업, 선박 및 보트 건조업",
-   "form": "joint",
    "day": 10,
    "time": "10:00",
    "off": true,
@@ -233,7 +232,8 @@
      "label": "산안법 시행규칙 제82조",
      "href": "laws/rule/#j82"
     }
-   ]
+   ],
+   "tool": "joint"
   },
   {
    "key": "edu_half",
@@ -242,8 +242,7 @@
    "basis": "산업안전보건법 제29조제1항 · 시행규칙 별표 4",
    "status": "verified",
    "memo": "사무직·판매직 매반기 6시간 이상, 그 밖의 근로자 매반기 12시간 이상. 반기 안에 나눠 실시해도 되며 누적 시간을 확인합니다.",
-   "form": "edu-log",
-   "tool": "edu-hours",
+   "tool": "edu-log",
    "hmonth": 6,
    "day": 10,
    "time": "14:00",

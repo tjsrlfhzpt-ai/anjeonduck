@@ -81,6 +81,62 @@
       "menu": "협의체 회의록·통보"
     },
     {
+      "id": "joint",
+      "name": "합동 안전·보건점검 작성기",
+      "short": "합동점검",
+      "desc": "합동점검 결과서·실시 통보·조치 요구서·조치 결과 확인서. 점검반 구성과 주기 확인, 지적사항 추적·이월.",
+      "src": "apps/joint.html",
+      "inject": "tailwind",
+      "css": "apps/committee.tailwind.css",
+      "tag": "분기·2개월",
+      "group": "서류 작성",
+      "law": "산안법 제64조제2항 · 시행규칙 제82조",
+      "cat": "작성기",
+      "menu": "합동 안전·보건점검"
+    },
+    {
+      "id": "patrol",
+      "name": "도급 작업장 순회점검 일지 작성기",
+      "short": "순회점검 일지",
+      "desc": "순회점검 일지·주간/월간 집계표·시정 요구서 3종. 업종별 주기(2일·1주) 판정, 미조치 지적사항 자동 이월.",
+      "src": "apps/patrol.html",
+      "inject": "tailwind",
+      "css": "apps/committee.tailwind.css",
+      "tag": "2일·1주",
+      "group": "서류 작성",
+      "law": "산안법 제64조제1항제2호 · 시행규칙 제80조",
+      "cat": "작성기",
+      "menu": "순회점검 일지"
+    },
+    {
+      "id": "edu-log",
+      "name": "안전보건교육 일지 작성기",
+      "short": "교육 일지·서명부",
+      "desc": "교육 일지·참석자 서명부·실시 통보·누계 대장. 교육 종류를 고르면 법정 시간과 교육내용이 제시됩니다. 명단 붙여넣기, 보충교육.",
+      "src": "apps/edu-log.html",
+      "inject": "tailwind",
+      "css": "apps/committee.tailwind.css",
+      "tag": "반기·수시",
+      "group": "서류 작성",
+      "law": "산안법 제29조 · 시행규칙 제26조",
+      "cat": "작성기",
+      "menu": "교육 일지·서명부"
+    },
+    {
+      "id": "permit",
+      "name": "안전작업허가서 작성기",
+      "short": "안전작업허가서",
+      "desc": "화기·밀폐공간·고소·전기 등 위험 작업 허가서. 작업 전 확인 항목과 가스 측정, 허가·종료 서명.",
+      "src": "apps/permit.html",
+      "inject": "tailwind",
+      "css": "apps/committee.tailwind.css",
+      "tag": "작업 전",
+      "group": "서류 작성",
+      "law": "안전보건규칙 제241조의2 · 제619조 등",
+      "cat": "작성기",
+      "menu": "안전작업허가서"
+    },
+    {
       "id": "safety-cost",
       "name": "산업안전보건관리비 계산기",
       "short": "안전관리비",
@@ -362,5 +418,10 @@
     "public_api": false,
     "_comment": "public_api: 공공데이터포털(정책뉴스·공공기관 채용·사고사망 속보) 수집·안전뉴스 메뉴. 켜려면 true + 저장소 변수 PUBLIC_API=true"
   },
-  "_base_url_comment": "커스텀 도메인이 정해지면 https://도메인 을 넣습니다. 비어 있으면 canonical·og:url·sitemap 을 만들지 않고 모든 링크를 상대 경로로 둡니다."
+  "_base_url_comment": "커스텀 도메인이 정해지면 https://도메인 을 넣습니다. 비어 있으면 canonical·og:url·sitemap 을 만들지 않고 모든 링크를 상대 경로로 둡니다.",
+  "search_verification": {
+    "naver": "",
+    "google": "",
+    "_comment": "네이버 서치어드바이저·구글 서치콘솔에서 'HTML 태그' 방식으로 받은 content 값만 넣습니다(따옴표 안의 영문·숫자). 넣고 배포하면 홈 화면 <head> 에 태그가 들어갑니다."
+  }
 }

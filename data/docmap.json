@@ -25,7 +25,7 @@
       {"name": "작업 전 안전점검회의(TBM) 기록", "basis": "법 제36조제4항(상시 주지 노력)", "href": "tools/tbm/"}
     ]},
     {"id": "edu", "title": "안전보건교육", "docs": [
-      {"name": "정기교육·채용 시·작업내용 변경 시·특별교육 일지와 서명부", "basis": "법 제29조 · 규칙 별표 4·5", "href": "tools/forms/edu-log/"},
+      {"name": "정기교육·채용 시·작업내용 변경 시·특별교육 일지와 서명부", "basis": "법 제29조 · 규칙 별표 4·5", "href": "tools/edu-log/"},
       {"name": "관리감독자 정기교육 기록", "basis": "규칙 별표 4", "href": "tools/edu-hours/"},
       {"name": "MSDS 교육 기록", "basis": "법 제114조제3항 · 규칙 제169조", "href": "tools/msds/", "cond": "화학물질 취급"}
     ]},
@@ -34,11 +34,11 @@
       {"name": "관리감독자·안전관리자 업무일지", "basis": "영 제15조 · 제18조제1항제9호", "href": "tools/forms/log-sup/"},
       {"name": "안전검사 합격증명·관리대장", "basis": "법 제93조 · 규칙 제126조", "href": "tools/inspect/", "cond": "검사대상 기계 보유"},
       {"name": "안전인증·자율안전확인 표시 확인(구입 기계·보호구)", "basis": "법 제87조·제92조", "href": "tools/machines/"},
-      {"name": "도급 순회점검표·합동 안전보건점검표", "basis": "법 제64조 · 규칙 제80조·제82조", "href": "tools/forms/patrol/", "cond": "도급 시"}
+      {"name": "도급 순회점검표·합동 안전보건점검표", "basis": "법 제64조 · 규칙 제80조·제82조", "href": "tools/patrol/", "cond": "도급 시"}
     ]},
     {"id": "work", "title": "작업관리", "docs": [
       {"name": "작업계획서(지게차·차량계 건설기계·중량물 등)", "basis": "기준규칙 제38조 · 별표 4", "href": "tools/forms/wp-forklift/", "cond": "해당 작업"},
-      {"name": "안전작업허가서(화기·밀폐·고소·전기 등)", "basis": "기준규칙 제241조의2·제619조의2 등 · 사내 허가 절차", "href": "tools/forms/permit/", "cond": "해당 작업"},
+      {"name": "안전작업허가서(화기·밀폐·고소·전기 등)", "basis": "기준규칙 제241조의2·제619조의2 등 · 사내 허가 절차", "href": "tools/permit/", "cond": "해당 작업"},
       {"name": "LOTO 잠금·꼬리표 운영", "basis": "기준규칙 제92조·제319조", "href": "tools/loto/"},
       {"name": "폭염작업 체감온도 기록", "basis": "기준규칙 제559조·제560조·제562조", "href": "tools/heat/", "cond": "폭염 작업"}
     ]},

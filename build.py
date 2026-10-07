@@ -567,14 +567,14 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
             ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
 
 
-TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "selection": "⚖️", "hpp": "🏭",
+TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "permit": "🔥", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
-TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "msds": "msds", "loto": "loto", "heat": "heat",
+TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "permit": "fire", "msds": "msds", "loto": "loto", "heat": "heat",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
               "schedule": "calendar", "duties": "briefcase", "retention": "folder", "inspect": "search", "docmap": "audit"}
-WRITE_TOOLS = ["tbm", "risk", "committee", "council", "msds", "loto", "heat"]
+WRITE_TOOLS = ["tbm", "risk", "patrol", "joint", "edu-log", "permit", "council", "committee", "msds", "loto", "heat"]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
@@ -740,6 +740,13 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     base = (site.get("base_url") or "").rstrip("/")
     canonical = f"{base}/{path}" if base else ""
     canon_tags = f'<link rel="canonical" href="{e(canonical)}">\n<meta property="og:url" content="{e(canonical)}">' if canonical else ""
+    # 검색엔진 소유 확인 태그(네이버 서치어드바이저·구글 서치콘솔). 홈에만 넣는다. 값은 영문·숫자·-_ 만 허용
+    _sv = site.get("search_verification") or {}
+    if path == "":
+        for _k, _n in (("naver", "naver-site-verification"), ("google", "google-site-verification")):
+            _v = str(_sv.get(_k) or "").strip()
+            if re.match(r"^[A-Za-z0-9_-]{8,120}$", _v):
+                canon_tags += f'\n<meta name="{_n}" content="{_v}">'
     full_title = f"{title} | {site['name']}" if title != site["name"] else f"{site['name']} | {site['tagline']}"
     cur = ' aria-current="page"'
     on_news = (site.get("features") or {}).get("public_api", False)
@@ -1000,7 +1007,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         src = src.replace("/*@TAILWIND@*/", css)
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
-    if t["id"] in ("tbm", "committee", "council"):
+    if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
         note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')
@@ -1320,7 +1327,7 @@ def build(out, today):
         law_rows += bd_row("laws/#updates", short_law(u.get("law", "")) + " " + u["title"].split(" — ")[0], md(u.get("effective") or u.get("date")), "시행 중")
     bd_laws = board(f"법령 현황 · 기준일 {md(man.get('checked_at'))}", "laws/", law_rows)
     _unused = board("법령 개정", "laws/#updates", "".join(bd_row(f"laws/#updates", u["title"], md(u.get("date")), u.get("law", "").replace("산업안전보건법 ", "").replace("산업안전보건", "산안")[:6]) for u in updates[:5]))
-    FORM_PICKS = ["log-sup", "log-safety", "edu-log", "permit", "patrol", "sapa-half"]
+    FORM_PICKS = ["log-sup", "log-safety", "log-shm", "wp-forklift", "sapa-eval", "sapa-half"]
     fby = {f["id"]: f for f in _forms}
     bd_forms = board(f"서식 작성기 {n_forms}종", "tools/forms/", "".join(bd_row(f"tools/forms/{i}/", fby[i]["title"], "", fby[i]["group"][:5]) for i in FORM_PICKS if i in fby))
     bd_res = board("자주 찾는 법정 서식", "resources/", "".join(bd_row(f"resources/{r['detail']}" if r.get("detail") else "resources/", r["title"], "", "서식" if r.get("category") == "법정 서식" else "고시") for r in popular[:6]))

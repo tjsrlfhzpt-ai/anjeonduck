@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안전작업허가서 작성기 | SafePlum</title>
+    <meta name="description" content="화기·밀폐공간·고소·정전·굴착·중량물 작업의 안전작업허가서를 작성하세요. 작업 종류별 확인 항목(산업안전보건기준에 관한 규칙 조문 표시), 가스 농도 측정 기록, 현장 게시용 요약, 허가 대장. 무료, 회원가입 없음.">
+    <link rel="icon" href="../../assets/favicon.png" type="image/png">
+    <!-- Tailwind: 빌드 때 미리 만든 CSS (런타임 CDN 사용 안 함) -->
+    <style>/*@TAILWIND@*/</style>
+    <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
+    <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
+    <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
+    <style>
+        [v-cloak] { display: none; }
+        /* Phosphor Icons 2.1 (MIT) — 쓰는 아이콘만 CSS 마스크로 넣음(외부 CDN 사용 안 함) */
+        .ph-bold,.ph-fill{display:inline-block;width:1em;height:1em;vertical-align:-0.125em;background-color:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat;flex:none}
+        .ph-bold.ph-arrow-counter-clockwise{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,128a100,100,0,0,1-98.66,100H128a99.39,99.39,0,0,1-68.62-27.29,12,12,0,0,1,16.48-17.45,76,76,0,1,0-1.57-109c-.13.13-.25.25-.39.37L54.89,92H72a12,12,0,0,1,0,24H24a12,12,0,0,1-12-12V56a12,12,0,0,1,24,0V76.72L57.48,57.06A100,100,0,0,1,228,128Z%22/></svg>")}
+        .ph-bold.ph-arrow-right{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z%22/></svg>")}
+        .ph-bold.ph-arrows-clockwise{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,48V96a12,12,0,0,1-12,12H168a12,12,0,0,1,0-24h19l-7.8-7.8a75.55,75.55,0,0,0-53.32-22.26h-.43A75.49,75.49,0,0,0,72.39,75.57,12,12,0,1,1,55.61,58.41a99.38,99.38,0,0,1,69.87-28.47H126A99.42,99.42,0,0,1,196.2,59.23L204,67V48a12,12,0,0,1,24,0ZM183.61,180.43a75.49,75.49,0,0,1-53.09,21.63h-.43A75.55,75.55,0,0,1,76.77,179.8L69,172H88a12,12,0,0,0,0-24H40a12,12,0,0,0-12,12v48a12,12,0,0,0,24,0V189l7.8,7.8A99.42,99.42,0,0,0,130,226.06h.56a99.38,99.38,0,0,0,69.87-28.47,12,12,0,0,0-16.78-17.16Z%22/></svg>")}
+        .ph-bold.ph-check{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z%22/></svg>")}
+        .ph-bold.ph-file-pdf{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M200,164v8h12a12,12,0,0,1,0,24H200v12a12,12,0,0,1-24,0V152a12,12,0,0,1,12-12h32a12,12,0,0,1,0,24ZM92,172a32,32,0,0,1-32,32H56v4a12,12,0,0,1-24,0V152a12,12,0,0,1,12-12H60A32,32,0,0,1,92,172Zm-24,0a8,8,0,0,0-8-8H56v16h4A8,8,0,0,0,68,172Zm100,8a40,40,0,0,1-40,40H112a12,12,0,0,1-12-12V152a12,12,0,0,1,12-12h16A40,40,0,0,1,168,180Zm-24,0a16,16,0,0,0-16-16h-4v32h4A16,16,0,0,0,144,180ZM36,108V40A20,20,0,0,1,56,20h96a12,12,0,0,1,8.49,3.52l56,56A12,12,0,0,1,220,88v20a12,12,0,0,1-24,0v-4H148a12,12,0,0,1-12-12V44H60v64a12,12,0,0,1-24,0ZM160,57V80h23Z%22/></svg>")}
+        .ph-bold.ph-file-text{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M216.49,79.52l-56-56A12,12,0,0,0,152,20H56A20,20,0,0,0,36,40V216a20,20,0,0,0,20,20H200a20,20,0,0,0,20-20V88A12,12,0,0,0,216.49,79.52ZM160,57l23,23H160ZM60,212V44h76V92a12,12,0,0,0,12,12h48V212Zm112-80a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,132Zm0,40a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,172Z%22/></svg>")}
+        .ph-bold.ph-floppy-disk{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M222.14,69.17,186.83,33.86A19.86,19.86,0,0,0,172.69,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V83.31A19.86,19.86,0,0,0,222.14,69.17ZM164,204H92V160h72Zm40,0H188V156a20,20,0,0,0-20-20H88a20,20,0,0,0-20,20v48H52V52H171l33,33ZM164,84a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h56A12,12,0,0,1,164,84Z%22/></svg>")}
+        .ph-bold.ph-lightbulb{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M180,232a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h80A12,12,0,0,1,180,232Zm40-128a91.51,91.51,0,0,1-35.17,72.35A12.26,12.26,0,0,0,180,186v2a20,20,0,0,1-20,20H96a20,20,0,0,1-20-20v-2a12,12,0,0,0-4.7-9.51A91.57,91.57,0,0,1,36,104.52C35.73,54.69,76,13.2,125.79,12A92,92,0,0,1,220,104Zm-24,0a68,68,0,0,0-69.65-68C89.56,36.88,59.8,67.55,60,104.38a67.71,67.71,0,0,0,26.1,53.19A35.87,35.87,0,0,1,100,184h56.1A36.13,36.13,0,0,1,170,157.49,67.68,67.68,0,0,0,196,104Zm-20.07-5.32a48.5,48.5,0,0,0-31.91-40,12,12,0,0,0-8,22.62,24.31,24.31,0,0,1,16.09,20,12,12,0,0,0,23.86-2.64Z%22/></svg>")}
+        .ph-bold.ph-magic-wand{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M252,152a12,12,0,0,1-12,12H228v12a12,12,0,0,1-24,0V164H192a12,12,0,0,1,0-24h12V128a12,12,0,0,1,24,0v12h12A12,12,0,0,1,252,152ZM56,76H68V88a12,12,0,0,0,24,0V76h12a12,12,0,1,0,0-24H92V40a12,12,0,0,0-24,0V52H56a12,12,0,0,0,0,24ZM184,188h-4v-4a12,12,0,0,0-24,0v4h-4a12,12,0,0,0,0,24h4v4a12,12,0,0,0,24,0v-4h4a12,12,0,0,0,0-24ZM222.14,82.83,82.82,222.14a20,20,0,0,1-28.28,0L33.85,201.46a20,20,0,0,1,0-28.29L173.17,33.86a20,20,0,0,1,28.28,0l20.69,20.68A20,20,0,0,1,222.14,82.83ZM159,112,144,97,53.65,187.31l15,15Zm43.31-43.31-15-15L161,80l15,15Z%22/></svg>")}
+        .ph-bold.ph-megaphone{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M252,120a52.06,52.06,0,0,0-52-52H160.32c-3.44-.21-52.6-4-99.46-43.3A20,20,0,0,0,28,40V200a19.8,19.8,0,0,0,11.54,18.12,19.86,19.86,0,0,0,21.32-2.81A192.92,192.92,0,0,1,144,174.47v26.2a20,20,0,0,0,8.9,16.64,11.35,11.35,0,0,0,1.39.8l14.44,7.06A20,20,0,0,0,198.37,213l11.09-41.82A52.07,52.07,0,0,0,252,120ZM52,191.63V48.4c36.17,28.07,72.17,38.1,92,41.66V150C124.17,153.52,88.17,163.55,52,191.63ZM176.39,202.2,168,198.1V172h16.4ZM200,148H168V92h32a28,28,0,1,1,0,56Z%22/></svg>")}
+        .ph-bold.ph-plus-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm52-84a12,12,0,0,1-12,12H140v28a12,12,0,0,1-24,0V140H88a12,12,0,0,1,0-24h28V88a12,12,0,0,1,24,0v28h28A12,12,0,0,1,180,128Z%22/></svg>")}
+        .ph-bold.ph-printer{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M214.67,68H204V40a12,12,0,0,0-12-12H64A12,12,0,0,0,52,40V68H41.33C25.16,68,12,80.56,12,96v80a12,12,0,0,0,12,12H52v28a12,12,0,0,0,12,12H192a12,12,0,0,0,12-12V188h28a12,12,0,0,0,12-12V96C244,80.56,230.84,68,214.67,68ZM76,52H180V68H76ZM180,204H76V172H180Zm40-40H204v-4a12,12,0,0,0-12-12H64a12,12,0,0,0-12,12v4H36V96c0-2.17,2.44-4,5.33-4H214.67c2.89,0,5.33,1.83,5.33,4Zm-16-44a16,16,0,1,1-16-16A16,16,0,0,1,204,120Z%22/></svg>")}
+        .ph-bold.ph-shield-check{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,36H48A20,20,0,0,0,28,56v56c0,54.29,26.32,87.22,48.4,105.29,23.71,19.39,47.44,26,48.44,26.29a12.1,12.1,0,0,0,6.32,0c1-.28,24.73-6.9,48.44-26.29,22.08-18.07,48.4-51,48.4-105.29V56A20,20,0,0,0,208,36Zm-4,76c0,35.71-13.09,64.69-38.91,86.15A126.28,126.28,0,0,1,128,219.38a126.14,126.14,0,0,1-37.09-21.23C65.09,176.69,52,147.71,52,112V60H204ZM79.51,144.49a12,12,0,1,1,17-17L112,143l47.51-47.52a12,12,0,0,1,17,17l-56,56a12,12,0,0,1-17,0Z%22/></svg>")}
+        .ph-bold.ph-spinner{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M140,32V64a12,12,0,0,1-24,0V32a12,12,0,0,1,24,0Zm33.25,62.75a12,12,0,0,0,8.49-3.52L204.37,68.6a12,12,0,0,0-17-17L164.77,74.26a12,12,0,0,0,8.48,20.49ZM224,116H192a12,12,0,0,0,0,24h32a12,12,0,0,0,0-24Zm-42.26,48.77a12,12,0,1,0-17,17l22.63,22.63a12,12,0,0,0,17-17ZM128,180a12,12,0,0,0-12,12v32a12,12,0,0,0,24,0V192A12,12,0,0,0,128,180ZM74.26,164.77,51.63,187.4a12,12,0,0,0,17,17l22.63-22.63a12,12,0,1,0-17-17ZM76,128a12,12,0,0,0-12-12H32a12,12,0,0,0,0,24H64A12,12,0,0,0,76,128ZM68.6,51.63a12,12,0,1,0-17,17L74.26,91.23a12,12,0,0,0,17-17Z%22/></svg>")}
+        .ph-bold.ph-upload-simple{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0ZM96.49,80.49,116,61v83a12,12,0,0,0,24,0V61l19.51,19.52a12,12,0,1,0,17-17l-40-40a12,12,0,0,0-17,0l-40,40a12,12,0,1,0,17,17Z%22/></svg>")}
+        .ph-bold.ph-users{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M125.18,156.94a64,64,0,1,0-82.36,0,100.23,100.23,0,0,0-39.49,32,12,12,0,0,0,19.35,14.2,76,76,0,0,1,122.64,0,12,12,0,0,0,19.36-14.2A100.33,100.33,0,0,0,125.18,156.94ZM44,108a40,40,0,1,1,40,40A40,40,0,0,1,44,108Zm206.1,97.67a12,12,0,0,1-16.78-2.57A76.31,76.31,0,0,0,172,172a12,12,0,0,1,0-24,40,40,0,1,0-10.3-78.67,12,12,0,1,1-6.16-23.19,64,64,0,0,1,57.64,110.8,100.23,100.23,0,0,1,39.49,32A12,12,0,0,1,250.1,205.67Z%22/></svg>")}
+        .ph-bold.ph-warning{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M240.26,186.1,152.81,34.23h0a28.74,28.74,0,0,0-49.62,0L15.74,186.1a27.45,27.45,0,0,0,0,27.71A28.31,28.31,0,0,0,40.55,228h174.9a28.31,28.31,0,0,0,24.79-14.19A27.45,27.45,0,0,0,240.26,186.1Zm-20.8,15.7a4.46,4.46,0,0,1-4,2.2H40.55a4.46,4.46,0,0,1-4-2.2,3.56,3.56,0,0,1,0-3.73L124,46.2a4.77,4.77,0,0,1,8,0l87.44,151.87A3.56,3.56,0,0,1,219.46,201.8ZM116,136V104a12,12,0,0,1,24,0v32a12,12,0,0,1-24,0Zm28,40a16,16,0,1,1-16-16A16,16,0,0,1,144,176Z%22/></svg>")}
+        .ph-bold.ph-x{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z%22/></svg>")}
+        .ph-fill.ph-camera{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-44,76a36,36,0,1,1-36-36A36,36,0,0,1,164,132Z%22/></svg>")}
+        .ph-fill.ph-check-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z%22/></svg>")}
+        .ph-fill.ph-info{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z%22/></svg>")}
+        .ph-fill.ph-lightbulb{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-32.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z%22/></svg>")}
+        .ph-fill.ph-magic-wand{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M248,152a8,8,0,0,1-8,8H224v16a8,8,0,0,1-16,0V160H192a8,8,0,0,1,0-16h16V128a8,8,0,0,1,16,0v16h16A8,8,0,0,1,248,152ZM56,72H72V88a8,8,0,0,0,16,0V72h16a8,8,0,0,0,0-16H88V40a8,8,0,0,0-16,0V56H56a8,8,0,0,0,0,16ZM184,192h-8v-8a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0v-8h8a8,8,0,0,0,0-16ZM219.31,80,80,219.31a16,16,0,0,1-22.62,0L36.68,198.63a16,16,0,0,1,0-22.63L176,36.69a16,16,0,0,1,22.63,0l20.68,20.68A16,16,0,0,1,219.31,80ZM208,68.69,187.31,48l-32,32L176,100.69Z%22/></svg>")}
+        .ph-fill.ph-sparkle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M208,144a15.78,15.78,0,0,1-10.42,14.94L146,178l-19,51.62a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.62a15.92,15.92,0,0,1,29.88,0L146,110l51.62,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z%22/></svg>")}
+        .ph-fill.ph-users-three{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z%22/></svg>")}
+        .ph-fill.ph-warning-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z%22/></svg>")}
+
+        .cm-warn { font-size: 12px; line-height: 1.55; color: #b45309; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 7px 9px; margin: 0; }
+        .cm-ok { font-size: 12px; line-height: 1.55; color: #047857; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 7px 9px; margin: 0; }
+        .cm-stop { font-size: 12px; line-height: 1.55; color: #b91c1c; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 7px 9px; margin: 0; font-weight: 700; }
+        .cm-law { font-size: 11px; line-height: 1.65; color: #475569; margin: 0; padding-left: 14px; list-style: disc; }
+        .cm-save { font-size: 11px; color: #94a3b8; }
+        .cm-fail { margin: 40px auto; max-width: 520px; padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; line-height: 1.7; }
+        /* 화면에서는 A4 미리보기를 칸 너비에 맞춰 줄여 보여 준다(값은 스크립트가 넣음). 인쇄·PDF에는 적용하지 않는다 */
+        @media screen { .cm-zoom { zoom: var(--pz, 1); } }
+        .adk-note { padding-bottom: 16px !important; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f1f5f9; }
+
+        .a4-container { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06); margin: 0 auto; box-sizing: border-box; position: relative; padding: 11mm 11mm; color: #0f172a; border: 1px solid #e2e8f0; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .a4-container { box-shadow: none; margin: 0; width: 100%; min-height: 0; border: 0 !important; padding: 0 !important; }
+            #app { min-height: 0 !important; display: block !important; }
+            main { display: block !important; padding: 0 !important; max-width: none !important; }
+            tr, img, .pd-keep { break-inside: avoid; page-break-inside: avoid; }
+            thead { display: table-header-group; }
+            h4 { break-after: avoid; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+        @page { size: A4; margin: 13mm 12mm; }
+
+        /* ---- 입력 칸(미리 만든 Tailwind CSS에 없는 모양은 여기 일반 CSS로 둔다) */
+        .pw-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .pw-card + .pw-card, .pw-stack > * + * { margin-top: 16px; }
+        .pw-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 14px; font-weight: 700; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin: 0 0 12px; }
+        .pw-h > span:first-child { display: inline-flex; align-items: center; gap: 6px; }
+        .pw-h small { font-size: 11px; font-weight: 400; color: #94a3b8; }
+        .pw-lb { display: block; font-size: 12px; font-weight: 500; color: #475569; margin-bottom: 4px; }
+        .pw-in { display: block; width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 10px; font-size: 13px; line-height: 1.4; background: #f8fafc; color: #1e293b; outline: none; font-family: inherit; }
+        textarea.pw-in { resize: vertical; line-height: 1.55; }
+        .pw-in:focus { background: #fff; border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,.25); }
+        .pw-g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .pw-g3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+        .pw-g2 > *, .pw-g3 > * { min-width: 0; }
+        .pw-span { grid-column: 1 / -1; }
+        .pw-span2 { grid-column: span 2; }
+        .text-amber-600 { color: #d97706; }
+        .pw-mt { margin-top: 10px; }
+        .pw-hint { font-size: 11px; line-height: 1.55; color: #64748b; margin: 6px 0 0; }
+        .pw-hint-r { color: #be123c; }
+        .pw-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .pw-btn { font-size: 12px; font-weight: 700; color: #334155; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
+        .pw-btn:hover { background: #e2e8f0; }
+        .pw-btn-pri { color: #fff; background: #059669; border-color: #059669; }
+        .pw-btn-pri:hover { background: #047857; }
+        .pw-btn-sm { padding: 6px 9px; }
+        .pw-add { font-size: 12px; font-weight: 700; color: #047857; background: none; border: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 8px 4px; font-family: inherit; }
+        .pw-x { flex: none; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; color: #94a3b8; background: none; border: 0; border-radius: 8px; cursor: pointer; }
+        .pw-x:hover { color: #e11d48; background: #fff1f2; }
+        .pw-a { color: #1d4ed8; text-decoration: underline; }
+        .pw-old { font-size: 12px; line-height: 1.6; color: #1e3a8a; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; }
+        .pw-old p { margin: 0 0 8px; }
+        .pw-notice { font-size: 12px; line-height: 1.6; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0f766e; border-radius: 8px; padding: 10px 12px; margin: 0; }
+
+        .pw-docs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .pw-doc { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 56px; padding: 8px 6px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; }
+        .pw-doc[aria-pressed="true"] { background: #ecfdf5; border-color: #10b981; color: #047857; }
+        .pw-types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .pw-type { display: flex; align-items: flex-start; gap: 8px; text-align: left; min-height: 52px; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; color: #334155; cursor: pointer; font-family: inherit; }
+        .pw-type b { display: block; font-size: 13px; }
+        .pw-type small { display: block; font-size: 11px; color: #64748b; line-height: 1.4; margin-top: 1px; }
+        .pw-type i { flex: none; width: 18px; height: 18px; border: 2px solid #94a3b8; border-radius: 5px; margin-top: 1px; display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 12px; font-weight: 900; color: #fff; }
+        .pw-type[aria-pressed="true"] { border-color: #d97706; background: #fffbeb; }
+        .pw-type[aria-pressed="true"] i { background: #d97706; border-color: #d97706; }
+        .pw-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .pw-chip { font-size: 12px; font-weight: 500; padding: 8px 11px; border: 1px solid #cbd5e1; border-radius: 999px; background: #fff; color: #334155; cursor: pointer; font-family: inherit; }
+        .pw-chip[aria-pressed="true"] { background: #0f766e; border-color: #0f766e; color: #fff; font-weight: 700; }
+
+        .pw-sec { border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .pw-sec + .pw-sec { margin-top: 12px; }
+        .pw-sec-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; background: #f1f5f9; padding: 8px 10px; font-size: 13px; font-weight: 700; color: #0f172a; }
+        .pw-sec-h small { font-size: 11px; font-weight: 500; color: #64748b; }
+        .pw-item { padding: 10px; border-top: 1px solid #e2e8f0; }
+        .pw-item-n { background: #fff7ed; box-shadow: inset 4px 0 0 #ea580c; }
+        .pw-item-t { font-size: 13px; line-height: 1.55; color: #1e293b; margin: 0 0 7px; overflow-wrap: anywhere; }
+        .pw-cite { display: inline-block; font-size: 11px; color: #1d4ed8; text-decoration: underline; white-space: nowrap; }
+        .pw-rec { display: inline-block; font-size: 10.5px; font-weight: 700; color: #6d28d9; background: #ede9fe; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+        .pw-ansrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+        .pw-seg { display: inline-flex; flex: none; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+        .pw-seg button { min-width: 58px; min-height: 38px; padding: 0 10px; font-size: 12px; font-weight: 700; color: #475569; background: #fff; border: 0; border-left: 1px solid #cbd5e1; cursor: pointer; font-family: inherit; }
+        .pw-seg button:first-child { border-left: 0; }
+        .pw-seg button[aria-pressed="true"][data-v="Y"] { background: #059669; color: #fff; }
+        .pw-seg button[aria-pressed="true"][data-v="N"] { background: #ea580c; color: #fff; }
+        .pw-seg button[aria-pressed="true"][data-v="NA"] { background: #64748b; color: #fff; }
+        .pw-ansrow .pw-in { flex: 1 1 150px; width: auto; }
+
+        .pw-gas { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; }
+        .pw-gas + .pw-gas { margin-top: 8px; }
+        .pw-gas-bad { border-color: #f87171; background: #fef2f2; }
+        .pw-gasgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+        .pw-gasgrid label { display: block; font-size: 11px; color: #475569; min-width: 0; }
+        .pw-gasgrid .pw-in { margin-top: 2px; padding: 8px 6px; }
+        .pw-in.pw-bad { border-color: #dc2626; background: #fee2e2; color: #991b1b; font-weight: 700; }
+        .pw-gas-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: #334155; }
+        .pw-gas-head span { flex: 1; }
+        .pw-verdict { font-size: 12px; font-weight: 700; margin: 6px 0 0; }
+        .pw-v-ok { color: #047857; } .pw-v-bad { color: #b91c1c; } .pw-v-none { color: #94a3b8; font-weight: 500; }
+        .pw-line { display: flex; gap: 6px; align-items: center; }
+        .pw-line + .pw-line { margin-top: 6px; }
+        .pw-line .pw-in { flex: 1 1 0; }
+        .pw-line .pw-w30 { flex: 0 0 30%; }
+        .pw-ck { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #1e293b; padding: 7px 0; line-height: 1.5; cursor: pointer; }
+        .pw-ck input { width: 20px; height: 20px; flex: none; margin: 1px 0 0; accent-color: #059669; }
+        .pw-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .pw-hist li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; }
+        .pw-hist-t { flex: 1 1 150px; min-width: 0; font-size: 12px; font-weight: 700; color: #1e293b; overflow-wrap: anywhere; }
+        .pw-hist-t small { display: block; font-size: 11px; font-weight: 400; color: #64748b; }
+        .pw-opt { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; cursor: pointer; font-family: inherit; }
+        .pw-opt:hover { border-color: #059669; background: #f0fdf4; }
+        .pw-opt b { display: block; font-size: 14px; color: #1e293b; margin: 6px 0 2px; }
+        .pw-opt span { display: block; font-size: 12px; color: #64748b; line-height: 1.5; }
+        .pw-opt em { display: inline-block; font-style: normal; font-size: 11px; font-weight: 700; color: #047857; background: #d1fae5; border-radius: 4px; padding: 1px 7px; }
+        .pw-modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(2,6,23,.6); }
+        .pw-modal-box { background: #fff; border-radius: 16px; max-width: 640px; width: 100%; max-height: 88vh; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .pw-modal-list { display: grid; gap: 10px; }
+        .pw-toast { position: fixed; right: 16px; bottom: 16px; left: 16px; max-width: 420px; margin-left: auto; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.2); font-size: 12px; font-weight: 700; color: #fff; background: #059669; }
+        .pw-toast-dark { background: #1e293b; }
+        .pw-prevbar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; font-weight: 700; color: #475569; }
+        .pw-prevbar small { font-size: 11px; font-weight: 400; color: #94a3b8; }
+        button:focus-visible, a:focus-visible, .pw-in:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
+        @media (max-width: 640px) {
+            .pw-in { font-size: 16px; padding: 10px; }   /* 16px 미만이면 iOS가 입력할 때 화면을 확대한다 */
+            .pw-g3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .pw-gasgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #app > header { position: static; padding: 10px 14px; }   /* 좁은 화면에서는 머리띠가 화면을 가리지 않게 고정하지 않는다 */
+            .pw-seg { flex: 1 1 100%; }
+            .pw-seg button { flex: 1; min-height: 44px; font-size: 13px; }
+            .pw-ansrow .pw-in { flex-basis: 100%; }
+        }
+        @media (max-width: 430px) {
+            .pw-g2.pw-fold, .pw-types { grid-template-columns: 1fr; }
+            .pw-line { flex-wrap: wrap; }
+            .pw-line .pw-in, .pw-line .pw-w30 { flex: 1 1 40%; }
+        }
+
+        /* ---- A4 문서 */
+        .pd { font-size: 10.5px; line-height: 1.42; }
+        .pd-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; border-bottom: 2.5px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px; }
+        .pd-title { font-size: 25px; font-weight: 900; letter-spacing: .12em; margin: 0; line-height: 1.2; }
+        .pd-sub { font-size: 10px; color: #475569; margin: 4px 0 0; }
+        .pd-no { font-size: 11px; margin: 4px 0 0; }
+        .pd-no b { font-size: 13px; }
+        .pd-t { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0 0 9px; }
+        .pd-t th, .pd-t td { border: 1px solid #1e293b; padding: 3px 5px; vertical-align: middle; overflow-wrap: anywhere; word-break: break-word; text-align: left; font-weight: 400; }
+        .pd-t th { background: #f1f5f9; font-weight: 700; text-align: center; }
+        .pd-t .c { text-align: center; }
+        .pd-t .cap { background: #e2e8f0; font-size: 11.5px; text-align: left; }
+        .pd-t .cap small { font-weight: 400; color: #475569; }
+        .pd-sign { border-collapse: collapse; flex: none; }
+        .pd-sign th, .pd-sign td { border: 1px solid #1e293b; text-align: center; width: 27mm; font-size: 10px; padding: 2px; }
+        .pd-sign th { background: #f1f5f9; font-weight: 700; }
+        .pd-sign td { height: 12mm; vertical-align: bottom; color: #334155; overflow-wrap: anywhere; }
+        .pd-sign .who { height: auto; font-size: 9.5px; color: #475569; vertical-align: middle; }
+        .pd-pre { white-space: pre-wrap; }
+        .pd-box { display: inline-block; width: 10px; height: 10px; border: 1.2px solid #0f172a; margin-right: 3px; vertical-align: -1px; text-align: center; font-size: 9px; line-height: 9px; font-weight: 900; }
+        .pd-ty { display: inline-block; margin-right: 12px; white-space: nowrap; }
+        .pd-ref { font-size: 9.5px; color: #475569; }
+        .pd-n { font-weight: 900; color: #b91c1c; }
+        .pd-dim { color: #94a3b8; font-size: 9.5px; }
+        .pd-bad { background: #fee2e2 !important; color: #b91c1c; font-weight: 900; }
+        .pd-alert { border: 2px solid #b91c1c; color: #b91c1c; font-weight: 700; padding: 5px 8px; margin: 0 0 9px; font-size: 11.5px; }
+        .pd-foot { font-size: 9.5px; color: #475569; line-height: 1.6; border-top: 1px solid #94a3b8; padding-top: 6px; margin-top: 4px; }
+        .pd-foot p { margin: 0; }
+        .pd-photo { border: 1px solid #1e293b; padding: 8px; text-align: center; margin: 0 0 9px; }
+        .pd-photo img { max-height: 60mm; max-width: 100%; object-fit: contain; }
+        .w8 { width: 8%; } .w10 { width: 10%; } .w12 { width: 12%; } .w14 { width: 14%; } .w16 { width: 16%; } .w18 { width: 18%; } .w20 { width: 20%; } .w24 { width: 24%; } .w5 { width: 5%; }
+
+        /* 현장 게시용 */
+        .pp-band { background: #b91c1c; color: #fff; text-align: center; font-size: 34px; font-weight: 900; letter-spacing: .1em; padding: 10px 6px; margin: 0; }
+        .pp-band small { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0; margin-top: 2px; }
+        .pp-t { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0 0 10px; }
+        .pp-t th, .pp-t td { border: 2px solid #0f172a; padding: 8px 10px; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; text-align: left; }
+        .pp-t th { width: 25%; background: #f1f5f9; font-size: 16px; font-weight: 700; text-align: center; }
+        .pp-t td { font-size: 20px; font-weight: 700; line-height: 1.35; }
+        .pp-t td.big { font-size: 27px; font-weight: 900; }
+        .pp-t td.sm { font-size: 14px; font-weight: 500; line-height: 1.55; }
+        .pp-t td.red { color: #b91c1c; }
+        .pp-list { margin: 0; padding-left: 18px; list-style: disc; font-size: 13px; font-weight: 500; line-height: 1.6; }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div id="app" class="min-h-screen flex flex-col" v-cloak>
+        <header class="bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center space-x-3">
+                    <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold mr-1">← SafePlum</a>
+                    <span class="bg-emerald-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-black">
+                        <i class="ph-bold ph-shield-check text-xl"></i>
+                    </span>
+                    <div>
+                        <h1 class="text-base font-bold tracking-tight">안전작업허가서 작성기</h1>
+                        <p class="text-[11px] text-slate-400">화기 · 밀폐공간 · 고소 · 정전 · 굴착 · 중량물 — 사내 허가 절차용 보조양식</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="cm-save" role="status" aria-live="polite">{{ saveMsg }}</span>
+                    <button type="button" id="btnPrint" @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
+                    </button>
+                    <button type="button" id="btnPdf" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                        <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
+                        <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
+                        <span>{{ isGeneratingPDF ? 'PDF 만드는 중…' : 'PDF 파일로 받기' }}</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- 입력 -->
+            <div class="lg:col-span-5 no-print pw-stack" style="min-width:0">
+                <div v-if="oldFormAvailable" class="pw-old">
+                    <p>예전 <b>안전작업허가서 서식</b>에 적어 둔 내용이 이 기기에 남아 있습니다. 여기로 가져올 수 있습니다(예전 내용은 지워지지 않습니다).</p>
+                    <div class="pw-row">
+                        <button type="button" id="importOld" class="pw-btn pw-btn-pri" @click="importOldForm">가져오기</button>
+                        <button type="button" class="pw-btn" @click="dismissOld">닫기</button>
+                    </div>
+                </div>
+
+                <p class="pw-notice">안전작업허가서는 일반 사업장에서는 <b>법정 서식이 아닌 사내 절차 문서</b>입니다(공정안전보고서 대상 사업장은 안전운전계획에 안전작업허가가 포함됩니다). 아래 확인 항목에는 근거가 되는 「산업안전보건기준에 관한 규칙」 조문을 붙였고, 조문에 없는 항목은 <span class="pw-rec">권장(사내 기준)</span>으로 표시했습니다.</p>
+
+                <!-- 문서 종류 -->
+                <div class="pw-card">
+                    <span class="pw-lb" style="font-weight:700">문서 종류 선택</span>
+                    <div class="pw-docs">
+                        <button v-for="item in docTypes" :key="item.value" type="button" class="pw-doc" :data-doc="item.value" @click="changeDocType(item.value)" :aria-pressed="form.docType === item.value ? 'true' : 'false'">
+                            <i :class="[item.icon, 'text-base']"></i>
+                            <span>{{ item.label }}</span>
+                        </button>
+                    </div>
+                    <p v-if="form.docType === 'post'" class="pw-hint">작업 장소에 붙이는 큰 글씨 요약입니다. 화재위험작업은 작업내용·작업일시·안전점검 및 조치 사항을 작업장소에 서면으로 게시해야 하고(기준규칙 제241조제4항), 밀폐공간 작업은 작업 시작 전 확인 사항을 출입구에 게시해야 합니다(제619조제3항).</p>
+                    <p v-if="form.docType === 'ledger'" class="pw-hint">아래 "보관"한 허가서와 지금 작성 중인 허가서를 모은 목록입니다. 내용을 고치려면 기록 목록에서 해당 허가서를 여세요.</p>
+                </div>
+
+                <!-- 1. 기본 정보 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-fill ph-info text-blue-500"></i> 1. 작업 개요</span>
+                        <button type="button" id="openEx" @click="openExModal" class="pw-btn pw-btn-sm"><i class="ph-fill ph-magic-wand"></i> 예시 불러오기</button>
+                    </h3>
+                    <div class="pw-g2 pw-fold">
+                        <div>
+                            <label class="pw-lb" for="pNo">허가번호</label>
+                            <div class="pw-line">
+                                <input id="pNo" :value="form.no" @input="onNoInput" type="text" class="pw-in" autocomplete="off">
+                                <button v-if="!form.noAuto" type="button" class="pw-btn pw-btn-sm" @click="autoNo" title="연도-일련번호로 다시 매깁니다">자동</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pStatus">진행 상태</label>
+                            <select id="pStatus" v-model="form.status" class="pw-in">
+                                <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pCompany">사업장(회사)명</label>
+                            <input id="pCompany" v-model="form.company" type="text" placeholder="예: (주)한국산업안전 1공장" class="pw-in">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pTitle">작업명</label>
+                            <input id="pTitle" v-model="form.title" type="text" placeholder="예: 2호 저장탱크 내부 용접 보수" class="pw-in">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pPlace">작업 장소</label>
+                            <input id="pPlace" v-model="form.place" type="text" placeholder="예: B동 옥외 탱크야드" class="pw-in">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pEquip">대상 설비·기기</label>
+                            <input id="pEquip" v-model="form.equip" type="text" placeholder="예: T-102 저장탱크" class="pw-in">
+                        </div>
+                        <div class="pw-span">
+                            <label class="pw-lb" for="pDesc">작업 내용</label>
+                            <textarea id="pDesc" v-model="form.desc" rows="2" placeholder="무엇을, 어떤 방법·장비로 하는지" class="pw-in"></textarea>
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pContractor">작업 업체(부서)</label>
+                            <input id="pContractor" v-model="form.contractor" type="text" placeholder="예: 가나설비(주)" class="pw-in">
+                        </div>
+                        <div>
+                            <span class="pw-lb">도급 여부</span>
+                            <label class="pw-ck" style="padding:8px 0 0"><input type="checkbox" id="pIsContract" v-model="form.isContract"> 도급(협력업체) 작업</label>
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pLead">작업 책임자(신청자)</label>
+                            <input id="pLead" v-model="form.lead" type="text" placeholder="소속·성명" class="pw-in">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pLeadTel">책임자 연락처</label>
+                            <input id="pLeadTel" v-model="form.leadTel" type="tel" placeholder="010-0000-0000" class="pw-in">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pStart">허가 시작</label>
+                            <input id="pStart" v-model="form.start" type="datetime-local" class="pw-in">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pEnd">허가 종료</label>
+                            <input id="pEnd" v-model="form.end" type="datetime-local" class="pw-in">
+                        </div>
+                    </div>
+                    <p class="pw-hint">허가 유효 시간을 당일·해당 작업조로 한정하고 야간·연장·다음 날 작업은 다시 허가받게 하는 것은 법령이 아니라 <b>사내 기준</b>으로 정하는 사항입니다.</p>
+                    <p v-for="(c, i) in timeChecks" :key="'tc-' + i" class="cm-warn pw-mt">{{ c }}</p>
+                </div>
+
+                <!-- 2. 작업 종류 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-bold ph-warning text-amber-600"></i> 2. 작업 종류 (여러 개 선택)</span><small>고르면 해당 확인 항목이 붙습니다</small></h3>
+                    <div class="pw-types">
+                        <button v-for="t in TYPES" :key="t.id" type="button" class="pw-type" :data-type="t.id" @click="toggleType(t.id)" :aria-pressed="hasType(t.id) ? 'true' : 'false'">
+                            <i aria-hidden="true">{{ hasType(t.id) ? '✓' : '' }}</i>
+                            <span><b>{{ t.label }}</b><small>{{ t.sub }}</small></span>
+                        </button>
+                    </div>
+                    <div v-if="hasType('etc')" class="pw-mt">
+                        <label class="pw-lb" for="pEtc">그 밖의 위험작업 이름</label>
+                        <input id="pEtc" v-model="form.etcName" type="text" placeholder="예: 방사선 투과검사, 고압 세척" class="pw-in">
+                    </div>
+                    <div class="pw-mt">
+                        <label class="pw-lb" for="pHaz">주요 위험요인</label>
+                        <textarea id="pHaz" v-model="form.hazards" rows="2" placeholder="예: 잔류 유증기 폭발, 산소결핍, 불티 비산, 추락" class="pw-in"></textarea>
+                    </div>
+                </div>
+
+                <!-- 3. 인원·지정 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-fill ph-users-three text-emerald-600"></i> 3. 작업 인원 · 지정</span><small>작업자 {{ workerCount }}명</small></h3>
+                    <div class="pw-g2 pw-fold">
+                        <div v-if="hasType('hot')">
+                            <label class="pw-lb" for="pFw">화재감시자 <a class="pw-cite" href="../../laws/krule/#j241-2" target="_blank" rel="noopener">기준규칙 제241조의2</a></label>
+                            <input id="pFw" v-model="form.fireWatch" type="text" placeholder="성명 · 배치 위치" class="pw-in">
+                        </div>
+                        <div v-if="hasType('hot')">
+                            <label class="pw-lb" for="pExt">소화기구 비치 <a class="pw-cite" href="../../laws/krule/#j241" target="_blank" rel="noopener">제241조제2항제3호</a></label>
+                            <input id="pExt" v-model="form.extinguisher" type="text" placeholder="예: 분말소화기 3.3kg 2대, 방화수" class="pw-in">
+                        </div>
+                        <div v-if="hasType('conf')">
+                            <label class="pw-lb" for="pAtt">감시인(밀폐공간 외부) <a class="pw-cite" href="../../laws/krule/#j623" target="_blank" rel="noopener">제623조</a></label>
+                            <input id="pAtt" v-model="form.attendant" type="text" placeholder="성명 · 연락 방법(무전 등)" class="pw-in">
+                        </div>
+                        <div v-if="hasType('conf')">
+                            <label class="pw-lb" for="pTester">농도 측정자(지정) <a class="pw-cite" href="../../laws/krule/#j619-2" target="_blank" rel="noopener">제619조의2</a></label>
+                            <input id="pTester" v-model="form.gasTester" type="text" placeholder="성명" class="pw-in">
+                        </div>
+                        <div v-if="needsDirector">
+                            <label class="pw-lb" for="pDir">작업지휘자·유도자·신호수</label>
+                            <input id="pDir" v-model="form.director" type="text" placeholder="성명 · 역할" class="pw-in">
+                        </div>
+                        <div class="pw-span">
+                            <label class="pw-lb" for="pEmg">비상연락처 · 대피 장소</label>
+                            <input id="pEmg" v-model="form.emergency" type="text" placeholder="예: 방재실 내선 119, 안전팀 010-…, 집결지 정문 주차장" class="pw-in">
+                        </div>
+                        <div v-if="hasType('conf')" class="pw-span">
+                            <label class="pw-lb" for="pGasRisk">불활성가스·유해가스 누출·유입·발생 가능성 검토 및 조치 <a class="pw-cite" href="../../laws/krule/#j619" target="_blank" rel="noopener">제619조제2항제4호</a></label>
+                            <textarea id="pGasRisk" v-model="form.gasRisk" rows="2" placeholder="예: 연결 배관 맹판 설치, 질소 퍼지 라인 차단·잠금" class="pw-in"></textarea>
+                        </div>
+                    </div>
+                    <div class="pw-mt">
+                        <div class="pw-row" style="justify-content:space-between">
+                            <span class="pw-lb" style="margin:0;font-weight:700">작업자 명단</span>
+                            <button type="button" id="addWorker" class="pw-add" @click="addWorker"><i class="ph-bold ph-plus-circle"></i> 작업자 추가</button>
+                        </div>
+                        <p v-if="!workers.length" class="pw-hint" style="margin-top:0">명단을 비워 두면 인쇄물에 손으로 적을 빈 칸 4줄이 나옵니다.</p>
+                        <div v-for="(w, i) in workers" :key="'w-' + i" class="pw-line">
+                            <input v-model="w.org" type="text" placeholder="소속" aria-label="작업자 소속" class="pw-in pw-w30">
+                            <input v-model="w.name" type="text" placeholder="성명" aria-label="작업자 성명" class="pw-in">
+                            <button type="button" class="pw-x" @click="workers.splice(i, 1)" aria-label="이 작업자 삭제"><i class="ph-bold ph-x"></i></button>
+                        </div>
+                    </div>
+                    <div class="pw-mt">
+                        <div class="pw-row" style="justify-content:space-between">
+                            <span class="pw-lb" style="margin:0;font-weight:700">필요 보호구</span>
+                            <button type="button" id="suggestPpe" class="pw-btn pw-btn-sm" @click="suggestPpe">작업 종류에 맞춰 고르기</button>
+                        </div>
+                        <div class="pw-chips pw-mt">
+                            <button v-for="p in PPE" :key="p" type="button" class="pw-chip" @click="togglePpe(p)" :aria-pressed="form.ppe.includes(p) ? 'true' : 'false'">{{ p }}</button>
+                        </div>
+                        <input v-model="form.ppeEtc" type="text" placeholder="그 밖의 보호구 (예: 용접용 가죽장갑, 귀마개)" aria-label="그 밖의 보호구" class="pw-in pw-mt">
+                        <p class="pw-hint">보호구는 작업조건에 맞는 것을 작업하는 근로자 수 이상으로 지급해야 합니다(<a class="pw-a" href="../../laws/krule/#j32" target="_blank" rel="noopener">기준규칙 제32조제1항</a>).</p>
+                    </div>
+                </div>
+
+                <!-- 4. 확인 항목 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-bold ph-check text-emerald-600"></i> 4. 작업 전 안전조치 확인</span><small>예 {{ tally.Y }} · 아니오 {{ tally.N }} · 해당없음 {{ tally.NA }} · 미확인 {{ tally.blank }}</small></h3>
+                    <p v-if="!activeTypes.length" class="cm-warn" style="margin-bottom:10px">작업 종류를 고르면 그 작업의 확인 항목이 여기에 붙습니다.</p>
+                    <p class="pw-hint pw-hint-r" style="margin:0 0 10px">현장에서 실제로 확인한 뒤에 표시하세요. '아니오'가 하나라도 있으면 조치 후 다시 확인하기 전에는 승인하지 않는 것이 원칙입니다(사내 기준).</p>
+                    <div v-for="sec in sections" :key="sec.id" class="pw-sec" :data-sec="sec.id">
+                        <div class="pw-sec-h"><span>{{ sec.label }}</span><small>{{ sec.items.length }}항목</small></div>
+                        <div v-for="it in sec.items" :key="it.id" class="pw-item" :class="{ 'pw-item-n': checks[it.id].v === 'N' }" :data-item="it.id">
+                            <p class="pw-item-t">{{ it.t }}
+                                <a v-if="it.c" class="pw-cite" v-bind="{ href: it.href }" target="_blank" rel="noopener">{{ it.cite }}</a>
+                                <span v-else class="pw-rec">권장(사내 기준)</span>
+                            </p>
+                            <div class="pw-ansrow">
+                                <div class="pw-seg" role="group" :aria-label="it.t">
+                                    <button v-for="o in ANS" :key="o.v" type="button" :data-v="o.v" @click="setAns(checks[it.id], o.v)" :aria-pressed="checks[it.id].v === o.v ? 'true' : 'false'">{{ o.l }}</button>
+                                </div>
+                                <input v-model="checks[it.id].note" type="text" :placeholder="checks[it.id].v === 'N' ? '미충족 사유·조치 계획' : '비고'" :aria-label="it.t + ' — 비고'" class="pw-in">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pw-sec" data-sec="custom">
+                        <div class="pw-sec-h"><span>사업장 추가 확인 항목 <span class="pw-rec">사내 기준</span></span>
+                            <button type="button" id="addCustom" class="pw-add" style="padding:2px 4px" @click="addCustom"><i class="ph-bold ph-plus-circle"></i> 항목 추가</button>
+                        </div>
+                        <p v-if="!custom.length" class="pw-hint" style="padding:8px 10px;margin:0">사업장 규정에 있는 확인 항목을 더할 수 있습니다.</p>
+                        <div v-for="(c, i) in custom" :key="'cu-' + i" class="pw-item" :class="{ 'pw-item-n': c.v === 'N' }">
+                            <div class="pw-line" style="margin-bottom:7px">
+                                <input v-model="c.t" type="text" placeholder="확인 항목" aria-label="추가 확인 항목" class="pw-in">
+                                <button type="button" class="pw-x" @click="custom.splice(i, 1)" aria-label="이 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                            </div>
+                            <div class="pw-ansrow">
+                                <div class="pw-seg" role="group" aria-label="추가 확인 항목 결과">
+                                    <button v-for="o in ANS" :key="o.v" type="button" :data-v="o.v" @click="setAns(c, o.v)" :aria-pressed="c.v === o.v ? 'true' : 'false'">{{ o.l }}</button>
+                                </div>
+                                <input v-model="c.note" type="text" placeholder="비고" aria-label="추가 확인 항목 비고" class="pw-in">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. 가스 농도 -->
+                <div v-if="showGas" class="pw-card" id="gasCard">
+                    <h3 class="pw-h"><span><i class="ph-fill ph-warning-circle text-rose-600"></i> 5. 산소·유해가스 농도 측정 기록</span>
+                        <button type="button" id="addGas" class="pw-add" style="padding:2px 4px" @click="addGas"><i class="ph-bold ph-plus-circle"></i> 측정 추가</button>
+                    </h3>
+                    <p class="pw-hint" style="margin:0 0 8px"><b>적정공기</b>(<a class="pw-a" href="../../laws/krule/#j618" target="_blank" rel="noopener">기준규칙 제618조제3호</a>): 산소 18% 이상 23.5% 미만 · 이산화탄소 1.5% 미만 · 일산화탄소 30ppm 미만 · 황화수소 10ppm 미만. 작업을 시작하기 전(일시 중단 후 다시 시작할 때 포함) 측정합니다(제619조의2제1항). 가연성가스(%LEL)는 적정공기 항목이 아니며 사내 기준으로 적는 칸입니다.</p>
+                    <p v-if="!gas.length" class="cm-warn">측정 기록이 없습니다.</p>
+                    <div v-for="(g, i) in gasView" :key="'g-' + i" class="pw-gas" :class="{ 'pw-gas-bad': g.j.bad }">
+                        <div class="pw-gas-head"><span>측정 {{ i + 1 }}</span>
+                            <button type="button" class="pw-x" @click="gas.splice(i, 1)" aria-label="이 측정 기록 삭제"><i class="ph-bold ph-x"></i></button>
+                        </div>
+                        <div class="pw-gasgrid">
+                            <label>측정 시각<input v-model="g.r.time" type="time" class="pw-in" aria-label="측정 시각"></label>
+                            <label>측정 위치<input v-model="g.r.place" type="text" class="pw-in" placeholder="예: 맨홀 하부" aria-label="측정 위치"></label>
+                            <label class="pw-span2">측정자<input v-model="g.r.by" type="text" class="pw-in" aria-label="측정자"></label>
+                            <label>O₂ (%)<input v-model="g.r.o2" type="text" inputmode="decimal" class="pw-in" :class="{ 'pw-bad': g.j.o2 === 'bad' }" aria-label="산소 농도(%)"></label>
+                            <label>CO₂ (%)<input v-model="g.r.co2" type="text" inputmode="decimal" class="pw-in" :class="{ 'pw-bad': g.j.co2 === 'bad' }" aria-label="이산화탄소 농도(%)"></label>
+                            <label>CO (ppm)<input v-model="g.r.co" type="text" inputmode="decimal" class="pw-in" :class="{ 'pw-bad': g.j.co === 'bad' }" aria-label="일산화탄소 농도(ppm)"></label>
+                            <label>H₂S (ppm)<input v-model="g.r.h2s" type="text" inputmode="decimal" class="pw-in" :class="{ 'pw-bad': g.j.h2s === 'bad' }" aria-label="황화수소 농도(ppm)"></label>
+                            <label>가연성 (%LEL)<input v-model="g.r.lel" type="text" inputmode="decimal" class="pw-in" aria-label="가연성가스(%LEL)"></label>
+                        </div>
+                        <p class="pw-verdict" :class="g.j.bad ? 'pw-v-bad' : g.j.full ? 'pw-v-ok' : 'pw-v-none'">{{ g.j.text }}</p>
+                    </div>
+                    <p v-if="gasState.bad" id="gasStop" class="cm-stop pw-mt" role="alert">작업 불가 — 가장 최근 측정값이 적정공기 기준을 벗어났습니다({{ gasState.why }}). 환기하거나 공기호흡기 또는 송기마스크를 지급해 착용하게 하는 등 조치한 뒤 다시 측정하세요(기준규칙 제619조의2제3항).</p>
+                </div>
+
+                <!-- 6. 에너지 차단·관련 문서 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-bold ph-file-text text-slate-600"></i> {{ showGas ? 6 : 5 }}. 에너지 차단 · 관련 문서</span></h3>
+                    <label class="pw-lb" for="pLoto">에너지 차단·잠금 내용 (전기·기계·배관 등)</label>
+                    <textarea id="pLoto" v-model="form.loto" rows="2" placeholder="예: MCC-3 차단기 OFF·잠금·꼬리표(홍길동), 입·출구 밸브 닫고 맹판 설치" class="pw-in"></textarea>
+                    <label class="pw-ck"><input type="checkbox" v-model="form.refRisk"> 이 작업의 위험성평가를 확인(첨부)했다</label>
+                    <label class="pw-ck"><input type="checkbox" v-model="form.refTbm"> 작업 전 안전점검회의(TBM)를 했다</label>
+                    <div class="pw-row pw-mt">
+                        <a class="pw-btn pw-btn-sm" href="../loto/" target="_blank" rel="noopener">잠금·표지(LOTO) 도구 <i class="ph-bold ph-arrow-right"></i></a>
+                        <a class="pw-btn pw-btn-sm" href="../risk/" target="_blank" rel="noopener">위험성평가 <i class="ph-bold ph-arrow-right"></i></a>
+                        <a class="pw-btn pw-btn-sm" href="../tbm/" target="_blank" rel="noopener">TBM 일지 <i class="ph-bold ph-arrow-right"></i></a>
+                    </div>
+                    <div class="pw-mt">
+                        <label class="pw-lb" for="pCond">허가 조건 · 특이사항</label>
+                        <textarea id="pCond" v-model="form.conditions" rows="2" placeholder="예: 강풍 시 작업 중지, 점심시간 화기 작업 금지" class="pw-in"></textarea>
+                    </div>
+                </div>
+
+                <!-- 7. 결재 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-bold ph-users text-slate-600"></i> {{ showGas ? 7 : 6 }}. 신청 → 검토 → 승인</span></h3>
+                    <div class="pw-g3">
+                        <div>
+                            <span class="pw-lb">신청 (작업 책임자)</span>
+                            <input :value="form.lead" type="text" class="pw-in" disabled aria-label="신청자(작업 책임자)" placeholder="1번 칸에서 입력">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pReviewer">검토 (안전관리자 등)</label>
+                            <input id="pReviewer" v-model="form.reviewer" type="text" placeholder="직책·성명" class="pw-in">
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="pApprover">승인 (허가권자)</label>
+                            <input id="pApprover" v-model="form.approver" type="text" placeholder="직책·성명" class="pw-in">
+                        </div>
+                    </div>
+                    <div id="autoChecks" class="pw-mt" style="display:grid;gap:6px">
+                        <p v-for="(c, i) in checksOut" :key="'chk-' + i" :class="c.lv === 'ok' ? 'cm-ok' : c.lv === 'stop' ? 'cm-stop' : 'cm-warn'">{{ c.text }}</p>
+                    </div>
+                </div>
+
+                <!-- 8. 작업 중·완료 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-bold ph-arrows-clockwise text-slate-600"></i> {{ showGas ? 8 : 7 }}. 작업 중 점검 · 완료 확인</span>
+                        <button type="button" id="addMid" class="pw-add" style="padding:2px 4px" @click="addMid"><i class="ph-bold ph-plus-circle"></i> 점검 기록 추가</button>
+                    </h3>
+                    <p v-if="!mid.length" class="pw-hint" style="margin-top:0">작업 중 순회 점검한 시각과 내용을 적습니다. 비워 두면 인쇄물에 빈 칸 2줄이 나옵니다.</p>
+                    <div v-for="(m, i) in mid" :key="'m-' + i" class="pw-line">
+                        <input v-model="m.time" type="time" aria-label="점검 시각" class="pw-in pw-w30">
+                        <input v-model="m.note" type="text" placeholder="점검 내용·지적 사항" aria-label="점검 내용" class="pw-in">
+                        <input v-model="m.by" type="text" placeholder="점검자" aria-label="점검자" class="pw-in pw-w30">
+                        <button type="button" class="pw-x" @click="mid.splice(i, 1)" aria-label="이 점검 기록 삭제"><i class="ph-bold ph-x"></i></button>
+                    </div>
+                    <div style="border-top:1px solid #f1f5f9;margin-top:12px;padding-top:6px">
+                        <label v-if="hasType('hot')" class="pw-ck"><input type="checkbox" id="dFire" v-model="form.doneFire"> 잔불·불티가 없음을 확인했다 <span class="pw-rec">권장(사내 기준)</span></label>
+                        <label v-if="hasType('conf')" class="pw-ck"><input type="checkbox" v-model="form.doneCount"> 퇴장 인원을 점검해 전원 나온 것을 확인했다 (제621조)</label>
+                        <label v-if="hasType('elec')" class="pw-ck"><input type="checkbox" v-model="form.doneLoto"> 작업기구·단락 접지기구를 제거하고, 잠금장치·꼬리표는 설치한 사람이 직접 철거했다 (제319조제3항)</label>
+                        <label class="pw-ck"><input type="checkbox" v-model="form.doneTidy"> 작업장 정리정돈, 자재·공구 회수를 확인했다 <span class="pw-rec">권장(사내 기준)</span></label>
+                        <label class="pw-ck"><input type="checkbox" v-model="form.doneRestore"> 떼어 낸 방호장치·덮개·안전난간 등을 원래대로 복구했다 <span class="pw-rec">권장(사내 기준)</span></label>
+                    </div>
+                    <div class="pw-g2 pw-fold pw-mt">
+                        <div>
+                            <label class="pw-lb" for="dTime">작업 완료 시각</label>
+                            <div class="pw-line">
+                                <input id="dTime" v-model="form.doneTime" type="datetime-local" class="pw-in">
+                                <button type="button" id="doneNow" class="pw-btn pw-btn-sm" @click="doneNow">지금</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="pw-lb" for="dBy">완료 확인자</label>
+                            <input id="dBy" v-model="form.doneBy" type="text" placeholder="직책·성명" class="pw-in">
+                        </div>
+                        <div class="pw-span">
+                            <label class="pw-lb" for="dNote">완료 메모</label>
+                            <input id="dNote" v-model="form.doneNote" type="text" placeholder="예: 17:40 잔불 감시 종료, 맹판 제거 후 인계" class="pw-in">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 사진 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-fill ph-camera text-slate-600"></i> 현장 사진 첨부</span><small>저장되지 않음</small></h3>
+                    <div class="pw-row">
+                        <input type="file" accept="image/*" @change="handleFileUpload" id="photo-input" class="hidden">
+                        <label for="photo-input" class="pw-btn"><i class="ph-bold ph-upload-simple"></i> 사진 파일 선택</label>
+                        <span class="pw-hint" style="margin:0">{{ photoDataUrl ? '사진 1장 첨부됨' : '선택된 사진 없음' }}</span>
+                        <button v-if="photoDataUrl" type="button" class="pw-btn pw-btn-sm" @click="removePhoto">삭제</button>
+                    </div>
+                    <p class="pw-hint">사진은 지금 화면의 허가서 인쇄·PDF에만 들어가고 이 기기에 저장되지 않습니다. 새로 고치면 사라집니다.</p>
+                </div>
+
+                <!-- 보관 -->
+                <div class="pw-card">
+                    <h3 class="pw-h"><span><i class="ph-bold ph-floppy-disk text-slate-600"></i> 보관 · 허가 기록</span><small>{{ history.length }} / {{ HIST_MAX }}건</small></h3>
+                    <div class="pw-row">
+                        <button type="button" id="archiveOnly" class="pw-btn pw-btn-pri" @click="archiveOnly">이 허가서 보관</button>
+                        <button type="button" id="archiveNew" class="pw-btn" @click="archiveAndNew">보관하고 새 허가서</button>
+                        <button type="button" id="dupCur" class="pw-btn" @click="duplicateCurrent">복제해서 새 허가 작성</button>
+                        <button type="button" id="resetBtn" class="pw-btn" @click="resetToBlank"><i class="ph-bold ph-arrow-counter-clockwise"></i> 새로 쓰기</button>
+                    </div>
+                    <p class="pw-hint">보관한 허가서는 "허가 대장"에 모입니다. <b>복제</b>하면 작업 개요·인원·보호구는 그대로 두고, 확인 결과·가스 측정·결재·완료 기록은 비운 새 허가서(새 번호·오늘 날짜)가 됩니다 — 반복 작업도 매번 다시 확인해야 하기 때문입니다. 이 기기 브라우저에만 최대 {{ HIST_MAX }}건 보관합니다.</p>
+                    <ul v-if="history.length" class="pw-hist pw-mt">
+                        <li v-for="h in history" :key="h.id">
+                            <span class="pw-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
+                            <button type="button" class="pw-btn pw-btn-sm" @click="openHistory(h.id)">열기</button>
+                            <button type="button" class="pw-btn pw-btn-sm" @click="duplicateHistory(h.id)">복제</button>
+                            <button type="button" class="pw-btn pw-btn-sm" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
+                        </li>
+                    </ul>
+                    <p v-else class="pw-hint">보관한 허가서가 아직 없습니다.</p>
+                </div>
+
+                <div class="pw-card">
+                    <h3 class="pw-h"><span>법령 메모</span></h3>
+                    <ul class="cm-law">
+                        <li>일반 사업장의 "안전작업허가서"는 법정 서식이 아니라 사내 절차 문서입니다. 공정안전보고서 제출 대상 사업장은 보고서의 안전운전계획에 안전작업허가가 포함됩니다(<a class="pw-a" href="../../laws/rule/#j50" target="_blank" rel="noopener">산업안전보건법 시행규칙 제50조제1항제3호다목</a>).</li>
+                        <li>화재위험작업: 가연성물질이 있는 장소에서는 작업시작 전에 제241조제2항 각 호의 사항을 확인하고 안전조치를 이행한 후 작업하게 해야 합니다(<a class="pw-a" href="../../laws/krule/#j241" target="_blank" rel="noopener">기준규칙 제241조제3항</a>).</li>
+                        <li>화재감시자: 작업반경 11미터 이내에 가연성물질이 있는 장소 등에서 용접·용단 작업을 하게 하는 경우 지정·배치해야 합니다. 같은 장소에서 상시·반복적으로 용접·용단작업을 할 때 경보용 설비·기구, 소화설비 또는 소화기가 갖추어진 경우에는 배치하지 않을 수 있습니다(<a class="pw-a" href="../../laws/krule/#j241-2" target="_blank" rel="noopener">제241조의2제1항</a>).</li>
+                        <li>밀폐공간: 산소 및 유해가스 농도의 측정·평가 결과는 측정·평가한 사람의 성명, 일시·장소 및 결과 등을 기록해 3년간 보존해야 합니다(<a class="pw-a" href="../../laws/krule/#j619-2" target="_blank" rel="noopener">제619조의2제4항</a>). 이 도구의 저장은 브라우저에만 남으므로 인쇄·PDF로 따로 보존하세요.</li>
+                        <li>정전 작업: 전로 차단은 제319조제2항 각 호의 절차에 따라 시행해야 합니다(<a class="pw-a" href="../../laws/krule/#j319" target="_blank" rel="noopener">제319조</a>).</li>
+                        <li>허가 유효 시간, 재허가, 결재 단계, 허가서 보존기간(밀폐공간 측정 기록 제외)은 법령에 정해져 있지 않으므로 사내 규정으로 정해 두세요.</li>
+                    </ul>
+                    <p class="pw-hint">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
+                </div>
+            </div>
+
+            <!-- 미리보기 -->
+            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
+                <div class="pw-prevbar no-print">
+                    <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> A4 실시간 미리보기</span>
+                    <small>A4 (210mm × 297mm)</small>
+                </div>
+
+                <div id="print-area" class="a4-container cm-zoom pd">
+
+                    <!-- [DOC 1] 안전작업허가서 -->
+                    <div v-if="form.docType === 'permit'" id="doc-permit">
+                        <div class="pd-top">
+                            <div style="min-width:0">
+                                <h2 class="pd-title">안전작업허가서</h2>
+                                <p class="pd-sub">사내 안전작업허가 절차용 보조양식 (법정 지정서식 아님)</p>
+                                <p class="pd-no">허가번호 <b>{{ form.no || '—' }}</b> &nbsp;·&nbsp; 상태 {{ form.status }}</p>
+                            </div>
+                            <table class="pd-sign" aria-label="결재">
+                                <tr><th>신청</th><th>검토</th><th>승인</th></tr>
+                                <tr><td>(서명)</td><td>(서명)</td><td>(서명)</td></tr>
+                                <tr><td class="who">{{ form.lead || '작업 책임자' }}</td><td class="who">{{ form.reviewer || '안전관리자 등' }}</td><td class="who">{{ form.approver || '허가권자' }}</td></tr>
+                            </table>
+                        </div>
+
+                        <p v-if="gasState.bad" class="pd-alert">작업 불가 — 최근 측정값이 적정공기 기준을 벗어남({{ gasState.why }}). 조치 후 다시 측정할 것.</p>
+                        <p v-else-if="tally.N" class="pd-alert">허가 조건 미충족 항목 {{ tally.N }}개 — 조치하고 다시 확인하기 전에는 승인하지 않음.</p>
+
+                        <table class="pd-t">
+                            <tr><th class="w14">사업장</th><td>{{ form.company }}</td><th class="w14">작업명</th><td>{{ form.title }}</td></tr>
+                            <tr><th>작업 장소</th><td>{{ form.place }}</td><th>대상 설비</th><td>{{ form.equip }}</td></tr>
+                            <tr><th>허가 유효 시간</th><td colspan="3"><b>{{ periodText }}</b></td></tr>
+                            <tr><th>작업 업체</th><td>{{ form.contractor }}<span v-if="form.isContract"> (도급)</span></td><th>작업 책임자</th><td>{{ form.lead }}<span v-if="form.leadTel"> · {{ form.leadTel }}</span></td></tr>
+                            <tr><th>작업 종류</th><td colspan="3"><span v-for="t in TYPES" :key="t.id" class="pd-ty"><span class="pd-box">{{ hasType(t.id) ? '✓' : '' }}</span>{{ t.id === 'etc' && form.etcName ? '기타(' + form.etcName + ')' : t.short }}</span></td></tr>
+                            <tr><th>작업 내용</th><td colspan="3" class="pd-pre">{{ form.desc }}</td></tr>
+                            <tr><th>주요 위험요인</th><td colspan="3" class="pd-pre">{{ form.hazards }}</td></tr>
+                            <tr><th>필요 보호구</th><td colspan="3">{{ ppeText }}</td></tr>
+                            <tr v-if="hasType('hot')"><th>화재감시자</th><td>{{ form.fireWatch }}</td><th>소화기구</th><td>{{ form.extinguisher }}</td></tr>
+                            <tr v-if="hasType('conf')"><th>감시인</th><td>{{ form.attendant }}</td><th>농도 측정자</th><td>{{ form.gasTester }}</td></tr>
+                            <tr v-if="hasType('conf')"><th>가스 누출·유입 검토</th><td colspan="3" class="pd-pre">{{ form.gasRisk }}</td></tr>
+                            <tr v-if="needsDirector"><th>지휘자·유도자</th><td colspan="3">{{ form.director }}</td></tr>
+                            <tr><th>비상연락·대피</th><td colspan="3">{{ form.emergency }}</td></tr>
+                            <tr><th>에너지 차단</th><td colspan="3" class="pd-pre">{{ form.loto }}</td></tr>
+                            <tr><th>관련 문서</th><td colspan="3"><span class="pd-ty"><span class="pd-box">{{ form.refRisk ? '✓' : '' }}</span>위험성평가 확인</span><span class="pd-ty"><span class="pd-box">{{ form.refTbm ? '✓' : '' }}</span>작업 전 안전점검회의(TBM)</span></td></tr>
+                            <tr v-if="form.conditions"><th>허가 조건</th><td colspan="3" class="pd-pre">{{ form.conditions }}</td></tr>
+                        </table>
+
+                        <table class="pd-t" id="pd-checks">
+                            <thead>
+                                <tr><th style="width:4%">No</th><th>작업 전 안전조치 확인 항목</th><th class="w16">근거 (기준규칙)</th><th class="w12">결과</th><th class="w18">비고</th></tr>
+                            </thead>
+                            <tbody v-for="sec in printSections" :key="'ps-' + sec.id">
+                                <tr><th colspan="5" class="cap">{{ sec.label }}</th></tr>
+                                <tr v-for="(it, i) in sec.items" :key="it.key">
+                                    <td class="c">{{ i + 1 }}</td>
+                                    <td>{{ it.t }}</td>
+                                    <td class="c pd-ref">{{ it.c ? it.pc : '권장(사내 기준)' }}</td>
+                                    <td class="c"><span v-if="it.v" :class="{ 'pd-n': it.v === 'N' }">{{ ANS_LABEL[it.v] }}</span><span v-else class="pd-dim" style="font-size:9px;white-space:nowrap">예·아니오·해당없음</span></td>
+                                    <td>{{ it.note }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table v-if="showGas" class="pd-t pd-keep" id="pd-gas">
+                            <colgroup><col style="width:9%"><col><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:11%"><col style="width:17%"></colgroup>
+                            <thead>
+                                <tr><th colspan="8" class="cap">산소·유해가스 농도 측정 기록 <small>— 적정공기: 산소 18% 이상 23.5% 미만, 이산화탄소 1.5% 미만, 일산화탄소 30ppm 미만, 황화수소 10ppm 미만 (기준규칙 제618조제3호)</small></th></tr>
+                                <tr><th class="w10">시각</th><th>측정 위치</th><th class="w10">O₂ (%)</th><th class="w10">CO₂ (%)</th><th class="w10">CO (ppm)</th><th class="w10">H₂S (ppm)</th><th class="w10">가연성 (%LEL)</th><th class="w14">측정자 / 판정</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(g, i) in gasView" :key="'pg-' + i">
+                                    <td class="c">{{ g.r.time }}</td><td>{{ g.r.place }}</td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.o2 === 'bad' }">{{ g.r.o2 }}</td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.co2 === 'bad' }">{{ g.r.co2 }}</td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.co === 'bad' }">{{ g.r.co }}</td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.h2s === 'bad' }">{{ g.r.h2s }}</td>
+                                    <td class="c">{{ g.r.lel }}</td>
+                                    <td class="c">{{ g.r.by }}<span v-if="g.j.short"> / <b :class="{ 'pd-n': g.j.bad }">{{ g.j.short }}</b></span></td>
+                                </tr>
+                                <tr v-for="n in gasBlankRows" :key="'pgb-' + n"><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            </tbody>
+                        </table>
+
+                        <table class="pd-t pd-keep" id="pd-workers">
+                            <colgroup><col style="width:5%"><col style="width:19%"><col style="width:26%"><col style="width:5%"><col style="width:19%"><col style="width:26%"></colgroup>
+                            <thead><tr><th colspan="6" class="cap">작업자 명단 <small>— 위 안전조치와 위험요인을 듣고 확인함</small></th></tr>
+                                <tr><th class="w5">No</th><th class="w20">소속</th><th>성명 / 서명</th><th class="w5">No</th><th class="w20">소속</th><th>성명 / 서명</th></tr></thead>
+                            <tbody>
+                                <tr v-for="(row, i) in workerRows" :key="'wr-' + i">
+                                    <td class="c">{{ row[0].n }}</td><td>{{ row[0].org }}</td><td>{{ row[0].name }}</td>
+                                    <td class="c">{{ row[1].n }}</td><td>{{ row[1].org }}</td><td>{{ row[1].name }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="pd-t pd-keep" id="pd-mid">
+                            <colgroup><col style="width:12%"><col><col style="width:20%"></colgroup>
+                            <thead><tr><th colspan="3" class="cap">작업 중 점검 기록</th></tr>
+                                <tr><th class="w14">시각</th><th>점검 내용·지적 사항</th><th class="w20">점검자</th></tr></thead>
+                            <tbody>
+                                <tr v-for="(m, i) in midRows" :key="'pm-' + i"><td class="c">{{ m.time }}&nbsp;</td><td>{{ m.note }}</td><td class="c">{{ m.by }}</td></tr>
+                            </tbody>
+                        </table>
+
+                        <table class="pd-t pd-keep" id="pd-done">
+                            <colgroup><col style="width:14%"><col><col style="width:14%"><col></colgroup>
+                            <tr><th colspan="4" class="cap">작업 완료 확인</th></tr>
+                            <tr><th class="w14">확인 사항</th><td colspan="3">
+                                <span v-for="d in doneItems" :key="d.k" class="pd-ty" style="white-space:normal"><span class="pd-box">{{ d.on ? '✓' : '' }}</span>{{ d.label }}</span>
+                            </td></tr>
+                            <tr><th>완료 시각</th><td>{{ doneTimeText }}</td><th class="w14">확인자</th><td>{{ form.doneBy }} <span class="pd-dim">(서명)</span></td></tr>
+                            <tr v-if="form.doneNote"><th>메모</th><td colspan="3">{{ form.doneNote }}</td></tr>
+                        </table>
+
+                        <div v-if="photoDataUrl" class="pd-photo pd-keep">
+                            <p style="margin:0 0 6px;font-weight:700">[ 현장 사진 ]</p>
+                            <img :src="photoDataUrl" alt="현장 사진">
+                        </div>
+
+                        <div class="pd-foot">
+                            <p>근거 조문: {{ basisText }}</p>
+                            <p>이 허가서는 사내 절차용 보조양식입니다. 허가 유효 시간·재허가·결재 단계는 사내 규정에 따릅니다. 밀폐공간 농도 측정·평가 결과는 3년간 보존(기준규칙 제619조의2제4항).</p>
+                        </div>
+                    </div>
+
+                    <!-- [DOC 2] 현장 게시용 -->
+                    <div v-else-if="form.docType === 'post'" id="doc-post">
+                        <p class="pp-band">안전작업허가 — {{ postState }}<small>허가번호 {{ form.no || '—' }} · {{ form.company || '사업장' }}</small></p>
+                        <p v-if="gasState.bad" class="pd-alert" style="margin-top:10px;font-size:16px">작업 불가 — 최근 측정값이 적정공기 기준을 벗어남({{ gasState.why }})</p>
+                        <table class="pp-t" style="margin-top:10px">
+                            <tr><th>작업명</th><td class="big">{{ form.title || '(작업명)' }}</td></tr>
+                            <tr><th>작업 종류</th><td>{{ typeText || '(작업 종류)' }}</td></tr>
+                            <tr><th>작업 내용</th><td class="sm pd-pre">{{ form.desc }}</td></tr>
+                            <tr><th>장소 · 설비</th><td>{{ [form.place, form.equip].filter(Boolean).join(' · ') }}</td></tr>
+                            <tr><th>허가 유효 시간</th><td class="big red">{{ periodText }}</td></tr>
+                            <tr><th>작업 업체<br>책임자</th><td>{{ [form.contractor, form.lead, form.leadTel].filter(Boolean).join(' · ') }}</td></tr>
+                            <tr v-if="workerNames"><th>작업자</th><td class="sm">{{ workerNames }} ({{ workerCount }}명)</td></tr>
+                            <tr v-if="hasType('hot')"><th>화재감시자</th><td>{{ form.fireWatch || '(지정 필요 여부 확인)' }}</td></tr>
+                            <tr v-if="hasType('conf')"><th>감시인</th><td>{{ form.attendant || '(지정)' }}</td></tr>
+                            <tr v-if="needsDirector && form.director"><th>지휘자·유도자</th><td>{{ form.director }}</td></tr>
+                            <tr><th>비상연락<br>대피 장소</th><td class="red">{{ form.emergency || '(비상연락처)' }}</td></tr>
+                            <tr><th>보호구</th><td class="sm">{{ ppeText }}</td></tr>
+                            <tr v-if="showGas"><th>농도 측정 결과<br>(최근)</th><td class="sm">{{ gasState.summary }}<span v-if="form.gasRisk"><br>가스 누출·유입 검토: {{ form.gasRisk }}</span></td></tr>
+                            <tr><th>안전점검<br>및 조치</th><td class="sm">
+                                확인 항목 {{ tally.total }}개 중 예 {{ tally.Y }} · 아니오 {{ tally.N }} · 해당없음 {{ tally.NA }} · 미확인 {{ tally.blank }}
+                                <ul class="pp-list" v-if="postMeasures.length"><li v-for="(m, i) in postMeasures" :key="'pmz-' + i">{{ m }}</li></ul>
+                                <div v-if="form.conditions" class="pd-pre">허가 조건: {{ form.conditions }}</div>
+                            </td></tr>
+                            <tr><th>승인</th><td>{{ form.approver || '(허가권자)' }} <span class="pd-dim" style="font-size:13px">(서명)</span></td></tr>
+                        </table>
+                        <div class="pd-foot" style="font-size:11px">
+                            <p>허가서에 적힌 작업·장소·시간 밖의 작업은 할 수 없습니다. 조건이 바뀌면 작업을 멈추고 다시 허가받으세요(사내 기준).</p>
+                            <p>게시 근거: 화재위험작업 — 기준규칙 제241조제4항 / 밀폐공간 작업 — 제619조제3항.</p>
+                        </div>
+                    </div>
+
+                    <!-- [DOC 3] 허가 대장 -->
+                    <div v-else id="doc-ledger">
+                        <div class="pd-top">
+                            <div><h2 class="pd-title" style="font-size:22px">안전작업허가 대장</h2>
+                                <p class="pd-sub">{{ form.company || '사업장' }} · {{ todayText }} 기준 · 이 기기에 보관된 {{ ledgerRows.length }}건 (사내 관리 대장)</p></div>
+                        </div>
+                        <table class="pd-t" id="pd-ledger">
+                            <thead><tr><th class="w12">허가번호</th><th class="w14">작업일시</th><th>작업명 · 장소</th><th class="w16">작업 종류</th><th class="w14">업체 · 책임자</th><th class="w10">상태</th></tr></thead>
+                            <tbody>
+                                <tr v-for="r in ledgerRows" :key="r.id">
+                                    <td class="c">{{ r.no }}<span v-if="r.live" class="pd-dim"><br>(작성 중·미보관)</span></td>
+                                    <td class="c">{{ r.when }}</td>
+                                    <td>{{ r.title }}<span v-if="r.place"> · {{ r.place }}</span></td>
+                                    <td class="c">{{ r.types }}</td>
+                                    <td>{{ r.who }}</td>
+                                    <td class="c">{{ r.status }}<span v-if="r.n" class="pd-n"><br>미충족 {{ r.n }}</span></td>
+                                </tr>
+                                <tr v-if="!ledgerRows.length"><td colspan="6" class="c pd-dim" style="padding:20px">보관한 허가서가 없습니다.</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="pd-foot"><p>이 대장은 이 기기 브라우저에 보관한 허가서만 모은 것입니다. 허가서 보존기간은 사내 규정에 따르되, 밀폐공간 농도 측정·평가 결과는 3년간 보존해야 합니다(기준규칙 제619조의2제4항).</p></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 예시 모달 -->
+        <div v-if="isExModalOpen" class="pw-modal no-print" role="dialog" aria-modal="true" aria-labelledby="exTitle" @keydown.esc="isExModalOpen = false" @click.self="isExModalOpen = false">
+            <div class="pw-modal-box">
+                <div class="pw-h">
+                    <span><i class="ph-fill ph-magic-wand text-emerald-600"></i> <span id="exTitle">작업 개요 예시</span></span>
+                    <button type="button" class="pw-x" @click="isExModalOpen = false" aria-label="닫기"><i class="ph-bold ph-x"></i></button>
+                </div>
+                <p class="pw-hint pw-hint-r" style="margin:0 0 10px">예시 문안입니다. 작업 개요·위험요인·보호구만 채우고, 확인 항목과 가스 측정은 비워 둡니다 — 현장에서 직접 확인하고 표시하세요.</p>
+                <div class="pw-modal-list">
+                    <button type="button" v-for="(opt, idx) in exPool" :key="'ex-' + idx" class="pw-opt" @click="selectEx(opt)">
+                        <em>예시 · {{ opt.badge }}</em>
+                        <b>{{ opt.title }}</b>
+                        <span>{{ opt.description }}</span>
+                    </button>
+                </div>
+                <div class="pw-row pw-mt" style="justify-content:flex-end"><button type="button" class="pw-btn" @click="isExModalOpen = false">닫기</button></div>
+            </div>
+        </div>
+
+        <div v-if="toast.visible" role="status" class="pw-toast no-print" :class="{ 'pw-toast-dark': toast.type !== 'success' }">
+            <i :class="toast.type === 'error' ? 'ph-fill ph-warning-circle text-base' : 'ph-fill ph-check-circle text-base'"></i>
+            <span>{{ toast.message }}</span>
+        </div>
+    </div>
+
+    <script>
+        // Vue 파일을 못 불러오면 빈 화면 대신 안내를 보여 준다
+        if (!window.Vue) {
+            document.getElementById('app').removeAttribute('v-cloak');
+            document.getElementById('app').innerHTML = '<div class="cm-fail"><b>화면을 불러오지 못했습니다.</b><br>새로 고침(F5)해 보세요. 계속 안 되면 브라우저의 확장 프로그램·보안 프로그램이 스크립트를 막고 있는지 확인하세요.<br><a href="../../">← SafePlum으로 돌아가기</a></div>';
+            throw new Error('Vue not loaded');
+        }
+        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        const STORE_KEY = 'safetake.permit.v1';
+        const OLD_FORM_KEY = 'safetake.form.permit';   // 예전 일반 서식(tools/forms/permit/)의 저장값 — 읽기만 하고 지우지 않는다
+        const HIST_MAX = 60;
+        function readProfile() {
+            try {
+                const p = JSON.parse(localStorage.getItem('safetake.profile') || '{}') || {};
+                if (typeof p !== 'object') return {};
+                if (!p.company) p.company = localStorage.getItem('safetake.company') || '';
+                return p;
+            } catch (e) { return {}; }
+        }
+        function readJson(key) {
+            try { const v = JSON.parse(localStorage.getItem(key) || 'null'); return v && typeof v === 'object' && !Array.isArray(v) ? v : null; } catch (e) { return null; }
+        }
+        const pad = (x) => String(x).padStart(2, '0');
+        // 브라우저 현지 시각 기준 'YYYY-MM-DDTHH:mm' (toISOString은 UTC라 한국에서 9시간 어긋남)
+        function toLocal(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+        const str = (v) => (typeof v === 'string' ? v : v == null || typeof v === 'object' ? '' : String(v));
+        const parseDt = (v) => { const d = new Date(v); return !v || isNaN(d.getTime()) ? null : d; };
+
+        // ---- 확인 항목. c = 「산업안전보건기준에 관한 규칙」 조문(a = 법령 화면의 조문 위치). c가 없는 항목은 조문에 없는 권장(사내 기준) 항목이다.
+        //      문구는 조문 내용을 확인 문장으로 옮긴 것이며, 수치(11미터, 2미터, 3.5미터, 30센티미터 등)는 조문 그대로다.
+        const K = (id, t, c, a) => ({ id, t, c: c || '', a: a || '' });
+        const COMMON = { id: 'common', label: '공통', short: '공통', items: [
+            K('cm1', '작업 내용·절차와 위험요인을 작업 전에 작업자에게 알렸다(작업 전 안전점검회의·TBM)'),
+            K('cm2', '이 작업의 유해·위험요인과 개선대책(위험성평가)을 확인했다', '산업안전보건법 제36조', 'act#j36'),
+            K('cm3', '동력으로 작동되는 기계의 정비·청소·수리 등이면 기계의 운전을 정지하고, 기동장치에 잠금장치를 하고 열쇠를 별도 관리하거나 표지판을 설치했다', '제92조제1항·제2항', 'j92'),
+            K('cm4', '기계·설비 내부에 압축된 기체 또는 액체 등이 방출될 우려가 있으면 미리 방출시키는 등 조치를 했다', '제92조제4항', 'j92'),
+            K('cm5', '작업조건에 맞는 보호구를 작업하는 근로자 수 이상으로 지급하고 착용을 확인했다', '제32조제1항', 'j32'),
+            K('cm6', '작업구역을 구획하고 출입통제 표지를 설치했다'),
+            K('cm7', '비상연락망·대피로·집결지를 작업자에게 알렸다'),
+            K('cm8', '같은 장소의 다른 작업(동시·상하 작업)과 간섭이 없는지 확인하고 조정했다')
+        ] };
+        const TYPES = [
+            { id: 'hot', label: '화기작업', short: '화기', sub: '용접·용단·가열·연삭 등 화재위험작업', basis: '제240조·제241조·제241조의2', items: [
+                K('hot1', '작업 준비 및 작업 절차를 수립했다', '제241조제2항제1호', 'j241'),
+                K('hot2', '작업장 내 위험물의 사용·보관 현황을 파악했다', '제241조제2항제2호', 'j241'),
+                K('hot3', '화기작업에 따른 인근 가연성물질에 대한 방호조치를 하고 소화기구를 비치했다', '제241조제2항제3호', 'j241'),
+                K('hot4', '용접불티 비산방지덮개, 용접방화포(성능인증을 받은 것) 등 불꽃·불티 비산방지조치를 했다', '제241조제2항제4호', 'j241'),
+                K('hot5', '인화성 액체의 증기 및 인화성 가스가 남아 있지 않도록 환기 등의 조치를 했다', '제241조제2항제5호', 'j241'),
+                K('hot6', '작업근로자에게 화재예방 및 피난교육 등 비상조치를 했다', '제241조제2항제6호', 'j241'),
+                K('hot7', '위험물·인화성 유류 등이 있을 우려가 있는 배관·탱크·드럼 등의 용기는 미리 그 물질을 제거하는 등 폭발·화재 예방 조치를 했다', '제240조', 'j240'),
+                K('hot8', '통풍이나 환기가 충분하지 않은 장소에서 통풍·환기를 위하여 산소를 사용하지 않는다', '제241조제1항', 'j241'),
+                K('hot9', '합성섬유·합성수지·종이류·인화성 액체 등은 화재위험이 없는 장소에 따로 보관하고, 작업장 내부에는 작업에 필요한 양만 두었다', '제236조제2항', 'j236'),
+                K('hot10', '작업내용, 작업일시, 안전점검 및 조치에 관한 사항을 작업 시작부터 종료까지 작업장소에 서면으로 게시한다(같은 장소의 상시·반복 작업은 생략 가능)', '제241조제4항', 'j241'),
+                K('hot11', '용접·용단 작업 장소가 화재감시자 배치 대상(작업반경 11미터 이내에 가연성물질이 있는 장소 등)이면 화재감시자를 지정하여 작업 장소에 배치했다', '제241조의2제1항', 'j241-2'),
+                K('hot12', '화재감시자에게 확성기, 휴대용 조명기구 및 화재 대피용 마스크 등 대피용 방연장비를 지급했다', '제241조의2제3항', 'j241-2'),
+                K('hot13', '가스용접·용단이면 호스와 취관에 손상·마모가 없고, 접촉부분을 호스밴드·호스클립 등 조임기구로 조였다', '제233조제1호·제2호', 'j233'),
+                K('hot14', '가스 용기는 넘어질 위험이 없도록 하고, 용기의 온도를 섭씨 40도 이하로 유지한다', '제234조제2호·제3호', 'j234'),
+                K('hot15', '탱크·보일러·반응탑 내부 등 통풍이 충분하지 않은 장소의 용접·용단이면 가스농도를 측정하고 환기시키는 등의 방법으로 적정공기 상태를 유지한다', '제629조제1항제1호', 'j629'),
+                K('hot16', '작업이 끝난 뒤 일정 시간(사내 기준) 잔불 감시를 할 사람을 정했다')
+            ] },
+            { id: 'conf', label: '밀폐공간 작업', short: '밀폐공간', sub: '탱크·맨홀·피트·정화조 등 내부 작업', basis: '제618조~제625조·제641조·제643조', items: [
+                K('conf1', '밀폐공간 작업 프로그램을 수립했고 그에 따라 작업한다', '제619조제1항', 'j619'),
+                K('conf2', '작업 시작 전에 작업 정보, 작업자 정보(관리감독자·근로자·감시인), 농도 측정결과 및 후속조치, 가스 누출·유입·발생 가능성 검토 및 후속조치, 착용할 보호구의 종류, 비상연락체계를 확인했다', '제619조제2항', 'j619'),
+                K('conf3', '위 확인 내용을 작업이 종료될 때까지 해당 작업장 출입구에 게시한다', '제619조제3항', 'j619'),
+                K('conf4', '작업 시작(일시 중단 후 다시 시작 포함) 전에 지정된 측정자가 산소 및 유해가스 농도를 측정하여 적정공기가 유지되고 있는지 평가했다', '제619조의2제1항', 'j619-2'),
+                K('conf5', '측정자가 밀폐공간의 위험성, 측정장비의 이상 유무 확인 및 조작 방법, 농도 측정방법, 적정공기의 기준과 평가 방법을 숙지했는지 확인하고 필요한 교육을 했다', '제619조의2제2항', 'j619-2'),
+                K('conf6', '적정공기가 유지되고 있지 않다고 평가되면 환기시키거나 공기호흡기 또는 송기마스크를 지급하여 착용하게 하는 등 조치한다', '제619조의2제3항', 'j619-2'),
+                K('conf7', '측정·평가한 사람의 성명, 일시·장소 및 결과를 기록하여 3년간 보존한다', '제619조의2제4항', 'j619-2'),
+                K('conf8', '작업을 시작하기 전과 작업 중에 적정공기 상태가 유지되도록 환기한다(환기할 수 없으면 공기호흡기 또는 송기마스크 지급·착용)', '제620조제1항', 'j620'),
+                K('conf9', '근로자를 입장시킬 때와 퇴장시킬 때마다 인원을 점검한다', '제621조', 'j621'),
+                K('conf10', '관계 근로자가 아닌 사람의 출입을 금지하고, 출입금지 표지를 밀폐공간 근처의 보기 쉬운 장소에 게시했다', '제622조제1항', 'j622'),
+                K('conf11', '작업상황을 감시할 수 있는 감시인을 지정하여 밀폐공간 외부에 배치했다', '제623조제1항', 'j623'),
+                K('conf12', '작업장과 외부의 감시인 간에 항상 연락을 취할 수 있는 설비를 설치했다', '제623조제3항', 'j623'),
+                K('conf13', '산소결핍이나 유해가스로 추락할 우려가 있으면 안전대나 구명밧줄, 공기호흡기 또는 송기마스크를 지급하여 착용하게 했다', '제624조제1항', 'j624'),
+                K('conf14', '공기호흡기 또는 송기마스크, 사다리 및 섬유로프 등 비상시 피난·구출에 필요한 기구를 갖추어 두었다', '제625조', 'j625'),
+                K('conf15', '작업근로자(감시인 포함)에게 밀폐공간의 위험성, 농도 측정, 환기설비 가동 등 안전한 작업방법, 보호구 착용·사용방법, 비상연락처 및 응급조치, 대피용 기구의 위치·사용방법을 알리고 숙지 여부를 확인했다', '제641조', 'j641'),
+                K('conf16', '위급한 근로자를 구출하는 작업자가 쓸 공기호흡기 또는 송기마스크를 준비했다', '제643조제1항', 'j643')
+            ] },
+            { id: 'height', label: '고소작업', short: '고소', sub: '추락 위험 장소·지붕·사다리 작업', basis: '제14조·제32조·제37조·제42조~제45조', items: [
+                K('hgt1', '추락하거나 넘어질 위험이 있는 장소에 비계를 조립하는 등의 방법으로 작업발판을 설치했다', '제42조제1항', 'j42'),
+                K('hgt2', '작업발판 설치가 곤란하여 추락방호망을 설치했거나, 그것도 곤란하여 안전대를 착용하게 하는 등 조치를 했다', '제42조제2항', 'j42'),
+                K('hgt3', '작업발판 및 통로의 끝이나 개구부에 안전난간, 울타리, 수직형 추락방망 또는 덮개 등을 설치했다', '제43조제1항', 'j43'),
+                K('hgt4', '높이 2미터 이상의 장소에서 안전대를 착용시킨 경우 안전대를 안전하게 걸어 사용할 수 있는 설비를 설치했다', '제44조제1항', 'j44'),
+                K('hgt5', '안전대 및 부속설비의 이상 유무를 작업을 시작하기 전에 점검했다', '제44조제2항', 'j44'),
+                K('hgt6', '물체가 떨어지거나 날아올 위험 또는 추락할 위험이 있는 작업에는 안전모를, 높이 2미터 이상의 추락할 위험이 있는 장소의 작업에는 안전대를 지급하고 착용하게 했다', '제32조제1항제1호·제2호', 'j32'),
+                K('hgt7', '이동식 사다리를 쓰는 경우: 평탄하고 견고하며 미끄럽지 않은 바닥에 설치, 넘어짐 방지 조치, 최대사용하중 이내, 높이 3.5미터 이하에서만 작업, 최상부 발판 및 그 하단 디딤대에서 작업 금지', '제42조제4항', 'j42'),
+                K('hgt8', '지붕 위 작업이면 가장자리에 안전난간을 설치하고, 채광창에는 견고한 구조의 덮개를, 슬레이트 등 강도가 약한 재료의 지붕에는 폭 30센티미터 이상의 발판을 설치했다', '제45조제1항', 'j45'),
+                K('hgt9', '물체가 떨어지거나 날아올 위험이 있어 낙하물 방지망·수직보호망·방호선반 설치, 출입금지구역 설정, 보호구 착용 등 조치를 했다', '제14조제2항', 'j14'),
+                K('hgt10', '비·눈·바람 등 기상상태가 불안정하여 근로자가 위험해질 우려가 있으면 작업을 중지한다', '제37조제1항', 'j37')
+            ] },
+            { id: 'elec', label: '정전(전기)작업', short: '정전·전기', sub: '전로 차단 후 설치·정비·점검', basis: '제38조·제318조~제321조', items: [
+                K('elc1', '자격·면허·경험 또는 기능을 갖춘 사람(유자격자)이 작업한다', '제318조', 'j318'),
+                K('elc2', '해당 전압이 50볼트를 넘거나 전기에너지가 250볼트암페어를 넘는 전기작업이면 작업계획서를 작성하고 그 내용을 근로자에게 알렸다', '제38조제1항제5호·제2항', 'j38'),
+                K('elc3', '전기기기등에 공급되는 모든 전원을 관련 도면, 배선도 등으로 확인했다', '제319조제2항제1호', 'j319'),
+                K('elc4', '전원을 차단한 후 각 단로기 등을 개방하고 확인했다', '제319조제2항제2호', 'j319'),
+                K('elc5', '차단장치나 단로기 등에 잠금장치 및 꼬리표를 부착했다', '제319조제2항제3호', 'j319'),
+                K('elc6', '유도전압 또는 전기에너지가 축적된 전기기기등은 접촉하기 전에 잔류전하를 완전히 방전시켰다', '제319조제2항제4호', 'j319'),
+                K('elc7', '검전기를 이용하여 작업 대상 기기가 충전되었는지를 확인했다', '제319조제2항제5호', 'j319'),
+                K('elc8', '다른 노출 충전부와의 접촉, 유도 또는 예비동력원의 역송전 등으로 전압이 발생할 우려가 있으면 충분한 용량의 단락 접지기구로 접지했다', '제319조제2항제6호', 'j319'),
+                K('elc9', '정전전로 또는 그 인근에서 작업하는 다른 근로자가 있으면 작업 전에 잠금장치 및 꼬리표 부착을 확인했다', '제320조', 'j320'),
+                K('elc10', '전원을 다시 공급하기 전에 작업기구·단락 접지기구를 제거하고, 모든 작업자가 전기기기등에서 떨어져 있는지 확인하며, 잠금장치와 꼬리표는 설치한 근로자가 직접 철거한다', '제319조제3항', 'j319'),
+                K('elc11', '전로를 차단할 수 없어 충전전로를 취급하거나 그 인근에서 작업하는 경우 절연용 보호구 착용, 절연용 방호구 설치 등 조치를 한다', '제321조제1항', 'j321')
+            ] },
+            { id: 'exc', label: '굴착작업', short: '굴착', sub: '지반 굴착·터파기', basis: '제38조·제39조·제338조~제344조', items: [
+                K('exc1', '작업장소 및 그 주변의 부석·균열의 유무를 점검했다', '제338조제1호', 'j338'),
+                K('exc2', '함수·용수 및 동결의 유무 또는 상태의 변화를 점검했다', '제338조제2호', 'j338'),
+                K('exc3', '굴착면의 기울기를 별표 11의 기준에 맞췄다(설계도서상 기울기 준수 또는 흙막이 등 붕괴 방지 조치를 한 경우 제외)', '제339조제1항', 'j339'),
+                K('exc4', '비가 올 경우를 대비하여 측구를 설치하거나 굴착경사면에 비닐을 덮는 등 빗물 침투에 의한 붕괴 예방 조치를 했다', '제339조제2항', 'j339'),
+                K('exc5', '토사등의 붕괴 또는 낙하 우려가 있어 미리 흙막이 지보공 설치, 방호망 설치 및 근로자의 출입 금지 등 조치를 했다', '제340조', 'j340'),
+                K('exc6', '매설물·조적벽·콘크리트벽·옹벽 등에 근접한 굴착이면 보강·이설 등 조치를, 노출된 매설물 등은 방호조치 또는 이설 등 조치를 했다', '제341조제1항·제2항', 'j341'),
+                K('exc7', '굴착기계등의 사용으로 가스도관, 지중전선로 등 지하 공작물이 파손될 우려가 있으면 그 기계를 사용한 굴착작업을 중지한다', '제342조제1호', 'j342'),
+                K('exc8', '굴착기계등의 운행경로 및 토석 적재장소의 출입방법을 정하여 관계 근로자에게 알렸다', '제342조제2호', 'j342'),
+                K('exc9', '굴착기계등이 후진하여 근로자에게 접근하거나 굴러 떨어질 우려가 있으면 유도자를 배치했다', '제344조제1항', 'j344'),
+                K('exc10', '굴착면의 높이가 2미터 이상이 되는 지반의 굴착작업이면 사전조사를 하고 작업계획서를 작성하여 근로자에게 알렸으며, 작업지휘자를 지정했다', '제38조제1항제6호·제39조제1항', 'j38'),
+                K('exc11', '굴착 전에 지하 매설물(가스·전기·통신·상하수도) 도면을 확인하고 관리 주체와 협의했다')
+            ] },
+            { id: 'lift', label: '중량물·양중 작업', short: '중량물·양중', sub: '크레인 인양, 중량물 운반·설치', basis: '제38조~제40조·제133조·제135조·제146조·제163조·제168조·제385조·제386조', items: [
+                K('lft1', '중량물의 취급작업에 대한 작업계획서를 작성하고 그 내용을 근로자에게 알렸다', '제38조제1항제11호·제2항', 'j38'),
+                K('lft2', '작업지휘자를 지정하여 작업계획서에 따라 작업을 지휘하게 했다', '제39조제1항', 'j39'),
+                K('lft3', '양중기를 사용하는 작업, 중량물을 2명 이상이 취급·운반하는 작업의 일정한 신호방법을 정했다', '제40조제1항', 'j40'),
+                K('lft4', '중량물을 운반·취급하는 데 하역운반기계·운반용구를 사용한다(작업의 성질상 곤란한 경우 제외)', '제385조', 'j385'),
+                K('lft5', '구를 위험이 있는 중량물은 구름멈춤대·쐐기 등으로 동요·이동을 조절하고, 구를 방향 앞의 일정거리 이내로는 근로자의 출입을 제한했다', '제386조', 'j386'),
+                K('lft6', '양중기 및 달기구의 정격하중 등 표시를 확인했고, 적재하중을 초과하는 하중을 걸지 않는다', '제133조·제135조', 'j133'),
+                K('lft7', '달기구에 최대허용하중 등의 표식이 견고하게 붙어 있고, 와이어로프 등 달기구의 안전계수가 기준에 맞는다', '제163조', 'j163'),
+                K('lft8', '변형되어 있거나 균열이 있는 훅·샤클·클램프·링 등을 고리걸이용구로 사용하지 않는다', '제168조제1항', 'j168'),
+                K('lft9', '크레인 작업: 미리 근로자의 출입을 통제하여 인양 중인 하물이 작업자의 머리 위로 통과하지 않게 한다', '제146조제1항제4호', 'j146'),
+                K('lft10', '크레인 작업: 하물을 바닥에서 끌어당기거나 밀어내지 않고, 인양할 하물이 보이지 않으면 어떠한 동작도 하지 않는다(신호하는 사람에 의한 작업 제외)', '제146조제1항제1호·제5호', 'j146'),
+                K('lft11', '인양물에 유도 로프를 달아 흔들림·회전을 조절한다')
+            ] },
+            { id: 'heavy', label: '중장비 작업', short: '중장비', sub: '굴착기 등 차량계 건설기계 사용', basis: '제38조·제197조·제199조·제200조·제202조·제203조', items: [
+                K('hvy1', '차량계 건설기계를 사용하는 작업의 작업계획서를 작성하고 그 내용을 근로자에게 알렸다', '제38조제1항제3호·제2항', 'j38'),
+                K('hvy2', '기계가 넘어지거나 굴러떨어질 우려가 있어 유도하는 사람을 배치하고 지반의 부동침하 방지, 갓길의 붕괴 방지 및 도로 폭의 유지 등 조치를 했다', '제199조', 'j199'),
+                K('hvy3', '운전 중인 기계에 접촉되어 부딪칠 위험이 있는 장소에 근로자를 출입시키지 않는다(유도자를 배치하고 유도하는 경우 제외)', '제200조제1항', 'j200'),
+                K('hvy4', '승차석이 아닌 위치에 근로자를 탑승시키지 않는다', '제202조', 'j202'),
+                K('hvy5', '기계의 구조 및 사용상 안전도 및 최대사용하중을 준수한다', '제203조', 'j203'),
+                K('hvy6', '전조등을 갖추었다(작업에 필요한 조명이 있는 장소는 제외)', '제197조', 'j197')
+            ] },
+            { id: 'etc', label: '그 밖의 위험작업', short: '기타', sub: '사업장이 허가 대상으로 정한 작업', basis: '', items: [] }
+        ];
+        const ALL_SECTIONS = [COMMON].concat(TYPES);
+        ALL_SECTIONS.forEach(s => s.items.forEach(it => {
+            if (!it.c) return;
+            const act = it.a.indexOf('act#') === 0;
+            it.href = act ? '../../laws/act/#' + it.a.slice(4) : '../../laws/krule/#' + it.a;
+            it.cite = act ? it.c : '기준규칙 ' + it.c;
+            it.pc = act ? it.c.replace('산업안전보건법', '법') : it.c;   // 인쇄물의 근거 칸은 좁아 짧게 적는다
+        }));
+        const ALL_ITEM_IDS = [].concat.apply([], ALL_SECTIONS.map(s => s.items.map(it => it.id)));
+        const TYPE_IDS = TYPES.map(t => t.id);
+        const ANS = [{ v: 'Y', l: '예' }, { v: 'N', l: '아니오' }, { v: 'NA', l: '해당없음' }];
+        const ANS_LABEL = { Y: '예', N: '아니오', NA: '해당없음' };
+        const STATUSES = ['작성 중', '승인', '작업 중', '완료', '중지·취소'];
+        // 앞 6개는 기준규칙 제32조제1항 각 호의 보호구, 송기마스크·공기호흡기는 제619조의2·제620조 등의 보호구
+        const PPE = ['안전모', '안전대', '안전화', '보안경', '보안면', '절연용 보호구', '방열복', '방진마스크', '송기마스크', '공기호흡기'];
+        const PPE_BY_TYPE = { hot: ['보안면', '안전화'], conf: ['송기마스크', '안전대'], height: ['안전모', '안전대'], elec: ['절연용 보호구', '안전화'], exc: ['안전모', '안전화'], lift: ['안전모', '안전화'], heavy: ['안전모', '안전화'], etc: [] };
+
+        // ---- 적정공기 판정 (기준규칙 제618조제3호: 산소 18퍼센트 이상 23.5퍼센트 미만, 이산화탄소 1.5퍼센트 미만, 일산화탄소 30피피엠 미만, 황화수소 10피피엠 미만)
+        const AIR = {
+            o2: { name: '산소', unit: '%', ok: (x) => x >= 18 && x < 23.5 },
+            co2: { name: '이산화탄소', unit: '%', ok: (x) => x < 1.5 },
+            co: { name: '일산화탄소', unit: 'ppm', ok: (x) => x < 30 },
+            h2s: { name: '황화수소', unit: 'ppm', ok: (x) => x < 10 }
+        };
+        const AIR_KEYS = ['o2', 'co2', 'co', 'h2s'];
+        const num = (v) => { const s = str(v).trim().replace(',', '.'); if (!/^-?\d+(\.\d+)?$/.test(s)) return null; return parseFloat(s); };
+        function judgeGas(r) {
+            const j = { o2: '', co2: '', co: '', h2s: '', bad: false, full: false, any: false, text: '', short: '', why: '' };
+            const bads = [], missing = [], invalid = [];
+            AIR_KEYS.forEach(k => {
+                const raw = str(r[k]).trim();
+                if (!raw) { missing.push(AIR[k].name); return; }
+                const x = num(raw);
+                if (x == null || x < 0) { invalid.push(AIR[k].name); j[k] = 'bad'; return; }
+                j.any = true;
+                if (AIR[k].ok(x)) j[k] = 'ok'; else { j[k] = 'bad'; bads.push(`${AIR[k].name} ${raw}${AIR[k].unit}`); }
+            });
+            j.bad = bads.length > 0;
+            j.full = !j.bad && !missing.length && !invalid.length;
+            j.why = bads.join(', ');
+            if (j.bad) { j.text = `적정공기 아님 — ${j.why}`; j.short = '부적정'; }
+            else if (invalid.length) { j.text = `숫자로 적어 주세요: ${invalid.join(', ')}`; j.short = ''; }
+            else if (!j.any) { j.text = '측정값을 적으면 적정공기 기준과 비교합니다.'; }
+            else if (missing.length) { j.text = `적은 값은 기준 이내 · 미측정: ${missing.join(', ')}`; j.short = '일부 측정'; }
+            else { j.text = '적정공기 기준 이내'; j.short = '적정'; }
+            return j;
+        }
+
+        createApp({
+            setup() {
+                const docTypes = [
+                    { label: '안전작업허가서', value: 'permit', icon: 'ph-bold ph-shield-check' },
+                    { label: '현장 게시용', value: 'post', icon: 'ph-bold ph-megaphone' },
+                    { label: '허가 대장', value: 'ledger', icon: 'ph-bold ph-file-text' }
+                ];
+                const profile = readProfile();
+                const saved = readJson(STORE_KEY);
+                const now = new Date();
+                const newId = () => 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
+                const todayAt = (h, m) => toLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m || 0));
+                const freshForm = () => ({
+                    pid: newId(), docType: 'permit', no: '', noAuto: true, status: '작성 중',
+                    company: str(profile.company), title: '', place: '', equip: '', desc: '',
+                    contractor: '', isContract: false, lead: '', leadTel: '',
+                    start: todayAt(9), end: todayAt(18),
+                    types: [], etcName: '', hazards: '',
+                    fireWatch: '', extinguisher: '', attendant: '', gasTester: '', director: '', emergency: '', gasRisk: '',
+                    ppe: [], ppeEtc: '', loto: '', refRisk: false, refTbm: false, conditions: '',
+                    reviewer: str(profile.manager), approver: '',
+                    doneFire: false, doneCount: false, doneLoto: false, doneTidy: false, doneRestore: false, doneTime: '', doneBy: '', doneNote: '',
+                    oldDismissed: false
+                });
+                const freshChecks = () => { const o = {}; ALL_ITEM_IDS.forEach(id => { o[id] = { v: '', note: '' }; }); return o; };
+                const freshGasRow = () => ({ time: '', place: '', o2: '', co2: '', co: '', h2s: '', lel: '', by: '' });
+
+                // ---- 저장값 정리(모양이 어긋난 값이 들어와도 화면이 깨지지 않게)
+                const ansOk = (v) => (v === 'Y' || v === 'N' || v === 'NA' ? v : '');
+                const cleanForm = (f) => {
+                    const base = freshForm();
+                    if (f && typeof f === 'object') Object.keys(base).forEach(k => {
+                        if (Array.isArray(base[k])) { if (Array.isArray(f[k])) base[k] = f[k].filter(x => typeof x === 'string'); }
+                        else if (typeof f[k] === typeof base[k]) base[k] = f[k];
+                    });
+                    if (!['permit', 'post', 'ledger'].includes(base.docType)) base.docType = 'permit';
+                    if (!STATUSES.includes(base.status)) base.status = '작성 중';
+                    base.types = TYPE_IDS.filter(id => base.types.includes(id));
+                    base.ppe = PPE.filter(p => base.ppe.includes(p));
+                    if (!base.pid) base.pid = newId();
+                    return base;
+                };
+                const cleanChecks = (c) => {
+                    const out = freshChecks();
+                    if (c && typeof c === 'object') ALL_ITEM_IDS.forEach(id => { const x = c[id]; if (x && typeof x === 'object') out[id] = { v: ansOk(x.v), note: str(x.note) }; });
+                    return out;
+                };
+                const arr = (a, fn) => (Array.isArray(a) ? a.filter(r => r && typeof r === 'object').slice(0, 100).map(fn) : []);
+                const cleanCustom = (a) => arr(a, r => ({ t: str(r.t), v: ansOk(r.v), note: str(r.note) }));
+                const cleanGas = (a) => arr(a, r => ({ time: str(r.time), place: str(r.place), o2: str(r.o2), co2: str(r.co2), co: str(r.co), h2s: str(r.h2s), lel: str(r.lel), by: str(r.by) }));
+                const cleanMid = (a) => arr(a, r => ({ time: str(r.time), note: str(r.note), by: str(r.by) }));
+                const cleanWorkers = (a) => arr(a, r => ({ org: str(r.org), name: str(r.name) }));
+                const cleanSnap = (s) => ({
+                    form: cleanForm(s && s.form), checks: cleanChecks(s && s.checks), custom: cleanCustom(s && s.custom),
+                    gas: cleanGas(s && s.gas), mid: cleanMid(s && s.mid), workers: cleanWorkers(s && s.workers)
+                });
+
+                const init = cleanSnap(saved);
+                const form = ref(init.form);
+                const checks = ref(init.checks);
+                const custom = ref(init.custom);
+                const gas = ref(init.gas);
+                const mid = ref(init.mid);
+                const workers = ref(init.workers);
+                const historyRaw = ref(Array.isArray(saved && saved.history)
+                    ? saved.history.filter(h => h && typeof h === 'object' && h.snap && typeof h.snap === 'object').slice(0, HIST_MAX).map(h => { const s = cleanSnap(h.snap); return { id: str(h.id) || s.form.pid, saved: Number(h.saved) || 0, snap: s }; })
+                    : []);
+                const restored = !!saved;
+
+                // ---- 허가번호 자동 채번: 연도-일련번호(3자리). 보관한 허가서의 같은 연도 번호 중 가장 큰 값 + 1
+                const nextNo = (startVal, exceptId) => {
+                    const d = parseDt(startVal) || now;
+                    const y = d.getFullYear();
+                    let max = 0;
+                    historyRaw.value.forEach(h => {
+                        if (h.id === exceptId) return;
+                        const m = new RegExp('^' + y + '-(\\d{1,6})$').exec(str(h.snap.form.no).trim());
+                        if (m) max = Math.max(max, parseInt(m[1], 10));
+                    });
+                    return `${y}-${String(max + 1).padStart(3, '0')}`;
+                };
+                if (form.value.noAuto || !form.value.no) { form.value.no = nextNo(form.value.start, form.value.pid); form.value.noAuto = true; }
+                watch(() => form.value.start, (v) => { if (form.value.noAuto) form.value.no = nextNo(v, form.value.pid); });
+                const onNoInput = (e) => { form.value.no = e.target.value; form.value.noAuto = false; };
+                const autoNo = () => { form.value.noAuto = true; form.value.no = nextNo(form.value.start, form.value.pid); };
+
+                // ---- 저장
+                const saveMsg = ref(restored ? '지난번 내용을 이어서 엽니다' : '');
+                let saveTimer = null;
+                const snapshot = () => JSON.parse(JSON.stringify({ form: form.value, checks: checks.value, custom: custom.value, gas: gas.value, mid: mid.value, workers: workers.value }));
+                const persist = () => {
+                    saveTimer = null;
+                    try {
+                        localStorage.setItem(STORE_KEY, JSON.stringify(Object.assign({ saved: Date.now() }, snapshot(), { history: historyRaw.value.map(h => ({ id: h.id, saved: h.saved, snap: h.snap })) })));
+                        saveMsg.value = '이 기기에 저장됨';
+                        return true;
+                    } catch (e) { saveMsg.value = '저장하지 못했습니다(저장 공간 부족)'; return false; }
+                };
+                watch([form, checks, custom, gas, mid, workers], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
+                window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); persist(); } });
+
+                // ---- 작업 종류·확인 항목
+                const hasType = (id) => form.value.types.includes(id);
+                const activeTypes = computed(() => TYPES.filter(t => form.value.types.includes(t.id)));
+                const sections = computed(() => [COMMON].concat(activeTypes.value.filter(t => t.items.length)));
+                const typeHasAnswers = (t) => t.items.some(it => checks.value[it.id].v || checks.value[it.id].note.trim());
+                const toggleType = (id) => {
+                    const t = TYPES.find(x => x.id === id);
+                    if (hasType(id)) {
+                        if (typeHasAnswers(t) && !window.confirm(`"${t.label}"을(를) 빼면 이 작업의 확인 결과 표시가 지워집니다. 계속할까요?`)) return;
+                        t.items.forEach(it => { checks.value[it.id] = { v: '', note: '' }; });
+                        form.value.types = form.value.types.filter(x => x !== id);
+                    } else {
+                        form.value.types = TYPE_IDS.filter(x => x === id || form.value.types.includes(x));
+                    }
+                };
+                const setAns = (st, v) => { st.v = st.v === v ? '' : v; };
+                const addCustom = () => custom.value.push({ t: '', v: '', note: '' });
+                const customRows = computed(() => custom.value.filter(c => c.t.trim()));
+                const tally = computed(() => {
+                    const o = { Y: 0, N: 0, NA: 0, blank: 0, total: 0 };
+                    const add = (v) => { o.total++; if (v) o[v]++; else o.blank++; };
+                    sections.value.forEach(s => s.items.forEach(it => add(checks.value[it.id].v)));
+                    customRows.value.forEach(c => add(c.v));
+                    return o;
+                });
+                const printSections = computed(() => {
+                    const out = sections.value.map(s => ({ id: s.id, label: s.id === 'common' ? '공통' : s.label + (s.basis ? ` (기준규칙 ${s.basis})` : ''), items: s.items.map(it => ({ key: it.id, t: it.t, c: it.c, pc: it.pc, v: checks.value[it.id].v, note: checks.value[it.id].note })) }));
+                    if (customRows.value.length) out.push({ id: 'custom', label: '사업장 추가 확인 항목 (사내 기준)', items: customRows.value.map((c, i) => ({ key: 'cu' + i, t: c.t, c: '', pc: '', v: c.v, note: c.note })) });
+                    return out;
+                });
+                const typeText = computed(() => activeTypes.value.map(t => (t.id === 'etc' && form.value.etcName.trim() ? form.value.etcName.trim() : t.label)).join(' + '));
+                const needsDirector = computed(() => ['exc', 'lift', 'heavy'].some(hasType));
+                const basisText = computed(() => {
+                    const parts = ['제32조(보호구의 지급 등)', '제92조(정비 등의 작업 시의 운전정지 등)'].concat(activeTypes.value.filter(t => t.basis).map(t => `${t.short} ${t.basis}`));
+                    return '산업안전보건기준에 관한 규칙 ' + parts.join(' · ');
+                });
+
+                // ---- 보호구
+                const togglePpe = (p) => { form.value.ppe = PPE.filter(x => (x === p ? !form.value.ppe.includes(p) : form.value.ppe.includes(x))); };
+                const suggestPpe = () => {
+                    if (!form.value.types.length) { showToast('작업 종류를 먼저 고르세요.', 'error'); return; }
+                    const want = new Set(form.value.ppe);
+                    form.value.types.forEach(id => PPE_BY_TYPE[id].forEach(p => want.add(p)));
+                    form.value.ppe = PPE.filter(p => want.has(p));
+                    showToast('작업 종류에 흔히 필요한 보호구를 골랐습니다. 실제 작업조건에 맞게 고치세요.');
+                };
+                const ppeText = computed(() => form.value.ppe.concat(form.value.ppeEtc.trim() ? [form.value.ppeEtc.trim()] : []).join(', '));
+
+                // ---- 인원
+                const addWorker = () => workers.value.push({ org: form.value.contractor, name: '' });
+                const namedWorkers = computed(() => workers.value.filter(w => w.name.trim() || w.org.trim()));
+                const workerCount = computed(() => workers.value.filter(w => w.name.trim()).length);
+                const workerNames = computed(() => workers.value.map(w => w.name.trim()).filter(Boolean).join(', '));
+                const workerRows = computed(() => {
+                    const list = namedWorkers.value.map((w, i) => ({ n: i + 1, org: w.org, name: w.name }));
+                    const n = Math.max(4, list.length + (list.length % 2));
+                    while (list.length < n) list.push({ n: list.length + 1, org: '', name: '' });
+                    const half = n / 2, rows = [];
+                    for (let i = 0; i < half; i++) rows.push([list[i], list[i + half]]);
+                    return rows;
+                });
+
+                // ---- 가스 농도
+                const showGas = computed(() => hasType('conf') || gas.value.length > 0);
+                const addGas = () => {
+                    const r = freshGasRow();
+                    const d = new Date();
+                    r.time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                    r.by = form.value.gasTester;
+                    gas.value.push(r);
+                };
+                const gasView = computed(() => gas.value.map(r => ({ r, j: judgeGas(r) })));
+                const gasState = computed(() => {
+                    // 판정은 값을 적은 마지막 측정(가장 최근)을 기준으로 한다
+                    const filled = gasView.value.filter(g => g.j.any || g.j.bad);
+                    const last = filled[filled.length - 1];
+                    if (!last) return { bad: false, has: false, why: '', summary: '측정 기록 없음' };
+                    const r = last.r;
+                    const vals = [r.o2 && `O₂ ${r.o2}%`, r.co2 && `CO₂ ${r.co2}%`, r.co && `CO ${r.co}ppm`, r.h2s && `H₂S ${r.h2s}ppm`, r.lel && `가연성 ${r.lel}%LEL`].filter(Boolean).join(' · ');
+                    return { bad: last.j.bad, has: true, full: last.j.full, why: last.j.why, summary: `${r.time ? r.time + ' ' : ''}${vals} → ${last.j.bad ? '적정공기 아님(작업 불가)' : last.j.full ? '적정공기 기준 이내' : '일부 항목만 측정'}${r.by ? ' · 측정자 ' + r.by : ''}` };
+                });
+                const gasBlankRows = computed(() => Math.max(0, 3 - gas.value.length));
+
+                // ---- 작업 중·완료
+                const addMid = () => { const d = new Date(); mid.value.push({ time: `${pad(d.getHours())}:${pad(d.getMinutes())}`, note: '', by: '' }); };
+                const midRows = computed(() => { const rows = mid.value.filter(m => m.time || m.note.trim() || m.by.trim()); return rows.length ? rows : [{ time: '', note: '', by: '' }, { time: '', note: '', by: '' }]; });
+                const doneNow = () => { form.value.doneTime = toLocal(new Date()); };
+                const doneItems = computed(() => {
+                    const f = form.value, out = [];
+                    if (hasType('hot')) out.push({ k: 'fire', on: f.doneFire, label: '잔불·불티 없음 확인' });
+                    if (hasType('conf')) out.push({ k: 'count', on: f.doneCount, label: '퇴장 인원 점검(전원 퇴장)' });
+                    if (hasType('elec')) out.push({ k: 'loto', on: f.doneLoto, label: '접지기구 제거·잠금장치와 꼬리표 철거' });
+                    out.push({ k: 'tidy', on: f.doneTidy, label: '정리정돈·자재 회수' });
+                    out.push({ k: 'restore', on: f.doneRestore, label: '방호장치·덮개 등 복구' });
+                    return out;
+                });
+
+                // ---- 표시용 문자열
+                const fmtDt = (v) => { const d = parseDt(v); return d ? `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}` : ''; };
+                const periodText = computed(() => {
+                    const s = parseDt(form.value.start), e = parseDt(form.value.end);
+                    if (!s && !e) return '';
+                    if (s && e && s.toDateString() === e.toDateString()) return `${fmtDt(form.value.start)} ~ ${pad(e.getHours())}:${pad(e.getMinutes())}`;
+                    return `${fmtDt(form.value.start) || '(시작 미정)'} ~ ${fmtDt(form.value.end) || '(종료 미정)'}`;
+                });
+                const doneTimeText = computed(() => fmtDt(form.value.doneTime));
+                const todayText = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`;
+                const postState = computed(() => ({ '작성 중': '승인 전', '승인': '승인됨', '작업 중': '작업 중', '완료': '작업 완료', '중지·취소': '작업 중지' })[form.value.status]);
+                const postMeasures = computed(() => {
+                    const f = form.value, out = [];
+                    if (hasType('hot') && f.extinguisher.trim()) out.push('소화기구: ' + f.extinguisher.trim());
+                    if (f.loto.trim()) out.push('에너지 차단: ' + f.loto.trim());
+                    printSections.value.forEach(s => s.items.forEach(it => { if (it.v === 'N') out.push('미충족: ' + it.t + (it.note.trim() ? ' — ' + it.note.trim() : '')); }));
+                    return out.slice(0, 8);
+                });
+
+                // ---- 자동 확인. 유효 시간·재허가처럼 조문에 없는 내용은 "사내 기준"으로 적는다
+                const timeChecks = computed(() => {
+                    const out = [];
+                    const s = parseDt(form.value.start), e = parseDt(form.value.end);
+                    if (!s || !e) { out.push('허가 시작·종료 시각을 넣으세요.'); return out; }
+                    if (e <= s) { out.push('허가 종료 시각이 시작 시각보다 빠르거나 같습니다.'); return out; }
+                    if (s.toDateString() !== e.toDateString()) out.push('허가 유효 시간이 날짜를 넘어갑니다 — 허가는 당일(해당 작업조)로 한정하고, 다음 날 작업은 다시 허가받는 것을 권장합니다(사내 기준).');
+                    else if (e.getHours() >= 20 || s.getHours() < 6) out.push('야간 시간대가 포함됩니다 — 야간·연장 작업은 조명·감시 인원을 확인하고 다시 허가받도록 정해 두는 것을 권장합니다(사내 기준).');
+                    else if ((e - s) / 3600000 > 12) out.push('허가 시간이 12시간을 넘습니다 — 작업조가 바뀌면 다시 허가받는 것을 권장합니다(사내 기준).');
+                    return out;
+                });
+                const checksOut = computed(() => {
+                    const f = form.value, out = [], t = tally.value;
+                    const W = (text) => out.push({ lv: 'warn', text }), S = (text) => out.push({ lv: 'stop', text });
+                    if (!f.types.length) W('작업 종류를 하나 이상 고르세요.');
+                    if (!f.title.trim() || !f.place.trim()) W('작업명과 작업 장소를 적으세요.');
+                    if (!f.lead.trim()) W('작업 책임자(신청자)가 비어 있습니다.');
+                    if (f.isContract && !f.contractor.trim()) W('도급 작업인데 작업 업체명이 비어 있습니다.');
+                    if (t.N) S(`허가 조건 미충족 항목 ${t.N}개 — '아니오'로 표시한 항목을 조치하고 다시 확인하기 전에는 승인하지 마세요(사내 기준).`);
+                    if (t.blank) W(`아직 확인하지 않은 항목이 ${t.blank}개 있습니다.`);
+                    const nNoNote = printSections.value.reduce((n, s) => n + s.items.filter(it => it.v === 'N' && !it.note.trim()).length, 0);
+                    if (nNoNote) W(`'아니오' 항목 ${nNoNote}개에 미충족 사유·조치 계획이 없습니다.`);
+                    if (hasType('hot')) {
+                        if (checks.value.hot11.v === 'Y' && !f.fireWatch.trim()) W('화재감시자를 배치했다고 표시했지만 성명이 비어 있습니다(기준규칙 제241조의2제1항).');
+                        if (!f.extinguisher.trim()) W('소화기구 비치 내용이 비어 있습니다(기준규칙 제241조제2항제3호).');
+                    }
+                    if (hasType('conf')) {
+                        if (!f.attendant.trim()) W('밀폐공간 외부에 배치할 감시인이 지정되지 않았습니다(기준규칙 제623조제1항).');
+                        if (!f.gasTester.trim()) W('산소·유해가스 농도 측정자가 지정되지 않았습니다(기준규칙 제619조의2제1항).');
+                        if (!f.emergency.trim()) W('비상연락체계가 비어 있습니다(기준규칙 제619조제2항제6호).');
+                        if (!gasState.value.has) W('산소·유해가스 농도 측정 기록이 없습니다 — 작업을 시작하기 전에 측정해야 합니다(기준규칙 제619조의2제1항).');
+                        else if (!gasState.value.bad && !gasState.value.full) W('가장 최근 측정에 빠진 항목이 있습니다 — 적정공기는 산소·이산화탄소·일산화탄소·황화수소 기준을 모두 봅니다(기준규칙 제618조제3호).');
+                    }
+                    if (gasState.value.bad) S(`작업 불가 — 가장 최근 측정값이 적정공기 기준을 벗어났습니다(${gasState.value.why}). 환기 등 조치 후 다시 측정하세요(기준규칙 제619조의2제3항).`);
+                    const approved = ['승인', '작업 중', '완료'].includes(f.status);
+                    if (approved && !f.approver.trim()) W('승인 이후 상태인데 승인자(허가권자)가 비어 있습니다.');
+                    if (approved && f.status !== '완료' && (t.N || gasState.value.bad)) S('미충족 항목이나 부적정 측정값이 있는데 상태가 "' + f.status + '"입니다. 조치가 끝났는지 확인하세요.');
+                    if (f.status === '완료') {
+                        if (!f.doneTime) W('상태가 "완료"인데 작업 완료 시각이 비어 있습니다.');
+                        if (hasType('hot') && !f.doneFire) W('화기작업 완료 확인에 잔불 확인이 표시되지 않았습니다(사내 기준).');
+                        if (hasType('conf') && !f.doneCount) W('밀폐공간 퇴장 인원 점검이 표시되지 않았습니다(기준규칙 제621조).');
+                    } else if (f.doneTime) W('작업 완료 시각이 적혀 있습니다 — 진행 상태를 "완료"로 바꾸세요.');
+                    const dup = historyRaw.value.find(h => h.id !== f.pid && str(h.snap.form.no).trim() && str(h.snap.form.no).trim() === f.no.trim());
+                    if (dup) W(`허가번호 ${f.no}가 보관된 다른 허가서와 같습니다.`);
+                    timeChecks.value.forEach(W);
+                    if (!out.length) out.push({ lv: 'ok', text: `확인 항목 ${t.total}개를 모두 확인했고 미충족 항목이 없습니다. 현장 상태가 바뀌면 다시 확인하세요.` });
+                    return out;
+                });
+
+                // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
+                const fitPreview = () => {
+                    const col = document.getElementById('preview-col');
+                    if (!col) return;
+                    const a4 = 210 * 96 / 25.4;
+                    document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
+                };
+                onMounted(() => {
+                    fitPreview(); window.addEventListener('resize', fitPreview);
+                    // 처음 그릴 때는 칸 너비가 아직 0일 수 있어, 배치가 끝난 뒤와 칸 크기가 바뀔 때 다시 맞춘다
+                    requestAnimationFrame(fitPreview); setTimeout(fitPreview, 300);
+                    const col = document.getElementById('preview-col');
+                    if (col && window.ResizeObserver) new ResizeObserver(fitPreview).observe(col);
+                });
+
+                const photoDataUrl = ref(null);
+                const isGeneratingPDF = ref(false);
+                const toast = ref({ visible: false, message: '', type: 'success' });
+                let toastTimer = null;
+                function showToast(message, type) {
+                    toast.value = { visible: true, message, type: type || 'success' };
+                    clearTimeout(toastTimer);
+                    toastTimer = setTimeout(() => { toast.value.visible = false; }, 2800);
+                }
+                const changeDocType = (type) => { form.value.docType = type; };
+
+                // ---- 사진(저장하지 않음)
+                const handleFileUpload = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (!/^image\//.test(file.type)) { showToast('사진(이미지) 파일만 첨부할 수 있습니다.', 'error'); e.target.value = ''; return; }
+                    if (file.size > 5 * 1024 * 1024) { showToast('파일 크기는 5MB 이하여야 합니다.', 'error'); e.target.value = ''; return; }
+                    const reader = new FileReader();
+                    reader.onload = (event) => { photoDataUrl.value = event.target.result; showToast('사진을 첨부했습니다(저장되지 않음).'); };
+                    reader.onerror = () => showToast('사진을 읽지 못했습니다.', 'error');
+                    reader.readAsDataURL(file);
+                };
+                const removePhoto = () => {
+                    photoDataUrl.value = null;
+                    const el = document.getElementById('photo-input');
+                    if (el) el.value = '';
+                };
+
+                // ---- 화면 내용 바꾸기
+                const load = (s) => {
+                    form.value = s.form; checks.value = s.checks; custom.value = s.custom; gas.value = s.gas; mid.value = s.mid; workers.value = s.workers;
+                    photoDataUrl.value = null;
+                    window.scrollTo(0, 0);
+                };
+                const isBusy = () => {
+                    const f = form.value;
+                    return !!(f.title.trim() || f.place.trim() || f.desc.trim() || f.types.length || gas.value.length || workers.value.length || tally.value.total !== tally.value.blank);
+                };
+                const blankSnap = () => {
+                    const s = cleanSnap(null);
+                    s.form.company = form.value.company; s.form.reviewer = form.value.reviewer; s.form.approver = form.value.approver;
+                    s.form.oldDismissed = form.value.oldDismissed;
+                    s.form.no = nextNo(s.form.start, s.form.pid);
+                    return s;
+                };
+                const resetToBlank = () => {
+                    if (isBusy() && !window.confirm('지금 작성 중인 내용을 지우고 새 허가서를 쓸까요?\n(보관하지 않은 내용은 사라집니다. 사업장명·검토자·승인자는 그대로 둡니다)')) return;
+                    load(blankSnap());
+                    showToast('새 허가서를 열었습니다.');
+                };
+
+                // ---- 예시(작성 요령을 보여 주는 예문 — 확인 결과는 채우지 않는다)
+                const exPool = [
+                    { badge: '화기', title: '배관 보수 용접', description: '생산동 스팀 배관 누설 부위를 아크 용접으로 보수하는 작업',
+                      set: { title: '스팀 배관 누설부 보수 용접', place: '생산동 2층 배관 랙', equip: '스팀 공급 배관 50A', desc: '누설 부위 보온재 제거 후 아크 용접으로 덧댐 보수, 비파괴 검사 후 보온 복구', types: ['hot', 'height'], hazards: '불티 비산에 의한 하부 가연물 화재, 고온 배관 화상, 작업발판 추락', ppe: ['안전모', '안전대', '안전화', '보안면'], ppeEtc: '용접용 가죽장갑·앞치마', extinguisher: '분말소화기 3.3kg 2대, 방화수 1통', loto: '스팀 공급 밸브 닫고 잠금·꼬리표, 잔압 배출 확인', conditions: '하부 통로 통제, 점심시간 화기 작업 금지' } },
+                    { badge: '밀폐공간', title: '탱크 내부 청소', description: '저장탱크를 비우고 맨홀로 들어가 내부 슬러지를 제거하는 작업',
+                      set: { title: '폐수 저장탱크 내부 슬러지 청소', place: '폐수처리장 옥외 탱크야드', equip: '폐수 저장탱크 T-201', desc: '탱크 배수 후 상부 맨홀로 진입하여 바닥 슬러지 제거, 고압 세척', types: ['conf'], hazards: '황화수소 중독, 산소결핍, 미끄러짐, 맨홀 추락', ppe: ['안전모', '안전대', '안전화', '송기마스크'], ppeEtc: '내화학 장갑·장화', gasRisk: '유입·배출 배관 밸브 닫고 맹판 설치, 슬러지 교반 시 황화수소 발생 가능 — 연속 측정', loto: '교반기·이송펌프 차단기 OFF·잠금·꼬리표', conditions: '송풍기 연속 가동, 측정기 경보 시 즉시 퇴장' } },
+                    { badge: '밀폐공간 + 화기', title: '탱크 내부 용접 보수', description: '탱크 내부 부식 부위를 용접으로 보수하는 복합 허가',
+                      set: { title: '2호 저장탱크 내부 용접 보수', place: 'B동 옥외 탱크야드', equip: 'T-102 저장탱크', desc: '탱크 내부 바닥판 부식 부위 그라인딩 후 덧판 용접', types: ['hot', 'conf'], hazards: '잔류 유증기 폭발, 산소결핍, 용접 흄, 불티 비산', ppe: ['안전모', '안전대', '안전화', '보안면', '송기마스크'], ppeEtc: '용접용 가죽장갑', extinguisher: '분말소화기 3.3kg 2대(맨홀 외부)', gasRisk: '입·출구 배관 맹판 설치, 내부 세척·증기 퍼지 후 측정', loto: '입·출구 밸브 닫고 맹판 설치, 교반기 전원 차단·잠금', conditions: '용접 중 강제 환기 연속 가동, 2시간마다 재측정(사내 기준)' } },
+                    { badge: '고소', title: '지붕 채광창 교체', description: '공장 지붕 위에서 노후 채광창을 교체하는 작업',
+                      set: { title: '공장 지붕 채광창 교체', place: '1공장 지붕', equip: '채광창 12개소', desc: '노후 채광창 철거 후 신품 설치, 자재는 고소작업차로 양중', types: ['height'], hazards: '채광창·슬레이트 파손에 의한 추락, 지붕 가장자리 추락, 자재 낙하', ppe: ['안전모', '안전대', '안전화'], ppeEtc: '', conditions: '비·강풍 시 작업 중지, 지붕 하부 출입 통제' } },
+                    { badge: '정전·전기', title: '분전반 교체', description: '전원을 차단하고 노후 분전반을 교체하는 작업',
+                      set: { title: '생산동 분전반 교체', place: '생산동 1층 전기실', equip: '분전반 LP-3', desc: '상위 차단기 차단 후 노후 분전반 철거·신품 설치, 결선 및 절연저항 측정', types: ['elec'], hazards: '충전부 접촉 감전, 오조작에 의한 전원 재투입, 아크 화상', ppe: ['안전모', '안전화', '절연용 보호구'], ppeEtc: '', loto: 'MCC-3 상위 차단기 OFF·잠금·꼬리표(작업자 본인 자물쇠), 검전 확인', conditions: '정전 구역·시간 사전 공지, 복전은 작업 책임자 확인 후' } }
+                ];
+                const isExModalOpen = ref(false);
+                const openExModal = () => { isExModalOpen.value = true; };
+                const selectEx = (opt) => {
+                    if (isBusy() && !window.confirm('지금 적어 둔 작업 개요·작업 종류·확인 결과를 예시로 바꿉니다. 계속할까요?')) return;
+                    const s = blankSnap();
+                    Object.assign(s.form, JSON.parse(JSON.stringify(opt.set)), { pid: form.value.pid, no: form.value.no, noAuto: form.value.noAuto, start: form.value.start, end: form.value.end, docType: form.value.docType });
+                    s.form = cleanForm(s.form);
+                    load(s);
+                    isExModalOpen.value = false;
+                    showToast(`예시 [${opt.title}]를 넣었습니다. 실제 작업 내용으로 고쳐 쓰세요.`);
+                };
+
+                // ---- 보관·대장·복제
+                const typeShort = (f) => TYPES.filter(t => f.types.includes(t.id)).map(t => t.short).join('+');
+                const countN = (s) => {
+                    let n = 0;
+                    [COMMON].concat(TYPES.filter(t => s.form.types.includes(t.id))).forEach(sec => sec.items.forEach(it => { if (s.checks[it.id].v === 'N') n++; }));
+                    s.custom.forEach(c => { if (c.t.trim() && c.v === 'N') n++; });
+                    return n;
+                };
+                const historyView = computed(() => historyRaw.value.map(h => {
+                    const f = h.snap.form;
+                    return { id: h.id, title: `${f.no || '(번호 없음)'} · ${f.title || '(작업명 없음)'}`, sub: `${(f.start || '').slice(0, 10)} · ${typeShort(f) || '종류 미선택'} · ${f.contractor || '업체 미기재'} · ${f.status}` };
+                }));
+                const ledgerRow = (s, live) => {
+                    const f = s.form, sd = parseDt(f.start), ed = parseDt(f.end);
+                    return {
+                        id: f.pid + (live ? '-live' : ''), live, no: f.no || '—',
+                        when: sd ? `${fmtDt(f.start)}${ed ? ' ~ ' + (sd.toDateString() === ed.toDateString() ? `${pad(ed.getHours())}:${pad(ed.getMinutes())}` : fmtDt(f.end)) : ''}` : '',
+                        title: f.title || '(작업명 없음)', place: f.place, types: typeShort(f), who: [f.contractor, f.lead].filter(x => x && x.trim()).join(' · '),
+                        status: f.status, n: countN(s), sort: f.start || ''
+                    };
+                };
+                const ledgerRows = computed(() => {
+                    const rows = historyRaw.value.map(h => ledgerRow(h.snap, false));
+                    const cur = { form: form.value, checks: checks.value, custom: custom.value };
+                    if (!historyRaw.value.some(h => h.id === form.value.pid) && isBusy()) rows.push(ledgerRow(cur, true));
+                    else { const i = historyRaw.value.findIndex(h => h.id === form.value.pid); if (i >= 0) rows[i] = ledgerRow(cur, false); }
+                    return rows.sort((a, b) => b.sort.localeCompare(a.sort));
+                });
+                const putHistory = () => {
+                    const snap = snapshot();
+                    const item = { id: snap.form.pid, saved: Date.now(), snap };
+                    const rest = historyRaw.value.filter(h => h.id !== item.id);
+                    const next = [item].concat(rest).sort((a, b) => (b.snap.form.start || '').localeCompare(a.snap.form.start || ''));
+                    const dropped = next.length > HIST_MAX;
+                    const before = historyRaw.value;
+                    historyRaw.value = next.slice(0, HIST_MAX);
+                    clearTimeout(saveTimer);
+                    if (!persist()) { historyRaw.value = before; showToast('저장 공간이 부족해 보관하지 못했습니다. 지난 기록을 일부 지워 주세요.', 'error'); return null; }
+                    return { dropped };
+                };
+                const archiveOnly = () => {
+                    const r = putHistory();
+                    if (r) showToast(r.dropped ? `보관했습니다. ${HIST_MAX}건을 넘어 가장 오래된 기록이 지워졌습니다.` : '이 허가서를 보관했습니다. 허가 대장에 반영됩니다.');
+                };
+                const archiveAndNew = () => {
+                    if (!window.confirm('이 허가서를 보관하고 빈 새 허가서를 열까요?')) return;
+                    if (!putHistory()) return;
+                    load(blankSnap());
+                    showToast('보관하고 새 허가서를 열었습니다.');
+                };
+                // 반복 작업용 복제: 작업 개요·인원·보호구·항목 구성은 그대로, 확인 결과·측정·결재 진행·완료 기록은 비운다(매번 다시 확인해야 하므로)
+                const cloneAsNew = (src) => {
+                    const s = cleanSnap(JSON.parse(JSON.stringify(src)));
+                    const f = s.form;
+                    const sd = parseDt(f.start), ed = parseDt(f.end);
+                    Object.assign(f, {
+                        pid: newId(), docType: 'permit', status: '작성 중', noAuto: true,
+                        start: todayAt(sd ? sd.getHours() : 9, sd ? sd.getMinutes() : 0), end: todayAt(ed ? ed.getHours() : 18, ed ? ed.getMinutes() : 0),
+                        refRisk: false, refTbm: false,
+                        doneFire: false, doneCount: false, doneLoto: false, doneTidy: false, doneRestore: false, doneTime: '', doneBy: '', doneNote: ''
+                    });
+                    f.no = nextNo(f.start, f.pid);
+                    s.checks = freshChecks();
+                    s.custom.forEach(c => { c.v = ''; c.note = ''; });
+                    s.gas = []; s.mid = [];
+                    return s;
+                };
+                const duplicateCurrent = () => {
+                    if (!isBusy()) { showToast('복제할 내용이 없습니다.', 'error'); return; }
+                    const inHist = historyRaw.value.some(h => h.id === form.value.pid);
+                    if (!window.confirm((inHist ? '지금 허가서의 바뀐 내용을 보관하고' : '지금 허가서를 보관하고') + ' 같은 작업의 새 허가서를 만들까요?\n(확인 결과·가스 측정·완료 기록은 비워집니다)')) return;
+                    if (!putHistory()) return;
+                    load(cloneAsNew(snapshot()));
+                    showToast('복제했습니다. 새 번호·오늘 날짜입니다. 안전조치를 다시 확인하세요.');
+                };
+                const duplicateHistory = (id) => {
+                    const h = historyRaw.value.find(x => x.id === id);
+                    if (!h) return;
+                    if (isBusy() && !historyRaw.value.some(x => x.id === form.value.pid) && !window.confirm('지금 작성 중인 내용은 보관되지 않았습니다. 버리고 복제본을 열까요?\n(남기려면 취소하고 "이 허가서 보관"을 먼저 누르세요)')) return;
+                    load(cloneAsNew(h.snap));
+                    showToast('복제했습니다. 새 번호·오늘 날짜입니다. 안전조치를 다시 확인하세요.');
+                };
+                const openHistory = (id) => {
+                    const h = historyRaw.value.find(x => x.id === id);
+                    if (!h) return;
+                    if (h.id !== form.value.pid && isBusy() && !window.confirm('지금 작성 중인 내용을 이 기록으로 바꿉니다.\n지금 내용을 남기려면 취소하고 "이 허가서 보관"을 먼저 누르세요. 계속할까요?')) return;
+                    const s = cleanSnap(JSON.parse(JSON.stringify(h.snap)));
+                    s.form.docType = 'permit';
+                    load(s);
+                    showToast('보관한 허가서를 열었습니다.');
+                };
+                const deleteHistory = (id) => {
+                    if (!window.confirm('이 허가 기록을 지울까요? 되돌릴 수 없습니다.')) return;
+                    historyRaw.value = historyRaw.value.filter(h => h.id !== id);
+                    clearTimeout(saveTimer); persist();
+                    showToast('기록을 지웠습니다.');
+                };
+
+                // ---- 예전 일반 서식(tools/forms/permit/)에 적어 둔 내용 가져오기
+                const oldState = readJson(OLD_FORM_KEY);
+                const oldHas = !!oldState && Object.keys(oldState).some(k => /^(f\.(kind|place|equip|company|lead|desc|no|approver|watch|done_note)|t\.(gas|workers)\.\d+\.\d+)$/.test(k) && str(oldState[k]).trim());
+                const oldFormAvailable = computed(() => oldHas && !form.value.oldDismissed);
+                const dismissOld = () => { form.value.oldDismissed = true; };
+                const OLD_KIND = { '화기작업': 'hot', '밀폐공간 작업': 'conf', '고소작업': 'height', '정전·전기작업': 'elec', '굴착작업': 'exc', '중장비 작업': 'heavy', '기타 위험작업': 'etc' };
+                const oldDt = (v) => { const m = /^(\d{4})-(\d{1,2})-(\d{1,2})[T ]+(\d{1,2}):(\d{2})/.exec(v); return m ? `${m[1]}-${pad(m[2])}-${pad(m[3])}T${pad(m[4])}:${m[5]}` : ''; };
+                const importOldForm = () => {
+                    const o = oldState || {};
+                    const g = (k) => str(o[k]).trim();
+                    if (isBusy() && !window.confirm('지금 적어 둔 내용을 예전 서식의 내용으로 바꿉니다. 계속할까요?')) return;
+                    const s = blankSnap();
+                    const f = s.form;
+                    f.oldDismissed = true;
+                    if (OLD_KIND[g('f.kind')]) f.types = [OLD_KIND[g('f.kind')]];
+                    f.title = g('f.desc').split('\n')[0].slice(0, 40);
+                    f.desc = g('f.desc'); f.place = g('f.place'); f.equip = g('f.equip'); f.contractor = g('f.company'); f.lead = g('f.lead');
+                    if (g('f.approver')) f.approver = g('f.approver');
+                    if (oldDt(g('f.from'))) f.start = oldDt(g('f.from'));
+                    if (oldDt(g('f.to'))) f.end = oldDt(g('f.to'));
+                    if (g('f.no')) { f.no = g('f.no'); f.noAuto = false; } else f.no = nextNo(f.start, f.pid);
+                    if (g('f.watch')) { if (f.types.includes('conf')) f.attendant = g('f.watch'); else f.fireWatch = g('f.watch'); }
+                    const rowsOf = (k, dflt) => (Number(o['n.' + k]) > 0 ? Math.min(Number(o['n.' + k]), 60) : dflt);
+                    for (let r = 0; r < rowsOf('gas', 3); r++) {
+                        const c = (i) => g(`t.gas.${r}.${i}`);
+                        if (![0, 1, 2, 3, 4, 5].some(i => c(i))) continue;
+                        const tm = /^(\d{1,2}):(\d{2})/.exec(c(0));
+                        s.gas.push({ time: tm ? `${pad(tm[1])}:${tm[2]}` : '', place: tm || !c(0) ? '' : c(0), o2: c(1), co2: '', co: c(3), h2s: c(4), lel: c(2), by: c(5) });
+                    }
+                    for (let r = 0; r < rowsOf('workers', 4); r++) {
+                        const org = g(`t.workers.${r}.1`), name = g(`t.workers.${r}.2`);
+                        if (org || name) s.workers.push({ org, name });
+                    }
+                    const dt = oldDt(g('f.done_time'));
+                    if (dt) f.doneTime = dt;
+                    f.doneBy = g('f.done_by');
+                    f.doneNote = [dt ? '' : g('f.done_time'), g('f.done_note')].filter(Boolean).join(' · ');
+                    load(s);
+                    showToast('예전 서식의 작업 개요·가스 측정·작업자·완료 확인을 가져왔습니다. 확인 항목은 조문별 항목으로 바뀌어 옮기지 않았으니 다시 확인하세요.');
+                };
+
+                // ---- 인쇄·PDF
+                const printDoc = () => { window.print(); };
+                // html2pdf(약 0.9MB)는 처음 누를 때만 불러온다
+                const loadHtml2pdf = () => new Promise((resolve, reject) => {
+                    if (window.html2pdf) return resolve();
+                    const sc = document.createElement('script');
+                    sc.src = '../../assets/vendor/html2pdf-0.10.1.bundle.min.js';
+                    sc.onload = () => resolve(); sc.onerror = () => reject(new Error('load'));
+                    document.head.appendChild(sc);
+                });
+                const downloadPDF = async () => {
+                    const element = document.getElementById('print-area');
+                    if (!element) return;
+                    isGeneratingPDF.value = true;
+                    showToast('PDF를 만들고 있습니다…', 'info');
+                    try { await loadHtml2pdf(); } catch (e) {
+                        isGeneratingPDF.value = false;
+                        showToast("PDF 도구를 불러오지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
+                        return;
+                    }
+                    // 줄여 보이던 미리보기를 실제 크기로 돌려놓고 찍는다
+                    document.documentElement.style.setProperty('--pz', '1');
+                    await nextTick();
+                    const docNameMap = { permit: '안전작업허가서', post: '현장게시용', ledger: '허가대장' };
+                    const f = form.value;
+                    const fileName = `${f.docType === 'ledger' ? (f.company || '사업장') : (f.no || '허가')}_${docNameMap[f.docType]}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
+                    const opt = {
+                        margin: 0, filename: fileName,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
+                    };
+                    window.html2pdf().set(opt).from(element).save().then(() => {
+                        isGeneratingPDF.value = false; fitPreview();
+                        showToast('PDF 파일을 저장했습니다.');
+                    }).catch(() => {
+                        isGeneratingPDF.value = false; fitPreview();
+                        showToast("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
+                    });
+                };
+
+                return {
+                    HIST_MAX, TYPES, ANS, ANS_LABEL, STATUSES, PPE, docTypes, form, checks, custom, gas, mid, workers, history: historyView,
+                    photoDataUrl, isGeneratingPDF, toast, saveMsg,
+                    hasType, activeTypes, sections, printSections, tally, typeText, needsDirector, basisText,
+                    toggleType, setAns, addCustom, togglePpe, suggestPpe, ppeText,
+                    addWorker, workerCount, workerNames, workerRows,
+                    showGas, addGas, gasView, gasState, gasBlankRows,
+                    addMid, midRows, doneNow, doneItems, periodText, doneTimeText, todayText, postState, postMeasures,
+                    timeChecks, checksOut, onNoInput, autoNo, changeDocType,
+                    handleFileUpload, removePhoto, resetToBlank,
+                    exPool, isExModalOpen, openExModal, selectEx,
+                    ledgerRows, archiveOnly, archiveAndNew, duplicateCurrent, duplicateHistory, openHistory, deleteHistory,
+                    oldFormAvailable, dismissOld, importOldForm,
+                    printDoc, downloadPDF
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

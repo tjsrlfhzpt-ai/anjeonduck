@@ -126,7 +126,7 @@
      "name": "교육일지·참석자 서명부",
      "basis": "법 제29조 · 규칙 제26조",
      "status": "ok",
-     "link": "forms/edu-log/",
+     "link": "edu-log/",
      "note": ""
     },
     {
@@ -167,7 +167,7 @@
      "name": "안전작업허가서",
      "basis": "기준규칙 제241조의2·제619조의2 참고",
      "status": "ok",
-     "link": "forms/permit/",
+     "link": "permit/",
      "note": ""
     },
     {
@@ -257,14 +257,14 @@
      "name": "작업장 순회점검표",
      "basis": "법 제64조 · 규칙 제80조",
      "status": "ok",
-     "link": "forms/patrol/",
+     "link": "patrol/",
      "note": ""
     },
     {
      "name": "합동 안전·보건점검표",
      "basis": "법 제64조제2항 · 규칙 제82조",
      "status": "ok",
-     "link": "forms/joint/",
+     "link": "joint/",
      "note": ""
     },
     {
