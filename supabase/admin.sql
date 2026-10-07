@@ -105,13 +105,38 @@ language sql immutable as $$
   select case when p is null or position('@' in p) < 2 then '' else left(split_part(p, '@', 1), 2) || '***@' || split_part(p, '@', 2) end;
 $$;
 
+-- 접속기록: 운영자가 회원 정보(목록)를 조회한 기록. 「개인정보의 안전성 확보조치 기준」의 접속기록 보관(1년 이상)에 대비해
+-- 누가·언제·어디서(IP)·무엇을 했는지 남기고 자동으로 지우지 않는다. 운영자 화면에서는 읽기만 한다.
+create table if not exists public.admin_access (
+  id bigint generated always as identity primary key,
+  admin_id uuid,
+  at timestamptz not null default now(),
+  what text not null,
+  detail text not null default '',
+  ip text not null default ''
+);
+create index if not exists admin_access_at on public.admin_access (at desc);
+alter table public.admin_access enable row level security;
+revoke all on public.admin_access from anon, authenticated;
+
+create or replace function public.client_ip() returns text
+language plpgsql stable as $$
+declare h text := current_setting('request.headers', true);
+begin
+  if h is null or h = '' then return ''; end if;
+  return left(btrim(split_part(coalesce(h::json ->> 'x-forwarded-for', ''), ',', 1)), 60);
+exception when others then return '';
+end $$;
+
 drop function if exists public.admin_members(text, boolean);
 create function public.admin_members(p_q text default '', p_only_suspended boolean default false)
 returns table (id uuid, nickname text, role text, created_at timestamptz, posts bigint, comments bigint, reported bigint,
                suspended boolean, until timestamptz, reason text, email text, verified boolean, last_seen timestamptz)
-language plpgsql stable security definer set search_path = public as $$
+language plpgsql volatile security definer set search_path = public as $$
 begin
   perform public.admin_only();
+  insert into public.admin_access (admin_id, what, detail, ip)
+  values (auth.uid(), '회원 목록 조회', left(coalesce(btrim(p_q), ''), 40) || case when p_only_suspended then ' (정지 회원만)' else '' end, public.client_ip());
   return query
   select pr.id, pr.nickname, pr.role, pr.created_at,
          (select count(*) from public.posts x where x.author_id = pr.id and x.deleted_at is null),
@@ -221,6 +246,17 @@ drop trigger if exists posts_log_admin_delete on public.posts;
 create trigger posts_log_admin_delete after update on public.posts for each row execute function public.log_admin_delete('post');
 drop trigger if exists comments_log_admin_delete on public.comments;
 create trigger comments_log_admin_delete after update on public.comments for each row execute function public.log_admin_delete('comment');
+
+create or replace function public.admin_access_logs()
+returns table (id bigint, at timestamptz, admin text, what text, detail text, ip text)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  perform public.admin_only();
+  return query select a.id, a.at, pr.nickname, a.what, a.detail, a.ip
+    from public.admin_access a left join public.profiles pr on pr.id = a.admin_id order by a.at desc, a.id desc limit 200;
+end $$;
+revoke execute on function public.admin_access_logs(), public.client_ip() from public, anon;
+grant execute on function public.admin_access_logs() to authenticated;
 
 create or replace function public.admin_logs()
 returns table (id bigint, created_at timestamptz, admin text, action text, target text, note text)
@@ -332,6 +368,7 @@ begin
   if coalesce(p_block, false) and em is not null then
     insert into public.blocked_emails (email_hash, reason) values (public.email_hash(em), left(btrim(p_reason), 200)) on conflict (email_hash) do nothing;
   end if;
+  insert into public.admin_access (admin_id, what, detail, ip) values (auth.uid(), '강제 탈퇴(계정 삭제)', nick, public.client_ip());
   delete from auth.users where id = p_user;
   perform public.admin_note('강제 탈퇴', nick, btrim(p_reason) || case when coalesce(p_purge, false) then ' · 글 가림' else '' end || case when coalesce(p_block, false) then ' · 재가입 차단' else '' end);
 end $$;

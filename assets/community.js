@@ -238,7 +238,7 @@
     navJob(b === "job");
     loading();
     var job = b === "job";
-    var q = sb.from("posts").select("id,board,category,title,created_at,comment_count,accepted_comment_id,notice," + (job ? "meta," : "") + "author:profiles(nickname)", { count: "exact" })
+    var q = sb.from("posts").select("id,board,category,title,created_at,comment_count,accepted_comment_id,notice," + (job ? "meta," : "") + "author:profiles(nickname)", { count: "exact" }).is("deleted_at", null)
       .eq("board", b).order("notice", { ascending: false }).order("created_at", { ascending: false }).range((p - 1) * PER, p * PER - 1);
     if (cat) q = q.eq("category", cat);
     if (kw) q = q.ilike("title", "%" + kw.replace(/[\\%_]/g, "\\$&") + "%");
@@ -283,8 +283,8 @@
     if (!id) return show(note("주소가 올바르지 않습니다.", "err"), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "목록으로")));
     loading();
     Promise.all([
-      sb.from("posts").select("*,author:profiles(nickname)").eq("id", id).maybeSingle(),
-      sb.from("comments").select("id,body,created_at,author_id,author:profiles(nickname)").eq("post_id", id).order("created_at", { ascending: true }).limit(500)
+      sb.from("posts").select("*,author:profiles(nickname)").eq("id", id).is("deleted_at", null).maybeSingle(),
+      sb.from("comments").select("id,body,created_at,author_id,author:profiles(nickname)").eq("post_id", id).is("deleted_at", null).order("created_at", { ascending: true }).limit(500)
     ]).then(function (rs) {
       var post = rs[0].data, err = rs[0].error || rs[1].error;
       if (err) return show(note(msg(err), "err"));
@@ -468,7 +468,7 @@
     }
     if (!id) return form(null);
     loading();
-    sb.from("posts").select("*").eq("id", id).maybeSingle().then(function (r) {
+    sb.from("posts").select("*").eq("id", id).is("deleted_at", null).maybeSingle().then(function (r) {
       if (r.error) return show(note(msg(r.error), "err"));
       if (!r.data || r.data.author_id !== ME.id) return show(note("본인이 쓴 글만 수정할 수 있습니다.", "err"), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "목록으로")));
       form(r.data);
@@ -621,7 +621,7 @@
     document.title = "운영 관리 | " + document.title.split(" | ").pop();
     if (!ME) { location.href = url("account", { next: location.pathname + location.search }); return; }
     if (ME.role !== "admin") return show(note("운영자만 볼 수 있는 화면입니다.", "err"), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "게시판으로")));
-    var TABS = [["stats", "현황"], ["reports", "신고"], ["members", "회원"], ["deleted", "삭제한 글"], ["log", "처리 기록"]];
+    var TABS = [["stats", "현황"], ["reports", "신고"], ["members", "회원"], ["deleted", "삭제한 글"], ["log", "처리 기록"], ["access", "접속 기록"]];
     var tab = TABS.some(function (t) { return t[0] === qs("tab"); }) ? qs("tab") : "stats", box = h("div", { class: "cm-adm-body" });
     function go(t, extra) { var p = { tab: t }; for (var k in extra || {}) p[k] = extra[k]; history.replaceState(null, "", url("admin", p)); tab = t; draw(); }
     function head() {
@@ -748,7 +748,15 @@
         }), "아직 처리 기록이 없습니다.");
       });
     }
-    function draw() { show(head(), box); ({ stats: drawStats, reports: drawReports, members: drawMembers, deleted: drawDeleted, log: drawLog })[tab](); }
+    function drawAccess() {
+      load("admin_access_logs", {}, function (rows) {
+        return [table(["일시", "운영자", "한 일", "내용", "접속 IP"], rows.map(function (r) {
+          return h("tr", null, h("td", { class: "cm-meta" }, h("time", { datetime: r.at }, when(r.at, true))), h("td", null, r.admin || ""), h("td", null, r.what), h("td", null, r.detail), h("td", { class: "cm-meta" }, r.ip || "-"));
+        }), "아직 기록이 없습니다."),
+        h("p", { class: "src-note" }, "운영자가 회원 정보를 조회하거나 계정을 삭제한 기록입니다. 최근 200건만 보여 주며, 기록 자체는 지우지 않고 보관합니다. Supabase 대시보드에서 직접 본 기록은 여기에 남지 않습니다.")];
+      });
+    }
+    function draw() { show(head(), box); ({ stats: drawStats, reports: drawReports, members: drawMembers, deleted: drawDeleted, log: drawLog, access: drawAccess })[tab](); }
     draw();
   }
 
