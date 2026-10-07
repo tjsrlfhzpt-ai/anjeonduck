@@ -528,6 +528,14 @@
                             <input id="pApprover" v-model="form.approver" type="text" placeholder="직책·성명" class="pw-in">
                         </div>
                     </div>
+                    <div class="pw-mt">
+                        <label class="pw-lb" for="pFoot">문서 맨 아래 문구 <span style="font-weight:500;color:#64748b">— 고치거나 모두 지울 수 있습니다</span></label>
+                        <textarea id="pFoot" v-model="form.footNote" rows="2" maxlength="400" class="pw-in" placeholder="비워 두면 문서에 나오지 않습니다"></textarea>
+                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:6px">
+                            <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#334155"><input type="checkbox" v-model="form.showBasis"> 근거 조문 줄 표시</label>
+                            <button type="button" class="pw-link" style="font-size:13px;color:#2563eb;background:none;border:0;cursor:pointer;padding:0" @click="resetFoot">기본 문구로 되돌리기</button>
+                        </div>
+                    </div>
                     <div id="autoChecks" class="pw-mt" style="display:grid;gap:6px">
                         <p v-for="(c, i) in checksOut" :key="'chk-' + i" :class="c.lv === 'ok' ? 'cm-ok' : c.lv === 'stop' ? 'cm-stop' : 'cm-warn'">{{ c.text }}</p>
                     </div>
@@ -735,9 +743,9 @@
                             <img :src="photoDataUrl" alt="현장 사진">
                         </div>
 
-                        <div class="pd-foot">
-                            <p>근거 조문: {{ basisText }}</p>
-                            <p>허가 유효 시간·재허가·결재 단계는 사내 규정에 따릅니다. 밀폐공간 농도 측정·평가 결과는 3년간 보존(기준규칙 제619조의2제4항).</p>
+                        <div class="pd-foot" v-if="form.showBasis || footLines.length">
+                            <p v-if="form.showBasis">근거 조문: {{ basisText }}</p>
+                            <p v-for="(ln, i) in footLines" :key="'ft-' + i">{{ ln }}</p>
                         </div>
                     </div>
 
@@ -1022,6 +1030,10 @@
                 const now = new Date();
                 const newId = () => 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
                 const todayAt = (h, m) => toLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m || 0));
+                // 문서 맨 아래 문구: 기본값을 넣어 두되 사용자가 고치거나 지울 수 있다
+                const FOOT_DEFAULT = '허가 유효 시간·재허가·결재 단계는 사내 규정에 따릅니다. 밀폐공간 농도 측정·평가 결과는 3년간 보존(기준규칙 제619조의2제4항).';
+                const footLines = computed(() => String(form.value.footNote || '').split(/\n/).map(x => x.trim()).filter(Boolean));
+                const resetFoot = () => { form.value.footNote = FOOT_DEFAULT; form.value.showBasis = true; };
                 const freshForm = () => ({
                     pid: newId(), docType: 'permit', no: '', noAuto: true, status: '작성 중',
                     company: str(profile.company), title: '', place: '', equip: '', desc: '',
@@ -1032,6 +1044,7 @@
                     ppe: [], ppeEtc: '', loto: '', refRisk: false, refTbm: false, conditions: '',
                     reviewer: str(profile.manager), approver: '',
                     doneFire: false, doneCount: false, doneLoto: false, doneTidy: false, doneRestore: false, doneTime: '', doneBy: '', doneNote: '',
+                    showBasis: true, footNote: FOOT_DEFAULT,
                     oldDismissed: false
                 });
                 const freshChecks = () => { const o = {}; ALL_ITEM_IDS.forEach(id => { o[id] = { v: '', note: '' }; }); return o; };
@@ -1551,7 +1564,7 @@
                 return {
                     HIST_MAX, TYPES, ANS, ANS_LABEL, STATUSES, PPE, docTypes, form, checks, custom, gas, mid, workers, history: historyView,
                     photoDataUrl, isGeneratingPDF, toast, saveMsg,
-                    hasType, activeTypes, sections, printSections, tally, typeText, needsDirector, basisText,
+                    hasType, activeTypes, sections, printSections, tally, typeText, needsDirector, basisText, footLines, resetFoot,
                     toggleType, setAns, addCustom, togglePpe, suggestPpe, ppeText,
                     addWorker, workerCount, workerNames, workerRows,
                     showGas, addGas, gasView, gasState, gasBlankRows,
