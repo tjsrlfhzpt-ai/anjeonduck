@@ -10,7 +10,8 @@
   var ERR = {
     LOGIN_REQUIRED: "로그인이 필요합니다.", RATE_LIMIT: "너무 빠르게 연속으로 등록했습니다. 잠시 뒤 다시 시도하세요.",
     DAILY_LIMIT: "하루 등록 한도를 넘었습니다. 내일 다시 시도하세요.", SUSPENDED: "글쓰기가 정지된 계정입니다. 마이페이지에서 기간과 사유를 확인할 수 있습니다.", ADMIN_ONLY: "운영자만 쓸 수 있는 기능입니다.",
-    CANNOT_SUSPEND_ADMIN: "운영자 계정과 자기 자신은 정지할 수 없습니다.", REASON_REQUIRED: "사유를 2자 이상 적어 주세요.", BAD_DAYS: "기간은 1~3650일 사이로 정하세요.", USER_NOT_FOUND: "회원을 찾을 수 없습니다.", NOT_FOUND: "대상을 찾을 수 없습니다. 이미 처리되었을 수 있습니다.",
+    CANNOT_SUSPEND_ADMIN: "운영자 계정과 자기 자신은 정지할 수 없습니다.", REASON_REQUIRED: "사유를 2자 이상 적어 주세요.", BAD_DAYS: "기간은 1~3650일 사이로 정하세요.", USER_NOT_FOUND: "회원을 찾을 수 없습니다.", "Database error saving new user": "가입을 처리하지 못했습니다. 이용이 제한된 이메일일 수 있습니다. 문의 창구로 알려 주세요.", SIGNUP_BLOCKED: "이용이 제한된 이메일입니다. 문의 창구로 알려 주세요.",
+    NOT_FOUND: "대상을 찾을 수 없습니다. 이미 처리되었을 수 있습니다.",
     NOT_ALLOWED: "권한이 없거나 이미 삭제된 글입니다.",
     POST_NOT_FOUND: "삭제되었거나 없는 글입니다.", NICKNAME_INVALID: "닉네임은 한글·영문·숫자·밑줄 2~12자이며 운영자를 연상시키는 이름은 쓸 수 없습니다.",
     NICKNAME_TAKEN: "이미 쓰고 있는 닉네임입니다.", NICKNAME_COOLDOWN: "닉네임은 7일에 한 번만 바꿀 수 있습니다.",
@@ -573,7 +574,7 @@
       } }, h("h2", { class: "h-sm" }, "비밀번호 찾기"), field("가입한 이메일", email), out, h("p", { class: "btns" }, br), h("p", { class: "cm-alt" }, sw("login", "로그인으로"))));
     }
     var nk = h("input", { type: "text", maxlength: "12", required: true, autocomplete: "nickname" }), pw2 = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true });
-    var ag1 = h("input", { type: "checkbox", required: true }), ag2 = h("input", { type: "checkbox", required: true }), bj = h("button", { type: "submit", class: "btn btn-block" }, "인증 메일 받기"), cj = pwConfirm(pw2);
+    var ag1 = h("input", { type: "checkbox", required: true }), ag2 = h("input", { type: "checkbox", required: true }), ag3 = h("input", { type: "checkbox", required: true }), bj = h("button", { type: "submit", class: "btn btn-block" }, "인증 메일 받기"), cj = pwConfirm(pw2);
     show(h("form", { class: "cm-form cm-auth", onsubmit: function (ev) {
       ev.preventDefault(); out.hidden = true;
       if (!cj.same()) { cj.input.focus(); return result(out, "비밀번호가 서로 다릅니다. 다시 확인해 주세요."); }
@@ -594,7 +595,12 @@
     } }, why(), h("h2", { class: "h-sm" }, "무료 회원가입"),
       h("p", { class: "hint" }, "누구나 무료로 가입합니다. 이름·전화번호는 받지 않고 이메일 인증만 하면 됩니다."),
       field("이메일", email, "인증 메일을 받을 주소 · 다른 회원에게 보이지 않습니다"), field("비밀번호", pw2, "8자 이상"), cj.el, field("닉네임", nk, "한글·영문·숫자·밑줄 2~12자 · 글에 공개됩니다"),
-      h("label", { class: "cm-chk" }, ag1, h("span", null, h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "과 ", h("a", { href: REL + "privacy/", target: "_blank" }, "개인정보 처리방침"), "을 읽었고 동의합니다. (필수)")),
+      h("label", { class: "cm-chk" }, ag1, h("span", null, h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "에 동의합니다. (필수)")),
+      h("div", { class: "cm-consent" }, h("b", null, "개인정보 수집·이용 안내"),
+        h("ul", null, h("li", null, "수집 항목: 이메일 주소, 비밀번호(암호화 저장), 닉네임"), h("li", null, "이용 목적: 본인 확인(인증 메일), 로그인, 글·댓글 작성자 표시, 이용 제한 등 운영 조치"),
+          h("li", null, "보유 기간: 회원 탈퇴 시까지(탈퇴하면 바로 삭제)"), h("li", null, "동의하지 않을 수 있으며, 그 경우 가입과 글쓰기를 할 수 없습니다. 읽기와 작성 도구는 가입 없이 쓸 수 있습니다.")),
+        h("p", null, "처리 위탁·국외 보관 등 자세한 내용은 ", h("a", { href: REL + "privacy/", target: "_blank" }, "개인정보 처리방침"), "에 있습니다.")),
+      h("label", { class: "cm-chk" }, ag3, h("span", null, "위 개인정보 수집·이용에 동의합니다. (필수)")),
       h("label", { class: "cm-chk" }, ag2, h("span", null, "만 14세 이상입니다. (필수)")),
       out, h("p", { class: "btns" }, bj), h("p", { class: "cm-alt" }, "이미 회원이면 ", sw("login", "로그인"))));
   }
@@ -604,8 +610,8 @@
     document.title = "운영 관리 | " + document.title.split(" | ").pop();
     if (!ME) { location.href = url("account", { next: location.pathname + location.search }); return; }
     if (ME.role !== "admin") return show(note("운영자만 볼 수 있는 화면입니다.", "err"), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "게시판으로")));
-    var TABS = [["reports", "신고"], ["members", "회원"], ["deleted", "삭제한 글"], ["log", "처리 기록"]];
-    var tab = TABS.some(function (t) { return t[0] === qs("tab"); }) ? qs("tab") : "reports", box = h("div", { class: "cm-adm-body" });
+    var TABS = [["stats", "현황"], ["reports", "신고"], ["members", "회원"], ["deleted", "삭제한 글"], ["log", "처리 기록"]];
+    var tab = TABS.some(function (t) { return t[0] === qs("tab"); }) ? qs("tab") : "stats", box = h("div", { class: "cm-adm-body" });
     function go(t, extra) { var p = { tab: t }; for (var k in extra || {}) p[k] = extra[k]; history.replaceState(null, "", url("admin", p)); tab = t; draw(); }
     function head() {
       return h("div", { class: "cm-top" }, h("div", { class: "seg cm-tabs", role: "group", "aria-label": "운영 관리" },
@@ -629,6 +635,33 @@
     function load(name, args, render) {
       box.textContent = ""; add(box, h("p", { class: "cm-load", role: "status" }, "불러오는 중…"));
       sb.rpc(name, args || {}).then(function (r) { if (r.error) return fail(r.error); box.textContent = ""; add(box, render(r.data || [])); }, fail);
+    }
+    function drawStats() {
+      load("admin_stats", {}, function (s) {
+        function tile(label, v, sub, to) {
+          var kids = [h("span", { class: "cm-tile-l" }, label), h("b", { class: "cm-tile-v" }, String(v)), sub ? h("span", { class: "cm-tile-s" }, sub) : null];
+          return to ? h("button", { type: "button", class: "cm-tile", onclick: to }, kids) : h("div", { class: "cm-tile" }, kids);
+        }
+        var days = s.days || [];
+        return [h("div", { class: "cm-tiles" },
+            tile("오늘 방문자", s.visitors_today, "어제 " + s.visitors_yesterday + "명"),
+            tile("오늘 가입", s.joins_today, "전체 회원 " + s.members + "명", function () { go("members"); }),
+            tile("오늘 글 · 댓글", s.posts_today + " · " + s.comments_today),
+            tile("처리할 신고", s.open_reports, "정지 중 " + s.suspended + "명", function () { go("reports"); })),
+          h("h3", { class: "h-sm", style: "margin:18px 0 8px" }, "최근 14일"),
+          table(["날짜", "방문자", "가입", "글", "댓글"], days.map(function (d) {
+            return h("tr", null, h("td", { class: "cm-meta" }, d.day + (d.day === s.today ? " (오늘)" : "")), h("td", null, String(d.visitors)), h("td", null, String(d.joins)), h("td", null, String(d.posts)), h("td", null, String(d.comments)));
+          }), "기록이 없습니다."),
+          h("p", { class: "src-note" }, "방문자는 하루에 한 번, 그날만 쓰는 임의 번호로 셉니다(같은 사람이 PC와 휴대폰으로 오면 2명). 누가 방문했는지는 기록하지 않습니다. 날짜는 한국 시간 기준이며, 이 기능을 켠 날부터 집계됩니다.")];
+      });
+    }
+    function kick(m) {
+      var why = window.prompt(m.nickname + " 님을 강제 탈퇴시킵니다. 계정이 바로 삭제되며 되돌릴 수 없습니다.\n\n사유를 적어 주세요(2~200자, 처리 기록에 남습니다).", ""); if (why == null) return;
+      if (why.trim().length < 2) return window.alert(ERR.REASON_REQUIRED);
+      var purge = window.confirm("이 회원이 쓴 글·댓글도 함께 가릴까요?\n\n[확인] 글·댓글도 가림 (3개월 뒤 완전 삭제)\n[취소] 글은 남김 (작성자가 '탈퇴한 회원'으로 표시)");
+      var block = window.confirm("같은 이메일로 다시 가입하지 못하게 막을까요?\n\n[확인] 재가입 차단\n[취소] 차단하지 않음");
+      if (!window.confirm("마지막 확인: " + m.nickname + " 님을 강제 탈퇴시킵니다.\n· 글·댓글: " + (purge ? "함께 가림" : "남김") + "\n· 재가입: " + (block ? "차단" : "허용") + "\n\n진행할까요?")) return;
+      call("admin_delete_user", { p_user: m.id, p_reason: why.trim(), p_purge: purge, p_block: block });
     }
     function drawReports() {
       var open = qs("done") !== "1";
@@ -670,18 +703,20 @@
         return [h("div", { class: "cm-adm-bar" },
           h("form", { class: "cm-search", role: "search", onsubmit: function (ev) { ev.preventDefault(); go("members", { q: inp.value.trim(), sus: only ? "1" : "" }); } }, inp, h("button", { type: "submit", class: "btn btn-sm btn-ghost" }, "검색")),
           h("button", { type: "button", class: "chip", "aria-pressed": String(only), onclick: function () { go("members", { q: q, sus: only ? "" : "1" }); } }, "정지 중인 회원만"),
-          h("span", { class: "hint" }, "가입일 최신순 200명까지. 이메일은 여기에 표시하지 않습니다.")),
-          table(["닉네임", "가입일", "글·댓글", "신고 받음", "상태", "조치"], rows.map(function (m) {
+          h("span", { class: "hint" }, "가입일 최신순 200명까지. 이메일은 앞 두 글자만 보입니다(전체 주소는 Supabase 대시보드).")),
+          table(["닉네임", "이메일(일부)", "가입 · 최근 로그인", "글·댓글", "신고 받음", "상태", "조치"], rows.map(function (m) {
             return h("tr", null,
               h("td", null, h("b", null, m.nickname), m.role === "admin" ? h("span", { class: "cm-st cm-st-ans" }, "운영자") : null),
-              h("td", { class: "cm-meta" }, h("time", { datetime: m.created_at }, when(m.created_at, true).slice(0, 10))),
+              h("td", { class: "cm-meta" }, m.email || "", m.verified === false ? h("span", { class: "cm-st cm-st-wait" }, "미인증") : null),
+              h("td", { class: "cm-meta" }, h("time", { datetime: m.created_at }, when(m.created_at, true)), h("br"), m.last_seen ? "로그인 " + when(m.last_seen, true) : "로그인 기록 없음"),
               h("td", { class: "cm-meta" }, m.posts + " · " + m.comments), h("td", { class: "cm-meta" }, String(m.reported)),
               h("td", null, m.suspended ? [h("span", { class: "cm-st cm-st-hot" }, "정지"), " ", h("span", { class: "cm-meta" }, (m.until ? when(m.until, true) + "까지" : "기한 없음")), h("p", { class: "cm-adm-snip" }, m.reason || "")] : "정상"),
-              h("td", { class: "cm-adm-acts" }, m.role === "admin" ? null : m.suspended
+              h("td", { class: "cm-adm-acts" }, m.role === "admin" ? null : [m.suspended
                 ? h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { call("admin_unsuspend", { p_user: m.id }, m.nickname + " 님의 정지를 해제할까요?"); } }, "정지 해제")
-                : h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { suspend(m); } }, "글쓰기 정지")));
+                : h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: function () { suspend(m); } }, "글쓰기 정지"),
+                h("button", { type: "button", class: "btn btn-sm btn-ghost cm-danger-b", onclick: function () { kick(m); } }, "강제 탈퇴")]));
           }), q || only ? "조건에 맞는 회원이 없습니다." : "회원이 없습니다."),
-          h("p", { class: "src-note" }, "정지된 회원은 글·댓글을 새로 쓰거나 고칠 수 없고, 읽기·자기 글 삭제·신고는 할 수 있습니다. 계정 자체를 없애거나 로그인을 막으려면 Supabase 대시보드(Authentication → Users)에서 처리하세요.")];
+          h("p", { class: "src-note" }, "정지된 회원은 글·댓글을 새로 쓰거나 고칠 수 없고, 읽기·자기 글 삭제·신고는 할 수 있습니다. 강제 탈퇴는 계정을 바로 삭제하며 되돌릴 수 없습니다.")];
       });
     }
     function drawDeleted() {
@@ -702,7 +737,7 @@
         }), "아직 처리 기록이 없습니다.");
       });
     }
-    function draw() { show(head(), box); ({ reports: drawReports, members: drawMembers, deleted: drawDeleted, log: drawLog })[tab](); }
+    function draw() { show(head(), box); ({ stats: drawStats, reports: drawReports, members: drawMembers, deleted: drawDeleted, log: drawLog })[tab](); }
     draw();
   }
 

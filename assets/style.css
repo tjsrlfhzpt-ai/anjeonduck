@@ -1624,3 +1624,11 @@ button.cm-tab{font:inherit;cursor:pointer}
 .cm-joinbox{margin-top:6px;padding-top:14px;border-top:1px solid var(--line-2);display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--text-2);line-height:1.55}
 .cm-joinbox p{margin:0}
 .cm-share{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 0}
+.cm-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cm-tile{display:flex;flex-direction:column;gap:2px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);font:inherit;color:var(--text)}
+button.cm-tile{cursor:pointer}button.cm-tile:hover{border-color:var(--blue-100);background:var(--blue-50)}
+.cm-tile-l{font-size:13px;font-weight:700;color:var(--text-2)}.cm-tile-v{font-size:26px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}.cm-tile-s{font-size:12.5px;color:var(--muted)}
+.cm-danger-b{color:#B3261E!important;border-color:#F5C6C1!important}
+@media (max-width:720px){.cm-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cm-consent{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:12.5px;color:var(--text-2);line-height:1.55}
+.cm-consent ul{margin:4px 0 4px 16px;padding:0}.cm-consent p{margin:0}

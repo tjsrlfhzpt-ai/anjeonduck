@@ -338,9 +338,9 @@
         "기타"
       ]
     },
-    "rules_effective": "2026-10-06",
+    "rules_effective": "2026-10-07",
     "privacy": {
-      "effective": "2026-10-06",
+      "effective": "2026-10-07",
       "db_region": "대한민국(AWS 서울 리전)",
       "mail_provider": "Supabase 기본 메일 발송(Supabase Inc.)",
       "deleted_retention": "삭제일부터 3개월",

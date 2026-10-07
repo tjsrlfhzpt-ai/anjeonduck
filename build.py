@@ -635,7 +635,7 @@ def dock_html(rel, active):
 def _asset_ver():
     import hashlib
     h = hashlib.sha1()
-    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/favicon.png", "assets/img/plum/logo.webp", "assets/img/plum/hero.webp", "assets/img/ico/tbm.webp"):
+    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/ping.js", "assets/favicon.png", "assets/img/plum/logo.webp", "assets/img/plum/hero.webp", "assets/img/ico/tbm.webp"):
         h.update((ROOT / f).read_bytes())
     return h.hexdigest()[:8]
 
@@ -717,13 +717,22 @@ def operator_html(site, rel_root):
     return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}'
 
 
+def ping_tag(site, rel_root):
+    """하루 방문자 수 집계 스크립트(assets/ping.js). 게시판(Supabase)이 연결됐을 때만 넣는다."""
+    cm = site.get("community") or {}
+    m = re.match(r"^https://([a-z0-9]+)\.supabase\.co/?$", str(cm.get("supabase_url") or ""))
+    if not (m and cm.get("supabase_anon_key")):
+        return ""
+    return f'<script async src="{rel_root}assets/ping.js?v={ASSET_VER}" data-url="https://{m.group(1)}.supabase.co" data-key="{html.escape(str(cm["supabase_anon_key"]))}"></script>'
+
+
 def hd_auth(site, rel_root):
     """헤더의 회원 영역. 게시판(Supabase)이 연결됐을 때만 나온다. 로그인 여부는 브라우저에 저장된 세션으로 판단한다."""
     cm = site.get("community") or {}
     m = re.match(r"^https://([a-z0-9]+)\.supabase\.co/?$", str(cm.get("supabase_url") or ""))
     if not (m and cm.get("supabase_anon_key")):
         return ""
-    return (f'<div class="hd-auth" id="hdAuth" data-key="sb-{m.group(1)}-auth-token" data-acct="{rel_root}board/account/">'
+    return (ping_tag(site, rel_root) + f'<div class="hd-auth" id="hdAuth" data-key="sb-{m.group(1)}-auth-token" data-acct="{rel_root}board/account/">'
             f'<a class="hd-auth-in" href="{rel_root}board/account/">로그인</a></div>')
 
 
@@ -989,6 +998,8 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         css = (ROOT / t["css"]).read_text(encoding="utf-8").replace("</style", "<\\/style")
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
+    if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
+        src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
     if t["id"] in ("tbm", "committee", "council"):
         note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
@@ -1608,7 +1619,7 @@ def build(out, today):
   <h2>5. 글의 책임과 권리</h2>
   <p>글의 내용에 대한 책임은 글을 쓴 회원에게 있습니다. 글의 저작권은 쓴 회원에게 있으며, SafePlum은 게시판 운영에 필요한 범위(게시·검색·목록 표시)에서 글을 보여 줍니다.</p>
   <h2>6. 삭제·이용 제한</h2>
-  <p>이 수칙에 어긋나거나 신고가 들어온 글은 운영자가 확인한 뒤 알리지 않고 가리거나 삭제할 수 있습니다. 위반이 반복되면 글쓰기를 제한하거나 계정을 정지할 수 있습니다. 회원은 자기 글과 댓글을 언제든 삭제할 수 있습니다.</p>
+  <p>이 수칙에 어긋나거나 신고가 들어온 글은 운영자가 확인한 뒤 알리지 않고 가리거나 삭제할 수 있습니다. 위반이 반복되면 기간을 정해 글쓰기를 정지하거나, 정도가 심하면 강제로 탈퇴시키고 다시 가입하지 못하게 할 수 있습니다. 정지된 회원은 마이페이지에서 기간과 사유를 확인할 수 있고, 이의가 있으면 문의 창구로 알려 주세요. 회원은 자기 글과 댓글을 언제든 삭제할 수 있습니다.</p>
   <h2>7. 권리 침해 신고</h2>
   <p>내 권리(명예·사생활·저작권 등)를 침해하는 글을 발견하면 글의 '신고' 버튼 또는 아래 문의 창구로 알려 주세요. 회원이 아니어도 문의 창구로 요청할 수 있습니다. 확인한 뒤 가림·삭제 등 필요한 조치를 합니다.</p>
   <p>{op_line}</p>
@@ -1630,22 +1641,23 @@ def build(out, today):
 <div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
   <h2>1. 수집하는 항목과 목적</h2>
   <div class="cm-tblw"><table class="cm-tbl"><thead><tr><th>항목</th><th>목적</th><th>수집 시점</th></tr></thead><tbody>
-    <tr><th>이메일 주소</th><td>본인 확인(인증 메일), 로그인, 비밀번호 재설정</td><td>회원가입</td></tr>
+    <tr><th>이메일 주소</th><td>본인 확인(인증 메일), 로그인, 비밀번호 재설정, 이용 제한·강제 탈퇴 등 운영 조치</td><td>회원가입</td></tr>
     <tr><th>비밀번호</th><td>로그인. 원문이 아닌 암호화(해시)된 값으로 저장됩니다.</td><td>회원가입</td></tr>
     <tr><th>닉네임</th><td>글·댓글의 작성자 표시(공개)</td><td>회원가입</td></tr>
     <tr><th>글·댓글·첨부 사진·신고 내용</th><td>게시판 제공, 신고 처리. 첨부 사진은 올릴 때 다시 저장되어 촬영 위치 등 사진 속 부가 정보(EXIF)는 남지 않습니다.</td><td>작성할 때</td></tr>
     <tr><th>접속 기록(접속 일시·IP 주소 등)</th><td>부정 이용 방지, 장애 대응. 인증·호스팅 서비스가 자동으로 남깁니다.</td><td>이용할 때 자동</td></tr>
   </tbody></table></div>
-  <p>이름·전화번호·주민등록번호 등은 받지 않습니다. 광고·분석용 추적 도구는 현재 쓰지 않습니다.</p>
+  <p>이름·전화번호·주민등록번호 등은 받지 않습니다. 외부 광고·분석 도구는 쓰지 않습니다. 하루 방문자 수를 세기 위해, 브라우저가 그날 처음 접속할 때 그날만 쓰는 임의 번호를 한 번 보냅니다. 이 번호는 매일 새로 만들어지고 계정·이메일과 연결하지 않으며, 날짜별 개수만 집계합니다.</p>
   <h2>2. 보유 기간</h2>
-  <p>회원 정보(이메일·비밀번호·닉네임)는 탈퇴할 때까지 보유하고, 탈퇴하면 바로 삭제합니다. 글과 댓글은 회원이 삭제하거나 탈퇴할 때 작성자 정보와의 연결이 끊어집니다. 삭제한 글은 화면에서 바로 사라지며, 분쟁·신고 대응을 위해 운영자만 볼 수 있는 상태로 보관한 뒤 파기합니다. 보관 기간: {pv_val("deleted_retention")}.</p>
+  <p>회원 정보(이메일·비밀번호·닉네임)는 탈퇴할 때까지 보유하고, 탈퇴하면 바로 삭제합니다. 이용수칙 위반으로 강제 탈퇴된 경우에는 같은 이메일로 다시 가입하는 것을 막기 위해, 이메일 주소를 원래 값으로 되돌릴 수 없게 바꾼 값(해시)만 따로 보관할 수 있습니다. 글과 댓글은 회원이 삭제하거나 탈퇴할 때 작성자 정보와의 연결이 끊어집니다. 삭제한 글은 화면에서 바로 사라지며, 분쟁·신고 대응을 위해 운영자만 볼 수 있는 상태로 보관한 뒤 파기합니다. 보관 기간: {pv_val("deleted_retention")}.</p>
   <h2>3. 처리 위탁과 보관 위치</h2>
   <div class="cm-tblw"><table class="cm-tbl"><thead><tr><th>맡기는 곳</th><th>맡기는 일</th><th>보관 위치</th></tr></thead><tbody>
     <tr><th>Supabase Inc.</th><td>회원 인증, 게시판 데이터베이스·첨부 사진 저장소 운영</td><td>{pv_val("db_region")}</td></tr>
     <tr><th>인증 메일 발송 서비스</th><td>가입 인증·비밀번호 재설정 메일 발송</td><td>{pv_val("mail_provider")}</td></tr>
     <tr><th>GitHub, Inc. (GitHub Pages)</th><td>웹사이트 파일 호스팅(접속 기록)</td><td>해당 사업자 정책에 따름</td></tr>
   </tbody></table></div>
-  <p>위 사업자가 국외 법인이므로 개인정보가 국외에서 처리·보관될 수 있습니다. 법령에 따른 요청이 있는 경우를 빼고 제3자에게 제공하지 않습니다.</p>
+  <p>위 사업자가 국외 법인이므로 개인정보가 국외에서 처리·보관될 수 있습니다. 넘어가는 항목은 이메일 주소·암호화된 비밀번호·닉네임·글과 댓글·접속 기록이며, 회원가입과 게시판 이용 시점에 암호화된 통신(HTTPS)으로 전송됩니다. 위탁받은 사업자는 회원 탈퇴 또는 위탁 종료 때까지 위 목적으로만 보관합니다. 국외 처리·보관을 원하지 않으면 가입하지 않거나 탈퇴할 수 있으며, 그 경우 게시판 글쓰기는 이용할 수 없습니다(읽기와 작성 도구는 가입 없이 이용 가능).</p>
+  <p>법령에 따른 요청이 있는 경우를 빼고 제3자에게 제공하지 않습니다.</p>
   <h2>4. 회원의 권리</h2>
   <p>'마이페이지'에서 닉네임·비밀번호를 바꾸고 탈퇴(삭제)할 수 있습니다. 열람·정정·삭제·처리정지를 직접 하기 어려우면 아래 문의 창구로 요청하세요. 만 14세 미만은 가입할 수 없습니다.</p>
   <h2>5. 안전 조치</h2>

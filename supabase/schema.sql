@@ -491,10 +491,16 @@ begin
 end $$;
 
 -- ------------------------------------------------------------ 회원
--- 이메일은 내보내지 않는다(필요하면 Supabase 대시보드에서 확인).
-create or replace function public.admin_members(p_q text default '', p_only_suspended boolean default false)
+-- 이메일은 일부만 보여 준다(예: tj***@gmail.com). 전체 주소는 Supabase 대시보드에서만 본다.
+create or replace function public.mask_email(p text) returns text
+language sql immutable as $$
+  select case when p is null or position('@' in p) < 2 then '' else left(split_part(p, '@', 1), 2) || '***@' || split_part(p, '@', 2) end;
+$$;
+
+drop function if exists public.admin_members(text, boolean);
+create function public.admin_members(p_q text default '', p_only_suspended boolean default false)
 returns table (id uuid, nickname text, role text, created_at timestamptz, posts bigint, comments bigint, reported bigint,
-               suspended boolean, until timestamptz, reason text)
+               suspended boolean, until timestamptz, reason text, email text, verified boolean, last_seen timestamptz)
 language plpgsql stable security definer set search_path = public as $$
 begin
   perform public.admin_only();
@@ -505,12 +511,16 @@ begin
          (select count(*) from public.reports r
             where (r.target_type = 'post' and exists (select 1 from public.posts x where x.id = r.target_id and x.author_id = pr.id))
                or (r.target_type = 'comment' and exists (select 1 from public.comments x where x.id = r.target_id and x.author_id = pr.id))),
-         (s.user_id is not null and (s.until is null or s.until > now())), s.until, s.reason
-    from public.profiles pr left join public.suspensions s on s.user_id = pr.id
+         (s.user_id is not null and (s.until is null or s.until > now())), s.until, s.reason,
+         public.mask_email(u.email::text), (u.email_confirmed_at is not null), u.last_sign_in_at
+    from public.profiles pr left join public.suspensions s on s.user_id = pr.id left join auth.users u on u.id = pr.id
    where (coalesce(btrim(p_q), '') = '' or pr.nickname ilike '%' || replace(replace(replace(btrim(p_q), '\', '\\'), '%', '\%'), '_', '\_') || '%')
      and (not p_only_suspended or (s.user_id is not null and (s.until is null or s.until > now())))
    order by pr.created_at desc limit 200;
 end $$;
+revoke execute on function public.admin_members(text, boolean) from public, anon;
+grant execute on function public.admin_members(text, boolean) to authenticated;
+
 
 -- p_days: 1~3650 또는 null(기한 없음). 운영자와 자기 자신은 정지할 수 없다.
 create or replace function public.admin_suspend(p_user uuid, p_days int, p_reason text) returns void
@@ -620,6 +630,106 @@ grant execute on function public.admin_reports(boolean), public.admin_handle_rep
   public.admin_suspend(uuid, int, text), public.admin_unsuspend(uuid), public.admin_deleted(), public.admin_restore(text, bigint),
   public.admin_set_notice(bigint, boolean), public.admin_logs() to authenticated;
 grant execute on function public.is_suspended(uuid) to authenticated;
+
+-- ============================================================ 방문자 수 · 가입자 확인 · 강제 탈퇴
+-- ------------------------------------------------------------ 하루 방문자 수
+-- 브라우저가 '그날 하루만 쓰는 임의 번호'를 하루에 한 번 보낸다. 번호는 매일 새로 만들어 다음 날과 이어지지 않고,
+-- IP·계정과 연결하지 않는다. 날짜별로 몇 개가 들어왔는지만 센다.
+create table if not exists public.visits (
+  day date not null,
+  vid text not null check (vid ~ '^[0-9a-f]{16,32}$'),
+  primary key (day, vid)
+);
+alter table public.visits enable row level security;
+revoke all on public.visits from anon, authenticated;
+
+create or replace function public.visit_ping(p_vid text) returns void
+language plpgsql security definer set search_path = public as $$
+declare d date := (now() at time zone 'Asia/Seoul')::date;
+begin
+  if p_vid is null or p_vid !~ '^[0-9a-f]{16,32}$' then return; end if;
+  if (select count(*) from public.visits where day = d) >= 200000 then return; end if;   -- 비정상 폭주 방지
+  insert into public.visits (day, vid) values (d, p_vid) on conflict do nothing;
+  if random() < 0.01 then delete from public.visits where day < d - 400; end if;
+end $$;
+revoke execute on function public.visit_ping(text) from public;
+grant execute on function public.visit_ping(text) to anon, authenticated;
+
+create or replace function public.admin_stats() returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare d date := (now() at time zone 'Asia/Seoul')::date; t0 timestamptz := (d::timestamp at time zone 'Asia/Seoul');
+begin
+  perform public.admin_only();
+  return jsonb_build_object(
+    'today', d,
+    'visitors_today', (select count(*) from public.visits where day = d),
+    'visitors_yesterday', (select count(*) from public.visits where day = d - 1),
+    'days', (select coalesce(jsonb_agg(jsonb_build_object('day', g.day, 'visitors', (select count(*) from public.visits v where v.day = g.day),
+                     'joins', (select count(*) from public.profiles p where (p.created_at at time zone 'Asia/Seoul')::date = g.day),
+                     'posts', (select count(*) from public.posts p where (p.created_at at time zone 'Asia/Seoul')::date = g.day),
+                     'comments', (select count(*) from public.comments c where (c.created_at at time zone 'Asia/Seoul')::date = g.day)) order by g.day desc), '[]'::jsonb)
+               from (select generate_series(d - 13, d, interval '1 day')::date as day) g),
+    'members', (select count(*) from public.profiles),
+    'joins_today', (select count(*) from public.profiles where created_at >= t0),
+    'posts_today', (select count(*) from public.posts where created_at >= t0 and deleted_at is null),
+    'comments_today', (select count(*) from public.comments where created_at >= t0 and deleted_at is null),
+    'open_reports', (select count(distinct (target_type, target_id)) from public.reports where handled_at is null),
+    'suspended', (select count(*) from public.suspensions where until is null or until > now()));
+end $$;
+
+-- ------------------------------------------------------------ 강제 탈퇴
+-- 다시 가입하지 못하게 막을 이메일. 주소 자체는 남기지 않고 SHA-256 값만 둔다.
+create table if not exists public.blocked_emails (
+  email_hash text primary key,
+  reason text not null default '',
+  created_at timestamptz not null default now()
+);
+alter table public.blocked_emails enable row level security;
+revoke all on public.blocked_emails from anon, authenticated;
+
+create or replace function public.email_hash(p text) returns text
+language sql immutable as $$ select encode(sha256(convert_to(lower(btrim(coalesce(p, ''))), 'UTF8')), 'hex'); $$;
+
+create or replace function public.block_banned_signup() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.email is not null and exists (select 1 from public.blocked_emails where email_hash = public.email_hash(new.email::text)) then
+    raise exception 'SIGNUP_BLOCKED';
+  end if;
+  return new;
+end $$;
+drop trigger if exists on_auth_user_block on auth.users;
+create trigger on_auth_user_block before insert on auth.users for each row execute function public.block_banned_signup();
+
+-- p_purge: 쓴 글·댓글도 함께 가린다(3개월 뒤 완전 삭제). p_block: 같은 이메일로 다시 가입하지 못하게 한다.
+create or replace function public.admin_delete_user(p_user uuid, p_reason text, p_purge boolean default false, p_block boolean default false) returns void
+language plpgsql security definer set search_path = public as $$
+declare nick text; rl text; em text;
+begin
+  perform public.admin_only();
+  select nickname, role into nick, rl from public.profiles where id = p_user;
+  if nick is null then raise exception 'USER_NOT_FOUND'; end if;
+  if p_user = auth.uid() or rl = 'admin' then raise exception 'CANNOT_SUSPEND_ADMIN'; end if;
+  if char_length(btrim(coalesce(p_reason, ''))) < 2 then raise exception 'REASON_REQUIRED'; end if;
+  select email::text into em from auth.users where id = p_user;
+  if coalesce(p_purge, false) then
+    perform set_config('app.sys', '1', true);
+    update public.comments set deleted_at = now(), deleted_by = auth.uid() where author_id = p_user and deleted_at is null;
+    update public.posts set deleted_at = now(), deleted_by = auth.uid() where author_id = p_user and deleted_at is null;
+    update public.posts p set comment_count = (select count(*) from public.comments c where c.post_id = p.id and c.deleted_at is null),
+           accepted_comment_id = case when exists (select 1 from public.comments c where c.id = p.accepted_comment_id and c.deleted_at is null) then p.accepted_comment_id else null end
+     where exists (select 1 from public.comments c where c.post_id = p.id and c.author_id = p_user);
+    perform set_config('app.sys', '', true);
+  end if;
+  if coalesce(p_block, false) and em is not null then
+    insert into public.blocked_emails (email_hash, reason) values (public.email_hash(em), left(btrim(p_reason), 200)) on conflict (email_hash) do nothing;
+  end if;
+  delete from auth.users where id = p_user;
+  perform public.admin_note('강제 탈퇴', nick, btrim(p_reason) || case when coalesce(p_purge, false) then ' · 글 가림' else '' end || case when coalesce(p_block, false) then ' · 재가입 차단' else '' end);
+end $$;
+
+revoke execute on function public.admin_stats(), public.admin_delete_user(uuid, text, boolean, boolean), public.block_banned_signup(), public.mask_email(text), public.email_hash(text) from public, anon;
+grant execute on function public.admin_stats(), public.admin_delete_user(uuid, text, boolean, boolean) to authenticated;
 
 -- ------------------------------------------------------------ 운영자 지정 (가입한 뒤 한 번만, 이메일을 바꿔서 따로 실행)
 -- update public.profiles set role = 'admin' where id = (select id from auth.users where email = '운영자 이메일');
