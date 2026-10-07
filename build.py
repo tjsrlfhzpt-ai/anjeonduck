@@ -2065,9 +2065,11 @@ def build(out, today):
     (out / "404.html").write_text(nf.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + base_js, 1), encoding="utf-8")
 
     if base:
+        # 로그인·글쓰기·운영 관리처럼 검색에 나올 필요가 없는 화면은 사이트맵에서 뺀다
+        urls = [u for u in urls if not re.match(r"^board/(admin|account|write|view)/", u)]
         sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc><lastmod>{today}</lastmod></url>" for u in urls)
         (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>', encoding="utf-8")
-    (out / "robots.txt").write_text("User-agent: *\nAllow: /\n" + (f"Sitemap: {base}/sitemap.xml\n" if base else ""), encoding="utf-8")
+    (out / "robots.txt").write_text("User-agent: *\nAllow: /\nDisallow: /board/admin/\nDisallow: /board/account/\nDisallow: /board/write/\n" + (f"Sitemap: {base}/sitemap.xml\n" if base else ""), encoding="utf-8")
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     total = sum(f.stat().st_size for f in out.rglob("*") if f.is_file())
