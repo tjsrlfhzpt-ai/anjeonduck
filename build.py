@@ -717,6 +717,16 @@ def operator_html(site, rel_root):
     return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}'
 
 
+def og_image_tags(site):
+    """공유 미리보기 이미지(카카오톡·메신저·SNS). 절대 주소여야 하므로 base_url 이 있을 때만 넣는다."""
+    base = (site.get("base_url") or "").rstrip("/")
+    if not base or not (ROOT / "assets/og.png").exists():
+        return ""
+    u = f"{base}/assets/og.png?v={ASSET_VER}"
+    return (f'<meta property="og:image" content="{u}">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
+            f'<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="{u}">')
+
+
 def ping_tag(site, rel_root):
     """하루 방문자 수 집계 스크립트(assets/ping.js). 게시판(Supabase)이 연결됐을 때만 넣는다."""
     cm = site.get("community") or {}
@@ -743,7 +753,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     # 검색엔진 소유 확인 태그(네이버 서치어드바이저·구글 서치콘솔). 홈에만 넣는다. 값은 영문·숫자·-_ 만 허용
     _sv = site.get("search_verification") or {}
     if path == "":
-        for _k, _n in (("naver", "naver-site-verification"), ("google", "google-site-verification")):
+        for _k, _n in (("naver", "naver-site-verification"), ("google", "google-site-verification"), ("bing", "msvalidate.01")):
             _v = str(_sv.get(_k) or "").strip()
             if re.match(r"^[A-Za-z0-9_-]{8,120}$", _v):
                 canon_tags += f'\n<meta name="{_n}" content="{_v}">'
@@ -769,6 +779,8 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
 <meta name="description" content="{d}">
 {canon_tags}
 <meta property="og:type" content="website">
+{og_image_tags(site)}
+{f'<link rel="alternate" type="application/rss+xml" title="{e(site["name"])} 브리핑·소식" href="{e(base)}/rss.xml">' if base else ''}
 <meta property="og:site_name" content="{e(site['name'])}">
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{d}">
@@ -1012,6 +1024,8 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         src = src.replace("/*@TAILWIND@*/", css)
     if site.get("name_ko") and f"| {site['name']}</title>" in src:   # 단독 화면 제목에도 한글 이름
         src = src.replace(f"| {site['name']}</title>", f"| {site['name_ko']} {site['name']}</title>", 1)
+    if "og:image" not in src and "</head>" in src:
+        src = src.replace("</head>", og_image_tags(site) + "\n</head>", 1)
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
@@ -2076,7 +2090,28 @@ def build(out, today):
         urls = [u for u in urls if not re.match(r"^board/(admin|account|write|view)/", u)]
         sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc><lastmod>{today}</lastmod></url>" for u in urls)
         (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>', encoding="utf-8")
-    (out / "robots.txt").write_text("User-agent: *\nAllow: /\nDisallow: /board/admin/\nDisallow: /board/account/\nDisallow: /board/write/\n" + (f"Sitemap: {base}/sitemap.xml\n" if base else ""), encoding="utf-8")
+    # ---- RSS (브리핑·소식). 네이버 서치어드바이저 등에 제출할 수 있다
+    if base:
+        from email.utils import format_datetime
+        def _rfc(dstr):
+            try:
+                return format_datetime(dt.datetime.strptime(dstr, "%Y-%m-%d").replace(hour=9, tzinfo=dt.timezone(dt.timedelta(hours=9))))
+            except Exception:
+                return ""
+        _items = "".join(
+            f"<item><title>{e(x['title'])}</title><link>{e(base)}/brief/</link><guid isPermaLink=\"false\">{e(base)}/brief/#{e(x['date'])}-{i}</guid>"
+            f"<pubDate>{_rfc(x['date'])}</pubDate><category>{e(x.get('cat', ''))}</category><description>{e(x.get('summary', ''))}</description></item>"
+            for i, x in enumerate(BOARD[:50]))
+        (out / "rss.xml").write_text(
+            f'<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>{e(site["name"])} 브리핑·소식</title><link>{e(base)}/brief/</link>'
+            f'<description>산업안전보건 정책·점검·법령·지원사업 소식 요약</description><language>ko</language>{_items}</channel></rss>', encoding="utf-8")
+    # ---- IndexNow 키 파일(빙·네이버 등에 변경 사실을 알릴 때 소유 확인용)
+    _ink = str(site.get("indexnow_key") or "")
+    if re.match(r"^[a-f0-9]{16,64}$", _ink):
+        (out / f"{_ink}.txt").write_text(_ink, encoding="utf-8")
+    _daum = str((site.get("search_verification") or {}).get("daum") or "").strip()
+    _daum_line = f"#DaumWebMasterTool:{_daum}\n" if re.match(r"^[A-Za-z0-9:_-]{8,200}$", _daum) else ""
+    (out / "robots.txt").write_text(_daum_line + "User-agent: *\nAllow: /\nDisallow: /board/admin/\nDisallow: /board/account/\nDisallow: /board/write/\n" + (f"Sitemap: {base}/sitemap.xml\n" if base else ""), encoding="utf-8")
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     total = sum(f.stat().st_size for f in out.rglob("*") if f.is_file())

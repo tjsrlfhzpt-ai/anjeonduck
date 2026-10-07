@@ -422,8 +422,11 @@
   "search_verification": {
     "naver": "bd9ade449360b8f1218d1212319b7d0fa0e2737d",
     "google": "",
-    "_comment": "네이버 서치어드바이저·구글 서치콘솔에서 'HTML 태그' 방식으로 받은 content 값만 넣습니다(따옴표 안의 영문·숫자). 넣고 배포하면 홈 화면 <head> 에 태그가 들어갑니다."
+    "_comment": "네이버 서치어드바이저·구글 서치콘솔·빙 웹마스터에서 'HTML 태그' 방식으로 받은 content 값만 넣습니다. daum 은 다음 웹마스터도구가 주는 robots.txt 용 코드(#DaumWebMasterTool: 뒤의 값)입니다. 넣고 배포하면 홈 화면 <head>·robots.txt 에 들어갑니다.",
+    "bing": "",
+    "daum": ""
   },
   "name_ko": "세이프플럼",
-  "home_title": "SafePlum 세이프플럼 | 안전관리자 서식·TBM·위험성평가 무료 작성 도구"
+  "home_title": "SafePlum 세이프플럼 | 안전관리자 서식·TBM·위험성평가 무료 작성 도구",
+  "indexnow_key": "3f5f2250b13535cdf37aedacd28282ce"
 }

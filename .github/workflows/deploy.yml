@@ -65,3 +65,9 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - name: 검색엔진에 변경 알림 (IndexNow — 실패해도 배포는 유지)
+        continue-on-error: true
+        run: |
+          sleep 20
+          python3 scripts/indexnow.py
