@@ -36,6 +36,11 @@ jobs:
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
         run: python3 scripts/fetch_public.py
+      - name: 공공데이터포털 API → 사고사망 속보만 (PUBLIC_API 를 켜지 않았을 때. 인증키가 없으면 건너뜀)
+        if: vars.PUBLIC_API != 'true'
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python3 scripts/fetch_public.py --accidents-only
       - name: 정적 페이지 생성
         run: python3 build.py --out _site
       - name: 법령 별표 원본 대조 (적용범위 판정 데이터)

@@ -280,7 +280,10 @@ def main():
         print("  DATA_GO_KR_KEY 없음 — 공공 API 수집을 건너뜁니다(기존 data/auto 파일이 있으면 그대로 사용).")
         return 0
     probe()
-    for name, fn in (("공공기관 채용", fetch_jobs), ("정책뉴스", fetch_news), ("사고사망 속보", fetch_accidents)):
+    jobs = (("공공기관 채용", fetch_jobs), ("정책뉴스", fetch_news), ("사고사망 속보", fetch_accidents))
+    if "--accidents-only" in sys.argv:  # 안전뉴스·공공채용 메뉴를 켜지 않은 상태: 사고사망 속보만 받는다
+        jobs = jobs[2:]
+    for name, fn in jobs:
         try:
             fn()
         except Exception as e:  # 한 API 실패가 다른 수집·빌드를 막지 않게
