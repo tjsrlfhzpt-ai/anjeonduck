@@ -10,6 +10,8 @@
     <style>/*@TAILWIND@*/</style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
     <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
+    <!-- 결재란(칸 이름·개수·성명·서명)은 사이트 공통 모듈을 쓴다 — 저장 키 safetake.appr.tool.edu-log -->
+    <script src="../../assets/docs.js"></script>
     <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
     <style>
@@ -84,7 +86,9 @@
                 border: 0 !important;
                 padding: 0 !important;
             }
-            #app { min-height: 0 !important; display: block !important; }
+            #app { min-height: 0 !important; height: auto !important; overflow: visible !important; display: block !important; }
+            #preview-col { display: block !important; height: auto !important; overflow: visible !important; }
+            .el-emp { display: none !important; }
             main { display: block !important; padding: 0 !important; max-width: none !important; }
             tr, img { break-inside: avoid; page-break-inside: avoid; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -132,12 +136,13 @@
         .el-topics span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
         .el-tag { flex: none; font-style: normal; font-size: 10px; font-weight: 700; color: #6d28d9; background: #ede9fe; border-radius: 4px; padding: 1px 6px; }
         .el-cus { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+        .el-cus > .el-in { flex: 1; }
         .el-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 420px; overflow-y: auto; }
         .el-hist li { display: flex; align-items: center; gap: 6px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; }
         .el-hist-t { flex: 1; min-width: 0; font-size: 12px; font-weight: 700; color: #1e293b; }
         .el-hist-t small { display: block; font-size: 11px; font-weight: 400; color: #64748b; overflow-wrap: anywhere; }
         .el-a { color: #1d4ed8; text-decoration: underline; }
-        .el-dt { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+        .el-dt { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
         .el-dt button { word-break: keep-all; text-align: center; line-height: 1.3; }
         .el-opt { display: block; width: 100%; text-align: left; background: #fff; }
         .el-opt > span { display: block; }
@@ -183,6 +188,80 @@
         .el-live { display: block; font-size: 9px; color: #b45309; }
         .el-h4 { margin: 4px 0 6px; font-size: 13px; font-weight: 700; }
         .el-fn { margin: -8px 0 14px; font-size: 10px; line-height: 1.55; color: #475569; }
+        /* ---- 입력 칸: 접이식 단계 */
+        .el-pane { display: grid; gap: 10px; align-content: start; }
+        .el-st { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0; }
+        .el-st.el-top { padding: 10px 12px; display: grid; gap: 8px; }
+        .el-sth { display: flex; width: 100%; align-items: center; gap: 10px; padding: 10px 12px; background: none; border: 0; text-align: left; cursor: pointer; font-family: inherit; border-radius: 12px; color: inherit; }
+        .el-sth:hover { background: #f8fafc; }
+        .el-stn { flex: none; width: 24px; height: 24px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .el-stn.done { background: #059669; color: #fff; }
+        .el-stt { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.35; }
+        .el-stt small { display: block; font-size: 11px; font-weight: 400; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .el-stw { flex: none; font-size: 11px; font-weight: 700; color: #b45309; white-space: nowrap; }
+        .el-std { flex: none; font-size: 13px; color: #059669; }
+        .el-chev { flex: none; width: 8px; height: 8px; border-right: 2px solid #94a3b8; border-bottom: 2px solid #94a3b8; transform: rotate(45deg); margin: 0 4px 4px 2px; transition: transform .15s; }
+        .el-chev.up { transform: rotate(-135deg); margin-bottom: -2px; }
+        .el-stb { padding: 12px; display: grid; gap: 12px; border-top: 1px solid #f1f5f9; min-width: 0; }
+        .el-stb > * { min-width: 0; }
+        .el-next { display: flex; justify-content: flex-end; }
+        .el-hint { margin: 0; font-size: 11px; line-height: 1.6; color: #64748b; }
+        .el-link { background: none; border: 0; padding: 2px 0; font-family: inherit; font-size: 12px; font-weight: 700; color: #047857; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .el-link:hover { text-decoration: underline; }
+        .el-bar { min-height: 22px; }
+        .el-btn:disabled { opacity: .5; cursor: default; }
+        .el-dt button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-family: inherit; font-size: 12px; font-weight: 700; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 4px; cursor: pointer; }
+        .el-dt button i { font-size: 16px; }
+        .el-dt button:hover { background: #f1f5f9; }
+        .el-dt button.on { color: #047857; background: #ecfdf5; border-color: #10b981; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+        .el-ses { border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; }
+        .el-ses.man { border-color: #fcd34d; background: #fffbeb; }
+        .el-chip { font-family: inherit; font-size: 12px; font-weight: 700; color: #475569; background: #fff; border: 1px solid #cbd5e1; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+        .el-chip:hover { background: #f1f5f9; }
+        .el-chip.on { color: #047857; background: #ecfdf5; border-color: #10b981; }
+        .el-durline { display: grid; gap: 2px; }
+        .el-durline .el-dur { padding: 0; }
+        .el-mv { display: inline-flex; align-items: center; gap: 1px; flex: none; }
+        .el-mv button { font-family: inherit; font-size: 9px; line-height: 1; color: #64748b; background: none; border: 0; padding: 6px 3px; cursor: pointer; border-radius: 4px; }
+        .el-mv button:hover:not(:disabled) { background: #e2e8f0; color: #0f172a; }
+        .el-mv button:disabled { opacity: .25; cursor: default; }
+        .el-mv .el-del { font-size: 13px; }
+        .el-mv .el-del:hover { color: #e11d48 !important; }
+        .el-word { margin-top: 8px; }
+        .el-apprpane { margin-top: 8px; display: grid; gap: 6px; overflow-x: auto; }
+        .el-apprpane .ad-appr { margin-left: 0; }
+        .el-tabs { display: none; }
+        /* 문서 안에서 바로 고치는 글자 */
+        .el-ed { white-space: pre-line; outline: 0; border-radius: 3px; cursor: text; min-width: 1em; }
+        .el-apprbox { flex: none; }
+        @media screen {
+            .el-ed:hover { box-shadow: 0 0 0 1px #94a3b8; }
+            .el-ed:focus { background: #ecfdf5; box-shadow: 0 0 0 2px #10b981; }
+            .el-ed:empty { display: inline-block; }
+            .el-ed:empty::before { content: "(비움)"; color: #cbd5e1; font-weight: 400; }
+            #print-area .ad-ctl { display: none; }
+            .el-cap .el-ed:empty::before { content: none; }
+            .el-cap .el-emp, .el-cap .ad-noprint { display: none !important; }
+        }
+        /* 넓은 화면: 입력 칸과 미리보기가 화면 높이 안에서 따로 스크롤 */
+        @media screen and (min-width: 1024px) {
+            #app { height: 100vh; height: 100dvh; min-height: 0 !important; overflow: hidden; }
+            #elMain { min-height: 0; grid-template-rows: minmax(0, 1fr); padding-top: 16px; padding-bottom: 0; }
+            #form-col, #preview-col { height: 100%; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 20px; }
+            #form-col { padding-right: 6px; scrollbar-gutter: stable; }
+        }
+        @media screen and (max-width: 1023.98px) {
+            .el-hd { position: static !important; }
+            .el-tabs { display: grid; grid-template-columns: 1fr 1fr; position: sticky; top: 0; z-index: 30; background: #fff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+            .el-tabs button { font-family: inherit; font-size: 14px; font-weight: 700; color: #64748b; background: none; border: 0; border-bottom: 3px solid transparent; padding: 11px 8px 8px; cursor: pointer; }
+            .el-tabs button.on { color: #047857; border-bottom-color: #059669; }
+            .el-hide-m { display: none !important; }
+        }
+        @media (max-width: 640px) {
+            .el-hd-sub, .el-long, .el-pv-l { display: none; }
+            .el-hd-in { gap: 8px !important; }
+            .el-hd { padding-top: 10px !important; padding-bottom: 10px !important; }
+        }
         @media screen { .el-pb { margin-top: 28px; padding-top: 28px; border-top: 2px dashed #94a3b8; } }
         button:focus-visible, a:focus-visible, .el-in:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
         @media (max-width: 480px) {
@@ -192,6 +271,7 @@
             .el-att { grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) auto; }
             .el-att > input:nth-of-type(3) { grid-column: 2 / 3; }
             .el-att > .cm-abs { grid-column: 3 / 4; }
+            .el-att > .el-mv { grid-column: 4 / 5; grid-row: 1; }
             .el-att-r { grid-column: 2 / -1; }
         }
         @media print {
@@ -205,7 +285,7 @@
 <body class="text-slate-800">
     <div id="app" class="min-h-screen flex flex-col" v-cloak>
         <header class="bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40 el-hd">
-            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4 el-hd-in">
                 <div class="flex items-center space-x-3">
                     <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold mr-1">← SafePlum</a>
                     <span class="bg-emerald-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-black">
@@ -213,29 +293,36 @@
                     </span>
                     <div>
                         <h1 class="text-base font-bold tracking-tight">안전보건교육 일지 작성기</h1>
-                        <p class="text-[11px] text-slate-400">산업안전보건법 제29조 · 시행규칙 제26조, 별표 4·5 · 교육 일지 / 참석자 서명부 / 실시 통보 / 실시 대장</p>
+                        <p class="text-[11px] text-slate-400 el-hd-sub">산업안전보건법 제29조 · 시행규칙 제26조, 별표 4·5 · 교육 일지 / 참석자 서명부 / 실시 통보 / 실시 대장</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="cm-save" role="status" aria-live="polite">{{ saveMsg }}</span>
                     <button type="button" @click="resetContent" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
-                        <i class="ph-bold ph-arrow-counter-clockwise"></i> 교육 내용 비우기
+                        <i class="ph-bold ph-arrow-counter-clockwise"></i> <span><span class="el-long">교육 </span>내용 비우기</span>
                     </button>
                     <button type="button" id="btnPrint" @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                        <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
+                        <i class="ph-bold ph-printer text-base"></i> <span>인쇄<span class="el-long"> / PDF 저장</span></span>
                     </button>
                     <button type="button" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
                         <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
                         <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
-                        <span>{{ isGeneratingPDF ? 'PDF 만드는 중…' : 'PDF 파일로 받기' }}</span>
+                        <span>{{ isGeneratingPDF ? '만드는 중…' : 'PDF 파일' }}</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 좁은 화면: 입력 | 미리보기 전환 -->
+        <div class="el-tabs no-print" role="tablist" aria-label="화면 전환">
+            <button type="button" role="tab" id="tabForm" :aria-selected="view === 'form' ? 'true' : 'false'" :class="{ on: view === 'form' }" @click="setView('form')">입력</button>
+            <button type="button" role="tab" id="tabDoc" :aria-selected="view === 'doc' ? 'true' : 'false'" :class="{ on: view === 'doc' }" @click="setView('doc')">미리보기</button>
+        </div>
+
+        <main id="elMain" class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- 입력 -->
-            <div class="lg:col-span-5 space-y-5 no-print" style="min-width:0">
+            <div id="form-col" class="lg:col-span-5 no-print" :class="{ 'el-hide-m': view !== 'form' }" style="min-width:0">
+                <div class="el-pane">
                 <div v-if="oldFormAvailable" class="el-old" id="oldBox">
                     <p>예전 <b>안전보건교육 일지·참석자 서명부 서식</b>에 적어 둔 내용이 이 기기에 남아 있습니다. 여기로 가져올 수 있습니다(예전 내용은 지워지지 않습니다).</p>
                     <div class="el-row">
@@ -245,418 +332,465 @@
                 </div>
 
                 <!-- 문서 종류 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <span class="block text-xs font-bold text-slate-600 mb-2">문서 종류 선택</span>
+                <div class="el-st el-top">
                     <div class="el-dt">
-                        <button v-for="item in docTypes" :key="item.value" type="button" :id="'doc-' + item.value" @click="changeDocType(item.value)" :aria-pressed="f.docType === item.value"
-                            :class="['py-2 px-2.5 rounded-lg border text-xs font-bold flex flex-col items-center justify-center gap-1 transition',
-                                f.docType === item.value ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100']">
-                            <i :class="[item.icon, 'text-base']"></i>
+                        <button v-for="item in docTypes" :key="item.value" type="button" :id="'doc-' + item.value" @click="changeDocType(item.value)" :aria-pressed="f.docType === item.value ? 'true' : 'false'" :class="{ on: f.docType === item.value }">
+                            <i :class="item.icon"></i>
                             <span>{{ item.label }}</span>
                         </button>
                     </div>
-                    <label v-if="f.docType === 'log'" class="el-chk" style="margin-top:10px"><input type="checkbox" v-model="f.appendSign"> 인쇄할 때 참석자 서명부를 일지 뒤에 붙이기</label>
+                    <div class="el-row el-bar">
+                        <label v-if="f.docType === 'log'" class="el-chk"><input type="checkbox" id="eAppend" v-model="f.appendSign"> 일지 뒤에 참석자 서명부 붙이기</label>
+                        <span style="flex:1"></span>
+                        <button type="button" class="el-link" id="openAll" @click="setAll(!allOpen)">{{ allOpen ? '모두 접기' : '모두 펼치기' }}</button>
+                    </div>
                 </div>
 
                 <!-- 실시 대장 설정 -->
-                <div v-if="f.docType === 'ledger'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-file-text text-slate-600"></i> 실시 대장·누계표 설정
-                    </h3>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="eLy">대상 연도</label>
-                            <select id="eLy" v-model.number="f.ledgerYear" class="el-in">
-                                <option v-for="y in ledgerYears" :key="y" :value="y">{{ y }}년</option>
-                            </select>
+                <section v-if="f.docType === 'ledger'" class="el-st" id="st-ledger">
+                    <st-head sid="ledger" :n="num.ledger" title="실시 대장·누계표 설정" :sum="sum.ledger" :open="open.ledger" @t="toggle"></st-head>
+                    <div v-show="open.ledger" class="el-stb" id="sb-ledger">
+                        <div class="el-g2">
+                            <div>
+                                <label class="el-lb" for="eLy">대상 연도</label>
+                                <select id="eLy" v-model.number="f.ledgerYear" class="el-in">
+                                    <option v-for="y in ledgerYears" :key="y" :value="y">{{ y }}년</option>
+                                </select>
+                            </div>
+                            <div>
+                                <span class="el-lb">개인별 정기교육 누계</span>
+                                <label class="el-chk"><input type="checkbox" id="eLp" v-model="f.ledgerPeople"> 개인별 표도 함께 인쇄</label>
+                            </div>
                         </div>
-                        <div>
-                            <span class="el-lb">개인별 정기교육 누계</span>
-                            <label class="el-chk"><input type="checkbox" v-model="f.ledgerPeople"> 개인별 표도 함께 인쇄</label>
-                        </div>
+                        <label class="el-chk"><input type="checkbox" id="eHalfL" :checked="f.half" @change="setHalf($event.target.checked)"> 교육시간 2분의 1 적용 사업 (별표 4 비고) — 개인별 법정 시간에 반영</label>
+                        <p class="el-hint">"교육 기록"에 보관한 일지와 지금 작성 중인 일지를 모아 만듭니다. 이 기기에 보관한 기록만 계산하므로, 다른 곳(위탁 교육·다른 PC)에서 한 교육은 들어가지 않습니다.</p>
+                        <p v-if="shortInfo" :class="shortInfo.ok ? 'cm-ok' : 'cm-warn'">{{ shortInfo.text }}</p>
                     </div>
-                    <p class="text-[11px] text-slate-500 el-lh">아래 "교육 기록"에 보관한 일지와 지금 작성 중인 일지를 모아 만듭니다. 이 기기에 보관한 기록만 계산하므로, 다른 곳(위탁 교육·다른 PC)에서 한 교육은 들어가지 않습니다.</p>
-                </div>
+                </section>
 
-                <div v-if="f.docType === 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3" id="noticeBox">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-megaphone text-slate-600"></i> 교육 실시 통보(안내문) 설정
-                    </h3>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="eNTo">받는 사람 (수신)</label>
-                            <input id="eNTo" v-model="f.noticeTo" type="text" placeholder="예: 생산1팀장, 교육 대상자 전원" class="el-in">
+                <!-- 실시 통보 설정 -->
+                <section v-if="f.docType === 'notice'" class="el-st" id="st-notice">
+                    <st-head sid="notice" :n="num.notice" title="교육 실시 통보(안내문) 설정" :sum="sum.notice" :warn="warn.notice" :open="open.notice" @t="toggle"></st-head>
+                    <div v-show="open.notice" class="el-stb" id="noticeBox">
+                        <div class="el-g2">
+                            <div>
+                                <label class="el-lb" for="eNTo">받는 사람 (수신)</label>
+                                <input id="eNTo" v-model="f.noticeTo" type="text" placeholder="예: 생산1팀장, 교육 대상자 전원" class="el-in">
+                            </div>
+                            <div>
+                                <label class="el-lb" for="eNDate">통보일</label>
+                                <input id="eNDate" v-model="f.noticeDate" type="date" class="el-in">
+                            </div>
                         </div>
                         <div>
-                            <label class="el-lb" for="eNDate">통보일</label>
-                            <input id="eNDate" v-model="f.noticeDate" type="date" class="el-in">
+                            <label class="el-lb" for="eNNote">준비물 · 유의사항</label>
+                            <textarea id="eNNote" v-model="f.noticeNote" rows="3" placeholder="예: 개인 보호구 지참, 교대근무자는 10분 전 교육장 도착, 참석이 어려운 사람은 전날까지 안전환경팀에 알릴 것" class="el-in"></textarea>
                         </div>
+                        <label class="el-chk"><input type="checkbox" id="eNList" v-model="f.noticeList"> 교육 대상자 명단을 안내문에 붙이기</label>
+                        <p class="el-hint">아래 단계에 적은 교육 과정·일시·장소·강사·교육 내용(표시한 항목)이 교육 예정 내용으로 들어갑니다. 교육을 마친 뒤 "교육 일지"로 바꾸면 같은 내용으로 일지와 서명부를 만들 수 있습니다. 안내문 양식과 통보 방법은 법령에 정해진 것이 아니라 사업장에서 정해 쓰는 것입니다.</p>
+                        <p v-for="(c, i) in stepChecks.notice" :key="'cn-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                        <div class="el-next"><button type="button" class="el-btn el-btn-pri" @click="goNext('notice')">다음 단계</button></div>
                     </div>
-                    <div>
-                        <label class="el-lb" for="eNNote">준비물 · 유의사항</label>
-                        <textarea id="eNNote" v-model="f.noticeNote" rows="3" placeholder="예: 개인 보호구 지참, 교대근무자는 10분 전 교육장 도착, 참석이 어려운 사람은 전날까지 안전환경팀에 알릴 것" class="el-in"></textarea>
-                    </div>
-                    <label class="el-chk"><input type="checkbox" v-model="f.noticeList"> 교육 대상자 명단을 안내문에 붙이기</label>
-                    <p class="text-[11px] text-slate-500 el-lh">아래 1~4번에 적은 교육 과정·일시·장소·강사·교육 내용(표시한 항목)이 교육 예정 내용으로 들어갑니다. 교육을 마친 뒤 "교육 일지"로 바꾸면 같은 내용으로 일지와 서명부를 만들 수 있습니다. 안내문 양식과 통보 방법은 법령에 정해진 것이 아니라 사업장에서 정해 쓰는 것입니다.</p>
-                </div>
+                </section>
 
                 <template v-if="f.docType !== 'ledger'">
-                <!-- 1. 교육 과정 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-fill ph-info text-blue-500"></i> 1. 교육 과정 · 법정 교육시간
-                    </h3>
-                    <div>
-                        <span class="el-lb">교육 대상 구분</span>
-                        <div class="el-seg" role="group" aria-label="교육 대상 구분">
-                            <button v-for="g in groups" :key="g.v" type="button" :id="'grp-' + g.v" :aria-pressed="f.group === g.v" :class="{ on: f.group === g.v }" @click="setGroup(g.v)">{{ g.label }}</button>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="el-lb">교육 종류</span>
-                        <div class="el-seg el-seg4" role="group" aria-label="교육 종류">
-                            <button v-for="c in courses" :key="c.v" type="button" :id="'crs-' + c.v" :aria-pressed="f.course === c.v" :class="{ on: f.course === c.v }" @click="setCourse(c.v)">{{ c.label }}</button>
-                        </div>
-                    </div>
-                    <div v-if="targetRows.length > 1">
-                        <label class="el-lb" for="eTarget">교육대상 (별표 4의 구분)</label>
-                        <select id="eTarget" v-model.number="f.target" class="el-in">
-                            <option v-for="(r, i) in targetRows" :key="i" :value="i">{{ r.t }}</option>
-                        </select>
-                    </div>
-                    <div v-if="f.course === 'special'">
-                        <label class="el-lb" for="eSp">특별교육 대상 작업 (별표 5 제1호라목)</label>
-                        <select id="eSp" v-model.number="f.specialNo" class="el-in">
-                            <option :value="0">작업을 고르세요 (개별 교육내용이 추가됩니다)</option>
-                            <option v-for="s in specials" :key="s.no" :value="s.no">{{ s.no }}. {{ s.name }}</option>
-                        </select>
-                    </div>
-                    <div class="el-legal" id="legalBox">
-                        <div class="el-legal-h"><span>법정 교육시간</span><b id="legalHours">{{ reqText }}</b></div>
-                        <p class="el-legal-t">{{ courseLabel }} — {{ targetRow.t }}</p>
-                        <p class="el-legal-o">별표 4 원문: {{ targetRow.h }}</p>
-                        <label v-if="targetRow.nShort" class="el-chk"><input type="checkbox" id="eShort" v-model="f.shortWork"> 단기간 작업 또는 간헐적 작업 (2시간 이상)</label>
-                        <label class="el-chk"><input type="checkbox" id="eHalf" v-model="f.half"> 교육시간 2분의 1 적용 사업 — 영 별표 1 제1호에 따른 사업, 상시근로자 50명 미만의 도매업, 숙박 및 음식점업 (별표 4 비고)</label>
-                        <p class="el-legal-s">{{ EDU.hoursSource }} · 확인일 {{ EDU.hoursChecked }} · <a class="el-a" href="../edu-hours/">별표 4 전체 표 보기</a></p>
-                    </div>
-                </div>
-
-                <!-- 2. 교육 개요 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-megaphone text-slate-600"></i> 2. 교육 개요
-                    </h3>
-                    <div class="el-g2">
+                <!-- 교육 과정 -->
+                <section class="el-st" id="st-s1">
+                    <st-head sid="s1" :n="num.s1" title="교육 과정 · 법정 교육시간" :sum="sum.s1" :done="done.s1" :warn="warn.s1" :open="open.s1" @t="toggle"></st-head>
+                    <div v-show="open.s1" class="el-stb" id="sb-s1">
                         <div>
-                            <label class="el-lb" for="eCompany">사업장(회사)명</label>
-                            <input id="eCompany" v-model="f.company" type="text" placeholder="예: (주)한국산업안전" class="el-in">
+                            <span class="el-lb">교육 대상 구분</span>
+                            <div class="el-seg" role="group" aria-label="교육 대상 구분">
+                                <button v-for="g in groups" :key="g.v" type="button" :id="'grp-' + g.v" :aria-pressed="f.group === g.v ? 'true' : 'false'" :class="{ on: f.group === g.v }" @click="setGroup(g.v)">{{ g.label }}</button>
+                            </div>
                         </div>
                         <div>
-                            <label class="el-lb" for="eSite">부서·현장명 (선택)</label>
-                            <input id="eSite" v-model="f.siteName" type="text" placeholder="예: 1공장 생산팀" class="el-in">
+                            <span class="el-lb">교육 종류</span>
+                            <div class="el-seg el-seg4" role="group" aria-label="교육 종류">
+                                <button v-for="c in courses" :key="c.v" type="button" :id="'crs-' + c.v" :aria-pressed="f.course === c.v ? 'true' : 'false'" :class="{ on: f.course === c.v }" @click="setCourse(c.v)">{{ c.label }}</button>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label class="el-lb" for="eTitle">교육명 (주제)</label>
-                        <input id="eTitle" v-model="f.title" type="text" placeholder="예: 3분기 근로자 정기 안전보건교육 — 끼임 사고 예방" class="el-in">
-                    </div>
-                    <div class="el-g4">
-                        <div class="el-span2">
-                            <label class="el-lb" for="eDate">교육일</label>
-                            <input id="eDate" v-model="f.date" type="date" class="el-in">
-                        </div>
-                        <div>
-                            <label class="el-lb" for="eStart">시작</label>
-                            <input id="eStart" v-model="f.start" type="time" class="el-in">
-                        </div>
-                        <div>
-                            <label class="el-lb" for="eEnd">종료</label>
-                            <input id="eEnd" v-model="f.end" type="time" class="el-in">
-                        </div>
-                    </div>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="eBreak">교육시간에서 뺄 휴게시간 (분)</label>
-                            <input id="eBreak" v-model.number="f.breakMin" type="number" min="0" step="5" inputmode="numeric" class="el-in">
-                        </div>
-                        <div>
-                            <span class="el-lb">교육 시간 (자동 계산)</span>
-                            <p id="durOut" :class="['el-dur', timeInfo.ok ? '' : 'bad']">{{ timeInfo.ok ? durationText : timeInfo.msg }}</p>
-                        </div>
-                    </div>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="ePlace">교육 장소</label>
-                            <input id="ePlace" v-model="f.place" type="text" placeholder="예: 본관 2층 교육장" class="el-in">
-                        </div>
-                        <div>
-                            <label class="el-lb" for="eMethod">교육 방법</label>
-                            <input id="eMethod" v-model="f.method" type="text" list="elMethods" placeholder="예: 집합교육" class="el-in">
-                            <datalist id="elMethods"><option v-for="m in methods" :key="m" :value="m"></option></datalist>
-                        </div>
-                    </div>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="eTOrg">강사 소속</label>
-                            <input id="eTOrg" v-model="f.teacherOrg" type="text" placeholder="예: 안전환경팀" class="el-in">
-                        </div>
-                        <div>
-                            <label class="el-lb" for="eTName">강사 성명</label>
-                            <input id="eTName" v-model="f.teacherName" type="text" placeholder="성명" class="el-in">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="el-lb" for="eTQual">강사 자격 메모 (시행규칙 제26조제3항)</label>
-                        <input id="eTQual" v-model="f.teacherQual" type="text" list="elQuals" placeholder="예: 안전관리자" class="el-in">
-                        <datalist id="elQuals"><option v-for="q in quals" :key="q" :value="q"></option></datalist>
-                    </div>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="eDept">교육 대상 (설명)</label>
-                            <input id="eDept" v-model="f.dept" type="text" placeholder="예: 생산1팀 전원" class="el-in">
-                        </div>
-                        <div>
-                            <label class="el-lb" for="eWriter">작성자</label>
-                            <input id="eWriter" v-model="f.writer" type="text" placeholder="예: 안전관리자 홍길동" class="el-in">
-                        </div>
-                    </div>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="eAppr">결재란 (쉼표로 구분, 비우면 숨김)</label>
-                            <input id="eAppr" v-model="f.appr" type="text" placeholder="예: 담당, 관리감독자, 안전보건관리책임자" class="el-in">
-                        </div>
-                        <div>
-                            <span class="el-lb">일지에 표시</span>
-                            <label class="el-chk"><input type="checkbox" v-model="f.showLegal"> 법정 교육시간(별표 4) 줄</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. 참석자 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-users-three text-emerald-600"></i> 3. 교육 대상자 명단
-                        </h3>
-                        <span class="text-[11px] text-slate-500" id="cntOut">대상 {{ counts.total }}명 · 참석 {{ counts.present }}명 · 미참석 {{ counts.absent }}명{{ rateText ? ' · 참석률 ' + rateText : '' }}</span>
-                    </div>
-                    <div>
-                        <label class="el-lb" for="eBulk">여러 명 한꺼번에 넣기 — 한 줄에 한 명</label>
-                        <textarea id="eBulk" v-model="bulk" rows="3" placeholder="홍길동&#10;생산1팀, 김철수&#10;생산1팀, 반장, 이영희  (엑셀에서 소속·직위·성명 칸을 복사해 붙여도 됩니다)" class="el-in"></textarea>
-                        <div class="el-row" style="margin-top:6px">
-                            <button type="button" id="bulkAdd" class="el-btn el-btn-pri" @click="addBulk">명단에 추가</button>
-                            <button type="button" id="addOne" class="el-btn" @click="addAttendee">한 명 추가</button>
-                            <button v-if="attendees.length" type="button" class="el-btn" @click="clearAttendees">명단 비우기</button>
-                        </div>
-                        <p class="text-[11px] text-slate-400 el-lh" style="margin-top:6px">쉼표(,)나 탭으로 나누면 "소속, 성명" 또는 "소속, 직위, 성명"으로 읽습니다. 나누지 않은 줄은 전체를 성명으로 넣습니다. 교육을 받아야 하는 사람을 모두 넣고, 받지 못한 사람은 "미참석"에 표시하세요.</p>
-                    </div>
-                    <p v-if="!attendees.length" class="text-[11px] text-slate-400">명단이 비어 있습니다. 비워 두면 서명부는 손으로 적는 빈 줄 {{ signBlank }}칸으로 인쇄됩니다.</p>
-                    <div v-else class="el-attbox" id="attBox">
-                        <div v-for="(a, idx) in attendees" :key="'at-' + idx" class="el-att">
-                            <span class="el-no">{{ idx + 1 }}</span>
-                            <input v-model="a.org" type="text" placeholder="소속" aria-label="소속" class="el-in">
-                            <input v-model="a.pos" type="text" placeholder="직위" aria-label="직위" class="el-in">
-                            <input v-model="a.name" type="text" placeholder="성명" aria-label="성명" class="el-in el-b">
-                            <label class="cm-abs"><input type="checkbox" v-model="a.absent"> 미참석</label>
-                            <button type="button" @click="attendees.splice(idx, 1)" :aria-label="(a.name || (idx + 1) + '번') + ' 삭제'" class="text-slate-400 hover:text-rose-500 p-1"><i class="ph-bold ph-x"></i></button>
-                            <input v-if="a.absent" v-model="a.reason" type="text" placeholder="미참석 사유 (예: 연차, 출장, 교대근무)" aria-label="미참석 사유" class="el-in el-att-r">
-                        </div>
-                    </div>
-                    <div class="el-g2">
-                        <div>
-                            <label class="el-lb" for="eBlank">서명부에 덧붙일 빈 줄</label>
-                            <select id="eBlank" v-model.number="f.blankRows" class="el-in">
-                                <option :value="0">없음</option><option :value="5">5줄</option><option :value="10">10줄</option><option :value="20">20줄</option>
+                        <div v-if="targetRows.length > 1">
+                            <label class="el-lb" for="eTarget">교육대상 (별표 4의 구분)</label>
+                            <select id="eTarget" :value="f.target" @change="setTarget($event.target.value)" class="el-in">
+                                <option v-for="(r, i) in targetRows" :key="i" :value="i">{{ r.t }}</option>
                             </select>
                         </div>
+                        <div v-if="f.course === 'special'">
+                            <label class="el-lb" for="eSp">특별교육 대상 작업 (별표 5 제1호라목)</label>
+                            <select id="eSp" v-model.number="f.specialNo" class="el-in">
+                                <option :value="0">작업을 고르세요 (개별 교육내용이 추가됩니다)</option>
+                                <option v-for="s in specials" :key="s.no" :value="s.no">{{ s.no }}. {{ s.name }}</option>
+                            </select>
+                        </div>
+                        <div class="el-legal" id="legalBox">
+                            <div class="el-legal-h"><span>법정 교육시간</span><b id="legalHours">{{ reqText }}</b></div>
+                            <p class="el-legal-t">{{ courseLabel }} — {{ targetRow.t }}</p>
+                            <p class="el-legal-o">별표 4 원문: {{ targetRow.h }}</p>
+                            <label v-if="targetRow.nShort" class="el-chk"><input type="checkbox" id="eShort" :checked="f.shortWork" @change="setShort($event.target.checked)"> 단기간 작업 또는 간헐적 작업 (2시간 이상)</label>
+                            <label class="el-chk"><input type="checkbox" id="eHalf" :checked="f.half" @change="setHalf($event.target.checked)"> 교육시간 2분의 1 적용 사업 — 영 별표 1 제1호에 따른 사업, 상시근로자 50명 미만의 도매업, 숙박 및 음식점업 (별표 4 비고)</label>
+                            <p class="el-legal-s">{{ EDU.hoursSource }} · 확인일 {{ EDU.hoursChecked }} · <a class="el-a" href="../edu-hours/">별표 4 전체 표 보기</a></p>
+                        </div>
+                        <div class="el-ses" :class="{ man: !f.timeAuto }" id="sesBox">
+                            <div class="el-legal-h"><span>이번 교육 실시 시간</span><b id="sesHours">{{ timeInfo.ok ? sesText : '—' }}</b></div>
+                            <p class="el-legal-s" id="sesWhy">{{ f.timeAuto ? autoWhy : '시간을 직접 고쳤습니다. 위 선택을 바꿔도 이 값은 그대로 둡니다.' }}{{ timeText ? ' (' + timeText + ')' : '' }}</p>
+                            <div v-if="!f.timeAuto" class="el-row"><button type="button" class="el-btn" id="sesAuto" @click="resetTimeAuto">자동으로 되돌리기 ({{ autoText }})</button></div>
+                        </div>
+                        <p v-for="(c, i) in stepChecks.s1" :key="'c1-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                        <div class="el-next"><button type="button" class="el-btn el-btn-pri" id="next-s1" @click="goNext('s1')">다음 단계</button></div>
+                    </div>
+                </section>
+
+                <!-- 교육 개요 -->
+                <section class="el-st" id="st-s2">
+                    <st-head sid="s2" :n="num.s2" title="교육 개요 (일시·장소·강사)" :sum="sum.s2" :done="done.s2" :warn="warn.s2" :open="open.s2" @t="toggle"></st-head>
+                    <div v-show="open.s2" class="el-stb" id="sb-s2">
+                        <div class="el-g2">
+                            <div>
+                                <label class="el-lb" for="eCompany">사업장(회사)명</label>
+                                <input id="eCompany" v-model="f.company" type="text" placeholder="예: (주)한국산업안전" class="el-in">
+                            </div>
+                            <div>
+                                <label class="el-lb" for="eSite">부서·현장명 (선택)</label>
+                                <input id="eSite" v-model="f.siteName" type="text" placeholder="예: 1공장 생산팀" class="el-in">
+                            </div>
+                        </div>
                         <div>
-                            <span class="el-lb">서명부 표시</span>
-                            <label class="el-chk"><input type="checkbox" v-model="f.signAbsent"> 미참석자도 서명부에 표시</label>
+                            <label class="el-lb" for="eTitle">교육명 (주제)</label>
+                            <input id="eTitle" v-model="f.title" type="text" placeholder="예: 3분기 근로자 정기 안전보건교육 — 끼임 사고 예방" class="el-in">
                         </div>
-                    </div>
-                </div>
-
-                <!-- 자동 확인 -->
-                <div class="space-y-2" style="margin-top:-8px" id="checks">
-                    <p v-for="(c, i) in checks" :key="'chk-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
-                </div>
-
-                <!-- 4. 교육 내용 -->
-                <div class="bg-purple-50/60 p-4 rounded-xl border border-purple-200/80 space-y-4">
-                    <div class="flex justify-between items-center border-b border-purple-200 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-sparkle text-purple-600"></i> 4. 교육 내용
-                        </h3>
-                        <button type="button" id="openEx" @click="openExModal" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm flex items-center gap-1.5 transition">
-                            <i class="ph-fill ph-magic-wand"></i> 작성 예시 불러오기
-                        </button>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="block text-xs font-bold text-slate-700">{{ contentTitle }}</span>
-                            <span class="text-[11px] text-purple-700 font-medium">시행규칙 별표 5</span>
+                        <div class="el-g4">
+                            <div class="el-span2">
+                                <label class="el-lb" for="eDate">교육일</label>
+                                <input id="eDate" v-model="f.date" type="date" class="el-in">
+                            </div>
+                            <div>
+                                <label class="el-lb" for="eStart">시작</label>
+                                <input id="eStart" :value="f.start" @input="onStart($event.target.value)" type="time" class="el-in">
+                            </div>
+                            <div>
+                                <label class="el-lb" for="eEnd">종료</label>
+                                <input id="eEnd" :value="f.end" @input="onEnd($event.target.value)" type="time" class="el-in">
+                            </div>
                         </div>
-                        <p class="text-[11px] text-rose-600 mb-1 el-lh">이번에 실제로 교육한 항목만 표시하세요. 한 번의 교육에서 모든 항목을 다뤄야 하는지는 이 도구가 판단하지 않습니다.</p>
-                        <div class="el-row" style="margin-bottom:6px">
-                            <button type="button" class="el-btn" id="pickAll" @click="pickAll(true)">모두 선택</button>
-                            <button type="button" class="el-btn" @click="pickAll(false)">모두 해제</button>
-                            <span class="text-[11px] text-slate-500">{{ pickedCount }} / {{ lawTopics.length }}개 선택</span>
+                        <div class="el-g4">
+                            <div class="el-span2">
+                                <label class="el-lb" for="eHours">교육 시간 (시간 단위, 예: 1.5)</label>
+                                <input id="eHours" :value="hoursVal" @change="setHours($event.target.value)" type="number" min="0.5" max="23" step="0.5" inputmode="decimal" class="el-in el-b">
+                            </div>
+                            <div class="el-span2">
+                                <label class="el-lb" for="eBreak">그중 뺄 휴게시간 (분)</label>
+                                <input id="eBreak" :value="f.breakMin" @input="onBreak($event.target.value)" type="number" min="0" step="5" inputmode="numeric" class="el-in">
+                            </div>
                         </div>
-                        <ul class="el-topics" id="topicList">
-                            <li v-for="(t, i) in lawTopics" :key="'lt-' + i">
-                                <label><input type="checkbox" :value="t.text" v-model="picked"> <span>{{ t.text }}</span> <em v-if="t.tag" class="el-tag">{{ t.tag }}</em></label>
-                            </li>
-                        </ul>
-                        <p v-if="f.course === 'special' && !f.specialNo" class="text-[11px] text-slate-500 el-lh" style="margin-top:6px">위 "1. 교육 과정"에서 특별교육 대상 작업을 고르면 그 작업의 개별 교육내용이 여기에 추가됩니다.</p>
-                        <p class="text-[11px] text-slate-400 el-lh" style="margin-top:6px">{{ EDU.contentSource }} · 확인일 {{ EDU.contentChecked }}</p>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-bold text-slate-700 mb-1">그 밖에 교육한 내용 (사업장 자체 주제)</span>
-                        <div v-for="(c, idx) in custom" :key="'cu-' + idx" class="el-cus">
-                            <input v-model="c.text" type="text" placeholder="예: 지난달 아차사고 사례 공유" aria-label="자체 교육 주제" class="el-in">
-                            <button type="button" @click="custom.splice(idx, 1)" aria-label="이 주제 삭제" class="text-slate-400 hover:text-rose-500 p-1"><i class="ph-bold ph-x"></i></button>
+                        <div class="el-row" role="group" aria-label="교육 시간 빠른 선택">
+                            <button v-for="h in quickHours" :key="h" type="button" class="el-chip" :class="{ on: timeInfo.ok && timeInfo.min === h * 60 }" :id="'qh-' + h" @click="setHours(h)">{{ h }}시간</button>
                         </div>
-                        <button type="button" id="addCustom" @click="custom.push({ text: '' })" class="text-xs text-purple-700 font-bold flex items-center gap-1">
-                            <i class="ph-bold ph-plus-circle"></i> 주제 추가
-                        </button>
+                        <div class="el-durline">
+                            <p id="durOut" :class="['el-dur', timeInfo.ok ? '' : 'bad']">{{ timeInfo.ok ? durationText : timeInfo.msg }}</p>
+                            <span v-if="f.timeAuto" class="el-hint" id="durMode">교육 과정에 맞춰 자동으로 넣은 시간입니다. 실제 실시한 시간으로 고쳐 쓰세요.</span>
+                            <span v-else class="el-hint" id="durMode">직접 고친 시간 · <button type="button" class="el-link" id="durAuto" @click="resetTimeAuto">자동으로 되돌리기 ({{ autoText }})</button></span>
+                        </div>
+                        <div class="el-g2">
+                            <div>
+                                <label class="el-lb" for="ePlace">교육 장소</label>
+                                <input id="ePlace" v-model="f.place" type="text" placeholder="예: 본관 2층 교육장" class="el-in">
+                            </div>
+                            <div>
+                                <label class="el-lb" for="eMethod">교육 방법</label>
+                                <input id="eMethod" v-model="f.method" type="text" list="elMethods" placeholder="예: 집합교육" class="el-in">
+                                <datalist id="elMethods"><option v-for="m in methods" :key="m" :value="m"></option></datalist>
+                            </div>
+                        </div>
+                        <div class="el-g2">
+                            <div>
+                                <label class="el-lb" for="eTOrg">강사 소속</label>
+                                <input id="eTOrg" v-model="f.teacherOrg" type="text" placeholder="예: 안전환경팀" class="el-in">
+                            </div>
+                            <div>
+                                <label class="el-lb" for="eTName">강사 성명</label>
+                                <input id="eTName" v-model="f.teacherName" type="text" placeholder="성명" class="el-in">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="el-lb" for="eTQual">강사 자격 메모 (시행규칙 제26조제3항)</label>
+                            <input id="eTQual" v-model="f.teacherQual" type="text" list="elQuals" placeholder="예: 안전관리자" class="el-in">
+                            <datalist id="elQuals"><option v-for="q in quals" :key="q" :value="q"></option></datalist>
+                        </div>
+                        <div class="el-g2">
+                            <div>
+                                <label class="el-lb" for="eDept">교육 대상 (설명)</label>
+                                <input id="eDept" v-model="f.dept" type="text" :placeholder="'비우면: ' + targetShort" class="el-in">
+                            </div>
+                            <div>
+                                <label class="el-lb" for="eWriter">작성자</label>
+                                <input id="eWriter" v-model="f.writer" type="text" placeholder="예: 안전관리자 홍길동" class="el-in">
+                            </div>
+                        </div>
+                        <p v-for="(c, i) in stepChecks.s2" :key="'c2-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                        <div class="el-next"><button type="button" class="el-btn el-btn-pri" id="next-s2" @click="goNext('s2')">다음 단계</button></div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1" for="eDetail">교육 내용 요약 (진행한 내용)</label>
-                        <textarea id="eDetail" v-model="f.detail" rows="5" placeholder="실제로 진행한 교육 내용을 적으세요." class="el-in"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1" for="eMat">교육 자료</label>
-                        <textarea id="eMat" v-model="f.materials" rows="2" placeholder="예: 자체 제작 교안(PPT 24쪽), KOSHA 동영상, 물질안전보건자료" class="el-in"></textarea>
-                        <p class="text-[11px] text-slate-400 el-lh" style="margin-top:4px">교육을 실시할 때에는 별표 5의 교육대상별 교육내용에 적합한 교재를 사용해야 합니다(<a class="el-a" href="../../laws/rule/#j36">시행규칙 제36조제1항</a>).</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1" for="eEval">평가 · 질의응답 · 건의</label>
-                        <textarea id="eEval" v-model="f.evalText" rows="3" placeholder="예: 구두 질의로 이해도 확인, 근로자 건의 사항" class="el-in"></textarea>
-                    </div>
-                </div>
+                </section>
 
-                <!-- 5. 미참석자 조치 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-arrows-clockwise text-slate-600"></i> 5. 미참석자 조치 계획
-                    </h3>
-                    <p class="text-[11px] text-slate-500">미참석 {{ counts.absent }}명{{ absentNames ? ' — ' + absentNames : '' }}</p>
-                    <textarea id="ePlan" v-model="f.absentPlan" rows="2" placeholder="예: 10월 14일(수) 15시 같은 내용으로 보충교육 실시" aria-label="미참석자 조치 계획" class="el-in"></textarea>
-                    <div v-if="counts.absent" class="el-row">
-                        <button type="button" id="makeSupp" class="el-btn el-btn-pri" @click="makeSupplement">미참석자 보충교육 일지 만들기</button>
+                <!-- 대상자 명단 -->
+                <section class="el-st" id="st-s3">
+                    <st-head sid="s3" :n="num.s3" title="교육 대상자 명단" :sum="sum.s3" :done="done.s3" :warn="warn.s3" :open="open.s3" @t="toggle"></st-head>
+                    <div v-show="open.s3" class="el-stb" id="sb-s3">
+                        <p class="el-hint" id="cntOut" style="font-weight:700;color:#334155">대상 {{ counts.total }}명 · 참석 {{ counts.present }}명 · 미참석 {{ counts.absent }}명{{ rateText ? ' · 참석률 ' + rateText : '' }}</p>
+                        <div>
+                            <label class="el-lb" for="eBulk">여러 명 한꺼번에 넣기 — 한 줄에 한 명</label>
+                            <textarea id="eBulk" v-model="bulk" rows="3" placeholder="홍길동&#10;생산1팀, 김철수&#10;생산1팀, 반장, 이영희  (엑셀에서 소속·직위·성명 칸을 복사해 붙여도 됩니다)" class="el-in"></textarea>
+                            <div class="el-row" style="margin-top:6px">
+                                <button type="button" id="bulkAdd" class="el-btn el-btn-pri" @click="addBulk">명단에 추가</button>
+                                <button type="button" id="addOne" class="el-btn" @click="addAttendee">한 명 추가</button>
+                                <button v-if="attendees.length > 1" type="button" id="sortAtt" class="el-btn" @click="sortAttendees">소속·성명순 정렬</button>
+                                <button v-if="attendees.length" type="button" class="el-btn" @click="clearAttendees">명단 비우기</button>
+                            </div>
+                            <p class="el-hint" style="margin-top:6px">쉼표(,)나 탭으로 나누면 "소속, 성명" 또는 "소속, 직위, 성명"으로 읽습니다. 교육을 받아야 하는 사람을 모두 넣고, 받지 못한 사람은 "미참석"에 표시하세요.</p>
+                        </div>
+                        <p v-if="!attendees.length" class="el-hint">명단이 비어 있습니다. 비워 두면 서명부는 손으로 적는 빈 줄 {{ signBlank }}칸으로 인쇄됩니다.</p>
+                        <div v-else class="el-attbox" id="attBox">
+                            <div v-for="(a, idx) in attendees" :key="'at-' + idx" class="el-att">
+                                <span class="el-no">{{ idx + 1 }}</span>
+                                <input v-model="a.org" type="text" placeholder="소속" aria-label="소속" class="el-in">
+                                <input v-model="a.pos" type="text" placeholder="직위" aria-label="직위" class="el-in">
+                                <input v-model="a.name" type="text" placeholder="성명" aria-label="성명" class="el-in el-b">
+                                <label class="cm-abs"><input type="checkbox" v-model="a.absent"> 미참석</label>
+                                <span class="el-mv">
+                                    <button type="button" :disabled="idx === 0" @click="moveAtt(idx, -1)" :aria-label="(idx + 1) + '번 위로'" title="위로">▲</button>
+                                    <button type="button" :disabled="idx === attendees.length - 1" @click="moveAtt(idx, 1)" :aria-label="(idx + 1) + '번 아래로'" title="아래로">▼</button>
+                                    <button type="button" @click="attendees.splice(idx, 1)" :aria-label="(a.name || (idx + 1) + '번') + ' 삭제'" title="삭제" class="el-del"><i class="ph-bold ph-x"></i></button>
+                                </span>
+                                <input v-if="a.absent" v-model="a.reason" type="text" placeholder="미참석 사유 (예: 연차, 출장, 교대근무)" aria-label="미참석 사유" class="el-in el-att-r">
+                            </div>
+                        </div>
+                        <div class="el-g2">
+                            <div>
+                                <label class="el-lb" for="eBlank">서명부에 덧붙일 빈 줄</label>
+                                <select id="eBlank" v-model.number="f.blankRows" class="el-in">
+                                    <option :value="0">없음</option><option :value="5">5줄</option><option :value="10">10줄</option><option :value="20">20줄</option>
+                                </select>
+                            </div>
+                            <div>
+                                <span class="el-lb">서명부 표시</span>
+                                <label class="el-chk"><input type="checkbox" id="eSignAbs" v-model="f.signAbsent"> 미참석자도 서명부에 표시</label>
+                            </div>
+                        </div>
+                        <p v-for="(c, i) in stepChecks.s3" :key="'c3-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                        <div class="el-next"><button type="button" class="el-btn el-btn-pri" id="next-s3" @click="goNext('s3')">다음 단계</button></div>
                     </div>
-                    <p v-if="counts.absent" class="text-[11px] text-slate-400 el-lh">이번 일지를 교육 기록에 보관하고, 미참석 {{ counts.absent }}명만 대상자로 넣은 새 일지를 엽니다. 교육 과정과 교육 내용은 그대로 가져오니 보충교육을 실제로 한 날짜·시간·강사로 고쳐 쓰세요.</p>
-                </div>
+                </section>
 
-                <!-- 6. 사진 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
-                        <i class="ph-fill ph-camera text-slate-600"></i> 6. 교육 사진 첨부
-                    </h3>
-                    <div class="flex items-center gap-3">
-                        <input type="file" accept="image/*" @change="handleFileUpload" id="photo-input" class="hidden">
-                        <label for="photo-input" class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 px-3 rounded-lg border border-slate-300 transition flex items-center gap-1.5">
-                            <i class="ph-bold ph-upload-simple"></i> 사진 파일 선택
-                        </label>
-                        <span class="text-xs text-slate-500 truncate max-w-[180px]">{{ photoDataUrl ? '교육 사진 1장 첨부됨' : '선택된 사진 없음' }}</span>
-                        <button v-if="photoDataUrl" type="button" @click="removePhoto" class="text-xs text-rose-500 hover:underline font-bold ml-auto">삭제</button>
+                <!-- 교육 내용 -->
+                <section class="el-st" id="st-s4">
+                    <st-head sid="s4" :n="num.s4" title="교육 내용" :sum="sum.s4" :done="done.s4" :warn="warn.s4" :open="open.s4" @t="toggle"></st-head>
+                    <div v-show="open.s4" class="el-stb" id="sb-s4">
+                        <div>
+                            <div class="el-row" style="justify-content:space-between;margin-bottom:4px">
+                                <span class="el-lb" style="margin:0;font-weight:700;color:#334155">{{ contentTitle }} <span style="font-weight:400;color:#64748b">(시행규칙 별표 5)</span></span>
+                                <button type="button" id="openEx" @click="openExModal" class="el-btn"><i class="ph-fill ph-magic-wand"></i> 작성 예시</button>
+                            </div>
+                            <p class="el-hint" style="margin-bottom:6px">이번에 실제로 교육한 항목만 표시하세요. 한 번의 교육에서 모든 항목을 다뤄야 하는지는 이 도구가 판단하지 않습니다.</p>
+                            <div class="el-row" style="margin-bottom:6px">
+                                <button type="button" class="el-btn" id="pickAll" @click="pickAll(true)">모두 선택</button>
+                                <button type="button" class="el-btn" @click="pickAll(false)">모두 해제</button>
+                                <span class="el-hint">{{ pickedCount }} / {{ lawTopics.length }}개 선택</span>
+                            </div>
+                            <ul class="el-topics" id="topicList">
+                                <li v-for="(t, i) in lawTopics" :key="'lt-' + i">
+                                    <label><input type="checkbox" :value="t.text" v-model="picked"> <span>{{ t.text }}</span> <em v-if="t.tag" class="el-tag">{{ t.tag }}</em></label>
+                                </li>
+                            </ul>
+                            <p v-if="f.course === 'special' && !f.specialNo" class="el-hint" style="margin-top:6px">"교육 과정" 단계에서 특별교육 대상 작업을 고르면 그 작업의 개별 교육내용이 여기에 추가됩니다.</p>
+                            <p class="el-hint" style="margin-top:6px">{{ EDU.contentSource }} · 확인일 {{ EDU.contentChecked }}</p>
+                        </div>
+                        <div>
+                            <span class="el-lb" style="font-weight:700;color:#334155">그 밖에 교육한 내용 (사업장 자체 주제)</span>
+                            <div v-for="(c, idx) in custom" :key="'cu-' + idx" class="el-cus">
+                                <input v-model="c.text" type="text" placeholder="예: 지난달 아차사고 사례 공유" aria-label="자체 교육 주제" class="el-in">
+                                <span class="el-mv">
+                                    <button type="button" :disabled="idx === 0" @click="moveCustom(idx, -1)" aria-label="이 주제 위로" title="위로">▲</button>
+                                    <button type="button" :disabled="idx === custom.length - 1" @click="moveCustom(idx, 1)" aria-label="이 주제 아래로" title="아래로">▼</button>
+                                    <button type="button" @click="custom.splice(idx, 1)" aria-label="이 주제 삭제" title="삭제" class="el-del"><i class="ph-bold ph-x"></i></button>
+                                </span>
+                            </div>
+                            <button type="button" id="addCustom" @click="custom.push({ text: '' })" class="el-link"><i class="ph-bold ph-plus-circle"></i> 주제 추가</button>
+                        </div>
+                        <div>
+                            <label class="el-lb" style="font-weight:700;color:#334155" for="eDetail">교육 내용 요약 (진행한 내용)</label>
+                            <textarea id="eDetail" v-model="f.detail" rows="5" placeholder="실제로 진행한 교육 내용을 적으세요." class="el-in"></textarea>
+                        </div>
+                        <div>
+                            <label class="el-lb" style="font-weight:700;color:#334155" for="eMat">교육 자료</label>
+                            <textarea id="eMat" v-model="f.materials" rows="2" placeholder="예: 자체 제작 교안(PPT 24쪽), KOSHA 동영상, 물질안전보건자료" class="el-in"></textarea>
+                            <p class="el-hint" style="margin-top:4px">교육을 실시할 때에는 별표 5의 교육대상별 교육내용에 적합한 교재를 사용해야 합니다(<a class="el-a" href="../../laws/rule/#j36">시행규칙 제36조제1항</a>).</p>
+                        </div>
+                        <div>
+                            <label class="el-lb" style="font-weight:700;color:#334155" for="eEval">평가 · 질의응답 · 건의</label>
+                            <textarea id="eEval" v-model="f.evalText" rows="3" placeholder="예: 구두 질의로 이해도 확인, 근로자 건의 사항" class="el-in"></textarea>
+                        </div>
+                        <p v-for="(c, i) in stepChecks.s4" :key="'c4-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                        <div class="el-next"><button type="button" class="el-btn el-btn-pri" id="next-s4" @click="goNext('s4')">다음 단계</button></div>
                     </div>
-                    <p class="text-[11px] text-slate-400 el-lh" style="margin-top:8px">사진은 일지 아래쪽에 인쇄됩니다. 사진은 이 기기에 저장되지 않으니(새로 고치거나 보관한 기록을 다시 열면 사라짐) 인쇄·PDF 저장을 먼저 하세요.</p>
-                </div>
+                </section>
+
+                <!-- 미참석자 조치 · 사진 -->
+                <section class="el-st" id="st-s5">
+                    <st-head sid="s5" :n="num.s5" title="미참석자 조치 · 교육 사진" :sum="sum.s5" :done="done.s5" :warn="warn.s5" :open="open.s5" @t="toggle"></st-head>
+                    <div v-show="open.s5" class="el-stb" id="sb-s5">
+                        <div>
+                            <label class="el-lb" for="ePlan">미참석자 조치 계획 — 미참석 {{ counts.absent }}명{{ absentNames ? ' (' + absentNames + ')' : '' }}</label>
+                            <textarea id="ePlan" v-model="f.absentPlan" rows="2" placeholder="예: 10월 14일(수) 15시 같은 내용으로 보충교육 실시" class="el-in"></textarea>
+                        </div>
+                        <div v-if="counts.absent">
+                            <button type="button" id="makeSupp" class="el-btn el-btn-pri" @click="makeSupplement">미참석자 보충교육 일지 만들기</button>
+                            <p class="el-hint" style="margin-top:6px">이번 일지를 교육 기록에 보관하고, 미참석 {{ counts.absent }}명만 대상자로 넣은 새 일지를 엽니다. 교육 과정과 교육 내용은 그대로 가져오니 보충교육을 실제로 한 날짜·시간·강사로 고쳐 쓰세요.</p>
+                        </div>
+                        <div>
+                            <span class="el-lb">교육 사진 (일지 아래쪽에 인쇄)</span>
+                            <div class="el-row">
+                                <input type="file" accept="image/*" @change="handleFileUpload" id="photo-input" class="hidden">
+                                <label for="photo-input" class="el-btn" style="cursor:pointer"><i class="ph-bold ph-upload-simple"></i> 사진 파일 선택</label>
+                                <span class="el-hint">{{ photoDataUrl ? '교육 사진 1장 첨부됨' : '선택된 사진 없음' }}</span>
+                                <button v-if="photoDataUrl" type="button" @click="removePhoto" class="el-link" style="color:#e11d48">삭제</button>
+                            </div>
+                            <p class="el-hint" style="margin-top:6px">사진은 이 기기에 저장되지 않으니(새로 고치거나 보관한 기록을 다시 열면 사라짐) 인쇄·PDF 저장을 먼저 하세요.</p>
+                        </div>
+                        <p v-for="(c, i) in stepChecks.s5" :key="'c5-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                        <div class="el-next"><button type="button" class="el-btn el-btn-pri" id="next-s5" @click="goNext('s5')">다음 단계</button></div>
+                    </div>
+                </section>
                 </template>
 
-                <!-- 보관·이어 쓰기 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-floppy-disk text-slate-600"></i> 교육 기록 · 이어 쓰기
-                    </h3>
-                    <div class="el-row">
-                        <button type="button" id="archiveNext" class="el-btn el-btn-pri" @click="archiveAndNext">보관하고 다음 교육 작성</button>
-                        <button type="button" id="archiveOnly" class="el-btn" @click="archiveOnly">지금 내용만 보관</button>
+                <!-- 결재란 · 문서 문구 -->
+                <section class="el-st" id="st-word">
+                    <st-head sid="word" :n="num.word" title="결재란 · 문서 제목과 문구" :sum="sum.word" :open="open.word" @t="toggle"></st-head>
+                    <div v-show="open.word" class="el-stb" id="sb-word">
+                        <div>
+                            <span class="el-lb" style="font-weight:700;color:#334155">결재란</span>
+                            <label class="el-chk"><input type="checkbox" id="eApprShow" v-model="f.apprShow"> 문서 위쪽에 결재란 넣기</label>
+                            <label v-if="f.apprShow" class="el-chk" style="margin-top:4px"><input type="checkbox" id="eApprAll" v-model="f.apprAll"> 서명부·실시 안내·실시 대장에도 결재란 넣기</label>
+                            <div v-if="f.apprShow" class="el-apprpane">
+                                <div class="el-apprbox" id="apprEdit" v-appr></div>
+                                <p class="el-hint">칸 이름(예: 담당 → 안전관리자, 승인 → 안전보건관리책임자)과 성명을 눌러서 고치세요. "＋ 칸 / － 칸"으로 1~6칸까지 바꿀 수 있고, 서명 칸을 누르면 서명을 넣을 수 있습니다. 서명은 다음 교육 일지를 새로 열면 지워집니다.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="el-lb" style="font-weight:700;color:#334155">일지·안내문에 표시</span>
+                            <label class="el-chk"><input type="checkbox" id="eShowLegal" v-model="f.showLegal"> 법정 교육시간(별표 4) 줄</label>
+                        </div>
+                        <div>
+                            <span class="el-lb" style="font-weight:700;color:#334155">문서 제목 · 고정 문구</span>
+                            <p class="el-hint" style="margin-bottom:6px">표의 항목 이름(사업장·강사·소속·직위 등)을 포함해 미리보기에서 글자를 눌러 바로 고칠 수도 있습니다. 내용을 지우면 그 문구는 인쇄되지 않습니다.</p>
+                            <div v-for="w in wordList" :key="w.k" class="el-word">
+                                <label class="el-lb" :for="'w-' + w.k">{{ w.label }}</label>
+                                <div class="el-cus" style="margin:0">
+                                    <textarea v-if="w.long" :id="'w-' + w.k" :value="L(w.k)" @change="setL(w.k, $event.target.value)" rows="2" class="el-in"></textarea>
+                                    <input v-else :id="'w-' + w.k" :value="L(w.k)" @change="setL(w.k, $event.target.value)" type="text" class="el-in">
+                                    <button v-if="isLChanged(w.k)" type="button" class="el-link" style="flex:none" @click="resetL(w.k)">기본으로</button>
+                                </div>
+                            </div>
+                            <div class="el-row" style="margin-top:8px">
+                                <button type="button" class="el-btn" id="lbReset" :disabled="!lbCount" @click="resetAllL">제목·항목 이름·문구 모두 기본으로 되돌리기{{ lbCount ? ' (' + lbCount + '곳 고침)' : '' }}</button>
+                            </div>
+                        </div>
+                        <div class="el-next"><button type="button" class="el-btn el-btn-pri" id="next-word" @click="goNext('word')">다음 단계</button></div>
                     </div>
-                    <p class="text-[11px] text-slate-400 el-lh">"보관하고 다음 교육 작성"을 누르면 이번 일지가 아래 목록에 남고, 사업장·교육 과정·대상자 명단은 그대로 둔 채 교육 내용만 비운 새 일지가 열립니다. 최근 {{ HIST_MAX }}건까지 이 기기에 보관합니다.</p>
-                    <p v-if="shortInfo" :class="shortInfo.ok ? 'cm-ok' : 'cm-warn'" id="shortInfo">{{ shortInfo.text }}</p>
-                    <ul v-if="history.length" class="el-hist" id="histList">
-                        <li v-for="h in history" :key="h.id">
-                            <span class="el-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
-                            <button type="button" class="el-btn" @click="openHistory(h.id)">열기</button>
-                            <button type="button" class="el-btn" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
-                        </li>
-                    </ul>
-                    <p v-else class="text-[11px] text-slate-400">보관한 교육 기록이 아직 없습니다.</p>
-                </div>
+                </section>
 
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 mb-2">법령 메모</h3>
-                    <ul class="cm-law">
-                        <li>사업주는 소속 근로자에게 정기적으로 안전보건교육을 하여야 하고, 근로자를 채용할 때와 작업내용을 변경할 때에는 해당 작업에 필요한 안전보건교육을 하여야 합니다(<a class="el-a" href="../../laws/act/#j29">법 제29조제1항·제2항</a>).</li>
-                        <li>근로자를 유해하거나 위험한 작업에 채용하거나 그 작업으로 작업내용을 변경할 때에는 그 작업에 필요한 안전보건교육(특별교육)을 추가로 하여야 합니다(법 제29조제3항).</li>
-                        <li>교육시간은 별표 4, 교육내용은 별표 5와 같습니다. 특별교육을 실시한 때에는 해당 근로자에 대하여 채용 시 교육 및 작업내용 변경 시 교육을 실시한 것으로 봅니다(<a class="el-a" href="../../laws/rule/#j26">시행규칙 제26조제1항</a>).</li>
-                        <li>자체 교육을 할 수 있는 사람: 안전보건관리책임자, 관리감독자, 안전관리자, 보건관리자, 안전보건관리담당자, 산업보건의, 공단의 해당 분야 강사요원 교육과정 이수자, 산업안전지도사·산업보건지도사, 고용노동부장관이 정하는 기준에 해당하는 사람(시행규칙 제26조제3항).</li>
-                        <li>안전보건교육은 고용노동부장관에게 등록한 안전보건교육기관에 위탁할 수 있습니다(법 제29조제4항).</li>
-                        <li>물질안전보건자료에 관한 교육(<a class="el-a" href="../../laws/rule/#j169">시행규칙 제169조제1항</a>)을 받은 근로자는 그 교육 시간만큼 법 제29조에 따른 안전보건교육을 실시한 것으로 봅니다.</li>
-                        <li>교육의 전부 또는 일부를 하지 않을 수 있는 경우가 있습니다(<a class="el-a" href="../../laws/act/#j30">법 제30조</a>, <a class="el-a" href="../../laws/rule/#j27">시행규칙 제27조</a>). 이 도구의 시간 비교에는 면제를 반영하지 않았습니다.</li>
-                        <li>교육방법과 그 밖에 교육에 필요한 사항은 고용노동부장관이 고시합니다(시행규칙 제26조제2항). 작업 전 안전점검회의(TBM)를 교육시간으로 인정받을 수 있는지, 온라인 교육의 인정 범위 등은 고시와 고용노동부 해석에 따르므로 이 도구는 판단하지 않습니다.</li>
-                        <li>과태료: 법 제29조제1항·제2항 위반은 500만원 이하(법 제175조제5항제1호), 제3항 위반은 3천만원 이하(<a class="el-a" href="../../laws/act/#j175">법 제175조제2항제1호</a>). 실제 부과 금액은 시행령의 부과기준에 따릅니다.</li>
-                        <li>교육 실시 기록의 보존기간: <a class="el-a" href="../../laws/act/#j164">법 제164조제1항</a> 각 호에 안전보건교육 기록은 따로 적혀 있지 않습니다. 고시 등에 정한 기준이 있는지 확인하고, 사내 보존 기준을 정해 두세요.</li>
-                    </ul>
-                    <p class="text-[11px] text-slate-400" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음). 대상자 이름이 들어 있으니 여럿이 쓰는 PC에서는 사용 후 기록을 지우세요.</p>
+                <!-- 보관·이어 쓰기 -->
+                <section class="el-st" id="st-hist">
+                    <st-head sid="hist" :n="num.hist" title="보관 · 교육 기록" :sum="sum.hist" :open="open.hist" @t="toggle"></st-head>
+                    <div v-show="open.hist" class="el-stb" id="sb-hist">
+                        <div class="el-row">
+                            <button type="button" id="archiveNext" class="el-btn el-btn-pri" @click="archiveAndNext">보관하고 다음 교육 작성</button>
+                            <button type="button" id="archiveOnly" class="el-btn" @click="archiveOnly">지금 내용만 보관</button>
+                        </div>
+                        <p class="el-hint">"보관하고 다음 교육 작성"을 누르면 이번 일지가 아래 목록에 남고, 사업장·교육 과정·대상자 명단은 그대로 둔 채 교육 내용만 비운 새 일지가 열립니다. 최근 {{ HIST_MAX }}건까지 이 기기에 보관합니다.</p>
+                        <p v-if="shortInfo && f.docType !== 'ledger'" :class="shortInfo.ok ? 'cm-ok' : 'cm-warn'" id="shortInfo">{{ shortInfo.text }}</p>
+                        <ul v-if="history.length" class="el-hist" id="histList">
+                            <li v-for="h in history" :key="h.id">
+                                <span class="el-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
+                                <button type="button" class="el-btn" @click="openHistory(h.id)">열기</button>
+                                <button type="button" class="el-btn" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
+                            </li>
+                        </ul>
+                        <p v-else class="el-hint">보관한 교육 기록이 아직 없습니다.</p>
+                        <p class="el-hint">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음). 대상자 이름이 들어 있으니 여럿이 쓰는 PC에서는 사용 후 기록을 지우세요.</p>
+                    </div>
+                </section>
+
+                <section class="el-st" id="st-law">
+                    <st-head sid="law" n="법" title="법령 메모" sum="법 제29조 · 시행규칙 제26조 · 별표 4·5" :open="open.law" @t="toggle"></st-head>
+                    <div v-show="open.law" class="el-stb" id="sb-law">
+                        <ul class="cm-law">
+                            <li>사업주는 소속 근로자에게 정기적으로 안전보건교육을 하여야 하고, 근로자를 채용할 때와 작업내용을 변경할 때에는 해당 작업에 필요한 안전보건교육을 하여야 합니다(<a class="el-a" href="../../laws/act/#j29">법 제29조제1항·제2항</a>).</li>
+                            <li>근로자를 유해하거나 위험한 작업에 채용하거나 그 작업으로 작업내용을 변경할 때에는 그 작업에 필요한 안전보건교육(특별교육)을 추가로 하여야 합니다(법 제29조제3항).</li>
+                            <li>교육시간은 별표 4, 교육내용은 별표 5와 같습니다. 특별교육을 실시한 때에는 해당 근로자에 대하여 채용 시 교육 및 작업내용 변경 시 교육을 실시한 것으로 봅니다(<a class="el-a" href="../../laws/rule/#j26">시행규칙 제26조제1항</a>).</li>
+                            <li>자체 교육을 할 수 있는 사람: 안전보건관리책임자, 관리감독자, 안전관리자, 보건관리자, 안전보건관리담당자, 산업보건의, 공단의 해당 분야 강사요원 교육과정 이수자, 산업안전지도사·산업보건지도사, 고용노동부장관이 정하는 기준에 해당하는 사람(시행규칙 제26조제3항).</li>
+                            <li>안전보건교육은 고용노동부장관에게 등록한 안전보건교육기관에 위탁할 수 있습니다(법 제29조제4항).</li>
+                            <li>물질안전보건자료에 관한 교육(<a class="el-a" href="../../laws/rule/#j169">시행규칙 제169조제1항</a>)을 받은 근로자는 그 교육 시간만큼 법 제29조에 따른 안전보건교육을 실시한 것으로 봅니다.</li>
+                            <li>교육의 전부 또는 일부를 하지 않을 수 있는 경우가 있습니다(<a class="el-a" href="../../laws/act/#j30">법 제30조</a>, <a class="el-a" href="../../laws/rule/#j27">시행규칙 제27조</a>). 이 도구의 시간 비교에는 면제를 반영하지 않았습니다.</li>
+                            <li>교육방법과 그 밖에 교육에 필요한 사항은 고용노동부장관이 고시합니다(시행규칙 제26조제2항). 작업 전 안전점검회의(TBM)를 교육시간으로 인정받을 수 있는지, 온라인 교육의 인정 범위 등은 고시와 고용노동부 해석에 따르므로 이 도구는 판단하지 않습니다.</li>
+                            <li>과태료: 법 제29조제1항·제2항 위반은 500만원 이하(법 제175조제5항제1호), 제3항 위반은 3천만원 이하(<a class="el-a" href="../../laws/act/#j175">법 제175조제2항제1호</a>). 실제 부과 금액은 시행령의 부과기준에 따릅니다.</li>
+                            <li>교육 실시 기록의 보존기간: <a class="el-a" href="../../laws/act/#j164">법 제164조제1항</a> 각 호에 안전보건교육 기록은 따로 적혀 있지 않습니다. 고시 등에 정한 기준이 있는지 확인하고, 사내 보존 기준을 정해 두세요.</li>
+                        </ul>
+                    </div>
+                </section>
+                <div id="noteSlot"></div>
                 </div>
             </div>
 
             <!-- 미리보기 -->
-            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
+            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" :class="{ 'el-hide-m': view !== 'doc' }" style="min-width:0">
                 <div class="w-full flex justify-between items-center mb-3 no-print">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <div class="flex items-center gap-2 el-pv-l">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                         <span class="text-xs font-bold text-slate-600">A4 실시간 미리보기</span>
                     </div>
-                    <span class="text-[11px] text-slate-400">A4 (210mm × 297mm)</span>
+                    <span class="text-[11px] text-slate-500">제목·항목 이름·문구는 눌러서 바로 고칠 수 있습니다</span>
                 </div>
-                <div id="print-area" class="a4-container cm-zoom p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm el-doc">
+                <div id="print-area" :class="{ 'el-cap': isGeneratingPDF }" class="a4-container cm-zoom p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm el-doc">
                     <!-- [DOC 1] 교육 일지 -->
                     <div v-if="f.docType === 'log'" id="docLog">
                         <div class="el-dhead">
-                            <h2>안전보건교육 일지</h2>
-                            <table v-if="apprList.length" class="el-appr">
-                                <tr><th v-for="(a, i) in apprList" :key="'ah-' + i">{{ a }}</th></tr>
-                                <tr><td v-for="(a, i) in apprList" :key="'ad-' + i"></td></tr>
-                            </table>
+                            <h2><ed k="t.log"></ed></h2>
+                            <div v-if="f.apprShow" class="el-apprbox" v-appr></div>
                         </div>
                         <table class="el-tb">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
-                                <th>사 업 장</th><td>{{ companyText }}</td>
-                                <th>교육 과정</th><td>{{ courseLabel }}</td>
+                                <th><ed k="h.company"></ed></th><td>{{ companyText }}</td>
+                                <th><ed k="h.course"></ed></th><td>{{ courseLabel }}</td>
                             </tr>
                             <tr>
-                                <th>교 육 명</th><td colspan="3" class="el-b">{{ f.title }}</td>
+                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b">{{ f.title }}</td>
                             </tr>
                             <tr>
-                                <th>일 시</th><td>{{ dateText }}<br>{{ timeText }}</td>
-                                <th>교육 시간</th><td class="el-b">{{ timeInfo.ok ? durationText : '' }}</td>
+                                <th><ed k="h.when"></ed></th><td>{{ dateText }}<br>{{ timeText }}</td>
+                                <th><ed k="h.dur"></ed></th><td class="el-b">{{ timeInfo.ok ? durationText : '' }}</td>
                             </tr>
                             <tr>
-                                <th>장 소</th><td>{{ f.place }}</td>
-                                <th>교육 방법</th><td>{{ f.method }}</td>
+                                <th><ed k="h.place"></ed></th><td>{{ f.place }}</td>
+                                <th><ed k="h.method"></ed></th><td>{{ f.method }}</td>
                             </tr>
                             <tr>
-                                <th>강 사</th><td>{{ teacherText }}</td>
-                                <th>교육 대상</th><td>{{ f.dept || targetShort }}</td>
+                                <th><ed k="h.teacher"></ed></th><td>{{ teacherText }}</td>
+                                <th><ed k="h.dept"></ed></th><td>{{ f.dept || targetShort }}</td>
                             </tr>
                             <tr>
-                                <th>인 원</th>
+                                <th><ed k="h.count"></ed></th>
                                 <td colspan="3">{{ counts.total ? '대상 ' + counts.total + '명 · 참석 ' + counts.present + '명 · 미참석 ' + counts.absent + '명 (참석률 ' + rateText + ')' : '대상 　　명 · 참석 　　명 · 미참석 　　명' }}</td>
                             </tr>
                             <tr v-if="f.showLegal">
-                                <th>법정<br>교육시간</th>
+                                <th><ed k="h.legal"></ed></th>
                                 <td colspan="3" class="el-sm">{{ targetRow.t }} — {{ reqText }} <span class="el-mut">(산업안전보건법 시행규칙 별표 4{{ f.half ? ', 비고에 따른 2분의 1 적용' : '' }})</span></td>
                             </tr>
                         </table>
                         <table class="el-tb">
                             <colgroup><col style="width:15%"><col></colgroup>
                             <tr>
-                                <th>교육 내용</th>
+                                <th><ed k="h.content"></ed></th>
                                 <td class="el-top">
                                     <ul v-if="docTopics.length" class="el-dl">
                                         <li v-for="(t, i) in docTopics" :key="'dt-' + i">{{ t }}</li>
@@ -666,15 +800,15 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>교육 자료</th>
+                                <th><ed k="h.mat"></ed></th>
                                 <td class="el-top"><div class="el-pre el-min1">{{ f.materials }}</div></td>
                             </tr>
                             <tr>
-                                <th>평가 ·<br>질의응답</th>
+                                <th><ed k="h.eval"></ed></th>
                                 <td class="el-top"><div class="el-pre el-min2">{{ f.evalText }}</div></td>
                             </tr>
                             <tr>
-                                <th>미참석자<br>조치</th>
+                                <th><ed k="h.absent"></ed></th>
                                 <td class="el-top">
                                     <div v-if="absentList.length" class="el-sm">미참석 {{ absentList.length }}명: <span v-for="(a, i) in absentList" :key="'ab-' + i">{{ i ? ', ' : '' }}{{ a.label }}</span></div>
                                     <div v-else-if="counts.total" class="el-sm">미참석자 없음</div>
@@ -683,59 +817,60 @@
                             </tr>
                         </table>
                         <div v-if="photoDataUrl" class="el-photo">
-                            <p>[ 교육 실시 사진 ]</p>
+                            <p :class="{ 'el-emp': !L('p.photo') }"><ed k="p.photo"></ed></p>
                             <img :src="photoDataUrl" alt="교육 실시 사진">
                         </div>
                         <div class="el-foot">
-                            <p>위와 같이 안전보건교육을 실시하였습니다.</p>
+                            <p :class="{ 'el-emp': !L('p.done') }"><ed k="p.done"></ed></p>
                             <p class="el-fd">{{ dateText }}</p>
-                            <p class="el-fs"><span>강사 : {{ f.teacherName }} <i>(서명)</i></span><span>작성자 : {{ f.writer }} <i>(서명)</i></span></p>
+                            <p class="el-fs"><span :class="{ 'el-emp': !L('p.teacher') }"><ed k="p.teacher"></ed> : {{ f.teacherName }} <i><ed k="p.sig"></ed></i></span><span :class="{ 'el-emp': !L('p.writer') }"><ed k="p.writer"></ed> : {{ f.writer }} <i><ed k="p.sig"></ed></i></span></p>
                         </div>
                     </div>
 
                     <!-- [DOC 4] 교육 실시 통보(안내문) -->
                     <div v-if="f.docType === 'notice'" id="docNotice">
-                        <div class="el-dhead el-dhead-c">
-                            <h2>안전보건교육 실시 안내</h2>
+                        <div class="el-dhead" :class="{ 'el-dhead-c': !(f.apprShow && f.apprAll) }">
+                            <h2><ed k="t.notice"></ed></h2>
+                            <div v-if="f.apprShow && f.apprAll" class="el-apprbox" v-appr></div>
                         </div>
                         <table class="el-tb">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
-                                <th>수 신</th><td>{{ f.noticeTo }}</td>
-                                <th>통 보 일</th><td>{{ noticeDateText }}</td>
+                                <th><ed k="h.to"></ed></th><td>{{ f.noticeTo }}</td>
+                                <th><ed k="h.ndate"></ed></th><td>{{ noticeDateText }}</td>
                             </tr>
                             <tr>
-                                <th>발 신</th><td colspan="3">{{ [companyText, f.writer.trim()].filter(Boolean).join(' · ') }}</td>
+                                <th><ed k="h.from"></ed></th><td colspan="3">{{ [companyText, f.writer.trim()].filter(Boolean).join(' · ') }}</td>
                             </tr>
                         </table>
-                        <p class="el-say">아래와 같이 안전보건교육을 실시하오니 교육 대상자는 빠짐없이 참석하여 주시기 바랍니다.</p>
+                        <p class="el-say" :class="{ 'el-emp': !L('p.notice') }"><ed k="p.notice"></ed></p>
                         <table class="el-tb">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
-                                <th>교육 과정</th><td>{{ courseLabel }}</td>
-                                <th>교육 방법</th><td>{{ f.method }}</td>
+                                <th><ed k="h.course"></ed></th><td>{{ courseLabel }}</td>
+                                <th><ed k="h.method"></ed></th><td>{{ f.method }}</td>
                             </tr>
                             <tr>
-                                <th>교 육 명</th><td colspan="3" class="el-b">{{ f.title }}</td>
+                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b">{{ f.title }}</td>
                             </tr>
                             <tr>
-                                <th>일 시</th><td>{{ dateText }}<br>{{ timeText }}</td>
-                                <th>교육 시간</th><td class="el-b">{{ timeInfo.ok ? durationText : '' }}</td>
+                                <th><ed k="h.when"></ed></th><td>{{ dateText }}<br>{{ timeText }}</td>
+                                <th><ed k="h.dur"></ed></th><td class="el-b">{{ timeInfo.ok ? durationText : '' }}</td>
                             </tr>
                             <tr>
-                                <th>장 소</th><td>{{ f.place }}</td>
-                                <th>강 사</th><td>{{ teacherText }}</td>
+                                <th><ed k="h.place"></ed></th><td>{{ f.place }}</td>
+                                <th><ed k="h.teacher"></ed></th><td>{{ teacherText }}</td>
                             </tr>
                             <tr>
-                                <th>교육 대상</th>
+                                <th><ed k="h.dept"></ed></th>
                                 <td colspan="3">{{ f.dept || targetShort }}{{ counts.total ? ' (' + counts.total + '명)' : '' }}</td>
                             </tr>
                             <tr v-if="f.showLegal">
-                                <th>법정<br>교육시간</th>
+                                <th><ed k="h.legal"></ed></th>
                                 <td colspan="3" class="el-sm">{{ targetRow.t }} — {{ reqText }} <span class="el-mut">(산업안전보건법 시행규칙 별표 4{{ f.half ? ', 비고에 따른 2분의 1 적용' : '' }})</span></td>
                             </tr>
                             <tr>
-                                <th>교육 내용<br>(예정)</th>
+                                <th><ed k="h.plan"></ed></th>
                                 <td colspan="3" class="el-top">
                                     <ul v-if="docTopics.length" class="el-dl">
                                         <li v-for="(t, i) in docTopics" :key="'nt-' + i">{{ t }}</li>
@@ -744,7 +879,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>준비물 ·<br>유의사항</th>
+                                <th><ed k="h.note"></ed></th>
                                 <td colspan="3" class="el-top"><div class="el-pre el-min2">{{ f.noticeNote }}</div></td>
                             </tr>
                         </table>
@@ -752,7 +887,7 @@
                             <h4 class="el-h4">교육 대상자 명단 ({{ noticeRows.length }}명)</h4>
                             <table class="el-tb el-led" id="noticeTable">
                                 <colgroup><col style="width:8%"><col style="width:30%"><col style="width:20%"><col style="width:24%"><col></colgroup>
-                                <thead><tr><th>번호</th><th>소속</th><th>직위</th><th>성명</th><th>비고</th></tr></thead>
+                                <thead><tr><th><ed k="c.no"></ed></th><th><ed k="c.org"></ed></th><th><ed k="c.pos"></ed></th><th><ed k="c.name"></ed></th><th><ed k="c.memo"></ed></th></tr></thead>
                                 <tbody>
                                     <tr v-for="(r, i) in noticeRows" :key="'nr-' + i">
                                         <td class="el-c">{{ i + 1 }}</td>
@@ -772,32 +907,33 @@
 
                     <!-- [DOC 2] 참석자 서명부 -->
                     <div v-if="showSign" id="docSign" :class="{ 'el-pb': f.docType === 'log' }">
-                        <div class="el-dhead el-dhead-c">
-                            <h2>안전보건교육 참석자 서명부</h2>
+                        <div class="el-dhead" :class="{ 'el-dhead-c': !(f.apprShow && f.apprAll && f.docType === 'sign') }">
+                            <h2><ed k="t.sign"></ed></h2>
+                            <div v-if="f.apprShow && f.apprAll && f.docType === 'sign'" class="el-apprbox" v-appr></div>
                         </div>
                         <table class="el-tb">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
-                                <th>교육 과정</th><td>{{ courseLabel }}</td>
-                                <th>사 업 장</th><td>{{ companyText }}</td>
+                                <th><ed k="h.course"></ed></th><td>{{ courseLabel }}</td>
+                                <th><ed k="h.company"></ed></th><td>{{ companyText }}</td>
                             </tr>
                             <tr>
-                                <th>교 육 명</th><td colspan="3" class="el-b">{{ f.title }}</td>
+                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b">{{ f.title }}</td>
                             </tr>
                             <tr>
-                                <th>일 시</th><td>{{ dateText }} {{ timeText }}{{ timeInfo.ok ? ' (' + durationText + ')' : '' }}</td>
-                                <th>장 소</th><td>{{ f.place }}</td>
+                                <th><ed k="h.when"></ed></th><td>{{ dateText }} {{ timeText }}{{ timeInfo.ok ? ' (' + durationText + ')' : '' }}</td>
+                                <th><ed k="h.place"></ed></th><td>{{ f.place }}</td>
                             </tr>
                             <tr>
-                                <th>강 사</th><td>{{ teacherText }}</td>
-                                <th>인 원</th><td>{{ counts.total ? '대상 ' + counts.total + '명 · 참석 ' + counts.present + '명' : '' }}</td>
+                                <th><ed k="h.teacher"></ed></th><td>{{ teacherText }}</td>
+                                <th><ed k="h.count"></ed></th><td>{{ counts.total ? '대상 ' + counts.total + '명 · 참석 ' + counts.present + '명' : '' }}</td>
                             </tr>
                         </table>
-                        <p class="el-say">아래 사람은 위 안전보건교육을 받았음을 확인하고 서명합니다.</p>
+                        <p class="el-say" :class="{ 'el-emp': !L('p.sign') }"><ed k="p.sign"></ed></p>
                         <table class="el-tb el-sign" id="signTable">
                             <colgroup><col style="width:8%"><col style="width:24%"><col style="width:15%"><col style="width:19%"><col style="width:19%"><col style="width:15%"></colgroup>
                             <thead>
-                                <tr><th>번호</th><th>소속</th><th>직위</th><th>성명</th><th>서명</th><th>비고</th></tr>
+                                <tr><th><ed k="c.no"></ed></th><th><ed k="c.org"></ed></th><th><ed k="c.pos"></ed></th><th><ed k="c.name"></ed></th><th><ed k="c.sign"></ed></th><th><ed k="c.memo"></ed></th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(r, i) in signRows" :key="'sr-' + i">
@@ -810,19 +946,20 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <p class="el-say el-r">교육 실시자(강사) : {{ f.teacherName }} <i>(서명)</i></p>
+                        <p class="el-say el-r" :class="{ 'el-emp': !L('p.signer') }"><ed k="p.signer"></ed> : {{ f.teacherName }} <i><ed k="p.sig"></ed></i></p>
                     </div>
 
                     <!-- [DOC 3] 실시 대장·누계 -->
                     <div v-if="f.docType === 'ledger'" id="docLedger">
-                        <div class="el-dhead el-dhead-c">
-                            <h2>{{ f.ledgerYear }}년 안전보건교육 실시 대장</h2>
+                        <div class="el-dhead" :class="{ 'el-dhead-c': !(f.apprShow && f.apprAll) }">
+                            <h2>{{ f.ledgerYear }}년 <ed k="t.ledger"></ed></h2>
+                            <div v-if="f.apprShow && f.apprAll" class="el-apprbox" v-appr></div>
                         </div>
                         <p class="el-say">{{ companyText || '(사업장명)' }} · 작성일 {{ todayText }} · 기록 {{ ledgerRows.length }}건</p>
                         <h4 class="el-h4">1. 교육 실시 내역</h4>
                         <table class="el-tb el-led" id="ledTable">
                             <colgroup><col style="width:5%"><col style="width:13%"><col style="width:18%"><col><col style="width:11%"><col style="width:12%"><col style="width:13%"></colgroup>
-                            <thead><tr><th>번호</th><th>교육일</th><th>교육 과정</th><th>교육명</th><th>시간</th><th>참석/대상</th><th>강사</th></tr></thead>
+                            <thead><tr><th>번호</th><th>교육일</th><th><ed k="h.course"></ed></th><th>교육명</th><th>시간</th><th>참석/대상</th><th>강사</th></tr></thead>
                             <tbody>
                                 <tr v-for="(r, i) in ledgerRows" :key="'lr-' + i">
                                     <td class="el-c">{{ i + 1 }}</td>
@@ -839,7 +976,7 @@
                         <h4 class="el-h4">2. 과정별 · 분기별 실시 시간 합계</h4>
                         <table class="el-tb el-led" id="sumTable">
                             <colgroup><col style="width:28%"><col style="width:9%"><col><col><col><col><col style="width:14%"></colgroup>
-                            <thead><tr><th>교육 과정</th><th>횟수</th><th>1분기</th><th>2분기</th><th>3분기</th><th>4분기</th><th>연간 합계</th></tr></thead>
+                            <thead><tr><th><ed k="h.course"></ed></th><th>횟수</th><th>1분기</th><th>2분기</th><th>3분기</th><th>4분기</th><th>연간 합계</th></tr></thead>
                             <tbody>
                                 <tr v-for="(s, i) in ledgerSum" :key="'ls-' + i">
                                     <td>{{ s.label }}</td>
@@ -850,7 +987,7 @@
                                 <tr v-if="!ledgerSum.length"><td colspan="7" class="el-c el-mut">기록 없음</td></tr>
                             </tbody>
                         </table>
-                        <p class="el-fn">※ 위 표는 실시한 교육 시간을 단순히 더한 값입니다. 대상자가 다른 교육이 섞여 있으면 한 사람이 받은 시간과 다릅니다.</p>
+                        <p class="el-fn" :class="{ 'el-emp': !L('p.fn1') }"><ed k="p.fn1"></ed></p>
                         <template v-if="f.ledgerPeople">
                             <h4 class="el-h4">3. 개인별 정기교육 이수 시간</h4>
                             <table class="el-tb el-led" id="peopleTable">
@@ -869,7 +1006,7 @@
                                     <tr v-if="!peopleRows.length"><td colspan="7" class="el-c el-mut">{{ f.ledgerYear }}년에 보관된 정기교육 기록이 없습니다.</td></tr>
                                 </tbody>
                             </table>
-                            <p class="el-fn">※ 소속과 성명이 같은 사람을 한 사람으로 보고, 참석한 정기교육 시간만 더했습니다(미참석으로 표시한 교육은 0시간). "기록 없음"은 그 기간에 이 기기에 보관한 정기교육 기록이 없다는 뜻이며, 교육을 하지 않았다는 뜻이 아닙니다. 법정 시간은 산업안전보건법 시행규칙 별표 4({{ EDU.hoursChecked }} 확인){{ f.half ? ', 비고에 따른 2분의 1 적용' : '' }} 기준이며, 교육 면제(법 제30조, 시행규칙 제27조)·입사일·휴직 등은 반영하지 않았습니다.</p>
+                            <p class="el-fn" :class="{ 'el-emp': !L('p.fn2') }"><ed k="p.fn2"></ed></p>
                         </template>
                     </div>
                 </div>
@@ -921,9 +1058,11 @@
             document.getElementById('app').innerHTML = '<div class="cm-fail"><b>화면을 불러오지 못했습니다.</b><br>새로 고침(F5)해 보세요. 계속 안 되면 브라우저의 확장 프로그램·보안 프로그램이 스크립트를 막고 있는지 확인하세요.<br><a href="../../">← SafePlum으로 돌아가기</a></div>';
             throw new Error('Vue not loaded');
         }
-        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        const { createApp, ref, reactive, computed, watch, nextTick, onMounted } = Vue;
         const STORE_KEY = 'safetake.edulog.v1';
         const OLD_FORM_KEY = 'safetake.form.edu-log';   // 예전 일반 서식(tools/forms/edu-log/)의 저장값 — 읽기만 하고 지우지 않는다
+        const APPR_KEY = 'tool.edu-log';                // 결재란 저장 키: safetake.appr.tool.edu-log (assets/docs.js)
+        const OLD_APPR = '담당, 관리감독자, 안전보건관리책임자';   // 예전 결재란 기본값(쉼표로 적던 방식)
         const HIST_MAX = 150;
         const ATT_MAX = 500;
 
@@ -974,8 +1113,94 @@
             if (half) n = n / 2;
             return n;
         };
+        const fmtHM = (m) => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+        // 이번 회차 교육시간 자동 제안(시간). 법정 시간은 별표 4 그대로이고, 나누는 횟수는 법령이 아니라 흔한 실시 방식에 맞춘 제안값이다.
+        //  - 정기교육: 근로자는 매반기 시간을 6회(매월), 관리감독자는 연간 시간을 4회(분기)로 나눈 값
+        //  - 특별교육 16시간: 별표 4의 "최초 작업에 종사하기 전 4시간 이상" 중 4시간
+        //  - 그 밖(채용 시·작업내용 변경 시·단기간 특별교육 등): 법정 시간 전체
+        const autoPlan = (g, c, t, half, shortWork) => {
+            const r = rowOf(g, c, t), n = reqOf(g, c, t, half, shortWork);
+            if (c === 'regular') {
+                const k = g === 'supervisor' ? 4 : 6, h = n / k;
+                return { h, why: `법정 ${g === 'supervisor' ? '연간' : '매반기'} ${fmtH(n)} 이상 — ${g === 'supervisor' ? '분기마다' : '매월'} 나누어 실시할 때의 회당 ${fmtH(h)}으로 넣었습니다.` };
+            }
+            if (c === 'special' && r.nShort && !shortWork) {
+                const h = Math.min(4, n);
+                return { h, why: half ? `법정 ${fmtH(n)} 이상 중 이번 회차 ${fmtH(h)}으로 넣었습니다.` : `법정 16시간 이상 — 최초 작업에 종사하기 전 4시간 이상(나머지 12시간은 3개월 이내 분할 가능)에 맞춰 4시간으로 넣었습니다.` };
+            }
+            return { h: n, why: `법정 ${fmtH(n)} 이상에 맞춰 넣었습니다.` };
+        };
+        // 자동 제안 시간에 맞춘 시작·종료·휴게. 6시간 이상이면 09:00 시작, 점심 휴게 60분을 뺀다.
+        const autoTimes = (x) => {
+            const p = autoPlan(x.group, x.course, x.target, x.half, x.shortWork), min = Math.round(p.h * 60), br = min >= 360 ? 60 : 0;
+            let st = hm(x.start); if (st == null) st = 13 * 60;
+            if (min >= 360 || st + min + br > 1439) st = 9 * 60;
+            return { start: fmtHM(st), end: fmtHM(st + min + br), breakMin: br, min, why: p.why };
+        };
+        const isAutoDur = (x) => { const t = calcTime(x); return t.ok && t.min === Math.round(autoPlan(x.group, x.course, x.target, x.half, x.shortWork).h * 60); };
 
-        createApp({
+        // ---- 문서 제목·항목 이름·고정 문구(기본값). 사용자가 고친 것만 f.lb에 저장한다
+        const LBD = {
+            't.log': '안전보건교육 일지', 't.notice': '안전보건교육 실시 안내', 't.sign': '안전보건교육 참석자 서명부', 't.ledger': '안전보건교육 실시 대장',
+            'h.company': '사 업 장', 'h.course': '교육 과정', 'h.title': '교 육 명', 'h.when': '일 시', 'h.dur': '교육 시간', 'h.place': '장 소', 'h.method': '교육 방법', 'h.teacher': '강 사', 'h.dept': '교육 대상', 'h.count': '인 원',
+            'h.legal': '법정\n교육시간', 'h.content': '교육 내용', 'h.mat': '교육 자료', 'h.eval': '평가 ·\n질의응답', 'h.absent': '미참석자\n조치',
+            'h.to': '수 신', 'h.ndate': '통 보 일', 'h.from': '발 신', 'h.plan': '교육 내용\n(예정)', 'h.note': '준비물 ·\n유의사항',
+            'c.no': '번호', 'c.org': '소속', 'c.pos': '직위', 'c.name': '성명', 'c.sign': '서명', 'c.memo': '비고',
+            'p.done': '위와 같이 안전보건교육을 실시하였습니다.', 'p.teacher': '강사', 'p.writer': '작성자', 'p.sig': '(서명)', 'p.photo': '[ 교육 실시 사진 ]',
+            'p.notice': '아래와 같이 안전보건교육을 실시하오니 교육 대상자는 빠짐없이 참석하여 주시기 바랍니다.',
+            'p.sign': '아래 사람은 위 안전보건교육을 받았음을 확인하고 서명합니다.', 'p.signer': '교육 실시자(강사)',
+            'p.fn1': '※ 위 표는 실시한 교육 시간을 단순히 더한 값입니다. 대상자가 다른 교육이 섞여 있으면 한 사람이 받은 시간과 다릅니다.',
+            'p.fn2': (x) => `※ 소속과 성명이 같은 사람을 한 사람으로 보고, 참석한 정기교육 시간만 더했습니다(미참석으로 표시한 교육은 0시간). "기록 없음"은 그 기간에 이 기기에 보관한 정기교육 기록이 없다는 뜻이며, 교육을 하지 않았다는 뜻이 아닙니다. 법정 시간은 산업안전보건법 시행규칙 별표 4(${EDU.hoursChecked} 확인)${x.half ? ', 비고에 따른 2분의 1 적용' : ''} 기준이며, 교육 면제(법 제30조, 시행규칙 제27조)·입사일·휴직 등은 반영하지 않았습니다.`
+        };
+        const LB_MAX = 400;
+        let FORM = null;   // setup()에서 넣는 작성 중인 일지(ref)
+        const lDef = (k) => (typeof LBD[k] === 'function' ? LBD[k](FORM.value) : LBD[k] || '');
+        const L = (k) => { const m = FORM.value.lb; return m && typeof m[k] === 'string' ? m[k] : lDef(k); };
+        const setL = (k, v) => {
+            if (!(k in LBD)) return;
+            v = str(v).replace(/\u00a0/g, ' ').replace(/\r/g, '').replace(/\s+$/, '').slice(0, LB_MAX);
+            const m = Object.assign({}, FORM.value.lb);
+            if (v === lDef(k)) delete m[k]; else m[k] = v;
+            FORM.value.lb = m;
+        };
+        // 문서 안에서 눌러 고치는 글자. 사용자 입력은 textContent로만 넣는다(HTML로 해석하지 않음)
+        const Ed = {
+            props: { k: { type: String, required: true } },
+            setup(props) {
+                const el = ref(null);
+                const val = computed(() => L(props.k));
+                const put = () => { const e = el.value; if (e && document.activeElement !== e && e.textContent !== val.value) e.textContent = val.value; };
+                onMounted(put); watch(val, put, { flush: 'post' });
+                const save = () => { const e = el.value; if (!e) return; setL(props.k, e.innerText || ''); e.textContent = L(props.k); };
+                const paste = (ev) => { ev.preventDefault(); const t = ((ev.clipboardData || window.clipboardData).getData('text') || '').replace(/\r/g, ''); document.execCommand('insertText', false, t); };
+                return { el, save, paste };
+            },
+            template: '<span ref="el" class="el-ed" contenteditable="true" spellcheck="false" role="textbox" aria-label="문구 고치기(비우면 인쇄하지 않음)" title="눌러서 고치기" @blur="save" @paste="paste" @drop.prevent @keydown.enter.exact.prevent="$event.target.blur()"></span>'
+        };
+        const StHead = {
+            props: { sid: String, n: [String, Number], title: String, sum: String, done: Boolean, warn: Number, open: Boolean },
+            emits: ['t'],
+            template: '<button type="button" class="el-sth" :id="\'sh-\' + sid" :aria-expanded="open ? \'true\' : \'false\'" @click="$emit(\'t\', sid)">'
+                + '<span class="el-stn" :class="{ done: done }">{{ n }}</span>'
+                + '<span class="el-stt">{{ title }}<small v-if="sum">{{ sum }}</small></span>'
+                + '<span v-if="warn" class="el-stw">살펴볼 곳 {{ warn }}</span>'
+                + '<i v-else-if="done" class="ph-bold ph-check el-std" role="img" aria-label="작성함"></i>'
+                + '<span class="el-chev" :class="{ up: open }" aria-hidden="true"></span></button>'
+        };
+        // 결재란 — assets/docs.js(ADoc)가 그리고 저장한다. 문서 종류를 바꿔 다시 그려질 때마다 붙인다
+        const apprDraw = () => { document.querySelectorAll('.el-apprbox').forEach(el => { if (el._appr) el._appr.redraw(); }); };
+        const vAppr = { mounted(el) { if (window.ADoc) el._appr = window.ADoc.mountApproval(el, APPR_KEY); } };
+        const readAppr = () => {
+            try {
+                const own = JSON.parse(localStorage.getItem('safetake.appr.' + APPR_KEY) || 'null');
+                if (own && Array.isArray(own.cols) && own.cols.length) return own.cols;
+                const d = JSON.parse(localStorage.getItem('safetake.appr.default') || 'null');
+                if (d && Array.isArray(d.cols) && d.cols.length) return d.cols;
+            } catch (e) { /* 저장소를 못 읽으면 기본 3칸 */ }
+            return ['담당', '검토', '승인'];
+        };
+
+        const app = createApp({
             setup() {
                 const docTypes = [
                     { label: '교육 일지', value: 'log', icon: 'ph-bold ph-file-text' },
@@ -1013,7 +1238,11 @@
                     teacherQual: '',
                     dept: '',
                     writer: str(profile.manager),
-                    appr: '담당, 관리감독자, 안전보건관리책임자',
+                    appr: OLD_APPR,          // 예전 방식(쉼표) 값 — 이제는 결재란 모듈로 옮겨 쓰고, 여기는 읽기만 한다
+                    apprShow: true,
+                    apprAll: false,
+                    timeAuto: true,          // 시작·종료·휴게가 교육 과정 선택을 따라가는지(직접 고치면 false)
+                    lb: {},                  // 고친 제목·항목 이름·문구
                     showLegal: true,
                     detail: '',
                     materials: '',
@@ -1033,7 +1262,8 @@
                 // ---- 저장값 정리(모양이 어긋난 값이 들어와도 화면이 깨지지 않게)
                 const cleanForm = (x) => {
                     const base = freshForm();
-                    if (x && typeof x === 'object') Object.keys(base).forEach(k => { if (typeof x[k] === typeof base[k]) base[k] = x[k]; });
+                    if (x && typeof x === 'object') Object.keys(base).forEach(k => { if (k !== 'lb' && typeof x[k] === typeof base[k]) base[k] = x[k]; });
+                    if (x && x.lb && typeof x.lb === 'object' && !Array.isArray(x.lb)) Object.keys(LBD).forEach(k => { if (typeof x.lb[k] === 'string') base.lb[k] = x.lb[k].slice(0, LB_MAX); });
                     if (!['log', 'sign', 'notice', 'ledger'].includes(base.docType)) base.docType = 'log';
                     if (!EDU.H[base.group]) base.group = 'worker';
                     if (!EDU.H[base.group][base.course]) base.course = 'regular';
@@ -1045,6 +1275,11 @@
                     if (!(base.breakMin >= 0 && base.breakMin < 1440)) base.breakMin = 0;
                     if (![0, 5, 10, 20].includes(base.blankRows)) base.blankRows = 0;
                     if (!(base.ledgerYear >= 2000 && base.ledgerYear <= 2100)) base.ledgerYear = now.getFullYear();
+                    base.breakMin = Math.floor(base.breakMin);
+                    // 예전 저장값(timeAuto 없음): 교육시간이 자동 제안값과 같을 때만 "자동"으로 본다. 시간 자체는 건드리지 않는다
+                    if (!x || typeof x.timeAuto !== 'boolean') base.timeAuto = isAutoDur(base);
+                    // 예전 저장값(apprShow 없음): 결재란 칸을 비워 숨겨 두었던 경우
+                    if (x && typeof x === 'object' && typeof x.apprShow !== 'boolean' && typeof x.appr === 'string' && !x.appr.trim()) base.apprShow = false;
                     return base;
                 };
                 const cleanAtt = (a) => Array.isArray(a) ? a.slice(0, ATT_MAX).filter(r => r && typeof r === 'object').map(r => ({ org: str(r.org), pos: str(r.pos), name: str(r.name), absent: !!r.absent, reason: str(r.reason) })) : [];
@@ -1054,6 +1289,18 @@
 
                 const init = cleanSnap(saved);
                 const f = ref(init.formData);
+                FORM = f;
+                // 예전 저장값 옮기기(한 번): ① 손대지 않은 기본 시간(13:00~15:00)은 선택한 교육 과정에 맞춰 다시 넣는다
+                //                        ② 쉼표로 적어 둔 결재란 칸 이름을 결재란 모듈 저장값으로 옮긴다(이미 있으면 그대로)
+                const legacy = !!(saved && saved.formData && typeof saved.formData === 'object' && typeof saved.formData.timeAuto !== 'boolean');
+                if (legacy) {
+                    const x = f.value;
+                    if (x.start === '13:00' && x.end === '15:00' && x.breakMin === 0 && !x.timeAuto) { const a = autoTimes(x); x.start = a.start; x.end = a.end; x.breakMin = a.breakMin; x.timeAuto = true; }
+                    try {
+                        const cols = x.appr.split(/[,，]/).map(v => v.trim().slice(0, 20)).filter(Boolean).slice(0, 6);
+                        if (cols.length && localStorage.getItem('safetake.appr.' + APPR_KEY) == null) localStorage.setItem('safetake.appr.' + APPR_KEY, JSON.stringify({ cols, names: cols.map(() => ''), signs: [], dates: [] }));
+                    } catch (e) { /* 저장소를 못 쓰면 사이트 기본 결재란을 쓴다 */ }
+                }
                 const attendees = ref(init.attendees);
                 const picked = ref(init.picked);
                 const custom = ref(init.custom);
@@ -1087,17 +1334,56 @@
                 const reqText = computed(() => periodWord(f.value.group, f.value.course) + fmtH(reqHours.value) + ' 이상');
                 const catOf = (t) => t.replace(/^\d\)\s*/, '').replace(/^그 밖의 근로자 — [가-힣]\)\s*/, '').split(':')[0];
                 const targetShort = computed(() => catOf(targetRow.value.t));
+                // ---- 이번 교육 실시 시간: 직접 고치기 전까지는 교육 과정 선택을 따라간다
+                const applyAuto = () => { const a = autoTimes(f.value); Object.assign(f.value, { start: a.start, end: a.end, breakMin: a.breakMin, timeAuto: true }); };
+                const follow = () => { if (f.value.timeAuto) applyAuto(); };
+                const relink = () => { f.value.timeAuto = isAutoDur(f.value); };
+                const resetTimeAuto = () => { applyAuto(); showToast('교육 시간을 교육 과정에 맞춰 다시 넣었습니다.'); };
+                const autoNow = computed(() => autoTimes(f.value));
+                const autoWhy = computed(() => autoNow.value.why);
+                const autoText = computed(() => fmtMin(autoNow.value.min));
                 const setGroup = (g) => {
                     if (f.value.group === g) return;
                     f.value.group = g;
-                    f.value.target = g === 'worker' && f.value.course !== 'special' ? rowsOf(g, f.value.course).length - 1 : (g === 'worker' ? 2 : 0);
+                    f.value.target = rowsOf(g, f.value.course).length - 1;   // 각 과정의 마지막 줄이 일반 근로자(그 밖의 근로자)에 해당
+                    follow();
                 };
                 const setCourse = (c) => {
                     if (f.value.course === c) return;
                     f.value.course = c;
-                    f.value.target = rowsOf(f.value.group, c).length - 1;   // 각 과정의 마지막 줄이 일반 근로자(그 밖의 근로자)에 해당
+                    f.value.target = rowsOf(f.value.group, c).length - 1;
                     if (c !== 'special') { f.value.specialNo = 0; f.value.shortWork = false; }
+                    follow();
                 };
+                const setTarget = (v) => {
+                    const n = rowsOf(f.value.group, f.value.course).length, i = Number(v);
+                    f.value.target = Number.isInteger(i) && i >= 0 && i < n ? i : n - 1;
+                    if (!rowOf(f.value.group, f.value.course, f.value.target).nShort) f.value.shortWork = false;
+                    follow();
+                };
+                const setHalf = (on) => { f.value.half = !!on; follow(); };
+                const setShort = (on) => { f.value.shortWork = !!on; follow(); };
+                const onStart = (v) => {
+                    const x = f.value, was = calcTime(x), st = hm(v);
+                    x.start = v;
+                    // 시작 시각을 옮기면 교육 시간은 그대로 두고 종료 시각을 따라 옮긴다(자정을 넘기면 옮기지 않음)
+                    if (was.ok && st != null && st + was.gross <= 1439) x.end = fmtHM(st + was.gross);
+                    else relink();
+                };
+                const onEnd = (v) => { f.value.end = v; relink(); };
+                const onBreak = (v) => { const n = Math.floor(Number(v)); f.value.breakMin = n > 0 && n < 1440 ? n : 0; relink(); };
+                const setHours = (v) => {
+                    const h = Number(v), x = f.value;
+                    if (!(h > 0 && h < 24)) { showToast('교육 시간은 0보다 크고 24시간보다 작게 넣으세요.', 'error'); return; }
+                    const min = Math.round(h * 60), br = Number(x.breakMin) > 0 ? Math.floor(x.breakMin) : 0;
+                    let st = hm(x.start); if (st == null) st = 13 * 60;
+                    if (st + min + br > 1439) st = Math.max(0, Math.min(9 * 60, 1439 - min - br));
+                    if (st + min + br > 1439) { showToast('시작 시각부터 자정 전까지 들어가지 않는 시간입니다. 날짜를 나누어 적으세요.', 'error'); return; }
+                    x.start = fmtHM(st); x.end = fmtHM(st + min + br);
+                    relink();
+                };
+                const quickHours = [1, 2, 3, 4, 6, 8];
+                const hoursVal = computed(() => { const t = calcTime(f.value); return t.ok ? Math.round(t.min / 60 * 100) / 100 : ''; });
                 // ---- 교육 내용(별표 5)
                 const contentKey = computed(() => (f.value.group === 'supervisor' ? 'sup_' : 'worker_') + (f.value.course === 'regular' ? 'regular' : 'hire'));
                 const special = computed(() => (f.value.course === 'special' ? EDU.special.find(s => s.no === f.value.specialNo) : null) || null);
@@ -1134,7 +1420,7 @@
                     const who = [f.value.teacherOrg, f.value.teacherName].map(x => x.trim()).filter(Boolean).join(' ');
                     return who + (f.value.teacherQual.trim() ? (who ? ' ' : '') + `(${f.value.teacherQual.trim()})` : '');
                 });
-                const apprList = computed(() => f.value.appr.split(/[,，]/).map(x => x.trim().slice(0, 12)).filter(Boolean).slice(0, 5));
+                const sesText = computed(() => durationText.value);
 
                 // ---- 명단
                 const named = computed(() => attendees.value.filter(a => a.name.trim() || a.org.trim() || a.pos.trim()));
@@ -1299,37 +1585,121 @@
                     if (f.value.docType === 'ledger') return [];
                     const out = [], x = f.value, t = timeInfo.value;
                     if (x.docType === 'notice') {
-                        if (!t.ok) out.push({ ok: false, text: `교육 시간을 계산할 수 없습니다 — ${t.msg}.` });
-                        else out.push({ ok: true, text: `예정 교육 ${fmtMin(t.min)} · ${courseLabel.value} 법정 시간은 ${reqText.value}입니다(별표 4).` });
-                        if (!x.place.trim()) out.push({ ok: false, text: '교육 장소가 비어 있습니다.' });
-                        if (!docTopics.value.length) out.push({ ok: false, text: '예정 교육 내용이 비어 있습니다. 아래 "4. 교육 내용"에서 다룰 항목을 표시하세요.' });
-                        if (isYmd(x.noticeDate) && isYmd(x.date) && x.noticeDate > x.date) out.push({ ok: false, text: '통보일이 교육일보다 늦습니다.' });
+                        if (!t.ok) out.push({ s: 's2', ok: false, text: `교육 시간을 계산할 수 없습니다 — ${t.msg}.` });
+                        else out.push({ s: 's2', ok: true, text: `예정 교육 ${fmtMin(t.min)} · ${courseLabel.value} 법정 시간은 ${reqText.value}입니다(별표 4).` });
+                        if (!x.place.trim()) out.push({ s: 's2', ok: false, e: true, text: '교육 장소가 비어 있습니다.' });
+                        if (!docTopics.value.length) out.push({ s: 's4', ok: false, e: true, text: '예정 교육 내용이 비어 있습니다. 아래 "4. 교육 내용"에서 다룰 항목을 표시하세요.' });
+                        if (isYmd(x.noticeDate) && isYmd(x.date) && x.noticeDate > x.date) out.push({ s: 'notice', ok: false, text: '통보일이 교육일보다 늦습니다.' });
                         return out;
                     }
-                    if (!t.ok) out.push({ ok: false, text: `교육 시간을 계산할 수 없습니다 — ${t.msg}. 자정을 넘기는 교육은 날짜별로 일지를 나누어 적으세요.` });
-                    else if (x.course === 'regular') out.push({ ok: true, text: `이번 교육 ${fmtMin(t.min)} · ${courseLabel.value} 법정 시간은 ${reqText.value}입니다(별표 4). 기간 합계는 "실시 대장·누계"에서 확인하세요.` });
-                    else if (t.min >= reqHours.value * 60) out.push({ ok: true, text: `이번 교육 ${fmtMin(t.min)} — ${courseLabel.value} 법정 시간 ${reqText.value}(별표 4)을 채웠습니다.` });
-                    else out.push({ ok: false, text: `이번 교육 ${fmtMin(t.min)} — ${courseLabel.value} 법정 시간 ${reqText.value}(별표 4)에 못 미칩니다. 여러 번에 나누어 실시했다면 회차마다 일지를 보관해 합계를 확인하세요.` + (x.course === 'special' && targetRow.value.nShort && !x.shortWork ? ' 16시간 중 12시간은 3개월 이내에서 분할하여 실시할 수 있습니다.' : '') });
-                    if (!counts.value.total) out.push({ ok: false, text: '교육 대상자 명단이 비어 있습니다. 명단을 넣으면 인원과 미참석자가 자동으로 집계됩니다.' });
+                    if (!t.ok) out.push({ s: 's2', ok: false, text: `교육 시간을 계산할 수 없습니다 — ${t.msg}. 자정을 넘기는 교육은 날짜별로 일지를 나누어 적으세요.` });
+                    else if (x.course === 'regular') out.push({ s: 's2', ok: true, text: `이번 교육 ${fmtMin(t.min)} · ${courseLabel.value} 법정 시간은 ${reqText.value}입니다(별표 4). 기간 합계는 "실시 대장·누계"에서 확인하세요.` });
+                    else if (t.min >= reqHours.value * 60) out.push({ s: 's2', ok: true, text: `이번 교육 ${fmtMin(t.min)} — ${courseLabel.value} 법정 시간 ${reqText.value}(별표 4)을 채웠습니다.` });
+                    else out.push({ s: 's2', ok: false, e: x.course === 'special' && !!targetRow.value.nShort && !x.shortWork, text: `이번 교육 ${fmtMin(t.min)} — ${courseLabel.value} 법정 시간 ${reqText.value}(별표 4)에 못 미칩니다. 여러 번에 나누어 실시했다면 회차마다 일지를 보관해 합계를 확인하세요.` + (x.course === 'special' && targetRow.value.nShort && !x.shortWork ? ' 16시간 중 12시간은 3개월 이내에서 분할하여 실시할 수 있습니다.' : '') });
+                    if (!counts.value.total) out.push({ s: 's3', ok: false, e: true, text: '교육 대상자 명단이 비어 있습니다. 명단을 넣으면 인원과 미참석자가 자동으로 집계됩니다.' });
                     else {
                         const noName = named.value.filter(a => !a.name.trim()).length;
-                        if (noName) out.push({ ok: false, text: `성명이 비어 있는 줄이 ${noName}개 있습니다.` });
+                        if (noName) out.push({ s: 's3', ok: false, text: `성명이 비어 있는 줄이 ${noName}개 있습니다.` });
                         const seen = new Set(), dups = new Set();
                         named.value.forEach(a => { const k = a.org.trim() + '|' + a.name.trim(); if (a.name.trim() && seen.has(k)) dups.add(a.name.trim()); seen.add(k); });
-                        if (dups.size) out.push({ ok: false, text: `소속·성명이 같은 사람이 겹쳐 있습니다: ${Array.from(dups).slice(0, 5).join(', ')}${dups.size > 5 ? ' 등' : ''}. 동명이인이면 소속이나 직위로 구분하세요.` });
-                        if (counts.value.absent && !x.absentPlan.trim()) out.push({ ok: false, text: `미참석 ${counts.value.absent}명의 조치 계획(보충교육 일정 등)이 비어 있습니다.` });
-                        else if (!counts.value.absent) out.push({ ok: true, text: `대상 ${counts.value.total}명 전원 참석으로 표시되어 있습니다.` });
+                        if (dups.size) out.push({ s: 's3', ok: false, text: `소속·성명이 같은 사람이 겹쳐 있습니다: ${Array.from(dups).slice(0, 5).join(', ')}${dups.size > 5 ? ' 등' : ''}. 동명이인이면 소속이나 직위로 구분하세요.` });
+                        if (counts.value.absent && !x.absentPlan.trim()) out.push({ s: 's5', ok: false, text: `미참석 ${counts.value.absent}명의 조치 계획(보충교육 일정 등)이 비어 있습니다.` });
+                        else if (!counts.value.absent) out.push({ s: 's3', ok: true, text: `대상 ${counts.value.total}명 전원 참석으로 표시되어 있습니다.` });
                     }
-                    if (!docTopics.value.length && !x.detail.trim()) out.push({ ok: false, text: '교육 내용이 비어 있습니다. 실제로 교육한 별표 5 항목을 표시하거나 내용을 적으세요.' });
-                    if (x.course === 'special' && !x.specialNo) out.push({ ok: false, text: '특별교육 대상 작업을 고르지 않았습니다(별표 5 제1호라목). 고르면 그 작업의 개별 교육내용이 표시됩니다.' });
-                    if (!x.teacherName.trim()) out.push({ ok: false, text: '강사 성명이 비어 있습니다. 자체 교육을 할 수 있는 사람은 시행규칙 제26조제3항에 정해져 있습니다.' });
+                    if (!docTopics.value.length && !x.detail.trim()) out.push({ s: 's4', ok: false, e: true, text: '교육 내용이 비어 있습니다. 실제로 교육한 별표 5 항목을 표시하거나 내용을 적으세요.' });
+                    if (x.course === 'special' && !x.specialNo) out.push({ s: 's1', ok: false, e: true, text: '특별교육 대상 작업을 고르지 않았습니다(별표 5 제1호라목). 고르면 그 작업의 개별 교육내용이 표시됩니다.' });
+                    if (!x.teacherName.trim()) out.push({ s: 's2', ok: false, e: true, text: '강사 성명이 비어 있습니다. 자체 교육을 할 수 있는 사람은 시행규칙 제26조제3항에 정해져 있습니다.' });
                     return out;
                 });
+
+                // ---- 접이식 단계
+                const STEP_IDS = ['ledger', 'notice', 's1', 's2', 's3', 's4', 's5', 'word', 'hist', 'law'];
+                const stepOrder = computed(() => (f.value.docType === 'ledger' ? ['ledger', 'word', 'hist'] : (f.value.docType === 'notice' ? ['notice'] : []).concat(['s1', 's2', 's3', 's4', 's5', 'word', 'hist'])));
+                const open = reactive({});
+                STEP_IDS.forEach(k => { open[k] = false; });
+                open[stepOrder.value[0]] = true;
+                const num = computed(() => { const o = {}; stepOrder.value.forEach((k, i) => { o[k] = i + 1; }); return o; });
+                const visibleSteps = computed(() => stepOrder.value.concat(['law']));
+                const allOpen = computed(() => visibleSteps.value.every(k => open[k]));
+                const setAll = (on) => { visibleSteps.value.forEach(k => { open[k] = on; }); };
+                const showStep = (id) => nextTick(() => { const el = document.getElementById('st-' + id); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' }); });
+                const toggle = (id) => { open[id] = !open[id]; if (open[id]) showStep(id); };
+                const goNext = (id) => {
+                    const o = stepOrder.value, nx = o[o.indexOf(id) + 1];
+                    open[id] = false;
+                    if (nx) { open[nx] = true; nextTick(() => { const el = document.getElementById('st-' + nx); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); }); }
+                };
+                const stepChecks = computed(() => { const o = {}; STEP_IDS.forEach(k => { o[k] = []; }); checks.value.forEach(c => { (o[c.s] || o.s2).push(c); }); return o; });
+                const warn = computed(() => { const o = {}; STEP_IDS.forEach(k => { o[k] = stepChecks.value[k].filter(c => !c.ok && !c.e).length; }); return o; });   // 아직 안 채운 칸(e)은 세지 않는다
+                const apprCols = ref(readAppr());
+                const syncAppr = () => { apprCols.value = readAppr(); };
+                const lbCount = computed(() => Object.keys(f.value.lb).length);
+                const sum = computed(() => {
+                    const x = f.value, c = counts.value;
+                    return {
+                        ledger: `${x.ledgerYear}년 · 기록 ${ledgerRows.value.length}건`,
+                        notice: [x.noticeTo.trim() ? '수신 ' + x.noticeTo.trim() : '수신 미입력', noticeDateText.value ? '통보일 ' + noticeDateText.value : ''].filter(Boolean).join(' · '),
+                        s1: `${courseLabel.value} · 법정 ${reqText.value}`,
+                        s2: [isYmd(x.date) ? x.date : '날짜 미입력', timeText.value, timeInfo.value.ok ? fmtMin(timeInfo.value.min) : '시간 확인', x.title.trim()].filter(Boolean).join(' · '),
+                        s3: c.total ? `참석 ${c.present}/${c.total}명` + (c.absent ? ` · 미참석 ${c.absent}명` : '') : '명단 없음 (빈 서명부로 인쇄)',
+                        s4: `별표 5 항목 ${picked.value.length}/${lawTopics.value.length}개` + (custom.value.some(t => t.text.trim()) ? ` · 자체 주제 ${custom.value.filter(t => t.text.trim()).length}개` : '') + (x.detail.trim() ? ' · 요약 작성' : ''),
+                        s5: (c.absent ? `미참석 ${c.absent}명 · 조치 계획 ${x.absentPlan.trim() ? '작성' : '없음'}` : '미참석자 없음') + (photoDataUrl.value ? ' · 사진 1장' : ''),
+                        word: (x.apprShow ? '결재 ' + apprCols.value.map(v => v || '(빈칸)').join(' · ') : '결재란 없음') + (lbCount.value ? ` · 문구 ${lbCount.value}곳 고침` : ''),
+                        hist: hist.value.length ? `보관한 기록 ${hist.value.length}건` : '보관한 기록 없음'
+                    };
+                });
+                const done = computed(() => {
+                    const x = f.value, c = counts.value;
+                    return {
+                        s1: !(x.course === 'special' && !x.specialNo),
+                        s2: !!(x.company.trim() && x.title.trim() && timeInfo.value.ok && x.place.trim() && x.teacherName.trim()),
+                        s3: c.total > 0 && !named.value.some(a => !a.name.trim()),
+                        s4: !!(docTopics.value.length || x.detail.trim()),
+                        s5: c.total > 0 && (!c.absent || !!x.absentPlan.trim())
+                    };
+                });
+                // 좁은 화면: 입력 | 미리보기
+                const view = ref('form');
+                const setView = (v) => { view.value = v; nextTick(() => { fitPreview(); window.scrollTo(0, 0); }); };
+                const toTop = () => { window.scrollTo(0, 0); const c = document.getElementById('form-col'); if (c) c.scrollTop = 0; };
+                // 문구
+                const WORDS = {
+                    log: [['t.log', '일지 제목'], ['p.done', '일지 맺음 문구', 1], ['p.teacher', '서명란 ① 이름'], ['p.writer', '서명란 ② 이름'], ['p.sig', '서명 표시']],
+                    sign: [['t.sign', '서명부 제목'], ['p.sign', '서명부 확인 문구', 1], ['p.signer', '서명부 아래 서명란 이름'], ['p.sig', '서명 표시']],
+                    notice: [['t.notice', '안내문 제목'], ['p.notice', '안내 문구', 1]],
+                    ledger: [['t.ledger', '대장 제목 (앞에 연도가 붙습니다)'], ['p.fn1', '합계표 아래 안내', 1], ['p.fn2', '개인별 표 아래 안내', 1]]
+                };
+                const wordList = computed(() => {
+                    const t = f.value.docType, seen = new Set();
+                    return WORDS[t].concat(t === 'log' && f.value.appendSign ? WORDS.sign : []).filter(w => !seen.has(w[0]) && seen.add(w[0])).map(w => ({ k: w[0], label: w[1], long: !!w[2] }));
+                });
+                const isLChanged = (k) => typeof f.value.lb[k] === 'string';
+                const resetL = (k) => { const m = Object.assign({}, f.value.lb); delete m[k]; f.value.lb = m; };
+                const resetAllL = () => {
+                    if (!lbCount.value || !window.confirm(`고친 제목·항목 이름·문구 ${lbCount.value}곳을 모두 기본값으로 되돌릴까요?`)) return;
+                    f.value.lb = {};
+                    showToast('제목·항목 이름·문구를 기본값으로 되돌렸습니다.');
+                };
+                // 결재 서명은 문서 한 건에 대한 것이므로 다른 일지를 열 때 지운다(칸 이름·성명은 그대로)
+                const clearSigns = () => {
+                    try {
+                        const k = 'safetake.appr.' + APPR_KEY, v = JSON.parse(localStorage.getItem(k) || 'null');
+                        if (v && Array.isArray(v.signs) && v.signs.some(Boolean)) { v.signs = []; v.dates = []; localStorage.setItem(k, JSON.stringify(v)); apprDraw(); }
+                    } catch (e) { /* 저장소를 못 쓰면 그대로 둔다 */ }
+                };
+                const moveRow = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return; const t = arr[i]; arr[i] = arr[j]; arr[j] = t; };
+                const moveAtt = (i, d) => moveRow(attendees.value, i, d);
+                const moveCustom = (i, d) => moveRow(custom.value, i, d);
+                const sortAttendees = () => {
+                    attendees.value = attendees.value.slice().sort((a, b) => a.org.trim().localeCompare(b.org.trim(), 'ko') || a.name.trim().localeCompare(b.name.trim(), 'ko'));
+                    showToast('소속·성명순으로 정렬했습니다.');
+                };
 
                 // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
                 const fitPreview = () => {
                     const col = document.getElementById('preview-col');
                     if (!col) return;
+                    if (!col.clientWidth) return;   // 좁은 화면에서 미리보기 탭이 숨겨져 있을 때
                     const a4 = 210 * 96 / 25.4;
                     document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
                 };
@@ -1339,6 +1709,11 @@
                     requestAnimationFrame(fitPreview); setTimeout(fitPreview, 300);
                     const col = document.getElementById('preview-col');
                     if (col && window.ResizeObserver) new ResizeObserver(fitPreview).observe(col);
+                    // 결재란을 고치면(칸 이름·칸 수) 단계 머리의 요약도 따라 바꾼다
+                    ['input', 'click'].forEach(ev => document.addEventListener(ev, (e) => { if (e.target && e.target.closest && e.target.closest('.el-apprbox')) setTimeout(syncAppr, 0); }));
+                    // 빌드 때 본문 끝에 붙는 화면용 안내 문구를 입력 칸 아래로 옮긴다(인쇄에는 나오지 않음)
+                    const moveNote = () => { const n = document.querySelector('body > .adk-note'), slot = document.getElementById('noteSlot'); if (n && slot) { n.style.margin = '0'; n.style.padding = '0 4px'; slot.appendChild(n); } };
+                    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', moveNote); else moveNote();
                 });
 
                 const photoDataUrl = ref(null);
@@ -1351,7 +1726,10 @@
                     toastTimer = setTimeout(() => { toast.value.visible = false; }, 2600);
                 };
                 const changeDocType = (type) => {
+                    if (f.value.docType === type) return;
                     f.value.docType = type;
+                    STEP_IDS.forEach(k => { open[k] = false; });
+                    open[stepOrder.value[0]] = true;
                     showToast(`${docTypes.find(d => d.value === type).label} 화면으로 바꿨습니다.`);
                 };
 
@@ -1469,7 +1847,7 @@
                     clearContent();
                     attendees.value.forEach(a => { a.absent = false; a.reason = ''; });
                     photoDataUrl.value = null;
-                    window.scrollTo(0, 0);
+                    clearSigns(); toTop();
                     showToast('보관했습니다. 다음 교육 일지를 열었습니다.');
                 };
                 // 미참석자만 대상으로 한 보충교육 일지를 새로 연다(이번 일지는 보관)
@@ -1482,7 +1860,7 @@
                     f.value = Object.assign({}, f.value, { mid: newId(), docType: 'log', date: toYmd(new Date()), title: /보충교육\)$/.test(base) ? base : base + ' (보충교육)', evalText: '', absentPlan: '', dept: '' });
                     attendees.value = miss.map(a => ({ org: a.org, pos: a.pos, name: a.name, absent: false, reason: '' }));
                     photoDataUrl.value = null;
-                    window.scrollTo(0, 0);
+                    clearSigns(); toTop();
                     showToast(`보관했습니다. 미참석 ${miss.length}명의 보충교육 일지를 열었습니다. 날짜·시간을 고쳐 쓰세요.`);
                 };
                 const openHistory = (id) => {
@@ -1491,9 +1869,10 @@
                     if (h.id !== f.value.mid && liveHasContent.value && !window.confirm('지금 작성 중인 내용을 이 기록으로 바꿉니다.\n지금 내용을 남기려면 취소하고 "지금 내용만 보관"을 먼저 누르세요. 계속할까요?')) return;
                     const s = cleanSnap(JSON.parse(JSON.stringify(h.snap)));
                     s.formData.docType = 'log';
+                    if (h.id !== f.value.mid) clearSigns();
                     f.value = s.formData; attendees.value = s.attendees; picked.value = s.picked; custom.value = s.custom;
                     photoDataUrl.value = null;
-                    window.scrollTo(0, 0);
+                    toTop();
                     showToast('보관한 교육 기록을 열었습니다.');
                 };
                 const deleteHistory = (id) => {
@@ -1521,7 +1900,8 @@
                     }
                     if (isYmd(g('f.date'))) f.value.date = g('f.date');
                     const tm = /(\d{1,2}:\d{2})\s*[~\-–]\s*(\d{1,2}:\d{2})/.exec(g('f.time'));
-                    if (tm && hm(tm[1]) != null && hm(tm[2]) != null) { f.value.start = tm[1].padStart(5, '0'); f.value.end = tm[2].padStart(5, '0'); f.value.breakMin = 0; }
+                    if (tm && hm(tm[1]) != null && hm(tm[2]) != null) { f.value.start = tm[1].padStart(5, '0'); f.value.end = tm[2].padStart(5, '0'); f.value.breakMin = 0; relink(); }
+                    else follow();
                     if (g('f.place')) f.value.place = g('f.place');
                     if (g('f.method')) f.value.method = g('f.method');
                     if (g('f.teacher')) { f.value.teacherName = g('f.teacher'); f.value.teacherOrg = ''; }
@@ -1586,9 +1966,12 @@
                     EDU, HIST_MAX, docTypes, groups: GROUPS, courses: COURSES, methods, quals, specials: EDU.special,
                     f, attendees, picked, custom, bulk, history: historyView,
                     photoDataUrl, isGeneratingPDF, toast, saveMsg,
-                    targetRows, targetRow, courseLabel, reqText, targetShort, setGroup, setCourse,
+                    targetRows, targetRow, courseLabel, reqText, targetShort, setGroup, setCourse, setTarget, setHalf, setShort,
+                    onStart, onEnd, onBreak, setHours, quickHours, hoursVal, resetTimeAuto, autoWhy, autoText, sesText,
+                    open, num, sum, done, warn, stepChecks, allOpen, setAll, toggle, goNext, view, setView,
+                    L, setL, wordList, isLChanged, resetL, resetAllL, lbCount, moveAtt, moveCustom, sortAttendees,
                     lawTopics, contentTitle, pickedCount, pickAll, docTopics,
-                    timeInfo, durationText, dateText, timeText, todayText, companyText, teacherText, apprList,
+                    timeInfo, durationText, dateText, timeText, todayText, companyText, teacherText,
                     counts, rateText, noticeRows, noticeDateText, makeSupplement, absentList, absentNames, signRows, signBlank, showSign, addBulk, addAttendee, clearAttendees,
                     ledgerYears, ledgerRows, ledgerSum, peopleRows, shortInfo, checks,
                     changeDocType, handleFileUpload, removePhoto, resetContent,
@@ -1598,7 +1981,11 @@
                     printDoc, downloadPDF
                 };
             }
-        }).mount('#app');
+        });
+        app.component('ed', Ed);
+        app.component('st-head', StHead);
+        app.directive('appr', vAppr);
+        app.mount('#app');
     </script>
 </body>
 </html>

@@ -10,6 +10,8 @@
     <style>/*@TAILWIND@*/</style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
     <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
+    <!-- 결재란(칸 이름·개수·성명·서명)은 사이트 공통 모듈을 그대로 쓴다 -->
+    <script src="../../assets/docs.js"></script>
     <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
     <style>
@@ -61,7 +63,10 @@
             .a4-container { box-shadow: none; margin: 0; width: 100%; min-height: 0; border: 0 !important; padding: 0 !important; }
             #app { min-height: 0 !important; display: block !important; }
             main { display: block !important; padding: 0 !important; max-width: none !important; }
+            #jtMain, #jtForm, #preview-col { height: auto !important; max-height: none !important; overflow: visible !important; position: static !important; }
+            #preview-col { display: block !important; }
             tr, img, .jt-ph { break-inside: avoid; page-break-inside: avoid; }
+            .jt-note { break-before: avoid; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             thead { display: table-header-group; }
             h4, .jt-h { break-after: avoid; }
@@ -158,11 +163,89 @@
         .jt-foot .d { font-size: 13px; color: #475569; }
         .jt-foot .n { font-size: 17px; font-weight: 900; color: #0f172a; overflow-wrap: anywhere; }
         .jt-foot .n small { font-size: 11px; font-weight: 400; color: #64748b; }
-        .jt-appr { width: 46%; margin: 0 0 12px auto; }
+        .jt-apprw { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+        .jt-apprw > div { max-width: 100%; }
+        .jt-appr { width: 46%; margin: 0; }
+        .jt-cap .ad-ctl, .jt-cap .ad-ph { display: none !important; }
+        .jt-cap .ad-n:empty::before { content: none !important; }
+        .jt-note-end { margin-top: 0; }
+        .jt-p, .jt-note { white-space: pre-line; }
         .jt-appr .v { width: 12%; }
         .jt-appr .box { height: 46px; }
         .jt-note { font-size: 10.5px; color: #64748b; line-height: 1.6; margin: -8px 0 14px; }
         .jt-page + .jt-page { margin-top: 28px; padding-top: 28px; border-top: 2px dashed #cbd5e1; }
+
+        /* 입력 칸: 접이식 단계 */
+        #jtForm > * + * { margin-top: 8px; }
+        .jt-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; }
+        .jt-doc-b { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 7px 4px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; line-height: 1.25; text-align: center; word-break: keep-all; }
+        .jt-doc-b:hover { background: #f1f5f9; }
+        .jt-doc-b.on { background: #ecfdf5; border-color: #10b981; color: #047857; }
+        .jt-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 4px 0; }
+        .jt-bar-t { font-size: 11px; color: #64748b; }
+        .jt-lk { font-size: 11px; font-weight: 700; color: #1d4ed8; background: none; border: 0; cursor: pointer; padding: 2px 0; text-decoration: underline; font-family: inherit; }
+        .jt-lk-del { color: #be123c; }
+        .jt-step { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; scroll-margin-top: 56px; }
+        .jt-step.open { border-color: #94a3b8; box-shadow: 0 1px 3px rgba(15,23,42,.08); }
+        .jt-sh { margin: 0; font-size: inherit; }
+        .jt-shb { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; background: none; border: 0; cursor: pointer; text-align: left; font-family: inherit; color: #1e293b; border-radius: 12px; }
+        .jt-shb:hover { background: #f8fafc; }
+        .jt-sn { flex: none; width: 22px; height: 22px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .jt-sn.ok { background: #059669; color: #fff; }
+        .jt-stx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+        .jt-st { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        .jt-sd { color: #059669; font-size: 13px; }
+        .jt-ss { font-size: 11px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .jt-sw { flex: none; font-size: 11px; font-weight: 700; color: #b45309; white-space: nowrap; }
+        .jt-sc { flex: none; width: 8px; height: 8px; border-right: 2px solid #64748b; border-bottom: 2px solid #64748b; transform: rotate(45deg); margin: 0 4px 4px 2px; transition: transform .15s; }
+        .jt-step.open .jt-sc { transform: rotate(-135deg); margin-bottom: -2px; }
+        .jt-sb { padding: 4px 10px 12px; border-top: 1px solid #f1f5f9; }
+        .jt-sb > * + * { margin-top: 10px; }
+        .jt-sb > .jt-chk + .jt-chk { margin-top: 6px; }
+        .jt-nx { display: flex; justify-content: flex-end; padding-top: 2px; }
+        .jt-sep { border-top: 1px solid #f1f5f9; padding-top: 10px; }
+        .jt-sep > * + * { margin-top: 10px; }
+        .jt-sep.jt-g2 > * + * { margin-top: 0; }
+        .jt-ck { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: #475569; cursor: pointer; }
+        .jt-ck input { margin-top: 2px; }
+        .jt-mv { flex: none; display: inline-flex; }
+        .jt-mv button { width: 22px; height: 24px; font-size: 12px; line-height: 1; color: #64748b; background: #f8fafc; border: 1px solid #cbd5e1; cursor: pointer; padding: 0; font-family: inherit; }
+        .jt-mv button:first-child { border-radius: 6px 0 0 6px; }
+        .jt-mv button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+        .jt-mv button:hover:not(:disabled) { background: #e2e8f0; color: #0f172a; }
+        .jt-mv button:disabled { opacity: .35; cursor: default; }
+        .jt-cust { color: #b45309; font-weight: 700; }
+        .jt-txa { display: flex; flex-wrap: wrap; gap: 2px 12px; }
+        .jt-txa:empty { display: none; }
+        .jt-tx .jt-hint { margin-top: 2px; }
+        .jt-apprEd { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 10px; background: #f8fafc; overflow-x: auto; }
+        .jt-apprEd .ad-appr { margin: 0 auto; }
+        .jt-apprEd .ad-ctl { justify-content: center; margin: 6px 0; font-size: 12px; }
+        .jt-det { border: 1px solid #e2e8f0; border-radius: 10px; }
+        .jt-det > summary { cursor: pointer; font-size: 12px; font-weight: 700; color: #334155; padding: 8px 10px; }
+        .jt-det-b { padding: 0 10px 10px; }
+        .jt-det-b > * + * { margin-top: 8px; }
+        .jt-det-b .jt-g2 { gap: 8px 6px; }
+        .jt-tabs { display: none; }
+        @media screen and (min-width: 1024px) {
+            /* 넓은 화면: 입력 칸과 미리보기가 화면 높이 안에서 따로 스크롤된다(페이지 전체가 길어지지 않게) */
+            #app { height: 100vh; height: 100dvh; min-height: 0 !important; }
+            #jtMain { min-height: 0; overflow: hidden; grid-template-rows: minmax(0, 1fr); padding-top: 14px; padding-bottom: 0; }
+            #jtForm, #preview-col { min-height: 0; height: 100%; overflow-y: auto; padding-bottom: 20px; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+            #jtForm { padding-right: 6px; overscroll-behavior: contain; }
+            #preview-col { display: block; }
+            .jt-step { scroll-margin-top: 0; }
+        }
+        @media screen and (max-width: 1023px) {
+            #app > header { position: static; padding: 8px 12px; }
+            #app > header > div { gap: 6px; }
+            .jt-hsub, .jt-hprint { display: none !important; }
+            .jt-tabs { display: flex; gap: 6px; position: sticky; top: 0; z-index: 30; background: #0f172a; padding: 6px 12px; }
+            .jt-tabs button { flex: 1; font-size: 13px; font-weight: 700; padding: 8px 6px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+            .jt-tabs button.on { background: #fff; color: #0f172a; border-color: #fff; }
+            .jt-tabs .jt-tabp { flex: none; padding: 8px 12px; background: #059669; border-color: #059669; color: #fff; }
+            #jtMain.v-form #preview-col, #jtMain.v-prev #jtForm { display: none; }
+        }
         button:focus-visible, a:focus-visible, .jt-in:focus-visible, label.jt-phbtn:focus-within { outline: 2px solid #10b981; outline-offset: 2px; }
         @media (max-width: 420px) {
             .jt-g3, .jt-g4 { grid-template-columns: 1fr 1fr; }
@@ -182,7 +265,7 @@
                     </span>
                     <div>
                         <h1 class="text-base font-bold tracking-tight">합동 안전·보건점검 작성기</h1>
-                        <p class="text-[11px] text-slate-400">산업안전보건법 제64조제2항 · 시행규칙 제82조 · 실시 통보 / 결과서 / 조치 요구서 / 조치 결과 확인서</p>
+                        <p class="text-[11px] text-slate-400 jt-hsub">산업안전보건법 제64조제2항 · 시행규칙 제82조 · 실시 통보 / 결과서 / 조치 요구서 / 조치 결과 확인서</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -190,7 +273,7 @@
                     <button type="button" @click="resetResults" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
                         <i class="ph-bold ph-arrow-counter-clockwise"></i> 점검 결과 비우기
                     </button>
-                    <button type="button" @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <button type="button" @click="printDoc" class="jt-hprint bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
                         <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
                     </button>
                     <button type="button" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
@@ -202,9 +285,16 @@
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 좁은 화면: 입력 | 미리보기 전환 -->
+        <div class="jt-tabs no-print" role="tablist" aria-label="화면 전환">
+            <button type="button" role="tab" id="tabForm" :aria-selected="view === 'form' ? 'true' : 'false'" :class="{ on: view === 'form' }" @click="setView('form')">입력</button>
+            <button type="button" role="tab" id="tabPrev" :aria-selected="view === 'prev' ? 'true' : 'false'" :class="{ on: view === 'prev' }" @click="setView('prev')">미리보기</button>
+            <button type="button" class="jt-tabp" @click="printDoc"><i class="ph-bold ph-printer"></i> 인쇄</button>
+        </div>
+
+        <main id="jtMain" :class="['flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6', 'v-' + view]">
             <!-- 입력 -->
-            <div class="lg:col-span-5 space-y-5 no-print" style="min-width:0">
+            <div id="jtForm" class="lg:col-span-5 no-print" style="min-width:0">
                 <div v-if="oldFormAvailable" class="jt-old">
                     <p>예전 <b>합동 안전·보건점검표 서식</b>에 적어 둔 내용이 이 기기에 남아 있습니다. 여기로 가져올 수 있습니다(예전 내용은 지워지지 않습니다).</p>
                     <div class="jt-row">
@@ -214,17 +304,15 @@
                 </div>
 
                 <!-- 문서 종류 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <label class="block text-xs font-bold text-slate-600 mb-2">문서 종류 선택</label>
-                    <div class="jt-g4">
-                        <button v-for="item in docTypes" :key="item.value" type="button" :data-doc="item.value" @click="changeDocType(item.value)" :aria-pressed="formData.docType === item.value"
-                            :class="['py-2 px-2.5 rounded-lg border text-xs font-bold flex flex-col items-center justify-center gap-1 transition',
-                                formData.docType === item.value ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100']">
+                <div class="jt-card">
+                    <div class="jt-g4" role="group" aria-label="문서 종류 선택">
+                        <button v-for="item in docTypes" :key="item.value" type="button" :data-doc="item.value" @click="changeDocType(item.value)" :aria-pressed="formData.docType === item.value ? 'true' : 'false'"
+                            :class="['jt-doc-b', formData.docType === item.value ? 'on' : '']">
                             <i :class="[item.icon, 'text-base']"></i>
                             <span>{{ item.label }}</span>
                         </button>
                     </div>
-                    <div v-if="formData.docType === 'request' || formData.docType === 'confirm'" class="jt-mt" style="margin-top:10px">
+                    <div v-if="formData.docType === 'request' || formData.docType === 'confirm'" style="margin-top:10px">
                         <label class="jt-lb" for="jTarget">{{ formData.docType === 'request' ? '통보 대상 업체' : '확인 대상 업체' }}</label>
                         <select id="jTarget" v-model="formData.target" class="jt-in">
                             <option value="">{{ formData.docType === 'request' ? '지적사항이 있는 전 업체 (업체별로 쪽 나눔)' : '전체 (한 장에 모아서)' }}</option>
@@ -235,11 +323,14 @@
                     </div>
                 </div>
 
+                <div class="jt-bar">
+                    <span class="jt-bar-t">입력 단계 {{ stepList.length }}개<template v-if="warnTotal"> · <b class="jt-sw">보완 {{ warnTotal }}</b></template></span>
+                    <button type="button" id="accAll" class="jt-lk" @click="toggleAll">{{ allOpen ? '모두 접기' : '모두 펼치기' }}</button>
+                </div>
+
                 <!-- 1. 점검 개요 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-fill ph-info text-blue-500"></i> 1. 점검 개요
-                    </h3>
+                <jt-step :s="S.overview">
+                    <p v-for="(c, i) in chk.overview" :key="'co-' + i" :class="['jt-chk', c.ok ? 'cm-ok' : 'cm-warn']">{{ c.text }}</p>
                     <div class="jt-g2">
                         <div>
                             <label class="jt-lb" for="jCompany">도급인(회사)명</label>
@@ -264,7 +355,7 @@
                         </div>
                         <div>
                             <label class="jt-lb" for="jRound">회차</label>
-                            <input id="jRound" v-model.number="formData.round" type="number" min="1" class="jt-in">
+                            <input id="jRound" v-model.number="formData.round" type="number" min="1" step="1" class="jt-in">
                         </div>
                     </div>
                     <div>
@@ -280,7 +371,7 @@
                         </select>
                     </div>
                     <p class="jt-cycle" id="jCycle">이 업종의 정기 합동 안전·보건점검: <b>{{ cycle.text }}</b> <span style="color:#475569">({{ cycle.law }})</span></p>
-                    <div v-if="formData.docType === 'notice'" class="pt-2 border-t border-slate-100 space-y-3">
+                    <div v-if="formData.docType === 'notice'" class="jt-sep">
                         <div class="jt-g2">
                             <div>
                                 <label class="jt-lb" for="jMeet">집결 장소 (선택)</label>
@@ -298,12 +389,12 @@
                         <div>
                             <label class="jt-lb" for="jNReq">협조 요청 사항 (한 줄에 하나씩)</label>
                             <textarea id="jNReq" v-model="formData.noticeReq" rows="5" class="jt-in"></textarea>
-                            <p class="jt-hint jt-mt">협조 요청 사항은 실무용 예시 문구입니다(법령에 정해진 통보 양식·기한은 시행규칙 제82조에 없음). 사업장에 맞게 고치세요.</p>
+                            <p class="jt-hint jt-mt">실무용 예시 문구입니다(통보 양식·기한은 시행규칙 제82조에 정해져 있지 않음). 사업장에 맞게 고치세요.
+                                <button v-if="formData.noticeReq !== NOTICE_DEFAULT" type="button" class="jt-lk" id="jNReqReset" @click="formData.noticeReq = NOTICE_DEFAULT">기본 문구로 되돌리기</button></p>
                         </div>
-                        <label class="jt-row" style="font-size:12px;color:#475569"><input type="checkbox" id="jNList" v-model="formData.noticeItems"> 통보서에 점검표의 점검 구분(제목)을 "주요 점검 내용"으로 넣기</label>
+                        <label class="jt-ck"><input type="checkbox" id="jNList" v-model="formData.noticeItems"> 통보서에 점검표의 점검 구분(제목)을 "주요 점검 내용"으로 넣기</label>
                     </div>
-                    <label v-if="formData.docType === 'result'" class="jt-row" style="font-size:12px;color:#475569"><input type="checkbox" id="jAppr" v-model="formData.approval"> 결과서 위에 결재란(작성·검토·승인) 넣기</label>
-                    <div v-if="formData.docType === 'request'" class="pt-2 border-t border-slate-100 jt-g2">
+                    <div v-if="formData.docType === 'request'" class="jt-sep jt-g2">
                         <div>
                             <label class="jt-lb" for="jReply">조치 결과 회신 기한 (선택)</label>
                             <input id="jReply" v-model="formData.replyDue" type="date" class="jt-in">
@@ -313,7 +404,7 @@
                             <input id="jRF" v-model="formData.reqFooter" type="text" placeholder="예: 안전보건총괄책임자" class="jt-in">
                         </div>
                     </div>
-                    <div v-if="formData.docType === 'confirm'" class="pt-2 border-t border-slate-100 jt-g2">
+                    <div v-if="formData.docType === 'confirm'" class="jt-sep jt-g2">
                         <div>
                             <label class="jt-lb" for="jCT">확인자 직위 (도급인)</label>
                             <input id="jCT" v-model="formData.confTitle" type="text" placeholder="예: 안전관리자" class="jt-in">
@@ -323,26 +414,20 @@
                             <input id="jCN" v-model="formData.confName" type="text" class="jt-in">
                         </div>
                     </div>
-                </div>
+                </jt-step>
 
                 <!-- 2. 점검반 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-users-three text-emerald-600"></i> 2. 점검반 구성
-                        </h3>
-                        <button type="button" id="addMember" @click="addMember('etc')" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold flex items-center gap-1">
-                            <i class="ph-bold ph-plus-circle"></i> 점검반원 추가
-                        </button>
-                    </div>
+                <jt-step :s="S.team">
+                    <p v-for="(c, i) in chk.team" :key="'ct-' + i" :class="['jt-chk', c.ok ? 'cm-ok' : 'cm-warn']">{{ c.text }}</p>
                     <p class="jt-hint">점검반에 넣어야 하는 사람(시행규칙 제82조제1항): ① 도급인 ② 관계수급인 ③ 도급인 및 관계수급인의 근로자 각 1명. 안전관리자 등은 "그 밖의 참여자"로 더할 수 있습니다.</p>
                     <div v-for="(m, idx) in team" :key="'tm-' + idx" class="jt-sub" data-member>
                         <div class="jt-head">
                             <span class="jt-no">{{ idx + 1 }}</span>
                             <select v-model="m.role" aria-label="점검반 구분" class="jt-in" style="flex:1;min-width:0;font-weight:700">
-                                <option v-for="r in ROLES" :key="r.v" :value="r.v">{{ r.label }}</option>
+                                <option v-for="r in ROLES" :key="r.v" :value="r.v">{{ roleLabel(r.v) }}</option>
                             </select>
-                            <span v-if="roleOf(m.role).req" class="jt-tag jt-tag-law">법정</span>
+                            <span v-if="roleOf(m.role).req" class="jt-tag jt-tag-law" title="시행규칙 제82조제1항에 적힌 점검반 구성원">법정</span>
+                            <span class="jt-mv"><button type="button" :disabled="idx === 0" @click="move(team, idx, -1)" aria-label="위로 옮기기">↑</button><button type="button" :disabled="idx === team.length - 1" @click="move(team, idx, 1)" aria-label="아래로 옮기기">↓</button></span>
                             <button type="button" class="jt-x" @click="removeMember(idx)" aria-label="이 점검반원 삭제"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="jt-g3">
@@ -352,29 +437,19 @@
                         </div>
                     </div>
                     <p v-if="!team.length" class="jt-hint">점검반원이 없습니다. "점검반원 추가"를 눌러 넣으세요.</p>
-                </div>
-
-                <!-- 자동 확인 -->
-                <div class="space-y-2" style="margin-top:-8px" id="jChecks">
-                    <p v-for="(c, i) in checks" :key="'chk-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
-                </div>
+                    <button type="button" id="addMember" @click="addMember('etc')" class="jt-add"><i class="ph-bold ph-plus-circle"></i> 점검반원 추가</button>
+                </jt-step>
 
                 <!-- 3. 이월 -->
-                <div v-if="showPrev" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-bold ph-arrows-clockwise text-slate-600"></i> {{ secNo.prev }}. 지난 점검 미조치 사항 확인
-                        </h3>
-                        <button type="button" id="addPrev" @click="addPrev" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
-                            <i class="ph-bold ph-plus-circle"></i> 추가
-                        </button>
-                    </div>
-                    <p v-if="!prev.length" class="jt-hint">지난 점검에서 조치가 끝나지 않은 지적사항이 있으면 여기서 이행 여부를 확인합니다. 아래 "보관하고 다음 점검 작성"을 쓰면 미조치 건이 자동으로 넘어옵니다.</p>
+                <jt-step v-if="S.prev" :s="S.prev">
+                    <p v-for="(c, i) in chk.prev" :key="'cp-' + i" :class="['jt-chk', c.ok ? 'cm-ok' : 'cm-warn']">{{ c.text }}</p>
+                    <p v-if="!prev.length" class="jt-hint">지난 점검에서 조치가 끝나지 않은 지적사항이 있으면 여기서 이행 여부를 확인합니다. "이어 쓰기" 단계의 "보관하고 다음 점검 작성"을 쓰면 미조치 건이 자동으로 넘어옵니다.</p>
                     <div v-for="(p, idx) in prev" :key="p.id" class="jt-sub" data-prev>
                         <div class="jt-head">
                             <span class="jt-tag jt-tag-carry">이월{{ p.from ? ' · ' + p.from : '' }}</span>
                             <input v-model="p.content" type="text" placeholder="지난 점검 지적 내용" aria-label="지난 점검 지적 내용" class="jt-in" style="flex:1;min-width:0">
-                            <button type="button" class="jt-x" @click="prev.splice(idx, 1)" aria-label="이 이월 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                            <span class="jt-mv"><button type="button" :disabled="idx === 0" @click="move(prev, idx, -1)" aria-label="위로 옮기기">↑</button><button type="button" :disabled="idx === prev.length - 1" @click="move(prev, idx, 1)" aria-label="아래로 옮기기">↓</button></span>
+                            <button type="button" class="jt-x" @click="removePrev(idx)" aria-label="이 이월 항목 삭제"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="jt-g4">
                             <input v-model="p.company" type="text" list="jtOwners" placeholder="해당 업체" aria-label="해당 업체" class="jt-in">
@@ -382,43 +457,39 @@
                             <select v-model="p.status" @change="onStatus(p)" aria-label="상태" class="jt-in">
                                 <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
                             </select>
-                            <input v-model="p.doneDate" type="date" aria-label="조치 완료일" title="조치 완료일" class="jt-in">
+                            <input v-model="p.doneDate" @change="onDone(p)" type="date" aria-label="조치 완료일" title="조치 완료일" class="jt-in">
                         </div>
                         <input v-model="p.action" type="text" placeholder="조치 내용" aria-label="조치 내용" class="jt-in jt-mt">
                     </div>
-                </div>
+                    <button type="button" id="addPrev" @click="addPrev" class="jt-add"><i class="ph-bold ph-plus-circle"></i> 지난 점검 미조치 사항 추가</button>
+                </jt-step>
 
                 <!-- 4. 점검표 -->
-                <div v-if="formData.docType === 'result'" class="bg-purple-50/60 p-4 rounded-xl border border-purple-200/80 space-y-3">
-                    <div class="flex justify-between items-center border-b border-purple-200 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-sparkle text-purple-600"></i> {{ secNo.check }}. 점검표
-                        </h3>
-                        <button type="button" id="openEx" @click="openExModal" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm flex items-center gap-1.5 transition">
-                            <i class="ph-fill ph-magic-wand"></i> 점검 항목 예시 세트
-                        </button>
-                    </div>
-                    <p class="text-[11px] text-rose-600">아래 점검 항목은 SafePlum이 만든 <b>예시(사내 기준용)</b>이며 법령에 정해진 점검 항목이 아닙니다. 사업장 작업에 맞게 고치거나 지우고, 실제로 점검한 결과만 표시하세요.</p>
+                <jt-step v-if="S.check" :s="S.check">
+                    <p v-for="(c, i) in chk.check" :key="'cc-' + i" :class="['jt-chk', c.ok ? 'cm-ok' : 'cm-warn']">{{ c.text }}</p>
+                    <p class="jt-hint" style="color:#be123c">아래 점검 항목은 SafePlum이 만든 <b style="color:#be123c">예시(사내 기준용)</b>이며 법령에 정해진 점검 항목이 아닙니다. 사업장 작업에 맞게 고치거나 지우고, 실제로 점검한 결과만 표시하세요.</p>
                     <div class="jt-row">
                         <div class="jt-stat" id="jStat">
                             <span class="s-ok">적합 {{ stat.ok }}</span><span class="s-bad">부적합 {{ stat.bad }}</span><span>해당없음 {{ stat.na }}</span><span class="s-todo" v-if="stat.todo">미점검 {{ stat.todo }}</span>
                         </div>
                         <button type="button" id="fillOk" class="jt-btn jt-btn-sm" @click="fillRestOk" v-if="stat.todo">미점검 항목 모두 적합으로</button>
+                        <button type="button" id="openEx" @click="openExModal" class="jt-btn jt-btn-sm" style="margin-left:auto"><i class="ph-fill ph-magic-wand"></i> 점검 항목 예시 세트</button>
                     </div>
                     <div v-for="(g, gi) in checklist" :key="g.id" class="jt-grp" data-group>
                         <div class="jt-head">
                             <input v-model="g.title" type="text" placeholder="구분 (예: 추락 예방)" aria-label="점검 구분" class="jt-in" style="flex:1;min-width:0;font-weight:700">
-                            <span class="jt-tag">예시·사내 기준</span>
+                            <span class="jt-mv"><button type="button" :disabled="gi === 0" @click="move(checklist, gi, -1)" aria-label="구분을 위로 옮기기">↑</button><button type="button" :disabled="gi === checklist.length - 1" @click="move(checklist, gi, 1)" aria-label="구분을 아래로 옮기기">↓</button></span>
                             <button type="button" class="jt-x" @click="removeGroup(gi)" aria-label="이 구분 전체 삭제"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div v-for="(it, ii) in g.items" :key="it.id" class="jt-item" data-item>
                             <div class="jt-itemrow">
                                 <input v-model="it.text" type="text" placeholder="점검 항목" aria-label="점검 항목" class="jt-in" style="flex:1;min-width:0">
-                                <button type="button" class="jt-x" @click="g.items.splice(ii, 1)" aria-label="이 점검 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                                <span class="jt-mv"><button type="button" :disabled="ii === 0" @click="move(g.items, ii, -1)" aria-label="항목을 위로 옮기기">↑</button><button type="button" :disabled="ii === g.items.length - 1" @click="move(g.items, ii, 1)" aria-label="항목을 아래로 옮기기">↓</button></span>
+                                <button type="button" class="jt-x" @click="removeItem(g, ii)" aria-label="이 점검 항목 삭제"><i class="ph-bold ph-x"></i></button>
                             </div>
                             <div class="jt-itemrow jt-wrap jt-mt">
                                 <span class="jt-seg" role="group" aria-label="점검 결과">
-                                    <button type="button" v-for="r in RESULTS" :key="r.v" :class="it.result === r.v ? r.cls : ''" :aria-pressed="it.result === r.v" @click="setResult(it, r.v)">{{ r.v }}</button>
+                                    <button type="button" v-for="r in RESULTS" :key="r.v" :class="it.result === r.v ? r.cls : ''" :aria-pressed="it.result === r.v ? 'true' : 'false'" @click="setResult(it, r.v)">{{ r.v }}</button>
                                 </span>
                                 <input v-model="it.note" type="text" :placeholder="it.result === '부적합' ? '부적합 내용 (지적사항으로 옮겨집니다)' : '비고'" aria-label="비고" class="jt-in" style="flex:1;min-width:0">
                             </div>
@@ -429,30 +500,24 @@
                         <button type="button" id="addGroup" class="jt-add" @click="addGroup"><i class="ph-bold ph-plus-circle"></i> 구분 추가</button>
                         <button type="button" id="toFindings" class="jt-btn jt-btn-pri" style="margin-left:auto" v-if="pendingBad" @click="badToFindings">부적합 {{ pendingBad }}건 지적사항으로 옮기기</button>
                     </div>
-                </div>
+                </jt-step>
 
                 <!-- 5. 지적사항 -->
-                <div v-if="formData.docType !== 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-bold ph-warning text-rose-600"></i> {{ secNo.find }}. 지적사항 및 조치
-                        </h3>
-                        <button type="button" id="addFinding" @click="addFinding" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold flex items-center gap-1">
-                            <i class="ph-bold ph-plus-circle"></i> 추가
-                        </button>
-                    </div>
+                <jt-step v-if="S.find" :s="S.find">
+                    <p v-for="(c, i) in chk.find" :key="'cf-' + i" :class="['jt-chk', c.ok ? 'cm-ok' : 'cm-warn']">{{ c.text }}</p>
                     <p v-if="!findings.length" class="jt-hint">점검에서 나온 지적사항과 해당 업체·조치 기한을 적습니다. 조치가 끝나지 않은 건은 다음 점검의 "지난 점검 미조치 사항"으로 넘어갑니다.</p>
                     <div v-for="(f, idx) in findings" :key="f.id" :class="['jt-sub', f.status !== '조치 완료' && f.due && f.due < today ? 'jt-bad' : '']" data-finding>
                         <div class="jt-head">
                             <span class="jt-no">{{ idx + 1 }}</span>
                             <input v-model="f.content" type="text" placeholder="지적 내용 (예: 2층 개구부 안전난간 일부 해체된 채 방치)" aria-label="지적 내용" class="jt-in" style="flex:1;min-width:0;font-weight:700">
+                            <span class="jt-mv"><button type="button" :disabled="idx === 0" @click="move(findings, idx, -1)" aria-label="위로 옮기기">↑</button><button type="button" :disabled="idx === findings.length - 1" @click="move(findings, idx, 1)" aria-label="아래로 옮기기">↓</button></span>
                             <button type="button" class="jt-x" @click="removeFinding(idx)" aria-label="이 지적사항 삭제"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="jt-g4">
                             <input v-model="f.location" type="text" placeholder="위치" aria-label="위치" class="jt-in">
                             <input v-model="f.company" type="text" list="jtOwners" placeholder="해당 업체" aria-label="해당 업체" class="jt-in">
                             <select v-model="f.risk" aria-label="위험도" class="jt-in">
-                                <option value="상">위험도 상</option><option value="중">위험도 중</option><option value="하">위험도 하</option>
+                                <option value="상">{{ T('h_risk') }} 상</option><option value="중">{{ T('h_risk') }} 중</option><option value="하">{{ T('h_risk') }} 하</option>
                             </select>
                             <input v-model="f.due" type="date" aria-label="조치 기한" title="조치 기한" class="jt-in">
                         </div>
@@ -461,7 +526,7 @@
                             <select v-model="f.status" @change="onStatus(f)" aria-label="상태" class="jt-in">
                                 <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
                             </select>
-                            <input v-model="f.doneDate" type="date" aria-label="조치 완료일" title="조치 완료일" class="jt-in">
+                            <input v-model="f.doneDate" @change="onDone(f)" type="date" aria-label="조치 완료일" title="조치 완료일" class="jt-in">
                         </div>
                         <div class="jt-row jt-mt">
                             <input type="file" accept="image/*" class="hidden" :id="'ph-' + f.id + '-b'" @change="onPhoto($event, f.id, 'before')">
@@ -470,38 +535,82 @@
                             <input type="file" accept="image/*" class="hidden" :id="'ph-' + f.id + '-a'" @change="onPhoto($event, f.id, 'after')">
                             <label :for="'ph-' + f.id + '-a'" :class="['jt-phbtn', photoOf(f.id).after ? 'has' : '']"><i class="ph-fill ph-camera"></i> 조치 후 사진{{ photoOf(f.id).after ? ' ✓' : '' }}</label>
                             <button v-if="photoOf(f.id).after" type="button" class="jt-link" @click="dropPhoto(f.id, 'after')">삭제</button>
-                            <span v-if="f.status !== '조치 완료' && f.due && f.due < today" class="text-[11px] text-rose-600 font-bold">기한 지남</span>
+                            <span v-if="f.status !== '조치 완료' && f.due && f.due < today" style="font-size:11px;font-weight:700;color:#e11d48">기한 지남</span>
                         </div>
                     </div>
-                    <datalist id="jtOwners"><option v-for="n in ownerNames" :key="n" :value="n"></option></datalist>
+                    <button type="button" id="addFinding" @click="addFinding" class="jt-add"><i class="ph-bold ph-plus-circle"></i> 지적사항 추가</button>
                     <p class="jt-hint">사진은 인쇄·PDF에만 들어가고 이 기기에 저장되지 않습니다(새로 고치면 사라짐).</p>
-                </div>
+                </jt-step>
 
                 <!-- 6. 종합 의견·다음 점검 -->
-                <div v-if="formData.docType !== 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-megaphone text-slate-600"></i> {{ secNo.sum }}. 종합 의견 · 다음 점검
-                    </h3>
+                <jt-step v-if="S.sum" :s="S.sum">
+                    <p v-for="(c, i) in chk.sum" :key="'cs-' + i" :class="['jt-chk', c.ok ? 'cm-ok' : 'cm-warn']">{{ c.text }}</p>
                     <div>
                         <label class="jt-lb" for="jSummary">종합 의견 (선택)</label>
                         <textarea id="jSummary" v-model="formData.summary" rows="3" placeholder="예: 전반적으로 양호하나 물류동 통로 적치물 정리가 반복 지적됨. 업체별 자체 점검 강화 요청." class="jt-in"></textarea>
                     </div>
                     <div class="jt-g2">
                         <div>
-                            <label class="jt-lb" for="jNext">다음 점검 예정일</label>
-                            <input id="jNext" v-model="formData.nextDate" type="date" class="jt-in">
+                            <label class="jt-lb" for="jNext">다음 점검 예정일 (선택)</label>
+                            <input id="jNext" :value="formData.nextDate" @input="onNextInput($event.target.value)" type="date" class="jt-in">
                         </div>
                         <div style="align-self:end">
-                            <button type="button" id="suggestNext" class="jt-btn" style="width:100%" @click="suggestNext">주기에 맞춰 넣기 ({{ cycle.months }}개월 뒤)</button>
+                            <button v-if="!formData.nextAuto" type="button" id="suggestNext" class="jt-btn" style="width:100%" @click="suggestNext">{{ formData.nextDate ? '자동으로 되돌리기' : '주기에 맞춰 넣기' }} ({{ cycle.months }}개월 뒤)</button>
+                            <button v-else type="button" id="clearNext" class="jt-btn" style="width:100%" @click="clearNext">예정일 비우기</button>
                         </div>
                     </div>
-                </div>
+                    <p class="jt-hint" id="jNextState">
+                        <template v-if="formData.nextAuto">자동 계산한 날짜입니다(점검일 + {{ cycle.months }}개월). 점검 일시나 업종을 바꾸면 함께 바뀌고, 날짜를 직접 고치면 고친 값이 유지됩니다.</template>
+                        <template v-else-if="formData.nextDate"><b>직접 입력한 날짜</b>입니다. 점검 일시를 바꿔도 그대로 둡니다.</template>
+                        <template v-else>비워 두면 문서에 다음 점검 줄이 들어가지 않습니다.</template>
+                    </p>
+                </jt-step>
+
+                <!-- 문서 문구·결재란 -->
+                <jt-step :s="S.text">
+                    <label class="jt-ck"><input type="checkbox" id="jAppr" v-model="apprOn"> 이 문서({{ docLabel }}) 위에 결재란 넣기</label>
+                    <div v-if="apprOn" class="jt-apprEd">
+                        <div v-if="hasADoc" v-appr id="jApprEd"></div>
+                        <p class="jt-hint">칸 이름과 성명은 눌러서 바로 고칩니다. 서명 칸을 누르면 서명을 넣을 수 있습니다. 결재란은 네 가지 문서가 함께 쓰며, "모든 서식 기본으로"를 누르면 SafePlum의 다른 서식에도 같은 결재란이 기본으로 나옵니다.</p>
+                    </div>
+                    <div class="jt-sep">
+                        <tx-in :k="'title_' + formData.docType" label="문서 제목"></tx-in>
+                        <tx-in k="name" label="점검명 (표의 '점 검 명' 칸)"></tx-in>
+                        <div v-if="formData.docType !== 'result'">
+                            <label class="jt-lb" for="jDocDate">문서 작성일<span v-if="formData.docDate" class="jt-cust"> · 직접 입력함</span></label>
+                            <input id="jDocDate" type="date" class="jt-in" :value="formData.docDate || today" @input="formData.docDate = $event.target.value">
+                            <div class="jt-txa"><button v-if="formData.docDate" type="button" class="jt-lk" id="jDocDateReset" @click="formData.docDate = ''">오늘 날짜로 되돌리기</button></div>
+                            <p v-if="!formData.docDate" class="jt-hint">고치지 않으면 문서를 여는 날의 날짜가 들어갑니다.</p>
+                        </div>
+                        <tx-in v-if="formData.docType !== 'result'" :k="'p_' + formData.docType" :label="formData.docType === 'confirm' ? '확인 문구' : '본문 문구'" rows="4" :hint="hintP"></tx-in>
+                        <tx-in v-if="formData.docType === 'notice' || formData.docType === 'request'" k="seal" label="발신 명의 뒤 표시"></tx-in>
+                        <tx-in :k="'n_' + formData.docType" label="문서 맨 아래 안내 문구" rows="3" :hint="hintN"></tx-in>
+                    </div>
+                    <details class="jt-det" id="jLabels">
+                        <summary>표 제목·항목 이름 바꾸기<span v-if="labelCustom"> · 고친 이름 {{ labelCustom }}개</span></summary>
+                        <div class="jt-det-b">
+                            <p class="jt-hint">사업장에서 쓰는 이름으로 바꿀 수 있습니다. 비우면 기본 이름으로 돌아갑니다. 점검반 구분의 기본 이름은 시행규칙 제82조제1항의 표현입니다.</p>
+                            <div class="jt-g2">
+                                <tx-in v-for="r in ROLES" :key="'rl-' + r.v" :k="'role_' + r.v" :label="'점검반 구분: ' + r.label"></tx-in>
+                                <tx-in k="h_team" label="점검반 표 제목"></tx-in>
+                                <tx-in k="h_prev" label="이월 사항 표 제목"></tx-in>
+                                <tx-in k="h_check" label="점검표 제목"></tx-in>
+                                <tx-in k="h_find" label="지적사항 표 제목"></tx-in>
+                                <tx-in k="h_risk" label="위험도 칸 이름"></tx-in>
+                                <tx-in k="h_photo" label="사진 제목"></tx-in>
+                                <tx-in k="h_sum" label="종합 의견 칸 이름"></tx-in>
+                                <tx-in k="h_next" label="다음 점검 칸 이름"></tx-in>
+                                <tx-in k="h_req" label="협조 요청 사항 제목 (통보서)"></tx-in>
+                                <tx-in k="lb_actor" label="조치자 구분 (확인서)"></tx-in>
+                                <tx-in k="lb_conf" label="확인자 구분 (확인서)"></tx-in>
+                            </div>
+                        </div>
+                    </details>
+                    <div v-if="txCount" class="jt-row"><button type="button" id="txResetAll" class="jt-lk" @click="resetAllText">고친 문구·이름 {{ txCount }}개를 모두 기본으로 되돌리기</button></div>
+                </jt-step>
 
                 <!-- 보관·이어 쓰기 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-floppy-disk text-slate-600"></i> 이어 쓰기 · 지난 점검 기록
-                    </h3>
+                <jt-step :s="S.hist">
                     <div class="jt-row">
                         <button type="button" id="archiveNext" class="jt-btn jt-btn-pri" @click="archiveAndNext">보관하고 다음 점검 작성</button>
                         <button type="button" id="archiveOnly" class="jt-btn" @click="archiveOnly">지금 내용만 보관</button>
@@ -515,10 +624,9 @@
                         </li>
                     </ul>
                     <p v-else class="jt-hint">보관한 점검 기록이 아직 없습니다.</p>
-                </div>
+                </jt-step>
 
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 mb-2">법령 메모</h3>
+                <jt-step :s="S.law">
                     <ul class="cm-law">
                         <li>도급인은 고용노동부령으로 정하는 바에 따라 자신의 근로자 및 관계수급인 근로자와 함께 정기적으로 또는 수시로 작업장의 안전 및 보건에 관한 점검을 하여야 합니다(<a class="jt-a" href="../../laws/act/#j64">법 제64조제2항</a>).</li>
                         <li>점검반 구성(<a class="jt-a" href="../../laws/rule/#j82">시행규칙 제82조제1항</a>): ① 도급인(같은 사업 내에 지역을 달리하는 사업장이 있는 경우에는 그 사업장의 안전보건관리책임자) ② 관계수급인(같은 사업 내에 지역을 달리하는 사업장이 있는 경우에는 그 사업장의 안전보건관리책임자) ③ 도급인 및 관계수급인의 근로자 각 1명(관계수급인의 근로자의 경우에는 해당 공정만 해당한다).</li>
@@ -527,8 +635,9 @@
                         <li>법 제64조제2항을 위반하면 500만원 이하의 벌금에 처합니다(<a class="jt-a" href="../../laws/act/#j172">법 제172조</a>).</li>
                         <li>이 작성기의 실시 통보서·점검 항목·위험도(상/중/하)·결재란·조치 요구서·조치 결과 확인서는 법정 서식이 아니라 실무용 보조 양식입니다.</li>
                     </ul>
-                    <p class="text-[11px] text-slate-400" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
-                </div>
+                    <p class="jt-hint">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
+                </jt-step>
+                <datalist id="jtOwners"><option v-for="n in ownerNames" :key="n" :value="n"></option></datalist>
             </div>
 
             <!-- 미리보기 -->
@@ -545,14 +654,17 @@
 
                     <!-- [DOC 1] 결과서 -->
                     <div v-if="formData.docType === 'result'" data-docview="result">
-                        <table v-if="formData.approval" class="jt-t jt-appr" aria-label="결재란">
-                            <tr><th rowspan="2" class="v">결<br>재</th><th>작성</th><th>검토</th><th>승인</th></tr>
-                            <tr><td class="box"></td><td class="box"></td><td class="box"></td></tr>
-                        </table>
-                        <h2 class="jt-title">{{ titlePrefix }} 합동 안전·보건점검 결과서</h2>
+                        <div v-if="apprOn" class="jt-apprw" data-apprdoc>
+                            <div v-if="hasADoc" v-appr></div>
+                            <table v-else class="jt-t jt-appr" aria-label="결재란">
+                                <tr><th rowspan="2" class="v">결<br>재</th><th>담당</th><th>검토</th><th>승인</th></tr>
+                                <tr><td class="box"></td><td class="box"></td><td class="box"></td></tr>
+                            </table>
+                        </div>
+                        <h2 class="jt-title">{{ T('title_result') }}</h2>
                         <table class="jt-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>점 검 명</th><td colspan="3">{{ inspName }}</td></tr>
+                            <tr><th>점 검 명</th><td colspan="3">{{ T('name') }}</td></tr>
                             <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td><th>점검 구분</th><td>{{ formData.kind }} 점검<span v-if="formData.kind === '정기'" class="s mut"> ({{ cycle.text }})</span></td></tr>
                             <tr><th>대상 작업장<br>·공정</th><td colspan="3">{{ formData.area }}</td></tr>
                             <tr><th>점검 결과</th><td colspan="3">점검 항목 {{ stat.total }}개 중 적합 {{ stat.ok }} · 부적합 {{ stat.bad }} · 해당없음 {{ stat.na }}<span v-if="stat.todo"> · 미점검 {{ stat.todo }}</span> / 지적사항 {{ findingRows.length }}건(조치 완료 {{ doneCount }}건)</td></tr>
@@ -561,7 +673,7 @@
                         <table class="jt-t">
                             <colgroup><col style="width:22%"><col style="width:24%"><col style="width:18%"><col style="width:18%"><col style="width:18%"></colgroup>
                             <thead>
-                                <tr><th colspan="5">점검반 (산업안전보건법 시행규칙 제82조제1항)</th></tr>
+                                <tr><th colspan="5">{{ T('h_team') }}</th></tr>
                                 <tr class="s"><th>구분</th><th>업체명</th><th>직위</th><th>성명</th><th>서명</th></tr>
                             </thead>
                             <tbody>
@@ -575,7 +687,7 @@
                         <table v-if="prevRows.length" class="jt-t">
                             <colgroup><col><col style="width:16%"><col style="width:13%"><col style="width:24%"><col style="width:12%"></colgroup>
                             <thead>
-                                <tr><th colspan="5">지난 점검 미조치 사항 이행 확인</th></tr>
+                                <tr><th colspan="5">{{ T('h_prev') }}</th></tr>
                                 <tr class="s"><th>지적 내용</th><th>해당 업체</th><th>조치 기한</th><th>조치 내용</th><th>상태</th></tr>
                             </thead>
                             <tbody>
@@ -589,7 +701,7 @@
                         <table v-if="checkGroups.length" class="jt-t">
                             <colgroup><col><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:28%"></colgroup>
                             <thead>
-                                <tr><th colspan="5">점검표 <span style="font-weight:400" class="s">(사내 점검 기준 — 법령에 정해진 항목이 아님)</span></th></tr>
+                                <tr><th colspan="5">{{ T('h_check') }}</th></tr>
                                 <tr class="s"><th>점검 항목</th><th>적합</th><th>부적합</th><th>해당<br>없음</th><th>비고</th></tr>
                             </thead>
                             <tbody v-for="(g, gi) in checkGroups" :key="'cg-' + gi">
@@ -607,8 +719,8 @@
                         <table class="jt-t">
                             <colgroup><col style="width:6%"><col><col style="width:13%"><col style="width:14%"><col style="width:8%"><col style="width:12%"><col style="width:19%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th colspan="8">지적사항 및 조치</th></tr>
-                                <tr class="s"><th>번호</th><th>지적 내용</th><th>위치</th><th>해당 업체</th><th>위험도</th><th>조치 기한</th><th>조치 내용</th><th>상태</th></tr>
+                                <tr><th colspan="8">{{ T('h_find') }}</th></tr>
+                                <tr class="s"><th>번호</th><th>지적 내용</th><th>위치</th><th>해당 업체</th><th>{{ T('h_risk') }}</th><th>조치 기한</th><th>조치 내용</th><th>상태</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(f, i) in findingRows" :key="'fr-' + i">
@@ -621,12 +733,12 @@
 
                         <table v-if="formData.summary || formData.nextDate" class="jt-t">
                             <colgroup><col style="width:15%"><col></colgroup>
-                            <tr v-if="formData.summary"><th>종합 의견</th><td class="pre s">{{ formData.summary }}</td></tr>
-                            <tr v-if="formData.nextDate"><th>다음 점검</th><td>{{ fmtDate(formData.nextDate) }} 예정</td></tr>
+                            <tr v-if="formData.summary"><th>{{ T('h_sum') }}</th><td class="pre s">{{ formData.summary }}</td></tr>
+                            <tr v-if="formData.nextDate"><th>{{ T('h_next') }}</th><td>{{ fmtDate(formData.nextDate) }} 예정</td></tr>
                         </table>
 
                         <div v-if="photoRows.length">
-                            <p class="jt-h">지적사항 사진</p>
+                            <p class="jt-h">{{ T('h_photo') }}</p>
                             <div class="jt-phs">
                                 <figure v-for="(p, i) in photoRows" :key="'ph-' + i" class="jt-ph">
                                     <img :src="p.src" :alt="p.cap">
@@ -634,19 +746,24 @@
                                 </figure>
                             </div>
                         </div>
+                        <p v-if="T('n_result')" class="jt-note jt-note-end" data-note>{{ T('n_result') }}</p>
                     </div>
 
                     <!-- [DOC 0] 실시 통보서 -->
                     <div v-else-if="formData.docType === 'notice'" data-docview="notice">
+                        <div v-if="apprOn" class="jt-apprw" data-apprdoc>
+                            <div v-if="hasADoc" v-appr></div>
+                            <table v-else class="jt-t jt-appr" aria-label="결재란">
+                                <tr><th rowspan="2" class="v">결<br>재</th><th>담당</th><th>검토</th><th>승인</th></tr>
+                                <tr><td class="box"></td><td class="box"></td><td class="box"></td></tr>
+                            </table>
+                        </div>
                         <p class="jt-to">수신: {{ noticeTo }}</p>
-                        <h2 class="jt-title">합동 안전·보건점검 실시 통보</h2>
-                        <p class="jt-p">
-                            산업안전보건법 제64조제2항 및 같은 법 시행규칙 제82조에 따라 도급인과 관계수급인이 함께하는 <strong>{{ titlePrefix }} 합동 안전·보건점검</strong>을
-                            아래와 같이 실시하오니 점검반원이 빠짐없이 참석할 수 있도록 협조하여 주시기 바랍니다.
-                        </p>
+                        <h2 class="jt-title">{{ T('title_notice') }}</h2>
+                        <p v-if="T('p_notice')" class="jt-p" data-para><template v-for="(s, i) in para('p_notice')" :key="i"><strong v-if="s.b">{{ s.t }}</strong><template v-else>{{ s.t }}</template></template></p>
                         <table class="jt-t">
                             <colgroup><col style="width:18%"><col></colgroup>
-                            <tr><th>점 검 명</th><td>{{ inspName }}</td></tr>
+                            <tr><th>점 검 명</th><td>{{ T('name') }}</td></tr>
                             <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td></tr>
                             <tr><th>대상 작업장·공정</th><td>{{ formData.area || '-' }}</td></tr>
                             <tr v-if="formData.meetPlace"><th>집결 장소</th><td>{{ formData.meetPlace }}</td></tr>
@@ -656,7 +773,7 @@
                         <table class="jt-t">
                             <colgroup><col style="width:26%"><col style="width:30%"><col style="width:22%"><col style="width:22%"></colgroup>
                             <thead>
-                                <tr><th colspan="4">점검반 (산업안전보건법 시행규칙 제82조제1항)</th></tr>
+                                <tr><th colspan="4">{{ T('h_team') }}</th></tr>
                                 <tr class="s"><th>구분</th><th>업체명</th><th>직위</th><th>성명</th></tr>
                             </thead>
                             <tbody>
@@ -664,9 +781,8 @@
                                 <tr v-if="!teamRows.length"><td colspan="4" class="c mut">점검반원을 입력하세요</td></tr>
                             </tbody>
                         </table>
-                        <p class="jt-note">※ 점검반은 도급인, 관계수급인, 도급인 및 관계수급인의 근로자 각 1명(관계수급인의 근로자의 경우에는 해당 공정만 해당한다)으로 구성합니다. 성명이 비어 있는 칸은 해당 업체에서 참석자를 정해 알려 주시기 바랍니다.</p>
-                        <div v-if="noticeLines.length">
-                            <p class="jt-h">협조 요청 사항</p>
+                                                <div v-if="noticeLines.length">
+                            <p class="jt-h">{{ T('h_req') }}</p>
                             <table class="jt-t">
                                 <colgroup><col style="width:7%"><col></colgroup>
                                 <tr v-for="(l, i) in noticeLines" :key="'nl-' + i"><td class="c">{{ i + 1 }}</td><td>{{ l }}</td></tr>
@@ -682,21 +798,26 @@
                                 </tbody>
                             </table>
                         </div>
+                        <p v-if="T('n_notice')" class="jt-note jt-note-end" data-note>{{ T('n_notice') }}</p>
                         <div class="jt-foot jt-sign">
-                            <p class="d">{{ todayText }}</p>
-                            <p class="n">{{ formData.company || '(도급인명)' }} {{ formData.reqFooter || '안전보건총괄책임자' }} <small>(직인생략)</small></p>
+                            <p class="d">{{ docDateText }}</p>
+                            <p class="n">{{ formData.company || '(도급인명)' }} {{ formData.reqFooter || '안전보건총괄책임자' }} <small v-if="T('seal')">{{ T('seal') }}</small></p>
                         </div>
                     </div>
 
                     <!-- [DOC 2] 조치 요구서 -->
                     <div v-else-if="formData.docType === 'request'" data-docview="request">
                         <div v-for="(g, gi) in reqGroups" :key="'rq-' + gi" class="jt-page">
+                            <div v-if="apprOn" class="jt-apprw" data-apprdoc>
+                                <div v-if="hasADoc" v-appr></div>
+                                <table v-else class="jt-t jt-appr" aria-label="결재란">
+                                    <tr><th rowspan="2" class="v">결<br>재</th><th>담당</th><th>검토</th><th>승인</th></tr>
+                                    <tr><td class="box"></td><td class="box"></td><td class="box"></td></tr>
+                                </table>
+                            </div>
                             <p class="jt-to">수신: {{ g.company }}</p>
-                            <h2 class="jt-title">합동 안전·보건점검 지적사항 조치 요구서</h2>
-                            <p class="jt-p">
-                                산업안전보건법 제64조제2항 및 같은 법 시행규칙 제82조에 따라 실시한 <strong>{{ titlePrefix }} 합동 안전·보건점검</strong> 결과,
-                                귀사 소관 작업장에서 아래와 같은 지적사항이 확인되어 통보하오니 조치 기한까지 개선하고 그 결과를 알려 주시기 바랍니다.
-                            </p>
+                            <h2 class="jt-title">{{ T('title_request') }}</h2>
+                            <p v-if="T('p_request')" class="jt-p" data-para><template v-for="(s, i) in para('p_request')" :key="i"><strong v-if="s.b">{{ s.t }}</strong><template v-else>{{ s.t }}</template></template></p>
                             <div class="jt-box">
                                 <dl>
                                     <dt>점검 일시</dt><dd>{{ formattedDatetime }}</dd>
@@ -708,7 +829,7 @@
                             </div>
                             <table class="jt-t">
                                 <colgroup><col style="width:7%"><col><col style="width:20%"><col style="width:9%"><col style="width:15%"></colgroup>
-                                <thead><tr><th>번호</th><th>지적 내용</th><th>위치</th><th>위험도</th><th>조치 기한</th></tr></thead>
+                                <thead><tr><th>번호</th><th>지적 내용</th><th>위치</th><th>{{ T('h_risk') }}</th><th>조치 기한</th></tr></thead>
                                 <tbody>
                                     <tr v-for="(f, i) in g.rows" :key="'rr-' + i">
                                         <td class="c">{{ i + 1 }}</td>
@@ -718,33 +839,40 @@
                                     <tr v-if="!g.rows.length"><td colspan="5" class="c mut">통보할 지적사항이 없습니다</td></tr>
                                 </tbody>
                             </table>
-                            <p class="jt-note">※ 위험도(상·중·하)는 점검반이 사내 기준으로 판단한 것입니다. 기한 안에 조치가 어려운 경우 사유와 임시 안전조치 내용을 미리 알려 주시기 바랍니다.</p>
+                            <p v-if="T('n_request')" class="jt-note" data-note>{{ T('n_request') }}</p>
                             <div v-if="g.photos.length">
-                                <p class="jt-h">지적사항 사진</p>
+                                <p class="jt-h">{{ T('h_photo') }}</p>
                                 <div class="jt-phs">
                                     <figure v-for="(p, i) in g.photos" :key="'rp-' + i" class="jt-ph"><img :src="p.src" :alt="p.cap"><figcaption>{{ p.cap }}</figcaption></figure>
                                 </div>
                             </div>
                             <div class="jt-foot jt-sign">
-                                <p class="d">{{ todayText }}</p>
-                                <p class="n">{{ formData.company || '(도급인명)' }} {{ formData.reqFooter || '안전보건총괄책임자' }} <small>(직인생략)</small></p>
+                                <p class="d">{{ docDateText }}</p>
+                                <p class="n">{{ formData.company || '(도급인명)' }} {{ formData.reqFooter || '안전보건총괄책임자' }} <small v-if="T('seal')">{{ T('seal') }}</small></p>
                             </div>
                         </div>
                     </div>
 
                     <!-- [DOC 3] 조치 결과 확인서 -->
                     <div v-else data-docview="confirm">
+                        <div v-if="apprOn" class="jt-apprw" data-apprdoc>
+                            <div v-if="hasADoc" v-appr></div>
+                            <table v-else class="jt-t jt-appr" aria-label="결재란">
+                                <tr><th rowspan="2" class="v">결<br>재</th><th>담당</th><th>검토</th><th>승인</th></tr>
+                                <tr><td class="box"></td><td class="box"></td><td class="box"></td></tr>
+                            </table>
+                        </div>
                         <p v-if="formData.target" class="jt-to">대상 업체: {{ formData.target }}</p>
-                        <h2 class="jt-title">합동 안전·보건점검 조치 결과 확인서</h2>
+                        <h2 class="jt-title">{{ T('title_confirm') }}</h2>
                         <table class="jt-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>점 검 명</th><td colspan="3">{{ inspName }}</td></tr>
+                            <tr><th>점 검 명</th><td colspan="3">{{ T('name') }}</td></tr>
                             <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td><th>대상 작업장<br>·공정</th><td>{{ formData.area }}</td></tr>
                             <tr><th>조치 현황</th><td colspan="3">지적사항 {{ confRows.length }}건 중 조치 완료 {{ confDone }}건 · 조치 중 {{ confDoing }}건 · 미조치 {{ confRows.length - confDone - confDoing }}건</td></tr>
                         </table>
                         <table class="jt-t">
                             <colgroup><col style="width:6%"><col><col style="width:13%"><col style="width:8%"><col style="width:12%"><col style="width:22%"><col style="width:12%"><col style="width:10%"></colgroup>
-                            <thead><tr class="s"><th>번호</th><th>지적 내용 (위치)</th><th>해당 업체</th><th>위험도</th><th>조치 기한</th><th>조치 내용</th><th>완료일</th><th>상태</th></tr></thead>
+                            <thead><tr class="s"><th>번호</th><th>지적 내용 (위치)</th><th>해당 업체</th><th>{{ T('h_risk') }}</th><th>조치 기한</th><th>조치 내용</th><th>완료일</th><th>상태</th></tr></thead>
                             <tbody>
                                 <tr v-for="(f, i) in confRows" :key="'cf-' + i">
                                     <td class="c">{{ i + 1 }}</td>
@@ -755,7 +883,7 @@
                                 <tr v-if="!confRows.length"><td colspan="8" class="c mut">지적사항 없음</td></tr>
                             </tbody>
                         </table>
-                        <p v-if="confRows.length && confDone < confRows.length" class="jt-note">※ 조치가 끝나지 않은 {{ confRows.length - confDone }}건은 다음 합동 점검에서 다시 확인합니다.</p>
+                        <p v-if="confNote" class="jt-note" data-note>{{ confNote }}</p>
                         <div v-if="confPhotos.length">
                             <p class="jt-h">조치 전·후 사진</p>
                             <div class="jt-phs">
@@ -763,14 +891,14 @@
                             </div>
                         </div>
                         <div class="jt-sign">
-                            <p class="jt-p" style="text-align:center;margin-top:20px">위 지적사항에 대한 조치 결과를 확인합니다.</p>
-                            <p style="text-align:center;font-size:12px;color:#475569;margin:0 0 12px">{{ todayText }}</p>
+                            <p v-if="T('p_confirm')" class="jt-p" data-para style="text-align:center;margin-top:20px">{{ T('p_confirm') }}</p>
+                            <p style="text-align:center;font-size:12px;color:#475569;margin:0 0 12px">{{ docDateText }}</p>
                             <table class="jt-t">
                                 <colgroup><col style="width:18%"><col style="width:28%"><col style="width:18%"><col style="width:18%"><col style="width:18%"></colgroup>
                                 <thead><tr class="s"><th>구분</th><th>업체명</th><th>직위</th><th>성명</th><th>서명</th></tr></thead>
                                 <tbody>
-                                    <tr v-for="(n, i) in confCompanies" :key="'cs-' + i"><td class="c s">조치자(관계수급인)</td><td class="c">{{ n }}</td><td></td><td></td><td class="sig">(서명)</td></tr>
-                                    <tr><td class="c s">확인자(도급인)</td><td class="c">{{ formData.company }}</td><td class="c s">{{ formData.confTitle }}</td><td class="c">{{ formData.confName }}</td><td class="sig">(서명)</td></tr>
+                                    <tr v-for="(n, i) in confCompanies" :key="'cs-' + i"><td class="c s">{{ T('lb_actor') }}</td><td class="c">{{ n }}</td><td></td><td></td><td class="sig">(서명)</td></tr>
+                                    <tr><td class="c s">{{ T('lb_conf') }}</td><td class="c">{{ formData.company }}</td><td class="c s">{{ formData.confTitle }}</td><td class="c">{{ formData.confName }}</td><td class="sig">(서명)</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -822,7 +950,7 @@
             document.getElementById('app').innerHTML = '<div class="cm-fail"><b>화면을 불러오지 못했습니다.</b><br>새로 고침(F5)해 보세요. 계속 안 되면 브라우저의 확장 프로그램·보안 프로그램이 스크립트를 막고 있는지 확인하세요.<br><a href="../../">← SafePlum으로 돌아가기</a></div>';
             throw new Error('Vue not loaded');
         }
-        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        const { createApp, ref, reactive, computed, watch, nextTick, onMounted, provide, inject } = Vue;
         const STORE_KEY = 'safetake.joint.v1';
         const OLD_FORM_KEY = 'safetake.form.joint';   // 예전 일반 서식(tools/forms/joint/)의 저장값 — 읽기만 하고 지우지 않는다
         const HIST_MAX = 24;
@@ -919,7 +1047,31 @@
         // 실시 통보서의 협조 요청 사항 기본 문구(법령 문구 아님, 실무 예시)
         const NOTICE_DEFAULT = ['점검반으로 지정된 사람은 점검 시작 10분 전까지 집결 장소로 와 주시기 바랍니다.', '관계수급인의 근로자는 점검 대상 공정에서 일하는 근로자로 정해 주시기 바랍니다.', '점검반원은 안전모·안전화 등 작업장에 맞는 보호구를 착용해 주시기 바랍니다.', '지난 점검에서 조치가 끝나지 않은 사항은 조치 결과(사진 포함)를 준비해 주시기 바랍니다.', '참석자가 바뀌는 경우 점검 전날까지 도급인 담당자에게 알려 주시기 바랍니다.'].join('\n');
 
-        createApp({
+        // 문서 문구·이름의 기본값. 사용자가 고친 것만 formData.tx 에 저장한다(없으면 기본값)
+        const TX_DEF = {
+            title_notice: '합동 안전·보건점검 실시 통보',
+            title_request: '합동 안전·보건점검 지적사항 조치 요구서',
+            title_confirm: '합동 안전·보건점검 조치 결과 확인서',
+            p_notice: '산업안전보건법 제64조제2항 및 같은 법 시행규칙 제82조에 따라 도급인과 관계수급인이 함께하는 {점검명}을 아래와 같이 실시하오니 점검반원이 빠짐없이 참석할 수 있도록 협조하여 주시기 바랍니다.',
+            p_request: '산업안전보건법 제64조제2항 및 같은 법 시행규칙 제82조에 따라 실시한 {점검명} 결과, 귀사 소관 작업장에서 아래와 같은 지적사항이 확인되어 통보하오니 조치 기한까지 개선하고 그 결과를 알려 주시기 바랍니다.',
+            p_confirm: '위 지적사항에 대한 조치 결과를 확인합니다.',
+            n_notice: '※ 점검반은 도급인, 관계수급인, 도급인 및 관계수급인의 근로자 각 1명(관계수급인의 근로자의 경우에는 해당 공정만 해당한다)으로 구성합니다. 성명이 비어 있는 칸은 해당 업체에서 참석자를 정해 알려 주시기 바랍니다.',
+            n_result: '',
+            n_request: '※ 위험도(상·중·하)는 점검반이 사내 기준으로 판단한 것입니다. 기한 안에 조치가 어려운 경우 사유와 임시 안전조치 내용을 미리 알려 주시기 바랍니다.',
+            n_confirm: '※ 조치가 끝나지 않은 {건수}건은 다음 합동 점검에서 다시 확인합니다.',
+            seal: '(직인생략)',
+            h_team: '점검반 (산업안전보건법 시행규칙 제82조제1항)', h_prev: '지난 점검 미조치 사항 이행 확인', h_check: '점검표', h_find: '지적사항 및 조치',
+            h_risk: '위험도', h_photo: '지적사항 사진', h_sum: '종합 의견', h_next: '다음 점검', h_req: '협조 요청 사항',
+            lb_actor: '조치자(관계수급인)', lb_conf: '확인자(도급인)'
+        };
+        ROLES.forEach(r => { TX_DEF['role_' + r.v] = r.label; });
+        const TX_AUTO = ['title_result', 'name'];                       // 입력값으로 계산하는 문구
+        const TX_KEYS = Object.keys(TX_DEF).concat(TX_AUTO);
+        const TX_EMPTY_OK = (k) => /^(p_|n_)/.test(k) || k === 'seal';  // 비우면 문서에서 빠지는 문구
+        const TX_LABEL = (k) => /^(role_|h_|lb_)/.test(k);
+        const DOC_KEY = 'tool.joint';                                    // 결재란 저장 이름(safetake.appr.tool.joint)
+
+        const app = createApp({
             setup() {
                 const docTypes = [
                     { label: '실시 통보', value: 'notice', icon: 'ph-bold ph-users' },
@@ -952,7 +1104,11 @@
                     noticeTo: '',
                     noticeReq: NOTICE_DEFAULT,
                     noticeItems: true,
-                    approval: true,
+                    approval: true,          // 결과서 결재란(예전 저장값과 같은 이름)
+                    apprNotice: false, apprRequest: false, apprConfirm: false,
+                    docDate: '',             // 통보서·요구서·확인서 작성일. 비어 있으면 여는 날
+                    nextAuto: false,         // 다음 점검 예정일을 점검일에서 자동 계산하는 중인지
+                    tx: {},                  // 사용자가 고친 문서 문구·이름
                     oldDismissed: false
                 });
                 const mkMember = (role, o) => Object.assign({ role, company: '', title: '', name: '' }, o || {});
@@ -972,7 +1128,12 @@
                 // ---- 저장값 정리(모양이 어긋난 값이 들어와도 화면이 깨지지 않게)
                 const cleanForm = (f) => {
                     const base = freshForm();
-                    if (f && typeof f === 'object') Object.keys(base).forEach(k => { if (typeof f[k] === typeof base[k]) base[k] = f[k]; });
+                    if (f && typeof f === 'object') Object.keys(base).forEach(k => { if (k !== 'tx' && typeof f[k] === typeof base[k]) base[k] = f[k]; });
+                    const tx = {};
+                    if (f && f.tx && typeof f.tx === 'object' && !Array.isArray(f.tx)) TX_KEYS.forEach(k => { if (typeof f.tx[k] === 'string') tx[k] = f.tx[k].slice(0, 2000); });
+                    base.tx = tx;
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(base.docDate)) base.docDate = '';
+                    if (base.nextAuto && !base.nextDate) base.nextAuto = false;
                     if (!['notice', 'result', 'request', 'confirm'].includes(base.docType)) base.docType = 'result';
                     if (!['정기', '수시'].includes(base.kind)) base.kind = '정기';
                     if (!CYCLES[base.industry]) base.industry = 'other';
@@ -987,8 +1148,10 @@
                     items: Array.isArray(g.items) ? g.items.filter(it => it && typeof it === 'object').map(it => ({ id: str(it.id) || newId('i'), text: str(it.text), result: RESULTS.some(r => r.v === it.result) ? it.result : '', note: str(it.note), fid: str(it.fid) })) : []
                 })) : null;
                 const cleanFinding = (r) => ({ id: str(r.id) || newId('f'), content: str(r.content), location: str(r.location), company: str(r.company), risk: RISKS.includes(r.risk) ? r.risk : '중', due: str(r.due), action: str(r.action), doneDate: str(r.doneDate), status: STATUSES.includes(r.status) ? r.status : '미조치' });
-                const cleanFindings = (a) => Array.isArray(a) ? a.filter(r => r && typeof r === 'object').map(cleanFinding) : [];
-                const cleanPrev = (a) => Array.isArray(a) ? a.filter(r => r && typeof r === 'object').map(r => Object.assign(cleanFinding(r), { from: str(r.from) })) : [];
+                // 같은 id가 두 번 들어 있으면(손으로 고친 백업 등) 목록이 꼬이므로 새 id를 준다
+                const uniqIds = (a, p) => { const seen = new Set(); a.forEach(x => { if (seen.has(x.id)) x.id = newId(p); seen.add(x.id); }); return a; };
+                const cleanFindings = (a) => Array.isArray(a) ? uniqIds(a.filter(r => r && typeof r === 'object').map(cleanFinding), 'f') : [];
+                const cleanPrev = (a) => Array.isArray(a) ? uniqIds(a.filter(r => r && typeof r === 'object').map(r => Object.assign(cleanFinding(r), { from: str(r.from) })), 'f') : [];
                 const cleanSnap = (s) => {
                     s = s && typeof s === 'object' ? s : {};
                     return { formData: cleanForm(s.formData), team: cleanTeam(s.team) || freshTeam(), checklist: cleanChecklist(s.checklist) || mkChecklist(BASE_CHECK), findings: cleanFindings(s.findings), prev: cleanPrev(s.prev) };
@@ -1029,8 +1192,10 @@
                 const curDate = computed(() => parseD(formData.value.datetime));
                 const titlePrefix = computed(() => {
                     const d = curDate.value;
-                    return `${d ? d.getFullYear() + '년 ' : ''}제${formData.value.round >= 1 ? formData.value.round : 1}차 ${formData.value.kind}`;
+                    const r = Math.floor(Number(formData.value.round));
+                    return `${d ? d.getFullYear() + '년 ' : ''}제${r >= 1 ? r : 1}차 ${formData.value.kind}`;
                 });
+                const inspShort = computed(() => `${titlePrefix.value} 합동 안전·보건점검`);
                 const inspName = computed(() => {
                     const f = formData.value;
                     return `${[f.company || '(도급인명)', f.siteName].filter(Boolean).join(' ')} ${titlePrefix.value} 합동 안전·보건점검`;
@@ -1043,10 +1208,43 @@
                 };
                 const fmtDate = (v) => { const d = parseD(v); return d ? `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일` : str(v); };
                 const formattedDatetime = computed(() => fmtDt(formData.value.datetime, '미정'));
-                const todayText = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+                const docDateText = computed(() => fmtDate(formData.value.docDate || today));
+
+                // ---- 문서 문구·이름(기본값 + 사용자가 고친 값)
+                const txDef = (k) => k === 'title_result' ? `${titlePrefix.value} 합동 안전·보건점검 결과서` : k === 'name' ? inspName.value : (TX_DEF[k] || '');
+                const txHas = (k) => Object.prototype.hasOwnProperty.call(formData.value.tx, k);
+                const txRaw = (k) => txHas(k) ? formData.value.tx[k] : txDef(k);                 // 입력 칸에 보이는 값
+                const T = (k) => { const v = txRaw(k); return v.trim() || TX_EMPTY_OK(k) ? v.trim() : txDef(k); };   // 문서에 들어가는 값
+                const isCustom = (k) => txHas(k) && T(k) !== txDef(k);
+                const setT = (k, v) => { const tx = Object.assign({}, formData.value.tx); if (v === txDef(k)) delete tx[k]; else tx[k] = v; formData.value.tx = tx; };
+                const resetT = (k) => { const tx = Object.assign({}, formData.value.tx); delete tx[k]; formData.value.tx = tx; };
+                // 비울 수 없는 이름 칸은 비운 채 나가면 기본값으로 돌린다
+                const blurT = (k) => { if (txHas(k) && !TX_EMPTY_OK(k) && !formData.value.tx[k].trim()) resetT(k); };
+                provide('tx', { T, raw: txRaw, setT, resetT, blurT, isCustom, canEmpty: TX_EMPTY_OK, isAuto: (k) => TX_AUTO.includes(k) });
+                const txCount = computed(() => TX_KEYS.filter(isCustom).length);
+                const labelCustom = computed(() => TX_KEYS.filter(k => TX_LABEL(k) && isCustom(k)).length);
+                const resetAllText = () => {
+                    if (!window.confirm('고친 문서 제목·문구·항목 이름을 모두 기본으로 되돌릴까요?\n(결재란과 입력한 점검 내용은 그대로 둡니다)')) return;
+                    formData.value.tx = {};
+                    showToast('문구와 이름을 기본으로 되돌렸습니다.');
+                };
+                const hintP = computed(() => formData.value.docType === 'confirm' ? '' : `{점검명} 자리에는 '${inspShort.value}'이 들어갑니다.`);
+                const hintN = computed(() => ({ confirm: '{건수} 자리에는 조치가 끝나지 않은 건수가 들어가고, 모두 조치 완료이면 이 문구는 나오지 않습니다.', result: '결과서에는 기본 문구가 없습니다. 필요한 안내가 있으면 적으세요.' })[formData.value.docType] || '');
+                const roleLabel = (v) => T('role_' + roleOf(v).v);
+                // 본문 문구의 {점검명} 자리를 굵게 넣는다(글자로만 그림)
+                const para = (k) => {
+                    const out = [];
+                    T(k).split('{점검명}').forEach((t, i) => { if (i) out.push({ b: true, t: inspShort.value }); if (t) out.push({ b: false, t }); });
+                    return out;
+                };
+                // ---- 결재란(문서 종류마다 넣을지 따로 정한다)
+                const APPR_FIELD = { notice: 'apprNotice', result: 'approval', request: 'apprRequest', confirm: 'apprConfirm' };
+                const apprOn = computed({ get: () => !!formData.value[APPR_FIELD[formData.value.docType]], set: (v) => { formData.value[APPR_FIELD[formData.value.docType]] = !!v; } });
+                const hasADoc = !!(window.ADoc && window.ADoc.mountApproval);
+                const docLabel = computed(() => (docTypes.find(d => d.value === formData.value.docType) || docTypes[1]).label);
 
                 const teamRows = computed(() => team.value.filter(m => m.name.trim() || m.title.trim() || m.company.trim() || roleOf(m.role).req)
-                    .map(m => ({ role: roleOf(m.role).label, company: memberCompany(m), title: m.title, name: m.name })));
+                    .map(m => ({ role: roleLabel(m.role), company: memberCompany(m), title: m.title, name: m.name })));
                 const teamSummary = computed(() => {
                     const names = team.value.filter(m => m.name.trim()).map(m => `${memberCompany(m) ? memberCompany(m) + ' ' : ''}${m.title ? m.title + ' ' : ''}${m.name}`);
                     return names.length ? `${names.join(', ')} (${names.length}명)` : '-';
@@ -1074,7 +1272,6 @@
                 const hostOwnCount = computed(() => merged.value.filter(isHostOwn).length);
                 const targetNames = computed(() => uniq(merged.value.filter(f => !isHostOwn(f)).map(f => f.company)));
                 const showPrev = computed(() => prev.value.length > 0 || formData.value.docType === 'result' || formData.value.docType === 'confirm');
-                const secNo = computed(() => { let n = 2; const o = {}; if (showPrev.value) o.prev = ++n; if (formData.value.docType === 'result') o.check = ++n; o.find = ++n; o.sum = ++n; return o; });
                 const noticeTo = computed(() => formData.value.noticeTo.trim() || uniq(team.value.filter(m => m.role === 'sub' || m.role === 'subWorker').map(m => m.company)).join(', ') || '관계수급인 각 업체');
                 const noticeLines = computed(() => formData.value.noticeReq.split('\n').map(x => x.trim()).filter(Boolean));
                 const noticeOpen = computed(() => prevRows.value.filter(p => p.status !== '조치 완료'));
@@ -1099,6 +1296,7 @@
                 const confDone = computed(() => confRows.value.filter(f => f.status === '조치 완료').length);
                 const confDoing = computed(() => confRows.value.filter(f => f.status === '조치 중').length);
                 const confPhotos = computed(() => photoList(confRows.value, ['before', 'after']));
+                const confNote = computed(() => { const n = confRows.value.length - confDone.value; return n > 0 ? T('n_confirm').split('{건수}').join(String(n)) : ''; });
                 const confCompanies = computed(() => uniq(confRows.value.filter(f => !isHostOwn(f)).map(f => f.company)));
                 // 대상 업체가 목록에서 사라지면(업체명 수정 등) 전체로 되돌린다
                 watch(targetNames, (names) => { if (formData.value.target && !names.includes(formData.value.target)) formData.value.target = ''; });
@@ -1108,20 +1306,21 @@
                 const qName = (q) => `${Math.floor(q / 4)}년 ${q % 4 + 1}분기`;
                 const checks = computed(() => {
                     const out = [];
-                    const f = formData.value, c = cycle.value;
+                    const f = formData.value, c = cycle.value, cur0 = curDate.value;
                     const has = (role) => team.value.some(m => m.role === role && m.name.trim());
                     const paren = '같은 사업 내에 지역을 달리하는 사업장이 있는 경우에는 그 사업장의 안전보건관리책임자';
                     const miss = [];
-                    if (!has('host')) { miss.push(1); out.push({ ok: false, text: `점검반에 도급인(성명)이 없습니다 — 도급인(${paren})으로 점검반을 구성해야 합니다(시행규칙 제82조제1항제1호).` }); }
-                    if (!has('sub')) { miss.push(2); out.push({ ok: false, text: `점검반에 관계수급인(성명)이 없습니다 — 관계수급인(${paren})으로 점검반을 구성해야 합니다(시행규칙 제82조제1항제2호).` }); }
+                    if (!has('host')) { miss.push(1); out.push({ sec: 'team', ok: false, text: `점검반에 도급인(성명)이 없습니다 — 도급인(${paren})으로 점검반을 구성해야 합니다(시행규칙 제82조제1항제1호).` }); }
+                    if (!has('sub')) { miss.push(2); out.push({ sec: 'team', ok: false, text: `점검반에 관계수급인(성명)이 없습니다 — 관계수급인(${paren})으로 점검반을 구성해야 합니다(시행규칙 제82조제1항제2호).` }); }
                     const hw = has('hostWorker'), sw = has('subWorker');
                     if (!hw || !sw) {
                         miss.push(3);
                         const who = !hw && !sw ? '도급인의 근로자와 관계수급인의 근로자' : !hw ? '도급인의 근로자' : '관계수급인의 근로자';
-                        out.push({ ok: false, text: `점검반에 ${who}(성명)가 없습니다 — 도급인 및 관계수급인의 근로자 각 1명(관계수급인의 근로자의 경우에는 해당 공정만 해당한다)을 포함해야 합니다(시행규칙 제82조제1항제3호).` });
+                        out.push({ sec: 'team', ok: false, text: `점검반에 ${who}(성명)가 없습니다 — 도급인 및 관계수급인의 근로자 각 1명(관계수급인의 근로자의 경우에는 해당 공정만 해당한다)을 포함해야 합니다(시행규칙 제82조제1항제3호).` });
                     }
-                    if (!miss.length) out.push({ ok: true, text: '점검반에 도급인, 관계수급인, 도급인 및 관계수급인의 근로자 각 1명이 모두 들어 있습니다(시행규칙 제82조제1항). 관계수급인의 근로자는 점검 대상 공정의 근로자인지 확인하세요.' });
-                    if (!f.area.trim()) out.push({ ok: false, text: '점검 대상 작업장·공정이 비어 있습니다.' });
+                    if (!miss.length) out.push({ sec: 'team', ok: true, text: '점검반에 도급인, 관계수급인, 도급인 및 관계수급인의 근로자 각 1명이 모두 들어 있습니다(시행규칙 제82조제1항). 관계수급인의 근로자는 점검 대상 공정의 근로자인지 확인하세요.' });
+                    if (!f.area.trim()) out.push({ sec: 'overview', ok: false, text: '점검 대상 작업장·공정이 비어 있습니다.' });
+                    if (!cur0) out.push({ sec: 'overview', ok: false, text: '점검 일시가 비어 있습니다.' });
 
                     const cur = curDate.value;
                     if (cur && f.kind === '정기') {
@@ -1131,32 +1330,76 @@
                             const lastTxt = toYmd(last);
                             const tail = ' 다른 곳에 점검 기록이 있다면 무시하세요.';
                             if (c.mode === 'bimonth') {
-                                if (toYmd(addMonths(last, 2)) < toYmd(cur)) out.push({ ok: false, text: `보관된 지난 정기 점검(${lastTxt})에서 2개월이 넘게 지났습니다 — ${c.name}의 정기 점검은 2개월에 1회 이상 실시해야 합니다(${c.law}). 기간을 세는 기준일은 조문에 따로 적혀 있지 않습니다.${tail}` });
-                                else out.push({ ok: true, text: `보관된 지난 정기 점검(${lastTxt}) 이후 2개월 안에 실시하는 점검입니다(${c.law}: 2개월에 1회 이상).` });
+                                if (toYmd(addMonths(last, 2)) < toYmd(cur)) out.push({ sec: 'overview', ok: false, text: `보관된 지난 정기 점검(${lastTxt})에서 2개월이 넘게 지났습니다 — ${c.name}의 정기 점검은 2개월에 1회 이상 실시해야 합니다(${c.law}). 기간을 세는 기준일은 조문에 따로 적혀 있지 않습니다.${tail}` });
+                                else out.push({ sec: 'overview', ok: true, text: `보관된 지난 정기 점검(${lastTxt}) 이후 2개월 안에 실시하는 점검입니다(${c.law}: 2개월에 1회 이상).` });
                             } else {
                                 const gap = qIdx(cur) - qIdx(last);
-                                if (gap > 1) out.push({ ok: false, text: `보관된 지난 정기 점검(${lastTxt}, ${qName(qIdx(last))}) 이후 점검 기록이 없는 분기가 ${gap - 1}개 있습니다 — 정기 점검은 분기에 1회 이상 실시해야 합니다(${c.law}).${tail}` });
-                                else out.push({ ok: true, text: `보관된 지난 정기 점검(${lastTxt}) ${gap === 0 ? '과 같은 분기' : '의 다음 분기'}에 실시하는 점검입니다(${c.law}: 분기에 1회 이상).` });
+                                if (gap > 1) out.push({ sec: 'overview', ok: false, text: `보관된 지난 정기 점검(${lastTxt}, ${qName(qIdx(last))}) 이후 점검 기록이 없는 분기가 ${gap - 1}개 있습니다 — 정기 점검은 분기에 1회 이상 실시해야 합니다(${c.law}).${tail}` });
+                                else out.push({ sec: 'overview', ok: true, text: `보관된 지난 정기 점검(${lastTxt}) ${gap === 0 ? '과 같은 분기' : '의 다음 분기'}에 실시하는 점검입니다(${c.law}: 분기에 1회 이상).` });
                             }
                         }
                     }
                     const nx = parseD(f.nextDate);
                     if (cur && nx) {
-                        if (toYmd(nx) <= toYmd(cur)) out.push({ ok: false, text: '다음 점검 예정일이 이번 점검일과 같거나 앞서 있습니다.' });
-                        else if (c.mode === 'bimonth' ? toYmd(addMonths(cur, 2)) < toYmd(nx) : qIdx(nx) - qIdx(cur) > 1) out.push({ ok: false, text: `다음 점검 예정일이 정기 점검 주기(${c.text}, ${c.law})보다 늦습니다.` });
+                        if (toYmd(nx) <= toYmd(cur)) out.push({ sec: 'sum', ok: false, text: '다음 점검 예정일이 이번 점검일과 같거나 앞서 있습니다.' });
+                        else if (c.mode === 'bimonth' ? toYmd(addMonths(cur, 2)) < toYmd(nx) : qIdx(nx) - qIdx(cur) > 1) out.push({ sec: 'sum', ok: false, text: `다음 점검 예정일이 정기 점검 주기(${c.text}, ${c.law})보다 늦습니다.` });
                     }
                     if (f.docType === 'result') {
-                        if (stat.value.todo) out.push({ ok: false, text: `결과를 표시하지 않은 점검 항목이 ${stat.value.todo}개 있습니다.` });
-                        if (pendingBad.value) out.push({ ok: false, text: `부적합 ${pendingBad.value}건이 지적사항에 아직 없습니다 — 점검표 아래 "지적사항으로 옮기기"를 누르세요.` });
+                        if (stat.value.todo) out.push({ sec: 'check', ok: false, text: `결과를 표시하지 않은 점검 항목이 ${stat.value.todo}개 있습니다.` });
+                        if (pendingBad.value) out.push({ sec: 'check', ok: false, text: `부적합 ${pendingBad.value}건이 지적사항에 아직 없습니다 — 점검표 아래 "지적사항으로 옮기기"를 누르세요.` });
                     }
                     const noOwner = findingRows.value.filter(x => x.status !== '조치 완료' && (!x.company.trim() || !x.due)).length;
-                    if (noOwner) out.push({ ok: false, text: `해당 업체나 조치 기한이 빠진 지적사항이 ${noOwner}건 있습니다.` });
-                    const late = merged.value.filter(x => x.status !== '조치 완료' && x.due && x.due < today).length;
-                    if (late) out.push({ ok: false, text: `조치 기한이 지났는데 끝나지 않은 지적사항이 ${late}건 있습니다(이월 포함).` });
-                    const noDate = merged.value.filter(x => x.status === '조치 완료' && !x.doneDate).length;
-                    if (noDate) out.push({ ok: false, text: `조치 완료로 표시했지만 완료일이 없는 지적사항이 ${noDate}건 있습니다.` });
+                    if (noOwner) out.push({ sec: 'find', ok: false, text: `해당 업체나 조치 기한이 빠진 지적사항이 ${noOwner}건 있습니다.` });
+                    [['find', findingRows.value, '지적사항'], ['prev', prevRows.value, '지난 점검 미조치 사항']].forEach(([sec, rows, nm]) => {
+                        const late = rows.filter(x => x.status !== '조치 완료' && x.due && x.due < today).length;
+                        if (late) out.push({ sec, ok: false, text: `조치 기한이 지났는데 끝나지 않은 ${nm}이 ${late}건 있습니다.` });
+                        const noDate = rows.filter(x => x.status === '조치 완료' && !x.doneDate).length;
+                        if (noDate) out.push({ sec, ok: false, text: `조치 완료로 표시했지만 완료일이 없는 ${nm}이 ${noDate}건 있습니다.` });
+                    });
                     return out;
                 });
+
+                // ---- 접이식 입력 단계
+                const view = ref('form');     // 좁은 화면에서 보이는 쪽: form | prev
+                const open = reactive({ overview: true });
+                const stepList = computed(() => {
+                    const f = formData.value, d = f.docType, st = stat.value;
+                    const named = team.value.filter(m => m.name.trim()).length;
+                    const openPrev = prevRows.value.filter(p => p.status !== '조치 완료').length;
+                    const a = [];
+                    a.push({ id: 'overview', title: '점검 개요', sum: [(f.datetime || '').slice(0, 10).replace(/-/g, '.'), f.area.trim() || '대상 미입력'].filter(Boolean).join(' · '), done: !!(f.company.trim() && curDate.value && f.area.trim()) });
+                    a.push({ id: 'team', title: '점검반 구성', sum: `${team.value.length}명 중 성명 입력 ${named}명`, done: checks.value.some(c => c.sec === 'team' && c.ok) });
+                    if (showPrev.value) a.push({ id: 'prev', title: '지난 점검 미조치 사항 확인', sum: prevRows.value.length ? `${prevRows.value.length}건 · 미조치 ${openPrev}건` : '없음', done: prevRows.value.length > 0 && openPrev === 0 });
+                    if (d === 'result') a.push({ id: 'check', title: '점검표', sum: `적합 ${st.ok} · 부적합 ${st.bad} · 해당없음 ${st.na}` + (st.todo ? ` · 미점검 ${st.todo}` : ''), done: st.total > 0 && st.todo === 0 && !pendingBad.value });
+                    if (d !== 'notice') {
+                        a.push({ id: 'find', title: '지적사항 및 조치', sum: findingRows.value.length ? `${findingRows.value.length}건 · 조치 완료 ${doneCount.value}건` : '없음', done: findingRows.value.length > 0 && doneCount.value === findingRows.value.length });
+                        a.push({ id: 'sum', title: '종합 의견 · 다음 점검', sum: f.nextDate ? `다음 점검 ${f.nextDate.replace(/-/g, '.')}` : (f.summary.trim() ? '의견 입력함' : '선택 입력'), done: !!(f.summary.trim() || f.nextDate) });
+                    }
+                    a.push({ id: 'text', title: '결재란 · 문서 제목과 문구', sum: (apprOn.value ? '결재란 넣음' : '결재란 없음') + (txCount.value ? ` · 고친 문구 ${txCount.value}개` : ''), done: false });
+                    a.push({ id: 'hist', title: '이어 쓰기 · 지난 점검 기록', sum: `보관 ${history.value.length}건`, done: false });
+                    a.push({ id: 'law', title: '법령 메모', sum: '법 제64조제2항 · 시행규칙 제82조', done: false });
+                    a.forEach((s, i) => { s.no = i + 1; s.last = i === a.length - 1; s.warn = checks.value.filter(c => c.sec === s.id && !c.ok).length; });
+                    return a;
+                });
+                const S = computed(() => { const o = {}; stepList.value.forEach(s => { o[s.id] = s; }); return o; });
+                const chk = computed(() => { const o = { overview: [], team: [], prev: [], check: [], find: [], sum: [] }; checks.value.forEach(c => { (o[c.sec] = o[c.sec] || []).push(c); }); return o; });
+                const warnTotal = computed(() => stepList.value.reduce((n, s) => n + s.warn, 0));
+                const allOpen = computed(() => stepList.value.every(s => open[s.id]));
+                const toggleAll = () => { const v = !allOpen.value; stepList.value.forEach(s => { open[s.id] = v; }); };
+                const showStep = (id) => nextTick(() => { const el = document.querySelector(`[data-step="${id}"]`); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'auto' }); });
+                const acc = {
+                    open,
+                    toggle: (id) => { open[id] = !open[id]; },
+                    next: (id) => {
+                        const l = stepList.value, i = l.findIndex(s => s.id === id);
+                        if (i < 0 || i >= l.length - 1) return;
+                        open[id] = false; open[l[i + 1].id] = true; showStep(l[i + 1].id);
+                    }
+                };
+                provide('acc', acc);
+                const goStep = (id) => { open[id] = true; view.value = 'form'; showStep(id); };
+                const scrollTop = () => { window.scrollTo(0, 0); ['jtForm', 'preview-col'].forEach(i => { const el = document.getElementById(i); if (el) el.scrollTop = 0; }); };
+                const setView = (v) => { view.value = v; nextTick(() => { fitPreview(); window.scrollTo(0, 0); }); };
 
                 // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
                 const fitPreview = () => {
@@ -1196,6 +1439,13 @@
                     checklist.value.splice(gi, 1);
                 };
                 const addItem = (g) => g.items.push(mkItem(''));
+                const removeItem = (g, ii) => {
+                    const it = g.items[ii];
+                    if ((it.result || it.note.trim()) && !window.confirm(`점검 항목 "${shortTxt(it.text) || '(이름 없음)'}"과 표시한 결과를 지울까요?`)) return;
+                    g.items.splice(ii, 1);
+                };
+                // 줄 순서 바꾸기(점검반·점검표·지적사항)
+                const move = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return; const x = arr.splice(i, 1)[0]; arr.splice(j, 0, x); };
                 const setResult = (it, v) => { it.result = it.result === v ? '' : v; };
                 const fillRestOk = () => {
                     let n = 0;
@@ -1219,16 +1469,33 @@
                     findings.value.splice(i, 1);
                 };
                 const addPrev = () => prev.value.push(Object.assign(mkFinding(), { from: '' }));
-                const onStatus = (f) => { if (f.status === '조치 완료' && !f.doneDate) f.doneDate = today; };
+                const removePrev = (i) => {
+                    const p = prev.value[i];
+                    if (p.content.trim() && !window.confirm(`이월 항목 "${shortTxt(p.content)}"을(를) 지울까요?`)) return;
+                    prev.value.splice(i, 1);
+                };
+                // 상태와 완료일을 서로 맞춘다: 완료로 바꾸면 오늘 날짜, 완료가 아니게 되면 완료일을 비우고, 완료일을 적으면 완료로
+                const onStatus = (f) => { if (f.status === '조치 완료') { if (!f.doneDate) f.doneDate = today; } else f.doneDate = ''; };
+                const onDone = (f) => { if (f.doneDate && f.status !== '조치 완료') f.status = '조치 완료'; };
+                // 다음 점검 예정일: '주기에 맞춰 넣기'를 누르면 점검일·업종을 따라 자동으로 바뀌고, 날짜를 직접 고치면 그 값을 둔다
+                const autoNext = () => { const d = curDate.value; return d ? toYmd(addMonths(d, cycle.value.months)) : ''; };
                 const suggestNext = () => {
-                    const d = curDate.value;
-                    if (!d) { showToast('점검 일시를 먼저 입력하세요.', 'error'); return; }
-                    formData.value.nextDate = toYmd(addMonths(d, cycle.value.months));
+                    const v = autoNext();
+                    if (!v) { showToast('점검 일시를 먼저 입력하세요.', 'error'); return; }
+                    formData.value.nextDate = v; formData.value.nextAuto = true;
                     showToast(`다음 점검을 ${cycle.value.months}개월 뒤로 넣었습니다(${cycle.value.text}).`);
                 };
+                const onNextInput = (v) => { formData.value.nextDate = v; formData.value.nextAuto = false; };
+                const clearNext = () => { formData.value.nextDate = ''; formData.value.nextAuto = false; };
+                watch(() => [formData.value.datetime, formData.value.industry, formData.value.nextAuto], () => {
+                    if (!formData.value.nextAuto) return;
+                    const v = autoNext();
+                    if (v) formData.value.nextDate = v;
+                });
                 const changeDocType = (type) => {
+                    if (formData.value.docType === type) return;
                     formData.value.docType = type;
-                    showToast(`${docTypes.find(d => d.value === type).label} 양식으로 전환되었습니다.`);
+                    showToast(`${docTypes.find(d => d.value === type).label} 양식으로 바꿨습니다. 입력한 내용은 그대로입니다.`);
                 };
 
                 // ---- 사진(이 기기에 저장하지 않고 인쇄·PDF에만 쓴다). 큰 사진은 줄여서 넣는다
@@ -1326,12 +1593,13 @@
                     const cur = curDate.value || new Date();
                     const time = (f.datetime || '').slice(11, 16) || '10:00';
                     const nextDt = (f.nextDate && parseD(f.nextDate) ? f.nextDate : toYmd(addMonths(cur, cycle.value.months))) + 'T' + time;
-                    formData.value = Object.assign({}, f, { mid: newId('m'), docType: 'result', kind: '정기', round: (Number(f.round) || 0) + 1, datetime: nextDt, summary: '', nextDate: '', target: '', replyDue: '' });
+                    formData.value = Object.assign({}, f, { mid: newId('m'), docType: 'result', kind: '정기', round: (Math.floor(Number(f.round)) || 0) + 1, datetime: nextDt, summary: '', nextDate: f.nextAuto ? toYmd(addMonths(parseD(nextDt) || cur, cycle.value.months)) : '', target: '', replyDue: '', docDate: '' });
                     checklist.value.forEach(g => g.items.forEach(it => { it.result = ''; it.note = ''; it.fid = ''; }));
                     prev.value = carryOld.concat(carryNew);
                     findings.value = [];
                     photos.value = {};
-                    window.scrollTo(0, 0);
+                    Object.keys(open).forEach(k => { open[k] = false; }); open.overview = true;
+                    scrollTop();
                     showToast(prev.value.length ? `다음 점검을 열었습니다. 미조치 ${prev.value.length}건을 이월했습니다.` : '다음 점검을 열었습니다.');
                 };
                 const openHistory = (id) => {
@@ -1341,7 +1609,7 @@
                     const s = cleanSnap(JSON.parse(JSON.stringify(h.snap)));
                     formData.value = s.formData; team.value = s.team; checklist.value = s.checklist; findings.value = s.findings; prev.value = s.prev;
                     photos.value = {};
-                    window.scrollTo(0, 0);
+                    scrollTop();
                     showToast('보관한 점검 기록을 열었습니다.');
                 };
                 const deleteHistory = (id) => {
@@ -1405,8 +1673,11 @@
                         showToast("PDF 도구를 불러오지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
                         return;
                     }
-                    // 줄여 보이던 미리보기를 실제 크기로 돌려놓고 찍는다
+                    // 줄여 보이던 미리보기를 실제 크기로 돌려놓고, 화면용 버튼(결재란 칸 추가 등)은 빼고 찍는다
+                    view.value = 'prev';
                     document.documentElement.style.setProperty('--pz', '1');
+                    element.classList.add('jt-cap');
+                    const done = () => { element.classList.remove('jt-cap'); isGeneratingPDF.value = false; fitPreview(); };
                     await nextTick();
                     const docNameMap = { notice: '실시통보', result: '결과서', request: '조치요구서', confirm: '조치결과확인서' };
                     const f = formData.value;
@@ -1419,26 +1690,63 @@
                         pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.jt-ph', '.jt-sign'] }
                     };
                     window.html2pdf().set(opt).from(element).save().then(() => {
-                        isGeneratingPDF.value = false; fitPreview();
+                        done();
                         showToast('PDF 파일을 저장했습니다.');
                     }).catch(() => {
-                        isGeneratingPDF.value = false; fitPreview();
+                        done();
                         showToast("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
                     });
                 };
 
                 return {
                     HIST_MAX, ROLES, RESULTS, STATUSES, exPool: EX_POOL, today, docTypes, formData, team, checklist, findings, prev, history: historyView,
-                    isGeneratingPDF, toast, saveMsg, cycle, titlePrefix, inspName, formattedDatetime, todayText, fmtDate,
+                    isGeneratingPDF, toast, saveMsg, cycle, titlePrefix, inspName, inspShort, formattedDatetime, docDateText, fmtDate, NOTICE_DEFAULT,
+                    T, para, hintP, hintN, txCount, labelCustom, resetAllText, roleLabel, apprOn, hasADoc, docLabel, confNote,
+                    view, setView, S, chk, stepList, warnTotal, allOpen, toggleAll, goStep, move, removeItem, removePrev, onDone, onNextInput, clearNext,
                     teamRows, teamSummary, stat, checkGroups, pendingBad, findingRows, prevRows, doneCount, ownerNames, targetNames, hostOwnCount,
-                    reqGroups, reqDoneCount, showPrev, secNo, noticeTo, noticeLines, noticeOpen, confRows, confDone, confDoing, confPhotos, confCompanies, photoRows, checks,
+                    reqGroups, reqDoneCount, showPrev, noticeTo, noticeLines, noticeOpen, confRows, confDone, confDoing, confPhotos, confCompanies, photoRows, checks,
                     roleOf, isHostRole, photoOf, addMember, removeMember, addGroup, removeGroup, addItem, setResult, fillRestOk, badToFindings,
                     addFinding, removeFinding, addPrev, onStatus, suggestNext, changeDocType, onPhoto, dropPhoto, resetResults,
                     isExModalOpen, openExModal, selectEx, archiveOnly, archiveAndNext, openHistory, deleteHistory,
                     oldFormAvailable, dismissOld, importOldForm, printDoc, downloadPDF
                 };
             }
-        }).mount('#app');
+        });
+        // 접이식 입력 단계 하나
+        app.component('jt-step', {
+            props: { s: { type: Object, required: true } },
+            setup() { return { acc: inject('acc') }; },
+            template: `<section class="jt-step" :class="{ open: acc.open[s.id] }" :data-step="s.id">
+                <h3 class="jt-sh"><button type="button" class="jt-shb" :aria-expanded="acc.open[s.id] ? 'true' : 'false'" :aria-controls="'st-' + s.id" @click="acc.toggle(s.id)">
+                    <span class="jt-sn" :class="{ ok: s.done }">{{ s.no }}</span>
+                    <span class="jt-stx"><span class="jt-st">{{ s.title }}<i v-if="s.done" class="ph-bold ph-check jt-sd" role="img" aria-label="입력 완료"></i></span><span class="jt-ss">{{ s.sum }}</span></span>
+                    <span v-if="s.warn" class="jt-sw" :title="'이 단계에서 채우거나 고칠 내용 ' + s.warn + '건'">보완 {{ s.warn }}</span>
+                    <span class="jt-sc" aria-hidden="true"></span>
+                </button></h3>
+                <div class="jt-sb" :id="'st-' + s.id" v-show="acc.open[s.id]">
+                    <slot></slot>
+                    <div v-if="!s.last" class="jt-nx"><button type="button" class="jt-btn jt-btn-pri" data-next @click="acc.next(s.id)">다음 단계 <i class="ph-bold ph-arrow-right"></i></button></div>
+                </div>
+            </section>`
+        });
+        // 고칠 수 있는 문서 문구 한 칸(기본값 표시, 고치면 표시하고 되돌리기 제공)
+        app.component('tx-in', {
+            props: { k: String, label: String, rows: [String, Number], hint: String },
+            setup() { return { tx: inject('tx') }; },
+            template: `<div class="jt-tx" :data-tx="k">
+                <label class="jt-lb" :for="'tx-' + k">{{ label }}<span v-if="tx.isCustom(k)" class="jt-cust"> · 직접 고침</span></label>
+                <textarea v-if="rows" :id="'tx-' + k" class="jt-in" :rows="rows" :value="tx.raw(k)" @input="tx.setT(k, $event.target.value)" @blur="tx.blurT(k)"></textarea>
+                <input v-else :id="'tx-' + k" type="text" class="jt-in" :value="tx.raw(k)" @input="tx.setT(k, $event.target.value)" @blur="tx.blurT(k)">
+                <div class="jt-txa">
+                    <button v-if="tx.isCustom(k)" type="button" class="jt-lk" data-txreset @click="tx.resetT(k)">{{ tx.isAuto(k) ? '자동으로 되돌리기' : '기본 문구로 되돌리기' }}</button>
+                    <button v-if="tx.canEmpty(k) && tx.T(k)" type="button" class="jt-lk jt-lk-del" data-txdel @click="tx.setT(k, '')">문구 지우기</button>
+                </div>
+                <p v-if="hint" class="jt-hint">{{ hint }}</p>
+            </div>`
+        });
+        // 결재란: 사이트 공통 모듈(assets/docs.js)이 그리고 저장한다
+        app.directive('appr', { mounted(el) { if (window.ADoc && window.ADoc.mountApproval) window.ADoc.mountApproval(el, DOC_KEY); } });
+        app.mount('#app');
     </script>
 </body>
 </html>

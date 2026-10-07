@@ -181,12 +181,114 @@
             .pt-add { padding: 10px 6px; font-size: 13px; }
             .pt-docbtn { padding: 12px 4px; }
         }
+
+        /* ---- 접이식 단계 */
+        .pt-step { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.05); scroll-margin-top: 8px; }
+        .pt-step.is-open { border-color: #94a3b8; }
+        .pt-sh0 { margin: 0; font-size: inherit; }
+        .pt-sh { width: 100%; display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: none; border: 0; cursor: pointer; font-family: inherit; text-align: left; min-height: 46px; border-radius: 12px; color: #1e293b; }
+        .pt-sh:hover { background: #f8fafc; }
+        .pt-sn { flex: none; width: 24px; height: 24px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .pt-sn.ok { background: #059669; color: #fff; }
+        .pt-st { flex: none; max-width: 62%; font-size: 14px; font-weight: 700; }
+        .pt-ss { flex: 1 1 0; min-width: 0; font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+        .pt-sd { flex: none; font-size: 12px; font-weight: 700; color: #059669; }
+        .pt-sw { flex: none; font-size: 12px; font-weight: 700; color: #b45309; }
+        .pt-sc { flex: none; width: 8px; height: 8px; border-right: 2px solid #64748b; border-bottom: 2px solid #64748b; transform: rotate(45deg); margin: 0 4px 3px 2px; transition: transform .15s; }
+        .is-open > .pt-sh0 .pt-sc { transform: rotate(-135deg); margin-bottom: -3px; }
+        .pt-sb { padding: 4px 12px 12px; border-top: 1px solid #f1f5f9; }
+        .pt-sb > * + * { margin-top: 10px; }
+        .pt-sb > :first-child { margin-top: 8px; }
+        .pt-next { display: flex; justify-content: flex-end; }
+        .pt-left > * + * { margin-top: 8px; }
+        .pt-quick { padding: 10px 12px; }
+        .pt-quick > * + * { margin-top: 8px; }
+        .pt-doc { gap: 6px; }
+        .pt-docbtn { flex-direction: row; gap: 6px; padding: 8px 4px; }
+        .pt-item-s { flex: 1 1 200px; min-width: 0; font-size: 13px; line-height: 1.45; color: #1e293b; overflow-wrap: anywhere; }
+        .pt-mv { flex: none; width: 30px; height: 32px; display: inline-flex; align-items: center; justify-content: center; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: inherit; padding: 0; }
+        .pt-mv:disabled { opacity: .35; cursor: default; }
+        .pt-link { font-size: 12px; font-weight: 700; color: #1d4ed8; background: none; border: 0; padding: 4px 2px; cursor: pointer; font-family: inherit; text-decoration: underline; }
+        .pt-auto-tag { font-size: 11px; color: #047857; font-weight: 700; }
+        .pt-sub { font-size: 12px; font-weight: 700; color: #0f172a; margin: 0; padding-top: 8px; border-top: 1px dashed #e2e8f0; }
+        .pt-sb > .pt-sub:first-child { border-top: 0; padding-top: 0; }
+        .pt-apprbox { overflow-x: auto; padding-bottom: 2px; }
+        .pt-apprbox .ad-appr { margin-left: 0; }
+        .pt-apprbox .ad-ctl { justify-content: flex-start; font-size: 13px; gap: 6px 14px; }
+        details.pt-law { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; }
+        details.pt-law summary { font-size: 13px; font-weight: 700; color: #475569; cursor: pointer; }
+        details.pt-law[open] summary { margin-bottom: 8px; }
+
+        /* ---- 아래 고정 막대 */
+        .pt-bar { flex: none; background: #fff; border-top: 1px solid #cbd5e1; z-index: 45; box-shadow: 0 -2px 8px rgba(15,23,42,.06); }
+        .pt-bar-in { max-width: 80rem; margin: 0 auto; padding: 8px 24px; display: flex; align-items: center; gap: 8px; }
+        .pt-bar-sp { flex: 1 1 0; min-width: 0; }
+        .pt-bar-st { font-size: 12px; font-weight: 700; color: #b45309; background: none; border: 0; cursor: pointer; font-family: inherit; padding: 6px 2px; text-decoration: underline; white-space: nowrap; }
+        .pt-bar-ok { font-size: 12px; font-weight: 700; color: #047857; white-space: nowrap; }
+        .pt-bar-ar { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pt-bar .pt-btn { white-space: nowrap; flex: none; }
+        .pt-tabs { display: inline-flex; flex: none; border: 1px solid #94a3b8; border-radius: 8px; overflow: hidden; }
+        .pt-tabs button { font-family: inherit; font-size: 13px; font-weight: 700; padding: 10px 12px; background: #fff; color: #475569; border: 0; cursor: pointer; min-height: 42px; }
+        .pt-tabs button + button { border-left: 1px solid #94a3b8; }
+        .pt-tabs button[aria-selected="true"] { background: #0f172a; color: #fff; }
+        .pt-toast { bottom: 76px !important; }
+
+        /* ---- 문서 결재란(공통 모듈) */
+        .pd-apprbox { flex: none; max-width: 100%; }
+        .pd-apprbox .ad-appr { font-size: 11px; }
+        .pd-apprbox .ad-appr th, .pd-apprbox .ad-appr td { min-width: 56px; }
+        .pt-pdfing .ad-ctl, .pt-pdfing .ad-ph { display: none !important; }
+        .pt-pdfing .ad-n:empty::before { content: none !important; }
+        .pd-head { flex-wrap: wrap; }
+        .pd-body { font-size: 12.5px; line-height: 1.9; margin: 0 0 12px; white-space: pre-wrap; }
+        .pd-foot { white-space: pre-wrap; }
+
+        /* 데스크톱: 화면 높이 안에서 왼쪽 입력·오른쪽 미리보기가 따로 스크롤된다 */
+        @media screen and (min-width: 1024px) {
+            #app { height: 100vh; height: 100dvh; min-height: 0 !important; }
+            main.pt-main { min-height: 0; overflow: hidden; grid-template-rows: minmax(0, 1fr); padding-top: 14px !important; padding-bottom: 0 !important; }
+            .pt-left, #preview-col { min-height: 0; height: 100%; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 20px; }
+            .pt-left { padding-right: 6px; scrollbar-width: thin; }
+            #preview-col { justify-content: flex-start; }
+            #preview-col > * { flex: none; }
+            .pt-tabs, .pt-m-only { display: none !important; }
+        }
+        /* 모바일·태블릿: 입력 | 미리보기 전환 + 아래 고정 막대 */
+        @media screen and (max-width: 1023.98px) {
+            html[data-view="form"] #preview-col { display: none !important; }
+            html[data-view="preview"] .pt-left { display: none !important; }
+            body { padding-bottom: 64px; }
+            .pt-bar { position: fixed; left: 0; right: 0; bottom: 0; }
+            .pt-bar-in { padding: 7px 10px; padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px)); gap: 6px; }
+            .pt-d-only { display: none !important; }
+            .pt-bar .pt-btn { padding: 11px 12px; font-size: 13px; }
+            .pt-top { position: static !important; }
+        }
+        @media (max-width: 640px) {
+            .pt-top h1 { font-size: 14px; }
+            .pt-top #printBtn { display: none; }
+            .pt-top-btns button { font-size: 12px; padding-left: 8px; padding-right: 8px; }
+            .pt-docbtn { font-size: 12px; }
+            .pt-docbtn i { display: none; }
+            .pt-top-sub, .pt-top .cm-save:empty { display: none; }
+            .pt-sh { padding: 10px; gap: 6px; }
+            .pt-st { font-size: 14px; }
+            .pt-mv { width: 38px; height: 40px; }
+            .pt-quick .pt-btn { flex: 1 1 auto; }
+            .pt-item { padding: 8px 0; }
+            .pt-item-s { flex-basis: 100%; font-size: 14px; }
+        }
+        @media print {
+            .pt-bar { display: none !important; }
+            #preview-col { display: block !important; overflow: visible !important; height: auto !important; }
+            .pd-head { break-inside: avoid; }
+        }
     </style>
 </head>
 <body class="text-slate-800">
     <div id="app" class="min-h-screen flex flex-col" v-cloak>
-        <header class="pt-top bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+        <header class="pt-top bg-slate-900 text-white py-3 px-6 shadow-md no-print sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
                 <div class="flex items-center space-x-3" style="min-width:0">
                     <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold mr-1" style="white-space:nowrap">← SafePlum</a>
                     <span class="bg-emerald-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-black">
@@ -194,18 +296,18 @@
                     </span>
                     <div style="min-width:0">
                         <h1 class="text-base font-bold tracking-tight">도급 작업장 순회점검 일지 작성기</h1>
-                        <p class="text-[11px] text-slate-400">산업안전보건법 제64조제1항제2호 · 시행규칙 제80조 · 일지 / 집계표 / 시정 요구서</p>
+                        <p class="pt-top-sub text-[11px] text-slate-400">산업안전보건법 제64조제1항제2호 · 시행규칙 제80조 · 일지 / 집계표 / 시정 요구서</p>
                     </div>
                 </div>
                 <div class="pt-top-btns flex flex-wrap items-center gap-2">
                     <span class="cm-save" role="status" aria-live="polite">{{ saveMsg }}</span>
-                    <button type="button" @click="resetResults" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                    <button type="button" id="resetResults" @click="resetResults" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
                         <i class="ph-bold ph-arrow-counter-clockwise"></i> 점검 결과 비우기
                     </button>
-                    <button type="button" @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <button type="button" id="printBtn" @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
                         <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
                     </button>
-                    <button type="button" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                    <button type="button" id="pdfBtn" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
                         <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
                         <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
                         <span>{{ isGeneratingPDF ? 'PDF 만드는 중…' : 'PDF 파일로 받기' }}</span>
@@ -214,9 +316,9 @@
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <main class="pt-main flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- 입력 -->
-            <div class="lg:col-span-5 space-y-5 no-print" style="min-width:0">
+            <div id="left-pane" class="pt-left lg:col-span-5 no-print" style="min-width:0">
                 <div v-if="oldFormAvailable" class="pt-old">
                     <p>예전 <b>순회점검표 서식</b>에 적어 둔 내용이 이 기기에 남아 있습니다. 여기로 가져올 수 있습니다(예전 내용은 지워지지 않습니다).</p>
                     <div class="pt-row">
@@ -225,20 +327,23 @@
                     </div>
                 </div>
 
-                <!-- 문서 종류 -->
-                <div class="pt-card">
-                    <span class="pt-lab" style="font-weight:700">문서 종류 선택</span>
-                    <div class="pt-doc">
+                <!-- 문서 종류 · 빠른 시작 -->
+                <div class="pt-card pt-quick">
+                    <div class="pt-doc" role="group" aria-label="문서 종류 선택">
                         <button v-for="item in docTypes" :key="item.value" type="button" class="pt-docbtn" :data-doc="item.value" @click="changeDocType(item.value)" :aria-pressed="formData.docType === item.value ? 'true' : 'false'">
                             <i :class="[item.icon, 'text-base']"></i>
                             <span>{{ item.label }}</span>
                         </button>
                     </div>
+                    <div class="pt-row">
+                        <button v-if="lastRec" type="button" id="copyLast" class="pt-btn pt-btn-pri" @click="copyLast" :title="lastRec.title + ' 기록의 구역·업체·점검 항목으로 오늘 일지를 새로 엽니다'">{{ copyLabel }}</button>
+                        <button v-if="formData.date !== today" type="button" id="quickToday" class="pt-btn" @click="setToday">점검일을 오늘로</button>
+                        <button type="button" id="toggleAll" class="pt-btn" style="margin-left:auto" @click="toggleAll">{{ allOpen ? '모두 접기' : '모두 펼치기' }}</button>
+                    </div>
                 </div>
 
-                <!-- 1. 기본 정보·주기 -->
-                <div class="pt-card">
-                    <div class="pt-h"><h3><i class="ph-fill ph-info text-blue-500"></i> 1. 사업장 · 순회 주기</h3></div>
+                <!-- 사업장 · 순회 주기 -->
+                <pt-step :s="S.basic" @toggle="toggle('basic')" @next="goNext('basic')">
                     <div class="pt-g2">
                         <div>
                             <label class="pt-lab" for="pCompany">도급인(회사)명</label>
@@ -265,11 +370,10 @@
                         <template v-else>업종을 고르면 순회점검 주기(2일에 1회 이상 / 1주일에 1회 이상)를 시행규칙 제80조제1항에 따라 판정합니다.</template>
                     </div>
                     <p class="pt-hint">업종은 통계청 한국표준산업분류 기준으로 사업장이 스스로 판단해야 합니다. 휴무일을 주기 계산에서 빼는지는 조문에 나와 있지 않습니다.</p>
-                </div>
+                </pt-step>
 
-                <!-- 집계표 설정 -->
-                <div v-if="formData.docType === 'summary'" class="pt-card">
-                    <div class="pt-h"><h3><i class="ph-bold ph-file-text text-slate-600"></i> 2. 집계 기간</h3></div>
+                <!-- 집계 기간 -->
+                <pt-step :s="S.sum" @toggle="toggle('sum')" @next="goNext('sum')">
                     <div class="pt-g2">
                         <div>
                             <label class="pt-lab" for="pSumMode">집계 단위</label>
@@ -280,24 +384,27 @@
                         </div>
                         <div>
                             <label class="pt-lab" for="pSumAnchor">기준일 (이 날이 든 주·달)</label>
-                            <input id="pSumAnchor" v-model="formData.sumAnchor" type="date" class="pt-in">
+                            <input id="pSumAnchor" :value="formData.sumAnchor || formData.date" @input="formData.sumAnchor = $event.target.value" type="date" class="pt-in">
                         </div>
                     </div>
                     <div class="pt-row">
-                        <button type="button" class="pt-btn" @click="shiftPeriod(-1)">← 이전</button>
+                        <button type="button" id="sumPrev" class="pt-btn" @click="shiftPeriod(-1)">← 이전</button>
                         <span class="text-xs font-bold text-slate-700">{{ period.label }}</span>
-                        <button type="button" class="pt-btn" @click="shiftPeriod(1)">다음 →</button>
+                        <button type="button" id="sumNext" class="pt-btn" @click="shiftPeriod(1)">다음 →</button>
                     </div>
+                    <p class="pt-hint">
+                        <template v-if="formData.sumAnchor">기준일을 직접 정했습니다. <button type="button" id="sumAuto" class="pt-link" @click="formData.sumAnchor = ''">점검일 기준(자동)으로 되돌리기</button></template>
+                        <span v-else class="pt-auto-tag">자동 — 점검일이 든 주·달을 집계합니다.</span>
+                    </p>
                     <div>
                         <label class="pt-lab" for="pSumNote">비고 (휴무일·작업 없는 날 등)</label>
                         <textarea id="pSumNote" v-model="formData.sumNote" rows="2" placeholder="예: 10/3(토)·10/4(일) 휴무로 관계수급인 작업 없음" class="pt-in"></textarea>
                     </div>
-                    <p class="pt-hint">집계표는 아래 "지난 순회 기록"에 보관한 일지와 지금 작성 중인 일지를 모아서 만듭니다. 이 기기에 보관하지 않은 날은 "기록 없음"으로 나오므로, 다른 곳에 기록이 있으면 비고에 적어 두세요.</p>
-                </div>
+                    <p class="pt-hint">집계표는 "지난 순회 기록"에 보관한 일지와 지금 작성 중인 일지를 모아서 만듭니다. 이 기기에 보관하지 않은 날은 "기록 없음"으로 나오므로, 다른 곳에 기록이 있으면 비고에 적어 두세요.</p>
+                </pt-step>
 
                 <!-- 시정 요구서 설정 -->
-                <div v-if="formData.docType === 'demand'" class="pt-card">
-                    <div class="pt-h"><h3><i class="ph-bold ph-megaphone text-slate-600"></i> 2. 시정 요구서 설정</h3></div>
+                <pt-step :s="S.dem" @toggle="toggle('dem')" @next="goNext('dem')">
                     <div class="pt-g2">
                         <div>
                             <label class="pt-lab" for="pDemTo">수신 (관계수급인)</label>
@@ -312,26 +419,29 @@
                         </div>
                         <div>
                             <label class="pt-lab" for="pDemDate">발행일</label>
-                            <input id="pDemDate" v-model="formData.demandDate" type="date" class="pt-in">
+                            <input id="pDemDate" :value="formData.demandDate || formData.date" @input="formData.demandDate = $event.target.value" type="date" class="pt-in">
                         </div>
                         <div>
                             <label class="pt-lab" for="pDemFoot">발신 명의</label>
                             <input id="pDemFoot" v-model="formData.demandFooter" type="text" placeholder="예: 안전보건총괄책임자" class="pt-in">
                         </div>
                     </div>
-                    <label class="pt-ck"><input type="checkbox" v-model="formData.demandAll"> 조치 완료된 지적사항도 함께 싣기</label>
-                    <p class="pt-hint">시정 요구서에는 아래 "지적사항"과 "지난 지적사항 이행 확인" 중 담당 업체가 수신 업체와 같은 건이 들어갑니다. 지금 {{ demandRows.length }}건.</p>
-                </div>
+                    <p class="pt-hint">
+                        <template v-if="formData.demandDate">발행일을 직접 정했습니다. <button type="button" id="demAuto" class="pt-link" @click="formData.demandDate = ''">점검일과 같게(자동) 되돌리기</button></template>
+                        <span v-else class="pt-auto-tag">발행일 자동 — 점검일과 같습니다.</span>
+                    </p>
+                    <label class="pt-ck"><input id="pDemAll" type="checkbox" v-model="formData.demandAll"> 조치 완료된 지적사항도 함께 싣기</label>
+                    <p class="pt-hint">시정 요구서에는 "지적사항"과 "지난 지적사항 이행 확인" 중 담당 업체가 수신 업체와 같은 건이 들어갑니다. 지금 {{ demandRows.length }}건.</p>
+                </pt-step>
 
-                <!-- 2. 점검 개요 -->
-                <div class="pt-card">
-                    <div class="pt-h"><h3><i class="ph-fill ph-users-three text-emerald-600"></i> {{ formData.docType === 'log' ? '2' : '3' }}. 순회 일시 · 점검자</h3></div>
+                <!-- 순회 일시 · 점검자 -->
+                <pt-step :s="S.when" @toggle="toggle('when')" @next="goNext('when')">
                     <div class="pt-g3">
-                        <div class="pt-span2" style="grid-column:1/-1">
+                        <div style="grid-column:1/-1">
                             <label class="pt-lab" for="pDate">점검일</label>
                             <div class="pt-row" style="flex-wrap:nowrap">
                                 <input id="pDate" v-model="formData.date" type="date" class="pt-in" style="flex:1">
-                                <button type="button" class="pt-btn" style="flex:none" @click="setToday">오늘</button>
+                                <button type="button" id="setToday" class="pt-btn" style="flex:none" @click="setToday">오늘</button>
                             </div>
                         </div>
                         <div>
@@ -347,6 +457,10 @@
                             <input id="pWeather" v-model="formData.weather" type="text" placeholder="맑음" class="pt-in">
                         </div>
                     </div>
+                    <div class="pt-row">
+                        <button type="button" id="timeNow1" class="pt-btn" @click="setNow('timeFrom')">시작 = 지금</button>
+                        <button type="button" id="timeNow2" class="pt-btn" @click="setNow('timeTo')">종료 = 지금</button>
+                    </div>
                     <div class="pt-g2">
                         <div>
                             <label class="pt-lab" for="pInspDept">점검자 소속·직책</label>
@@ -357,19 +471,17 @@
                             <input id="pInsp" v-model="formData.inspector" type="text" placeholder="성명" class="pt-in">
                         </div>
                     </div>
-                </div>
+                </pt-step>
 
-                <!-- 3. 순회 구역 -->
-                <div class="pt-card">
-                    <div class="pt-h">
-                        <h3><i class="ph-bold ph-users text-emerald-600"></i> {{ formData.docType === 'log' ? '3' : '4' }}. 순회 구역 · 관계수급인</h3>
-                        <span class="text-[11px] text-slate-400">{{ zones.length }}곳 · 작업 인원 {{ totalWorkers }}명</span>
-                    </div>
+                <!-- 순회 구역 -->
+                <pt-step :s="S.zones" @toggle="toggle('zones')" @next="goNext('zones')">
                     <p v-if="!zones.length" class="pt-hint">순회한 구역이 없습니다. "구역 추가"를 눌러 관계수급인이 작업하는 장소를 넣으세요.</p>
                     <div v-for="(z, idx) in zones" :key="'z-' + idx" class="pt-box pt-zone">
                         <div class="pt-rowhead">
                             <span class="pt-no">{{ idx + 1 }}</span>
                             <input v-model="z.zone" type="text" placeholder="구역·공정 (예: A동 2층 배관)" aria-label="구역·공정" class="pt-in" style="flex:1;font-weight:700">
+                            <button type="button" class="pt-mv" :disabled="idx === 0" @click="moveRow(zones, idx, -1)" aria-label="이 구역을 위로">↑</button>
+                            <button type="button" class="pt-mv" :disabled="idx === zones.length - 1" @click="moveRow(zones, idx, 1)" aria-label="이 구역을 아래로">↓</button>
                             <button type="button" class="pt-x" @click="removeZone(idx)" aria-label="이 구역 삭제"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="pt-g2">
@@ -380,25 +492,16 @@
                         </div>
                     </div>
                     <button type="button" id="addZone" class="pt-add" @click="addZone"><i class="ph-bold ph-plus-circle"></i> 구역 추가</button>
-                </div>
+                </pt-step>
 
-                <!-- 자동 확인 -->
-                <div class="space-y-2" id="checks" style="margin-top:-8px">
-                    <p v-for="(c, i) in checks" :key="'chk-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
-                </div>
-
-                <!-- 4. 지난 지적사항 이행 확인 -->
-                <div v-if="formData.docType !== 'summary'" class="pt-card">
-                    <div class="pt-h">
-                        <h3><i class="ph-bold ph-arrows-clockwise text-slate-600"></i> {{ formData.docType === 'log' ? '4' : '5' }}. 지난 지적사항 이행 확인</h3>
-                        <button type="button" id="addPrev" class="pt-add" @click="addPrev"><i class="ph-bold ph-plus-circle"></i> 추가</button>
-                    </div>
-                    <p v-if="!prev.length" class="pt-hint">조치가 끝나지 않은 지적사항은 "보관하고 다음 순회 작성"을 누르면 여기로 자동으로 넘어옵니다.</p>
+                <!-- 지난 지적사항 이행 확인 -->
+                <pt-step :s="S.prev" @toggle="toggle('prev')" @next="goNext('prev')">
+                    <p v-if="!prev.length" class="pt-hint">조치가 끝나지 않은 지적사항은 다음 순회 일지를 열 때(지난 일지 복사 · 보관하고 다음 순회 작성) 여기로 자동으로 넘어옵니다.</p>
                     <div v-for="(p, idx) in prev" :key="'pv-' + idx" class="pt-box pt-prev">
                         <div class="pt-rowhead">
                             <span class="pt-no">{{ idx + 1 }}</span>
                             <input v-model="p.hazard" type="text" placeholder="지난 지적사항" aria-label="지난 지적사항" class="pt-in" style="flex:1">
-                            <button type="button" class="pt-x" @click="prev.splice(idx, 1)" aria-label="이 이행 확인 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                            <button type="button" class="pt-x" @click="removePrev(idx)" aria-label="이 이행 확인 항목 삭제"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <p v-if="p.demand || p.zone || p.found" class="pt-hint">{{ [p.found ? '지적일 ' + p.found : '', p.zone, p.demand ? '요구: ' + p.demand : ''].filter(Boolean).join(' · ') }}</p>
                         <div class="pt-g3">
@@ -409,31 +512,36 @@
                             </select>
                         </div>
                     </div>
-                </div>
+                    <button type="button" id="addPrev" class="pt-add" @click="addPrev"><i class="ph-bold ph-plus-circle"></i> 이행 확인 항목 추가</button>
+                </pt-step>
 
-                <!-- 5. 점검 항목 -->
-                <div v-if="formData.docType === 'log'" class="pt-card" id="itemsCard">
-                    <div class="pt-h">
-                        <h3><i class="ph-bold ph-check text-emerald-600"></i> 5. 점검 항목</h3>
-                        <button type="button" id="openEx" @click="openExModal" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm flex items-center gap-1.5 transition">
-                            <i class="ph-fill ph-magic-wand"></i> 업종별 예시 항목
-                        </button>
+                <!-- 점검 항목 -->
+                <pt-step :s="S.items" @toggle="toggle('items')" @next="goNext('items')">
+                    <div class="pt-row">
+                        <button v-if="tally.none" type="button" id="fillGood" class="pt-btn pt-btn-pri" @click="fillGood">남은 {{ tally.none }}개 모두 양호</button>
+                        <span class="text-[11px] text-slate-500">양호 {{ tally.good }} · 미흡 {{ tally.bad }} · 해당없음 {{ tally.na }} · 미확인 {{ tally.none }}</span>
                     </div>
                     <div class="pt-row">
-                        <span class="text-[11px] text-slate-500">양호 {{ tally.good }} · 미흡 {{ tally.bad }} · 해당없음 {{ tally.na }} · 미확인 {{ tally.none }}</span>
-                        <button v-if="tally.none" type="button" id="fillGood" class="pt-btn" style="margin-left:auto" @click="fillGood">남은 {{ tally.none }}개 모두 양호</button>
+                        <label class="pt-ck"><input id="editItems" type="checkbox" v-model="editItems"> 항목 고치기 (문구 · 추가 · 삭제 · 순서)</label>
+                        <button type="button" id="openEx" @click="openExModal" class="pt-btn" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px"><i class="ph-fill ph-magic-wand"></i> 업종별 예시 항목</button>
                     </div>
                     <p class="pt-hint pt-hint-red">직접 확인한 항목만 표시하세요. 점검 항목은 법령에 정해진 것이 아니라 사업장에 맞게 고쳐 쓰는 예시입니다.</p>
+                    <div id="itemsCard">
                     <template v-for="(g, gi) in groups" :key="'g-' + gi">
-                        <div class="pt-grp">
-                            <span>{{ g.name || '(분류 없음)' }}</span>
-                            <button type="button" class="pt-add" style="padding:0 2px" @click="addItem(g.name)" :aria-label="(g.name || '분류 없음') + ' 항목 추가'"><i class="ph-bold ph-plus-circle"></i> 항목</button>
+                        <div class="pt-grp" v-if="editItems || g.shown">
+                            <input v-if="editItems" :value="g.name" @change="renameGroup(g.name, $event.target.value)" type="text" placeholder="분류 이름" aria-label="분류 이름" class="pt-in" style="flex:1;font-weight:700">
+                            <span v-else>{{ g.name || '(분류 없음)' }}</span>
+                            <button v-if="editItems" type="button" class="pt-add" style="padding:0 2px" @click="addItem(g.name)" :aria-label="(g.name || '분류 없음') + ' 항목 추가'"><i class="ph-bold ph-plus-circle"></i> 항목</button>
                         </div>
-                        <div v-for="it in g.rows" :key="'it-' + it.i" class="pt-item">
-                            <div class="pt-item-t pt-rowhead">
+                        <template v-for="(it, ri) in g.rows" :key="'it-' + it.i">
+                        <div v-if="editItems || items[it.i].text.trim()" class="pt-item">
+                            <div v-if="editItems" class="pt-item-t pt-rowhead">
                                 <textarea v-model="items[it.i].text" rows="2" placeholder="점검 항목" aria-label="점검 항목" class="pt-in pt-auto"></textarea>
+                                <button type="button" class="pt-mv" :disabled="ri === 0" @click="moveItem(it.i, -1)" aria-label="이 점검 항목을 위로">↑</button>
+                                <button type="button" class="pt-mv" :disabled="ri === g.rows.length - 1" @click="moveItem(it.i, 1)" aria-label="이 점검 항목을 아래로">↓</button>
                                 <button type="button" class="pt-x" @click="removeItem(it.i)" aria-label="이 점검 항목 삭제"><i class="ph-bold ph-x"></i></button>
                             </div>
+                            <span v-else class="pt-item-s">{{ items[it.i].text }}</span>
                             <div class="pt-seg" role="group" :aria-label="(items[it.i].text || '항목') + ' 점검 결과'">
                                 <button type="button" class="pt-good" :aria-pressed="items[it.i].result === '양호' ? 'true' : 'false'" @click="setResult(it.i, '양호')">양호</button>
                                 <button type="button" class="pt-bad" :aria-pressed="items[it.i].result === '미흡' ? 'true' : 'false'" @click="setResult(it.i, '미흡')">미흡</button>
@@ -441,24 +549,24 @@
                             </div>
                             <button v-if="items[it.i].result === '미흡' && !hasFindingFor(items[it.i].text)" type="button" class="pt-chip" @click="findingFromItem(it.i)">+ 지적사항으로 옮기기</button>
                         </div>
+                        </template>
                     </template>
-                    <div class="pt-row">
-                        <input v-model="newGroup" type="text" placeholder="새 분류 이름 (예: 밀폐공간)" aria-label="새 분류 이름" class="pt-in" style="flex:1 1 140px">
+                    </div>
+                    <div v-if="editItems" class="pt-row">
+                        <input v-model="newGroup" type="text" placeholder="새 분류 이름 (예: 밀폐공간)" aria-label="새 분류 이름" class="pt-in" style="flex:1 1 140px" @keydown.enter.prevent="addGroup">
                         <button type="button" id="addGroup" class="pt-btn" @click="addGroup">분류 추가</button>
                     </div>
-                </div>
+                </pt-step>
 
-                <!-- 6. 지적사항 -->
-                <div v-if="formData.docType !== 'summary'" class="pt-card">
-                    <div class="pt-h">
-                        <h3><i class="ph-bold ph-warning" style="color:#d97706"></i> {{ formData.docType === 'log' ? '6' : '6' }}. 지적사항 · 시정 요구</h3>
-                        <button type="button" id="addFinding" class="pt-add" @click="addFinding()"><i class="ph-bold ph-plus-circle"></i> 추가</button>
-                    </div>
+                <!-- 지적사항 -->
+                <pt-step :s="S.find" @toggle="toggle('find')" @next="goNext('find')">
                     <p v-if="!findings.length" class="pt-hint">지적사항이 없으면 비워 두세요. 일지에는 "지적사항 없음"으로 나옵니다.</p>
                     <div v-for="(f, idx) in findings" :key="f.fid" :class="['pt-box', 'pt-finding', f.status !== '조치 완료' ? 'pt-box-warn' : '']">
                         <div class="pt-rowhead">
                             <span class="pt-no">{{ idx + 1 }}</span>
                             <input v-model="f.zone" type="text" list="ptZones" placeholder="위치·구역" aria-label="지적 위치" class="pt-in" style="flex:1">
+                            <button type="button" class="pt-mv" :disabled="idx === 0" @click="moveRow(findings, idx, -1)" aria-label="이 지적사항을 위로">↑</button>
+                            <button type="button" class="pt-mv" :disabled="idx === findings.length - 1" @click="moveRow(findings, idx, 1)" aria-label="이 지적사항을 아래로">↓</button>
                             <button type="button" class="pt-x" @click="removeFinding(idx)" aria-label="이 지적사항 삭제"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <textarea v-model="f.hazard" rows="2" placeholder="지적사항 (위험요인) — 예: 2층 개구부 덮개가 열린 채 방치됨" aria-label="지적사항" class="pt-in"></textarea>
@@ -472,13 +580,13 @@
                         </div>
                         <label class="pt-ck"><input type="checkbox" v-model="f.immediate" @change="onImmediate(f)"> 현장에서 즉시 조치함</label>
                     </div>
+                    <button type="button" id="addFinding" class="pt-add" @click="addFinding()"><i class="ph-bold ph-plus-circle"></i> 지적사항 추가</button>
                     <datalist id="ptOwners"><option v-for="n in ownerNames" :key="n" :value="n"></option></datalist>
                     <datalist id="ptZones"><option v-for="n in zoneNames" :key="n" :value="n"></option></datalist>
-                </div>
+                </pt-step>
 
-                <!-- 7. 종합 의견·다음 순회 -->
-                <div v-if="formData.docType === 'log'" class="pt-card">
-                    <div class="pt-h"><h3><i class="ph-fill ph-sparkle text-purple-600"></i> 7. 특이사항 · 다음 순회</h3></div>
+                <!-- 특이사항 · 다음 순회 -->
+                <pt-step :s="S.note" @toggle="toggle('note')" @next="goNext('note')">
                     <div>
                         <label class="pt-lab" for="pNote">특이사항 · 종합 의견</label>
                         <textarea id="pNote" v-model="formData.note" rows="3" placeholder="예: 3층 혼재작업 구간 작업 시간 조정을 협의체 안건으로 올리기로 함" class="pt-in"></textarea>
@@ -486,19 +594,23 @@
                     <div>
                         <label class="pt-lab" for="pNext">다음 순회 예정일</label>
                         <div class="pt-row" style="flex-wrap:nowrap">
-                            <input id="pNext" v-model="formData.nextDate" type="date" class="pt-in" style="flex:1">
+                            <input id="pNext" v-model="formData.nextDate" @input="formData.nextAuto = false" type="date" class="pt-in" style="flex:1">
                             <button type="button" id="suggestNext" class="pt-btn" style="flex:none" @click="suggestNext">주기에 맞춰 넣기</button>
                         </div>
+                        <p class="pt-hint" style="margin-top:4px">
+                            <span v-if="formData.nextAuto && formData.nextDate" class="pt-auto-tag">자동 — 점검일이나 업종을 바꾸면 따라 바뀝니다.</span>
+                            <template v-else-if="formData.nextDate">직접 넣은 날짜입니다. <button type="button" id="nextClear" class="pt-link" @click="formData.nextDate = ''; formData.nextAuto = false">비우기</button></template>
+                            <template v-else>비워 두면 일지에 "다음 순회" 줄이 나오지 않습니다.</template>
+                        </p>
                     </div>
-                </div>
+                </pt-step>
 
-                <!-- 8. 사진 -->
-                <div v-if="formData.docType !== 'summary'" class="pt-card">
-                    <div class="pt-h"><h3><i class="ph-fill ph-camera text-slate-600"></i> {{ formData.docType === 'log' ? '8' : '7' }}. 현장 사진 첨부 (최대 {{ PHOTO_MAX }}장)</h3></div>
+                <!-- 사진 -->
+                <pt-step :s="S.photo" @toggle="toggle('photo')" @next="goNext('photo')">
                     <div class="pt-row">
                         <input type="file" accept="image/*" multiple @change="handleFileUpload" id="photo-input" class="hidden">
                         <label for="photo-input" class="pt-btn" style="display:inline-flex;align-items:center;gap:6px"><i class="ph-bold ph-upload-simple"></i> 사진 선택·촬영</label>
-                        <span class="text-xs text-slate-500">{{ photos.length ? photos.length + '장 첨부됨' : '선택된 사진 없음' }}</span>
+                        <span class="text-xs text-slate-500">{{ photos.length ? photos.length + '장 첨부됨 (최대 ' + PHOTO_MAX + '장)' : '최대 ' + PHOTO_MAX + '장' }}</span>
                     </div>
                     <div v-if="photos.length" class="pt-photos">
                         <div v-for="(ph, i) in photos" :key="'ph-' + i">
@@ -510,17 +622,80 @@
                         </div>
                     </div>
                     <p class="pt-hint">사진은 이 기기에 저장되지 않습니다. 화면을 닫거나 다음 순회로 넘어가면 사라지므로, 인쇄·PDF 저장을 먼저 하세요.</p>
-                </div>
+                </pt-step>
 
-                <!-- 보관·이어 쓰기 -->
-                <div class="pt-card">
-                    <div class="pt-h"><h3><i class="ph-bold ph-floppy-disk text-slate-600"></i> 다음 순회 이어 쓰기 · 지난 순회 기록</h3></div>
-                    <button type="button" id="archiveNext" class="pt-btn pt-btn-pri pt-btn-big" @click="archiveAndNext">보관하고 다음 순회 작성</button>
-                    <div class="pt-row">
-                        <button type="button" id="archiveOnly" class="pt-btn" @click="archiveOnly">지금 내용만 보관</button>
-                        <label class="pt-ck"><input type="checkbox" v-model="formData.keepResults"> 점검 결과(양호·미흡)도 복사</label>
+                <!-- 문서 꾸미기 -->
+                <pt-step :s="S.style" @toggle="toggle('style')" @next="goNext('style')">
+                    <p class="pt-sub">문서 제목</p>
+                    <div v-if="formData.docType === 'log'">
+                        <label class="pt-lab" for="cTitleLog">일지 제목</label>
+                        <input id="cTitleLog" v-model="custom.titleLog" type="text" :placeholder="DEF.titleLog" class="pt-in">
                     </div>
-                    <p class="pt-hint">"보관하고 다음 순회 작성"을 누르면 이번 일지가 아래 목록에 남고, 순회 구역·업체·점검 항목은 그대로 둔 채 점검일만 다음 순회일로 바뀝니다. 조치가 끝나지 않은 지적사항은 "이행 확인"으로 옮겨집니다. 이 기기에 최대 {{ HIST_MAX }}건까지 보관합니다.</p>
+                    <div v-if="formData.docType === 'summary'">
+                        <label class="pt-lab" for="cTitleSum">집계표 제목 (앞에 주간·월간이 붙습니다)</label>
+                        <input id="cTitleSum" v-model="custom.titleSum" type="text" :placeholder="DEF.titleSum" class="pt-in">
+                    </div>
+                    <div v-if="formData.docType === 'demand'">
+                        <label class="pt-lab" for="cTitleDem">시정 요구서 제목</label>
+                        <input id="cTitleDem" v-model="custom.titleDemand" type="text" :placeholder="DEF.titleDemand" class="pt-in">
+                    </div>
+
+                    <template v-if="formData.docType !== 'demand'">
+                        <p class="pt-sub">결재란</p>
+                        <label class="pt-ck"><input id="cShowAppr" type="checkbox" v-model="custom.showAppr"> 문서 위쪽에 결재란 넣기</label>
+                        <template v-if="custom.showAppr">
+                            <div v-if="hasADoc" class="pt-apprbox"><div :data-pappr="apprKey" :key="'sa-' + apprKey"></div></div>
+                            <p class="pt-hint">칸 이름과 성명은 눌러서 바로 고칩니다(문서 미리보기의 결재란에서도 같습니다). 칸은 6개까지, 서명 칸을 누르면 서명을 넣을 수 있습니다. "모든 서식 기본으로"를 누르면 SafePlum의 다른 서식에도 같은 결재란이 기본으로 쓰입니다. 서명은 새 순회 일지를 열면 지워집니다.</p>
+                            <label class="pt-ck" style="white-space:normal"><input id="cApprAuto" type="checkbox" v-model="custom.apprAutoName"> 첫 칸 성명이 비어 있으면 점검자 성명을 자동으로 넣기</label>
+                        </template>
+                    </template>
+
+                    <template v-if="formData.docType === 'log'">
+                        <p class="pt-sub">일지 아래 서명 줄</p>
+                        <label class="pt-ck"><input id="cShowSign" type="checkbox" v-model="custom.showSign"> 점검자 · 확인자 서명 줄 넣기</label>
+                        <p class="pt-sub">항목 이름 <span style="font-weight:400;color:#64748b">(비워 두면 기본 이름)</span></p>
+                        <div class="pt-g2" id="labelGrid">
+                            <div v-for="d in LABEL_DEFS" :key="d.k">
+                                <label class="pt-lab" :for="'cl-' + d.k">{{ d.def }}</label>
+                                <input :id="'cl-' + d.k" v-model="custom.labels[d.k]" type="text" :placeholder="d.def" class="pt-in">
+                            </div>
+                        </div>
+                    </template>
+
+                    <template v-if="formData.docType === 'demand'">
+                        <p class="pt-sub">본문 문구</p>
+                        <textarea id="cDemBody" v-model="demandBodyV" rows="4" aria-label="시정 요구서 본문 문구" class="pt-in"></textarea>
+                        <div class="pt-row" v-if="custom.demandBody != null"><span class="pt-hint">직접 고친 문구입니다.</span><button type="button" id="cDemBodyReset" class="pt-link" @click="custom.demandBody = null">기본 문구로 되돌리기</button></div>
+                        <div class="pt-g2">
+                            <div>
+                                <label class="pt-lab" for="cSeal">발신 명의 뒤 표시</label>
+                                <input id="cSeal" v-model="sealV" type="text" placeholder="(비움)" class="pt-in">
+                            </div>
+                            <div style="align-self:end">
+                                <label class="pt-ck"><input id="cShowReply" type="checkbox" v-model="custom.showReply"> 조치 결과 확인란 넣기</label>
+                            </div>
+                        </div>
+                    </template>
+
+                    <p class="pt-sub">문서 맨 아래 문구</p>
+                    <textarea id="cFoot" v-model="footV" rows="3" aria-label="문서 맨 아래 문구" placeholder="(문구 없음 — 문서에 나오지 않습니다)" class="pt-in"></textarea>
+                    <div class="pt-row">
+                        <button type="button" id="cFootClear" class="pt-btn" @click="footV = ''">문구 지우기</button>
+                        <button v-if="custom[footKey] != null" type="button" id="cFootReset" class="pt-link" @click="custom[footKey] = null">기본 문구로 되돌리기</button>
+                    </div>
+                    <div class="pt-row" style="border-top:1px dashed #e2e8f0;padding-top:8px">
+                        <button type="button" id="cResetAll" class="pt-btn" @click="resetCustom">제목 · 항목 이름 · 문구 모두 기본으로</button>
+                    </div>
+                </pt-step>
+
+                <!-- 보관 · 지난 기록 -->
+                <pt-step :s="S.hist" @toggle="toggle('hist')" @next="goNext('hist')">
+                    <div class="pt-row">
+                        <button type="button" id="archiveOnly2" class="pt-btn pt-btn-pri" @click="archiveOnly">{{ archState === 'changed' ? '다시 보관' : '보관' }}</button>
+                        <button type="button" id="archiveNext2" class="pt-btn" @click="archiveAndNext">보관하고 다음 순회 작성</button>
+                    </div>
+                    <label class="pt-ck" style="white-space:normal"><input id="keepResults" type="checkbox" v-model="formData.keepResults"> 다음 일지를 열 때 점검 결과(양호·미흡)도 복사</label>
+                    <p class="pt-hint">"보관"은 이번 일지를 아래 목록에 남깁니다. 다음 날에는 맨 위의 "지난 일지 복사"를 누르면 구역·업체·점검 항목은 그대로 둔 채 오늘 날짜의 새 일지가 열리고, 조치가 끝나지 않은 지적사항은 "이행 확인"으로 넘어옵니다. 이 기기에 최대 {{ HIST_MAX }}건까지 보관합니다.</p>
                     <ul v-if="history.length" class="pt-hist">
                         <li v-for="h in history" :key="h.id">
                             <span class="pt-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
@@ -530,10 +705,10 @@
                         </li>
                     </ul>
                     <p v-else class="pt-hint">보관한 순회 기록이 아직 없습니다.</p>
-                </div>
+                </pt-step>
 
-                <div class="pt-card">
-                    <div class="pt-h"><h3>법령 메모</h3></div>
+                <details class="pt-law">
+                    <summary>법령 메모</summary>
                     <ul class="cm-law">
                         <li>도급인은 관계수급인 근로자가 도급인의 사업장에서 작업을 하는 경우 작업장 순회점검을 이행하여야 합니다(<a class="pt-a" href="../../laws/act/#j64">법 제64조제1항제2호</a>).</li>
                         <li>순회점검 주기(<a class="pt-a" href="../../laws/rule/#j80">시행규칙 제80조제1항</a>): ① 건설업, 제조업, 토사석 광업, 서적, 잡지 및 기타 인쇄물 출판업, 음악 및 기타 오디오물 출판업, 금속 및 비금속 원료 재생업 — 2일에 1회 이상 ② 위 사업을 제외한 사업 — 1주일에 1회 이상.</li>
@@ -542,17 +717,17 @@
                         <li>시행규칙 제80조는 순회점검의 주기만 정하고 있습니다. 점검 항목·기록 서식·보존기간은 이 조문에 정해져 있지 않으므로, 실시 사실을 확인할 수 있게 사내 기준을 정해 기록·보관하세요.</li>
                     </ul>
                     <p class="pt-hint" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
-                </div>
+                </details>
             </div>
 
             <!-- 미리보기 -->
             <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
                 <div class="w-full flex justify-between items-center mb-3 no-print">
                     <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-xs font-bold text-slate-600">A4 실시간 미리보기</span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span class="text-xs font-bold text-slate-600">A4 미리보기</span>
                     </div>
-                    <span class="text-[11px] text-slate-400">A4 (210mm × 297mm)</span>
+                    <span class="text-[11px] text-slate-400">결재란의 칸 이름·성명은 눌러서 고칩니다</span>
                 </div>
 
                 <div id="print-area" class="a4-container cm-zoom p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm">
@@ -560,44 +735,47 @@
                     <!-- [DOC 1] 순회점검 일지 -->
                     <div v-if="formData.docType === 'log'">
                         <div class="pd-head">
-                            <div><h2 class="pd-title">도급 작업장 순회점검 일지</h2></div>
-                            <table class="pd-appr">
-                                <tr><th>점검자</th><th>검토</th><th>승인</th></tr>
-                                <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
-                            </table>
+                            <div><h2 class="pd-title">{{ titleLog }}</h2></div>
+                            <template v-if="custom.showAppr">
+                                <div v-if="hasADoc" class="pd-apprbox" data-pappr="tool.patrol" key="da-log"></div>
+                                <table v-else class="pd-appr">
+                                    <tr><th>점검자</th><th>검토</th><th>승인</th></tr>
+                                    <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
+                                </table>
+                            </template>
                         </div>
 
                         <table class="pd-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>사업장</th><td>{{ siteLabel }}</td><th>점검 일시</th><td>{{ dateLabel }}</td></tr>
-                            <tr><th>점검자</th><td>{{ inspLabel }}</td><th>날씨</th><td>{{ formData.weather }}</td></tr>
-                            <tr><th>점검 주기</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '(업종 미선택)' }}</td></tr>
+                            <tr><th>{{ L.lSite }}</th><td>{{ siteLabel }}</td><th>{{ L.lWhen }}</th><td>{{ dateLabel }}</td></tr>
+                            <tr><th>{{ L.lInsp }}</th><td>{{ inspLabel }}</td><th>{{ L.lWeather }}</th><td>{{ formData.weather }}</td></tr>
+                            <tr><th>{{ L.lCycle }}</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '' }}</td></tr>
                         </table>
 
-                        <table class="pd-t">
+                        <table class="pd-t" id="docZones">
                             <colgroup><col style="width:6%"><col style="width:23%"><col style="width:20%"><col><col style="width:8%"><col style="width:19%"></colgroup>
                             <thead>
-                                <tr><th colspan="6">순회 구역 및 관계수급인</th></tr>
-                                <tr class="pd-sub"><th>번호</th><th>구역·공정</th><th>관계수급인</th><th>작업 내용</th><th>인원</th><th>동행·확인자 (서명)</th></tr>
+                                <tr><th colspan="6">{{ L.lZones }}</th></tr>
+                                <tr class="pd-sub"><th>번호</th><th>{{ L.lZone }}</th><th>{{ L.lSub }}</th><th>{{ L.lWork }}</th><th>인원</th><th>{{ L.lComp }}</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(z, i) in zoneRows" :key="'dz-' + i">
                                     <td class="c">{{ i + 1 }}</td><td>{{ z.zone }}</td><td>{{ z.company }}</td><td class="s">{{ z.work }}</td><td class="c">{{ z.workers }}</td>
-                                    <td class="c s">{{ z.companion }} <span style="color:#cbd5e1">(서명)</span></td>
+                                    <td class="s">{{ z.companion }}</td>
                                 </tr>
-                                <tr v-if="!zoneRows.length"><td colspan="6" class="c" style="color:#64748b">순회 구역을 입력하세요</td></tr>
+                                <tr v-if="!zoneRows.length"><td colspan="6" style="height:26px"></td></tr>
                             </tbody>
                         </table>
 
                         <table v-if="prevRows.length" class="pd-t" id="docPrev">
                             <colgroup><col style="width:6%"><col style="width:13%"><col><col style="width:26%"><col style="width:14%"><col style="width:12%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th colspan="7">지난 지적사항 이행 확인</th></tr>
+                                <tr><th colspan="7">{{ L.lPrev }}</th></tr>
                                 <tr class="pd-sub"><th>번호</th><th>지적일</th><th>지적사항</th><th>시정 요구 내용</th><th>담당</th><th>기한</th><th>결과</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(p, i) in prevRows" :key="'dp-' + i">
-                                    <td class="c">{{ i + 1 }}</td><td class="c s">{{ p.found }}</td><td class="pre">{{ p.hazard }}</td><td class="s pre">{{ p.demand }}</td><td class="c s">{{ p.owner }}</td><td class="c s">{{ p.due }}</td><td class="c s">{{ p.result || '확인 전' }}</td>
+                                    <td class="c">{{ i + 1 }}</td><td class="c s">{{ p.found }}</td><td class="pre">{{ p.hazard }}</td><td class="s pre">{{ p.demand }}</td><td class="c s">{{ p.owner }}</td><td class="c s">{{ p.due }}</td><td class="c s">{{ p.result }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -605,7 +783,7 @@
                         <table class="pd-t" id="docItems">
                             <colgroup><col style="width:6%"><col><col style="width:9%"><col style="width:9%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th>번호</th><th>점검 항목</th><th>양호</th><th>미흡</th><th>해당없음</th></tr>
+                                <tr><th>번호</th><th>{{ L.lItems }}</th><th>양호</th><th>미흡</th><th>해당없음</th></tr>
                             </thead>
                             <tbody>
                                 <template v-for="(g, gi) in docGroups" :key="'dg-' + gi">
@@ -621,7 +799,7 @@
                         <table class="pd-t" id="docFindings">
                             <colgroup><col style="width:6%"><col style="width:14%"><col><col style="width:25%"><col style="width:13%"><col style="width:12%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th colspan="7">지적사항 및 시정 요구</th></tr>
+                                <tr><th colspan="7">{{ L.lFind }}</th></tr>
                                 <tr class="pd-sub"><th>번호</th><th>위치</th><th>지적사항 (위험요인)</th><th>시정 요구 내용</th><th>담당</th><th>기한</th><th>상태</th></tr>
                             </thead>
                             <tbody>
@@ -629,40 +807,43 @@
                                     <td class="c">{{ i + 1 }}</td><td class="s">{{ f.zone }}</td><td class="pre">{{ f.hazard }}</td><td class="s pre">{{ f.demand }}</td><td class="c s">{{ f.owner }}</td>
                                     <td class="c s">{{ f.immediate ? '즉시' : f.due }}</td><td class="c s">{{ f.immediate ? '즉시 조치' : f.status }}</td>
                                 </tr>
-                                <tr v-if="!findingRows.length"><td colspan="7" class="c" style="color:#475569">지적사항 없음</td></tr>
+                                <tr v-if="!findingRows.length"><td colspan="7" class="c">지적사항 없음</td></tr>
                             </tbody>
                         </table>
 
                         <table v-if="formData.note || formData.nextDate" class="pd-t">
                             <colgroup><col style="width:15%"><col></colgroup>
-                            <tr v-if="formData.note"><th>특이사항</th><td class="pre">{{ formData.note }}</td></tr>
-                            <tr v-if="formData.nextDate"><th>다음 순회</th><td>{{ fmtDay(formData.nextDate) }}</td></tr>
+                            <tr v-if="formData.note"><th>{{ L.lNote }}</th><td class="pre">{{ formData.note }}</td></tr>
+                            <tr v-if="formData.nextDate"><th>{{ L.lNext }}</th><td>{{ fmtDay(formData.nextDate) }}</td></tr>
                         </table>
 
                         <div v-if="photos.length" class="pd-photos pt-keep">
                             <figure v-for="(ph, i) in photos" :key="'dph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption>{{ ph.cap || '현장 사진 ' + (i + 1) }}</figcaption></figure>
                         </div>
 
-                        <table class="pd-t pt-keep" style="margin-bottom:8px">
+                        <table v-if="custom.showSign" class="pd-t pt-keep" id="docSign" style="margin-bottom:8px">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>점검자</th><td style="height:34px">{{ inspLabel }} <span style="color:#cbd5e1;float:right">(서명)</span></td><th>확인<br><span style="font-weight:400;font-size:10px">안전보건총괄책임자</span></th><td><span style="color:#cbd5e1;float:right">(서명)</span></td></tr>
+                            <tr><th>{{ L.lInsp }}</th><td style="height:34px">{{ inspLabel }} <span style="color:#94a3b8;float:right">(서명)</span></td><th>{{ L.lConfirm }}<template v-if="L.lConfirmRole"><br><span style="font-weight:400;font-size:10px">{{ L.lConfirmRole }}</span></template></th><td><span style="color:#94a3b8;float:right">(서명)</span></td></tr>
                         </table>
-                        <p class="pd-foot">※ 관계수급인은 도급인이 실시하는 순회점검을 거부·방해 또는 기피해서는 안 되며 점검 결과 도급인의 시정요구가 있으면 이에 따라야 합니다(산업안전보건법 시행규칙 제80조제2항).</p>
+                        <p v-if="footText" class="pd-foot" id="docFoot">{{ footText }}</p>
                     </div>
 
                     <!-- [DOC 2] 집계표 -->
                     <div v-else-if="formData.docType === 'summary'">
                         <div class="pd-head">
-                            <div><h2 class="pd-title">{{ formData.sumMode === 'month' ? '월간' : '주간' }} 순회점검 집계표</h2></div>
-                            <table class="pd-appr">
-                                <tr><th>작성</th><th>검토</th><th>승인</th></tr>
-                                <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
-                            </table>
+                            <div><h2 class="pd-title">{{ titleSum }}</h2></div>
+                            <template v-if="custom.showAppr">
+                                <div v-if="hasADoc" class="pd-apprbox" data-pappr="tool.patrol.sum" key="da-sum"></div>
+                                <table v-else class="pd-appr">
+                                    <tr><th>작성</th><th>검토</th><th>승인</th></tr>
+                                    <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
+                                </table>
+                            </template>
                         </div>
                         <table class="pd-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>사업장</th><td>{{ siteLabel }}</td><th>집계 기간</th><td>{{ period.label }}</td></tr>
-                            <tr><th>점검 주기</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '(업종 미선택)' }}</td></tr>
+                            <tr><th>{{ L.lSite }}</th><td>{{ siteLabel }}</td><th>집계 기간</th><td>{{ period.label }}</td></tr>
+                            <tr><th>{{ L.lCycle }}</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '' }}</td></tr>
                         </table>
                         <div class="pd-stat" id="sumStat">
                             <div><b>{{ summary.days }}</b>순회 실시 일수</div>
@@ -674,7 +855,7 @@
                         <table class="pd-t" id="sumTable">
                             <colgroup><col style="width:15%"><col style="width:8%"><col style="width:14%"><col><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:19%"></colgroup>
                             <thead>
-                                <tr><th>날짜</th><th>실시</th><th>점검자</th><th>순회 구역 (관계수급인)</th><th>지적</th><th>완료</th><th>미조치</th><th>비고</th></tr>
+                                <tr><th>날짜</th><th>실시</th><th>{{ L.lInsp }}</th><th>순회 구역 (관계수급인)</th><th>지적</th><th>완료</th><th>미조치</th><th>비고</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="d in summary.rows" :key="d.date">
@@ -703,24 +884,21 @@
                             <colgroup><col style="width:15%"><col></colgroup>
                             <tr><th>비고</th><td class="pre">{{ formData.sumNote }}</td></tr>
                         </table>
-                        <p class="pd-foot">※ 이 집계표는 작성기에 보관된 순회점검 일지 {{ summary.recN }}건을 모은 것입니다. "완료·미조치"는 그날 지적된 건의 현재(가장 최근 기록) 조치 상태입니다. 주기 초과는 직전 순회일과의 간격이 주기(일수)를 넘은 경우를 단순 계산한 것으로, 휴무일은 고려하지 않았습니다.</p>
+                        <p v-if="footText" class="pd-foot" id="docFoot">{{ footText }}</p>
                     </div>
 
                     <!-- [DOC 3] 시정 요구서 -->
                     <div v-else-if="formData.docType === 'demand'">
                         <div style="text-align:center;margin-bottom:18px">
-                            <h2 class="pd-title">순회점검 지적사항 시정 요구서</h2>
+                            <h2 class="pd-title">{{ titleDemand }}</h2>
                         </div>
                         <table class="pd-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr><th>수신</th><td>{{ formData.demandTo || '관계수급인 각 업체' }} 귀중</td><th>문서 번호</th><td>{{ formData.demandNo }}</td></tr>
                             <tr><th>발신</th><td>{{ siteLabel }}</td><th>발행일</th><td>{{ fmtDay(formData.demandDate || formData.date) }}</td></tr>
-                            <tr><th>점검 일시</th><td>{{ dateLabel }}</td><th>점검자</th><td>{{ inspLabel }}</td></tr>
+                            <tr><th>{{ L.lWhen }}</th><td>{{ dateLabel }}</td><th>{{ L.lInsp }}</th><td>{{ inspLabel }}</td></tr>
                         </table>
-                        <p style="font-size:12.5px;line-height:1.9;margin:0 0 12px">
-                            산업안전보건법 제64조제1항제2호 및 같은 법 시행규칙 제80조에 따라 실시한 작업장 순회점검 결과, 아래와 같은 지적사항이 확인되어 시정을 요구하오니
-                            조치 기한까지 조치하고 그 결과를 알려 주시기 바랍니다.
-                        </p>
+                        <p v-if="demandBodyV" class="pd-body" id="demBody">{{ demandBodyV }}</p>
                         <table class="pd-t" id="demTable">
                             <colgroup><col style="width:6%"><col style="width:13%"><col><col style="width:22%"><col style="width:11%"><col style="width:20%"></colgroup>
                             <thead>
@@ -730,23 +908,23 @@
                                 <tr v-for="(r, i) in demandRows" :key="'dm-' + i">
                                     <td class="c">{{ i + 1 }}</td>
                                     <td class="s">{{ r.zone }}<div v-if="!formData.demandTo && r.owner" style="color:#475569">[{{ r.owner }}]</div></td>
-                                    <td class="pre">{{ r.hazard }}<div v-if="r.carried" class="s" style="color:#b45309">※ {{ r.found }} 지적 · 이월</div></td>
+                                    <td class="pre">{{ r.hazard }}<div v-if="r.carried" class="s" style="color:#475569">※ {{ r.found }} 지적 · 이월</div></td>
                                     <td class="s pre">{{ r.demand }}</td>
                                     <td class="c s">{{ r.immediate ? '즉시 조치' : (r.due || '즉시') }}</td>
                                     <td class="s" style="height:46px">{{ r.done ? '조치 완료' : '' }}</td>
                                 </tr>
-                                <tr v-if="!demandRows.length"><td colspan="6" class="c" style="color:#475569">시정을 요구할 지적사항이 없습니다</td></tr>
+                                <tr v-if="!demandRows.length"><td colspan="6" style="height:46px"></td></tr>
                             </tbody>
                         </table>
                         <div v-if="photos.length" class="pd-photos pt-keep">
                             <figure v-for="(ph, i) in photos" :key="'mph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption>{{ ph.cap || '현장 사진 ' + (i + 1) }}</figcaption></figure>
                         </div>
-                        <p class="pd-foot" style="margin-bottom:16px">※ 관계수급인은 도급인이 실시하는 순회점검을 거부·방해 또는 기피해서는 안 되며 점검 결과 도급인의 시정요구가 있으면 이에 따라야 합니다(산업안전보건법 시행규칙 제80조제2항).</p>
-                        <div style="text-align:center;margin:22px 0 26px">
+                        <p v-if="footText" class="pd-foot" id="docFoot" style="margin-bottom:16px">{{ footText }}</p>
+                        <div class="pt-keep" style="text-align:center;margin:22px 0 26px">
                             <p style="font-size:13px;color:#475569;margin:0 0 8px">{{ fmtDay(formData.demandDate || formData.date) }}</p>
-                            <p style="font-size:17px;font-weight:900;margin:0">{{ formData.company || '(도급인명)' }} {{ formData.demandFooter || '안전보건총괄책임자' }} <span style="font-size:12px;font-weight:400;color:#64748b">(직인생략)</span></p>
+                            <p id="demSign" style="font-size:17px;font-weight:900;margin:0">{{ formData.company || '(도급인명)' }} {{ formData.demandFooter || '안전보건총괄책임자' }} <span v-if="sealV" style="font-size:12px;font-weight:400;color:#64748b">{{ sealV }}</span></p>
                         </div>
-                        <div class="pd-reply pt-keep">
+                        <div v-if="custom.showReply" class="pd-reply pt-keep" id="demReply">
                             <b>[ 조치 결과 확인 ]</b><br>
                             위 시정 요구 사항에 대하여 조치를 마쳤음을 알립니다.<br>
                             조치 완료일: 　　　　년 　　월 　　일　　　　관계수급인: {{ formData.demandTo || '　　　　　　　　' }}　　현장책임자: 　　　　　　　(서명)<br>
@@ -757,41 +935,57 @@
             </div>
         </main>
 
+        <!-- 아래 고정 막대: (모바일) 입력|미리보기 전환 + 보관 -->
+        <div class="pt-bar no-print">
+            <div class="pt-bar-in">
+                <div class="pt-tabs" role="tablist" aria-label="화면 전환">
+                    <button type="button" id="tabForm" role="tab" :aria-selected="view === 'form' ? 'true' : 'false'" @click="setView('form')">입력</button>
+                    <button type="button" id="tabPreview" role="tab" :aria-selected="view === 'preview' ? 'true' : 'false'" @click="setView('preview')">미리보기</button>
+                </div>
+                <button v-if="warnN" type="button" id="warnBtn" class="pt-bar-st" @click="gotoWarn">주의 {{ warnN }}건</button>
+                <span v-else class="pt-bar-ok pt-d-only">입력 확인 완료</span>
+                <span class="pt-bar-ar pt-d-only" id="archText">{{ archText }}</span>
+                <span class="pt-bar-sp"></span>
+                <button type="button" class="pt-btn pt-m-only" @click="printDoc">인쇄</button>
+                <button type="button" id="archiveOnly" class="pt-btn pt-btn-pri" @click="archiveOnly">{{ archState === 'changed' ? '다시 보관' : '보관' }}</button>
+                <button type="button" id="archiveNext" class="pt-btn pt-d-only" @click="archiveAndNext">보관하고 다음 순회 작성</button>
+            </div>
+        </div>
+
         <!-- 예시 세트 모달 -->
-        <div v-if="isExModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print" role="dialog" aria-modal="true" aria-labelledby="exTitle" @keydown.esc="isExModalOpen = false">
+        <div v-if="isExModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 no-print" role="dialog" aria-modal="true" aria-labelledby="exTitle" @click.self="isExModalOpen = false">
             <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 border border-slate-200">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="bg-purple-100 text-purple-700 p-1.5 rounded-lg"><i class="ph-bold ph-magic-wand text-lg"></i></div>
-                        <div>
-                            <h3 id="exTitle" class="font-bold text-base text-slate-900">업종별 점검 항목 예시</h3>
-                            <p class="text-xs text-slate-500">법정 항목이 아닌 예시입니다. 적용한 뒤 사업장 작업에 맞게 고쳐 쓰세요.</p>
-                        </div>
+                    <div>
+                        <h3 id="exTitle" class="font-bold text-base text-slate-900">업종별 점검 항목 예시</h3>
+                        <p class="text-xs text-slate-500">법정 항목이 아닌 예시입니다. 적용한 뒤 사업장 작업에 맞게 고쳐 쓰세요.</p>
                     </div>
-                    <button type="button" @click="isExModalOpen = false" aria-label="닫기" class="text-slate-400 hover:text-slate-700 p-1"><i class="ph-bold ph-x text-lg"></i></button>
+                    <button type="button" id="exClose" @click="isExModalOpen = false" aria-label="닫기" class="text-slate-400 hover:text-slate-700 p-1"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
-                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                    <button type="button" v-for="(opt, idx) in exPool" :key="'ex-' + idx" @click="selectEx(opt)" class="pt-opt pt-exopt p-4 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/40 cursor-pointer transition space-y-2 group">
+                <div class="space-y-3 overflow-y-auto pr-1" style="max-height:60vh">
+                    <button type="button" v-for="(opt, idx) in exPool" :key="'ex-' + idx" @click="selectEx(opt)" class="pt-opt pt-exopt p-4 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer transition space-y-2 group">
                         <span class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
-                            <span class="text-xs text-slate-400 group-hover:text-purple-600 font-bold flex items-center gap-1">적용하기 <i class="ph-bold ph-arrow-right"></i></span>
+                            <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
+                            <span class="text-xs text-slate-400 font-bold flex items-center gap-1">적용하기 <i class="ph-bold ph-arrow-right"></i></span>
                         </span>
                         <span class="block font-bold text-sm text-slate-800">{{ opt.title }}</span>
                         <span class="block text-xs text-slate-500">{{ opt.description }} · {{ opt.count }}개 항목</span>
                     </button>
                 </div>
-                <div class="flex justify-between items-center mt-5 pt-3 border-t border-slate-100" style="justify-content:flex-end">
+                <div class="flex items-center mt-5 pt-3 border-t border-slate-100" style="justify-content:flex-end">
                     <button type="button" @click="isExModalOpen = false" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold">닫기</button>
                 </div>
             </div>
         </div>
 
-        <div v-if="toast.visible" role="status" class="no-print fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-300" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'" style="max-width:calc(100vw - 32px)">
+        <div v-if="toast.visible" role="status" class="pt-toast no-print fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'" style="max-width:calc(100vw - 32px)">
             <i :class="toast.type === 'error' ? 'ph-fill ph-warning-circle text-base' : 'ph-fill ph-check-circle text-base'"></i>
             <span>{{ toast.message }}</span>
         </div>
     </div>
 
+    <!-- 결재란 공통 모듈(칸 이름·개수·성명·서명, 사이트 기본값) -->
+    <script src="../../assets/docs.js"></script>
     <script>
         // Vue 파일을 못 불러오면 빈 화면 대신 안내를 보여 준다
         if (!window.Vue) {
@@ -849,11 +1043,70 @@
         const F_STATUS = ['시정 요구', '조치 중', '조치 완료'];
         const P_RESULT = ['', '조치 완료', '조치 중', '미조치'];
 
-        createApp({
+        // ---- 문서에서 사용자가 바꿀 수 있는 이름·문구의 기본값
+        const DEF = {
+            titleLog: '도급 작업장 순회점검 일지',
+            titleSum: '순회점검 집계표',
+            titleDemand: '순회점검 지적사항 시정 요구서',
+            footLog: '※ 관계수급인은 도급인이 실시하는 순회점검을 거부·방해 또는 기피해서는 안 되며 점검 결과 도급인의 시정요구가 있으면 이에 따라야 합니다(산업안전보건법 시행규칙 제80조제2항).',
+            footSum: '※ "완료·미조치"는 그날 지적된 건의 가장 최근 조치 상태입니다. 주기 초과는 직전 순회일과의 간격이 주기(일수)를 넘은 경우를 단순 계산한 것으로, 휴무일은 고려하지 않았습니다.',
+            footDemand: '※ 관계수급인은 도급인이 실시하는 순회점검을 거부·방해 또는 기피해서는 안 되며 점검 결과 도급인의 시정요구가 있으면 이에 따라야 합니다(산업안전보건법 시행규칙 제80조제2항).',
+            demandBody: '산업안전보건법 제64조제1항제2호 및 같은 법 시행규칙 제80조에 따라 실시한 작업장 순회점검 결과, 아래와 같은 지적사항이 확인되어 시정을 요구하오니 조치 기한까지 조치하고 그 결과를 알려 주시기 바랍니다.',
+            seal: '(직인생략)'
+        };
+        const LABEL_DEFS = [
+            { k: 'lSite', def: '사업장' }, { k: 'lWhen', def: '점검 일시' }, { k: 'lInsp', def: '점검자' }, { k: 'lWeather', def: '날씨' },
+            { k: 'lCycle', def: '점검 주기' }, { k: 'lZones', def: '순회 구역 및 관계수급인' }, { k: 'lZone', def: '구역·공정' }, { k: 'lSub', def: '관계수급인' },
+            { k: 'lWork', def: '작업 내용' }, { k: 'lComp', def: '동행·확인자 (서명)' }, { k: 'lPrev', def: '지난 지적사항 이행 확인' }, { k: 'lItems', def: '점검 항목' },
+            { k: 'lFind', def: '지적사항 및 시정 요구' }, { k: 'lNote', def: '특이사항' }, { k: 'lNext', def: '다음 순회' }, { k: 'lConfirm', def: '확인' },
+            { k: 'lConfirmRole', def: '안전보건총괄책임자' }
+        ];
+        const NULLABLE = ['footLog', 'footSum', 'footDemand', 'demandBody', 'seal'];   // null = 기본 문구, '' = 지움
+        // 결재란은 사이트 공통 모듈(assets/docs.js)의 저장 키를 쓴다
+        const APPR_KEY = { log: 'tool.patrol', summary: 'tool.patrol.sum' };
+        const APPR_COLS = { log: ['점검자', '검토', '승인'], summary: ['작성', '검토', '승인'] };
+
+        // 접이식 단계
+        const ALL_DOCS = ['log', 'summary', 'demand'];
+        const STEP_DEFS = [
+            { id: 'basic', title: '사업장 · 순회 주기', docs: ALL_DOCS },
+            { id: 'sum', title: '집계 기간', docs: ['summary'] },
+            { id: 'dem', title: '시정 요구서 설정', docs: ['demand'] },
+            { id: 'when', title: '순회 일시 · 점검자', docs: ALL_DOCS },
+            { id: 'zones', title: '순회 구역 · 관계수급인', docs: ALL_DOCS },
+            { id: 'prev', title: '지난 지적사항 이행 확인', docs: ['log', 'demand'] },
+            { id: 'items', title: '점검 항목', docs: ['log'] },
+            { id: 'find', title: '지적사항 · 시정 요구', docs: ['log', 'demand'] },
+            { id: 'note', title: '특이사항 · 다음 순회', docs: ['log'] },
+            { id: 'photo', title: '현장 사진', docs: ['log', 'demand'] },
+            { id: 'style', title: '문서 꾸미기', docs: ALL_DOCS },
+            { id: 'hist', title: '보관 · 지난 기록', docs: ALL_DOCS }
+        ];
+        const PtStep = {
+            props: { s: { type: Object, default: null } },
+            emits: ['toggle', 'next'],
+            template:
+                '<section v-if="s" class="pt-step" :class="{ \'is-open\': s.open }" :id="\'step-\' + s.id">' +
+                '<h3 class="pt-sh0"><button type="button" class="pt-sh" :aria-expanded="s.open ? \'true\' : \'false\'" :aria-controls="\'sb-\' + s.id" @click="$emit(\'toggle\')">' +
+                '<span class="pt-sn" :class="{ ok: s.done }">{{ s.no }}</span>' +
+                '<span class="pt-st">{{ s.title }}</span>' +
+                '<span class="pt-ss">{{ s.sum }}</span>' +
+                '<span v-if="s.warn" class="pt-sw">주의 {{ s.warn }}</span>' +
+                '<span v-else-if="s.done" class="pt-sd" aria-label="입력 완료">✓</span>' +
+                '<span class="pt-sc" aria-hidden="true"></span>' +
+                '</button></h3>' +
+                '<div v-show="s.open" class="pt-sb" :id="\'sb-\' + s.id">' +
+                '<p v-for="(c, i) in s.checks" :key="i" :class="c.ok ? \'cm-ok\' : \'cm-warn\'">{{ c.text }}</p>' +
+                '<slot></slot>' +
+                '<div v-if="!s.last" class="pt-next"><button type="button" class="pt-btn" @click="$emit(\'next\')">다음 단계 →</button></div>' +
+                '</div></section>'
+        };
+
+        const app = createApp({
             setup() {
                 const docTypes = [
                     { label: '순회점검 일지', value: 'log', icon: 'ph-bold ph-shield-check' },
-                    { label: '주간·월간 집계표', value: 'summary', icon: 'ph-bold ph-file-text' },
+                    { label: '집계표', value: 'summary', icon: 'ph-bold ph-file-text' },
                     { label: '시정 요구서', value: 'demand', icon: 'ph-bold ph-megaphone' }
                 ];
                 const profile = readProfile();
@@ -874,12 +1127,13 @@
                     inspector: str(profile.manager),
                     note: '',
                     nextDate: '',
+                    nextAuto: false,        // 다음 순회 예정일을 주기에 맞춰 자동으로 따라가게 할지
                     sumMode: 'week',
-                    sumAnchor: '',
+                    sumAnchor: '',          // '' = 점검일 기준(자동)
                     sumNote: '',
                     demandTo: '',
                     demandNo: '',
-                    demandDate: '',
+                    demandDate: '',         // '' = 점검일과 같게(자동)
                     demandFooter: '안전보건총괄책임자',
                     demandAll: false,
                     keepResults: false,
@@ -887,6 +1141,12 @@
                 });
                 const freshZones = () => [{ zone: '', company: '', work: '', workers: '', companion: '' }];
                 const freshItems = () => flatItems(BASE_ITEMS);
+                const freshCustom = () => {
+                    const labels = {};
+                    LABEL_DEFS.forEach(d => { labels[d.k] = ''; });
+                    return { titleLog: '', titleSum: '', titleDemand: '', labels, footLog: null, footSum: null, footDemand: null, demandBody: null, seal: null,
+                        showAppr: true, apprAutoName: true, showSign: true, showReply: true, apprSeeded: false, apprMid: '' };
+                };
 
                 // ---- 저장값 정리(모양이 어긋난 값이 들어와도 화면이 깨지지 않게)
                 const obj = (r) => (r && typeof r === 'object' ? r : {});
@@ -909,6 +1169,16 @@
                     s = obj(s);
                     return { formData: cleanForm(s.formData), zones: cleanZones(s.zones) || freshZones(), items: cleanItems(s.items) || freshItems(), findings: cleanFindings(s.findings), prev: cleanPrev(s.prev) };
                 };
+                const cleanCustom = (c) => {
+                    const base = freshCustom();
+                    c = obj(c);
+                    Object.keys(base).forEach(k => {
+                        if (k === 'labels') { const l = obj(c.labels); LABEL_DEFS.forEach(d => { base.labels[d.k] = str(l[d.k]).slice(0, 60); }); }
+                        else if (NULLABLE.includes(k)) base[k] = typeof c[k] === 'string' ? c[k].slice(0, 2000) : null;
+                        else if (typeof c[k] === typeof base[k]) base[k] = typeof c[k] === 'string' ? c[k].slice(0, 200) : c[k];
+                    });
+                    return base;
+                };
 
                 const init = cleanSnap(saved);
                 const formData = ref(init.formData);
@@ -916,12 +1186,15 @@
                 const items = ref(init.items);
                 const findings = ref(init.findings);
                 const prev = ref(init.prev);
+                const custom = ref(cleanCustom(saved && saved.custom));
                 const history = ref(Array.isArray(saved && saved.history)
                     ? saved.history.filter(h => h && typeof h === 'object' && h.snap && typeof h.snap === 'object').slice(0, HIST_MAX).map(h => { const s = cleanSnap(h.snap); return { id: str(h.id) || s.formData.mid, saved: Number(h.saved) || 0, snap: s }; })
                     : []);
                 const restored = !!saved;
                 if (restored && !formData.value.company && profile.company) formData.value.company = str(profile.company);
                 const newGroup = ref('');
+                const editItems = ref(false);
+                const photos = ref([]);
 
                 // ---- 저장
                 const saveMsg = ref(restored ? '지난번 내용을 이어서 엽니다' : '');
@@ -930,12 +1203,12 @@
                 const persist = () => {
                     saveTimer = null;
                     try {
-                        localStorage.setItem(STORE_KEY, JSON.stringify(Object.assign({ saved: Date.now() }, snapshot(), { history: history.value.map(h => ({ id: h.id, saved: h.saved, snap: h.snap })) })));
+                        localStorage.setItem(STORE_KEY, JSON.stringify(Object.assign({ saved: Date.now() }, snapshot(), { custom: custom.value, history: history.value.map(h => ({ id: h.id, saved: h.saved, snap: h.snap })) })));
                         saveMsg.value = '이 기기에 저장됨';
                         return true;
                     } catch (e) { saveMsg.value = '저장하지 못했습니다(저장 공간 부족)'; return false; }
                 };
-                watch([formData, zones, items, findings, prev], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
+                watch([formData, zones, items, findings, prev, custom], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
                 window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); persist(); } });
 
                 // ---- 주기 판정 (시행규칙 제80조제1항)
@@ -946,6 +1219,8 @@
                     return { days: 2, text: '2일에 1회 이상', basis: `시행규칙 제80조제1항제1호${o.mok}목(${o.label})` };
                 });
                 const nextDue = computed(() => (cycle.value.days && isDay(formData.value.date) ? addDays(formData.value.date, cycle.value.days) : ''));
+                // "주기에 맞춰 넣기"로 넣은 날짜는 점검일·업종이 바뀌면 따라간다(직접 고치면 멈춤)
+                watch(nextDue, (v) => { if (formData.value.nextAuto && v) formData.value.nextDate = v; });
 
                 // ---- 계산값
                 const zoneRows = computed(() => zones.value.filter(z => z.zone.trim() || z.company.trim() || z.work.trim()));
@@ -959,8 +1234,9 @@
                     const out = [];
                     items.value.forEach((it, i) => {
                         let g = out.find(x => x.name === it.group);
-                        if (!g) { g = { name: it.group, rows: [] }; out.push(g); }
+                        if (!g) { g = { name: it.group, rows: [], shown: false }; out.push(g); }
                         g.rows.push({ i });
+                        if (it.text.trim()) g.shown = true;
                     });
                     return out;
                 });
@@ -973,13 +1249,38 @@
                     items.value.forEach(it => { if (!it.text.trim()) return; if (it.result === '양호') t.good++; else if (it.result === '미흡') t.bad++; else if (it.result === '해당없음') t.na++; else t.none++; });
                     return t;
                 });
-                const siteLabel = computed(() => [formData.value.company || '(도급인명)', formData.value.siteName].filter(Boolean).join(' '));
+                const siteLabel = computed(() => [formData.value.company, formData.value.siteName].filter(x => str(x).trim()).join(' '));
                 const inspLabel = computed(() => [formData.value.inspDept, formData.value.inspector].filter(x => str(x).trim()).join(' '));
                 const dateLabel = computed(() => {
                     const f = formData.value;
                     const t = [f.timeFrom, f.timeTo].filter(Boolean).join(' ~ ');
-                    return [fmtDay(f.date) || '미정', t].filter(Boolean).join(' ');
+                    return [fmtDay(f.date), t].filter(Boolean).join(' ');
                 });
+                const fmtShort = (s) => { const d = parseDay(s); return d ? `${d.getMonth() + 1}/${d.getDate()}(${WD[d.getDay()]})` : ''; };
+
+                // ---- 문서 제목·항목 이름·맺음 문구(사용자가 바꾼 값이 없으면 기본값)
+                const L = computed(() => { const o = {}; LABEL_DEFS.forEach(d => { o[d.k] = str(custom.value.labels[d.k]).trim() || d.def; }); return o; });
+                const titleLog = computed(() => custom.value.titleLog.trim() || DEF.titleLog);
+                const titleSum = computed(() => (formData.value.sumMode === 'month' ? '월간 ' : '주간 ') + (custom.value.titleSum.trim() || DEF.titleSum));
+                const titleDemand = computed(() => custom.value.titleDemand.trim() || DEF.titleDemand);
+                const editable = (key) => computed({ get: () => (custom.value[key] == null ? DEF[key] : custom.value[key]), set: (v) => { custom.value[key] = str(v); } });
+                const footKey = computed(() => ({ log: 'footLog', summary: 'footSum', demand: 'footDemand' })[formData.value.docType]);
+                const footV = computed({ get: () => (custom.value[footKey.value] == null ? DEF[footKey.value] : custom.value[footKey.value]), set: (v) => { custom.value[footKey.value] = str(v); } });
+                const footText = computed(() => footV.value.trim());
+                const demandBodyV = editable('demandBody');
+                const sealV = editable('seal');
+                const customCount = computed(() => {
+                    const c = custom.value;
+                    return [c.titleLog, c.titleSum, c.titleDemand].filter(x => x.trim()).length + LABEL_DEFS.filter(d => str(c.labels[d.k]).trim()).length + NULLABLE.filter(k => c[k] != null).length
+                        + (c.showAppr ? 0 : 1) + (c.showSign ? 0 : 1) + (c.showReply ? 0 : 1);
+                });
+                const resetCustom = () => {
+                    if (!window.confirm('문서 제목, 항목 이름, 본문·맨 아래 문구를 모두 기본으로 되돌릴까요?\n(결재란의 칸 이름·성명은 그대로 둡니다)')) return;
+                    const c = freshCustom();
+                    c.apprSeeded = custom.value.apprSeeded; c.apprMid = custom.value.apprMid;
+                    custom.value = c;
+                    showToast('기본값으로 되돌렸습니다.');
+                };
 
                 // ---- 보관 기록 + 지금 작성 중인 일지를 날짜순으로
                 const records = computed(() => {
@@ -997,7 +1298,7 @@
                     return m;
                 });
 
-                // ---- 집계표
+                // ---- 집계표 (기준일을 따로 정하지 않으면 점검일이 든 주·달)
                 const period = computed(() => {
                     const f = formData.value;
                     const a = parseDay(f.sumAnchor) || parseDay(f.date) || new Date();
@@ -1039,7 +1340,7 @@
                                 const g = diffDays(before[before.length - 1], d);
                                 if (g > cd) { gaps++; row.remark = `주기 초과 (직전 순회 ${before[before.length - 1].slice(5).replace('-', '/')} 이후 ${g}일)`; }
                             }
-                            if (rs.some(r => r.current)) row.remark = [row.remark, '작성 중'].filter(Boolean).join(' · ');
+                            if (rs.some(r => r.current) && archState.value !== 'saved') row.remark = [row.remark, '작성 중'].filter(Boolean).join(' · ');
                         } else if (d <= today) row.remark = '기록 없음';
                         rows.push(row);
                     }
@@ -1065,77 +1366,236 @@
                 // 수신 업체가 목록에서 사라지면(업체명 수정 등) 전체로 되돌린다
                 watch(demandOwners, (v) => { if (formData.value.demandTo && !v.includes(formData.value.demandTo)) formData.value.demandTo = ''; });
 
+                // ---- 보관 상태(지금 내용이 보관된 것과 같은지)
+                const CORE = ['company', 'siteName', 'industry', 'date', 'timeFrom', 'timeTo', 'weather', 'inspDept', 'inspector', 'note', 'nextDate'];
+                const coreOf = (s) => JSON.stringify([CORE.map(k => s.formData[k]), s.zones.map(z => [z.zone, z.company, z.work, z.workers, z.companion]), s.items.map(i => [i.group, i.text, i.result]),
+                    s.findings.map(f => [f.fid, f.zone, f.hazard, f.demand, f.owner, f.due, f.immediate, f.status]), s.prev.map(p => [p.fid, p.found, p.zone, p.hazard, p.demand, p.owner, p.due, p.result])]);
+                const curSnap = () => ({ formData: formData.value, zones: zones.value, items: items.value, findings: findings.value, prev: prev.value });
+                const archState = computed(() => {
+                    const h = history.value.find(x => x.id === formData.value.mid);
+                    if (!h) return 'new';
+                    return coreOf(h.snap) === coreOf(curSnap()) ? 'saved' : 'changed';
+                });
+                const archText = computed(() => (archState.value === 'saved' ? '이 일지는 보관되어 있습니다' : archState.value === 'changed' ? '보관한 뒤 고친 내용이 있습니다' : ''));
+                const hasWork = () => items.value.some(it => it.result) || findingRows.value.length > 0 || !!formData.value.note.trim() || photos.value.length > 0 || prev.value.some(p => p.result) || !!formData.value.timeFrom || !!formData.value.timeTo;
+
                 // ---- 자동 확인(법령 문구는 시행규칙 제80조 그대로. 조문에 없는 내용은 요건으로 표시하지 않는다)
                 const checks = computed(() => {
                     const out = [], f = formData.value, cd = cycle.value.days;
-                    if (!cd) out.push({ ok: false, text: '업종을 선택하지 않아 순회점검 주기를 판정하지 못했습니다(시행규칙 제80조제1항).' });
+                    const add = (step, ok, text) => out.push({ step, ok, text });
+                    if (!cd) add('basic', false, '업종을 선택하지 않아 순회점검 주기를 판정하지 못했습니다(시행규칙 제80조제1항).');
                     if (cd && isDay(f.date)) {
                         const before = history.value.filter(h => h.id !== f.mid).map(h => h.snap.formData.date).filter(d => isDay(d) && d < f.date).sort();
                         if (before.length) {
                             const last = before[before.length - 1], g = diffDays(last, f.date);
-                            if (g > cd) out.push({ ok: false, text: `주기 공백: 보관된 직전 순회(${fmtDay(last)}) 이후 ${g}일 만의 점검입니다 — ${cycle.value.text} 실시해야 합니다(${cycle.value.basis}). 그 사이 관계수급인 작업이 없었거나 다른 곳에 기록이 있다면 무시하세요.` });
-                            else out.push({ ok: true, text: `직전 순회(${fmtDay(last)}) 이후 ${g}일 — 주기(${cycle.value.text}) 안입니다.` });
+                            if (g > cd) add('when', false, `주기 공백: 보관된 직전 순회(${fmtDay(last)}) 이후 ${g}일 만의 점검입니다 — ${cycle.value.text} 실시해야 합니다(${cycle.value.basis}). 그 사이 관계수급인 작업이 없었거나 다른 곳에 기록이 있다면 무시하세요.`);
+                            else add('when', true, `직전 순회(${fmtDay(last)}) 이후 ${g}일 — 주기(${cycle.value.text}) 안입니다.`);
                         }
-                        if (f.date < today && diffDays(f.date, today) > cd && !history.value.some(h => h.snap.formData.date > f.date)) out.push({ ok: false, text: `점검일이 ${diffDays(f.date, today)}일 전입니다. 오늘 순회라면 점검일의 "오늘"을 누르세요.` });
+                        if (f.date < today && diffDays(f.date, today) > cd && archState.value !== 'saved' && !history.value.some(h => h.snap.formData.date > f.date)) add('when', false, `점검일이 ${diffDays(f.date, today)}일 전입니다. 오늘 순회라면 점검일의 "오늘"을 누르세요.`);
                     }
+                    if (!isDay(f.date)) add('when', false, '점검일이 비어 있습니다.');
+                    if (f.timeFrom && f.timeTo && f.timeTo < f.timeFrom) add('when', false, '종료 시각이 시작 시각보다 빠릅니다.');
                     if (f.docType === 'summary') {
-                        if (cd && summary.value.gaps) out.push({ ok: false, text: `집계 기간에 주기를 넘긴 간격이 ${summary.value.gaps}번 있습니다. 휴무 등 사유가 있으면 비고에 적어 두세요.` });
-                        if (!summary.value.days) out.push({ ok: false, text: '집계 기간에 보관된 순회 기록이 없습니다. 기준일을 확인하세요.' });
+                        if (cd && summary.value.gaps) add('sum', false, `집계 기간에 주기를 넘긴 간격이 ${summary.value.gaps}번 있습니다. 휴무 등 사유가 있으면 비고에 적어 두세요.`);
+                        if (!summary.value.days) add('sum', false, '집계 기간에 보관된 순회 기록이 없습니다. 기준일을 확인하세요.');
                         return out;
                     }
-                    if (!str(f.inspector).trim()) out.push({ ok: false, text: '점검자 성명이 비어 있습니다.' });
-                    if (!zoneRows.value.length) out.push({ ok: false, text: '순회 구역이 없습니다 — 관계수급인 근로자가 작업하는 장소를 넣으세요.' });
+                    if (!str(f.inspector).trim()) add('when', false, '점검자 성명이 비어 있습니다.');
+                    if (!zoneRows.value.length) add('zones', false, '순회 구역이 없습니다 — 관계수급인 근로자가 작업하는 장소를 넣으세요.');
                     else {
                         const noCo = zoneRows.value.filter(z => !z.company.trim()).length;
-                        if (noCo) out.push({ ok: false, text: `관계수급인 업체명이 빠진 구역이 ${noCo}곳 있습니다.` });
+                        if (noCo) add('zones', false, `관계수급인 업체명이 빠진 구역이 ${noCo}곳 있습니다.`);
                     }
                     if (f.docType === 'log') {
                         const t = tally.value;
-                        if (t.none) out.push({ ok: false, text: `점검 결과를 표시하지 않은 항목이 ${t.none}개 있습니다.` });
-                        else if (t.good + t.bad + t.na) out.push({ ok: true, text: `점검 항목 ${t.good + t.bad + t.na}개를 모두 확인했습니다(양호 ${t.good} · 미흡 ${t.bad} · 해당없음 ${t.na}).` });
-                        if (t.bad && !findingRows.value.length) out.push({ ok: false, text: `미흡 항목이 ${t.bad}개인데 지적사항이 없습니다. "지적사항으로 옮기기"를 눌러 시정 요구 내용을 적으세요.` });
+                        if (t.none) add('items', false, `점검 결과를 표시하지 않은 항목이 ${t.none}개 있습니다.`);
+                        else if (t.good + t.bad + t.na) add('items', true, `점검 항목 ${t.good + t.bad + t.na}개를 모두 확인했습니다(양호 ${t.good} · 미흡 ${t.bad} · 해당없음 ${t.na}).`);
+                        if (t.bad && !findingRows.value.length) add('items', false, `미흡 항목이 ${t.bad}개인데 지적사항이 없습니다. "지적사항으로 옮기기"를 눌러 시정 요구 내용을 적으세요.`);
                         if (f.nextDate && isDay(f.date)) {
-                            if (f.nextDate <= f.date) out.push({ ok: false, text: '다음 순회 예정일이 이번 점검일과 같거나 앞서 있습니다.' });
-                            else if (cd && diffDays(f.date, f.nextDate) > cd) out.push({ ok: false, text: `다음 순회 예정일이 ${diffDays(f.date, f.nextDate)}일 뒤입니다 — ${cycle.value.text} 실시해야 합니다(${cycle.value.basis}).` });
+                            if (f.nextDate <= f.date) add('note', false, '다음 순회 예정일이 이번 점검일과 같거나 앞서 있습니다.');
+                            else if (cd && diffDays(f.date, f.nextDate) > cd) add('note', false, `다음 순회 예정일이 ${diffDays(f.date, f.nextDate)}일 뒤입니다 — ${cycle.value.text} 실시해야 합니다(${cycle.value.basis}).`);
                         }
                     }
                     const open = findingRows.value.filter(x => x.status !== '조치 완료');
                     const noOwner = open.filter(x => !x.owner.trim() || !x.due).length;
-                    if (noOwner) out.push({ ok: false, text: `담당 업체나 조치 기한이 빠진 지적사항이 ${noOwner}건 있습니다.` });
+                    if (noOwner) add('find', false, `담당 업체나 조치 기한이 빠진 지적사항이 ${noOwner}건 있습니다.`);
                     const unchecked = prevRows.value.filter(p => !p.result).length;
-                    if (unchecked) out.push({ ok: false, text: `지난 지적사항 ${unchecked}건의 이행 결과를 아직 확인하지 않았습니다.` });
-                    const overdue = prevRows.value.filter(p => p.result !== '조치 완료' && p.due && isDay(f.date) && p.due < f.date).length + open.filter(x => x.due && isDay(f.date) && x.due < f.date).length;
-                    if (overdue) out.push({ ok: false, text: `조치 기한이 지난 미조치 지적사항이 ${overdue}건 있습니다 — 관계수급인은 시정요구에 따라야 합니다(시행규칙 제80조제2항).` });
-                    if (f.docType === 'demand' && !demandRows.value.length) out.push({ ok: false, text: '시정 요구서에 실을 지적사항이 없습니다. 수신 업체와 지적사항의 담당 업체를 확인하세요.' });
+                    if (unchecked) add('prev', false, `지난 지적사항 ${unchecked}건의 이행 결과를 아직 확인하지 않았습니다.`);
+                    const od1 = prevRows.value.filter(p => p.result !== '조치 완료' && p.due && isDay(f.date) && p.due < f.date).length;
+                    const od2 = open.filter(x => x.due && isDay(f.date) && x.due < f.date).length;
+                    if (od1) add('prev', false, `조치 기한이 지난 미조치 지적사항이 ${od1}건 있습니다 — 관계수급인은 시정요구에 따라야 합니다(시행규칙 제80조제2항).`);
+                    if (od2) add('find', false, `조치 기한이 점검일보다 앞선 지적사항이 ${od2}건 있습니다. 기한을 확인하세요.`);
+                    if (f.docType === 'demand' && !demandRows.value.length) add('dem', false, '시정 요구서에 실을 지적사항이 없습니다. 수신 업체와 지적사항의 담당 업체를 확인하세요.');
                     return out;
                 });
+
+                // ---- 접이식 단계
+                const quickDone = () => ({
+                    basic: !!(str(formData.value.company).trim() && cycle.value.days),
+                    when: formData.value.date === today && !!str(formData.value.inspector).trim(),
+                    zones: zoneRows.value.length > 0,
+                    items: tally.value.none === 0 && (tally.value.good + tally.value.bad + tally.value.na) > 0
+                });
+                const firstOpen = () => {
+                    if (!restored) return 'basic';
+                    const d = quickDone();
+                    return ['basic', 'when', 'zones', 'items'].find(k => !d[k]) || 'find';
+                };
+                const openSet = ref({ [firstOpen()]: true });
+                const view = ref('form');
+                // 모바일의 입력|미리보기 전환은 <html data-view>로 CSS에 알린다(#app 자체의 속성은 Vue가 묶지 않는다)
+                watch(view, (v) => { document.documentElement.setAttribute('data-view', v); }, { immediate: true });
+                const S = computed(() => {
+                    const f = formData.value, t = tally.value, m = {};
+                    const fr = findingRows.value, pr = prevRows.value;
+                    const openN = fr.filter(x => x.status !== '조치 완료').length;
+                    const sums = {
+                        basic: [str(f.company).trim(), cycle.value.text].filter(Boolean).join(' · ') || '업종을 고르세요',
+                        sum: period.value.label,
+                        dem: `${f.demandTo || '전체 업체'} · ${demandRows.value.length}건`,
+                        when: [fmtShort(f.date), [f.timeFrom, f.timeTo].filter(Boolean).join('~'), str(f.inspector).trim()].filter(Boolean).join(' · '),
+                        zones: zoneRows.value.length ? `${zoneRows.value.length}곳 · ${totalWorkers.value}명` : '없음',
+                        prev: pr.length ? `${pr.length}건 중 ${pr.filter(p => p.result).length}건 확인` : '없음',
+                        items: `양호 ${t.good} · 미흡 ${t.bad}${t.na ? ' · 해당없음 ' + t.na : ''} · 미확인 ${t.none}`,
+                        find: fr.length ? `${fr.length}건${openN ? ' (미조치 ' + openN + ')' : ''}` : '없음',
+                        note: [f.note.trim() ? '특이사항 있음' : '', f.nextDate ? '다음 ' + fmtShort(f.nextDate) : ''].filter(Boolean).join(' · ') || '선택',
+                        photo: photos.value.length ? `${photos.value.length}장` : '선택',
+                        style: customCount.value ? `직접 고친 곳 ${customCount.value}` : '제목 · 결재란 · 항목 이름 · 문구',
+                        hist: `${history.value.length}건 보관`
+                    };
+                    const done = {
+                        basic: !!(str(f.company).trim() && cycle.value.days),
+                        sum: summary.value.days > 0,
+                        dem: demandRows.value.length > 0,
+                        when: isDay(f.date) && !!str(f.inspector).trim(),
+                        zones: zoneRows.value.length > 0,
+                        prev: pr.length > 0 && pr.every(p => p.result),
+                        items: t.none === 0 && (t.good + t.bad + t.na) > 0,
+                        find: fr.length > 0,
+                        note: !!(f.note.trim() || f.nextDate),
+                        photo: photos.value.length > 0,
+                        style: false,
+                        hist: archState.value === 'saved'
+                    };
+                    const vis = STEP_DEFS.filter(d => d.docs.includes(f.docType));
+                    vis.forEach((d, i) => {
+                        const cs = checks.value.filter(c => c.step === d.id);
+                        const warn = cs.filter(c => !c.ok).length;
+                        m[d.id] = { id: d.id, no: i + 1, title: d.title, sum: sums[d.id], done: done[d.id] && !warn, warn, checks: cs, open: !!openSet.value[d.id], last: i === vis.length - 1 };
+                    });
+                    return m;
+                });
+                const visIds = () => STEP_DEFS.filter(d => d.docs.includes(formData.value.docType)).map(d => d.id);
+                const allOpen = computed(() => visIds().every(id => openSet.value[id]));
+                const scrollToStep = (id) => nextTick(() => { const el = document.getElementById('step-' + id); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); });
+                const toggle = (id) => { openSet.value = Object.assign({}, openSet.value, { [id]: !openSet.value[id] }); };
+                const openStep = (id) => { view.value = 'form'; openSet.value = Object.assign({}, openSet.value, { [id]: true }); scrollToStep(id); };
+                const goNext = (id) => {
+                    const ids = visIds(), n = ids[ids.indexOf(id) + 1];
+                    if (!n) return;
+                    openSet.value = Object.assign({}, openSet.value, { [id]: false, [n]: true });
+                    scrollToStep(n);
+                };
+                const toggleAll = () => { const on = !allOpen.value, o = {}; STEP_DEFS.forEach(d => { o[d.id] = on; }); openSet.value = o; };
+                const warnN = computed(() => checks.value.filter(c => !c.ok).length);
+                const gotoWarn = () => { const c = checks.value.find(x => !x.ok); if (c) openStep(c.step); };
+                const scrollTop = () => { const lp = document.getElementById('left-pane'); if (lp) lp.scrollTop = 0; window.scrollTo(0, 0); };
 
                 // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
                 const fitPreview = () => {
                     const col = document.getElementById('preview-col');
-                    if (!col) return;
+                    if (!col || !col.clientWidth) return;
                     const a4 = 210 * 96 / 25.4;
                     document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
                 };
+                const setView = (v) => { view.value = v; nextTick(() => { fitPreview(); window.scrollTo(0, 0); }); };
+
+                // ---- 결재란(공통 모듈 assets/docs.js): 칸 이름·개수·성명·서명, 사이트 기본값
+                const hasADoc = !!(window.ADoc && window.ADoc.mountApproval);
+                const apprKey = computed(() => APPR_KEY[formData.value.docType] || APPR_KEY.log);
+                const lsGet = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+                const apprInst = [];
+                // 처음 한 번: 사이트 기본 결재란을 따로 정해 두지 않았다면 이 문서의 원래 칸 이름(점검자·검토·승인)으로 시작한다
+                const seedAppr = () => {
+                    if (custom.value.apprSeeded) return;
+                    try {
+                        const d = lsGet('safetake.appr.default');
+                        if (!(d && Array.isArray(d.cols) && d.cols.length)) Object.keys(APPR_KEY).forEach(k => {
+                            const key = 'safetake.appr.' + APPR_KEY[k];
+                            if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ cols: APPR_COLS[k], names: ['', '', ''], signs: [], dates: [] }));
+                        });
+                    } catch (e) { /* 저장소를 못 쓰면 공통 기본값(담당·검토·승인)으로 보인다 */ }
+                    custom.value.apprSeeded = true;
+                };
+                // 서명은 일지 한 건에 대한 것이다. 다른 일지(새 순회·지난 기록)를 열면 지운다(칸 이름·성명은 유지)
+                const syncSigns = () => {
+                    const mid = formData.value.mid;
+                    if (custom.value.apprMid === mid) return;
+                    if (custom.value.apprMid) Object.keys(APPR_KEY).forEach(k => {
+                        try {
+                            const key = 'safetake.appr.' + APPR_KEY[k], s = lsGet(key);
+                            if (s && Array.isArray(s.signs) && s.signs.some(Boolean)) { s.signs = []; s.dates = []; localStorage.setItem(key, JSON.stringify(s)); }
+                        } catch (e) { /* 그대로 둔다 */ }
+                    });
+                    custom.value.apprMid = mid;
+                    apprInst.forEach(it => { if (document.contains(it.el)) it.inst.redraw(); });
+                };
+                const apprName0 = (key) => {
+                    const s = lsGet('safetake.appr.' + key);
+                    if (s && Array.isArray(s.cols)) return str((s.names || [])[0]).trim();
+                    const d = lsGet('safetake.appr.default');
+                    return d && Array.isArray(d.cols) && d.cols.length ? str((d.names || [])[0]).trim() : '';
+                };
+                // 첫 칸 성명이 비어 있으면 점검자 성명을 보여 준다(저장하지 않음 — 칸에 직접 쓰면 그 값이 저장되어 유지된다)
+                const autoName = (el) => {
+                    const n0 = el.querySelector('.ad-n[data-n="0"]');
+                    if (!n0 || document.activeElement === n0) return;
+                    if (apprName0(el.getAttribute('data-pappr'))) return;
+                    const want = custom.value.apprAutoName ? str(formData.value.inspector).trim() : '';
+                    if (n0.textContent !== want) n0.textContent = want;
+                };
+                const mountAppr = () => {
+                    if (!hasADoc) return;
+                    for (let i = apprInst.length - 1; i >= 0; i--) if (!document.contains(apprInst[i].el)) { apprInst[i].mo.disconnect(); apprInst.splice(i, 1); }
+                    document.querySelectorAll('#app [data-pappr]').forEach(el => {
+                        if (apprInst.some(it => it.el === el)) return;
+                        const inst = window.ADoc.mountApproval(el, el.getAttribute('data-pappr'));
+                        if (!inst) return;
+                        const mo = new MutationObserver(() => autoName(el));
+                        mo.observe(el, { childList: true });
+                        el.addEventListener('focusout', () => setTimeout(() => apprInst.forEach(it => autoName(it.el)), 0));
+                        apprInst.push({ el, inst, mo });
+                        autoName(el);
+                    });
+                };
+                seedAppr();
+                watch(() => [formData.value.docType, custom.value.showAppr], () => nextTick(mountAppr), { flush: 'post' });
+                watch(() => [formData.value.inspector, custom.value.apprAutoName], () => apprInst.forEach(it => autoName(it.el)));
+                watch(() => formData.value.mid, () => nextTick(syncSigns));
+
+                const isExModalOpen = ref(false);
                 onMounted(() => {
                     fitPreview(); window.addEventListener('resize', fitPreview);
                     requestAnimationFrame(fitPreview); setTimeout(fitPreview, 300);
                     const col = document.getElementById('preview-col');
                     if (col && window.ResizeObserver) new ResizeObserver(fitPreview).observe(col);
+                    syncSigns(); mountAppr();
+                    window.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && isExModalOpen.value) isExModalOpen.value = false; });
                 });
 
-                const photos = ref([]);
                 const isGeneratingPDF = ref(false);
                 const toast = ref({ visible: false, message: '', type: 'success' });
                 let toastTimer = null;
                 const showToast = (message, type = 'success') => {
                     toast.value = { visible: true, message, type };
                     clearTimeout(toastTimer);
-                    toastTimer = setTimeout(() => { toast.value.visible = false; }, 2800);
+                    toastTimer = setTimeout(() => { toast.value.visible = false; }, 3200);
                 };
 
                 // ---- 구역·항목·지적사항
                 const setToday = () => { formData.value.date = today; };
+                const setNow = (k) => { const d = new Date(); formData.value[k] = `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+                const moveRow = (arr, i, dir) => { const j = i + dir; if (j < 0 || j >= arr.length) return; const t = arr[i]; arr.splice(i, 1); arr.splice(j, 0, t); };
                 const addZone = () => zones.value.push({ zone: '', company: '', work: '', workers: '', companion: '' });
                 const removeZone = (i) => {
                     const z = zones.value[i];
@@ -1146,13 +1606,32 @@
                     let at = -1;
                     items.value.forEach((it, i) => { if (it.group === group) at = i; });
                     items.value.splice(at + 1 || items.value.length, 0, { group, text: '', result: '' });
+                    editItems.value = true;
                 };
-                const removeItem = (i) => { items.value.splice(i, 1); };
+                const removeItem = (i) => {
+                    const it = items.value[i];
+                    if (it.text.trim() && it.result && !window.confirm('결과를 표시해 둔 점검 항목입니다. 지울까요?')) return;
+                    items.value.splice(i, 1);
+                };
+                // 같은 분류 안에서 위·아래 항목과 자리를 바꾼다
+                const moveItem = (i, dir) => {
+                    const g = items.value[i].group;
+                    let j = i + dir;
+                    while (j >= 0 && j < items.value.length && items.value[j].group !== g) j += dir;
+                    if (j < 0 || j >= items.value.length) return;
+                    const a = items.value[i]; items.value[i] = items.value[j]; items.value[j] = a;
+                };
+                const renameGroup = (from, to) => {
+                    to = str(to).trim();
+                    if (to === from) return;
+                    items.value.forEach(it => { if (it.group === from) it.group = to; });
+                };
                 const addGroup = () => {
                     const g = newGroup.value.trim();
                     if (!g) { showToast('분류 이름을 입력하세요.', 'error'); return; }
                     items.value.push({ group: g, text: '', result: '' });
                     newGroup.value = '';
+                    editItems.value = true;
                 };
                 const setResult = (i, v) => { const it = items.value[i]; it.result = it.result === v ? '' : v; };
                 const fillGood = () => {
@@ -1168,45 +1647,63 @@
                     const it = items.value[i];
                     const single = zoneRows.value.length === 1 ? zoneRows.value[0] : null;
                     addFinding({ hazard: itemMark(it.text), zone: single ? single.zone : '', owner: single ? single.company : '' });
-                    showToast('지적사항에 넣었습니다. 위험요인과 시정 요구 내용을 구체적으로 고쳐 쓰세요.');
+                    showToast('지적사항에 넣었습니다. "지적사항 · 시정 요구" 단계에서 시정 요구 내용과 기한을 적으세요.');
                 };
                 const removeFinding = (i) => {
                     const f = findings.value[i];
                     if ((f.hazard || f.demand) && !window.confirm('이 지적사항을 지울까요?')) return;
                     findings.value.splice(i, 1);
                 };
-                const onImmediate = (f) => { if (f.immediate) f.status = '조치 완료'; };
+                const removePrev = (i) => {
+                    const p = prev.value[i];
+                    if (p.hazard.trim() && !window.confirm('이 이행 확인 항목을 지울까요?\n(조치가 끝나지 않았다면 다음 일지로 넘어가지 않습니다)')) return;
+                    prev.value.splice(i, 1);
+                };
+                // "즉시 조치"를 켜면 조치 완료, 끄면(잘못 누른 경우) 시정 요구로 되돌린다
+                const onImmediate = (f) => { if (f.immediate) f.status = '조치 완료'; else if (f.status === '조치 완료') f.status = '시정 요구'; };
                 const onStatus = (f) => { if (f.status !== '조치 완료') f.immediate = false; };
                 const addPrev = () => prev.value.push({ fid: newId('f'), found: '', zone: '', hazard: '', demand: '', owner: '', due: '', result: '' });
                 const suggestNext = () => {
                     if (!nextDue.value) { showToast('업종과 점검일을 먼저 입력하세요.', 'error'); return; }
                     formData.value.nextDate = nextDue.value;
+                    formData.value.nextAuto = true;
                     showToast(`다음 순회 예정일을 ${fmtDay(nextDue.value)}로 넣었습니다(${cycle.value.text}).`);
                 };
                 const changeDocType = (type) => {
+                    if (formData.value.docType === type) return;
                     formData.value.docType = type;
-                    if (type === 'summary' && !formData.value.sumAnchor) formData.value.sumAnchor = formData.value.date;
-                    if (type === 'demand' && !formData.value.demandDate) formData.value.demandDate = today;
-                    showToast(`${docTypes.find(d => d.value === type).label} 양식으로 전환되었습니다.`);
+                    const first = { summary: 'sum', demand: 'dem' }[type];
+                    if (first) openSet.value = Object.assign({}, openSet.value, { [first]: true });
                 };
 
-                // ---- 사진(저장하지 않음)
-                const handleFileUpload = (e) => {
+                // ---- 사진(저장하지 않음). 휴대폰 원본은 수 MB라 긴 변 1600px JPEG로 줄여 붙인다
+                const shrink = (file) => new Promise((resolve, reject) => {
+                    const url = URL.createObjectURL(file), img = new Image();
+                    img.onload = () => {
+                        try {
+                            const M = 1600, w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, M / Math.max(w, h)), c = document.createElement('canvas');
+                            c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+                            const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+                            URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg', 0.85));
+                        } catch (e) { URL.revokeObjectURL(url); reject(e); }
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('read')); };
+                    img.src = url;
+                });
+                const handleFileUpload = async (e) => {
                     const files = Array.from(e.target.files || []);
                     e.target.value = '';
-                    let room = PHOTO_MAX - photos.value.length;
                     if (!files.length) return;
-                    if (room <= 0) { showToast(`사진은 ${PHOTO_MAX}장까지 첨부할 수 있습니다.`, 'error'); return; }
-                    files.forEach(file => {
-                        if (room <= 0) return;
-                        if (!/^image\//.test(file.type)) { showToast('사진(이미지) 파일만 첨부할 수 있습니다.', 'error'); return; }
-                        if (file.size > 8 * 1024 * 1024) { showToast('사진 한 장은 8MB 이하여야 합니다.', 'error'); return; }
-                        room--;
-                        const reader = new FileReader();
-                        reader.onload = (ev) => { if (photos.value.length < PHOTO_MAX) photos.value.push({ url: ev.target.result, cap: '' }); };
-                        reader.onerror = () => showToast('사진을 읽지 못했습니다.', 'error');
-                        reader.readAsDataURL(file);
-                    });
+                    if (photos.value.length >= PHOTO_MAX) { showToast(`사진은 ${PHOTO_MAX}장까지 첨부할 수 있습니다.`, 'error'); return; }
+                    let skipped = 0;
+                    for (const file of files) {
+                        if (photos.value.length >= PHOTO_MAX) { skipped++; continue; }
+                        if (!/^image\//.test(file.type)) { showToast('사진(이미지) 파일만 첨부할 수 있습니다.', 'error'); continue; }
+                        if (file.size > 30 * 1024 * 1024) { showToast('사진 한 장은 30MB 이하여야 합니다.', 'error'); continue; }
+                        try { const url = await shrink(file); if (photos.value.length < PHOTO_MAX) photos.value.push({ url, cap: '' }); }
+                        catch (err) { showToast('사진을 읽지 못했습니다(HEIC 사진은 JPG로 바꿔 주세요).', 'error'); }
+                    }
+                    if (skipped) showToast(`사진은 ${PHOTO_MAX}장까지 첨부할 수 있어 ${skipped}장은 넣지 않았습니다.`, 'error');
                 };
 
                 // ---- 되돌리기
@@ -1249,9 +1746,9 @@
                         ['기타', ['야간·단독 작업자의 연락 체계가 정해져 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
                     ] }
                 ];
+
                 const exPool = exSets.map(s => Object.assign({ count: s.sets.reduce((n, g) => n + g[1].length, 0) }, s));
-                const isExModalOpen = ref(false);
-                const openExModal = () => { isExModalOpen.value = true; };
+                const openExModal = () => { isExModalOpen.value = true; nextTick(() => { const b = document.getElementById('exClose'); if (b) b.focus(); }); };
                 const selectEx = (opt) => {
                     const touched = items.value.some(it => it.result) || JSON.stringify(items.value.map(it => [it.group, it.text])) !== JSON.stringify(freshItems().map(it => [it.group, it.text]));
                     if (touched && !window.confirm('지금 점검 항목과 표시해 둔 결과를 지우고 예시 항목으로 바꿉니다. 계속할까요?')) return;
@@ -1279,9 +1776,11 @@
                     if (!persist()) { history.value = before; showToast('저장 공간이 부족해 보관하지 못했습니다. 지난 기록을 일부 지워 주세요.', 'error'); return null; }
                     return { dropped };
                 };
+                const needDate = () => { if (isDay(formData.value.date)) return true; showToast('점검일을 먼저 입력하세요.', 'error'); openStep('when'); return false; };
                 const archiveOnly = () => {
+                    if (!needDate()) return;
                     const r = putHistory();
-                    if (r) showToast(r.dropped ? `보관했습니다. ${HIST_MAX}건을 넘어 가장 오래된 기록이 지워졌습니다.` : '이번 순회를 지난 순회 기록에 보관했습니다.');
+                    if (r) showToast(r.dropped ? `보관했습니다. ${HIST_MAX}건을 넘어 가장 오래된 기록이 지워졌습니다.` : `${fmtDay(formData.value.date)} 일지를 보관했습니다.${photos.value.length ? ' 사진은 보관되지 않으니 인쇄·PDF 저장을 해 두세요.' : ''}`);
                 };
                 // 끝나지 않은 지적사항을 다음 순회의 "이행 확인"으로 넘긴다
                 const carryFrom = (s) => {
@@ -1293,16 +1792,21 @@
                     const f = s.formData;
                     formData.value = Object.assign({}, formData.value, {
                         mid: newId('p'), docType: 'log', company: f.company, siteName: f.siteName, industry: f.industry, inspDept: f.inspDept, inspector: f.inspector,
-                        date, timeFrom: '', timeTo: '', weather: '', note: '', nextDate: '', demandNo: '', demandDate: '', demandTo: ''
+                        date, timeFrom: '', timeTo: '', weather: '', note: '', nextDate: '', nextAuto: false, sumAnchor: '', demandNo: '', demandDate: '', demandTo: ''
                     });
                     zones.value = s.zones.map(z => Object.assign({}, z));
                     items.value = s.items.map(it => ({ group: it.group, text: it.text, result: formData.value.keepResults ? it.result : '' }));
                     prev.value = carryFrom(s);
                     findings.value = [];
                     photos.value = [];
-                    window.scrollTo(0, 0);
+                    editItems.value = false;
+                    view.value = 'form';
+                    // 바로 점검 결과를 표시할 수 있게 그 단계만 펼친다(확인할 지난 지적사항이 있으면 함께)
+                    openSet.value = prev.value.length ? { prev: true, items: true } : { items: true };
+                    nextTick(() => { scrollTop(); scrollToStep(prev.value.length ? 'prev' : 'items'); });
                 };
                 const archiveAndNext = () => {
+                    if (!needDate()) return;
                     const f = formData.value;
                     const nd = today > f.date ? today : (f.nextDate && f.nextDate > f.date ? f.nextDate : (nextDue.value || addDays(f.date, 1)));
                     if (!window.confirm(`이번 순회(${fmtDay(f.date)})를 보관하고 ${fmtDay(nd)} 순회 일지를 새로 열까요?\n(구역·업체·점검 항목은 그대로, 조치가 끝나지 않은 지적사항은 "이행 확인"으로 옮깁니다)`)) return;
@@ -1311,22 +1815,38 @@
                     startNext(snapshot(), nd);
                     showToast(prev.value.length ? `${fmtDay(nd)} 순회를 열었습니다. 미조치 지적사항 ${prev.value.length}건을 이행 확인으로 옮겼습니다.` : `${fmtDay(nd)} 순회를 열었습니다.`);
                 };
-                const applySnap = (s) => { formData.value = s.formData; zones.value = s.zones; items.value = s.items; findings.value = s.findings; prev.value = s.prev; photos.value = []; };
+                const applySnap = (s) => {
+                    // 화면 설정(예전 서식 안내 닫음, 결과 복사 여부)은 지금 것을 유지한다
+                    s.formData.oldDismissed = formData.value.oldDismissed; s.formData.keepResults = formData.value.keepResults;
+                    formData.value = s.formData; zones.value = s.zones; items.value = s.items; findings.value = s.findings; prev.value = s.prev; photos.value = []; editItems.value = false;
+                };
                 const openHistory = (id) => {
                     const h = history.value.find(x => x.id === id);
                     if (!h) return;
-                    if (h.id !== formData.value.mid && !window.confirm('지금 작성 중인 내용을 이 기록으로 바꿉니다.\n지금 내용을 남기려면 취소하고 "지금 내용만 보관"을 먼저 누르세요. 계속할까요?')) return;
+                    if (h.id !== formData.value.mid && archState.value !== 'saved' && hasWork() && !window.confirm('지금 작성 중인 내용을 이 기록으로 바꿉니다.\n지금 내용을 남기려면 취소하고 "보관"을 먼저 누르세요. 계속할까요?')) return;
                     applySnap(cleanSnap(JSON.parse(JSON.stringify(h.snap))));
-                    window.scrollTo(0, 0);
+                    view.value = 'form';
+                    nextTick(scrollTop);
                     showToast('보관한 순회 기록을 열었습니다.');
                 };
-                const copyHistory = (id) => {
-                    const h = history.value.find(x => x.id === id);
-                    if (!h) return;
-                    if (!window.confirm(`${fmtDay(h.snap.formData.date)} 기록의 구역·업체·점검 항목을 복사해 오늘(${fmtDay(today)}) 일지를 새로 엽니다.\n지금 작성 중인 내용은 보관하지 않으면 사라집니다. 계속할까요?`)) return;
+                // 보관하지 않은 작업이 있을 때만 묻는다(매일 쓰는 길에서는 한 번에 넘어가게)
+                const copyFrom = (h) => {
+                    if (archState.value !== 'saved' && hasWork() && !window.confirm(`${fmtDay(h.snap.formData.date)} 기록의 구역·업체·점검 항목을 복사해 오늘(${fmtDay(today)}) 일지를 새로 엽니다.\n지금 작성 중인 내용은 보관하지 않아 사라집니다. 계속할까요?`)) return;
                     startNext(cleanSnap(JSON.parse(JSON.stringify(h.snap))), today);
-                    showToast('복사해서 오늘 일지를 열었습니다.');
+                    showToast(prev.value.length ? `${fmtShort(h.snap.formData.date)} 일지를 복사해 오늘 일지를 열었습니다. 미조치 지적사항 ${prev.value.length}건을 이행 확인으로 옮겼습니다.` : `${fmtShort(h.snap.formData.date)} 일지를 복사해 오늘 일지를 열었습니다.`);
                 };
+                const copyHistory = (id) => { const h = history.value.find(x => x.id === id); if (h) copyFrom(h); };
+                // 가장 최근(오늘보다 앞선) 보관 기록 — 맨 위 "어제 것 복사" 단추
+                const lastRecRaw = computed(() => history.value.filter(h => isDay(h.snap.formData.date) && h.snap.formData.date < today).sort((a, b) => b.snap.formData.date.localeCompare(a.snap.formData.date) || b.saved - a.saved)[0] || null);
+                const lastRec = computed(() => {
+                    const h = lastRecRaw.value;
+                    if (!h) return null;
+                    // 오늘 일지를 이미 쓰고 있으면(결과를 표시했거나 보관함) 단추를 내보이지 않는다
+                    if (formData.value.date === today && (archState.value !== 'new' || items.value.some(it => it.result))) return null;
+                    return { id: h.id, date: h.snap.formData.date, title: fmtDay(h.snap.formData.date) };
+                });
+                const copyLabel = computed(() => (lastRec.value ? (lastRec.value.date === addDays(today, -1) ? '어제 것 복사' : `지난 일지 복사 (${fmtShort(lastRec.value.date)})`) : ''));
+                const copyLast = () => { if (lastRecRaw.value) copyFrom(lastRecRaw.value); };
                 const deleteHistory = (id) => {
                     if (!window.confirm('이 순회 기록을 지울까요? 되돌릴 수 없습니다.')) return;
                     history.value = history.value.filter(h => h.id !== id);
@@ -1382,6 +1902,7 @@
                     showToast('예전 서식의 내용을 가져왔습니다. "확인" 칸에 내용이 있던 지적사항은 조치 완료로 넣었으니 확인하세요.');
                 };
 
+
                 // ---- 인쇄·PDF
                 const printDoc = () => { window.print(); };
                 // html2pdf(약 0.9MB)는 처음 누를 때만 불러온다
@@ -1394,7 +1915,7 @@
                 });
                 const downloadPDF = async () => {
                     const element = document.getElementById('print-area');
-                    if (!element) return;
+                    if (!element || isGeneratingPDF.value) return;
                     isGeneratingPDF.value = true;
                     showToast('PDF를 만들고 있습니다…', 'info');
                     try { await loadHtml2pdf(); } catch (e) {
@@ -1402,8 +1923,10 @@
                         showToast("PDF 도구를 불러오지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
                         return;
                     }
-                    // 줄여 보이던 미리보기를 실제 크기로 돌려놓고 찍는다
+                    // 줄여 보이던 미리보기를 실제 크기로 돌려놓고, 화면용 단추(결재란 ＋/－ 등)는 빼고 찍는다
+                    view.value = 'preview';
                     document.documentElement.style.setProperty('--pz', '1');
+                    element.classList.add('pt-pdfing');
                     await nextTick();
                     const f = formData.value;
                     const tail = f.docType === 'summary' ? `${period.value.from}_순회점검_집계표` : `${f.date}_${f.docType === 'demand' ? '순회점검_시정요구서' : '순회점검_일지'}`;
@@ -1415,29 +1938,29 @@
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                         pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
                     };
-                    window.html2pdf().set(opt).from(element).save().then(() => {
-                        isGeneratingPDF.value = false; fitPreview();
-                        showToast('PDF 파일을 저장했습니다.');
-                    }).catch(() => {
-                        isGeneratingPDF.value = false; fitPreview();
-                        showToast("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
-                    });
+                    const done = (msg, type) => { isGeneratingPDF.value = false; element.classList.remove('pt-pdfing'); fitPreview(); showToast(msg, type); };
+                    window.html2pdf().set(opt).from(element).save().then(() => done('PDF 파일을 저장했습니다.'))
+                        .catch(() => done("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error'));
                 };
 
                 return {
-                    HIST_MAX, PHOTO_MAX, INDUSTRIES, docTypes, formData, zones, items, findings, prev, history: historyView, newGroup,
+                    HIST_MAX, PHOTO_MAX, INDUSTRIES, DEF, LABEL_DEFS, docTypes, today, formData, zones, items, findings, prev, custom, history: historyView, newGroup, editItems,
                     photos, isGeneratingPDF, toast, saveMsg, fmtDay,
                     cycle, nextDue, zoneRows, totalWorkers, findingRows, prevRows, ownerNames, zoneNames, groups, docGroups, tally,
                     siteLabel, inspLabel, dateLabel, period, summary, shiftPeriod, demandOwners, demandRows, checks,
-                    setToday, addZone, removeZone, addItem, removeItem, addGroup, setResult, fillGood, addFinding, hasFindingFor, findingFromItem, removeFinding,
+                    L, titleLog, titleSum, titleDemand, footKey, footV, footText, demandBodyV, sealV, resetCustom, hasADoc, apprKey,
+                    S, view, setView, toggle, goNext, toggleAll, allOpen, warnN, gotoWarn, archState, archText,
+                    setToday, setNow, moveRow, addZone, removeZone, addItem, removeItem, moveItem, renameGroup, addGroup, setResult, fillGood, addFinding, hasFindingFor, findingFromItem, removeFinding, removePrev,
                     onImmediate, onStatus, addPrev, suggestNext, changeDocType, handleFileUpload, resetResults,
                     exPool, isExModalOpen, openExModal, selectEx,
-                    archiveOnly, archiveAndNext, openHistory, copyHistory, deleteHistory,
+                    archiveOnly, archiveAndNext, openHistory, copyHistory, deleteHistory, lastRec, copyLabel, copyLast,
                     oldFormAvailable, dismissOld, importOldForm,
                     printDoc, downloadPDF
                 };
             }
-        }).mount('#app');
+        });
+        app.component('pt-step', PtStep);
+        app.mount('#app');
     </script>
 </body>
 </html>

@@ -116,50 +116,194 @@
         .cc-opt { display: block; width: 100%; text-align: left; background: #fff; }
         .cc-opt > span { display: block; }
         .cc-opt > span:first-child { display: flex; }
-        .cc-t { table-layout: fixed; }
-        .cc-t th, .cc-t td { overflow-wrap: anywhere; word-break: break-word; }
-        .cc-w34 { width: 34%; }
-        .cc-min { min-height: 2.6em; }
         button:focus-visible, a:focus-visible, .cc-in:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
         @media (max-width: 420px) { .cc-grid3 { grid-template-columns: 1fr 1fr; } .cc-grid3 > :first-child { grid-column: 1 / -1; } }
         @media print { thead { display: table-header-group; } h4 { break-after: avoid; } }
+        /* ===== 화면 배치: 접이식 입력 단계 + 고정 미리보기 ===== */
+        .cc-header { position: sticky; top: 0; z-index: 40; padding: 8px 16px; }
+        .cc-hin { max-width: 80rem; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+        .cc-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .cc-logo { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; font-size: 18px; flex: none; }
+        .cc-h1 { font-size: 15px; font-weight: 700; letter-spacing: -.01em; margin: 0; }
+        .cc-h1s { font-size: 11px; margin: 0; }
+        .cc-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+        .cc-hb { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #cbd5e1; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+        .cc-hb:hover { background: #334155; }
+        .cc-hb:disabled { opacity: .6; cursor: default; }
+        .cc-hb-pri { color: #fff; font-weight: 700; background: #059669; border-color: #059669; }
+        .cc-hb-pri:hover { background: #10b981; }
+        .cc-main { padding: 12px 16px 16px; display: block; }
+        .cc-pane { min-width: 0; }
+        .cc-form > * + * { margin-top: 8px; }
+        .cc-tabs { position: sticky; top: 0; z-index: 30; display: flex; background: #fff; border-bottom: 1px solid #cbd5e1; }
+        .cc-tabs button { flex: 1; padding: 11px 0; font-size: 14px; font-weight: 700; color: #64748b; background: none; border: 0; border-bottom: 3px solid transparent; cursor: pointer; }
+        .cc-tabs button.on { color: #047857; border-bottom-color: #059669; }
+        @media screen and (max-width: 1023px) {
+            .cc-header { position: static; }
+            .cc-h1s { display: none; }
+            .cc-mhide { display: none !important; }
+            .cc-step { scroll-margin-top: 52px; }
+        }
+        @media screen and (min-width: 1024px) {
+            .cc-tabs { display: none; }
+            .cc-main { display: grid; grid-template-columns: minmax(400px, 5fr) 7fr; gap: 20px; align-items: start; }
+            /* 두 칸이 화면 높이 안에서 각자 스크롤한다. --nh = 페이지 맨 아래 안내문 높이(스크립트가 잰다) — 그만큼 비워 두어 페이지 자체는 스크롤되지 않게 */
+            #app { min-height: 0; }
+            .cc-pane { position: sticky; top: calc(var(--hh, 56px) + 12px); height: calc(100vh - var(--hh, 56px) - 24px - var(--nh, 0px)); min-height: 320px; overflow-y: auto; scrollbar-width: thin; }
+            .cc-form { padding-right: 4px; }
+        }
+        .cc-top { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px; }
+        .cc-dt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .cc-dt button { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px 4px; font-size: 12.5px; font-weight: 700; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; }
+        .cc-dt button.on { color: #047857; background: #ecfdf5; border-color: #10b981; }
+        .cc-topr { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; margin-top: 6px; font-size: 11px; color: #64748b; }
+        .cc-lk { font: inherit; font-size: 11px; font-weight: 700; color: #1d4ed8; background: none; border: 0; padding: 0 2px; cursor: pointer; text-decoration: underline; }
+        .cc-step { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+        .cc-step.open { border-color: #94a3b8; }
+        .cc-sth { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; background: none; border: 0; text-align: left; cursor: pointer; border-radius: 12px; }
+        .cc-sth:hover { background: #f8fafc; }
+        .cc-sn { flex: none; width: 22px; height: 22px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .cc-step.open .cc-sn { background: #0f172a; color: #fff; }
+        .cc-stt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .cc-stt b { font-size: 13px; color: #0f172a; }
+        .cc-stt small { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cc-sw { flex: none; display: inline-flex; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; color: #b45309; }
+        .cc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        .cc-sd { flex: none; color: #059669; font-size: 14px; }
+        .cc-car { flex: none; color: #94a3b8; font-size: 11px; transition: transform .15s; }
+        .cc-step.open .cc-car { transform: rotate(180deg); }
+        .cc-sb { padding: 2px 10px 10px; }
+        .cc-sb > * + * { margin-top: 8px; }
+        .cc-next { display: flex; justify-content: flex-end; }
+        .cc-l { display: block; font-size: 11.5px; font-weight: 500; color: #475569; margin-bottom: 3px; }
+        .cc-g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .cc-g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+        @media (max-width: 420px) { .cc-g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cc-lbg { grid-template-columns: 1fr; } }
+        .cc-hint { font-size: 11px; line-height: 1.55; color: #64748b; margin: 0; }
+        .cc-ck { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #334155; }
+        .cc-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 8px; }
+        .cc-bt { font-size: 12px; font-weight: 700; color: #334155; }
+        .cc-add { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #047857; background: none; border: 0; padding: 2px; cursor: pointer; }
+        .cc-line { display: flex; align-items: center; gap: 6px; }
+        .cc-x { flex: none; color: #94a3b8; background: none; border: 0; padding: 4px; cursor: pointer; line-height: 1; }
+        .cc-x:hover { color: #e11d48; }
+        .cc-x:disabled { opacity: .3; cursor: default; }
+        .cc-mv { flex: none; display: inline-flex; }
+        .cc-mv button { color: #94a3b8; background: none; border: 0; padding: 4px 2px; font-size: 10px; line-height: 1; cursor: pointer; }
+        .cc-mv button:hover { color: #0f172a; }
+        .cc-mv button:disabled { opacity: .3; cursor: default; }
+        .cc-ta { resize: vertical; line-height: 1.55; display: block; }
+        .cc-lb + .cc-lb { margin-top: 6px; }
+        .cc-lbh { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; font-size: 11.5px; color: #475569; margin-bottom: 2px; }
+        .cc-lbs { font-size: 11px; color: #b45309; }
+        .cc-lbg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; margin-top: 8px; }
+        .cc-lbg .cc-lb + .cc-lb { margin-top: 0; }
+        .cc-det > summary { font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; padding: 4px 0; }
+        .cc-lawbox { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px 10px; }
+        .cc-appr-edit { overflow-x: auto; padding: 4px 0; }
+        .cc-appr-edit .ad-appr { margin-left: 0; }
+        .cc-appr-edit .ad-ctl { justify-content: flex-start; font-size: 12.5px; gap: 4px 14px; }
+        .cc-pvbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; font-size: 11px; color: #64748b; margin-bottom: 8px; }
+        .cc-pvbar b { color: #334155; }
+        .cc-toast { position: fixed; right: 16px; bottom: 16px; z-index: 60; max-width: calc(100vw - 32px); display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; color: #fff; font-size: 12px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+
+        /* ===== 문서(A4) ===== */
+        .cc-doc { padding: 11mm 11mm 12mm; color: #0f172a; font-size: 12px; line-height: 1.5; border: 1px solid #e2e8f0; }
+        .cc-doc p { margin: 0; }
+        .cc-dh { display: flex; align-items: flex-end; gap: 12px; border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 16px; }
+        .cc-title { flex: 1; min-width: 0; margin: 0; text-align: center; font-size: 23px; font-weight: 900; letter-spacing: .02em; line-height: 1.35; overflow-wrap: anywhere; }
+        .cc-dh-a .cc-title { font-size: 19px; text-align: left; align-self: center; }
+        .cc-appr { flex: none; max-width: 62%; }
+        .cc-appr .ad-appr { font-size: 11px; }
+        .cc-appr .ad-appr th:not(.ad-h), .cc-appr .ad-appr td { min-width: 54px; }
+        .cc-to { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px !important; text-align: center; overflow-wrap: anywhere; }
+        .cc-dh-a .cc-to { text-align: left; }
+        .cc-t { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; margin: 0 0 14px; }
+        .cc-t th, .cc-t td { border: 1px solid #1e293b; padding: 6px 8px; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; text-align: left; font-weight: 400; }
+        .cc-t th { background: #f1f5f9; font-weight: 700; text-align: center; }
+        .cc-t .cc-sh th { background: #f8fafc; font-size: 11px; color: #475569; padding: 4px 6px; }
+        .cc-tc td { text-align: center; }
+        .cc-rr td { height: 30px; padding: 3px 6px; }
+        .cc-c { text-align: center !important; }
+        .cc-s11 { font-size: 11px; }
+        .cc-s10 { font-size: 10px; }
+        .cc-top-a { vertical-align: top !important; }
+        .cc-pre { white-space: pre-wrap; line-height: 1.6; }
+        .cc-min { min-height: 2.6em; }
+        .cc-h4 { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; padding-left: 7px; border-left: 4px solid #1e293b; line-height: 1.3; }
+        .cc-photo { border: 1px solid #1e293b; padding: 10px; margin-bottom: 14px; text-align: center; break-inside: avoid; }
+        .cc-photo p { font-size: 11px; font-weight: 700; margin-bottom: 6px !important; }
+        .cc-photo img { max-height: 224px; max-width: 100%; margin: 0 auto; display: block; object-fit: contain; }
+        .cc-intro { font-size: 13.5px; line-height: 2; margin: 18px 4px 14px !important; white-space: pre-wrap; }
+        .cc-below { text-align: center; font-size: 13.5px; font-weight: 700; letter-spacing: .3em; margin: 0 0 10px !important; }
+        .cc-nt th, .cc-nt td { padding: 9px 10px; }
+        .cc-who { color: #475569; margin-top: 4px; padding-left: 8px; border-left: 2px solid #cbd5e1; }
+        .cc-sig { margin-top: 36px; text-align: center; break-inside: avoid; }
+        .cc-sig > * + * { margin-top: 10px !important; }
+        .cc-close { font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+        .cc-sigd { font-size: 13px; color: #334155; min-height: 1em; }
+        .cc-sign { font-size: 17px; font-weight: 900; letter-spacing: .02em; overflow-wrap: anywhere; }
+        .cc-sign small { font-size: 12px; font-weight: 400; color: #64748b; letter-spacing: 0; }
+        .cc-foot { margin-top: 14px !important; font-size: 10.5px; color: #475569; white-space: pre-wrap; line-height: 1.5; }
+        .cc-ed { outline: 0; border-radius: 2px; white-space: pre-wrap; }
+        .cc-ph { color: #94a3b8; font-weight: 400; }
+        @media screen {
+            .cc-ed { cursor: text; }
+            .cc-ed:hover { box-shadow: 0 0 0 1px #93c5fd; }
+            .cc-ed:focus { background: #e6f0fd; box-shadow: 0 0 0 1px #3b82f6; }
+            .cc-ed:empty::before { content: '✎'; color: #cbd5e1; font-weight: 400; }
+        }
+        .cc-cap .cc-ed:empty::before { content: none !important; }
+        .cc-cap .ad-ctl, .cc-cap .ad-ph, .cc-cap .cc-ph { display: none !important; }
+        .cc-cap .ad-n:empty::before { content: none !important; }
+        .cc-cap.cc-doc { border: 0; box-shadow: none; }
+        @media print {
+            .cc-pane { position: static !important; max-height: none !important; overflow: visible !important; display: block !important; }
+            .cc-pane.no-print, .no-print { display: none !important; }
+            .cc-main { display: block !important; padding: 0 !important; max-width: none !important; }
+            .cc-ph { display: none !important; }
+            .cc-foot:has(.cc-ed:empty) { display: none; }
+            .cc-t thead { display: table-header-group; }
+            .cc-h4 { break-after: avoid; page-break-after: avoid; }
+            .cc-dh, .cc-sig { break-inside: avoid; }
+        }
     </style>
+    <!-- 결재란(칸 이름·칸 수·성명·서명) 공통 모듈 — 사이트의 다른 서식과 같은 저장 키를 쓴다 -->
+    <script src="../../assets/docs.js"></script>
 </head>
 <body class="text-slate-800">
     <div id="app" class="min-h-screen flex flex-col" v-cloak>
-        <header class="bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center space-x-3">
-                    <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold mr-1">← SafePlum</a>
-                    <span class="bg-emerald-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-black">
-                        <i class="ph-bold ph-users text-xl"></i>
-                    </span>
-                    <div>
-                        <h1 class="text-base font-bold tracking-tight">안전보건 협의체 회의록 작성기</h1>
-                        <p class="text-[11px] text-slate-400">산업안전보건법 제64조 · 시행규칙 제79조 · 회의록 / 개최 통보 / 결과 보고서</p>
+        <header id="cc-header" class="cc-header bg-slate-900 text-white shadow-md no-print">
+            <div class="cc-hin">
+                <div class="cc-brand">
+                    <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold">← SafePlum</a>
+                    <span class="cc-logo bg-emerald-500 text-slate-950 rounded-lg"><i class="ph-bold ph-users"></i></span>
+                    <div style="min-width:0">
+                        <h1 class="cc-h1">안전보건 협의체 회의록 작성기</h1>
+                        <p class="cc-h1s text-slate-400">산업안전보건법 제64조 · 시행규칙 제79조 · 회의록 / 개최 통보 / 결과 보고서</p>
                     </div>
                 </div>
-
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="cc-acts">
                     <span class="cm-save" role="status" aria-live="polite">{{ saveMsg }}</span>
-                    <button type="button" @click="resetToDefault" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
-                        <i class="ph-bold ph-arrow-counter-clockwise"></i> 협의 내용 비우기
-                    </button>
-                    <button type="button" @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                        <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
-                    </button>
-                    <button type="button" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
-                        <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
-                        <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
+                    <button type="button" @click="printDoc" class="cc-hb cc-hb-pri"><i class="ph-bold ph-printer"></i> 인쇄 / PDF 저장</button>
+                    <button type="button" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="cc-hb">
+                        <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf"></i>
+                        <i v-else class="ph-bold ph-spinner animate-spin"></i>
                         <span>{{ isGeneratingPDF ? 'PDF 만드는 중…' : 'PDF 파일로 받기' }}</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 모바일: 입력 | 미리보기 전환 -->
+        <div class="cc-tabs no-print" role="tablist" aria-label="화면 전환">
+            <button type="button" role="tab" id="tabForm" :aria-selected="view === 'form'" :class="{ on: view === 'form' }" @click="setView('form')">입력</button>
+            <button type="button" role="tab" id="tabDoc" :aria-selected="view === 'doc'" :class="{ on: view === 'doc' }" @click="setView('doc')">미리보기</button>
+        </div>
+
+        <main class="cc-main flex-1 w-full mx-auto max-w-7xl">
             <!-- 입력 -->
-            <div class="lg:col-span-5 space-y-5 no-print" style="min-width:0">
+            <div id="form-col" class="cc-pane cc-form no-print" :class="{ 'cc-mhide': view !== 'form' }">
                 <div v-if="oldFormAvailable" class="cc-old">
                     <p>예전 <b>협의체 회의록 서식</b>에 적어 둔 내용이 이 기기에 남아 있습니다. 여기로 가져올 수 있습니다(예전 내용은 지워지지 않습니다).</p>
                     <div class="cc-row">
@@ -169,149 +313,143 @@
                 </div>
 
                 <!-- 문서 종류 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <label class="block text-xs font-bold text-slate-600 mb-2">문서 종류 선택</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button v-for="item in docTypes" :key="item.value" type="button" @click="changeDocType(item.value)" :aria-pressed="formData.docType === item.value"
-                            :class="['py-2 px-2.5 rounded-lg border text-xs font-bold flex flex-col items-center justify-center gap-1 transition',
-                                formData.docType === item.value ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100']">
-                            <i :class="[item.icon, 'text-base']"></i>
-                            <span>{{ item.label }}</span>
+                <div class="cc-top">
+                    <div class="cc-dt" role="group" aria-label="문서 종류 선택">
+                        <button v-for="item in docTypes" :key="item.value" type="button" @click="changeDocType(item.value)" :aria-pressed="formData.docType === item.value" :class="{ on: formData.docType === item.value }">
+                            <i :class="item.icon"></i><span>{{ item.label }}</span>
                         </button>
+                    </div>
+                    <div class="cc-topr">
+                        <span>단계를 눌러 펼치세요 · 확인할 곳 {{ warnTotal }}건</span>
+                        <span>
+                            <button type="button" id="openAll" class="cc-lk" @click="setAll(true)">모두 펼치기</button>
+                            <button type="button" id="closeAll" class="cc-lk" @click="setAll(false)">모두 접기</button>
+                        </span>
                     </div>
                 </div>
 
-                <!-- 1. 기본 정보 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-fill ph-info text-blue-500"></i> 1. 기본 회의 정보
-                    </h3>
-                    <div class="grid grid-cols-4 gap-2">
+                <!-- 기본 정보 -->
+                <cc-step sid="basic">
+                    <div class="cc-g2">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cYear">연도</label>
-                            <input id="cYear" v-model.number="formData.year" type="number" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="cc-l" for="cDt">회의 일시</label>
+                            <input id="cDt" v-model="formData.datetime" type="datetime-local" class="cc-in">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cMonth">월</label>
-                            <select id="cMonth" v-model.number="formData.month" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                                <option v-for="m in 12" :key="m" :value="m">{{ m }}월</option>
-                            </select>
+                            <label class="cc-l" for="cLoc">회의 장소</label>
+                            <input id="cLoc" v-model="formData.location" type="text" placeholder="예: 본관 2층 회의실" class="cc-in">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cType">구분</label>
-                            <select id="cType" v-model="formData.type" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="cc-l" for="cCompany">도급인(회사)명</label>
+                            <input id="cCompany" v-model="formData.company" type="text" placeholder="예: (주)한국산업안전" class="cc-in">
+                        </div>
+                        <div>
+                            <label class="cc-l" for="cSite">사업장·현장명 (선택)</label>
+                            <input id="cSite" v-model="formData.siteName" type="text" placeholder="예: 1공장" class="cc-in">
+                        </div>
+                    </div>
+                    <div class="cc-g4">
+                        <div>
+                            <label class="cc-l" for="cType">구분</label>
+                            <select id="cType" v-model="formData.type" class="cc-in">
                                 <option value="정기">정기회의</option>
                                 <option value="임시">임시회의</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cRound">회차</label>
-                            <input id="cRound" v-model.number="formData.round" type="number" min="1" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cCompany">도급인(회사)명</label>
-                            <input id="cCompany" v-model="formData.company" type="text" placeholder="예: (주)한국산업안전" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="cc-l" for="cRound">회차</label>
+                            <input id="cRound" v-model.number="formData.round" @input="formData.autoRound = false" type="number" min="1" class="cc-in">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cSite">사업장·현장명 (선택)</label>
-                            <input id="cSite" v-model="formData.siteName" type="text" placeholder="예: 1공장" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cDt">회의 일시</label>
-                            <input id="cDt" v-model="formData.datetime" type="datetime-local" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="cc-l" for="cYear">연도</label>
+                            <input id="cYear" v-model.number="formData.year" @input="formData.autoYm = false" type="number" class="cc-in">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cLoc">회의 장소</label>
-                            <input id="cLoc" v-model="formData.location" type="text" placeholder="예: 본관 2층 회의실" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="cc-l" for="cMonth">월</label>
+                            <select id="cMonth" v-model.number="formData.month" @change="formData.autoYm = false" class="cc-in">
+                                <option v-for="m in 12" :key="m" :value="m">{{ m }}월</option>
+                            </select>
                         </div>
                     </div>
-                    <div v-if="formData.docType === 'notice'" class="pt-2 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-slate-700 mb-1" for="cNF">통보문 하단 발신 명의</label>
-                        <input id="cNF" v-model="formData.noticeFooter" type="text" placeholder="예: 안전보건총괄책임자" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white outline-none">
-                    </div>
-                    <div v-if="formData.docType === 'report'" class="pt-2 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-slate-700 mb-1" for="cRF">결과 보고서 하단 명의</label>
-                        <input id="cRF" v-model="formData.reportFooter" type="text" placeholder="예: 안전보건총괄책임자" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white outline-none">
-                    </div>
-                </div>
-
-                <!-- 2. 구성·참석 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-users-three text-emerald-600"></i> 2. 협의체 구성·참석
-                        </h3>
-                        <span class="text-[11px] text-slate-400">수급인 {{ subs.length }}곳 · 참석 {{ presentSubs }}곳</span>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-blue-700">도급인</span>
-                            <button type="button" @click="addHost" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
-                                <i class="ph-bold ph-plus-circle"></i> 추가
-                            </button>
+                    <p class="cc-hint">
+                        <template v-if="formData.autoYm">연도·월은 회의 일시에 맞춰 자동으로 들어갑니다.</template>
+                        <template v-else>연도·월을 직접 고쳤습니다. <button type="button" id="autoYm" class="cc-lk" @click="formData.autoYm = true">회의 일시에 맞추기</button></template>
+                        <template v-if="formData.type === '정기'">
+                            <template v-if="formData.autoRound"> 정기회의 회차는 월과 같게 들어갑니다.</template>
+                            <template v-else> 회차를 직접 고쳤습니다. <button type="button" id="autoRound" class="cc-lk" @click="formData.autoRound = true">월과 같게 되돌리기</button></template>
+                        </template>
+                    </p>
+                    <label class="cc-ck"><input type="checkbox" id="cPrefix" v-model="formData.titlePrefix"> 문서 제목 앞에 "{{ titlePrefix }}" 붙이기</label>
+                    <div v-if="formData.docType === 'notice'" class="cc-g2">
+                        <div>
+                            <label class="cc-l" for="cND">통보일 (비우면 오늘)</label>
+                            <input id="cND" v-model="formData.noticeDate" type="date" class="cc-in">
                         </div>
-                        <div v-for="(rep, idx) in hostReps" :key="'host-' + idx" class="flex gap-2 items-center">
-                            <input v-model="rep.title" type="text" placeholder="직책 (예: 안전보건총괄책임자)" aria-label="도급인 참석자 직책" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <input v-model="rep.name" type="text" placeholder="성명" aria-label="도급인 참석자 성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <label class="cm-abs"><input type="checkbox" v-model="rep.absent"> 불참</label>
-                            <button v-if="hostReps.length > 1" type="button" @click="hostReps.splice(idx, 1)" aria-label="이 참석자 삭제" class="text-slate-400 hover:text-rose-500 p-1">
-                                <i class="ph-bold ph-x"></i>
-                            </button>
+                        <div>
+                            <label class="cc-l" for="cNF">발신 명의</label>
+                            <input id="cNF" v-model="formData.noticeFooter" type="text" placeholder="예: 안전보건총괄책임자" class="cc-in">
                         </div>
                     </div>
-
-                    <div class="space-y-2 pt-2 border-t border-slate-100">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-emerald-700">수급인 (업체별)</span>
-                            <button type="button" id="addSub" @click="addSub" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold flex items-center gap-1">
-                                <i class="ph-bold ph-plus-circle"></i> 업체 추가
-                            </button>
+                    <div v-if="formData.docType === 'report'" class="cc-g2">
+                        <div>
+                            <label class="cc-l" for="cRD">보고일 (비우면 회의일)</label>
+                            <input id="cRD" v-model="formData.reportDate" type="date" class="cc-in">
                         </div>
-                        <p v-if="!subs.length" class="text-[11px] text-slate-400">수급인 업체가 없습니다. "업체 추가"를 눌러 도급인 사업장에서 작업하는 수급인을 모두 넣으세요.</p>
-                        <div v-for="(s, idx) in subs" :key="'sub-' + idx" class="cc-sub">
-                            <div class="cc-subhead">
-                                <span class="cc-no">{{ idx + 1 }}</span>
-                                <input v-model="s.company" type="text" placeholder="수급인 업체명" aria-label="수급인 업체명" class="cc-in" style="flex:1;min-width:0;font-weight:700">
-                                <label class="cm-abs"><input type="checkbox" v-model="s.absent"> 불참</label>
-                                <button type="button" @click="removeSub(idx)" aria-label="이 업체 삭제" class="text-slate-400 hover:text-rose-500 p-1">
-                                    <i class="ph-bold ph-x"></i>
-                                </button>
-                            </div>
-                            <div class="cc-grid3">
-                                <input v-model="s.work" type="text" placeholder="작업 내용 (예: 배관 보수)" aria-label="작업 내용" class="cc-in">
-                                <input v-model="s.title" type="text" placeholder="직위 (예: 현장소장)" aria-label="참석자 직위" class="cc-in">
-                                <input v-model="s.name" type="text" placeholder="참석자 성명" aria-label="참석자 성명" class="cc-in">
-                            </div>
-                            <input v-if="s.absent" v-model="s.reason" type="text" placeholder="불참 사유·결과 전달 방법 (예: 작업 종료, 회의록 사본 전달)" aria-label="불참 사유" class="cc-in" style="margin-top:6px">
+                        <div>
+                            <label class="cc-l" for="cRF">보고 명의</label>
+                            <input id="cRF" v-model="formData.reportFooter" type="text" placeholder="예: 안전보건총괄책임자" class="cc-in">
                         </div>
                     </div>
-                </div>
+                </cc-step>
 
-                <!-- 자동 확인 -->
-                <div class="space-y-2" style="margin-top:-8px">
-                    <p v-for="(c, i) in checks" :key="'chk-' + i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
-                </div>
-
-                <!-- 3. 전회 조치사항 -->
-                <div v-if="formData.docType !== 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-bold ph-arrows-clockwise text-slate-600"></i> 3. 지난 회의 조치사항 이행 확인
-                        </h3>
-                        <button type="button" @click="addPrev" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
-                            <i class="ph-bold ph-plus-circle"></i> 추가
-                        </button>
+                <!-- 구성·참석 -->
+                <cc-step sid="members">
+                    <div class="cc-bar">
+                        <span class="cc-bt" style="color:#1d4ed8">도급인</span>
+                        <button type="button" id="addHost" @click="addHost" class="cc-add"><i class="ph-bold ph-plus-circle"></i> 추가</button>
                     </div>
-                    <p v-if="!prev.length" class="text-[11px] text-slate-400">지난 회의에서 정한 조치가 있으면 이행 여부를 적습니다. 아래 "보관하고 다음 회의 작성"을 쓰면 끝나지 않은 조치가 자동으로 넘어옵니다.</p>
+                    <div v-for="(rep, idx) in hostReps" :key="'host-' + idx" class="cc-line">
+                        <input v-model="rep.title" type="text" placeholder="직책 (예: 안전보건총괄책임자)" aria-label="도급인 참석자 직책" class="cc-in">
+                        <input v-model="rep.name" type="text" placeholder="성명" aria-label="도급인 참석자 성명" class="cc-in">
+                        <label class="cm-abs"><input type="checkbox" v-model="rep.absent"> 불참</label>
+                        <cc-mv :list="hostReps" :i="idx"></cc-mv>
+                        <button :disabled="hostReps.length < 2" type="button" @click="hostReps.splice(idx, 1)" aria-label="이 참석자 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
+                    </div>
+
+                    <div class="cc-bar" style="margin-top:6px">
+                        <span class="cc-bt" style="color:#047857">수급인 (업체별)</span>
+                        <button type="button" id="addSub" @click="addSub" class="cc-add"><i class="ph-bold ph-plus-circle"></i> 업체 추가</button>
+                    </div>
+                    <p v-if="!subs.length" class="cc-hint">수급인 업체가 없습니다. "업체 추가"를 눌러 도급인 사업장에서 작업하는 수급인을 모두 넣으세요.</p>
+                    <div v-for="(s, idx) in subs" :key="'sub-' + idx" class="cc-sub">
+                        <div class="cc-subhead">
+                            <span class="cc-no">{{ idx + 1 }}</span>
+                            <input v-model="s.company" type="text" placeholder="수급인 업체명" aria-label="수급인 업체명" class="cc-in" style="flex:1;min-width:0;font-weight:700">
+                            <label class="cm-abs"><input type="checkbox" v-model="s.absent"> 불참</label>
+                            <cc-mv :list="subs" :i="idx"></cc-mv>
+                            <button type="button" @click="removeSub(idx)" aria-label="이 업체 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
+                        </div>
+                        <div class="cc-grid3">
+                            <input v-model="s.work" type="text" placeholder="작업 내용 (예: 배관 보수)" aria-label="작업 내용" class="cc-in">
+                            <input v-model="s.title" type="text" placeholder="직위 (예: 현장소장)" aria-label="참석자 직위" class="cc-in">
+                            <input v-model="s.name" type="text" placeholder="참석자 성명" aria-label="참석자 성명" class="cc-in">
+                        </div>
+                        <input v-if="s.absent" v-model="s.reason" type="text" placeholder="불참 사유·결과 전달 방법 (예: 작업 종료, 회의록 사본 전달)" aria-label="불참 사유" class="cc-in" style="margin-top:6px">
+                    </div>
+                </cc-step>
+
+                <!-- 전회 조치사항 -->
+                <cc-step sid="prev">
+                    <div class="cc-bar">
+                        <span class="cc-hint" style="margin:0">지난 회의에서 정한 조치의 이행 여부를 적습니다.</span>
+                        <button type="button" id="addPrev" @click="addPrev" class="cc-add"><i class="ph-bold ph-plus-circle"></i> 추가</button>
+                    </div>
+                    <p v-if="!prev.length" class="cc-hint">아직 없습니다. "보관하고 다음 회의 작성"을 쓰면 끝나지 않은 조치가 자동으로 넘어옵니다.</p>
                     <div v-for="(p, idx) in prev" :key="'prev-' + idx" class="cc-sub">
                         <div class="cc-subhead">
                             <input v-model="p.content" type="text" placeholder="지난 회의 조치 사항" aria-label="지난 회의 조치 사항" class="cc-in" style="flex:1;min-width:0">
-                            <button type="button" @click="prev.splice(idx, 1)" aria-label="이 항목 삭제" class="text-slate-400 hover:text-rose-500 p-1"><i class="ph-bold ph-x"></i></button>
+                            <cc-mv :list="prev" :i="idx"></cc-mv>
+                            <button type="button" @click="prev.splice(idx, 1)" aria-label="이 항목 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="cc-grid3">
                             <input v-model="p.owner" type="text" list="ccOwners" placeholder="담당 업체" aria-label="담당 업체" class="cc-in">
@@ -321,29 +459,21 @@
                             </select>
                         </div>
                     </div>
-                </div>
+                </cc-step>
 
-                <!-- 4. 협의 사항 -->
-                <div class="bg-purple-50/60 p-4 rounded-xl border border-purple-200/80 space-y-4">
-                    <div class="flex justify-between items-center border-b border-purple-200 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-sparkle text-purple-600"></i> {{ formData.docType === 'notice' ? '3. 협의 예정 사항 및 협조사항' : '4. 협의 사항 및 결정 내용' }}
-                        </h3>
-                        <button v-if="formData.docType !== 'notice'" type="button" @click="openExModal" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm flex items-center gap-1.5 transition">
-                            <i class="ph-fill ph-magic-wand"></i> 예시 세트 불러오기
-                        </button>
-                    </div>
-
+                <!-- 협의 사항 -->
+                <cc-step sid="topics">
                     <div v-if="formData.docType !== 'notice'">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="block text-xs font-bold text-slate-700">협의해야 하는 사항 5가지</span>
-                            <span class="text-[11px] text-purple-700 font-medium">시행규칙 제79조제2항 각 호</span>
+                        <div class="cc-bar">
+                            <span class="cc-bt">협의해야 하는 사항 5가지 <small style="font-weight:400;color:#6d28d9">시행규칙 제79조제2항 각 호</small></span>
+                            <span class="cc-row" style="gap:6px">
+                                <button type="button" id="exBtn" @click="openExModal" class="cc-btn" style="color:#6d28d9;border-color:#ddd6fe;background:#f5f3ff"><i class="ph-fill ph-magic-wand"></i> 예시</button>
+                                <button type="button" id="clearBtn" @click="resetToDefault" class="cc-btn"><i class="ph-bold ph-arrow-counter-clockwise"></i> 비우기</button>
+                            </span>
                         </div>
-                        <p class="text-[11px] text-rose-600 mb-1">실제로 협의·결정한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
+                        <p class="cc-hint" style="color:#be123c">실제로 협의·결정한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
                     </div>
-                    <div v-else>
-                        <p class="text-[11px] text-slate-600">통보문에는 협의 항목(제목)만 들어갑니다. 추가 안건이 있으면 아래에서 항목을 더하세요.</p>
-                    </div>
+                    <p v-else class="cc-hint">통보문에는 협의 항목(제목)만 들어갑니다. 추가 안건이 있으면 아래에서 항목을 더하세요.</p>
 
                     <div v-for="(t, idx) in topics" :key="'tp-' + idx" class="cc-topic">
                         <div class="cc-subhead">
@@ -351,45 +481,39 @@
                             <span v-if="t.fixed" class="cc-tlabel">{{ t.label }}</span>
                             <input v-else v-model="t.label" type="text" placeholder="추가 안건 제목" aria-label="추가 안건 제목" class="cc-in" style="flex:1;min-width:0;font-weight:700">
                             <span v-if="t.fixed" class="cc-tag">법정</span>
-                            <button v-else type="button" @click="topics.splice(idx, 1)" aria-label="이 안건 삭제" class="text-slate-400 hover:text-rose-500 p-1"><i class="ph-bold ph-x"></i></button>
+                            <template v-else>
+                                <cc-mv :list="topics" :i="idx" :min="fixedCount"></cc-mv>
+                                <button type="button" @click="topics.splice(idx, 1)" aria-label="이 안건 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
+                            </template>
                         </div>
-                        <textarea v-if="formData.docType !== 'notice'" v-model="t.content" rows="3" :placeholder="t.ph || '협의 내용 및 결정 사항'" :aria-label="(t.label || '추가 안건') + ' — 협의 내용'" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed"></textarea>
+                        <textarea v-if="formData.docType !== 'notice'" v-model="t.content" rows="2" :placeholder="t.ph || '협의 내용 및 결정 사항'" :aria-label="(t.label || '추가 안건') + ' — 협의 내용'" class="cc-in cc-ta"></textarea>
                     </div>
-                    <button type="button" id="addTopic" @click="addTopic" class="text-xs text-purple-700 font-bold flex items-center gap-1">
-                        <i class="ph-bold ph-plus-circle"></i> 그 밖의 안건 추가
-                    </button>
+                    <button type="button" id="addTopic" @click="addTopic" class="cc-add" style="color:#6d28d9"><i class="ph-bold ph-plus-circle"></i> 그 밖의 안건 추가</button>
 
                     <div v-if="formData.docType === 'notice'">
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="block text-xs font-bold text-slate-700" for="cNI">안내 및 협조사항</label>
-                            <button type="button" @click="resetNoticeInstructions" class="text-xs text-blue-700 hover:text-blue-900 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded font-medium transition flex items-center gap-1">
-                                <i class="ph-bold ph-arrow-counter-clockwise"></i> 표준 협조사항 채우기
-                            </button>
+                        <div class="cc-bar">
+                            <label class="cc-bt" for="cNI">안내 및 협조사항</label>
+                            <button type="button" id="niReset" @click="resetNoticeInstructions" class="cc-lk">표준 문구로 되돌리기</button>
                         </div>
-                        <textarea id="cNI" v-model="formData.noticeInstructions" rows="6" placeholder="참석 당부 및 협조사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed"></textarea>
+                        <textarea id="cNI" v-model="formData.noticeInstructions" rows="6" placeholder="참석 당부 및 협조사항을 입력하세요." class="cc-in cc-ta"></textarea>
                     </div>
-
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1" for="cOthers">{{ formData.docType === 'notice' ? '그 밖의 안내' : '기타 사항 (건의·공지 등)' }}</label>
-                        <textarea id="cOthers" v-model="formData.others" rows="3" placeholder="기타 논의 내용이나 안내사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed"></textarea>
+                        <label class="cc-bt" for="cOthers" style="display:block;margin-bottom:4px">{{ formData.docType === 'notice' ? '그 밖의 안내' : '기타 사항 (건의·공지 등)' }}</label>
+                        <textarea id="cOthers" v-model="formData.others" rows="2" placeholder="기타 논의 내용이나 안내사항을 입력하세요." class="cc-in cc-ta"></textarea>
                     </div>
-                </div>
+                </cc-step>
 
-                <!-- 5. 후속 조치 -->
-                <div v-if="formData.docType !== 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-bold ph-check text-emerald-600"></i> 5. 후속 조치 (업체별)
-                        </h3>
-                        <button type="button" id="addAction" @click="addAction" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold flex items-center gap-1">
-                            <i class="ph-bold ph-plus-circle"></i> 추가
-                        </button>
+                <!-- 후속 조치 -->
+                <cc-step sid="actions">
+                    <div class="cc-bar">
+                        <span class="cc-hint" style="margin:0">조치·담당 업체·기한을 적어 두면 다음 회의의 "이행 확인"으로 넘어갑니다.</span>
+                        <button type="button" id="addAction" @click="addAction" class="cc-add"><i class="ph-bold ph-plus-circle"></i> 추가</button>
                     </div>
-                    <p v-if="!actions.length" class="text-[11px] text-slate-400">회의에서 정한 조치와 담당 업체·기한을 적어 두면 다음 회의의 "이행 확인"으로 넘어갑니다.</p>
                     <div v-for="(a, idx) in actions" :key="'act-' + idx" class="cc-sub">
                         <div class="cc-subhead">
                             <input v-model="a.content" type="text" placeholder="조치 사항 (예: 지게차 통로 구획선 재도색)" aria-label="조치 사항" class="cc-in" style="flex:1;min-width:0">
-                            <button type="button" @click="actions.splice(idx, 1)" aria-label="이 조치 삭제" class="text-slate-400 hover:text-rose-500 p-1"><i class="ph-bold ph-x"></i></button>
+                            <cc-mv :list="actions" :i="idx"></cc-mv>
+                            <button type="button" @click="actions.splice(idx, 1)" aria-label="이 조치 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="cc-grid3">
                             <input v-model="a.owner" type="text" list="ccOwners" placeholder="담당 업체" aria-label="담당 업체" class="cc-in">
@@ -399,55 +523,84 @@
                             </select>
                         </div>
                     </div>
-                    <datalist id="ccOwners"><option v-for="n in ownerNames" :key="n" :value="n"></option></datalist>
-                </div>
+                </cc-step>
+                <datalist id="ccOwners"><option v-for="n in ownerNames" :key="n" :value="n"></option></datalist>
 
-                <!-- 6. 다음 회의 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-megaphone text-slate-600"></i> {{ formData.docType === 'notice' ? '4' : '6' }}. 다음 회의 일정
-                    </h3>
-                    <div class="grid grid-cols-2 gap-2">
+                <!-- 다음 회의 · 사진 -->
+                <cc-step sid="next">
+                    <div class="cc-g2">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cNext">다음 회의 일시</label>
-                            <input id="cNext" v-model="formData.nextDatetime" type="datetime-local" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="cc-l" for="cNext">다음 회의 일시</label>
+                            <input id="cNext" v-model="formData.nextDatetime" type="datetime-local" class="cc-in">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1" for="cNextLoc">장소</label>
-                            <input id="cNextLoc" v-model="formData.nextLocation" type="text" placeholder="비우면 이번 장소와 같음" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="cc-l" for="cNextLoc">장소</label>
+                            <input id="cNextLoc" v-model="formData.nextLocation" type="text" placeholder="비우면 이번 장소와 같음" class="cc-in">
                         </div>
                     </div>
                     <div class="cc-row">
-                        <button type="button" class="cc-btn" @click="suggestNext">한 달 뒤 같은 시각으로</button>
-                        <span class="text-[11px] text-slate-400">매월 1회 이상 정기 개최(시행규칙 제79조제3항)</span>
+                        <button type="button" id="plusMonth" class="cc-btn" @click="suggestNext">한 달 뒤 같은 시각으로</button>
+                        <button v-if="formData.nextDatetime" type="button" id="clearNext" class="cc-lk" @click="formData.nextDatetime = ''">비우기</button>
+                        <span class="cc-hint" style="margin:0">매월 1회 이상 정기 개최(시행규칙 제79조제3항)</span>
                     </div>
-                </div>
-
-                <!-- 7. 사진 -->
-                <div v-if="formData.docType !== 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
-                        <i class="ph-fill ph-camera text-slate-600"></i> 7. 회의 현장 사진 첨부
-                    </h3>
-                    <div class="flex items-center gap-3">
+                    <div class="cc-bar" style="border-top:1px solid #f1f5f9;padding-top:8px">
+                        <span class="cc-bt">회의 현장 사진 (1장)</span>
+                    </div>
+                    <div class="cc-row">
                         <input type="file" accept="image/*" @change="handleFileUpload" id="photo-input" class="hidden">
-                        <label for="photo-input" class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 px-3 rounded-lg border border-slate-300 transition flex items-center gap-1.5">
-                            <i class="ph-bold ph-upload-simple"></i> 사진 파일 선택
-                        </label>
-                        <span class="text-xs text-slate-500 truncate max-w-[180px]">{{ photoDataUrl ? '현장 사진 1장 첨부됨' : '선택된 사진 없음' }}</span>
-                        <button v-if="photoDataUrl" type="button" @click="removePhoto" class="text-xs text-rose-500 hover:underline font-bold ml-auto">삭제</button>
+                        <label for="photo-input" class="cc-btn"><i class="ph-bold ph-upload-simple"></i> 사진 파일 선택</label>
+                        <span class="cc-hint" style="margin:0">{{ photoDataUrl ? '현장 사진 1장 첨부됨 (저장되지 않음)' : '선택된 사진 없음' }}</span>
+                        <button v-if="photoDataUrl" type="button" @click="removePhoto" class="cc-lk" style="color:#e11d48">삭제</button>
                     </div>
-                </div>
+                </cc-step>
+
+                <!-- 결재란 · 문서 문구 -->
+                <cc-step sid="format">
+                    <div class="cc-bar"><span class="cc-bt">결재란</span></div>
+                    <label class="cc-ck"><input type="checkbox" id="cAppr" v-model="formData[apprField]"> {{ docLabel }} 위쪽에 결재란 표시</label>
+                    <template v-if="apprAvail">
+                        <div v-show="formData[apprField]">
+                            <div class="cc-appr-edit" v-appr></div>
+                            <p class="cc-hint">칸 이름(예: 담당 → 안전관리자)과 성명을 눌러 바로 고치고, ＋칸 / －칸으로 칸 수를 바꿉니다(최대 6칸). 서명 칸을 누르면 서명이나 성명 도장을 넣을 수 있습니다. 미리보기의 결재란에서도 똑같이 고칠 수 있고, 세 문서가 같은 결재란을 씁니다.</p>
+                        </div>
+                    </template>
+                    <p v-else class="cc-hint">결재란 기능을 불러오지 못했습니다. 새로 고침해 보세요.</p>
+
+                    <div class="cc-bar" style="border-top:1px solid #f1f5f9;padding-top:8px">
+                        <span class="cc-bt">문서 제목 · 문구</span>
+                        <button v-if="labelCount" type="button" id="labelsReset" class="cc-lk" @click="resetLabels">모두 기본으로 ({{ labelCount }})</button>
+                    </div>
+                    <p class="cc-hint">미리보기에서 제목·표 머리글·맺음말을 직접 눌러 고쳐도 됩니다. 내용을 지우면 문서에서 빠집니다.</p>
+                    <div v-for="it in labelMain" :key="it.k" class="cc-lb">
+                        <div class="cc-lbh">
+                            <label :for="'lb-' + it.k">{{ it.name }}</label>
+                            <span v-if="it.on" class="cc-lbs">{{ it.val === '' ? '문서에서 뺌' : '직접 고침' }} · <button type="button" class="cc-lk" :data-reset="it.k" @click="resetLabel(it.k)">{{ it.dyn ? '자동으로 되돌리기' : '기본으로 되돌리기' }}</button></span>
+                            <span v-else-if="it.dyn" class="cc-lbs">자동</span>
+                        </div>
+                        <textarea v-if="it.ml" :id="'lb-' + it.k" :value="it.val" @input="setLabel(it.k, $event.target.value)" rows="2" class="cc-in cc-ta"></textarea>
+                        <input v-else :id="'lb-' + it.k" :value="it.val" @input="setLabel(it.k, $event.target.value)" type="text" class="cc-in">
+                    </div>
+                    <details class="cc-det">
+                        <summary>표 머리글 · 항목 이름 ({{ labelMinor.length }}개)</summary>
+                        <div class="cc-lbg">
+                            <div v-for="it in labelMinor" :key="it.k" class="cc-lb">
+                                <div class="cc-lbh">
+                                    <label :for="'lb-' + it.k">{{ it.name }}</label>
+                                    <span v-if="it.on" class="cc-lbs"><button type="button" class="cc-lk" :data-reset="it.k" @click="resetLabel(it.k)">기본으로</button></span>
+                                </div>
+                                <input :id="'lb-' + it.k" :value="it.val" @input="setLabel(it.k, $event.target.value)" type="text" class="cc-in">
+                            </div>
+                        </div>
+                    </details>
+                </cc-step>
 
                 <!-- 보관·이어 쓰기 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-bold ph-floppy-disk text-slate-600"></i> 매월 이어 쓰기 · 지난 회의 기록
-                    </h3>
+                <cc-step sid="archive">
                     <div class="cc-row">
                         <button type="button" id="archiveNext" class="cc-btn cc-btn-pri" @click="archiveAndNext">보관하고 다음 회의 작성</button>
-                        <button type="button" class="cc-btn" @click="archiveOnly">지금 내용만 보관</button>
+                        <button type="button" id="archiveOnly" class="cc-btn" @click="archiveOnly">지금 내용만 보관</button>
                     </div>
-                    <p class="text-[11px] text-slate-400">"보관하고 다음 회의 작성"을 누르면 이번 회의가 아래 목록에 남고, 구성원 명단은 그대로 둔 채 회차·일시가 다음 회의로 넘어가며, 끝나지 않은 후속 조치는 "이행 확인"으로 옮겨집니다. 이 기기에 최대 {{ HIST_MAX }}건까지 보관합니다.</p>
+                    <p class="cc-hint">"보관하고 다음 회의 작성"을 누르면 이번 회의가 아래 목록에 남고, 구성원 명단은 그대로 둔 채 회차·일시가 다음 회의로 넘어가며, 끝나지 않은 후속 조치는 "이행 확인"으로 옮겨집니다. 결재란의 서명은 지워집니다. 이 기기에 최대 {{ HIST_MAX }}건까지 보관합니다.</p>
                     <ul v-if="history.length" class="cc-hist">
                         <li v-for="h in history" :key="h.id">
                             <span class="cc-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
@@ -455,11 +608,11 @@
                             <button type="button" class="cc-btn" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
                         </li>
                     </ul>
-                    <p v-else class="text-[11px] text-slate-400">보관한 회의 기록이 아직 없습니다.</p>
-                </div>
+                    <p v-else class="cc-hint">보관한 회의 기록이 아직 없습니다.</p>
+                </cc-step>
 
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 mb-2">법령 메모</h3>
+                <details class="cc-det cc-lawbox">
+                    <summary>법령 메모</summary>
                     <ul class="cm-law">
                         <li>도급인은 관계수급인 근로자가 도급인의 사업장에서 작업을 하는 경우 도급인과 수급인을 구성원으로 하는 안전 및 보건에 관한 협의체를 구성·운영해야 합니다(<a class="cc-a" href="../../laws/act/#j64">법 제64조제1항제1호</a>).</li>
                         <li>협의체는 도급인 및 그의 수급인 전원으로 구성해야 합니다(<a class="cc-a" href="../../laws/rule/#j79">시행규칙 제79조제1항</a>).</li>
@@ -469,337 +622,329 @@
                         <li>건설공사도급인이 노사협의체를 구성·운영하는 경우에는 산업안전보건위원회 및 이 협의체를 각각 구성·운영하는 것으로 봅니다(<a class="cc-a" href="../../laws/act/#j75">법 제75조제2항</a>).</li>
                         <li>법 제64조제1항제1호를 위반하면 500만원 이하의 벌금에 처합니다(<a class="cc-a" href="../../laws/act/#j172">법 제172조</a>).</li>
                     </ul>
-                    <p class="text-[11px] text-slate-400" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
-                </div>
+                    <p class="cc-hint" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
+                </details>
             </div>
 
             <!-- 미리보기 -->
-            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
-                <div class="w-full flex justify-between items-center mb-3 no-print">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-xs font-bold text-slate-600">A4 실시간 미리보기</span>
-                    </div>
-                    <span class="text-[11px] text-slate-400">A4 (210mm × 297mm)</span>
+            <div id="preview-col" class="cc-pane cc-prev" :class="{ 'cc-mhide': view !== 'doc' }">
+                <div class="cc-pvbar no-print">
+                    <span><b>A4 미리보기</b> · {{ docLabel }}</span>
+                    <span>제목·머리글·결재란을 눌러 바로 고칠 수 있습니다</span>
                 </div>
 
-                <div id="print-area" class="a4-container cm-zoom p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm">
+                <div id="print-area" class="a4-container cm-zoom cc-doc" :class="{ 'cc-cap': isGeneratingPDF }">
 
                     <!-- [DOC 1] 회의록 -->
                     <div v-if="formData.docType === 'minutes'">
-                        <div class="text-center mb-6">
-                            <h2 class="text-2xl font-black tracking-wide border-b-2 border-slate-900 pb-3">{{ titlePrefix }} 안전 및 보건에 관한 협의체 회의록</h2>
+                        <div class="cc-dh" :class="{ 'cc-dh-a': showAppr }">
+                            <h2 class="cc-title"><span v-if="formData.titlePrefix">{{ titlePrefix + ' ' }}</span><cc-ed k="title.minutes"></cc-ed></h2>
+                            <div v-if="showAppr" class="cc-appr" v-appr></div>
                         </div>
 
-                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4 cc-t">
-                            <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">회 의 명</th>
-                                <td class="border border-slate-800 p-2 font-medium" colspan="3">{{ meetingName }}</td>
-                            </tr>
-                            <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">일 시</th>
-                                <td class="border border-slate-800 p-2 w-1/2">{{ formattedDatetime }}</td>
-                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">장 소</th>
-                                <td class="border border-slate-800 p-2">{{ formData.location || '사내 회의실' }}</td>
-                            </tr>
-                            <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">참 석</th>
-                                <td class="border border-slate-800 p-2" colspan="3">{{ attendSummary }}</td>
-                            </tr>
-                        </table>
-
-                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4 cc-t">
-                            <thead>
-                                <tr class="bg-slate-100 text-center font-bold">
-                                    <th class="border border-slate-800 p-2" colspan="6">참석자 명단 (도급인 및 수급인 전원)</th>
-                                </tr>
-                                <tr class="bg-slate-50 text-center text-[11px] text-slate-600 font-semibold">
-                                    <th class="border border-slate-800 p-1 w-14">구분</th>
-                                    <th class="border border-slate-800 p-1">업체명</th>
-                                    <th class="border border-slate-800 p-1">작업 내용</th>
-                                    <th class="border border-slate-800 p-1 w-20">직위</th>
-                                    <th class="border border-slate-800 p-1 w-20">성명</th>
-                                    <th class="border border-slate-800 p-1 w-20">서명</th>
-                                </tr>
-                            </thead>
+                        <table class="cc-t">
+                            <colgroup><col style="width:13%"><col style="width:43%"><col style="width:13%"><col></colgroup>
                             <tbody>
-                                <tr v-for="(r, i) in rosterRows" :key="'ro-' + i" class="text-center h-8">
-                                    <td class="border border-slate-800 p-1 text-[11px]">{{ r.kind }}</td>
-                                    <td class="border border-slate-800 p-1">{{ r.company }}</td>
-                                    <td class="border border-slate-800 p-1 text-[11px]">{{ r.work }}</td>
-                                    <td class="border border-slate-800 p-1 text-[11px]">{{ r.title }}</td>
-                                    <td class="border border-slate-800 p-1">{{ r.name }}</td>
-                                    <td class="border border-slate-800 p-1 text-[10px]" :class="r.absent ? 'text-slate-600' : 'text-slate-300'">{{ r.absent ? ('불참' + (r.reason ? ' · ' + r.reason : '')) : '(서명)' }}</td>
+                                <tr>
+                                    <th><cc-ed k="h.name"></cc-ed></th>
+                                    <td colspan="3" style="font-weight:500"><cc-ed k="meetingName"></cc-ed></td>
+                                </tr>
+                                <tr>
+                                    <th><cc-ed k="h.dt"></cc-ed></th>
+                                    <td>{{ formattedDatetime }}</td>
+                                    <th><cc-ed k="h.loc"></cc-ed></th>
+                                    <td>{{ formData.location }}</td>
+                                </tr>
+                                <tr>
+                                    <th><cc-ed k="h.att"></cc-ed></th>
+                                    <td colspan="3"><cc-ed k="attend"></cc-ed></td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <table v-if="prevRows.length" class="w-full border-collapse border border-slate-800 text-xs mb-4 cc-t">
+                        <table class="cc-t cc-tc">
+                            <colgroup><col style="width:9%"><col><col><col style="width:14%"><col style="width:13%"><col style="width:15%"></colgroup>
                             <thead>
-                                <tr class="bg-slate-100 text-center font-bold"><th class="border border-slate-800 p-2" colspan="4">지난 회의 조치사항 이행 확인</th></tr>
-                                <tr class="bg-slate-50 text-center text-[11px] text-slate-600 font-semibold">
-                                    <th class="border border-slate-800 p-1">조치 사항</th>
-                                    <th class="border border-slate-800 p-1 w-24">담당</th>
-                                    <th class="border border-slate-800 p-1 w-20">기한</th>
-                                    <th class="border border-slate-800 p-1 w-14">결과</th>
+                                <tr><th colspan="6"><cc-ed k="ro.title"></cc-ed></th></tr>
+                                <tr class="cc-sh">
+                                    <th><cc-ed k="ro.kind"></cc-ed></th>
+                                    <th><cc-ed k="ro.co"></cc-ed></th>
+                                    <th><cc-ed k="ro.work"></cc-ed></th>
+                                    <th><cc-ed k="ro.pos"></cc-ed></th>
+                                    <th><cc-ed k="ro.nm"></cc-ed></th>
+                                    <th><cc-ed k="ro.sign"></cc-ed></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(r, i) in rosterRows" :key="'ro-' + i" class="cc-rr">
+                                    <td class="cc-s11">{{ r.host ? L('ro.host') : L('ro.sub') }}</td>
+                                    <td>{{ r.company }}</td>
+                                    <td class="cc-s11">{{ r.work }}</td>
+                                    <td class="cc-s11">{{ r.title }}</td>
+                                    <td>{{ r.name }}</td>
+                                    <td class="cc-s10" :style="{ color: r.absent ? '#475569' : '#cbd5e1' }">{{ r.absent ? ('불참' + (r.reason ? ' · ' + r.reason : '')) : L('ro.signph') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table v-if="prevRows.length" class="cc-t">
+                            <colgroup><col><col style="width:17%"><col style="width:14%"><col style="width:11%"></colgroup>
+                            <thead>
+                                <tr><th colspan="4"><cc-ed k="pv.title"></cc-ed></th></tr>
+                                <tr class="cc-sh">
+                                    <th><cc-ed k="c.act"></cc-ed></th><th><cc-ed k="c.owner"></cc-ed></th><th><cc-ed k="c.due"></cc-ed></th><th><cc-ed k="c.result"></cc-ed></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(p, i) in prevRows" :key="'pv-' + i">
-                                    <td class="border border-slate-800 p-1">{{ p.content }}</td>
-                                    <td class="border border-slate-800 p-1 text-center">{{ p.owner }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ p.due }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ p.result }}</td>
+                                    <td>{{ p.content }}</td>
+                                    <td class="cc-c">{{ p.owner }}</td>
+                                    <td class="cc-c cc-s11">{{ p.due }}</td>
+                                    <td class="cc-c cc-s11">{{ p.result }}</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4 cc-t">
+                        <table class="cc-t">
+                            <colgroup><col style="width:34%"><col></colgroup>
                             <thead>
-                                <tr class="bg-slate-100 text-center font-bold">
-                                    <th class="border border-slate-800 p-2 w-1/2 cc-w34">협의 항목</th>
-                                    <th class="border border-slate-800 p-2">협의 내용 및 결정 사항</th>
-                                </tr>
+                                <tr><th><cc-ed k="tp.h1"></cc-ed></th><th><cc-ed k="tp.h2"></cc-ed></th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(t, i) in topics" :key="'dt-' + i">
-                                    <td class="border border-slate-800 p-2 align-top cc-w34">{{ i + 1 }}. {{ t.label || '(안건)' }}</td>
-                                    <td class="border border-slate-800 p-2 align-top"><div class="whitespace-pre-wrap leading-relaxed text-[11px] cc-min">{{ t.content }}</div></td>
+                                    <td class="cc-top-a">{{ i + 1 }}. {{ t.label || '(안건)' }}</td>
+                                    <td class="cc-top-a"><div class="cc-pre cc-s11 cc-min">{{ t.content }}</div></td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <table v-if="actionRows.length" class="w-full border-collapse border border-slate-800 text-xs mb-4 cc-t">
+                        <table v-if="actionRows.length" class="cc-t">
+                            <colgroup><col><col style="width:17%"><col style="width:14%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr class="bg-slate-100 text-center font-bold"><th class="border border-slate-800 p-2" colspan="4">후속 조치</th></tr>
-                                <tr class="bg-slate-50 text-center text-[11px] text-slate-600 font-semibold">
-                                    <th class="border border-slate-800 p-1">조치 사항</th>
-                                    <th class="border border-slate-800 p-1 w-24">담당</th>
-                                    <th class="border border-slate-800 p-1 w-20">기한</th>
-                                    <th class="border border-slate-800 p-1 w-14">상태</th>
+                                <tr><th colspan="4"><cc-ed k="ac.title"></cc-ed></th></tr>
+                                <tr class="cc-sh">
+                                    <th><cc-ed k="c.act"></cc-ed></th><th><cc-ed k="c.owner"></cc-ed></th><th><cc-ed k="c.due"></cc-ed></th><th><cc-ed k="c.status"></cc-ed></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(a, i) in actionRows" :key="'ar-' + i">
-                                    <td class="border border-slate-800 p-1">{{ a.content }}</td>
-                                    <td class="border border-slate-800 p-1 text-center">{{ a.owner }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ a.due }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ a.status }}</td>
+                                    <td>{{ a.content }}</td>
+                                    <td class="cc-c">{{ a.owner }}</td>
+                                    <td class="cc-c cc-s11">{{ a.due }}</td>
+                                    <td class="cc-c cc-s11">{{ a.status }}</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <table v-if="formData.others || formData.nextDatetime" class="w-full border-collapse border border-slate-800 text-xs mb-4 cc-t">
-                            <tr v-if="formData.others">
-                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">기타 사항</th>
-                                <td class="border border-slate-800 p-2.5 align-top"><div class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ formData.others }}</div></td>
-                            </tr>
-                            <tr v-if="formData.nextDatetime">
-                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">다음 회의</th>
-                                <td class="border border-slate-800 p-2.5">{{ formattedNext }}</td>
-                            </tr>
+                        <table v-if="formData.others || formData.nextDatetime" class="cc-t">
+                            <colgroup><col style="width:13%"><col></colgroup>
+                            <tbody>
+                                <tr v-if="formData.others">
+                                    <th><cc-ed k="h.others"></cc-ed></th>
+                                    <td class="cc-top-a"><div class="cc-pre cc-s11">{{ formData.others }}</div></td>
+                                </tr>
+                                <tr v-if="formData.nextDatetime">
+                                    <th><cc-ed k="h.next"></cc-ed></th>
+                                    <td>{{ formattedNext }}</td>
+                                </tr>
+                            </tbody>
                         </table>
 
-                        <div v-if="photoDataUrl" class="border border-slate-800 p-3 mb-2 text-center bg-slate-50/50">
-                            <p class="text-[11px] font-bold text-slate-700 mb-2">[ 회의 진행 현장 사진 ]</p>
-                            <img :src="photoDataUrl" alt="회의 현장 사진" class="max-h-56 mx-auto rounded border border-slate-300 shadow-sm object-contain">
+                        <div v-if="photoDataUrl" class="cc-photo">
+                            <p><cc-ed k="ph.title"></cc-ed></p>
+                            <img :src="photoDataUrl" alt="회의 현장 사진">
                         </div>
+                        <p class="cc-foot"><cc-ed k="foot.minutes" ml></cc-ed></p>
                     </div>
 
                     <!-- [DOC 2] 개최 통보 -->
-                    <div v-else-if="formData.docType === 'notice'" class="py-4 px-2">
-                        <div class="text-center mb-8 pb-4 border-b-2 border-slate-900">
-                            <p class="text-xs font-semibold text-slate-500 mb-1">수신: {{ recipients }}</p>
-                            <h2 class="text-2xl font-black tracking-wider text-slate-900">{{ titlePrefix }} 안전 및 보건에 관한 협의체 회의 개최 통보</h2>
+                    <div v-else-if="formData.docType === 'notice'">
+                        <div class="cc-dh" :class="{ 'cc-dh-a': showAppr }">
+                            <div style="flex:1;min-width:0">
+                                <p class="cc-to"><cc-ed k="nt.to"></cc-ed></p>
+                                <h2 class="cc-title"><span v-if="formData.titlePrefix">{{ titlePrefix + ' ' }}</span><cc-ed k="title.notice"></cc-ed></h2>
+                            </div>
+                            <div v-if="showAppr" class="cc-appr" v-appr></div>
                         </div>
 
-                        <div class="text-sm leading-relaxed space-y-6">
-                            <p class="text-slate-800 leading-loose">
-                                산업안전보건법 제64조제1항제1호 및 같은 법 시행규칙 제79조에 따라 도급인과 수급인이 함께하는
-                                <strong>{{ titlePrefix }} 안전 및 보건에 관한 협의체 {{ formData.type }}회의</strong>를
-                                아래와 같이 개최하오니, 수급인 각 업체에서는 빠짐없이 참석하여 주시기 바랍니다.
-                            </p>
+                        <p class="cc-intro"><cc-ed k="nt.intro" ml></cc-ed></p>
+                        <p class="cc-below"><cc-ed k="nt.below"></cc-ed></p>
 
-                            <div class="bg-slate-50 p-5 rounded-lg border border-slate-300 space-y-3 text-xs">
-                                <p class="font-bold text-center text-sm tracking-widest text-slate-900 mb-3">- 아 래 -</p>
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">1. 일 시 :</div>
-                                    <div class="col-span-9 font-medium">{{ formattedDatetime }}</div>
-                                </div>
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">2. 장 소 :</div>
-                                    <div class="col-span-9 font-medium">{{ formData.location || '사내 회의실' }}</div>
-                                </div>
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">3. 참석 대상 :</div>
-                                    <div class="col-span-9">
-                                        <p class="font-medium">도급인 및 수급인 {{ subs.length }}개 업체</p>
-                                        <div class="text-[11px] text-slate-600 mt-1 pl-2 border-l-2 border-slate-300 space-y-0.5">
-                                            <p>• 도급인: {{ formattedHost }}</p>
+                        <table class="cc-t cc-nt">
+                            <colgroup><col style="width:19%"><col></colgroup>
+                            <tbody>
+                                <tr>
+                                    <th><cc-ed k="nt.dt"></cc-ed></th>
+                                    <td style="font-weight:500">{{ formattedDatetime }}</td>
+                                </tr>
+                                <tr>
+                                    <th><cc-ed k="nt.loc"></cc-ed></th>
+                                    <td style="font-weight:500">{{ formData.location }}</td>
+                                </tr>
+                                <tr>
+                                    <th><cc-ed k="nt.who"></cc-ed></th>
+                                    <td>
+                                        <p style="font-weight:500">도급인 및 수급인 {{ subs.length }}개 업체</p>
+                                        <div class="cc-s11 cc-who">
+                                            <p>• {{ L('ro.host') }}: {{ formattedHost }}</p>
                                             <p v-for="(s, i) in subs" :key="'ns-' + i">• {{ s.company || '(수급인 ' + (i + 1) + ')' }}{{ s.work ? ' — ' + s.work : '' }}{{ s.title || s.name ? ' · ' + [s.title, s.name].filter(Boolean).join(' ') : '' }}</p>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">4. 협의 사항 :</div>
-                                    <div class="col-span-9">
-                                        <div class="p-2.5 bg-white border border-slate-200 rounded leading-relaxed text-[11px]">
-                                            <p v-for="(t, i) in topics" :key="'nt-' + i">{{ i + 1 }}) {{ t.label || '(안건)' }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">5. 안내 및 협조사항 :</div>
-                                    <div class="col-span-9">
-                                        <div class="whitespace-pre-wrap leading-relaxed text-[11px] text-slate-700">{{ formData.noticeInstructions }}</div>
-                                        <div v-if="formData.others" class="whitespace-pre-wrap mt-2 pt-2 border-t border-slate-200 leading-relaxed text-[11px] text-slate-600">{{ formData.others }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><cc-ed k="nt.topics"></cc-ed></th>
+                                    <td class="cc-s11"><p v-for="(t, i) in topics" :key="'nt-' + i">{{ i + 1 }}) {{ t.label || '(안건)' }}</p></td>
+                                </tr>
+                                <tr v-if="formData.noticeInstructions || formData.others">
+                                    <th><cc-ed k="nt.inst"></cc-ed></th>
+                                    <td class="cc-s11">
+                                        <div class="cc-pre">{{ formData.noticeInstructions }}</div>
+                                        <div v-if="formData.others" class="cc-pre" :style="formData.noticeInstructions ? 'margin-top:6px;padding-top:6px;border-top:1px solid #cbd5e1' : ''">{{ formData.others }}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <div class="mt-14 text-center space-y-3">
-                            <p class="text-sm font-medium text-slate-600">{{ todayText }}</p>
-                            <p class="text-lg font-black tracking-wide text-slate-900">
-                                {{ formData.company || '(도급인명)' }} {{ formData.noticeFooter || '안전보건총괄책임자' }} <span class="text-xs font-normal text-slate-500">(직인생략)</span>
-                            </p>
+                        <div class="cc-sig">
+                            <p class="cc-sigd">{{ noticeDateText }}</p>
+                            <p class="cc-sign"><span v-if="formData.company">{{ formData.company }}</span><span v-else class="cc-ph">(도급인명)</span> <cc-ed f="noticeFooter"></cc-ed> <small><cc-ed k="nt.stamp"></cc-ed></small></p>
                         </div>
+                        <p class="cc-foot"><cc-ed k="foot.notice" ml></cc-ed></p>
                     </div>
 
                     <!-- [DOC 3] 결과 보고서 -->
                     <div v-else-if="formData.docType === 'report'">
-                        <div class="text-center mb-6 pb-3 border-b-2 border-slate-900">
-                            <h2 class="text-2xl font-black tracking-wide">{{ titlePrefix }} 안전 및 보건에 관한 협의체 회의 결과 보고</h2>
+                        <div class="cc-dh" :class="{ 'cc-dh-a': showAppr }">
+                            <h2 class="cc-title"><span v-if="formData.titlePrefix">{{ titlePrefix + ' ' }}</span><cc-ed k="title.report"></cc-ed></h2>
+                            <div v-if="showAppr" class="cc-appr" v-appr></div>
                         </div>
 
-                        <div class="mb-5">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 1. 회의 개요</h4>
-                            <table class="w-full border-collapse border border-slate-800 text-xs cc-t">
+                        <h4 class="cc-h4">{{ rpNo.s1 }}. <cc-ed k="rp.s1"></cc-ed></h4>
+                        <table class="cc-t">
+                            <colgroup><col style="width:16%"><col></colgroup>
+                            <tbody>
+                                <tr><th><cc-ed k="h.name"></cc-ed></th><td><cc-ed k="meetingName"></cc-ed></td></tr>
+                                <tr><th><cc-ed k="rp.dtloc"></cc-ed></th><td>{{ formattedDatetime }}{{ formData.location ? ' / ' + formData.location : '' }}</td></tr>
                                 <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center">회 의 명</th>
-                                    <td class="border border-slate-800 p-2">{{ meetingName }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center">일시 및 장소</th>
-                                    <td class="border border-slate-800 p-2">{{ formattedDatetime }} / {{ formData.location || '사내 회의실' }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center">참석 현황</th>
-                                    <td class="border border-slate-800 p-2">
-                                        {{ attendSummary }}
-                                        <div v-if="absentSubs.length" class="text-[11px] text-slate-600 mt-1">불참 업체: {{ absentText }}</div>
+                                    <th><cc-ed k="rp.att"></cc-ed></th>
+                                    <td>
+                                        <cc-ed k="attend"></cc-ed>
+                                        <div v-if="absentSubs.length" class="cc-s11" style="color:#475569;margin-top:3px">불참 업체: {{ absentText }}</div>
                                     </td>
                                 </tr>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
 
-                        <div class="mb-5">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 2. 협의 결과</h4>
-                            <table class="w-full border-collapse border border-slate-800 text-xs cc-t">
+                        <h4 class="cc-h4">{{ rpNo.s2 }}. <cc-ed k="rp.s2"></cc-ed></h4>
+                        <table class="cc-t">
+                            <colgroup><col style="width:34%"><col></colgroup>
+                            <thead>
+                                <tr><th><cc-ed k="tp.h1"></cc-ed></th><th><cc-ed k="tp.h2"></cc-ed></th></tr>
+                            </thead>
+                            <tbody>
                                 <tr v-for="(t, i) in topics" :key="'rt-' + i">
-                                    <th class="border border-slate-800 bg-slate-100 p-2 font-bold align-top cc-w34" style="text-align:left">{{ i + 1 }}. {{ t.label || '(안건)' }}</th>
-                                    <td class="border border-slate-800 p-2 align-top"><div class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ t.content }}</div></td>
+                                    <td class="cc-top-a" style="font-weight:700;background:#f8fafc">{{ i + 1 }}. {{ t.label || '(안건)' }}</td>
+                                    <td class="cc-top-a"><div class="cc-pre cc-s11 cc-min">{{ t.content }}</div></td>
                                 </tr>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
 
-                        <div v-if="prevRows.length" class="mb-5">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 지난 회의 조치사항 이행 결과</h4>
-                            <table class="w-full border-collapse border border-slate-800 text-xs cc-t">
-                                <tr class="bg-slate-100 text-center font-bold">
-                                    <th class="border border-slate-800 p-1">조치 사항</th><th class="border border-slate-800 p-1 w-24">담당</th><th class="border border-slate-800 p-1 w-20">기한</th><th class="border border-slate-800 p-1 w-14">결과</th>
-                                </tr>
-                                <tr v-for="(p, i) in prevRows" :key="'rp-' + i">
-                                    <td class="border border-slate-800 p-1">{{ p.content }}</td>
-                                    <td class="border border-slate-800 p-1 text-center">{{ p.owner }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ p.due }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ p.result }}</td>
-                                </tr>
+                        <template v-if="prevRows.length">
+                            <h4 class="cc-h4">{{ rpNo.s3 }}. <cc-ed k="rp.s3"></cc-ed></h4>
+                            <table class="cc-t">
+                                <colgroup><col><col style="width:17%"><col style="width:14%"><col style="width:11%"></colgroup>
+                                <thead>
+                                    <tr><th><cc-ed k="c.act"></cc-ed></th><th><cc-ed k="c.owner"></cc-ed></th><th><cc-ed k="c.due"></cc-ed></th><th><cc-ed k="c.result"></cc-ed></th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(p, i) in prevRows" :key="'rp-' + i">
+                                        <td>{{ p.content }}</td>
+                                        <td class="cc-c">{{ p.owner }}</td>
+                                        <td class="cc-c cc-s11">{{ p.due }}</td>
+                                        <td class="cc-c cc-s11">{{ p.result }}</td>
+                                    </tr>
+                                </tbody>
                             </table>
-                        </div>
+                        </template>
 
-                        <div class="mb-5">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 3. 후속 조치 계획</h4>
-                            <table class="w-full border-collapse border border-slate-800 text-xs cc-t">
-                                <tr class="bg-slate-100 text-center font-bold">
-                                    <th class="border border-slate-800 p-1">조치 사항</th><th class="border border-slate-800 p-1 w-24">담당</th><th class="border border-slate-800 p-1 w-20">기한</th><th class="border border-slate-800 p-1 w-14">상태</th>
-                                </tr>
+                        <h4 class="cc-h4">{{ rpNo.s4 }}. <cc-ed k="rp.s4"></cc-ed></h4>
+                        <table class="cc-t">
+                            <colgroup><col><col style="width:17%"><col style="width:14%"><col style="width:11%"></colgroup>
+                            <thead>
+                                <tr><th><cc-ed k="c.act"></cc-ed></th><th><cc-ed k="c.owner"></cc-ed></th><th><cc-ed k="c.due"></cc-ed></th><th><cc-ed k="c.status"></cc-ed></th></tr>
+                            </thead>
+                            <tbody>
                                 <tr v-for="(a, i) in actionRows" :key="'ra-' + i">
-                                    <td class="border border-slate-800 p-1">{{ a.content }}</td>
-                                    <td class="border border-slate-800 p-1 text-center">{{ a.owner }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ a.due }}</td>
-                                    <td class="border border-slate-800 p-1 text-center text-[11px]">{{ a.status }}</td>
+                                    <td>{{ a.content }}</td>
+                                    <td class="cc-c">{{ a.owner }}</td>
+                                    <td class="cc-c cc-s11">{{ a.due }}</td>
+                                    <td class="cc-c cc-s11">{{ a.status }}</td>
                                 </tr>
-                                <tr v-if="!actionRows.length"><td class="border border-slate-800 p-2 text-center text-slate-600" colspan="4">후속 조치 없음</td></tr>
+                                <tr v-if="!actionRows.length"><td class="cc-c" colspan="4" style="color:#475569"><cc-ed k="rp.noact"></cc-ed></td></tr>
+                            </tbody>
+                        </table>
+
+                        <template v-if="formData.others || formData.nextDatetime">
+                            <h4 class="cc-h4">{{ rpNo.s5 }}. <cc-ed k="rp.s5"></cc-ed></h4>
+                            <table class="cc-t">
+                                <colgroup><col style="width:16%"><col></colgroup>
+                                <tbody>
+                                    <tr v-if="formData.others">
+                                        <th><cc-ed k="h.others"></cc-ed></th>
+                                        <td><div class="cc-pre cc-s11">{{ formData.others }}</div></td>
+                                    </tr>
+                                    <tr v-if="formData.nextDatetime">
+                                        <th><cc-ed k="h.next"></cc-ed></th>
+                                        <td>{{ formattedNext }}</td>
+                                    </tr>
+                                </tbody>
                             </table>
-                        </div>
+                        </template>
 
-                        <div v-if="formData.others || formData.nextDatetime" class="mb-5">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 4. 기타 사항 및 다음 회의</h4>
-                            <table class="w-full border-collapse border border-slate-800 text-xs cc-t">
-                                <tr v-if="formData.others">
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center">기타 사항</th>
-                                    <td class="border border-slate-800 p-2"><div class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ formData.others }}</div></td>
-                                </tr>
-                                <tr v-if="formData.nextDatetime">
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center">다음 회의</th>
-                                    <td class="border border-slate-800 p-2">{{ formattedNext }}</td>
-                                </tr>
-                            </table>
-                        </div>
+                        <template v-if="photoDataUrl">
+                            <h4 class="cc-h4">{{ rpNo.s6 }}. <cc-ed k="rp.s6"></cc-ed></h4>
+                            <div class="cc-photo"><img :src="photoDataUrl" alt="회의 현장 사진"></div>
+                        </template>
 
-                        <div v-if="photoDataUrl" class="mb-6">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 회의 현장 사진</h4>
-                            <div class="border border-slate-800 p-3 text-center bg-slate-50/50">
-                                <img :src="photoDataUrl" alt="회의 현장 사진" class="max-h-56 mx-auto rounded border border-slate-300 shadow-sm object-contain">
-                            </div>
+                        <div class="cc-sig">
+                            <p class="cc-close"><cc-ed k="rp.close" ml></cc-ed></p>
+                            <p class="cc-sigd">{{ reportDateText }}</p>
+                            <p class="cc-sign"><span v-if="formData.company">{{ formData.company }}</span><span v-else class="cc-ph">(도급인명)</span> <cc-ed f="reportFooter"></cc-ed> <small><cc-ed k="rp.stamp"></cc-ed></small></p>
                         </div>
-
-                        <div class="mt-12 text-center space-y-3">
-                            <p class="text-sm font-medium text-slate-600">위와 같이 안전 및 보건에 관한 협의체 회의 결과를 보고합니다.</p>
-                            <p class="text-xs text-slate-500">{{ formatJustDate }}</p>
-                            <p class="text-base font-black tracking-wide text-slate-900">
-                                {{ formData.company || '(도급인명)' }} {{ formData.reportFooter || '안전보건총괄책임자' }} <span class="text-xs font-normal text-slate-500">(직인생략)</span>
-                            </p>
-                        </div>
+                        <p class="cc-foot"><cc-ed k="foot.report" ml></cc-ed></p>
                     </div>
                 </div>
             </div>
         </main>
 
         <!-- 예시 세트 모달 -->
-        <div v-if="isExModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print" role="dialog" aria-modal="true" aria-labelledby="exTitle" @keydown.esc="isExModalOpen = false">
-            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 border border-slate-200">
+        <div v-if="isExModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 no-print" role="dialog" aria-modal="true" aria-labelledby="exTitle" @click.self="isExModalOpen = false">
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-5 border border-slate-200">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="bg-purple-100 text-purple-700 p-1.5 rounded-lg"><i class="ph-bold ph-magic-wand text-lg"></i></div>
-                        <div>
-                            <h3 id="exTitle" class="font-bold text-base text-slate-900">협의 내용 예시 세트</h3>
-                            <p class="text-xs text-slate-500">예시 문안입니다. 적용한 뒤 실제 회의 내용으로 반드시 고쳐 쓰세요.</p>
-                        </div>
+                    <div>
+                        <h3 id="exTitle" class="font-bold text-base text-slate-900">협의 내용 예시 세트</h3>
+                        <p class="text-xs text-slate-500">예시 문안입니다. 적용한 뒤 실제 회의 내용으로 반드시 고쳐 쓰세요.</p>
                     </div>
-                    <button type="button" @click="isExModalOpen = false" aria-label="닫기" class="text-slate-400 hover:text-slate-700 p-1"><i class="ph-bold ph-x text-lg"></i></button>
+                    <button type="button" id="exClose" @click="isExModalOpen = false" aria-label="닫기" class="cc-x"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
                 <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                    <button type="button" v-for="(opt, idx) in currentExOptions" :key="'ex-' + idx" @click="selectEx(opt)" class="cc-opt p-4 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/40 cursor-pointer transition space-y-2 group">
+                    <button type="button" v-for="(opt, idx) in currentExOptions" :key="'ex-' + idx" @click="selectEx(opt)" class="cc-opt p-3 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/40 cursor-pointer transition group">
                         <span class="flex justify-between items-center">
                             <span class="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
                             <span class="text-xs text-slate-400 group-hover:text-purple-600 font-bold flex items-center gap-1">적용하기 <i class="ph-bold ph-arrow-right"></i></span>
                         </span>
-                        <span class="block font-bold text-sm text-slate-800">{{ opt.title }}</span>
+                        <span class="block font-bold text-sm text-slate-800" style="margin-top:6px">{{ opt.title }}</span>
                         <span class="block text-xs text-slate-500">{{ opt.description }}</span>
                     </button>
                 </div>
                 <div class="flex justify-between items-center mt-5 pt-3 border-t border-slate-100">
-                    <button type="button" @click="refreshEx" class="text-xs text-slate-600 hover:text-purple-700 font-bold flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-100 transition">
-                        <i class="ph-bold ph-arrows-clockwise text-sm"></i> 다른 예시 보기 (새로고침)
-                    </button>
-                    <button type="button" @click="isExModalOpen = false" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold">닫기</button>
+                    <button type="button" id="exMore" @click="refreshEx" class="cc-btn"><i class="ph-bold ph-arrows-clockwise"></i> 다른 예시 보기</button>
+                    <button type="button" @click="isExModalOpen = false" class="cc-btn">닫기</button>
                 </div>
             </div>
         </div>
 
-        <div v-if="toast.visible" role="status" class="no-print fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-300" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'">
+        <div v-if="toast.visible" role="status" class="cc-toast no-print" :style="{ background: toast.type === 'success' ? '#059669' : '#1e293b' }">
             <i :class="toast.type === 'error' ? 'ph-fill ph-warning-circle text-base' : 'ph-fill ph-check-circle text-base'"></i>
             <span>{{ toast.message }}</span>
         </div>
@@ -812,7 +957,7 @@
             document.getElementById('app').innerHTML = '<div class="cm-fail"><b>화면을 불러오지 못했습니다.</b><br>새로 고침(F5)해 보세요. 계속 안 되면 브라우저의 확장 프로그램·보안 프로그램이 스크립트를 막고 있는지 확인하세요.<br><a href="../../">← SafePlum으로 돌아가기</a></div>';
             throw new Error('Vue not loaded');
         }
-        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        const { createApp, ref, reactive, computed, watch, nextTick, onMounted, provide, inject, h } = Vue;
         const STORE_KEY = 'safetake.council.v1';
         const OLD_FORM_KEY = 'safetake.form.council';   // 예전 일반 서식(tools/forms/council/)의 저장값 — 읽기만 하고 지우지 않는다
         const HIST_MAX = 24;
@@ -850,7 +995,125 @@
             { label: '사업주와 수급인 또는 수급인 상호 간의 연락 방법 및 작업공정의 조정', ph: '예: 같은 장소에서 겹치는 작업의 순서·시간 조정' }
         ];
 
-        createApp({
+        // 문서에 찍히는 제목·머리글·고정 문구. 사용자가 고치면 labels[k]에 저장하고, 없으면 기본값을 쓴다.
+        // [키, 입력 칸 이름, 기본값(null = 입력에 따라 자동으로 만들어지는 문구), 쓰이는 문서(m 회의록·n 통보·r 보고), 표시(M 주요 · L 여러 줄)]
+        const ORG = '안전 및 보건에 관한 협의체';
+        const BASIS = '근거: 산업안전보건법 제64조제1항제1호 · 같은 법 시행규칙 제79조(협의체의 구성 및 운영)';
+        const LABELS = [
+            ['title.minutes', '문서 제목', ORG + ' 회의록', 'm', 'M'],
+            ['title.notice', '문서 제목', ORG + ' 회의 개최 통보', 'n', 'M'],
+            ['title.report', '문서 제목', ORG + ' 회의 결과 보고', 'r', 'M'],
+            ['meetingName', '회의명', null, 'mr', 'M'],
+            ['attend', '참석 현황 문구', null, 'mr', 'M'],
+            ['nt.to', '수신', null, 'n', 'M'],
+            ['nt.intro', '통보문 본문', null, 'n', 'ML'],
+            ['nt.stamp', '발신 명의 뒤 문구', '(직인생략)', 'n', 'M'],
+            ['rp.close', '맺음말', '위와 같이 ' + ORG + ' 회의 결과를 보고합니다.', 'r', 'ML'],
+            ['rp.stamp', '보고 명의 뒤 문구', '(직인생략)', 'r', 'M'],
+            ['foot.minutes', '문서 맨 아래 문구', BASIS, 'm', 'ML'],
+            ['foot.notice', '문서 맨 아래 문구', '', 'n', 'ML'],
+            ['foot.report', '문서 맨 아래 문구', BASIS, 'r', 'ML'],
+            ['h.name', '회의명 칸 이름', '회 의 명', 'mr', ''],
+            ['h.dt', '일시 칸 이름', '일 시', 'm', ''],
+            ['h.loc', '장소 칸 이름', '장 소', 'm', ''],
+            ['h.att', '참석 칸 이름', '참 석', 'm', ''],
+            ['ro.title', '명단 표 제목', '참석자 명단 (도급인 및 수급인 전원)', 'm', ''],
+            ['ro.kind', '명단: 구분', '구분', 'm', ''],
+            ['ro.co', '명단: 업체명', '업체명', 'm', ''],
+            ['ro.work', '명단: 작업 내용', '작업 내용', 'm', ''],
+            ['ro.pos', '명단: 직위', '직위', 'm', ''],
+            ['ro.nm', '명단: 성명', '성명', 'm', ''],
+            ['ro.sign', '명단: 서명', '서명', 'm', ''],
+            ['ro.host', '도급인 호칭', '도급인', 'mn', ''],
+            ['ro.sub', '수급인 호칭', '수급인', 'm', ''],
+            ['ro.signph', '서명 칸 안내 글자', '(서명)', 'm', ''],
+            ['pv.title', '이행 확인 표 제목', '지난 회의 조치사항 이행 확인', 'm', ''],
+            ['tp.h1', '협의 표: 항목', '협의 항목', 'mr', ''],
+            ['tp.h2', '협의 표: 내용', '협의 내용 및 결정 사항', 'mr', ''],
+            ['ac.title', '후속 조치 표 제목', '후속 조치', 'm', ''],
+            ['c.act', '조치 표: 조치 사항', '조치 사항', 'mr', ''],
+            ['c.owner', '조치 표: 담당', '담당', 'mr', ''],
+            ['c.due', '조치 표: 기한', '기한', 'mr', ''],
+            ['c.result', '조치 표: 결과', '결과', 'mr', ''],
+            ['c.status', '조치 표: 상태', '상태', 'mr', ''],
+            ['h.others', '기타 사항 칸 이름', '기타 사항', 'mr', ''],
+            ['h.next', '다음 회의 칸 이름', '다음 회의', 'mr', ''],
+            ['ph.title', '사진 제목', '[ 회의 진행 현장 사진 ]', 'm', ''],
+            ['nt.below', '통보: 아래', '- 아 래 -', 'n', ''],
+            ['nt.dt', '통보: 일시', '일 시', 'n', ''],
+            ['nt.loc', '통보: 장소', '장 소', 'n', ''],
+            ['nt.who', '통보: 참석 대상', '참석 대상', 'n', ''],
+            ['nt.topics', '통보: 협의 사항', '협의 사항', 'n', ''],
+            ['nt.inst', '통보: 안내 및 협조사항', '안내 및 협조사항', 'n', ''],
+            ['rp.s1', '보고: 회의 개요', '회의 개요', 'r', ''],
+            ['rp.s2', '보고: 협의 결과', '협의 결과', 'r', ''],
+            ['rp.s3', '보고: 이행 결과', '지난 회의 조치사항 이행 결과', 'r', ''],
+            ['rp.s4', '보고: 후속 조치 계획', '후속 조치 계획', 'r', ''],
+            ['rp.s5', '보고: 기타·다음 회의', '기타 사항 및 다음 회의', 'r', ''],
+            ['rp.s6', '보고: 사진', '회의 현장 사진', 'r', ''],
+            ['rp.dtloc', '보고: 일시 및 장소', '일시 및 장소', 'r', ''],
+            ['rp.att', '보고: 참석 현황', '참석 현황', 'r', ''],
+            ['rp.noact', '보고: 후속 조치 없음', '후속 조치 없음', 'r', '']
+        ];
+        const LABEL_KEYS = LABELS.map(x => x[0]);
+        const LABEL_NAME = {}; LABELS.forEach(x => { LABEL_NAME[x[0]] = x[1]; });
+        const PER_MEETING = ['meetingName', 'attend', 'nt.intro'];   // 다음 회의로 넘어갈 때 자동 문구로 되돌리는 것
+        const APPR_KEY = 'tool.council';
+        const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+
+        // 미리보기에서 바로 고치는 글자(항상 textContent로만 넣는다)
+        const CcEd = {
+            props: { k: String, f: String, ml: Boolean },
+            setup(props) {
+                const cc = inject('ccL');
+                const el = ref(null);
+                const val = computed(() => props.f ? str(cc.form.value[props.f]) : (has(cc.labels, props.k) ? cc.labels[props.k] : (cc.defs.value[props.k] || '')));
+                const sync = (force) => { const e = el.value; if (e && (force || document.activeElement !== e) && e.textContent !== val.value) e.textContent = val.value; };
+                onMounted(() => sync(true));
+                watch(val, () => sync(false), { flush: 'post' });
+                const read = () => { let t = (el.value.innerText || '').replace(/\r/g, '').replace(/ /g, ' ').replace(/\n+$/, ''); if (!props.ml) t = t.replace(/\s*\n\s*/g, ' '); return t.slice(0, 600); };
+                const onInput = () => { const t = read(); if (props.f) cc.form.value[props.f] = t; else cc.labels[props.k] = t; };
+                const onBlur = () => { if (!props.f && has(cc.labels, props.k) && cc.labels[props.k] === (cc.defs.value[props.k] || '')) delete cc.labels[props.k]; sync(true); };
+                const onKeydown = (e) => { if (e.key === 'Enter' && !(props.ml && e.shiftKey)) { e.preventDefault(); el.value.blur(); } else if (e.key === 'Escape') el.value.blur(); };
+                const onPaste = (e) => { e.preventDefault(); let t = ((e.clipboardData || window.clipboardData).getData('text') || ''); if (!props.ml) t = t.replace(/\s*\n\s*/g, ' '); document.execCommand('insertText', false, t); };
+                return () => h('span', { ref: el, class: 'cc-ed', contenteditable: 'true', role: 'textbox', spellcheck: 'false', 'aria-label': (props.f ? '명의' : LABEL_NAME[props.k] || '문구') + ' 고치기', title: '눌러서 고치기', onInput, onBlur, onKeydown, onPaste });
+            }
+        };
+        // 접이식 입력 단계
+        const CcStep = {
+            props: { sid: String },
+            setup(props) {
+                const cc = inject('cc');
+                const m = computed(() => cc.meta.value[props.sid]);
+                const isOpen = computed(() => !!cc.open[props.sid]);
+                return { m, isOpen, toggle: () => { cc.open[props.sid] = !cc.open[props.sid]; }, goNext: () => cc.goNext(props.sid) };
+            },
+            template: `<section v-if="m" class="cc-step" :class="{ open: isOpen }" :id="'st-' + sid">
+                <button type="button" class="cc-sth" @click="toggle" :aria-expanded="isOpen ? 'true' : 'false'" :aria-controls="'sb-' + sid">
+                    <span class="cc-sn">{{ m.no }}</span>
+                    <span class="cc-stt"><b>{{ m.title }}</b><small>{{ m.sum }}</small></span>
+                    <span v-if="m.warn" class="cc-sw" :title="'확인할 곳 ' + m.warn + '건'"><i class="ph-bold ph-warning"></i>{{ m.warn }}<span class="cc-sr">건 확인</span></span>
+                    <span v-else-if="m.done" class="cc-sd" title="작성 완료"><i class="ph-bold ph-check"></i><span class="cc-sr">작성 완료</span></span>
+                    <span class="cc-car" aria-hidden="true">▼</span>
+                </button>
+                <div class="cc-sb" :id="'sb-' + sid" v-show="isOpen">
+                    <slot></slot>
+                    <p v-for="(c, i) in m.checks" :key="i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
+                    <div v-if="m.next" class="cc-next"><button type="button" class="cc-btn cc-btn-pri" data-next @click="goNext">다음: {{ m.nextTitle }} →</button></div>
+                </div>
+            </section>`
+        };
+        // 행 순서 바꾸기
+        const CcMv = {
+            props: { list: Array, i: Number, min: { type: Number, default: 0 } },
+            setup(props) {
+                const mv = (d) => { const j = props.i + d; if (j < props.min || j >= props.list.length) return; const x = props.list.splice(props.i, 1)[0]; props.list.splice(j, 0, x); };
+                return { mv };
+            },
+            template: `<span class="cc-mv"><button type="button" :disabled="i <= min" @click="mv(-1)" aria-label="위로 옮기기">▲</button><button type="button" :disabled="i >= list.length - 1" @click="mv(1)" aria-label="아래로 옮기기">▼</button></span>`
+        };
+
+        const app = createApp({
             setup() {
                 const docTypes = [
                     { label: '회의록', value: 'minutes', icon: 'ph-bold ph-users' },
@@ -883,7 +1146,13 @@
                     others: '',
                     nextDatetime: '',
                     nextLocation: '',
-                    oldDismissed: false
+                    oldDismissed: false,
+                    autoYm: true,          // 연도·월을 회의 일시에 맞춰 자동으로
+                    autoRound: true,       // 정기회의 회차를 월과 같게 자동으로
+                    titlePrefix: true,     // 제목 앞에 '2026년 10월' 붙이기
+                    noticeDate: '',        // 통보일(비우면 오늘)
+                    reportDate: '',        // 보고일(비우면 회의일)
+                    apprMinutes: true, apprNotice: false, apprReport: true
                 });
                 const freshTopics = () => STATUTORY.map(t => ({ label: t.label, ph: t.ph, fixed: true, content: '' }));
                 // 저장해 둔 사업장 정보(안전보건관리책임자·안전관리자·보건관리자 이름)가 있으면 미리 채운다
@@ -904,6 +1173,11 @@
                     if (!['minutes', 'notice', 'report'].includes(base.docType)) base.docType = 'minutes';
                     if (!['정기', '임시'].includes(base.type)) base.type = '정기';
                     if (!(base.month >= 1 && base.month <= 12)) base.month = now.getMonth() + 1;
+                    // 예전 저장값에는 '자동' 표시가 없다 — 저장된 값이 자동 값과 같을 때만 자동으로 본다(직접 고친 값을 덮어쓰지 않게)
+                    const dt = new Date(base.datetime), okDt = !!base.datetime && !isNaN(dt.getTime());
+                    if (!f || typeof f.autoYm !== 'boolean') base.autoYm = !okDt || (base.year === dt.getFullYear() && base.month === dt.getMonth() + 1);
+                    if (!f || typeof f.autoRound !== 'boolean') base.autoRound = base.type === '정기' && base.round === base.month;
+                    ['noticeDate', 'reportDate'].forEach(k => { if (!/^\d{4}-\d{2}-\d{2}$/.test(base[k])) base[k] = ''; });
                     return base;
                 };
                 const cleanHost = (a) => Array.isArray(a) && a.length ? a.map(r => ({ title: str(r && r.title), name: str(r && r.name), absent: !!(r && r.absent) })) : null;
@@ -920,7 +1194,13 @@
                 };
                 const cleanActions = (a) => Array.isArray(a) ? a.map(r => ({ content: str(r && r.content), owner: str(r && r.owner), due: str(r && r.due), status: ['진행 중', '완료', '보류'].includes(r && r.status) ? r.status : '진행 중' })) : [];
                 const cleanPrev = (a) => Array.isArray(a) ? a.map(r => ({ content: str(r && r.content), owner: str(r && r.owner), due: str(r && r.due), result: ['', '완료', '진행 중', '미이행'].includes(r && r.result) ? r.result : '' })) : [];
+                const cleanLabels = (o) => {
+                    const out = {};
+                    if (o && typeof o === 'object') LABEL_KEYS.forEach(k => { if (has(o, k) && typeof o[k] === 'string') out[k] = o[k].slice(0, 600); });
+                    return out;
+                };
                 const cleanSnap = (s) => ({
+                    labels: cleanLabels(s && s.labels),
                     formData: cleanForm(s && s.formData), hostReps: cleanHost(s && s.hostReps) || freshHost(), subs: cleanSubs(s && s.subs) || freshSubs(),
                     topics: cleanTopics(s && s.topics), actions: cleanActions(s && s.actions), prev: cleanPrev(s && s.prev)
                 });
@@ -932,6 +1212,8 @@
                 const topics = ref(init.topics);
                 const actions = ref(init.actions);
                 const prev = ref(init.prev);
+                const labels = reactive(init.labels);
+                const setLabels = (o) => { Object.keys(labels).forEach(k => { delete labels[k]; }); Object.assign(labels, o); };
                 const history = ref(Array.isArray(saved && saved.history)
                     ? saved.history.filter(h => h && typeof h === 'object' && h.snap).slice(0, HIST_MAX).map(h => { const s = cleanSnap(h.snap); return { id: str(h.id) || s.formData.mid, saved: Number(h.saved) || 0, snap: s }; })
                     : []);
@@ -941,7 +1223,7 @@
                 // ---- 저장
                 const saveMsg = ref(restored ? '지난번 내용을 이어서 엽니다' : '');
                 let saveTimer = null;
-                const snapshot = () => JSON.parse(JSON.stringify({ formData: formData.value, hostReps: hostReps.value, subs: subs.value, topics: topics.value, actions: actions.value, prev: prev.value }));
+                const snapshot = () => JSON.parse(JSON.stringify({ formData: formData.value, hostReps: hostReps.value, subs: subs.value, topics: topics.value, actions: actions.value, prev: prev.value, labels: labels }));
                 const persist = () => {
                     saveTimer = null;
                     try {
@@ -950,16 +1232,16 @@
                         return true;
                     } catch (e) { saveMsg.value = '저장하지 못했습니다(저장 공간 부족)'; return false; }
                 };
-                watch([formData, hostReps, subs, topics, actions, prev], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
+                watch([formData, hostReps, subs, topics, actions, prev, labels], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
                 window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); persist(); } });
 
-                // 회의 일시를 바꾸면 연도·월을 따라 맞춘다(직접 고칠 수 있음)
-                watch(() => formData.value.datetime, (v) => {
-                    const dt = new Date(v);
-                    if (!v || isNaN(dt.getTime())) return;
-                    formData.value.year = dt.getFullYear();
-                    formData.value.month = dt.getMonth() + 1;
-                });
+                // 연도·월은 회의 일시를, 정기회의 회차는 월을 따라간다. 사용자가 직접 고치면(autoYm/autoRound = false) 건드리지 않는다.
+                const syncAuto = () => {
+                    const f = formData.value, dt = new Date(f.datetime);
+                    if (f.autoYm && f.datetime && !isNaN(dt.getTime())) { f.year = dt.getFullYear(); f.month = dt.getMonth() + 1; }
+                    if (f.autoRound && f.type === '정기' && f.month >= 1 && f.month <= 12) f.round = f.month;
+                };
+                watch(() => { const f = formData.value; return [f.datetime, f.autoYm, f.autoRound, f.type, f.month].join('|'); }, syncAuto);
 
                 // ---- 계산값
                 const subName = (s, i) => s.company.trim() || `수급인 ${i + 1}`;
@@ -968,22 +1250,21 @@
                 const absentSubs = computed(() => subs.value.map((s, i) => ({ name: subName(s, i), reason: s.reason.trim(), absent: s.absent })).filter(s => s.absent));
                 const absentText = computed(() => absentSubs.value.map(s => s.reason ? `${s.name}(${s.reason})` : s.name).join(', '));
                 const titlePrefix = computed(() => formData.value.type === '임시'
-                    ? `${formData.value.year}년 제${formData.value.round}차(임시)`
+                    ? `${formData.value.year}년 제${formData.value.round || ' '}차(임시)`
                     : `${formData.value.year}년 ${formData.value.month}월`);
                 const meetingName = computed(() => {
                     const f = formData.value;
-                    const who = [f.company || '(도급인명)', f.siteName].filter(Boolean).join(' ');
-                    return `${who} ${f.year}년 제${f.round}차 안전 및 보건에 관한 협의체 (${f.type}회의)`;
+                    return [f.company, f.siteName, `${f.year}년`, f.round ? `제${f.round}차` : '', ORG, `(${f.type}회의)`].map(x => str(x).trim()).filter(Boolean).join(' ');
                 });
                 const attendSummary = computed(() => `도급인 ${presentHost.value}명 · 수급인 ${subs.value.length}개 업체 중 ${presentSubs.value}개 업체 참석`);
-                const formattedHost = computed(() => hostReps.value.map(r => r.name ? `${r.title}(${r.name})` : r.title).filter(Boolean).join(', '));
+                const formattedHost = computed(() => hostReps.value.map(r => r.name && r.title ? `${r.title}(${r.name})` : (r.title || r.name)).filter(Boolean).join(', '));
                 const recipients = computed(() => {
                     const names = subs.value.map(s => s.company.trim()).filter(Boolean);
                     return names.length ? names.join(', ') : '수급인 각 업체';
                 });
                 const rosterRows = computed(() => {
-                    const rows = hostReps.value.map(r => ({ kind: '도급인', company: formData.value.company, work: '', title: r.title, name: r.name, absent: r.absent, reason: '' }));
-                    subs.value.forEach(s => rows.push({ kind: '수급인', company: s.company, work: s.work, title: s.title, name: s.name, absent: s.absent, reason: s.reason }));
+                    const rows = hostReps.value.map(r => ({ host: true, company: formData.value.company, work: '', title: r.title, name: r.name, absent: r.absent, reason: '' }));
+                    subs.value.forEach(s => rows.push({ host: false, company: s.company, work: s.work, title: s.title, name: s.name, absent: s.absent, reason: s.reason }));
                     return rows;
                 });
                 const actionRows = computed(() => actions.value.filter(a => a.content.trim()));
@@ -997,52 +1278,150 @@
                     return `${dt.getFullYear()}년 ${pad(dt.getMonth() + 1)}월 ${pad(dt.getDate())}일 ${pad(dt.getHours())}시 ${pad(dt.getMinutes())}분`;
                 };
                 const formattedDatetime = computed(() => fmtDt(formData.value.datetime, '미정'));
-                const formattedNext = computed(() => fmtDt(formData.value.nextDatetime, '미정') + ' / ' + (formData.value.nextLocation || formData.value.location || '장소 추후 안내'));
+                const formattedNext = computed(() => [fmtDt(formData.value.nextDatetime, '미정'), formData.value.nextLocation || formData.value.location].filter(Boolean).join(' / '));
                 const formatJustDate = computed(() => {
                     const dt = new Date(formData.value.datetime);
-                    if (!formData.value.datetime || isNaN(dt.getTime())) return '202X년 X월 X일';
+                    if (!formData.value.datetime || isNaN(dt.getTime())) return '';
                     return `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
                 });
-                // 개최 통보는 회의 전에 보내는 문서이므로 작성일(오늘)을 적는다
+                // 개최 통보는 회의 전에 보내는 문서이므로 작성일(오늘)을 적는다. 통보일·보고일을 직접 넣으면 그 날짜를 쓴다.
                 const todayText = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+                const ymdText = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? `${+m[1]}년 ${+m[2]}월 ${+m[3]}일` : ''; };
+                const noticeDateText = computed(() => ymdText(formData.value.noticeDate) || todayText);
+                const reportDateText = computed(() => ymdText(formData.value.reportDate) || formatJustDate.value);
+
+                // ---- 문서 문구(제목·머리글·맺음말·맨 아래 문구)
+                const docLabel = computed(() => docTypes.find(d => d.value === formData.value.docType).label);
+                const docCode = computed(() => formData.value.docType[0]);
+                const defs = computed(() => {
+                    const o = {};
+                    LABELS.forEach(x => { o[x[0]] = x[2] || ''; });
+                    o.meetingName = meetingName.value;
+                    o.attend = attendSummary.value;
+                    o['nt.to'] = '수신: ' + recipients.value;
+                    o['nt.intro'] = `산업안전보건법 제64조제1항제1호 및 같은 법 시행규칙 제79조에 따라 도급인과 수급인이 함께하는 ${titlePrefix.value} ${ORG} ${formData.value.type}회의를 아래와 같이 개최하오니, 수급인 각 업체에서는 빠짐없이 참석하여 주시기 바랍니다.`;
+                    return o;
+                });
+                const L = (k) => has(labels, k) ? labels[k] : (defs.value[k] || '');
+                const setLabel = (k, v) => { v = str(v).slice(0, 600); if (v === (defs.value[k] || '')) delete labels[k]; else labels[k] = v; };
+                const resetLabel = (k) => { delete labels[k]; };
+                const labelCount = computed(() => Object.keys(labels).length);
+                const resetLabels = () => {
+                    if (!window.confirm('고쳐 둔 문서 제목·머리글·문구를 모두 기본값으로 되돌릴까요?')) return;
+                    setLabels({});
+                    showToast('문서 문구를 기본값으로 되돌렸습니다.');
+                };
+                const labelItems = computed(() => LABELS.filter(x => x[3].includes(docCode.value)).map(x => ({ k: x[0], name: x[1], dyn: x[2] === null, main: x[4].includes('M'), ml: x[4].includes('L'), on: has(labels, x[0]), val: L(x[0]) })));
+                const labelMain = computed(() => labelItems.value.filter(x => x.main));
+                const labelMinor = computed(() => labelItems.value.filter(x => !x.main));
+                provide('ccL', { labels, defs, form: formData });
+                const rpNo = computed(() => {
+                    const f = formData.value, o = {}; let n = 0;
+                    [['s1', true], ['s2', true], ['s3', prevRows.value.length > 0], ['s4', true], ['s5', !!(f.others || f.nextDatetime)], ['s6', !!photoDataUrl.value]].forEach(x => { if (x[1]) o[x[0]] = ++n; });
+                    return o;
+                });
+
+                // ---- 결재란(공통 모듈) 표시 여부는 문서 종류별로 기억한다
+                const apprAvail = !!window.ADoc;
+                const apprField = computed(() => ({ minutes: 'apprMinutes', notice: 'apprNotice', report: 'apprReport' })[formData.value.docType]);
+                const showAppr = computed(() => apprAvail && !!formData.value[apprField.value]);
+                const redrawAppr = () => { document.querySelectorAll('.cc-appr, .cc-appr-edit').forEach(el => { if (el._ad) el._ad.redraw(); }); };
+                const clearSigns = () => {
+                    try {
+                        const k = 'safetake.appr.' + APPR_KEY, s = JSON.parse(localStorage.getItem(k) || 'null');
+                        if (!s || typeof s !== 'object' || !Array.isArray(s.signs) || !s.signs.some(Boolean)) return;
+                        s.signs = []; s.dates = [];
+                        localStorage.setItem(k, JSON.stringify(s));
+                        redrawAppr();
+                    } catch (e) { /* 저장소를 못 쓰는 환경 */ }
+                };
 
                 // ---- 자동 확인(법령 문구는 시행규칙 제79조 그대로. 정족수처럼 조문에 없는 내용은 요건으로 표시하지 않는다)
                 const ym = (v) => { const d = new Date(v); return !v || isNaN(d.getTime()) ? null : d.getFullYear() * 12 + d.getMonth(); };
                 const checks = computed(() => {
                     const out = [];
                     const n = subs.value.length;
-                    if (!n) out.push({ ok: false, text: '수급인 업체가 없습니다 — 협의체는 도급인 및 그의 수급인 전원으로 구성해야 합니다(시행규칙 제79조제1항).' });
-                    else if (absentSubs.value.length) out.push({ ok: false, text: `수급인 ${n}개 업체 중 ${presentSubs.value}개 업체 참석 · 불참: ${absentSubs.value.map(s => s.name).join(', ')} — 협의체는 도급인 및 그의 수급인 전원으로 구성합니다(시행규칙 제79조제1항). 불참 업체에 회의 결과를 전달한 방법을 불참 사유 칸에 적어 두기를 권합니다.` });
-                    else out.push({ ok: true, text: `수급인 ${n}개 업체 전원 참석 — 명단에 도급인 사업장에서 작업하는 수급인이 모두 들어 있는지 확인하세요(시행규칙 제79조제1항).` });
+                    if (!n) out.push({ step: 'members', ok: false, text: '수급인 업체가 없습니다 — 협의체는 도급인 및 그의 수급인 전원으로 구성해야 합니다(시행규칙 제79조제1항).' });
+                    else if (absentSubs.value.length) out.push({ step: 'members', ok: false, text: `수급인 ${n}개 업체 중 ${presentSubs.value}개 업체 참석 · 불참: ${absentSubs.value.map(s => s.name).join(', ')} — 협의체는 도급인 및 그의 수급인 전원으로 구성합니다(시행규칙 제79조제1항). 불참 업체에 회의 결과를 전달한 방법을 불참 사유 칸에 적어 두기를 권합니다.` });
+                    else out.push({ step: 'members', ok: true, text: `수급인 ${n}개 업체 전원 참석 — 명단에 도급인 사업장에서 작업하는 수급인이 모두 들어 있는지 확인하세요(시행규칙 제79조제1항).` });
                     const unnamed = subs.value.filter(s => !s.company.trim()).length;
-                    if (unnamed) out.push({ ok: false, text: `업체명이 비어 있는 수급인이 ${unnamed}곳 있습니다.` });
-                    if (!presentHost.value) out.push({ ok: false, text: '도급인 참석자가 모두 불참으로 표시되어 있습니다.' });
+                    if (unnamed) out.push({ step: 'members', ok: false, text: `업체명이 비어 있는 수급인이 ${unnamed}곳 있습니다.` });
+                    if (!presentHost.value) out.push({ step: 'members', ok: false, text: '도급인 참석자가 모두 불참으로 표시되어 있습니다.' });
                     if (formData.value.docType !== 'notice') {
                         const empty = topics.value.filter(t => t.fixed && !t.content.trim()).length;
-                        if (empty) out.push({ ok: false, text: `협의해야 하는 사항 5가지 중 ${empty}가지가 비어 있습니다(시행규칙 제79조제2항). 변동이 없더라도 확인한 내용을 적어 두세요.` });
-                        else out.push({ ok: true, text: '협의해야 하는 사항 5가지를 모두 적었습니다(시행규칙 제79조제2항).' });
+                        if (empty) out.push({ step: 'topics', ok: false, text: `협의해야 하는 사항 5가지 중 ${empty}가지가 비어 있습니다(시행규칙 제79조제2항). 변동이 없더라도 확인한 내용을 적어 두세요.` });
+                        else out.push({ step: 'topics', ok: true, text: '협의해야 하는 사항 5가지를 모두 적었습니다(시행규칙 제79조제2항).' });
                         const noOwner = actionRows.value.filter(a => !a.owner.trim() || !a.due).length;
-                        if (noOwner) out.push({ ok: false, text: `담당 업체나 기한이 빠진 후속 조치가 ${noOwner}건 있습니다.` });
+                        if (noOwner) out.push({ step: 'actions', ok: false, text: `담당 업체나 기한이 빠진 후속 조치가 ${noOwner}건 있습니다.` });
                     }
                     const cur = ym(formData.value.datetime), nx = ym(formData.value.nextDatetime);
-                    if (cur != null && nx != null) {
-                        if (nx < cur || formData.value.nextDatetime <= formData.value.datetime) out.push({ ok: false, text: '다음 회의 일시가 이번 회의보다 앞서 있습니다.' });
-                        else if (nx - cur > 1) out.push({ ok: false, text: `다음 회의가 ${nx - cur}개월 뒤입니다 — 협의체는 매월 1회 이상 정기적으로 회의를 개최해야 합니다(시행규칙 제79조제3항).` });
+                    if (cur != null && nx != null && formData.value.docType !== 'notice') {
+                        if (nx < cur || formData.value.nextDatetime <= formData.value.datetime) out.push({ step: 'next', ok: false, text: '다음 회의 일시가 이번 회의보다 앞서 있습니다.' });
+                        else if (nx - cur > 1) out.push({ step: 'next', ok: false, text: `다음 회의가 ${nx - cur}개월 뒤입니다 — 협의체는 매월 1회 이상 정기적으로 회의를 개최해야 합니다(시행규칙 제79조제3항).` });
                     }
                     if (cur != null && formData.value.type === '정기') {
                         const before = history.value.filter(h => h.id !== formData.value.mid).map(h => ym(h.snap.formData.datetime)).filter(v => v != null && v <= cur);
                         if (before.length) {
                             const last = Math.max.apply(null, before);
-                            if (cur - last > 1) out.push({ ok: false, text: `보관된 지난 회의(${Math.floor(last / 12)}년 ${last % 12 + 1}월) 이후 ${cur - last - 1}개월 동안 회의 기록이 없습니다 — 매월 1회 이상 개최·기록해야 합니다(시행규칙 제79조제3항). 다른 곳에 기록이 있다면 무시하세요.` });
+                            if (cur - last > 1) out.push({ step: 'basic', ok: false, text: `보관된 지난 회의(${Math.floor(last / 12)}년 ${last % 12 + 1}월) 이후 ${cur - last - 1}개월 동안 회의 기록이 없습니다 — 매월 1회 이상 개최·기록해야 합니다(시행규칙 제79조제3항). 다른 곳에 기록이 있다면 무시하세요.` });
                         }
                     }
                     return out;
                 });
 
+                // ---- 접이식 입력 단계: 번호·제목·한 줄 요약·완료 표시·확인할 곳 수
+                const open = reactive({ basic: true });
+                const shortDt = (v) => { const d = new Date(v); return !v || isNaN(d.getTime()) ? '' : `${d.getMonth() + 1}.${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+                const stepMeta = computed(() => {
+                    const f = formData.value, notice = f.docType === 'notice', list = [];
+                    const n = subs.value.length, unnamed = subs.value.filter(s => !s.company.trim()).length;
+                    list.push({ id: 'basic', title: '기본 회의 정보', sum: [titlePrefix.value + ' ' + f.type, shortDt(f.datetime), f.location].filter(Boolean).join(' · '), done: !!(str(f.company).trim() && f.datetime && str(f.location).trim()) });
+                    list.push({ id: 'members', title: '협의체 구성·참석', sum: `도급인 ${presentHost.value}명 · 수급인 ${n}곳 중 ${presentSubs.value}곳 참석`, done: n > 0 && !unnamed && hostReps.value.some(r => r.name.trim()) });
+                    if (!notice) {
+                        const pr = prevRows.value, dn = pr.filter(p => p.result === '완료').length, un = pr.filter(p => !p.result).length;
+                        list.push({ id: 'prev', title: '지난 회의 조치사항 이행 확인', sum: pr.length ? `${pr.length}건 · 완료 ${dn}건` + (un ? ` · 확인 전 ${un}건` : '') : '없음', done: pr.length > 0 && !un });
+                    }
+                    const filled = topics.value.filter(t => t.fixed && t.content.trim()).length, extra = topics.value.length - STATUTORY.length;
+                    list.push(notice
+                        ? { id: 'topics', title: '협의 예정 사항 · 협조사항', sum: `안건 ${topics.value.length}건` + (f.noticeInstructions.trim() ? ' · 협조사항 있음' : ' · 협조사항 없음'), done: !!f.noticeInstructions.trim() }
+                        : { id: 'topics', title: '협의 사항 및 결정 내용', sum: `법정 ${STATUTORY.length}가지 중 ${filled}가지 작성` + (extra > 0 ? ` · 추가 안건 ${extra}건` : ''), done: filled === STATUTORY.length });
+                    if (!notice) {
+                        const ar = actionRows.value;
+                        list.push({ id: 'actions', title: '후속 조치 (업체별)', sum: ar.length ? `${ar.length}건 · 완료 ${ar.filter(a => a.status === '완료').length}건` : '없음', done: ar.length > 0 && ar.every(a => a.owner.trim() && a.due) });
+                        list.push({ id: 'next', title: '다음 회의 일정 · 사진', sum: (f.nextDatetime ? '다음 회의 ' + shortDt(f.nextDatetime) : '다음 회의 미정') + (photoDataUrl.value ? ' · 사진 1장' : ''), done: !!f.nextDatetime });
+                    }
+                    list.push({ id: 'format', title: '결재란 · 문서 제목·문구', sum: `결재란 ${showAppr.value ? '표시' : '숨김'}` + (labelCount.value ? ` · 고친 문구 ${labelCount.value}곳` : ' · 문구 기본값'), done: false });
+                    list.push({ id: 'archive', title: '매월 이어 쓰기 · 지난 회의 기록', sum: `보관 ${history.value.length}건`, done: false });
+                    const map = {};
+                    list.forEach((s, i) => {
+                        s.no = i + 1;
+                        s.checks = checks.value.filter(c => c.step === s.id);
+                        s.warn = s.checks.filter(c => !c.ok).length;
+                        s.next = list[i + 1] ? list[i + 1].id : '';
+                        s.nextTitle = list[i + 1] ? list[i + 1].title : '';
+                        map[s.id] = s;
+                    });
+                    return map;
+                });
+                const warnTotal = computed(() => Object.keys(stepMeta.value).reduce((a, k) => a + stepMeta.value[k].warn, 0));
+                const toStep = (id) => nextTick(() => { const el = document.getElementById('st-' + id); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); });
+                const goNext = (id) => { const nx = stepMeta.value[id] && stepMeta.value[id].next; if (!nx) return; open[id] = false; open[nx] = true; toStep(nx); };
+                const setAll = (v) => { Object.keys(stepMeta.value).forEach(k => { open[k] = v; }); };
+                const toTop = () => { Object.keys(open).forEach(k => { open[k] = k === 'basic'; }); window.scrollTo(0, 0); const c = document.getElementById('form-col'); if (c) c.scrollTop = 0; };
+                provide('cc', { meta: stepMeta, open, goNext });
+                // 모바일: 입력 | 미리보기 전환
+                const view = ref('form');
+                const setView = (v) => { view.value = v; window.scrollTo(0, 0); nextTick(fitPreview); };
+
                 // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
                 const fitPreview = () => {
                     const col = document.getElementById('preview-col');
-                    if (!col) return;
+                    if (!col || !col.clientWidth) return;
+                    const hd = document.getElementById('cc-header');
+                    if (hd) document.documentElement.style.setProperty('--hh', hd.offsetHeight + 'px');
+                    let nh = 0;
+                    document.querySelectorAll('body > .adk-note').forEach(n => { const cs = getComputedStyle(n); nh += n.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0); });
+                    document.documentElement.style.setProperty('--nh', Math.ceil(nh) + 'px');
                     const a4 = 210 * 96 / 25.4;
                     document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
                 };
@@ -1052,6 +1431,7 @@
                     requestAnimationFrame(fitPreview); setTimeout(fitPreview, 300);
                     const col = document.getElementById('preview-col');
                     if (col && window.ResizeObserver) new ResizeObserver(fitPreview).observe(col);
+                    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isExModalOpen.value) isExModalOpen.value = false; });
                 });
 
                 const photoDataUrl = ref(null);
@@ -1082,6 +1462,7 @@
                     showToast('다음 회의를 한 달 뒤 같은 시각으로 넣었습니다.');
                 };
                 const changeDocType = (type) => {
+                    if (formData.value.docType === type) return;
                     formData.value.docType = type;
                     showToast(`${docTypes.find(d => d.value === type).label} 양식으로 전환되었습니다.`);
                 };
@@ -1215,17 +1596,21 @@
                     const carry = actions.value.filter(a => a.content.trim() && a.status !== '완료').map(a => ({ content: a.content, owner: a.owner, due: a.due, result: '' }));
                     const stillOpen = prev.value.filter(p => p.content.trim() && p.result !== '완료').map(p => ({ content: p.content, owner: p.owner, due: p.due, result: '' }));
                     const nextDt = f.nextDatetime || plusMonth(f.datetime) || toLocal(new Date());
+                    // 회차: 월과 같게 쓰던 경우는 다음 달 숫자로(아래 syncAuto), 직접 정한 경우는 1을 더한다
                     formData.value = Object.assign({}, f, {
-                        mid: newId(), docType: 'minutes', type: '정기', round: (Number(f.round) || 0) + 1,
-                        datetime: nextDt, location: f.nextLocation || f.location, others: '', nextDatetime: '', nextLocation: ''
+                        mid: newId(), docType: 'minutes', type: '정기', round: (Number(f.round) || 0) + 1, autoYm: true,
+                        datetime: nextDt, location: f.nextLocation || f.location, others: '', nextDatetime: '', nextLocation: '', noticeDate: '', reportDate: ''
                     });
+                    syncAuto();
+                    PER_MEETING.forEach(k => { delete labels[k]; });
+                    clearSigns();
                     hostReps.value.forEach(x => { x.absent = false; });
                     subs.value.forEach(x => { x.absent = false; x.reason = ''; });
                     topics.value = freshTopics();
                     prev.value = stillOpen.concat(carry);
                     actions.value = [];
                     photoDataUrl.value = null;
-                    window.scrollTo(0, 0);
+                    toTop();
                     showToast(prev.value.length ? `다음 회의를 열었습니다. 끝나지 않은 조치 ${prev.value.length}건을 이행 확인으로 옮겼습니다.` : '다음 회의를 열었습니다.');
                 };
                 const openHistory = (id) => {
@@ -1234,8 +1619,9 @@
                     if (h.id !== formData.value.mid && !window.confirm('지금 작성 중인 내용을 이 기록으로 바꿉니다.\n지금 내용을 남기려면 취소하고 "지금 내용만 보관"을 먼저 누르세요. 계속할까요?')) return;
                     const s = cleanSnap(JSON.parse(JSON.stringify(h.snap)));
                     formData.value = s.formData; hostReps.value = s.hostReps; subs.value = s.subs; topics.value = s.topics; actions.value = s.actions; prev.value = s.prev;
+                    if (Object.keys(s.labels).length) setLabels(s.labels);   // 문구를 함께 보관한 기록만 문구까지 되돌린다
                     photoDataUrl.value = null;
-                    window.scrollTo(0, 0);
+                    toTop();
                     showToast('보관한 회의 기록을 열었습니다.');
                 };
                 const deleteHistory = (id) => {
@@ -1270,6 +1656,7 @@
                     if (ss.length) subs.value = ss;
                     const tp = freshTopics();
                     tp.forEach((t, i) => { t.content = g(`t.agenda.${i}.1`); });
+                    formData.value.autoYm = true;
                     topics.value = tp;
                     const etc = [g('f.no') ? `회차: ${g('f.no')}` : '', g('x.etc')].filter(Boolean).join('\n');
                     if (etc) formData.value.others = etc;
@@ -1322,8 +1709,11 @@
                 return {
                     HIST_MAX, docTypes, formData, hostReps, subs, topics, actions, prev, history: historyView,
                     photoDataUrl, isGeneratingPDF, toast, saveMsg,
+                    view, setView, warnTotal, setAll, fixedCount: STATUTORY.length,
+                    L, setLabel, resetLabel, resetLabels, labelCount, labelMain, labelMinor, docLabel, rpNo,
+                    apprAvail, apprField, showAppr, noticeDateText, reportDateText,
                     presentSubs, absentSubs, absentText, titlePrefix, meetingName, attendSummary, formattedHost, recipients,
-                    rosterRows, actionRows, prevRows, ownerNames, formattedDatetime, formattedNext, formatJustDate, todayText, checks,
+                    rosterRows, actionRows, prevRows, ownerNames, formattedDatetime, formattedNext, checks,
                     addHost, addSub, removeSub, addTopic, addAction, addPrev, suggestNext, changeDocType,
                     handleFileUpload, removePhoto, resetToDefault, resetNoticeInstructions,
                     isExModalOpen, currentExOptions, openExModal, refreshEx, selectEx,
@@ -1332,7 +1722,11 @@
                     printDoc, downloadPDF
                 };
             }
-        }).mount('#app');
+        });
+        app.component('cc-ed', CcEd); app.component('cc-step', CcStep); app.component('cc-mv', CcMv);
+        // 결재란: 사이트 공통 모듈(assets/docs.js)이 그리고 저장한다 — 칸 이름·칸 수·성명·서명
+        app.directive('appr', { mounted(el) { if (window.ADoc) el._ad = window.ADoc.mountApproval(el, APPR_KEY); } });
+        app.mount('#app');
     </script>
 </body>
 </html>

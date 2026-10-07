@@ -63,7 +63,7 @@ def fmt_date(d):
 # 브리핑·법령 근거로 쓸 수 있는 공식 1차 출처(도메인 끝). 그 밖의 주소는 '참고 보도'로만 표시하고 근거로 세지 않는다.
 OFFICIAL_HOSTS = ("law.go.kr", "moel.go.kr", "kosha.or.kr", "korea.kr", "assembly.go.kr", "moleg.go.kr", "lawmaking.go.kr", "gwanbo.go.kr",
                   "comwel.or.kr", "me.go.kr", "nfa.go.kr", "mois.go.kr", "molit.go.kr", "kgs.or.kr", "data.go.kr", "work24.go.kr", "opinion.lawmaking.go.kr",
-                  "kdi.re.kr")  # kdi.re.kr: KDI 경제정책정보센터가 부처 보도자료 원문을 그대로 게재(국책연구기관)
+                  "kdi.re.kr", "safetymonth.or.kr", "bizinfo.go.kr")  # kdi.re.kr: KDI 경제정책정보센터가 부처 보도자료 원문을 그대로 게재(국책연구기관)
 
 
 def is_official(url):
@@ -704,7 +704,7 @@ def lawver_html(tool_id, rel_root, fallback=""):
     oldest = min(d for d in dates if d)
     warn_s = ' <span class="stale">· 확인일이 오래되었습니다 — 공식 원문 재확인 필요</span>' if stale(oldest) else ""
     return (f'<aside class="wrap"><p class="lawver"><b>법적 근거 확인일</b> {e(oldest)}{warn_s}<br><b>적용 법령 버전</b> ' + " / ".join(rows)
-            + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#versions">법령 버전·시행 예정 보기</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a>'
+            + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#status">법령 버전·시행 예정 보기</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a>'
             + '<br>이 화면의 판정·계산·예시 문구는 SafePlum이 정리한 참고 자료이며 법령 원문이 아닙니다.</p></aside>')
 
 
@@ -1568,7 +1568,7 @@ def build(out, today):
                 f'<span class="nb-t">{e(x["title"])}{chk}</span><span class="nb-a">{e(x.get("agency", ""))}</span></summary>'
                 f'<div class="nb-body">{ot}<p>{e(x["summary"])}</p>{per}<p><b>실무 포인트</b> {e(x.get("point", ""))}</p>{vf}'
                 f'<p><a class="link-ext" href="{e(x["url"])}" target="_blank" rel="noopener">{e(x.get("src_label") or "공식 출처")} ↗</a>{more}</p></div></details>')
-    cats = ["입법예고", "점검", "감독", "지원사업", "법령", "정책", "통계", "사고", "자료"]
+    cats = ["입법예고", "점검", "감독", "지원사업", "공모전·대회", "법령", "정책", "통계", "사고", "자료"]
     cat_btns = '<button type="button" data-c="" aria-pressed="true">전체</button>' + "".join(f'<button type="button" data-c="{c}" aria-pressed="false">{c} {sum(1 for x in BOARD if x["cat"] == c)}</button>' for c in cats if any(x["cat"] == c for x in BOARD))
     board_html = f"""<div class="nb"><div class="seg nb-filter" id="nbF" role="group" aria-label="분류">{cat_btns}</div>
 <div class="nb-list" id="nbL">{"".join(board_row(x) for x in BOARD)}</div>
@@ -1598,7 +1598,7 @@ def build(out, today):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="{up}">홈</a><span>/</span>{crumb}</p>
   <h1>안전 브리핑·소식</h1>
-  <p>고용노동부·안전보건공단의 점검·감독 예정, 지원사업, 법령·정책, 통계 발표를 한 게시판에 모았습니다. 제목을 누르면 요약과 실무 포인트, 공식 출처가 열립니다.</p>
+  <p>고용노동부·안전보건공단의 점검·감독 예정, 지원사업, 공모전·대회, 법령·정책, 통계 발표를 한 게시판에 모았습니다. 제목을 누르면 요약과 실무 포인트, 공식 출처가 열립니다.</p>
 </div></section>"""
     write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
           brief_head.format(up="../", crumb="안전 브리핑") + f'<div class="wrap layout-detail"><section class="col-main">{brief_main}</section>{brief_side}</div>',
@@ -1929,17 +1929,17 @@ def build(out, today):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>서식·자료</p>
   <h1>서식·자료</h1>
-  <p>법정 서식·별표 {n_law}건은 국가법령정보센터 현행 원본으로 열리고(개정되면 같은 버튼이 최신본을 엽니다), 웹 작성 서식 {n_web}건은 여기서 바로 작성·인쇄합니다.</p>
+  <p data-landing>법정 서식·별표 {n_law}건은 국가법령정보센터 현행 원본으로 열리고(개정되면 같은 버튼이 최신본을 엽니다), 웹 작성 서식 {n_web}건은 여기서 바로 작성·인쇄합니다.</p>
 </div></section>
-<section class="wrap" style="padding-top:16px">{tools_cta.format(rel="../")}</section>
-<section class="wrap ftools-page" style="padding-top:8px">
+<section class="wrap" style="padding-top:16px" data-landing>{tools_cta.format(rel="../")}</section>
+<section class="wrap ftools-page" style="padding-top:8px" data-landing>
   <div class="ftools">
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>웹 서식 작성기 {n_web}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>안전보건 자료실</strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
 </section>
-<section class="wrap" style="padding-top:28px">
+<section class="wrap" style="padding-top:28px" data-landing>
   {sec_head("상황별로 찾기", sub="지금 하려는 일을 고르면 필요한 법정 서식·기준표·작성 도구를 모아 보여줍니다.")}
   <div class="sit-grid">{situation_cards(resources, "../", site.get("free_tools"))}</div>
 </section>
@@ -1959,8 +1959,8 @@ def build(out, today):
     <p class="count" aria-live="polite">자료 <strong data-count>{len(resources)}</strong>건</p>
     <ul class="rlist" data-list data-page-size="30">{''.join(resource_row(r, site, '../') for r in resources)}</ul>
     <p class="more-wrap" data-more-wrap hidden><button type="button" class="btn btn-ghost btn-block" data-more>더 보기</button></p>
-    {empty_box("검색 결과가 없습니다.").replace('class="empty"', 'class="empty" data-empty hidden')}
-    <p class="src-line">법정 서식·별표 목록 확인일 {e(load("data/lawforms.json")["checked"])} · 국가법령정보센터 법령 본문의 별표·서식 목록 기준. 법령 원문은 저작권 보호 대상이 아닙니다(저작권법 제7조).</p>
+    {empty_box("조건에 맞는 서식·자료가 없습니다. 낱말을 줄이거나 다른 말로 찾아보세요.", '<div class="btns"><button type="button" class="btn btn-sm" data-reset>전체 자료 보기</button><a class="btn btn-sm btn-ghost" href="library/" data-q-href="library/">공단 자료실에서 찾기</a><a class="btn btn-sm btn-ghost" href="../tools/">무료 도구에서 찾기</a></div>').replace('class="empty"', 'class="empty" data-empty hidden')}
+    <p class="src-line" style="margin-top:14px">법정 서식·별표 목록 확인일 {e(load("data/lawforms.json")["checked"])} · 국가법령정보센터 법령 본문의 별표·서식 목록 기준. 법령 원문은 저작권 보호 대상이 아닙니다(저작권법 제7조).</p>
   </section>
 </div>"""
     for pid, src, name, title, desc in [
@@ -2124,7 +2124,7 @@ def build(out, today):
     base = (site.get("base_url") or "").rstrip("/")
     base_js = ("<script>document.write('<base href=\"'+(/\\.github\\.io$/.test(location.hostname)?'/'+location.pathname.split('/')[1]+'/':'/')+'\">')</script>")
     nf = page(site, "", "404.html", "페이지를 찾을 수 없습니다",
-        '<section class="phead"><div class="wrap"><img src="assets/img/ico/fix.webp" width="120" height="120" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns"><a class="btn" href="./">홈으로</a></p></div></section>')
+        '<section class="phead"><div class="wrap"><img src="assets/img/ico/fix.webp" width="120" height="120" alt=""><h1>페이지를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 없는 페이지입니다.</p><p class="btns" style="margin-top:14px"><a class="btn" href="./">홈으로</a><a class="btn btn-ghost" href="tools/">무료 도구</a><a class="btn btn-ghost" href="resources/">서식·자료</a><a class="btn btn-ghost" href="laws/">법령</a><a class="btn btn-ghost" href="board/">게시판</a></p></div></section>')
     (out / "404.html").write_text(nf.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + base_js, 1), encoding="utf-8")
 
     if base:

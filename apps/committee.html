@@ -43,665 +43,811 @@
         .ph-fill.ph-users-three{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z%22/></svg>")}
         .ph-fill.ph-warning-circle{--i:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22currentColor%22><path d=%22M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z%22/></svg>")}
 
-        .cm-warn { font-size: 11px; line-height: 1.5; color: #b45309; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 6px 8px; margin: 0; }
-        .cm-ok { font-size: 11px; line-height: 1.5; color: #047857; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 6px 8px; margin: 0; }
-        .cm-law { font-size: 11px; line-height: 1.6; color: #475569; margin: 0; padding-left: 14px; list-style: disc; }
-        .cm-abs { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: #475569; white-space: nowrap; flex: none; }
+        .cm-warn { font-size: 11.5px; line-height: 1.5; color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 6px 8px; margin: 0; }
+        .cm-ok { font-size: 11.5px; line-height: 1.5; color: #047857; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 6px 8px; margin: 0; }
+        .cm-law { font-size: 11.5px; line-height: 1.65; color: #475569; margin: 0; padding-left: 16px; list-style: disc; }
+        .cm-law li { margin-bottom: 3px; }
         .cm-save { font-size: 11px; color: #94a3b8; }
         .cm-fail { margin: 40px auto; max-width: 520px; padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; line-height: 1.7; }
         /* 화면에서는 A4 미리보기를 칸 너비에 맞춰 줄여 보여 준다(값은 스크립트가 넣음). 인쇄·PDF에는 적용하지 않는다 */
         @media screen { .cm-zoom { zoom: var(--pz, 1); } }
-        .adk-note { padding-bottom: 16px !important; }
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f1f5f9;
+        .adk-note { padding-bottom: 10px !important; flex: none; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f1f5f9; margin: 0; }
+
+        /* ---------- 화면 틀: 머리줄 / 입력(왼쪽) / 미리보기(오른쪽) ---------- */
+        #app { display: flex; flex-direction: column; min-height: 100vh; }
+        .cm-top { flex: none; background: #0f172a; color: #fff; padding: 10px 16px; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+        .cm-top-in { max-width: 1440px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+        .cm-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .cm-brand a { font-size: 12px; font-weight: 700; color: #cbd5e1; white-space: nowrap; }
+        .cm-brand a:hover { color: #fff; }
+        .cm-logo { background: #10b981; color: #020617; padding: 7px; border-radius: 8px; display: inline-flex; font-size: 18px; }
+        .cm-brand h1 { font-size: 15px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+        .cm-brand p { font-size: 11px; color: #94a3b8; margin: 0; }
+        .cm-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .cm-hbtn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1; cursor: pointer; }
+        .cm-hbtn:hover { background: #334155; }
+        .cm-hbtn:disabled { opacity: .6; cursor: default; }
+        .cm-hbtn.pri { background: #059669; border-color: #059669; color: #fff; font-weight: 700; }
+        .cm-hbtn.pri:hover { background: #10b981; }
+
+        .cm-tabs { position: sticky; top: 0; z-index: 30; display: flex; gap: 6px; padding: 8px 12px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+        .cm-tab { flex: 1; font-size: 13px; font-weight: 700; padding: 9px 8px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #475569; cursor: pointer; }
+        .cm-tab[aria-selected="true"] { background: #0f172a; border-color: #0f172a; color: #fff; }
+        .cm-tab.pr { flex: none; background: #059669; border-color: #059669; color: #fff; display: inline-flex; align-items: center; gap: 4px; padding: 9px 12px; }
+
+        .cm-main { flex: 1; width: 100%; max-width: 1440px; margin: 0 auto; padding: 12px; box-sizing: border-box; }
+        .cm-main[data-tab="in"] .cm-out { display: none; }
+        .cm-main[data-tab="out"] .cm-pane { display: none; }
+        .cm-pane { min-width: 0; }
+        .cm-out { min-width: 0; }
+        @media screen and (min-width: 1024px) {
+            html, body { height: 100%; }
+            body { display: flex; flex-direction: column; overflow: hidden; }
+            #app { flex: 1 1 0; min-height: 0; }
+            .cm-tabs { display: none; }
+            .cm-main { display: grid; grid-template-columns: minmax(380px, 460px) minmax(0, 1fr); gap: 20px; padding: 14px 24px 0; min-height: 0; }
+            .cm-main[data-tab] .cm-out, .cm-main[data-tab] .cm-pane { display: block; }
+            .cm-pane, .cm-out { min-height: 0; overflow-y: auto; padding-bottom: 20px; }
+            .cm-pane { padding-right: 6px; }
         }
 
-        /* Printable A4 dimensions & crisp typography */
-        .a4-container {
-            width: 210mm;
-            min-height: 297mm;
-            background: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            margin: 0 auto;
-            box-sizing: border-box;
-            position: relative;
+        /* ---------- 입력 칸 ---------- */
+        .cm-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 6px; }
+        .cm-type { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12.5px; font-weight: 700; padding: 9px 4px; border-radius: 8px; border: 1px solid transparent; background: #f8fafc; color: #475569; cursor: pointer; }
+        .cm-type:hover { background: #f1f5f9; }
+        .cm-type[aria-pressed="true"] { background: #ecfdf5; border-color: #10b981; color: #047857; }
+        .cm-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 2px 6px; font-size: 11.5px; color: #64748b; }
+        .cm-link { font: inherit; font-size: 11.5px; font-weight: 700; color: #1d4ed8; background: none; border: 0; padding: 2px 0; cursor: pointer; }
+        .cm-link:hover { text-decoration: underline; }
+        .cm-link.red { color: #be123c; }
+
+        .cm-step { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; scroll-margin-top: 60px; }
+        .cm-step.open { border-color: #94a3b8; box-shadow: 0 1px 3px rgba(15,23,42,.08); }
+        .cm-step-h { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; padding: 10px 12px; cursor: pointer; border-radius: 12px; }
+        .cm-step-h:hover { background: #f8fafc; }
+        .cm-step-n { flex: none; width: 24px; height: 24px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .cm-step.open .cm-step-n { background: #0f172a; color: #fff; }
+        .cm-step.done .cm-step-n { background: #059669; color: #fff; }
+        .cm-step-t { flex: 1; min-width: 0; display: block; }
+        .cm-step-t b { display: block; font-size: 13.5px; color: #0f172a; }
+        .cm-step-t small { display: block; font-size: 11.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cm-step-t small.w { color: #b45309; font-weight: 700; }
+        .cm-chev { flex: none; width: 8px; height: 8px; border-right: 2px solid #64748b; border-bottom: 2px solid #64748b; transform: rotate(45deg); margin: 0 4px 4px 0; transition: transform .15s; }
+        .cm-step.open .cm-chev { transform: rotate(-135deg); margin-bottom: -2px; }
+        .cm-step-b { padding: 4px 12px 12px; border-top: 1px solid #f1f5f9; }
+        .cm-step-b > * + * { margin-top: 10px; }
+        .cm-step-f { display: flex; justify-content: flex-end; padding-top: 2px; }
+
+        .cm-lb { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 3px; }
+        .cm-in { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 8px; font-size: 13px; line-height: 1.4; background: #f8fafc; color: #1e293b; outline: none; font-family: inherit; }
+        .cm-in:focus { background: #fff; border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,.25); }
+        textarea.cm-in { resize: vertical; line-height: 1.55; display: block; }
+        .cm-g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .cm-g3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+        .cm-g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+        .cm-hint { font-size: 11.5px; line-height: 1.55; color: #64748b; margin: 0; }
+        .cm-hint.r { color: #be123c; }
+        .cm-sub { font-size: 12.5px; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .cm-sub.b { color: #1d4ed8; } .cm-sub.g { color: #047857; }
+        .cm-sep { border: 0; border-top: 1px solid #f1f5f9; margin: 12px 0 0; }
+        .cm-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #334155; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 10px; cursor: pointer; font-family: inherit; }
+        .cm-btn:hover { background: #e2e8f0; }
+        .cm-btn.pri { color: #fff; background: #059669; border-color: #059669; }
+        .cm-btn.pri:hover { background: #047857; }
+        .cm-btn.dark { color: #fff; background: #0f172a; border-color: #0f172a; }
+        .cm-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+        .cm-ib { flex: none; width: 24px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; background: none; border: 0; border-radius: 6px; cursor: pointer; padding: 0; }
+        .cm-ib:hover { background: #f1f5f9; color: #0f172a; }
+        .cm-ib.x:hover { color: #e11d48; }
+        .cm-ib:disabled { opacity: .3; cursor: default; background: none; }
+        .cm-rep { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 64px auto; gap: 4px; align-items: center; }
+        .cm-rep + .cm-rep { margin-top: 5px; }
+        .cm-rep .cm-in { padding: 6px 7px; font-size: 12.5px; }
+        .cm-rep select.cm-in { padding: 6px 2px; }
+        .cm-rep .px { grid-column: 1 / 4; }
+        .cm-ibs { display: inline-flex; }
+        .cm-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px; background: #fff; }
+        .cm-card + .cm-card { margin-top: 6px; }
+        .cm-card-h { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+        .cm-card-h:last-child { margin-bottom: 0; }
+        .cm-no { flex: none; width: 20px; height: 20px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .cm-check { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #334155; }
+        .cm-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .cm-hist li { display: flex; align-items: center; gap: 6px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; }
+        .cm-hist-t { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 700; color: #1e293b; }
+        .cm-hist-t small { display: block; font-size: 11px; font-weight: 400; color: #64748b; overflow-wrap: anywhere; }
+        .cm-a { color: #1d4ed8; text-decoration: underline; }
+        button:focus-visible, a:focus-visible, .cm-in:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
+
+        /* ---------- 미리보기 ---------- */
+        .cm-out-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; margin: 0 auto 8px; font-size: 11.5px; color: #64748b; }
+        .cm-out-h b { color: #475569; }
+        .a4-container { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06); margin: 0 auto; box-sizing: border-box; position: relative; padding: 40px; border: 1px solid #e2e8f0; color: #0f172a; }
+        .cm-doc th, .cm-doc td { overflow-wrap: anywhere; word-break: keep-all; }
+        .cm-doc table:not(.ad-appr) { width: 100%; border-collapse: collapse; }
+        .cm-fix { table-layout: fixed; }
+        .cm-head { display: flex; flex-wrap: wrap-reverse; align-items: flex-end; justify-content: flex-end; gap: 10px 16px; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px; }
+        .cm-head h2 { flex: 1 1 300px; min-width: 0; margin: 0; text-align: center; font-size: 22px; line-height: 1.35; font-weight: 900; letter-spacing: .02em; word-break: keep-all; }
+        .cm-head.solo h2 { font-size: 24px; }
+        .cm-apprbox { flex: none; max-width: 100%; }
+        .cm-pre { white-space: pre-wrap; line-height: 1.65; }
+        .cm-h4 { font-size: 12px; font-weight: 700; color: #1e293b; margin: 0 0 6px; display: flex; align-items: center; gap: 5px; }
+        .cm-h4::before { content: ""; width: 6px; height: 6px; background: #1e293b; flex: none; }
+        .cm-foot { font-size: 11px; color: #475569; margin-top: 10px; line-height: 1.6; }
+        .cm-sign { margin-top: 44px; text-align: center; }
+        .cm-sign p { margin: 0 0 10px; }
+        .cm-nt th { width: 108px; }
+        .cm-nt td, .cm-nt th { padding: 9px 10px; font-size: 13px; vertical-align: top; }
+        .cm-nt ol { margin: 0; padding-left: 18px; list-style: decimal; line-height: 1.7; }
+        /* 미리보기에서 바로 고치는 글자 */
+        .cm-ed { outline: 0; border-radius: 2px; cursor: text; min-width: 1em; }
+        .cm-ed.multi { display: block; white-space: pre-wrap; }
+        @media screen {
+            .cm-ed:hover { background: #eff6ff; box-shadow: 0 0 0 1px #93c5fd; }
+            .cm-ed:focus { background: #dbeafe; box-shadow: 0 0 0 1px #3b82f6; }
+            .cm-ed:empty::before { content: attr(data-ph); color: #94a3b8; font-weight: 400; }
+        }
+        #print-area.cm-pdfing .cm-ed:empty, #print-area.cm-pdfing .no-print, #print-area.cm-pdfing .ad-ctl, #print-area.cm-pdfing .ad-noprint, #print-area.cm-pdfing .ad-ph-acts,
+        #print-area.cm-pdfing .ad-fig-ctl, #print-area.cm-pdfing .ad-empty, #print-area.cm-pdfing .ad-photos.ad-none { display: none !important; }
+
+        .cm-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(2,6,23,.6); }
+        .cm-modal-box { background: #fff; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,.3); width: 100%; max-width: 640px; padding: 18px; max-height: 90vh; display: flex; flex-direction: column; }
+        .cm-modal-box h3 { margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; }
+        .cm-modal-list { overflow-y: auto; margin: 12px 0; display: grid; gap: 8px; }
+        .cm-opt { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; cursor: pointer; font-family: inherit; }
+        .cm-opt:hover { border-color: #7c3aed; background: #faf5ff; }
+        .cm-opt b { display: block; font-size: 13.5px; color: #1e293b; }
+        .cm-opt small { display: block; font-size: 12px; color: #64748b; margin-top: 2px; line-height: 1.5; }
+        .cm-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 70; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-size: 12.5px; font-weight: 700; color: #fff; background: #059669; max-width: 90vw; }
+        .cm-toast.info { background: #1e293b; } .cm-toast.error { background: #b91c1c; }
+
+        @media (max-width: 420px) {
+            .cm-g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .cm-brand p { display: none; }
+            .cm-hbtn { padding: 7px 9px; }
         }
 
         @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .a4-container {
-                box-shadow: none;
-                margin: 0;
-                width: 100%;
-                min-height: 0;
-                border: 0 !important;
-                padding: 0 !important;
-            }
+            html, body { height: auto !important; overflow: visible !important; display: block !important; background: #fff !important; padding: 0; }
+            .no-print { display: none !important; }
             #app { min-height: 0 !important; display: block !important; }
-            main { display: block !important; padding: 0 !important; max-width: none !important; }
-            tr, img { break-inside: avoid; page-break-inside: avoid; }
+            .cm-main { display: block !important; padding: 0 !important; max-width: none !important; }
+            .cm-out { display: block !important; overflow: visible !important; padding: 0 !important; }
+            .a4-container { box-shadow: none; margin: 0; width: 100%; min-height: 0; border: 0 !important; padding: 0 !important; }
+            thead { display: table-header-group; }
+            tr, img, figure, .cm-sign { break-inside: avoid; page-break-inside: avoid; }
+            h4, .cm-h4 { break-after: avoid; page-break-after: avoid; }
+            .cm-ed:empty { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
         @page { size: A4; margin: 14mm 13mm; }
     </style>
 </head>
 <body class="text-slate-800">
-    <div id="app" class="min-h-screen flex flex-col" v-cloak>
-        <!-- Top Navigation Bar -->
-        <header class="bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center space-x-3">
-                    <a href="../../" class="text-xs text-slate-300 hover:text-white font-bold mr-1">← SafePlum</a>
-                    <span class="bg-emerald-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-black">
-                        <i class="ph-bold ph-shield-check text-xl"></i>
-                    </span>
-                    <div>
-                        <h1 class="text-base font-bold tracking-tight">산업안전보건위원회 문서 작성기</h1>
-                        <p class="text-[11px] text-slate-400">산업안전보건법 제24조 · 회의록 / 개최 공고 / 결과 보고서</p>
+    <div id="app" v-cloak>
+        <header class="cm-top no-print">
+            <div class="cm-top-in">
+                <div class="cm-brand">
+                    <a href="../../">← SafePlum</a>
+                    <span class="cm-logo"><i class="ph-bold ph-shield-check"></i></span>
+                    <div style="min-width:0">
+                        <h1>산업안전보건위원회 문서 작성기</h1>
+                        <p>산업안전보건법 제24조 · 회의록 / 개최 공고 / 결과 보고서</p>
                     </div>
                 </div>
-
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="cm-acts">
                     <span class="cm-save" role="status" aria-live="polite">{{ saveMsg }}</span>
-                    <button @click="resetToDefault" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
-                        <i class="ph-bold ph-arrow-counter-clockwise"></i> 안건·의결 기본값
-                    </button>
-                    <button @click="printDoc" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                        <i class="ph-bold ph-printer text-base"></i> 인쇄 / PDF 저장
-                    </button>
-                    <button @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
-                        <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf text-base"></i>
-                        <i v-else class="ph-bold ph-spinner animate-spin text-base"></i>
+                    <button type="button" id="btnPrint" @click="printDoc" class="cm-hbtn pri"><i class="ph-bold ph-printer"></i> 인쇄 / PDF 저장</button>
+                    <button type="button" id="btnPdf" @click="downloadPDF" :disabled="isGeneratingPDF" title="화면 그대로 그림으로 만든 PDF입니다. 글자가 선명하고 여러 쪽이 깔끔하게 나뉘는 쪽은 '인쇄 / PDF 저장'입니다." class="cm-hbtn">
+                        <i v-if="!isGeneratingPDF" class="ph-bold ph-file-pdf"></i>
+                        <i v-else class="ph-bold ph-spinner animate-spin"></i>
                         <span>{{ isGeneratingPDF ? 'PDF 만드는 중…' : 'PDF 파일로 받기' }}</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Left Input Form Area (lg:col-span-5) -->
-            <div class="lg:col-span-5 space-y-5 no-print">
-                <!-- 1. 문서 종류 선택 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <label class="block text-xs font-bold text-slate-600 mb-2">문서 종류 선택</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button 
-                            v-for="item in docTypes" 
-                            :key="item.value"
-                            type="button"
-                            @click="changeDocType(item.value)"
-                            :class="[
-                                'py-2 px-2.5 rounded-lg border text-xs font-bold flex flex-col items-center justify-center gap-1 transition',
-                                formData.docType === item.value 
-                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm' 
-                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                            ]"
-                        >
-                            <i :class="[item.icon, 'text-base']"></i>
-                            <span>{{ item.label }}</span>
-                        </button>
-                    </div>
+        <!-- 좁은 화면: 입력 | 미리보기 전환 -->
+        <div class="cm-tabs no-print" role="tablist" aria-label="화면 전환">
+            <button type="button" role="tab" id="tabIn" class="cm-tab" :aria-selected="tab === 'in'" @click="setTab('in')">입력</button>
+            <button type="button" role="tab" id="tabOut" class="cm-tab" :aria-selected="tab === 'out'" @click="setTab('out')">미리보기</button>
+            <button type="button" class="cm-tab pr" @click="printDoc"><i class="ph-bold ph-printer"></i> 인쇄</button>
+        </div>
+
+        <main class="cm-main" :data-tab="tab">
+            <!-- ===================== 입력 ===================== -->
+            <div class="cm-pane no-print" id="inPane">
+                <div class="cm-types" role="group" aria-label="문서 종류">
+                    <button v-for="item in docTypes" :key="item.value" type="button" class="cm-type" :data-doc="item.value" :aria-pressed="formData.docType === item.value" @click="changeDocType(item.value)">
+                        <i :class="item.icon"></i><span>{{ item.label }}</span>
+                    </button>
+                </div>
+                <div class="cm-bar">
+                    <span>세 문서는 같은 입력 내용을 함께 씁니다.</span>
+                    <button type="button" id="toggleAll" class="cm-link" @click="toggleAll">{{ allOpen ? '모두 접기' : '모두 펼치기' }}</button>
                 </div>
 
-                <!-- 2. 기본 정보 입력 -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-                        <i class="ph-fill ph-info text-blue-500"></i> 1. 기본 회의 정보
-                    </h3>
+                <section v-for="(s, i) in steps" :key="s.id" class="cm-step" :class="{ open: open[s.id], done: s.done }" :data-step="s.id">
+                    <button type="button" class="cm-step-h" :aria-expanded="open[s.id] ? 'true' : 'false'" :aria-controls="'step-' + s.id" @click="toggleStep(s.id)">
+                        <span class="cm-step-n"><i v-if="s.done" class="ph-bold ph-check" aria-label="입력 완료"></i><template v-else>{{ i + 1 }}</template></span>
+                        <span class="cm-step-t"><b>{{ s.title }}</b><small :class="{ w: s.warn }">{{ s.warn || s.sum }}</small></span>
+                        <span class="cm-chev" aria-hidden="true"></span>
+                    </button>
+                    <div class="cm-step-b" :id="'step-' + s.id" v-show="open[s.id]">
 
-                    <div class="grid grid-cols-4 gap-2">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">연도</label>
-                            <input v-model.number="formData.year" type="number" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <!-- 1. 기본 회의 정보 -->
+                        <template v-if="s.id === 'basic'">
+                            <div class="cm-g2">
+                                <div>
+                                    <label class="cm-lb" for="fDt">회의 일시</label>
+                                    <input id="fDt" v-model="formData.datetime" type="datetime-local" class="cm-in">
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fLoc">회의 장소</label>
+                                    <input id="fLoc" v-model="formData.location" type="text" placeholder="예: 본관 2층 대회의실" class="cm-in">
+                                </div>
+                            </div>
+                            <div class="cm-g4">
+                                <div>
+                                    <label class="cm-lb" for="fYear">연도</label>
+                                    <input id="fYear" v-model.number="formData.year" @input="touch('year')" type="number" min="1900" max="2999" class="cm-in">
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fQuarter">분기</label>
+                                    <select id="fQuarter" v-model="formData.quarter" @change="touch('quarter')" class="cm-in">
+                                        <option value="1">1분기</option><option value="2">2분기</option><option value="3">3분기</option><option value="4">4분기</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fType">구분</label>
+                                    <select id="fType" v-model="formData.type" class="cm-in">
+                                        <option value="정기">정기회의</option><option value="임시">임시회의</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fRound">회차</label>
+                                    <input id="fRound" v-model.number="formData.round" @input="touch('round')" type="number" min="1" class="cm-in">
+                                </div>
+                            </div>
+                            <p class="cm-hint" id="autoNote">
+                                <template v-if="manualList.length">직접 입력한 값:
+                                    <template v-for="(m, mi) in manualList" :key="m.k"><span v-if="mi"> · </span>{{ m.label }} <button type="button" class="cm-link" :data-auto="m.k" @click="unsetManual(m.k)">자동으로 되돌리기</button></template>
+                                </template>
+                                <template v-else>연도·분기는 회의 일시를, 정기회의 회차는 분기를 따라 자동으로 맞춥니다. 직접 고치면 그 값이 유지됩니다.</template>
+                            </p>
+                            <div class="cm-g2">
+                                <div>
+                                    <label class="cm-lb" for="fCompany">사업장(회사)명</label>
+                                    <input id="fCompany" v-model="formData.company" type="text" placeholder="예: (주)한국산업안전" class="cm-in">
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fBody">위원회 이름</label>
+                                    <input id="fBody" v-model="formData.bodyName" type="text" placeholder="산업안전보건위원회" class="cm-in">
+                                </div>
+                            </div>
+                            <div v-if="formData.docType === 'notice'" class="cm-g3">
+                                <div>
+                                    <label class="cm-lb" for="fNDate">공고일</label>
+                                    <input id="fNDate" :value="noticeDateEff" @input="setDate('noticeDate', $event.target.value)" type="date" class="cm-in">
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fNNo">공고 번호</label>
+                                    <input id="fNNo" :value="noticeNoEff" @input="setNoticeNo($event.target.value)" type="text" class="cm-in">
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fNFoot">발신 명의</label>
+                                    <input id="fNFoot" v-model="formData.noticeFooter" type="text" :placeholder="bodyName + ' 위원장'" class="cm-in">
+                                </div>
+                            </div>
+                            <div v-if="formData.docType === 'report'" class="cm-g2">
+                                <div>
+                                    <label class="cm-lb" for="fRDate">보고일</label>
+                                    <input id="fRDate" :value="reportDateEff" @input="setDate('reportDate', $event.target.value)" type="date" class="cm-in">
+                                </div>
+                                <div>
+                                    <label class="cm-lb" for="fRFoot">보고 명의</label>
+                                    <input id="fRFoot" v-model="formData.reportFooter" type="text" placeholder="안전보건관리책임자" class="cm-in">
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- 2. 위원 구성·출석 -->
+                        <template v-else-if="s.id === 'reps'">
+                            <div v-for="g in repGroups" :key="g.key">
+                                <p class="cm-sub" :class="g.cls">
+                                    <span>{{ g.label }} <span style="font-weight:400;color:#64748b">{{ g.list.length }}명</span></span>
+                                    <button type="button" class="cm-link" :data-add="g.key" @click="addRep(g.key)">＋ 위원 추가</button>
+                                </p>
+                                <div style="margin-top:6px">
+                                    <div v-for="(rep, idx) in g.list" :key="g.key + idx" class="cm-rep" :data-rep="g.key">
+                                        <input v-model="rep.title" type="text" :list="'dl-' + g.key" placeholder="직책" :aria-label="g.label + ' ' + (idx + 1) + ' 직책'" class="cm-in">
+                                        <input v-model="rep.name" type="text" placeholder="성명" :aria-label="g.label + ' ' + (idx + 1) + ' 성명'" class="cm-in">
+                                        <select :value="repStatus(rep)" @change="setRepStatus(rep, $event.target.value)" :aria-label="g.label + ' ' + (idx + 1) + ' 출석'" class="cm-in">
+                                            <option value="in">출석</option><option value="proxy">대리</option><option value="out">불참</option>
+                                        </select>
+                                        <span class="cm-ibs">
+                                            <button type="button" class="cm-ib" :disabled="idx === 0" @click="moveRow(g.list, idx, -1)" aria-label="위로">▲</button>
+                                            <button type="button" class="cm-ib" :disabled="idx === g.list.length - 1" @click="moveRow(g.list, idx, 1)" aria-label="아래로">▼</button>
+                                            <button type="button" class="cm-ib x" :disabled="g.list.length <= 1" @click="removeRep(g.key, idx)" aria-label="이 위원 삭제"><i class="ph-bold ph-x"></i></button>
+                                        </span>
+                                        <input v-if="rep.proxy && !rep.absent" v-model="rep.proxyName" type="text" placeholder="대리 출석자 성명" :aria-label="g.label + ' ' + (idx + 1) + ' 대리 출석자'" class="cm-in px">
+                                    </div>
+                                </div>
+                                <hr v-if="g.key === 'employer'" class="cm-sep">
+                            </div>
+                            <datalist id="dl-employer"><option value="대표자"></option><option value="안전보건관리책임자"></option><option value="안전관리자"></option><option value="보건관리자"></option><option value="산업보건의"></option><option value="부서장"></option><option value="사용자위원"></option></datalist>
+                            <datalist id="dl-employee"><option value="근로자대표"></option><option value="명예산업안전감독관"></option><option value="근로자위원"></option></datalist>
+                            <p v-if="!balanced" class="cm-warn" id="balWarn">사용자위원 {{ employerReps.length }}명 · 근로자위원 {{ employeeReps.length }}명 — 산업안전보건위원회는 근로자위원과 사용자위원을 같은 수로 구성합니다(법 제24조제1항).</p>
+                            <p v-if="formData.docType !== 'notice'" :class="quorumOk ? 'cm-ok' : 'cm-warn'" id="quorum">출석: 사용자위원 {{ presentEmployer }}/{{ employerReps.length }}명 · 근로자위원 {{ presentEmployee }}/{{ employeeReps.length }}명 — {{ quorumOk ? '각 과반수 출석으로 개의 요건을 충족합니다' : '근로자위원·사용자위원 각 과반수가 출석해야 개의할 수 있습니다' }}(시행령 제37조제2항).</p>
+                            <p class="cm-hint">"대리"는 근로자대표·명예산업안전감독관·대표자·안전관리자·보건관리자가 출석할 수 없을 때 해당 사업에 종사하는 사람 1명을 지정해 직무를 대리하게 한 경우입니다(시행령 제37조제3항). 출석 인원에 넣어 셉니다.</p>
+                        </template>
+
+                        <!-- 3. 안건·의결 -->
+                        <template v-else-if="s.id === 'items'">
+                            <div class="cm-row" style="justify-content:space-between">
+                                <span class="cm-hint">법 제24조제2항의 심의·의결 사항이 기본으로 들어 있습니다.</span>
+                                <button v-if="formData.docType !== 'notice'" type="button" id="openEx" class="cm-btn" @click="openExModal"><i class="ph-fill ph-lightbulb"></i> 작성 예시</button>
+                            </div>
+                            <p v-if="formData.docType !== 'notice'" class="cm-hint r">실제로 심의·의결한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
+                            <p v-else class="cm-hint">공고문에는 안건 제목만 들어갑니다.</p>
+                            <div>
+                                <div v-for="(it, idx) in items" :key="'it' + idx" class="cm-card" data-item>
+                                    <div class="cm-card-h">
+                                        <span class="cm-no">{{ idx + 1 }}</span>
+                                        <input v-model="it.title" type="text" placeholder="안건 제목" :aria-label="'안건 ' + (idx + 1) + ' 제목'" class="cm-in" style="flex:1;font-weight:600">
+                                        <button type="button" class="cm-ib" :disabled="idx === 0" @click="moveRow(items, idx, -1)" aria-label="안건 위로">▲</button>
+                                        <button type="button" class="cm-ib" :disabled="idx === items.length - 1" @click="moveRow(items, idx, 1)" aria-label="안건 아래로">▼</button>
+                                        <button type="button" class="cm-ib x" @click="removeItem(idx)" aria-label="이 안건 삭제"><i class="ph-bold ph-x"></i></button>
+                                    </div>
+                                    <template v-if="formData.docType !== 'notice'">
+                                        <textarea v-model="it.content" rows="2" placeholder="심의 내용 및 의결·결정 사항" :aria-label="'안건 ' + (idx + 1) + ' 심의·의결 내용'" class="cm-in"></textarea>
+                                        <input v-model="it.result" type="text" list="dl-result" placeholder="결과 (선택 — 예: 원안 의결)" :aria-label="'안건 ' + (idx + 1) + ' 결과'" class="cm-in" style="margin-top:5px">
+                                    </template>
+                                </div>
+                            </div>
+                            <datalist id="dl-result"><option value="원안 의결"></option><option value="수정 의결"></option><option value="보고"></option><option value="보류"></option><option value="의결하지 못함"></option></datalist>
+                            <div class="cm-row">
+                                <button type="button" id="addItem" class="cm-btn" @click="addItem"><i class="ph-bold ph-plus-circle"></i> 안건 추가</button>
+                                <button type="button" id="resetItems" class="cm-link" @click="resetItems">법정 심의사항 9개로 되돌리기</button>
+                                <button v-if="formData.docType !== 'notice'" type="button" id="clearItems" class="cm-link red" @click="clearItemContents">내용만 비우기</button>
+                            </div>
+                            <template v-if="formData.docType === 'notice'">
+                                <div>
+                                    <div class="cm-sub" style="margin-bottom:4px"><label for="fNI">안내 및 협조사항</label>
+                                        <button type="button" id="resetNI" class="cm-link" @click="resetNoticeInstructions">기본 문구로 되돌리기</button></div>
+                                    <textarea id="fNI" v-model="formData.noticeInstructions" rows="6" placeholder="참석 당부 및 협조사항 (비우면 공고문에서 빠집니다)" class="cm-in"></textarea>
+                                </div>
+                            </template>
+                            <div>
+                                <label class="cm-lb" for="fOthers">{{ formData.docType === 'notice' ? '그 밖의 안내 (선택)' : (formData.docType === 'report' ? '향후 계획·건의사항 (선택)' : '그 밖의 토의사항 (선택)') }}</label>
+                                <textarea id="fOthers" v-model="formData.others" rows="3" placeholder="비우면 문서에서 빠집니다." class="cm-in"></textarea>
+                            </div>
+                        </template>
+
+                        <!-- 4. 이행 확인·후속 조치 -->
+                        <template v-else-if="s.id === 'follow'">
+                            <p class="cm-sub"><span>지난 회의 의결사항 이행 확인</span><button type="button" id="addPrev" class="cm-link" @click="addPrev">＋ 추가</button></p>
+                            <p v-if="!prev.length" class="cm-hint">지난 회의에서 정한 일이 있으면 이행 여부를 적습니다. "보관하고 다음 회의 작성"을 쓰면 끝나지 않은 후속 조치가 여기로 넘어옵니다.</p>
+                            <div v-else>
+                                <div v-for="(p, idx) in prev" :key="'pv' + idx" class="cm-card" data-prev>
+                                    <div class="cm-card-h">
+                                        <input v-model="p.content" type="text" placeholder="지난 회의 의결·조치 사항" aria-label="지난 회의 의결·조치 사항" class="cm-in" style="flex:1">
+                                        <button type="button" class="cm-ib" :disabled="idx === 0" @click="moveRow(prev, idx, -1)" aria-label="위로">▲</button>
+                                        <button type="button" class="cm-ib" :disabled="idx === prev.length - 1" @click="moveRow(prev, idx, 1)" aria-label="아래로">▼</button>
+                                        <button type="button" class="cm-ib x" @click="prev.splice(idx, 1)" aria-label="이 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                                    </div>
+                                    <div class="cm-g3">
+                                        <input v-model="p.owner" type="text" placeholder="담당" aria-label="담당" class="cm-in">
+                                        <input v-model="p.due" type="date" aria-label="기한" class="cm-in">
+                                        <select v-model="p.result" aria-label="이행 결과" class="cm-in">
+                                            <option value="">(비움)</option><option value="완료">완료</option><option value="진행 중">진행 중</option><option value="미이행">미이행</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="cm-sep">
+                            <p class="cm-sub"><span>이번 회의 후속 조치</span><button type="button" id="addAction" class="cm-link" @click="addAction">＋ 추가</button></p>
+                            <p v-if="!actions.length" class="cm-hint">의결한 일의 담당·기한을 적어 두면 문서에 표로 들어가고, 다음 회의의 "이행 확인"으로 넘어갑니다.</p>
+                            <div v-else>
+                                <div v-for="(a, idx) in actions" :key="'ac' + idx" class="cm-card" data-action>
+                                    <div class="cm-card-h">
+                                        <input v-model="a.content" type="text" placeholder="조치 사항 (예: 프레스 방호장치 교체)" aria-label="조치 사항" class="cm-in" style="flex:1">
+                                        <button type="button" class="cm-ib" :disabled="idx === 0" @click="moveRow(actions, idx, -1)" aria-label="위로">▲</button>
+                                        <button type="button" class="cm-ib" :disabled="idx === actions.length - 1" @click="moveRow(actions, idx, 1)" aria-label="아래로">▼</button>
+                                        <button type="button" class="cm-ib x" @click="actions.splice(idx, 1)" aria-label="이 조치 삭제"><i class="ph-bold ph-x"></i></button>
+                                    </div>
+                                    <div class="cm-g3">
+                                        <input v-model="a.owner" type="text" placeholder="담당" aria-label="담당" class="cm-in">
+                                        <input v-model="a.due" type="date" aria-label="기한" class="cm-in">
+                                        <select v-model="a.status" aria-label="상태" class="cm-in">
+                                            <option value="진행 중">진행 중</option><option value="완료">완료</option><option value="보류">보류</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="cm-sep">
+                            <p class="cm-sub"><span>다음 회의 일정 (선택)</span><button type="button" id="suggestNext" class="cm-link" @click="suggestNext">3개월 뒤 같은 시각</button></p>
+                            <div class="cm-g2">
+                                <input v-model="formData.nextDatetime" id="fNext" type="datetime-local" aria-label="다음 회의 일시" class="cm-in">
+                                <input v-model="formData.nextLocation" id="fNextLoc" type="text" placeholder="장소 (비우면 이번과 같음)" aria-label="다음 회의 장소" class="cm-in">
+                            </div>
+                        </template>
+
+                        <!-- 5. 결재란·제목·문구·사진 -->
+                        <template v-else-if="s.id === 'style'">
+                            <label class="cm-check"><input type="checkbox" id="showAppr" :checked="showAppr" @change="setShowAppr($event.target.checked)"> 이 문서({{ docLabel }}) 위쪽에 결재란 넣기</label>
+                            <p class="cm-hint">결재 칸 이름·성명은 미리보기의 결재란에서 바로 고치고, 칸은 그 아래 "＋ 칸 / － 칸"으로 늘리거나 줄입니다(최대 6칸). 서명 칸을 누르면 서명을 넣을 수 있습니다. "모든 서식 기본으로"를 누르면 SafePlum의 다른 서식도 같은 결재란으로 시작합니다.</p>
+                            <hr class="cm-sep">
+                            <div>
+                                <div class="cm-sub" style="margin-bottom:4px"><label for="fTitle">문서 제목</label>
+                                    <button v-if="isOver('title.' + formData.docType)" type="button" id="titleAuto" class="cm-link" @click="resetLabel('title.' + formData.docType)">자동 제목으로 되돌리기</button></div>
+                                <input id="fTitle" :value="T('title.' + formData.docType)" @input="setL('title.' + formData.docType, $event.target.value)" type="text" class="cm-in">
+                                <p v-if="isOver('title.' + formData.docType)" class="cm-hint" style="margin-top:3px">직접 고친 제목입니다. 연도·분기·회차를 바꿔도 따라 바뀌지 않습니다.</p>
+                            </div>
+                            <div v-if="formData.docType === 'minutes'">
+                                <label class="cm-lb" for="fSignPh">서명 칸 안내 글자 (비우면 빈칸)</label>
+                                <input id="fSignPh" :value="T('signPh')" @input="setL('signPh', $event.target.value, true)" type="text" class="cm-in">
+                            </div>
+                            <div v-for="n in noteKeys" :key="n.k">
+                                <div class="cm-sub" style="margin-bottom:4px"><label :for="'note-' + n.k">{{ n.label }}</label>
+                                    <button v-if="isOver(n.k)" type="button" class="cm-link" :data-reset="n.k" @click="resetLabel(n.k)">기본으로 되돌리기</button></div>
+                                <textarea :id="'note-' + n.k" :value="T(n.k)" @input="setL(n.k, $event.target.value, true)" :rows="n.rows" placeholder="비우면 문서에서 빠집니다." class="cm-in"></textarea>
+                            </div>
+                            <p class="cm-hint" id="labelNote">미리보기에서 제목·표 머리글·항목 이름·문구에 마우스를 올리면 파랗게 표시됩니다. 눌러서 바로 고칠 수 있습니다.
+                                <template v-if="overCount"> 지금 바꾼 곳 {{ overCount }}군데 — <button type="button" id="resetLabels" class="cm-link" @click="resetAllLabels">모두 기본으로 되돌리기</button></template>
+                            </p>
+                            <template v-if="hasADoc && formData.docType !== 'notice'">
+                                <hr class="cm-sep">
+                                <div class="cm-row">
+                                    <button type="button" id="addPhoto" class="cm-btn" @click="pickPhoto"><i class="ph-fill ph-camera"></i> 회의 사진 추가</button>
+                                    <span class="cm-hint">{{ photoCount ? '사진 ' + photoCount + '장 — 문서 맨 뒤에 붙습니다. 설명·순서는 미리보기에서 고칩니다.' : '첨부한 사진 없음' }}</span>
+                                </div>
+                            </template>
+                        </template>
+
+                        <!-- 6. 보관·다음 회의 -->
+                        <template v-else-if="s.id === 'archive'">
+                            <div class="cm-row">
+                                <button type="button" id="archiveNext" class="cm-btn pri" @click="archiveAndNext">보관하고 다음 회의 작성</button>
+                                <button type="button" id="archiveOnly" class="cm-btn" @click="archiveOnly">지금 내용만 보관</button>
+                            </div>
+                            <p class="cm-hint">"보관하고 다음 회의 작성"을 누르면 이번 회의가 아래 목록에 남고, 위원 명단·안건 제목은 그대로 둔 채 일시가 다음 분기로 넘어가며, 끝나지 않은 후속 조치는 "이행 확인"으로 옮겨집니다. 기록은 이 기기에 {{ HIST_MAX }}건까지 보관됩니다(사진은 보관되지 않음).</p>
+                            <ul v-if="history.length" class="cm-hist" id="histList">
+                                <li v-for="h in historyView" :key="h.id">
+                                    <span class="cm-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
+                                    <button type="button" class="cm-btn" @click="openHistory(h.id)">열기</button>
+                                    <button type="button" class="cm-btn" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
+                                </li>
+                            </ul>
+                            <p v-else class="cm-hint">보관한 회의 기록이 아직 없습니다.</p>
+                            <hr class="cm-sep">
+                            <div class="cm-row">
+                                <button type="button" id="resetAll" class="cm-link red" @click="resetAll">작성 중인 내용 모두 지우고 새로 시작</button>
+                            </div>
+                            <p class="cm-hint">입력 내용은 이 기기 브라우저에만 저장됩니다. <a v-if="hasADoc" href="#" data-mydata class="cm-a">백업·삭제</a></p>
+                        </template>
+
+                        <!-- 7. 법령 메모 -->
+                        <template v-else-if="s.id === 'law'">
+                            <ul class="cm-law">
+                                <li>사업주는 근로자위원과 사용자위원이 같은 수로 구성되는 산업안전보건위원회를 구성·운영해야 합니다(<a class="cm-a" href="../../laws/act/#j24">법 제24조제1항</a>). 구성 대상 사업의 종류와 상시근로자 수는 <a class="cm-a" href="../../laws/yeong/#j34">시행령 제34조</a> 별표 9에서 정합니다.</li>
+                                <li>근로자위원: 근로자대표, 명예산업안전감독관(위촉되어 있는 사업장에서 근로자대표가 지명하는 1명 이상), 근로자대표가 지명하는 9명 이내의 해당 사업장 근로자(<a class="cm-a" href="../../laws/yeong/#j35">시행령 제35조제1항</a>).</li>
+                                <li>사용자위원: 해당 사업의 대표자, 안전관리자 1명, 보건관리자 1명, 산업보건의(선임되어 있는 경우), 대표자가 지명하는 9명 이내의 부서의 장(시행령 제35조제2항).</li>
+                                <li>위원장은 위원 중에서 호선하며, 근로자위원과 사용자위원 중 각 1명을 공동위원장으로 선출할 수 있습니다(<a class="cm-a" href="../../laws/yeong/#j36">시행령 제36조</a>).</li>
+                                <li>정기회의는 분기마다 위원장이 소집하고, 임시회의는 위원장이 필요하다고 인정할 때 소집합니다(<a class="cm-a" href="../../laws/yeong/#j37">시행령 제37조제1항</a>).</li>
+                                <li>근로자위원·사용자위원 각 과반수 출석으로 개의하고, 출석위원 과반수 찬성으로 의결합니다(시행령 제37조제2항).</li>
+                                <li>회의록에는 개최 일시 및 장소, 출석위원, 심의 내용 및 의결·결정 사항, 그 밖의 토의사항을 기록해 갖추어 둡니다(시행령 제37조제4항).</li>
+                                <li>법 제24조제2항 각 호의 사항을 의결하지 못했거나 의결 사항의 해석·이행방법에 의견이 일치하지 않으면, 근로자위원과 사용자위원의 합의에 따라 위원회에 중재기구를 두어 해결하거나 제3자의 중재를 받습니다(<a class="cm-a" href="../../laws/yeong/#j38">시행령 제38조</a>).</li>
+                                <li>위원장은 회의 결과 등을 사내방송·사내보·게시·자체 정례조회, 그 밖의 적절한 방법으로 근로자에게 신속히 알립니다(<a class="cm-a" href="../../laws/yeong/#j39">시행령 제39조</a>).</li>
+                                <li>사업주와 근로자는 위원회가 심의·의결한 사항을 성실하게 이행해야 합니다(법 제24조제4항).</li>
+                                <li>회의록은 2년 동안 보존합니다(<a class="cm-a" href="../../laws/act/#j164">법 제164조제1항제2호</a>).</li>
+                            </ul>
+                        </template>
+
+                        <div v-if="i < steps.length - 1" class="cm-step-f">
+                            <button type="button" class="cm-btn dark" :data-next="s.id" @click="goNext(i)">다음: {{ steps[i + 1].title }} <i class="ph-bold ph-arrow-right"></i></button>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">분기</label>
-                            <select v-model="formData.quarter" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                                <option value="1">1분기</option>
-                                <option value="2">2분기</option>
-                                <option value="3">3분기</option>
-                                <option value="4">4분기</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">구분</label>
-                            <select v-model="formData.type" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                                <option value="정기">정기회의</option>
-                                <option value="임시">임시회의</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">회차</label>
-                            <input v-model.number="formData.round" type="number" min="1" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                        </div>
                     </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">사업장(회사)명</label>
-                        <input v-model="formData.company" type="text" placeholder="예: (주)한국산업안전" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">회의 일시</label>
-                            <input v-model="formData.datetime" type="datetime-local" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">회의 장소</label>
-                            <input v-model="formData.location" type="text" placeholder="예: 본관 2층 대회의실" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
-                        </div>
-                    </div>
-
-                    <!-- 문서 형태별 맞춤 하단 명의 설정 -->
-                    <div v-if="formData.docType === 'notice'" class="pt-2 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">공고문 하단 발신 명의</label>
-                        <input v-model="formData.noticeFooter" type="text" placeholder="예: 산업안전보건위원회 위원장" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white outline-none">
-                    </div>
-
-                    <div v-if="formData.docType === 'report'" class="pt-2 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">결과보고서 하단 결재 명의</label>
-                        <input v-model="formData.reportFooter" type="text" placeholder="예: 안전보건관리책임자" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 focus:bg-white outline-none">
-                    </div>
-                </div>
-
-                <!-- 3. 위원 명단 관리 (회의록에서는 서명 대상, 공고/보고에서는 참석자 수 집계용) -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-users-three text-emerald-600"></i> 2. 위원 구성·출석
-                        </h3>
-                        <span class="text-[11px] text-slate-400">위원 {{ totalRepsCount }}명 · 출석 {{ presentCount }}명</span>
-                    </div>
-
-                    <!-- 사용자위원 -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-blue-700">사용자위원 (사측)</span>
-                            <button type="button" @click="addRep('employer')" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
-                                <i class="ph-bold ph-plus-circle"></i> 추가
-                            </button>
-                        </div>
-                        <div v-for="(rep, idx) in employerReps" :key="'emp-' + idx" class="flex gap-2 items-center">
-                            <input v-model="rep.title" type="text" placeholder="직책 (예: 대표자)" aria-label="직책" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <input v-model="rep.name" type="text" placeholder="성명" aria-label="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <label class="cm-abs"><input type="checkbox" v-model="rep.absent"> 불참</label>
-                            <button v-if="employerReps.length > 1" type="button" @click="removeRep('employer', idx)" aria-label="이 위원 삭제" class="text-slate-400 hover:text-rose-500 p-1">
-                                <i class="ph-bold ph-x"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 근로자위원 -->
-                    <div class="space-y-2 pt-2 border-t border-slate-100">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-emerald-700">근로자위원 (노측)</span>
-                            <button type="button" @click="addRep('employee')" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold flex items-center gap-1">
-                                <i class="ph-bold ph-plus-circle"></i> 추가
-                            </button>
-                        </div>
-                        <div v-for="(rep, idx) in employeeReps" :key="'worker-' + idx" class="flex gap-2 items-center">
-                            <input v-model="rep.title" type="text" placeholder="직책 (예: 근로자대표)" aria-label="직책" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <input v-model="rep.name" type="text" placeholder="성명" aria-label="성명" class="w-1/2 border border-slate-300 rounded-lg p-1.5 text-xs bg-slate-50 outline-none">
-                            <label class="cm-abs"><input type="checkbox" v-model="rep.absent"> 불참</label>
-                            <button v-if="employeeReps.length > 1" type="button" @click="removeRep('employee', idx)" aria-label="이 위원 삭제" class="text-slate-400 hover:text-rose-500 p-1">
-                                <i class="ph-bold ph-x"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 구성·정족수 자동 확인 -->
-                <div class="space-y-2" style="margin-top:-8px">
-                    <p v-if="!balanced" class="cm-warn">사용자위원 {{ employerReps.length }}명 · 근로자위원 {{ employeeReps.length }}명 — 산업안전보건위원회는 근로자위원과 사용자위원을 <b>같은 수</b>로 구성합니다(법 제24조제1항).</p>
-                    <p :class="quorumOk ? 'cm-ok' : 'cm-warn'">출석: 사용자위원 {{ presentEmployer }}/{{ employerReps.length }}명 · 근로자위원 {{ presentEmployee }}/{{ employeeReps.length }}명 — {{ quorumOk ? '각 과반수 출석으로 개의 요건을 충족합니다' : '근로자위원·사용자위원 각 과반수가 출석해야 개의할 수 있습니다' }}(시행령 제37조제2항).</p>
-                </div>
-
-                <!-- 4. 회의 내용 및 AI 지원 도구 -->
-                <div class="bg-purple-50/60 p-4 rounded-xl border border-purple-200/80 space-y-4">
-                    <div class="flex justify-between items-center border-b border-purple-200 pb-2">
-                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                            <i class="ph-fill ph-sparkle text-purple-600"></i> {{ formData.docType === 'notice' ? '3. 공고 내용 및 안내사항' : '3. 회의 안건 및 의결사항' }}
-                        </h3>
-                        <button v-if="formData.docType !== 'notice'" type="button" @click="openAiModal" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm flex items-center gap-1.5 transition">
-                            <i class="ph-fill ph-magic-wand"></i> 예시 세트 불러오기
-                        </button>
-                    </div>
-
-                    <!-- 회의 안건 (공통 법정 8대 안건 기본) -->
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="block text-xs font-bold text-slate-700">주요 심의 및 의결 안건</label>
-                            <span class="text-[11px] text-purple-700 font-medium">법 제24조 제2항 심의·의결 사항</span>
-                        </div>
-                        <textarea v-model="formData.agenda" rows="10" placeholder="회의 안건을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed font-mono"></textarea>
-                    </div>
-
-                    <!-- [분기 1] 개최공고인 경우: 안내 및 협조사항 전용 에디터 -->
-                    <div v-if="formData.docType === 'notice'">
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="block text-xs font-bold text-slate-700">회의 진행 안내 및 협조사항</label>
-                            <button type="button" @click="resetNoticeInstructions" class="text-xs text-blue-700 hover:text-blue-900 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded font-medium transition flex items-center gap-1">
-                                <i class="ph-bold ph-arrow-counter-clockwise"></i> 표준 협조사항 채우기
-                            </button>
-                        </div>
-                        <textarea v-model="formData.noticeInstructions" rows="6" placeholder="참석 당부 및 협조사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed"></textarea>
-                    </div>
-
-                    <!-- [분기 2] 회의록 / 결과보고서인 경우: 의결사항 에디터 및 AI 의결 상세추천 -->
-                    <div v-else>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="block text-xs font-bold text-slate-700">심의 및 의결사항</label>
-                            <button type="button" @click="openResolutionsModal" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1 px-2.5 rounded-md shadow-sm flex items-center gap-1 transition">
-                                <i class="ph-fill ph-lightbulb"></i> 의결사항 예시 보기
-                            </button>
-                        </div>
-                        <p class="text-[11px] text-rose-600 mb-1">실제로 심의·의결한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
-                        <textarea v-model="formData.resolutions" rows="9" placeholder="의결 사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed font-mono"></textarea>
-                    </div>
-
-                    <!-- 기타 토의 및 향후 계획 -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">{{ formData.docType === 'report' ? '향후 추진 계획 및 건의사항' : '기타 사항' }}</label>
-                        <textarea v-model="formData.others" rows="3" placeholder="기타 토의 내용이나 안내사항을 입력하세요." class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-purple-500 outline-none resize-none leading-relaxed"></textarea>
-                    </div>
-                </div>
-
-                <!-- 5. 회의 현장 사진 첨부 (공고문 제외, 회의록 및 결과보고서에 적용) -->
-                <div v-if="formData.docType !== 'notice'" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
-                        <i class="ph-fill ph-camera text-slate-600"></i> 4. 회의 현장 사진 첨부
-                    </h3>
-                    <div class="flex items-center gap-3">
-                        <input type="file" accept="image/*" @change="handleFileUpload" id="photo-input" class="hidden">
-                        <label for="photo-input" class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 px-3 rounded-lg border border-slate-300 transition flex items-center gap-1.5">
-                            <i class="ph-bold ph-upload-simple"></i> 사진 파일 선택
-                        </label>
-                        <span class="text-xs text-slate-500 truncate max-w-[180px]">
-                            {{ photoDataUrl ? '현장 사진 1장 첨부됨' : '선택된 사진 없음' }}
-                        </span>
-                        <button v-if="photoDataUrl" type="button" @click="removePhoto" class="text-xs text-rose-500 hover:underline font-bold ml-auto">
-                            삭제
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 mb-2">법령 메모</h3>
-                    <ul class="cm-law">
-                        <li>정기회의는 분기마다 위원장이 소집하고, 임시회의는 위원장이 필요하다고 인정할 때 소집합니다(시행령 제37조제1항).</li>
-                        <li>근로자위원·사용자위원 각 과반수 출석으로 개의하고, 출석위원 과반수 찬성으로 의결합니다(시행령 제37조제2항).</li>
-                        <li>회의록에는 개최 일시·장소, 출석위원, 심의 내용 및 의결·결정 사항, 그 밖의 토의사항을 적어 갖추어 둡니다(시행령 제37조제4항).</li>
-                        <li>회의 결과는 사내방송·사내보·게시·정례조회 등으로 근로자에게 신속히 알립니다(시행령 제39조).</li>
-                        <li>회의록은 2년 동안 보존합니다(법 제164조제1항제2호).</li>
-                    </ul>
-                    <p class="text-[11px] text-slate-400" style="margin-top:8px">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
-                </div>
+                </section>
             </div>
 
-            <!-- Right Document Preview Area (lg:col-span-7) -->
-            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
-                <div class="w-full flex justify-between items-center mb-3 no-print">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-xs font-bold text-slate-600">A4 실시간 미리보기</span>
-                    </div>
-                    <span class="text-[11px] text-slate-400">A4 (210mm × 297mm)</span>
+            <!-- ===================== 미리보기 ===================== -->
+            <div id="preview-col" class="cm-out">
+                <div class="cm-out-h no-print">
+                    <span><b>A4 미리보기</b> — 제목·항목 이름·문구를 눌러 바로 고칠 수 있습니다</span>
+                    <span>{{ docLabel }}</span>
                 </div>
 
-                <!-- Printable A4 Document Container -->
-                <div id="print-area" class="a4-container cm-zoom p-8 md:p-10 text-slate-900 border border-slate-200 rounded-sm">
-                    
-                    <!-- [DOC 1] 회의록 양식 (법정 서명란 포함) -->
-                    <div v-if="formData.docType === 'minutes'">
-                        <div class="text-center mb-6">
-                            <h2 class="text-2xl font-black tracking-wide border-b-2 border-slate-900 pb-3">
-                                {{ titlePrefix }} 산업안전보건위원회 회의록
-                            </h2>
+                <div id="print-area" class="a4-container cm-zoom cm-doc" :class="{ 'cm-pdfing': isGeneratingPDF }">
+
+                    <!-- [문서 1] 회의록 -->
+                    <div v-if="formData.docType === 'minutes'" data-doc="minutes">
+                        <div class="cm-head" :class="{ solo: !apprOn }">
+                            <h2><ed k="title.minutes"></ed></h2>
+                            <div v-if="apprOn" class="cm-apprbox"><div v-appr="APPR_KEY"></div></div>
                         </div>
 
-                        <!-- 기본 정보 표 -->
-                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
+                        <table class="border border-slate-800 text-xs mb-4">
                             <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">회 의 명</th>
-                                <td class="border border-slate-800 p-2 font-medium" colspan="3">
-                                    {{ formData.company || '(사업장명)' }} {{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 ({{ formData.type }}회의)
-                                </td>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center"><ed k="h.name"></ed></th>
+                                <td class="border border-slate-800 p-2 font-medium" colspan="3"><ed k="meetName"></ed></td>
                             </tr>
                             <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">일 시</th>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center"><ed k="h.dt"></ed></th>
                                 <td class="border border-slate-800 p-2 w-1/2">{{ formattedDatetime }}</td>
-                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">장 소</th>
-                                <td class="border border-slate-800 p-2">{{ formData.location || '사내 회의실' }}</td>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center"><ed k="h.loc"></ed></th>
+                                <td class="border border-slate-800 p-2">{{ formData.location }}</td>
                             </tr>
                         </table>
 
-                        <!-- 참석 위원 서명 날인란 (법정 필수) -->
-                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
+                        <table class="border border-slate-800 text-xs mb-4 cm-fix" id="repTable">
                             <thead>
                                 <tr class="bg-slate-100 text-center font-bold">
-                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">사용자위원 ({{ employerReps.length }}명 중 {{ presentEmployer }}명 출석)</th>
-                                    <th class="border border-slate-800 p-2 w-1/2" colspan="3">근로자위원 ({{ employeeReps.length }}명 중 {{ presentEmployee }}명 출석)</th>
+                                    <th class="border border-slate-800 p-2" colspan="3"><ed k="h.er"></ed> ({{ employerReps.length }}명 중 {{ presentEmployer }}명 출석)</th>
+                                    <th class="border border-slate-800 p-2" colspan="3"><ed k="h.ee"></ed> ({{ employeeReps.length }}명 중 {{ presentEmployee }}명 출석)</th>
                                 </tr>
                                 <tr class="bg-slate-50 text-center text-[11px] text-slate-600 font-semibold">
-                                    <th class="border border-slate-800 p-1 w-20">직책</th>
-                                    <th class="border border-slate-800 p-1">성명</th>
-                                    <th class="border border-slate-800 p-1 w-14">서명</th>
-                                    <th class="border border-slate-800 p-1 w-20">직책</th>
-                                    <th class="border border-slate-800 p-1">성명</th>
-                                    <th class="border border-slate-800 p-1 w-14">서명</th>
+                                    <th class="border border-slate-800 p-1" style="width:19%"><ed k="h.pos"></ed></th>
+                                    <th class="border border-slate-800 p-1"><ed k="h.nm"></ed></th>
+                                    <th class="border border-slate-800 p-1" style="width:11%"><ed k="h.sign"></ed></th>
+                                    <th class="border border-slate-800 p-1" style="width:19%"><ed k="h.pos"></ed></th>
+                                    <th class="border border-slate-800 p-1"><ed k="h.nm"></ed></th>
+                                    <th class="border border-slate-800 p-1" style="width:11%"><ed k="h.sign"></ed></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="idx in maxRepCount" :key="'rep-row-' + idx" class="text-center h-8">
-                                    <!-- 사용자위원 -->
-                                    <td class="border border-slate-800 p-1 text-[11px]">{{ employerReps[idx-1]?.title || '' }}</td>
-                                    <td class="border border-slate-800 p-1">{{ employerReps[idx-1]?.name || '' }}</td>
-                                    <td class="border border-slate-800 p-1 text-[10px] font-serif" :class="employerReps[idx-1]?.absent ? 'text-slate-600' : 'text-slate-300'">
-                                        {{ employerReps[idx-1] ? (employerReps[idx-1].absent ? '불참' : '(서명)') : '' }}
-                                    </td>
-                                    <!-- 근로자위원 -->
-                                    <td class="border border-slate-800 p-1 text-[11px]">{{ employeeReps[idx-1]?.title || '' }}</td>
-                                    <td class="border border-slate-800 p-1">{{ employeeReps[idx-1]?.name || '' }}</td>
-                                    <td class="border border-slate-800 p-1 text-[10px] font-serif" :class="employeeReps[idx-1]?.absent ? 'text-slate-600' : 'text-slate-300'">
-                                        {{ employeeReps[idx-1] ? (employeeReps[idx-1].absent ? '불참' : '(서명)') : '' }}
-                                    </td>
+                                <tr v-for="row in repRows" :key="'rr' + row.i" class="text-center h-8">
+                                    <template v-for="(r, ci) in row.cells" :key="ci">
+                                        <td class="border border-slate-800 p-1 text-[11px]">{{ r ? r.title : '' }}</td>
+                                        <td class="border border-slate-800 p-1">{{ r ? repName(r) : '' }}</td>
+                                        <td class="border border-slate-800 p-1 text-[10px]" :class="r && r.absent ? 'text-slate-600' : 'text-slate-300'">{{ r ? (r.absent ? '불참' : T('signPh')) : '' }}</td>
+                                    </template>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <!-- 회의 안건 및 의결사항 표 -->
-                        <table class="w-full border-collapse border border-slate-800 text-xs mb-4">
+                        <div v-if="prevFilled.length" class="mb-4" id="prevBlock">
+                            <h4 class="cm-h4"><ed k="h.prev"></ed></h4>
+                            <table class="border border-slate-800 text-xs cm-fix">
+                                <thead><tr class="bg-slate-100 text-center font-bold">
+                                    <th class="border border-slate-800 p-1.5" style="width:7%"><ed k="h.no"></ed></th>
+                                    <th class="border border-slate-800 p-1.5"><ed k="h.prevc"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:16%"><ed k="h.owner"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:15%"><ed k="h.due"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:14%"><ed k="h.presult"></ed></th>
+                                </tr></thead>
+                                <tbody><tr v-for="(p, idx) in prevFilled" :key="'pp' + idx">
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ idx + 1 }}</td>
+                                    <td class="border border-slate-800 p-1.5">{{ p.content }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ p.owner }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ shortDate(p.due) }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ p.result }}</td>
+                                </tr></tbody>
+                            </table>
+                        </div>
+
+                        <table class="border border-slate-800 text-xs mb-4 cm-fix" id="itemTable">
+                            <thead><tr class="bg-slate-100 text-center font-bold">
+                                <th class="border border-slate-800 p-2" style="width:7%"><ed k="h.no"></ed></th>
+                                <th class="border border-slate-800 p-2" style="width:31%"><ed k="h.item"></ed></th>
+                                <th class="border border-slate-800 p-2"><ed k="h.content"></ed></th>
+                                <th v-if="anyResult" class="border border-slate-800 p-2" style="width:14%"><ed k="h.result"></ed></th>
+                            </tr></thead>
+                            <tbody>
+                                <tr v-for="(it, idx) in items" :key="'di' + idx">
+                                    <td class="border border-slate-800 p-2 text-center align-top">{{ idx + 1 }}</td>
+                                    <td class="border border-slate-800 p-2 align-top font-medium">{{ it.title }}</td>
+                                    <td class="border border-slate-800 p-2 align-top"><div class="cm-pre">{{ it.content }}</div></td>
+                                    <td v-if="anyResult" class="border border-slate-800 p-2 text-center align-top">{{ it.result }}</td>
+                                </tr>
+                                <tr v-if="!items.length"><td class="border border-slate-800 p-2 text-center" :colspan="anyResult ? 4 : 3">&nbsp;</td></tr>
+                            </tbody>
+                        </table>
+
+                        <table v-if="formData.others.trim()" class="border border-slate-800 text-xs mb-4" id="othersTable">
                             <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">회의 안건</th>
-                                <td class="border border-slate-800 p-2.5 align-top">
-                                    <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.agenda }}</div>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center"><ed k="h.others.minutes"></ed></th>
+                                <td class="border border-slate-800 p-2 align-top"><div class="cm-pre">{{ formData.others }}</div></td>
+                            </tr>
+                        </table>
+
+                        <div v-if="actionsFilled.length" class="mb-4" id="actBlock">
+                            <h4 class="cm-h4"><ed k="h.act"></ed></h4>
+                            <table class="border border-slate-800 text-xs cm-fix">
+                                <thead><tr class="bg-slate-100 text-center font-bold">
+                                    <th class="border border-slate-800 p-1.5" style="width:7%"><ed k="h.no"></ed></th>
+                                    <th class="border border-slate-800 p-1.5"><ed k="h.actc"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:16%"><ed k="h.owner"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:15%"><ed k="h.due"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:14%"><ed k="h.status"></ed></th>
+                                </tr></thead>
+                                <tbody><tr v-for="(a, idx) in actionsFilled" :key="'aa' + idx">
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ idx + 1 }}</td>
+                                    <td class="border border-slate-800 p-1.5">{{ a.content }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ a.owner }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ shortDate(a.due) }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ a.status }}</td>
+                                </tr></tbody>
+                            </table>
+                        </div>
+
+                        <table v-if="nextText" class="border border-slate-800 text-xs mb-4" id="nextTable">
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center"><ed k="h.next"></ed></th>
+                                <td class="border border-slate-800 p-2">{{ nextText }}</td>
+                            </tr>
+                        </table>
+
+                        <p class="cm-foot" :class="{ 'no-print': !T('foot.minutes') }"><ed k="foot.minutes" multi erasable></ed></p>
+                    </div>
+
+                    <!-- [문서 2] 개최 공고 -->
+                    <div v-else-if="formData.docType === 'notice'" data-doc="notice">
+                        <div v-if="apprOn" style="display:flex;justify-content:flex-end;margin-bottom:10px"><div v-appr="APPR_KEY"></div></div>
+                        <p class="text-xs font-semibold text-slate-500 text-center mb-1" id="noticeNoLine">{{ formData.company }} <ed k="h.noticeNo"></ed> 제 {{ noticeNoEff }}호</p>
+                        <div class="cm-head solo" style="margin-bottom:24px"><h2><ed k="title.notice"></ed></h2></div>
+
+                        <p class="text-sm leading-loose mb-5" :class="{ 'no-print': !T('notice.body') }"><ed k="notice.body" multi erasable></ed></p>
+                        <p class="font-bold text-center text-sm tracking-widest mb-3"><ed k="h.below"></ed></p>
+
+                        <table class="border border-slate-800 cm-nt" id="noticeTable">
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 font-bold text-center"><ed k="h.n.dt"></ed></th>
+                                <td class="border border-slate-800 font-medium">{{ formattedDatetime }}</td>
+                            </tr>
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 font-bold text-center"><ed k="h.n.loc"></ed></th>
+                                <td class="border border-slate-800 font-medium">{{ formData.location }}</td>
+                            </tr>
+                            <tr>
+                                <th class="border border-slate-800 bg-slate-100 font-bold text-center"><ed k="h.n.who"></ed></th>
+                                <td class="border border-slate-800">
+                                    <div class="font-medium">총 {{ totalRepsCount }}명 ({{ T('h.er') }} {{ employerReps.length }}명, {{ T('h.ee') }} {{ employeeReps.length }}명)</div>
+                                    <div class="text-xs text-slate-600 mt-1" style="line-height:1.7">
+                                        <div>{{ T('h.er') }}: {{ formattedEmployerReps }}</div>
+                                        <div>{{ T('h.ee') }}: {{ formattedEmployeeReps }}</div>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
-                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">심의 및<br>의결 사항</th>
-                                <td class="border border-slate-800 p-2.5 align-top">
-                                    <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.resolutions }}</div>
+                                <th class="border border-slate-800 bg-slate-100 font-bold text-center"><ed k="h.n.items"></ed></th>
+                                <td class="border border-slate-800">
+                                    <ol><li v-for="(it, idx) in itemsTitled" :key="'ni' + idx">{{ it.title }}</li></ol>
                                 </td>
                             </tr>
-                            <tr v-if="formData.others">
-                                <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">기타 사항</th>
-                                <td class="border border-slate-800 p-2.5 align-top">
-                                    <div class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ formData.others }}</div>
+                            <tr v-if="formData.noticeInstructions.trim() || formData.others.trim()">
+                                <th class="border border-slate-800 bg-slate-100 font-bold text-center"><ed k="h.n.inst"></ed></th>
+                                <td class="border border-slate-800">
+                                    <div v-if="formData.noticeInstructions.trim()" class="cm-pre">{{ formData.noticeInstructions }}</div>
+                                    <div v-if="formData.others.trim()" class="cm-pre" :style="formData.noticeInstructions.trim() ? 'margin-top:8px;padding-top:8px;border-top:1px solid #cbd5e1' : ''">{{ formData.others }}</div>
                                 </td>
                             </tr>
                         </table>
 
-                        <!-- 첨부 사진 출력 -->
-                        <div v-if="photoDataUrl" class="border border-slate-800 p-3 mb-2 text-center bg-slate-50/50">
-                            <p class="text-[11px] font-bold text-slate-700 mb-2">[ 회의 진행 현장 사진 ]</p>
-                            <img :src="photoDataUrl" alt="회의 현장 사진" class="max-h-56 mx-auto rounded border border-slate-300 shadow-sm object-contain">
+                        <div class="cm-sign">
+                            <p class="text-sm font-medium text-slate-600">{{ fmtDate(noticeDateEff) }}</p>
+                            <p class="text-lg font-black tracking-wide">{{ formData.company || '(사업장명)' }} {{ formData.noticeFooter || (bodyName + ' 위원장') }} <span class="text-xs font-normal text-slate-500" :class="{ 'no-print': !T('stamp.notice') }"><ed k="stamp.notice" erasable></ed></span></p>
                         </div>
                     </div>
 
-                    <!-- [DOC 2] 개최 공고 양식 (서명란 없음, 사내 공문 서식) -->
-                    <div v-else-if="formData.docType === 'notice'" class="py-4 px-2">
-                        <div class="text-center mb-8 pb-4 border-b-2 border-slate-900">
-                            <p class="text-xs font-semibold text-slate-500 mb-1">{{ formData.company }} 공고 제 {{ formData.year }}-{{ formData.quarter }}호</p>
-                            <h2 class="text-2xl font-black tracking-wider text-slate-900">
-                                {{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 {{ formData.type }}회의 개최 공고
-                            </h2>
+                    <!-- [문서 3] 결과 보고서 -->
+                    <div v-else data-doc="report">
+                        <div class="cm-head" :class="{ solo: !apprOn }">
+                            <h2><ed k="title.report"></ed></h2>
+                            <div v-if="apprOn" class="cm-apprbox"><div v-appr="APPR_KEY"></div></div>
                         </div>
 
-                        <div class="text-sm leading-relaxed space-y-6">
-                            <p class="text-slate-800 leading-loose">
-                                산업안전보건법 제24조 및 당사 안전보건관리규정에 따라 사업장 내 산업재해 예방 및 쾌적한 작업환경 조성을 위하여 
-                                <strong>{{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 {{ formData.type }}회의</strong>를 
-                                아래와 같이 소집하여 개최하오니, 각 위원께서는 한 분도 빠짐없이 참석하여 주시기 바랍니다.
-                            </p>
-
-                            <div class="bg-slate-50 p-5 rounded-lg border border-slate-300 space-y-3 text-xs">
-                                <p class="font-bold text-center text-sm tracking-widest text-slate-900 mb-3">- 아 래 -</p>
-                                
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">1. 일 시 :</div>
-                                    <div class="col-span-9 font-medium">{{ formattedDatetime }}</div>
-                                </div>
-
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">2. 장 소 :</div>
-                                    <div class="col-span-9 font-medium">{{ formData.location || '사내 회의실' }}</div>
-                                </div>
-
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">3. 참석 대상 :</div>
-                                    <div class="col-span-9">
-                                        <p class="font-medium">총 {{ totalRepsCount }}명 (사용자위원 {{ employerReps.length }}명, 근로자위원 {{ employeeReps.length }}명)</p>
-                                        <div class="text-[11px] text-slate-600 mt-1 pl-2 border-l-2 border-slate-300 space-y-0.5">
-                                            <p>• 사용자위원: {{ formattedEmployerReps }}</p>
-                                            <p>• 근로자위원: {{ formattedEmployeeReps }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">4. 주요 심의 안건 :</div>
-                                    <div class="col-span-9">
-                                        <div class="whitespace-pre-wrap p-2.5 bg-white border border-slate-200 rounded leading-relaxed font-mono text-[11px]">{{ formData.agenda }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-12 gap-2">
-                                    <div class="col-span-3 font-bold text-slate-700">5. 안내 및 협조사항 :</div>
-                                    <div class="col-span-9">
-                                        <div class="whitespace-pre-wrap leading-relaxed text-[11px] text-slate-700">{{ formData.noticeInstructions }}</div>
-                                        <div v-if="formData.others" class="whitespace-pre-wrap mt-2 pt-2 border-t border-slate-200 leading-relaxed text-[11px] text-slate-600">
-                                            {{ formData.others }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 하단 발신 명의 -->
-                        <div class="mt-14 text-center space-y-3">
-                            <p class="text-sm font-medium text-slate-600">{{ formatJustDate }}</p>
-                            <p class="text-lg font-black tracking-wide text-slate-900">
-                                {{ formData.company || '(사업장명)' }} {{ formData.noticeFooter || '산업안전보건위원회 위원장' }} <span class="text-xs font-normal text-slate-500">(직인생략)</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- [DOC 3] 결과 보고서 양식 (서명란 없음, 결재/보고 문서) -->
-                    <div v-else-if="formData.docType === 'report'">
-                        <div class="text-center mb-6 pb-3 border-b-2 border-slate-900">
-                            <h2 class="text-2xl font-black tracking-wide">
-                                {{ titlePrefix }} 산업안전보건위원회 회의 결과 보고
-                            </h2>
-                        </div>
-
-                        <!-- 1. 회의 개요 표 -->
                         <div class="mb-5">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 1. 회의 개요
-                            </h4>
-                            <table class="w-full border-collapse border border-slate-800 text-xs">
+                            <h4 class="cm-h4"><ed k="h.r1"></ed></h4>
+                            <table class="border border-slate-800 text-xs" id="reportInfo">
                                 <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">회 의 명</th>
-                                    <td class="border border-slate-800 p-2" colspan="3">
-                                        {{ formData.company || '(사업장명)' }} {{ formData.year }}년도 제{{ formData.round }}차 산업안전보건위원회 ({{ formData.type }}회의)
-                                    </td>
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center"><ed k="h.name"></ed></th>
+                                    <td class="border border-slate-800 p-2"><ed k="meetName"></ed></td>
                                 </tr>
                                 <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">일시 및 장소</th>
-                                    <td class="border border-slate-800 p-2" colspan="3">
-                                        {{ formattedDatetime }} / {{ formData.location || '사내 회의실' }}
-                                    </td>
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center"><ed k="h.dtloc"></ed></th>
+                                    <td class="border border-slate-800 p-2">{{ formattedDatetime }}<template v-if="formData.location"> / {{ formData.location }}</template></td>
                                 </tr>
                                 <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2 w-20 font-bold text-center">참석 인원</th>
-                                    <td class="border border-slate-800 p-2" colspan="3">
-                                        위원 {{ totalRepsCount }}명 중 {{ presentCount }}명 출석 (사용자위원 {{ presentEmployer }}/{{ employerReps.length }}명, 근로자위원 {{ presentEmployee }}/{{ employeeReps.length }}명)
-                                    </td>
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center"><ed k="h.count"></ed></th>
+                                    <td class="border border-slate-800 p-2">위원 {{ totalRepsCount }}명 중 {{ presentCount }}명 출석 ({{ T('h.er') }} {{ presentEmployer }}/{{ employerReps.length }}명, {{ T('h.ee') }} {{ presentEmployee }}/{{ employeeReps.length }}명)<template v-if="absentNames"> · 불참: {{ absentNames }}</template></td>
                                 </tr>
                             </table>
                         </div>
 
-                        <!-- 2. 심의 및 의결 결과 표 -->
                         <div class="mb-5">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 2. 주요 심의 및 의결 사항
-                            </h4>
-                            <table class="w-full border-collapse border border-slate-800 text-xs">
-                                <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">회의 안건</th>
-                                    <td class="border border-slate-800 p-2.5 align-top">
-                                        <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.agenda }}</div>
-                                    </td>
+                            <h4 class="cm-h4"><ed k="h.r2"></ed></h4>
+                            <table class="border border-slate-800 text-xs cm-fix" id="itemTable">
+                                <thead><tr class="bg-slate-100 text-center font-bold">
+                                    <th class="border border-slate-800 p-2" style="width:7%"><ed k="h.no"></ed></th>
+                                    <th class="border border-slate-800 p-2" style="width:31%"><ed k="h.item"></ed></th>
+                                    <th class="border border-slate-800 p-2"><ed k="h.rcontent"></ed></th>
+                                    <th v-if="anyResult" class="border border-slate-800 p-2" style="width:14%"><ed k="h.result"></ed></th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr v-for="(it, idx) in items" :key="'ri' + idx">
+                                        <td class="border border-slate-800 p-2 text-center align-top">{{ idx + 1 }}</td>
+                                        <td class="border border-slate-800 p-2 align-top font-medium">{{ it.title }}</td>
+                                        <td class="border border-slate-800 p-2 align-top"><div class="cm-pre">{{ it.content }}</div></td>
+                                        <td v-if="anyResult" class="border border-slate-800 p-2 text-center align-top">{{ it.result }}</td>
+                                    </tr>
+                                    <tr v-if="!items.length"><td class="border border-slate-800 p-2 text-center" :colspan="anyResult ? 4 : 3">&nbsp;</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div v-if="actionsFilled.length" class="mb-5" id="actBlock">
+                            <h4 class="cm-h4"><ed k="h.r3"></ed></h4>
+                            <table class="border border-slate-800 text-xs cm-fix">
+                                <thead><tr class="bg-slate-100 text-center font-bold">
+                                    <th class="border border-slate-800 p-1.5" style="width:7%"><ed k="h.no"></ed></th>
+                                    <th class="border border-slate-800 p-1.5"><ed k="h.actc"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:16%"><ed k="h.owner"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:15%"><ed k="h.due"></ed></th>
+                                    <th class="border border-slate-800 p-1.5" style="width:14%"><ed k="h.status"></ed></th>
+                                </tr></thead>
+                                <tbody><tr v-for="(a, idx) in actionsFilled" :key="'ra' + idx">
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ idx + 1 }}</td>
+                                    <td class="border border-slate-800 p-1.5">{{ a.content }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ a.owner }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ shortDate(a.due) }}</td>
+                                    <td class="border border-slate-800 p-1.5 text-center">{{ a.status }}</td>
+                                </tr></tbody>
+                            </table>
+                        </div>
+
+                        <div v-if="formData.others.trim() || nextText" class="mb-5">
+                            <table class="border border-slate-800 text-xs" id="othersTable">
+                                <tr v-if="formData.others.trim()">
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center"><ed k="h.others.report"></ed></th>
+                                    <td class="border border-slate-800 p-2 align-top"><div class="cm-pre">{{ formData.others }}</div></td>
                                 </tr>
-                                <tr>
-                                    <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">의결 결과</th>
-                                    <td class="border border-slate-800 p-2.5 align-top">
-                                        <div class="whitespace-pre-wrap leading-relaxed font-mono text-[11px]">{{ formData.resolutions }}</div>
-                                    </td>
-                                </tr>
-                                <tr v-if="formData.others">
-                                    <th class="border border-slate-800 bg-slate-100 p-2.5 w-24 font-bold text-center">향후 계획</th>
-                                    <td class="border border-slate-800 p-2.5 align-top">
-                                        <div class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ formData.others }}</div>
-                                    </td>
+                                <tr v-if="nextText">
+                                    <th class="border border-slate-800 bg-slate-100 p-2 w-24 font-bold text-center"><ed k="h.next"></ed></th>
+                                    <td class="border border-slate-800 p-2">{{ nextText }}</td>
                                 </tr>
                             </table>
                         </div>
 
-                        <!-- 3. 현장 사진 첨부 -->
-                        <div v-if="photoDataUrl" class="mb-6">
-                            <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 bg-slate-800 inline-block"></span> 3. 회의 현장 사진
-                            </h4>
-                            <div class="border border-slate-800 p-3 text-center bg-slate-50/50">
-                                <img :src="photoDataUrl" alt="회의 현장 사진" class="max-h-56 mx-auto rounded border border-slate-300 shadow-sm object-contain">
-                            </div>
-                        </div>
-
-                        <!-- 하단 결재 명의 -->
-                        <div class="mt-12 text-center space-y-3">
-                            <p class="text-sm font-medium text-slate-600">위와 같이 산업안전보건위원회 회의 결과를 보고합니다.</p>
-                            <p class="text-xs text-slate-500">{{ formatJustDate }}</p>
-                            <p class="text-base font-black tracking-wide text-slate-900">
-                                {{ formData.company || '(사업장명)' }} {{ formData.reportFooter || '안전보건관리책임자' }} <span class="text-xs font-normal text-slate-500">(직인생략)</span>
-                            </p>
+                        <div class="cm-sign">
+                            <p class="text-sm font-medium text-slate-600" :class="{ 'no-print': !T('report.closing') }"><ed k="report.closing" multi erasable></ed></p>
+                            <p class="text-xs text-slate-500">{{ fmtDate(reportDateEff) }}</p>
+                            <p class="text-base font-black tracking-wide">{{ formData.company || '(사업장명)' }} {{ formData.reportFooter || '안전보건관리책임자' }} <span class="text-xs font-normal text-slate-500" :class="{ 'no-print': !T('stamp.report') }"><ed k="stamp.report" erasable></ed></span></p>
                         </div>
                     </div>
 
+                    <!-- 사진대지(회의록·결과 보고서 맨 뒤) -->
+                    <div v-if="hasADoc" v-show="formData.docType !== 'notice'" v-photos="PHOTO_DOC"></div>
                 </div>
             </div>
         </main>
 
-        <!-- AI 종합세트 모달 (안건 + 의결사항 패키지 추천 & 새로고침) -->
-        <div v-if="isAiModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print">
-            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 border border-slate-200">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="bg-purple-100 text-purple-700 p-1.5 rounded-lg">
-                            <i class="ph-bold ph-magic-wand text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-base text-slate-900">안건·의결 예시 세트</h3>
-                            <p class="text-xs text-slate-500">예시 문안입니다. 적용한 뒤 실제 회의 내용으로 반드시 고쳐 쓰세요.</p>
-                        </div>
-                    </div>
-                    <button type="button" @click="isAiModalOpen = false" class="text-slate-400 hover:text-slate-700 p-1">
-                        <i class="ph-bold ph-x text-lg"></i>
+        <!-- 작성 예시 -->
+        <div v-if="isExOpen" class="cm-modal no-print" role="dialog" aria-modal="true" aria-labelledby="exT" @click.self="isExOpen = false" @keydown.esc="isExOpen = false">
+            <div class="cm-modal-box">
+                <div class="cm-row" style="justify-content:space-between">
+                    <h3 id="exT">심의·의결 내용 작성 예시</h3>
+                    <button type="button" class="cm-ib" @click="isExOpen = false" aria-label="닫기"><i class="ph-bold ph-x"></i></button>
+                </div>
+                <p class="cm-hint" style="margin-top:4px">예시 문안입니다. 고르면 안건의 "심의·의결 내용"에 들어가니, 실제 회의 내용으로 반드시 고쳐 쓰세요.</p>
+                <div class="cm-modal-list">
+                    <button v-for="(opt, idx) in examples" :key="'ex' + idx" type="button" class="cm-opt" @click="applyExample(opt)">
+                        <b>{{ opt.title }}</b><small>{{ opt.description }}</small>
                     </button>
                 </div>
-
-                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                    <div 
-                        v-for="(opt, idx) in currentAiOptions" 
-                        :key="'ai-opt-' + idx"
-                        @click="selectAiOption(opt)"
-                        class="p-4 rounded-xl border border-slate-200 hover:border-purple-500 hover:bg-purple-50/40 cursor-pointer transition space-y-2 group"
-                    >
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
-                            <span class="text-xs text-slate-400 group-hover:text-purple-600 font-bold flex items-center gap-1">
-                                적용하기 <i class="ph-bold ph-arrow-right"></i>
-                            </span>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-800">{{ opt.title }}</h4>
-                        <p class="text-xs text-slate-500 line-clamp-2">{{ opt.description }}</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-center mt-5 pt-3 border-t border-slate-100">
-                    <button type="button" @click="refreshAiOptions" class="text-xs text-slate-600 hover:text-purple-700 font-bold flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-100 transition">
-                        <i class="ph-bold ph-arrows-clockwise text-sm"></i> 다른 예시 보기 (새로고침)
-                    </button>
-                    <button type="button" @click="isAiModalOpen = false" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold">
-                        닫기
-                    </button>
-                </div>
+                <div class="cm-row" style="justify-content:flex-end"><button type="button" id="exClose" class="cm-btn" @click="isExOpen = false">닫기</button></div>
             </div>
         </div>
 
-        <!-- AI 의결사항 전용 모달 (상세 의결 내용 라이브러리 & 새로고침) -->
-        <div v-if="isResolutionsModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs no-print">
-            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 border border-slate-200">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="bg-indigo-100 text-indigo-700 p-1.5 rounded-lg">
-                            <i class="ph-bold ph-lightbulb text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-base text-slate-900">의결사항 예시</h3>
-                            <p class="text-xs text-slate-500">예시 문안입니다. 실제로 의결한 내용만 남기고 고쳐 쓰세요.</p>
-                        </div>
-                    </div>
-                    <button type="button" @click="isResolutionsModalOpen = false" class="text-slate-400 hover:text-slate-700 p-1">
-                        <i class="ph-bold ph-x text-lg"></i>
-                    </button>
-                </div>
-
-                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                    <div 
-                        v-for="(opt, idx) in currentResolutionsOptions" 
-                        :key="'res-opt-' + idx"
-                        @click="selectResolutionOption(opt)"
-                        class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/40 cursor-pointer transition space-y-2 group"
-                    >
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
-                            <span class="text-xs text-slate-400 group-hover:text-indigo-600 font-bold flex items-center gap-1">
-                                본문 적용 <i class="ph-bold ph-check"></i>
-                            </span>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-800">{{ opt.title }}</h4>
-                        <div class="text-[11px] font-mono text-slate-600 bg-white p-2.5 rounded border border-slate-200 max-h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed">
-                            {{ opt.resolutions }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-center mt-5 pt-3 border-t border-slate-100">
-                    <button type="button" @click="refreshResolutionsOptions" class="text-xs text-slate-600 hover:text-indigo-700 font-bold flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-100 transition">
-                        <i class="ph-bold ph-arrows-clockwise text-sm"></i> 다른 실무 예시 보기 (새로고침)
-                    </button>
-                    <button type="button" @click="isResolutionsModalOpen = false" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold">
-                        닫기
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Toast Notification Box -->
-        <div v-if="toast.visible" role="status" class="no-print fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-300" :class="toast.type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'">
-            <i :class="toast.type === 'error' ? 'ph-fill ph-warning-circle text-base' : 'ph-fill ph-check-circle text-base'"></i>
+        <div v-if="toast.visible" role="status" class="cm-toast no-print" :class="toast.type">
+            <i :class="toast.type === 'error' ? 'ph-fill ph-warning-circle' : 'ph-fill ph-check-circle'"></i>
             <span>{{ toast.message }}</span>
         </div>
     </div>
 
+    <!-- 사이트 공통 모듈: 결재란 · 서명 · 사진대지 · 백업 (못 불러와도 작성기는 동작) -->
+    <script src="../../assets/docs.js"></script>
     <script>
         // Vue 파일을 못 불러오면 빈 화면 대신 안내를 보여 준다
         if (!window.Vue) {
@@ -709,446 +855,605 @@
             document.getElementById('app').innerHTML = '<div class="cm-fail"><b>화면을 불러오지 못했습니다.</b><br>새로 고침(F5)해 보세요. 계속 안 되면 브라우저의 확장 프로그램·보안 프로그램이 스크립트를 막고 있는지 확인하세요.<br><a href="../../">← SafePlum으로 돌아가기</a></div>';
             throw new Error('Vue not loaded');
         }
-        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        const { createApp, ref, computed, watch, nextTick, onMounted, h } = Vue;
         const STORE_KEY = 'safetake.committee.v1';
+        const APPR_KEY = 'tool.committee';      // 결재란 저장 키: safetake.appr.tool.committee (assets/docs.js)
+        const PHOTO_DOC = 'tool.committee';     // 사진 저장 묶음(IndexedDB)
+        const HIST_MAX = 20;
+        const DEFAULT_BODY = '산업안전보건위원회';
+
+        const str = (v) => (typeof v === 'string' ? v : (typeof v === 'number' && isFinite(v) ? String(v) : ''));
+        const cut = (v, n) => { const s = str(v); return s.length > n ? s.slice(0, n) : s; };
+        const p2 = (x) => String(x).padStart(2, '0');
+        // 브라우저 현지 시각 기준 'YYYY-MM-DDTHH:mm' (toISOString은 UTC라 한국에서 9시간 어긋남)
+        const toLocal = (d) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}`;
+        const today = () => toLocal(new Date()).slice(0, 10);
+        const parseDt = (v) => { if (!v || typeof v !== 'string') return null; const d = new Date(v.length === 10 ? v + 'T00:00' : v); return isNaN(d.getTime()) ? null : d; };
+        const quarterOf = (d) => String(Math.floor(d.getMonth() / 3) + 1);
+        const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        const WD = ['일', '월', '화', '수', '목', '금', '토'];
+
         function readProfile() {
             try {
                 const p = JSON.parse(localStorage.getItem('safetake.profile') || '{}') || {};
-                if (!p.company) p.company = localStorage.getItem('safetake.company') || '';
-                return p;
-            } catch (e) { return {}; }
+                const o = typeof p === 'object' && !Array.isArray(p) ? p : {};
+                if (!o.company) o.company = localStorage.getItem('safetake.company') || '';
+                return { company: str(o.company), resp: str(o.resp), manager: str(o.manager), health: str(o.health) };
+            } catch (e) { return { company: '', resp: '', manager: '', health: '' }; }
         }
         function readSaved() {
-            try { const v = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return v && typeof v === 'object' ? v : null; } catch (e) { return null; }
-        }
-        // 브라우저 현지 시각 기준 'YYYY-MM-DDTHH:mm' (toISOString은 UTC라 한국에서 9시간 어긋남)
-        function localNow() {
-            const d = new Date();
-            const p = (x) => String(x).padStart(2, '0');
-            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+            try { const v = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return v && typeof v === 'object' && !Array.isArray(v) ? v : null; } catch (e) { return null; }
         }
 
-        createApp({
+        // ---- 법 제24조제2항의 심의·의결 사항(제15조제1항제1호~제5호·제7호, 제6호 중 중대재해, 기계·기구·설비 도입, 그 밖의 사항)
+        const BASE_TITLES = [
+            '산업재해 예방계획의 수립',
+            '안전보건관리규정의 작성 및 변경',
+            '안전보건교육',
+            '작업환경측정 등 작업환경의 점검 및 개선',
+            '근로자의 건강진단 등 건강관리',
+            '산업재해에 관한 통계의 기록 및 유지',
+            '중대재해의 원인 조사 및 재발 방지대책 수립',
+            '유해하거나 위험한 기계·기구·설비를 도입한 경우 안전·보건조치',
+            '그 밖에 근로자의 안전 및 보건을 유지·증진시키기 위하여 필요한 사항'
+        ];
+        const baseAgendaText = BASE_TITLES.map((t, i) => `${i + 1}) ${t}`).join('\n');
+        const freshItems = () => BASE_TITLES.map(t => ({ title: t, content: '', result: '' }));
+        // 예전 저장값의 줄머리 낱말(예: "1) 예방계획: …") — 안건 제목과 겹치므로 옮길 때 뗀다
+        const OLD_HEADS = ['예방계획', '관리규정', '안전교육', '작업환경', '건강관리', '재해통계', '중대재해', '설비조치', '기타'];
+        // 예전 형식(안건·의결사항을 글 상자 두 개에 줄마다 번호를 붙여 적던 것)을 안건별 행으로 옮긴다. 적어 둔 글은 버리지 않는다.
+        function itemsFromText(agenda, resolutions) {
+            const stripNo = (s) => s.replace(/^\s*\d{1,2}\s*[).]\s*/, '');
+            const items = str(agenda).split(/\r?\n/).map(s => s.trim()).filter(Boolean).map(s => ({ title: cut(stripNo(s), 300), content: '', result: '' }));
+            const numbered = []; const free = [];
+            str(resolutions).split(/\r?\n/).forEach(line => {
+                const m = line.match(/^\s*(\d{1,2})\s*[).]\s*(.*)$/);
+                if (m) numbered.push({ no: Number(m[1]), text: m[2] });
+                else if (line.trim()) { if (numbered.length) numbered[numbered.length - 1].text += '\n' + line.trim(); else free.push(line.trim()); }
+            });
+            numbered.forEach(r => {
+                let text = r.text.trim(); let head = '';
+                const mm = text.match(/^([^:：\n]{1,12})[:：]\s*([\s\S]*)$/);
+                if (mm && OLD_HEADS.includes(mm[1].trim())) { head = mm[1].trim(); text = mm[2].trim(); }
+                const it = items[r.no - 1];
+                if (it) { if (text) it.content = it.content ? it.content + '\n' + text : text; }
+                else if (text) items.push({ title: head || `안건 ${r.no}`, content: text, result: '' });
+            });
+            if (free.length) items.push({ title: '심의 및 의결사항', content: free.join('\n'), result: '' });
+            return items;
+        }
+
+        const defaultNoticeInstructions = `1. 각 위원께서는 정시에 참석하여 주시기 바랍니다.
+2. 부득이한 사정으로 참석이 어려운 위원께서는 사전에 담당자(안전관리자)에게 알려 주시기 바랍니다.
+3. 회의 안건과 관련된 자료는 사전에 검토하여 주시기 바라며, 추가 안건이 있는 경우 회의 개최 3일 전까지 제출해 주시기 바랍니다.`;
+
+        // ---- 문서 안의 고칠 수 있는 글자(제목·표 머리글·문구)의 기본값. 사용자가 고친 것만 labels 에 저장한다.
+        const LD = {
+            'h.name': '회 의 명', 'h.dt': '일 시', 'h.loc': '장 소', 'h.er': '사용자위원', 'h.ee': '근로자위원', 'h.pos': '직책', 'h.nm': '성명', 'h.sign': '서명',
+            'h.no': '번호', 'h.item': '안건', 'h.content': '심의 내용 및 의결·결정 사항', 'h.rcontent': '심의·의결 결과', 'h.result': '결과',
+            'h.others.minutes': '그 밖의 토의사항', 'h.others.report': '향후 계획', 'h.next': '다음 회의',
+            'h.prev': '지난 회의 의결사항 이행 확인', 'h.prevc': '지난 회의 의결·조치 사항', 'h.owner': '담당', 'h.due': '기한', 'h.presult': '이행 결과',
+            'h.act': '후속 조치', 'h.actc': '조치 사항', 'h.status': '상태',
+            'h.r1': '1. 회의 개요', 'h.r2': '2. 주요 심의 및 의결 사항', 'h.r3': '3. 후속 조치', 'h.dtloc': '일시 및 장소', 'h.count': '참석 인원',
+            'h.noticeNo': '공고', 'h.below': '- 아 래 -', 'h.n.dt': '일 시', 'h.n.loc': '장 소', 'h.n.who': '참석 대상', 'h.n.items': '심의 안건', 'h.n.inst': '안내 및 협조사항',
+            'signPh': '(서명)', 'stamp.notice': '(직인생략)', 'stamp.report': '(직인생략)',
+            'foot.minutes': '근거: 산업안전보건법 제24조제3항, 같은 법 시행령 제37조제4항 · 회의록 보존기간 2년(법 제164조제1항제2호)'
+        };
+        // 회의마다 달라지는 값에서 만들어지는 글자 — "다음 회의"로 넘어갈 때 고친 것을 버린다
+        const VOLATILE = ['title.minutes', 'title.notice', 'title.report', 'meetName', 'notice.body'];
+        const labels = ref({});
+        let DYN = null;   // setup 안에서 만든 자동 문구(computed)
+        const defOf = (k) => { const d = DYN ? DYN.value[k] : undefined; return d !== undefined ? d : (LD[k] || ''); };
+        const hasL = (k) => typeof labels.value[k] === 'string';
+        const T = (k) => (hasL(k) ? labels.value[k] : defOf(k));
+        // erasable: 비워 두는 것도 "고친 값"으로 친다(문구 삭제). 아니면 비우면 기본값으로 돌아간다.
+        const setL = (k, v, erasable) => {
+            v = cut(v, 2000);
+            if (v === defOf(k) || (!v.trim() && !erasable)) { if (hasL(k)) delete labels.value[k]; }
+            else labels.value[k] = v;
+        };
+        const cleanLabels = (o) => {
+            const out = {};
+            if (o && typeof o === 'object' && !Array.isArray(o)) Object.keys(o).slice(0, 200).forEach(k => { if (typeof o[k] === 'string' && k.length <= 40) out[k] = cut(o[k], 2000); });
+            return out;
+        };
+
+        // 미리보기에서 바로 고치는 글자. 글자만 다룬다(붙여넣기도 글자만) — v-html 을 쓰지 않는다.
+        const PLAIN_OK = (() => { try { const d = document.createElement('div'); d.contentEditable = 'plaintext-only'; return d.contentEditable === 'plaintext-only'; } catch (e) { return false; } })();
+        const Ed = {
+            props: { k: { type: String, required: true }, multi: Boolean, erasable: Boolean },
+            setup(p) {
+                const el = ref(null);
+                const read = () => { const e = el.value; if (!e) return ''; let t = (PLAIN_OK ? e.textContent : e.innerText) || ''; t = t.replace(/ /g, ' '); return p.multi ? t.replace(/\n+$/, '') : t.replace(/\s*\n\s*/g, ' '); };
+                const paint = () => { const e = el.value; if (e && document.activeElement !== e && e.textContent !== T(p.k)) e.textContent = T(p.k); };
+                onMounted(paint);
+                watch(() => [T(p.k), p.k], paint, { flush: 'post' });
+                const onInput = () => setL(p.k, read(), true);
+                const onBlur = () => { setL(p.k, p.multi ? read() : read().trim(), p.erasable); const e = el.value; if (e) e.textContent = T(p.k); };
+                const onKeydown = (ev) => {
+                    if (ev.key === 'Escape') { ev.target.blur(); return; }
+                    if (ev.key !== 'Enter') return;
+                    if (!p.multi) { ev.preventDefault(); ev.target.blur(); }
+                    else if (!PLAIN_OK) { ev.preventDefault(); document.execCommand('insertText', false, '\n'); }
+                };
+                const onPaste = (ev) => {
+                    if (PLAIN_OK && p.multi) return;
+                    ev.preventDefault();
+                    let t = (ev.clipboardData || window.clipboardData).getData('text') || '';
+                    if (!p.multi) t = t.replace(/\s*\r?\n\s*/g, ' ');
+                    document.execCommand('insertText', false, t);
+                };
+                return () => h('span', {
+                    ref: el, class: ['cm-ed', { multi: p.multi }], contenteditable: PLAIN_OK ? 'plaintext-only' : 'true', spellcheck: 'false', role: 'textbox',
+                    'aria-label': '문서 글자 고치기', 'data-k': p.k, 'data-ph': p.erasable ? '(문구 없음 — 눌러서 입력)' : defOf(p.k),
+                    onInput, onBlur, onKeydown, onPaste, onDrop: (ev) => ev.preventDefault()
+                });
+            }
+        };
+
+        const app = createApp({
             setup() {
-                // Document type selections
                 const docTypes = [
                     { label: '회의록', value: 'minutes', icon: 'ph-bold ph-users' },
                     { label: '개최 공고', value: 'notice', icon: 'ph-bold ph-megaphone' },
                     { label: '결과 보고서', value: 'report', icon: 'ph-bold ph-file-text' }
                 ];
+                const DOC_IDS = docTypes.map(d => d.value);
+                const hasADoc = !!window.ADoc;
 
-                // Statutory 8 core agenda items
-                const baseAgendaText = `1) 산업재해 예방계획의 수립
-2) 안전보건관리규정의 작성 및 변경
-3) 안전보건교육
-4) 작업환경측정 등 작업환경의 점검 및 개선
-5) 근로자의 건강진단 등 건강관리
-6) 산업재해에 관한 통계의 기록 및 유지
-7) 중대재해의 원인 조사 및 재발 방지대책 수립
-8) 유해하거나 위험한 기계·기구·설비를 도입한 경우 안전·보건조치
-9) 그 밖에 근로자의 안전 및 보건을 유지·증진시키기 위하여 필요한 사항`;
-
-                // Standard initial resolutions matching the 8 items
-                const initialResolutions = `1) 예방계획:
-2) 관리규정:
-3) 안전교육:
-4) 작업환경:
-5) 건강관리:
-6) 재해통계:
-7) 중대재해:
-8) 설비조치:
-9) 기타: `;
-
-                // 표준 예시 (예전 기본값 — 예시 창에서만 사용)
-                const standardExample = `1) 예방계획: 분기별 안전보건 목표 및 실행과제 전원 만장일치 원안 승인함.
-2) 관리규정: 현행 사내 안전보건관리규정의 적합성을 검토하고 현행 유지하기로 의결함.
-3) 안전교육: 정기안전보건교육 이수율 100% 달성을 위해 온라인 및 현장 집체교육 병행 실시.
-4) 작업환경: 작업환경측정 결과 유해인자 노출기준 미만 확인 및 국소배기장치 정기점검 유지.
-5) 건강관리: 일반/특수건강진단 유소견자 사후관리 프로그램 지속 운영 및 보호구 추가 지급.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 최근 3개월 무재해 유지 확인, 경미한 아차사고 발굴 건에 대한 작업발판 개선 완료.
-8) 설비조치: 유해위험설비 신규 도입 계획 없음 확인 (차기 도입 시 사전 위험성평가 시행).
-9) 기타: 전 근로자 대상 스트레칭 및 쾌적한 휴게시설 위생관리를 지속하기로 가결함.`;
-
-                // Standard notice instructions
-                const defaultNoticeInstructions = `1. 각 위원님께서는 지각이나 결석 없이 정시에 참석하여 주시기 바랍니다.
-2. 부득이한 사정으로 참석이 어려운 위원께서는 사전에 간사(안전관리자)에게 통보하여 주시기 바랍니다.
-3. 회의 안건과 관련된 자료는 사전에 검토하여 주시기 바라며, 추가 안건이 있는 경우 회의 개최 3일 전까지 제출해 주시기 바랍니다.
-4. 본 회의는 산업안전보건법 제24조에 따른 법정 의무 회의이므로 전원 참석을 원칙으로 합니다.`;
-
-                // Main Reactive Form State
+                // ---------- 상태(기본값 → 저장값 정리)
                 const profile = readProfile();
+                const freshForm = () => {
+                    const now = new Date();
+                    return {
+                        mid: newId(), docType: 'minutes', year: now.getFullYear(), quarter: quarterOf(now), type: '정기', round: Number(quarterOf(now)),
+                        company: profile.company || '', bodyName: DEFAULT_BODY, datetime: toLocal(now), location: '',
+                        noticeDate: '', reportDate: '', noticeNo: '', noticeFooter: '', reportFooter: '안전보건관리책임자',
+                        noticeInstructions: defaultNoticeInstructions, others: '', nextDatetime: '', nextLocation: '',
+                        manual: { year: false, quarter: false, round: false, noticeDate: false, reportDate: false, noticeNo: false },
+                        hideAppr: { minutes: false, notice: true, report: false }
+                    };
+                };
+                const freshEmployer = () => [
+                    { title: '안전보건관리책임자', name: profile.resp || '', absent: false, proxy: false, proxyName: '' },
+                    { title: '안전관리자', name: profile.manager || '', absent: false, proxy: false, proxyName: '' },
+                    { title: '보건관리자', name: profile.health || '', absent: false, proxy: false, proxyName: '' }
+                ];
+                const freshEmployee = () => [
+                    { title: '근로자대표', name: '', absent: false, proxy: false, proxyName: '' },
+                    { title: '근로자위원', name: '', absent: false, proxy: false, proxyName: '' },
+                    { title: '근로자위원', name: '', absent: false, proxy: false, proxyName: '' }
+                ];
+                const DT_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, D_RE = /^\d{4}-\d{2}-\d{2}$/;
+                const cleanForm = (f) => {
+                    const d = freshForm();
+                    if (!f || typeof f !== 'object' || Array.isArray(f)) return d;
+                    if (typeof f.mid === 'string' && f.mid) d.mid = cut(f.mid, 40);
+                    if (DOC_IDS.includes(f.docType)) d.docType = f.docType;
+                    if (f.type === '정기' || f.type === '임시') d.type = f.type;
+                    if (typeof f.datetime === 'string' && (f.datetime === '' || (DT_RE.test(f.datetime) && parseDt(f.datetime)))) d.datetime = f.datetime.slice(0, 16);
+                    const dt = parseDt(d.datetime);
+                    const y = Number(f.year), q = String(f.quarter), r = Number(f.round);
+                    const yOk = Number.isInteger(y) && y >= 1900 && y <= 2999, qOk = ['1', '2', '3', '4'].includes(q), rOk = Number.isInteger(r) && r >= 1 && r <= 9999;
+                    d.year = yOk ? y : (dt ? dt.getFullYear() : d.year);
+                    d.quarter = qOk ? q : (dt ? quarterOf(dt) : d.quarter);
+                    d.round = rOk ? r : Number(d.quarter);
+                    ['company', 'location', 'noticeFooter', 'reportFooter', 'nextLocation'].forEach(k => { if (typeof f[k] === 'string') d[k] = cut(f[k], 200); });
+                    if (typeof f.bodyName === 'string' && f.bodyName.trim()) d.bodyName = cut(f.bodyName, 80);
+                    if (typeof f.noticeNo === 'string') d.noticeNo = cut(f.noticeNo, 40);
+                    ['noticeInstructions', 'others'].forEach(k => { if (typeof f[k] === 'string') d[k] = cut(f[k], 6000); });
+                    ['noticeDate', 'reportDate'].forEach(k => { if (typeof f[k] === 'string' && D_RE.test(f[k]) && parseDt(f[k])) d[k] = f[k]; });
+                    if (typeof f.nextDatetime === 'string' && DT_RE.test(f.nextDatetime) && parseDt(f.nextDatetime)) d.nextDatetime = f.nextDatetime.slice(0, 16);
+                    // 예전 기본 명의('산업안전보건위원회 위원장')는 위원회 이름을 따라가도록 비워 둔다
+                    if (d.noticeFooter === DEFAULT_BODY + ' 위원장') d.noticeFooter = '';
+                    const m = f.manual && typeof f.manual === 'object' ? f.manual : null;
+                    if (m) Object.keys(d.manual).forEach(k => { d.manual[k] = m[k] === true; });
+                    else {
+                        // 예전 저장값(자동/직접 구분이 없던 때): 자동으로 나올 값과 다르면 사용자가 고친 것으로 보고 그대로 둔다
+                        d.manual.year = !!dt && yOk && d.year !== dt.getFullYear();
+                        d.manual.quarter = !!dt && qOk && d.quarter !== quarterOf(dt);
+                        d.manual.round = d.type === '정기' && rOk && d.round !== Number(d.quarter);
+                    }
+                    if (!d.noticeDate) d.manual.noticeDate = false;
+                    if (!d.reportDate) d.manual.reportDate = false;
+                    if (!d.noticeNo.trim()) d.manual.noticeNo = false;
+                    const ha = f.hideAppr && typeof f.hideAppr === 'object' ? f.hideAppr : {};
+                    DOC_IDS.forEach(k => { if (typeof ha[k] === 'boolean') d.hideAppr[k] = ha[k]; });
+                    return d;
+                };
+                const cleanReps = (a) => Array.isArray(a) && a.length ? a.slice(0, 40).map(r => {
+                    const absent = !!(r && r.absent);
+                    return { title: cut(r && r.title, 60), name: cut(r && r.name, 60), absent, proxy: !absent && !!(r && r.proxy), proxyName: cut(r && r.proxyName, 60) };
+                }) : null;
+                const cleanItems = (a) => Array.isArray(a) ? a.slice(0, 60).map(r => ({ title: cut(r && r.title, 300), content: cut(r && r.content, 6000), result: cut(r && r.result, 40) })) : null;
+                const cleanPrev = (a) => Array.isArray(a) ? a.slice(0, 60).map(r => ({ content: cut(r && r.content, 500), owner: cut(r && r.owner, 60), due: D_RE.test(str(r && r.due)) ? r.due : '', result: ['', '완료', '진행 중', '미이행'].includes(r && r.result) ? r.result : '' })) : [];
+                const cleanActions = (a) => Array.isArray(a) ? a.slice(0, 60).map(r => ({ content: cut(r && r.content, 500), owner: cut(r && r.owner, 60), due: D_RE.test(str(r && r.due)) ? r.due : '', status: ['진행 중', '완료', '보류'].includes(r && r.status) ? r.status : '진행 중' })) : [];
+                const cleanSnap = (s) => {
+                    s = s && typeof s === 'object' && !Array.isArray(s) ? s : {};
+                    const f = s.formData && typeof s.formData === 'object' ? s.formData : {};
+                    let items = cleanItems(s.items);
+                    if (!items) items = (typeof f.agenda === 'string' || typeof f.resolutions === 'string') ? itemsFromText(f.agenda, f.resolutions) : freshItems();
+                    return {
+                        formData: cleanForm(s.formData), employerReps: cleanReps(s.employerReps) || freshEmployer(), employeeReps: cleanReps(s.employeeReps) || freshEmployee(),
+                        items, prev: cleanPrev(s.prev), actions: cleanActions(s.actions), labels: cleanLabels(s.labels)
+                    };
+                };
+
                 const saved = readSaved();
-                const formData = ref({
-                    docType: 'minutes',
-                    year: new Date().getFullYear(),
-                    quarter: String(Math.floor((new Date().getMonth() + 3) / 3)),
-                    type: '정기',
-                    round: Math.floor((new Date().getMonth() + 3) / 3),
-                    company: profile.company || '',
-                    datetime: localNow(),
-                    location: '',
-                    noticeFooter: '산업안전보건위원회 위원장',
-                    reportFooter: '안전보건관리책임자',
-                    agenda: baseAgendaText,
-                    resolutions: initialResolutions,
-                    noticeInstructions: defaultNoticeInstructions,
-                    others: ''
-                });
+                const init = cleanSnap(saved);
+                if (saved && !init.formData.company && profile.company) init.formData.company = profile.company;
+                const formData = ref(init.formData);
+                const employerReps = ref(init.employerReps);
+                const employeeReps = ref(init.employeeReps);
+                const items = ref(init.items);
+                const prev = ref(init.prev);
+                const actions = ref(init.actions);
+                labels.value = init.labels;
+                const history = ref(saved && Array.isArray(saved.history)
+                    ? saved.history.filter(x => x && typeof x === 'object' && x.snap && typeof x.snap === 'object').slice(0, HIST_MAX).map(x => { const s = cleanSnap(x.snap); return { id: s.formData.mid, saved: Number(x.saved) || 0, snap: s }; })
+                    : []);
 
-                // Representative Lists
-                // 저장해 둔 사업장 정보(안전보건관리책임자·안전관리자·보건관리자 이름)가 있으면 미리 채운다
-                const employerReps = ref([
-                    { title: '안전보건관리책임자', name: profile.resp || '', absent: false },
-                    { title: '안전관리자', name: profile.manager || '', absent: false },
-                    { title: '보건관리자', name: profile.health || '', absent: false }
-                ]);
-
-                const employeeReps = ref([
-                    { title: '근로자대표', name: '', absent: false },
-                    { title: '근로자위원', name: '', absent: false },
-                    { title: '근로자위원', name: '', absent: false }
-                ]);
-
-                // 지난번에 적은 내용 이어 쓰기(공고 → 회의록 → 결과 보고를 같은 내용으로 이어 만들 수 있게 전부 되살린다)
-                const cleanReps = (a) => Array.isArray(a) && a.length ? a.map(r => ({ title: String((r && r.title) || ''), name: String((r && r.name) || ''), absent: !!(r && r.absent) })) : null;
-                let restored = false;
-                if (saved) {
-                    const f = saved.formData || {};
-                    Object.keys(formData.value).forEach(k => { if (typeof f[k] === typeof formData.value[k]) formData.value[k] = f[k]; });
-                    if (!['minutes', 'notice', 'report'].includes(formData.value.docType)) formData.value.docType = 'minutes';
-                    employerReps.value = cleanReps(saved.employerReps) || employerReps.value;
-                    employeeReps.value = cleanReps(saved.employeeReps) || employeeReps.value;
-                    if (!formData.value.company && profile.company) formData.value.company = profile.company;
-                    restored = true;
-                }
-                const saveMsg = ref(restored ? '지난번 내용을 이어서 엽니다' : '');
+                // ---------- 저장
+                const snapshot = () => JSON.parse(JSON.stringify({ formData: formData.value, employerReps: employerReps.value, employeeReps: employeeReps.value, items: items.value, prev: prev.value, actions: actions.value, labels: labels.value }));
+                const saveMsg = ref(saved ? '지난번 내용을 이어서 엽니다' : '');
                 let saveTimer = null;
                 const persist = () => {
+                    saveTimer = null;
                     try {
-                        localStorage.setItem(STORE_KEY, JSON.stringify({ saved: Date.now(), formData: formData.value, employerReps: employerReps.value, employeeReps: employeeReps.value }));
+                        localStorage.setItem(STORE_KEY, JSON.stringify(Object.assign({ v: 2, saved: Date.now() }, snapshot(), { history: history.value })));
                         saveMsg.value = '이 기기에 저장됨';
-                    } catch (e) { saveMsg.value = '저장하지 못했습니다'; }
+                        return true;
+                    } catch (e) { saveMsg.value = '저장하지 못했습니다(저장 공간 부족 또는 사생활 보호 모드)'; return false; }
                 };
-                watch([formData, employerReps, employeeReps], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
+                watch([formData, employerReps, employeeReps, items, prev, actions, labels], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
                 window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); persist(); } });
 
-                // 회의 일시를 바꾸면 연도·분기를 따라 맞춘다(직접 고칠 수 있음)
-                watch(() => formData.value.datetime, (v) => {
-                    const dt = new Date(v);
-                    if (!v || isNaN(dt.getTime())) return;
-                    formData.value.year = dt.getFullYear();
-                    formData.value.quarter = String(Math.floor(dt.getMonth() / 3) + 1);
+                // ---------- 자동으로 채우는 값(직접 고친 것은 건드리지 않는다)
+                const applyAuto = () => {
+                    const f = formData.value, m = f.manual, dt = parseDt(f.datetime);
+                    if (dt) {
+                        if (!m.year && f.year !== dt.getFullYear()) f.year = dt.getFullYear();
+                        if (!m.quarter && f.quarter !== quarterOf(dt)) f.quarter = quarterOf(dt);
+                    }
+                    if (!m.round && f.type === '정기' && f.round !== Number(f.quarter)) f.round = Number(f.quarter);
+                };
+                watch(() => { const f = formData.value, m = f.manual; return [f.datetime, f.type, f.quarter, m.year, m.quarter, m.round].join('|'); }, applyAuto);
+                const touch = (k) => { formData.value.manual[k] = true; };
+                const unsetManual = (k) => {
+                    const f = formData.value;
+                    f.manual[k] = false;
+                    if (k === 'noticeDate' || k === 'reportDate' || k === 'noticeNo') f[k] = '';
+                    applyAuto();
+                };
+                const yearShown = computed(() => { const y = Number(formData.value.year); return Number.isInteger(y) && y > 0 ? y : ''; });
+                const roundShown = computed(() => { const r = Number(formData.value.round); return Number.isInteger(r) && r > 0 ? r : ''; });
+                const bodyName = computed(() => formData.value.bodyName.trim() || DEFAULT_BODY);
+                const noticeDateEff = computed(() => {
+                    const f = formData.value;
+                    if (f.manual.noticeDate && f.noticeDate) return f.noticeDate;
+                    const t = today(), md = (f.datetime || '').slice(0, 10);
+                    return md && md < t ? md : t;   // 공고는 회의 전에 내므로 오늘(회의일이 이미 지났으면 회의일)
+                });
+                const reportDateEff = computed(() => { const f = formData.value; return f.manual.reportDate && f.reportDate ? f.reportDate : ((f.datetime || '').slice(0, 10) || today()); });
+                const noticeNoEff = computed(() => { const f = formData.value; return f.manual.noticeNo ? f.noticeNo : `${yearShown.value}-${roundShown.value}`; });
+                const setDate = (k, v) => { const f = formData.value; if (D_RE.test(v)) { f[k] = v; f.manual[k] = true; } else { f[k] = ''; f.manual[k] = false; } };
+                const setNoticeNo = (v) => { const f = formData.value; f.noticeNo = cut(v, 40); f.manual.noticeNo = !!v.trim(); };
+                const manualList = computed(() => {
+                    const m = formData.value.manual, t = formData.value.docType, a = [];
+                    if (m.year) a.push({ k: 'year', label: '연도' });
+                    if (m.quarter) a.push({ k: 'quarter', label: '분기' });
+                    if (m.round && formData.value.type === '정기') a.push({ k: 'round', label: '회차' });
+                    if (t === 'notice' && m.noticeDate) a.push({ k: 'noticeDate', label: '공고일' });
+                    if (t === 'notice' && m.noticeNo) a.push({ k: 'noticeNo', label: '공고 번호' });
+                    if (t === 'report' && m.reportDate) a.push({ k: 'reportDate', label: '보고일' });
+                    return a;
                 });
 
-                // 출석·정족수(시행령 제37조제2항: 근로자위원·사용자위원 각 과반수 출석으로 개의)
+                // ---------- 출석·정족수(시행령 제37조제2항: 근로자위원·사용자위원 각 과반수 출석으로 개의)
                 const presentEmployer = computed(() => employerReps.value.filter(r => !r.absent).length);
                 const presentEmployee = computed(() => employeeReps.value.filter(r => !r.absent).length);
                 const presentCount = computed(() => presentEmployer.value + presentEmployee.value);
+                const totalRepsCount = computed(() => employerReps.value.length + employeeReps.value.length);
                 const balanced = computed(() => employerReps.value.length === employeeReps.value.length);
                 const quorumOk = computed(() => presentEmployer.value * 2 > employerReps.value.length && presentEmployee.value * 2 > employeeReps.value.length);
-                const titlePrefix = computed(() => formData.value.type === '임시'
-                    ? `${formData.value.year}년 제${formData.value.round}차(임시)`
-                    : `${formData.value.year}년 ${formData.value.quarter}분기`);
+                const repStatus = (r) => (r.absent ? 'out' : (r.proxy ? 'proxy' : 'in'));
+                const setRepStatus = (r, v) => { r.absent = v === 'out'; r.proxy = v === 'proxy'; };
+                const repName = (r) => (r.proxy && !r.absent ? (r.proxyName.trim() ? `${r.name} (대리 ${r.proxyName.trim()})` : `${r.name} (대리)`).trim() : r.name);
+                const listReps = (a) => a.map(r => (r.name.trim() ? `${r.title}(${r.name.trim()})` : r.title)).filter(s => s.trim()).join(', ');
+                const formattedEmployerReps = computed(() => listReps(employerReps.value));
+                const formattedEmployeeReps = computed(() => listReps(employeeReps.value));
+                const absentNames = computed(() => employerReps.value.concat(employeeReps.value).filter(r => r.absent).map(r => (r.name.trim() ? `${r.title} ${r.name.trim()}` : r.title)).filter(s => s.trim()).join(', '));
+                const repRows = computed(() => {
+                    const n = Math.max(employerReps.value.length, employeeReps.value.length, 3), rows = [];
+                    for (let i = 0; i < n; i++) rows.push({ i, cells: [employerReps.value[i] || null, employeeReps.value[i] || null] });
+                    return rows;
+                });
+                const repGroups = computed(() => [
+                    { key: 'employer', label: T('h.er'), cls: 'b', list: employerReps.value },
+                    { key: 'employee', label: T('h.ee'), cls: 'g', list: employeeReps.value }
+                ]);
+                const addRep = (type) => {
+                    const list = type === 'employer' ? employerReps.value : employeeReps.value;
+                    if (list.length >= 40) { showToast('위원은 한쪽에 40명까지 넣을 수 있습니다.', 'error'); return; }
+                    list.push({ title: type === 'employer' ? '사용자위원' : '근로자위원', name: '', absent: false, proxy: false, proxyName: '' });
+                };
+                const removeRep = (type, index) => {
+                    const list = type === 'employer' ? employerReps.value : employeeReps.value;
+                    if (list.length <= 1) return;
+                    const r = list[index];
+                    if (r && r.name.trim() && !window.confirm(`${r.title} ${r.name} 위원을 명단에서 지울까요?`)) return;
+                    list.splice(index, 1);
+                };
+                const moveRow = (list, idx, d) => { const j = idx + d; if (j < 0 || j >= list.length) return; const x = list.splice(idx, 1)[0]; list.splice(j, 0, x); };
 
-                // A4 미리보기를 오른쪽 칸 너비에 맞춘다
+                // ---------- 안건
+                const anyResult = computed(() => items.value.some(it => it.result.trim()));
+                const itemsTitled = computed(() => items.value.filter(it => it.title.trim()));
+                const itemsFilledCount = computed(() => items.value.filter(it => it.content.trim()).length);
+                const addItem = () => {
+                    if (items.value.length >= 60) { showToast('안건은 60개까지 넣을 수 있습니다.', 'error'); return; }
+                    items.value.push({ title: '', content: '', result: '' });
+                    nextTick(() => { const el = document.querySelectorAll('[data-item]')[items.value.length - 1]; if (el) { const inp = el.querySelector('input'); if (inp) inp.focus(); } });
+                };
+                const removeItem = (idx) => {
+                    const it = items.value[idx];
+                    if (it && (it.content.trim() || it.result.trim()) && !window.confirm(`${idx + 1}번 안건과 적어 둔 내용을 지울까요?`)) return;
+                    items.value.splice(idx, 1);
+                };
+                const resetItems = () => {
+                    if (!window.confirm('안건 제목을 법 제24조제2항의 심의·의결 사항 9개로 되돌릴까요?\n같은 제목의 안건에 적어 둔 내용은 그대로 두고, 그 밖의 안건은 지워집니다.')) return;
+                    const old = items.value;
+                    items.value = freshItems().map(n => { const o = old.find(x => x.title.trim() === n.title); return o ? { title: n.title, content: o.content, result: o.result } : n; });
+                    showToast('안건을 법정 심의·의결 사항 9개로 되돌렸습니다.');
+                };
+                const clearItemContents = () => {
+                    if (!itemsFilledCount.value && !anyResult.value) { showToast('지울 내용이 없습니다.', 'info'); return; }
+                    if (!window.confirm('모든 안건의 심의·의결 내용과 결과를 비울까요? (안건 제목은 그대로 둡니다)')) return;
+                    items.value.forEach(it => { it.content = ''; it.result = ''; });
+                    showToast('심의·의결 내용을 비웠습니다.');
+                };
+                const resetNoticeInstructions = () => {
+                    const cur = formData.value.noticeInstructions.trim();
+                    if (cur && cur !== defaultNoticeInstructions && !window.confirm('안내 및 협조사항을 기본 문구로 바꿀까요? 지금 적어 둔 내용은 지워집니다.')) return;
+                    formData.value.noticeInstructions = defaultNoticeInstructions;
+                    showToast('기본 안내 및 협조사항을 넣었습니다.');
+                };
+
+                // ---------- 이행 확인·후속 조치·다음 회의
+                const prevFilled = computed(() => prev.value.filter(p => p.content.trim()));
+                const actionsFilled = computed(() => actions.value.filter(a => a.content.trim()));
+                const addPrev = () => { if (prev.value.length < 60) prev.value.push({ content: '', owner: '', due: '', result: '' }); };
+                const addAction = () => { if (actions.value.length < 60) actions.value.push({ content: '', owner: '', due: '', status: '진행 중' }); };
+                const plusMonths = (v, n) => {
+                    const d = parseDt(v); if (!d) return '';
+                    const day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + n);
+                    d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+                    return toLocal(d);
+                };
+                const suggestNext = () => {
+                    const v = plusMonths(formData.value.datetime, 3);
+                    if (!v) { showToast('회의 일시를 먼저 넣어 주세요.', 'error'); return; }
+                    formData.value.nextDatetime = v;
+                };
+                const fmtDt = (v) => {
+                    if (!v) return '';
+                    const dt = parseDt(v); if (!dt) return '';
+                    return `${dt.getFullYear()}년 ${p2(dt.getMonth() + 1)}월 ${p2(dt.getDate())}일(${WD[dt.getDay()]}) ${p2(dt.getHours())}시 ${p2(dt.getMinutes())}분`;
+                };
+                const fmtDate = (v) => { const dt = parseDt(v); return dt ? `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일` : ''; };
+                const shortDate = (v) => (D_RE.test(v || '') ? v.replace(/-/g, '.') : '');
+                const formattedDatetime = computed(() => fmtDt(formData.value.datetime));
+                const nextText = computed(() => {
+                    const f = formData.value, a = fmtDt(f.nextDatetime);
+                    if (!a) return '';
+                    const loc = f.nextLocation.trim() || f.location.trim();
+                    return loc ? `${a} / ${loc}` : a;
+                });
+
+                // ---------- 제목·자동 문구
+                const titlePrefix = computed(() => formData.value.type === '임시'
+                    ? `${yearShown.value}년 제${roundShown.value}차(임시)`
+                    : `${yearShown.value}년 ${formData.value.quarter}분기`);
+                DYN = computed(() => {
+                    const f = formData.value, b = bodyName.value, y = yearShown.value, r = roundShown.value;
+                    return {
+                        'title.minutes': `${titlePrefix.value} ${b} 회의록`,
+                        'title.notice': `${y}년도 제${r}차 ${b} ${f.type}회의 개최 공고`,
+                        'title.report': `${titlePrefix.value} ${b} 회의 결과 보고`,
+                        'meetName': `${f.company.trim() || '(사업장명)'} ${y}년도 제${r}차 ${b} (${f.type}회의)`,
+                        'notice.body': `산업안전보건법 제24조에 따라 ${y}년도 제${r}차 ${b} ${f.type}회의를 아래와 같이 개최하오니, 위원께서는 참석하여 주시기 바랍니다.`,
+                        'report.closing': `위와 같이 ${b} 회의 결과를 보고합니다.`
+                    };
+                });
+                const isOver = (k) => hasL(k);
+                const resetLabel = (k) => { if (hasL(k)) delete labels.value[k]; };
+                const overCount = computed(() => Object.keys(labels.value).length);
+                const resetAllLabels = () => {
+                    if (!window.confirm('문서 제목·표 머리글·항목 이름·문구를 모두 기본값으로 되돌릴까요?')) return;
+                    labels.value = {};
+                    showToast('제목·항목 이름·문구를 기본값으로 되돌렸습니다.');
+                };
+                const noteKeys = computed(() => {
+                    const t = formData.value.docType;
+                    if (t === 'minutes') return [{ k: 'foot.minutes', label: '회의록 맨 아래 문구', rows: 2 }];
+                    if (t === 'notice') return [{ k: 'notice.body', label: '공고문 머리말', rows: 3 }, { k: 'stamp.notice', label: '명의 옆 글자', rows: 1 }];
+                    return [{ k: 'report.closing', label: '보고서 맺음말', rows: 2 }, { k: 'stamp.report', label: '명의 옆 글자', rows: 1 }];
+                });
+                const docLabel = computed(() => (docTypes.find(d => d.value === formData.value.docType) || docTypes[0]).label);
+                const showAppr = computed(() => !formData.value.hideAppr[formData.value.docType]);
+                const apprOn = computed(() => hasADoc && showAppr.value);
+                const setShowAppr = (on) => { formData.value.hideAppr[formData.value.docType] = !on; };
+
+                // ---------- 사진(공통 모듈, IndexedDB)
+                const photoCount = ref(0);
+                const syncPhotos = () => { if (hasADoc) ADoc.countPhotos(PHOTO_DOC).then(c => { photoCount.value = c.total; }); };
+                if (hasADoc) { ADoc.onPhotos(PHOTO_DOC, syncPhotos); syncPhotos(); }
+                const pickPhoto = () => { if (hasADoc) ADoc.pickPhoto(PHOTO_DOC, ''); };
+
+                // ---------- 알림
+                const toast = ref({ visible: false, message: '', type: 'success' });
+                let toastTimer = null;
+                const showToast = (message, type = 'success') => {
+                    clearTimeout(toastTimer);
+                    toast.value = { visible: true, message, type };
+                    toastTimer = setTimeout(() => { toast.value.visible = false; }, type === 'error' ? 4200 : 2600);
+                };
+
+                // ---------- 단계(접이식)
+                const open = ref({ basic: true });
+                const shortWhen = computed(() => { const dt = parseDt(formData.value.datetime); return dt ? `${dt.getMonth() + 1}.${dt.getDate()}(${WD[dt.getDay()]}) ${p2(dt.getHours())}:${p2(dt.getMinutes())}` : '일시 미정'; });
+                const steps = computed(() => {
+                    const f = formData.value, notice = f.docType === 'notice', a = [];
+                    const allReps = employerReps.value.concat(employeeReps.value);
+                    const named = allReps.filter(r => r.name.trim()).length;
+                    a.push({ id: 'basic', title: '기본 회의 정보', sum: `${titlePrefix.value}${f.type === '정기' ? ' 정기' : ''} · ${shortWhen.value}${f.location.trim() ? ' · ' + f.location.trim() : ''}`,
+                        done: !!(f.company.trim() && parseDt(f.datetime) && f.location.trim()), warn: '' });
+                    a.push({ id: 'reps', title: '위원 구성·출석', sum: notice ? `위원 ${totalRepsCount.value}명 · 성명 입력 ${named}명` : `위원 ${totalRepsCount.value}명 · 출석 ${presentCount.value}명`,
+                        done: named === allReps.length && balanced.value && (notice || quorumOk.value),
+                        warn: !balanced.value ? `위원 수가 다릅니다 (사용자 ${employerReps.value.length} · 근로자 ${employeeReps.value.length})` : (!notice && !quorumOk.value ? `과반수 출석 미달 (사용자 ${presentEmployer.value}/${employerReps.value.length} · 근로자 ${presentEmployee.value}/${employeeReps.value.length})` : '') });
+                    const n = items.value.length, filled = itemsFilledCount.value, untitled = items.value.filter(it => !it.title.trim()).length;
+                    a.push({ id: 'items', title: notice ? '안건·협조사항' : '안건·의결사항', sum: notice ? `안건 ${n}건` : `안건 ${n}건 · 내용 입력 ${filled}건`,
+                        done: n > 0 && !untitled && (notice || filled === n), warn: n === 0 ? '안건이 없습니다' : (untitled ? `제목이 빈 안건 ${untitled}건` : '') });
+                    if (!notice) a.push({ id: 'follow', title: '이행 확인·후속 조치', sum: `이행 확인 ${prevFilled.value.length}건 · 후속 조치 ${actionsFilled.value.length}건${f.nextDatetime ? ' · 다음 회의 정함' : ''}`, done: prevFilled.value.length + actionsFilled.value.length > 0, warn: '' });
+                    a.push({ id: 'style', title: '결재란·제목·문구' + (notice ? '' : '·사진'), sum: `결재란 ${showAppr.value ? '넣음' : '뺌'}${overCount.value ? ' · 고친 글자 ' + overCount.value + '군데' : ''}${!notice && photoCount.value ? ' · 사진 ' + photoCount.value + '장' : ''}`, done: false, warn: '' });
+                    a.push({ id: 'archive', title: '보관·다음 회의', sum: history.value.length ? `보관한 기록 ${history.value.length}건` : '보관한 기록 없음', done: false, warn: '' });
+                    a.push({ id: 'law', title: '법령 메모', sum: '법 제24조 · 시행령 제34조~제39조', done: false, warn: '' });
+                    return a;
+                });
+                const allOpen = computed(() => steps.value.every(s => open.value[s.id]));
+                const toggleStep = (id) => { open.value[id] = !open.value[id]; };
+                const toggleAll = () => { const v = !allOpen.value; const o = {}; steps.value.forEach(s => { o[s.id] = v; }); open.value = o; };
+                const goNext = (i) => {
+                    const cur = steps.value[i], nx = steps.value[i + 1];
+                    if (!nx) return;
+                    open.value[cur.id] = false; open.value[nx.id] = true;
+                    nextTick(() => { const el = document.querySelector(`[data-step="${nx.id}"]`); if (el) { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); const b = el.querySelector('.cm-step-h'); if (b) b.focus({ preventScroll: true }); } });
+                };
+                const tab = ref('in');
+                const setTab = (t) => { tab.value = t; nextTick(() => { fitPreview(); window.scrollTo(0, 0); }); };
+                const changeDocType = (type) => { if (DOC_IDS.includes(type)) formData.value.docType = type; };
+
+                // ---------- 보관·다음 회의
+                const histTitle = (f) => (f.type === '임시' ? `${f.year}년 제${f.round}차 임시회의` : `${f.year}년 ${f.quarter}분기 정기회의 (제${f.round}차)`);
+                const historyView = computed(() => history.value.map(x => {
+                    const f = x.snap.formData, sd = x.saved ? new Date(x.saved) : null;
+                    return { id: x.id, title: histTitle(f), sub: [fmtDate(f.datetime) || '일시 미정', f.company, sd && !isNaN(sd.getTime()) ? `보관 ${sd.getFullYear()}.${p2(sd.getMonth() + 1)}.${p2(sd.getDate())}` : ''].filter(Boolean).join(' · ') };
+                }));
+                const putHistory = () => {
+                    const snap = snapshot(), id = snap.formData.mid;
+                    const next = [{ id, saved: Date.now(), snap }].concat(history.value.filter(x => x.id !== id));
+                    const dropped = next.length > HIST_MAX, before = history.value;
+                    history.value = next.slice(0, HIST_MAX);
+                    clearTimeout(saveTimer);
+                    if (!persist()) { history.value = before; showToast('저장 공간이 부족해 보관하지 못했습니다. 지난 기록을 일부 지워 주세요.', 'error'); return null; }
+                    return { dropped };
+                };
+                const archiveOnly = () => {
+                    const r = putHistory();
+                    if (r) showToast(r.dropped ? `보관했습니다. ${HIST_MAX}건을 넘어 가장 오래된 기록이 지워졌습니다.` : '이번 회의를 기록에 보관했습니다.');
+                };
+                const loadSnap = (s) => {
+                    formData.value = s.formData; employerReps.value = s.employerReps; employeeReps.value = s.employeeReps;
+                    items.value = s.items; prev.value = s.prev; actions.value = s.actions; labels.value = s.labels;
+                };
+                const archiveAndNext = () => {
+                    if (!window.confirm('이번 회의를 보관하고 다음 회의를 새로 작성할까요?\n· 위원 명단·안건 제목은 그대로, 심의·의결 내용은 비웁니다.\n· 끝나지 않은 후속 조치는 "이행 확인"으로 옮깁니다.' + (photoCount.value ? '\n· 첨부한 사진은 비워집니다(기록에 남지 않으니 필요하면 먼저 인쇄·PDF로 저장하세요).' : ''))) return;
+                    if (!putHistory()) return;
+                    const f = formData.value;
+                    const carry = actions.value.filter(a => a.content.trim() && a.status !== '완료').map(a => ({ content: a.content, owner: a.owner, due: a.due, result: '' }));
+                    const stillOpen = prev.value.filter(p => p.content.trim() && p.result !== '완료').map(p => ({ content: p.content, owner: p.owner, due: p.due, result: '' }));
+                    const nextDt = f.nextDatetime || plusMonths(f.datetime, 3) || toLocal(new Date());
+                    const keepRound = f.manual.round || f.type === '임시';
+                    const nf = Object.assign({}, f, {
+                        mid: newId(), docType: 'notice', type: '정기', datetime: nextDt, location: f.nextLocation.trim() || f.location,
+                        round: keepRound ? (Number(f.round) || 0) + 1 : f.round, others: '', nextDatetime: '', nextLocation: '', noticeDate: '', reportDate: '', noticeNo: '',
+                        manual: { year: false, quarter: false, round: f.manual.round, noticeDate: false, reportDate: false, noticeNo: false },
+                        hideAppr: Object.assign({}, f.hideAppr)
+                    });
+                    formData.value = nf;
+                    applyAuto();
+                    employerReps.value.concat(employeeReps.value).forEach(r => { r.absent = false; r.proxy = false; r.proxyName = ''; });
+                    items.value = items.value.map(it => ({ title: it.title, content: '', result: '' }));
+                    prev.value = stillOpen.concat(carry);
+                    actions.value = [];
+                    const lb = Object.assign({}, labels.value); VOLATILE.forEach(k => { delete lb[k]; }); labels.value = lb;
+                    if (hasADoc && photoCount.value) ADoc.clearPhotos(PHOTO_DOC);
+                    open.value = { basic: true };
+                    scrollTop();
+                    showToast(prev.value.length ? `다음 회의(개최 공고부터)를 열었습니다. 끝나지 않은 조치 ${prev.value.length}건을 이행 확인으로 옮겼습니다.` : '다음 회의를 열었습니다. 개최 공고부터 작성합니다.');
+                };
+                const scrollTop = () => { const p = document.getElementById('inPane'); if (p) p.scrollTop = 0; window.scrollTo(0, 0); };
+                const openHistory = (id) => {
+                    const x = history.value.find(y => y.id === id);
+                    if (!x) return;
+                    if (x.id !== formData.value.mid && !window.confirm('지금 작성 중인 내용을 이 기록으로 바꿉니다.\n지금 내용을 남기려면 취소하고 "지금 내용만 보관"을 먼저 누르세요. 계속할까요?')) return;
+                    loadSnap(cleanSnap(JSON.parse(JSON.stringify(x.snap))));
+                    scrollTop();
+                    showToast('보관한 회의 기록을 열었습니다.');
+                };
+                const deleteHistory = (id) => {
+                    if (!window.confirm('이 회의 기록을 지울까요? 되돌릴 수 없습니다.')) return;
+                    history.value = history.value.filter(x => x.id !== id);
+                    clearTimeout(saveTimer); persist();
+                    showToast('기록을 지웠습니다.');
+                };
+                const resetAll = () => {
+                    if (!window.confirm('작성 중인 내용(회의 정보·위원 명단·안건·문구)을 모두 지우고 처음 상태로 돌릴까요?\n보관한 회의 기록과 결재란은 그대로 둡니다.' + (photoCount.value ? '\n첨부한 사진도 지워집니다.' : ''))) return;
+                    loadSnap(cleanSnap(null));
+                    if (hasADoc && photoCount.value) ADoc.clearPhotos(PHOTO_DOC);
+                    open.value = { basic: true };
+                    scrollTop();
+                    showToast('처음 상태로 되돌렸습니다.');
+                };
+
+                // ---------- 작성 예시(문안일 뿐 — 적용 뒤 반드시 실제 내용으로 고쳐 쓴다)
+                const examples = [
+                    { title: '법정 심의사항 표준 예시', description: '법 제24조제2항의 심의·의결 사항 9개를 모두 다루는 기본 문안',
+                      lines: ['분기별 안전보건 목표 및 실행과제를 원안대로 의결함.', '현행 안전보건관리규정의 적합성을 검토하고 현행대로 유지하기로 의결함.', '정기 안전보건교육을 온라인 및 현장 집체교육으로 병행 실시하기로 함.', '작업환경측정 결과를 보고받고 국소배기장치 정기점검을 유지하기로 함.', '건강진단 유소견자 사후관리 프로그램을 계속 운영하기로 함.', '분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.', '해당 분기 중대재해 없음을 확인함.', '유해·위험 설비 신규 도입 계획 없음을 확인함(도입 시 사전 위험성평가 실시).', '휴게시설 위생관리를 계속하기로 의결함.'] },
+                    { title: '위험성평가·아차사고 발굴 중심', description: '근로자 참여 위험성평가와 아차사고 신고 활성화',
+                      lines: ['정기 위험성평가 및 근로자 참여 상시 위험성평가 추진계획을 승인함.', '아차사고 신고 포상제 도입에 따른 안전보건관리규정 개정안을 의결함.', '작업 전 안전점검회의(TBM) 교육을 전 부서에 실시하기로 함.', '분진·소음 발생 공정을 특별점검하고 국소배기장치 후드 유속을 점검하기로 함.', '특수건강진단 대상자 전원 수검 및 청력보존 프로그램을 수립하기로 함.', '분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.', '동종업종 중대재해 사례를 공유하고 유사 공정을 개선하기로 함.', '신규 장비 반입 전 안전인증 적합 여부를 사전 심의하기로 함.', '교대근무자 휴게환경을 개선하기로 함.'] },
+                    { title: '하절기 폭염·호우 대응', description: '온열질환 예방과 풍수해 대비 점검',
+                      lines: ['하절기 온열질환 예방 특별계획(물·그늘·휴식)을 확정함.', '폭염 시 옥외작업 휴식·중지 기준을 안전보건관리규정에 반영하기로 함.', '온열질환 응급처치 요령 및 심폐소생술 실습 교육을 실시하기로 함.', '고열 발생 작업장의 환기 상태를 집중 점검하기로 함.', '온열질환 고위험군 근로자 보건상담을 실시하기로 함.', '분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.', '침수 우려 구역의 차수판 설치 상태를 점검하기로 함.', '이동식 에어컨 및 차양막 추가 배치를 승인함.', '식염포도당 비치 및 보랭 장구 지급을 의결함.'] },
+                    { title: '동절기 한파·화재 예방', description: '한랭질환·결빙 미끄러짐·난방기구 화재 대책',
+                      lines: ['동절기 화재·폭발 및 한랭질환 예방 종합대책을 승인함.', '동절기 옥외작업 안전수칙 및 난방기구 취급 기준을 정함.', '소화기 사용법 훈련 및 밀폐공간 질식 예방 교육을 실시하기로 함.', '옥외 통로 결빙 구간에 제설제를 비치하고 미끄럼방지 조치를 하기로 함.', '옥외작업자 건강상태를 매일 확인하기로 함.', '분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.', '계단·보행로 미끄러짐 위험 구간의 안전난간과 조명을 보강하기로 함.', '동파 방지 열선 및 누전차단기 작동 상태를 전수 점검하기로 함.', '옥외 근로자 방한용품 지급을 의결함.'] },
+                    { title: '지게차·중량물 운반 안전', description: '하역운반기계 충돌 방지와 근골격계 부담작업',
+                      lines: ['하역운반기계 충돌 재해예방 계획 및 전용통로 구획을 승인함.', '지게차 운전자 자격 확인 및 작업계획서 사전 승인 절차를 규정에 반영하기로 함.', '지게차 사각지대 및 신호수 배치에 관한 교육을 실시하기로 함.', '보행자 통로와 지게차 주행로를 분리하기로 함.', '중량물 취급자 근골격계 검진 및 사후관리를 실시하기로 함.', '분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.', '적재물 낙하 위험 구간에 안전망을 설치하기로 함.', '지게차 후방감지장치 설치를 승인함.', '작업 전 스트레칭을 정례화하기로 함.'] },
+                    { title: '기계 끼임 예방(제조업)', description: '방호장치 개선과 정비 시 잠금·표지(LOTO)',
+                      lines: ['프레스 및 컨베이어 방호장치 개선계획을 원안대로 의결함.', '정비·보수 시 잠금장치 및 표지 부착 절차를 규정에 반영하기로 함.', '기계 위험점 실습형 교육을 분기 내 실시하기로 함.', '소음 기준 초과 공정의 방음 대책을 추진하기로 함.', '소음성 난청 유소견자에게 청력보호구를 맞춤 지급하기로 함.', '분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.', '센서 임의 해제 방지를 위한 인터록 키 관리 체계를 정하기로 함.', '노후 컨베이어 비상정지장치 증설을 승인함.', '입식 작업자 피로예방 매트를 교체하기로 함.'] },
+                    { title: '화학물질·MSDS 관리', description: '화학물질 취급 안전과 국소배기장치 성능',
+                      lines: ['화학물질 취급구역 누출감지기 증설 및 비상대응훈련 계획을 승인함.', '신규 화학물질 반입 전 물질안전보건자료(MSDS) 사전 검토 절차를 규정에 반영하기로 함.', 'MSDS 경고표지 및 보호구 착용 교육을 실시하기로 함.', '국소배기장치 성능을 전수 점검하고 필터를 교체하기로 함.', '화학물질 취급자 특수건강진단 및 유소견자 면담을 실시하기로 함.', '분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.', '소분 용기 경고표지 누락 방지를 위해 전용 용기를 통일하기로 함.', '세안·세척설비 보수 공사를 의결함.', '호흡보호구 교체 지급을 의결함.'] }
+                ];
+                const isExOpen = ref(false);
+                const openExModal = () => { isExOpen.value = true; nextTick(() => { const b = document.getElementById('exClose'); if (b) b.focus(); }); };
+                const applyExample = (opt) => {
+                    const same = items.value.length === BASE_TITLES.length && items.value.every((it, i) => it.title.trim() === BASE_TITLES[i]);
+                    const has = itemsFilledCount.value > 0 || anyResult.value;
+                    const msg = same
+                        ? (has ? '지금 적어 둔 심의·의결 내용을 이 예시 문안으로 바꿉니다. 계속할까요?' : '')
+                        : '안건을 법정 심의·의결 사항 9개로 바꾸고 예시 문안을 넣습니다. 지금 안건과 내용은 지워집니다. 계속할까요?';
+                    if (msg && !window.confirm(msg)) return;
+                    items.value = BASE_TITLES.map((t, i) => ({ title: t, content: opt.lines[i] || '', result: '' }));
+                    isExOpen.value = false;
+                    showToast(`예시 문안을 넣었습니다 — 실제 회의 내용으로 고쳐 쓰세요.`);
+                };
+
+                // ---------- 미리보기 크기 맞춤
                 const fitPreview = () => {
                     const col = document.getElementById('preview-col');
-                    if (!col) return;
+                    if (!col || !col.clientWidth) return;
                     const a4 = 210 * 96 / 25.4;
-                    document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 2) / a4))));
+                    document.documentElement.style.setProperty('--pz', String(Math.min(1, Math.max(0.3, (col.clientWidth - 4) / a4))));
                 };
                 onMounted(() => {
                     fitPreview(); window.addEventListener('resize', fitPreview);
-                    // 처음 그릴 때는 칸 너비가 아직 0일 수 있어, 배치가 끝난 뒤와 칸 크기가 바뀔 때 다시 맞춘다
                     requestAnimationFrame(fitPreview); setTimeout(fitPreview, 300);
                     const col = document.getElementById('preview-col');
                     if (col && window.ResizeObserver) new ResizeObserver(fitPreview).observe(col);
                 });
 
-                const photoDataUrl = ref(null);
+                // ---------- 인쇄·PDF
+                const printDoc = () => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); window.print(); };
                 const isGeneratingPDF = ref(false);
-
-                // Toast system
-                const toast = ref({ visible: false, message: '', type: 'success' });
-                const showToast = (message, type = 'success') => {
-                    toast.value = { visible: true, message, type };
-                    setTimeout(() => {
-                        toast.value.visible = false;
-                    }, 2600);
-                };
-
-                // Clean computed properties to eliminate parser bugs with parentheses in template literals
-                const formattedEmployerReps = computed(() => {
-                    return employerReps.value
-                        .map(r => r.name ? `${r.title}(${r.name})` : r.title)
-                        .filter(Boolean)
-                        .join(', ');
-                });
-
-                const formattedEmployeeReps = computed(() => {
-                    return employeeReps.value
-                        .map(r => r.name ? `${r.title}(${r.name})` : r.title)
-                        .filter(Boolean)
-                        .join(', ');
-                });
-
-                const totalRepsCount = computed(() => {
-                    return employerReps.value.length + employeeReps.value.length;
-                });
-
-                const maxRepCount = computed(() => {
-                    return Math.max(employerReps.value.length, employeeReps.value.length, 3);
-                });
-
-                const formattedDatetime = computed(() => {
-                    if (!formData.value.datetime) return '미정';
-                    const dt = new Date(formData.value.datetime);
-                    if (isNaN(dt.getTime())) return formData.value.datetime;
-                    const y = dt.getFullYear();
-                    const m = String(dt.getMonth() + 1).padStart(2, '0');
-                    const d = String(dt.getDate()).padStart(2, '0');
-                    const hh = String(dt.getHours()).padStart(2, '0');
-                    const mm = String(dt.getMinutes()).padStart(2, '0');
-                    return `${y}년 ${m}월 ${d}일 ${hh}시 ${mm}분`;
-                });
-
-                const formatJustDate = computed(() => {
-                    if (!formData.value.datetime) return '202X년 X월 X일';
-                    const dt = new Date(formData.value.datetime);
-                    if (isNaN(dt.getTime())) return '202X년 X월 X일';
-                    return `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
-                });
-
-                // Representative list helpers
-                const addRep = (type) => {
-                    if (type === 'employer') {
-                        employerReps.value.push({ title: '사용자위원', name: '', absent: false });
-                    } else {
-                        employeeReps.value.push({ title: '근로자위원', name: '', absent: false });
-                    }
-                };
-
-                const removeRep = (type, index) => {
-                    if (type === 'employer') {
-                        employerReps.value.splice(index, 1);
-                    } else {
-                        employeeReps.value.splice(index, 1);
-                    }
-                };
-
-                const changeDocType = (type) => {
-                    formData.value.docType = type;
-                    const label = docTypes.find(d => d.value === type)?.label;
-                    showToast(`${label} 양식으로 전환되었습니다.`);
-                };
-
-                // Photo handling
-                const handleFileUpload = (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    if (file.size > 5 * 1024 * 1024) {
-                        showToast('파일 크기는 5MB 이하여야 합니다.', 'error');
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        photoDataUrl.value = event.target.result;
-                        showToast('회의 현장 사진이 첨부되었습니다.');
-                    };
-                    reader.readAsDataURL(file);
-                };
-
-                const removePhoto = () => {
-                    photoDataUrl.value = null;
-                    const el = document.getElementById('photo-input');
-                    if (el) el.value = '';
-                    showToast('첨부 사진이 제거되었습니다.');
-                };
-
-                // Reset helpers
-                const resetToDefault = () => {
-                    if (!window.confirm('회의 안건·의결사항·협조사항·기타 사항을 기본값으로 되돌릴까요?\n(위원 명단과 기본 회의 정보는 그대로 둡니다)')) return;
-                    formData.value.agenda = baseAgendaText;
-                    formData.value.resolutions = initialResolutions;
-                    formData.value.noticeInstructions = defaultNoticeInstructions;
-                    formData.value.others = '';
-                    showToast('안건·의결사항을 기본값으로 되돌렸습니다.');
-                };
-
-                const resetNoticeInstructions = () => {
-                    formData.value.noticeInstructions = defaultNoticeInstructions;
-                    showToast('표준 안내 및 협조사항이 입력되었습니다.');
-                };
-
-                // 1) Comprehensive AI Package Pool
-                const aiOptionsPool = [
-                    {
-                        badge: '기본 준수형',
-                        title: '표준 법정 의무 준수 및 정기점검 세트',
-                        description: '법 제24조 제2항 심의·의결 사항 9개를 모두 다루는 표준 예시입니다.',
-                        agenda: baseAgendaText,
-                        resolutions: standardExample,
-                        others: '차기 회의는 분기 말 점검 결과 집계 후 소집하기로 함.'
-                    },
-                    {
-                        badge: '위험성평가 특화',
-                        title: '상시 위험성평가 및 아차사고 발굴 중심 세트',
-                        description: '중대재해 감축 로드맵에 맞춘 자기규율 예방체계 구축 및 현장 위험요인 발굴 중심 세트입니다.',
-                        agenda: baseAgendaText,
-                        resolutions: `1) 예방계획: 반기별 정기 위험성평가 및 근로자 참여 상시 위험성평가 추진계획 승인.
-2) 관리규정: 아차사고 신고 포상제 도입에 따른 사내 안전규정 개정안 심의 의결.
-3) 안전교육: 작업 전 10분 TBM(Toolbox Meeting) 실효성 강화 교육 전 부서 시행.
-4) 작업환경: 분진 및 소음 발생 공정 특별점검 및 국소배기장치 후드 유속 점검.
-5) 건강관리: 특수건강진단 대상자 100% 수검 및 청력보존 프로그램 수립.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 동종업종 중대재해 사례 공유 및 당사 유사공정 수평전개 개선 조치.
-8) 설비조치: 생산라인 자동화 신규 장비 반입 전 안전인증 적합성 사전 심의.
-9) 기타: 교대근무자 뇌심혈관질환 예방을 위한 심리상담 및 휴게환경 개선.`,
-                        others: '근로자 상시 위험제안 창구를 사내 인트라넷에 개설하기로 함.'
-                    },
-                    {
-                        badge: '하절기 계절대응',
-                        title: '하절기 폭염·호우·온열질환 집중 예방 세트',
-                        description: '하절기 옥외작업 폭염 대응 3대 수칙 준수 및 풍수해 대비 점검 중심 세트입니다.',
-                        agenda: baseAgendaText,
-                        resolutions: `1) 예방계획: 하절기 폭염 대비 온열질환 예방 특별계획(물·그늘·휴식) 확정.
-2) 관리규정: 체감온도 35도 이상 시 옥외작업 중지 기준을 안전보건규정에 명문화.
-3) 안전교육: 열사병·열탈진 응급처치 요령 및 심폐소생술(CPR) 전사원 실습 교육.
-4) 작업환경: 고열 발생 보일러실 및 조리실 환기 상태 집중 점검 및 제빙기 확충.
-5) 건강관리: 고혈압·당뇨 등 온열질환 고위험군 근로자 1:1 보건상담 매주 시행.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 침수 우려 지하 피트 및 배전반 침수방지 차수판 설치 상태 점검 완료.
-8) 설비조치: 이동식 에어컨 및 이동형 차양막 현장 추가 배치 승인.
-9) 기타: 현장 식염포도당 비치 및 쿨토시·아이스조끼 등 개인 보랭장구 지급.`,
-                        others: '폭염경보 발령 시 오후 2시~5시 단축근무 지침을 준수하기로 함.'
-                    },
-                    {
-                        badge: '동절기 한파예방',
-                        title: '동절기 한파·빙판길 전도·화재 예방 세트',
-                        description: '동절기 한랭질환 예방, 결빙 미끄러짐 방지 및 난방기구 화재 안전대책 중심 세트입니다.',
-                        agenda: baseAgendaText,
-                        resolutions: `1) 예방계획: 동절기 화재·폭발 및 한랭질환 예방 종합대책 심의 승인.
-2) 관리규정: 동절기 옥외작업 안전수칙 및 난방기구 취급 기준 정립.
-3) 안전교육: 밀폐공간 갈탄/방동제 중독 예방 및 소화기 사용법 훈련 실시.
-4) 작업환경: 옥외 하역장 및 통로 결빙구간 친환경 제설제 비치 및 미끄럼방지 테이프 시공.
-5) 건강관리: 야외작업자 저체온증·동상 예방을 위한 건강상태 일일 모니터링.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 계단실 및 보행로 미끄러짐 위험구간 안전난간 보강 및 조명 개선.
-8) 설비조치: 동파 방지용 열선 피복 점검 및 누전차단기 정상작동 전수검사.
-9) 기타: 옥외 근로자용 방한복, 핫팩, 방한장갑 적기 지급 완료.`,
-                        others: '난방용 온열기구 무단 반입을 금지하고 정기 화재 순찰을 강화함.'
-                    },
-                    {
-                        badge: '물류·운반 특화',
-                        title: '지게차 충돌방지 및 중량물 운반 안전 세트',
-                        description: '지게차 스마트 안전장치 도입 및 근골격계 부담작업 예방에 특화된 세트입니다.',
-                        agenda: baseAgendaText,
-                        resolutions: `1) 예방계획: 하역운반기계 충돌 재해예방 특별계획 및 전용통로 구획 승인.
-2) 관리규정: 지게차 운전자 자격확인 및 작업계획서 사전 승인제도 의무화 규정화.
-3) 안전교육: 지게차 사각지대 위험성 및 신호수 지정에 관한 특별안전교육.
-4) 작업환경: 보행자 통로와 지게차 주행로의 완전 분리(방호울타리 시공).
-5) 건강관리: 중량물 다빈도 취급자 대상 근골격계 정밀검진 및 물리치료 연계.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 과거 물류창고 적재물 낙하 아차사고 구간 랙(Rack) 안전망 설치.
-8) 설비조치: 지게차 어라운드뷰(AI 카메라) 및 후방감지센서 전 차량 설치 승인.
-9) 기타: 상하차 작업 전 교대별 맞춤 스트레칭 프로그램 정례화.`,
-                        others: '물류동 내 지게차 제한속도(10km/h) 준수 계도를 매주 실시하기로 함.'
-                    }
-                ];
-
-                // 2) Detailed Resolutions Pool (8 distinct scenarios)
-                const resolutionsPool = [
-                    {
-                        badge: '표준 의무이행',
-                        title: '법정 심의사항 표준 예시',
-                        resolutions: standardExample
-                    },
-                    {
-                        badge: '위험기계·끼임예방',
-                        title: '제조업 회전체 끼임방지 및 안전방호 강화안',
-                        resolutions: `1) 예방계획: 프레스 및 컨베이어 방호장치 전수 개선계획 원안 승인함.
-2) 관리규정: 정비·보수 시 LOTO(잠금장치 및 표지부착) 절차 위반 시 제재 규정 신설.
-3) 안전교육: 기계 위험점(협착점, 물림점) 실습형 안전체험 교육 분기 내 이수.
-4) 작업환경: 소음 기준 초과 프레스 공정에 대한 방음벽 보강공사 추진.
-5) 건강관리: 소음성 난청 유소견자 방음보호구 1:1 맞춤 피팅 및 지급.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 설비 청소 중 센서 임의해제 방지를 위한 인터록 키 관리 체계 확립.
-8) 설비조치: 노후 컨베이어 비상정지풀코드 스위치 전 구간 추가 증설 승인.
-9) 기타: 장시간 입식 작업자 피로예방 매트 교체 및 하지정맥류 예방 스트레칭 도입.`
-                    },
-                    {
-                        badge: '하절기 폭염대책',
-                        title: '하절기 온열질환 및 풍수해 대응 가결안',
-                        resolutions: `1) 예방계획: 6~8월 온열질환 집중 예방기간 지정 및 예방물품 보급안 가결.
-2) 관리규정: 기상청 폭염특보 연계 단계별 휴식시간 부여(시간당 10~15분) 사규 반영.
-3) 안전교육: 전 직원 대상 온열질환 자가진단표 작성 및 이상 징후 발생 시 조치요령 교육.
-4) 작업환경: 옥외 하역장 그늘막 및 대형 냉풍기 4대 추가 설치 의결.
-5) 건강관리: 옥외근로자 혈압·맥박 매일 출근 시 체크 및 고위험군 작업 전환 배려.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 배수로 토사 준설 및 강풍 대비 가설물 결속 보강 작업 완료 확인.
-8) 설비조치: 우천 시 감전사고 예방을 위한 이동형 누전차단기 방수형 일괄 교체.
-9) 기타: 시원한 생수, 식염포도당 상시 비치 및 보냉 물병 전원 지급 완료.`
-                    },
-                    {
-                        badge: '화학물질·MSDS',
-                        title: '화학물질 취급안전 및 국소배기장치 성능개선안',
-                        resolutions: `1) 예방계획: 유해화학물질 취급구역 누출감지기 증설 및 비상대응훈련 계획 승인.
-2) 관리규정: 신규 화학물질 반입 전 MSDS(물질안전보건자료) 사전 검토 의무화.
-3) 안전교육: MSDS 경고표지 숙지 및 보호구 착용법 분기 2시간 집중 교육.
-4) 작업환경: 국소배기장치 제어풍속 법정기준 충족 여부 전수점검 및 필터 교체.
-5) 건강관리: 특정 화학물질 취급자 특수건강진단 조기 실시 및 유소견자 면담.
-6) 재해통계: 분기 산업재해·아차사고 발생 현황을 보고받고 통계 기록을 유지하기로 함.
-7) 중대재해: 세척제 소분 용기 MSDS 경고표지 누락 방지를 위한 전용 용기 통일.
-8) 설비조치: 세안·세척설비 온수 공급장치 설치 및 방류턱 크랙 보수 공사 가결.
-9) 기타: 호흡기 보호를 위한 특급 방진·방독마스크 최신형 교체 지급.`
-                    }
-                ];
-
-                // Modal state
-                const isAiModalOpen = ref(false);
-                const isResolutionsModalOpen = ref(false);
-                const currentAiOptions = ref([]);
-                const currentResolutionsOptions = ref([]);
-
-                const shuffleArray = (arr, count) => {
-                    const shuffled = [...arr].sort(() => 0.5 - Math.random());
-                    return shuffled.slice(0, count);
-                };
-
-                const refreshAiOptions = () => {
-                    currentAiOptions.value = shuffleArray(aiOptionsPool, 3);
-                };
-
-                const refreshResolutionsOptions = () => {
-                    currentResolutionsOptions.value = shuffleArray(resolutionsPool, 3);
-                };
-
-                const openAiModal = () => {
-                    refreshAiOptions();
-                    isAiModalOpen.value = true;
-                };
-
-                const openResolutionsModal = () => {
-                    refreshResolutionsOptions();
-                    isResolutionsModalOpen.value = true;
-                };
-
-                const selectAiOption = (opt) => {
-                    formData.value.agenda = opt.agenda;
-                    formData.value.resolutions = opt.resolutions;
-                    if (opt.others) formData.value.others = opt.others;
-                    isAiModalOpen.value = false;
-                    showToast(`[${opt.title}] 세트가 적용되었습니다.`);
-                };
-
-                const selectResolutionOption = (opt) => {
-                    formData.value.resolutions = opt.resolutions;
-                    isResolutionsModalOpen.value = false;
-                    showToast(`[${opt.title}] 의결사항이 적용되었습니다.`);
-                };
-
-                const printDoc = () => { window.print(); };
                 // html2pdf(약 0.9MB)는 처음 누를 때만 불러온다
                 const loadHtml2pdf = () => new Promise((resolve, reject) => {
                     if (window.html2pdf) return resolve();
@@ -1159,80 +1464,51 @@
                 });
                 const downloadPDF = async () => {
                     const element = document.getElementById('print-area');
-                    if (!element) return;
-
-                    isGeneratingPDF.value = true;
+                    if (!element || isGeneratingPDF.value) return;
+                    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
                     showToast('PDF를 만들고 있습니다…', 'info');
                     try { await loadHtml2pdf(); } catch (e) {
-                        isGeneratingPDF.value = false;
                         showToast("PDF 도구를 불러오지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
                         return;
                     }
+                    const wasTab = tab.value;
+                    tab.value = 'out';
+                    isGeneratingPDF.value = true;   // 화면용 버튼·안내를 숨긴다(#print-area.cm-pdfing)
                     // 줄여 보이던 미리보기를 실제 크기로 돌려놓고 찍는다
                     document.documentElement.style.setProperty('--pz', '1');
                     await nextTick();
-
-                    const docNameMap = {
-                        minutes: '회의록',
-                        notice: '개최공고',
-                        report: '결과보고서'
+                    const f = formData.value;
+                    const docNameMap = { minutes: '회의록', notice: '개최공고', report: '결과보고서' };
+                    const part = f.type === '임시' ? `제${roundShown.value}차_임시` : `${f.quarter}분기`;
+                    const fileName = `${f.company.trim() || '사업장'}_${yearShown.value}년_${part}_${docNameMap[f.docType] || '문서'}.pdf`.replace(/[\\/:*?"<>|\s]+/g, '_');
+                    const opt = { margin: 0, filename: fileName, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'figure', '.cm-sign'] } };
+                    const done = (ok) => {
+                        isGeneratingPDF.value = false; tab.value = wasTab;
+                        nextTick(fitPreview);
+                        if (ok) showToast('PDF 파일을 저장했습니다.'); else showToast("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
                     };
-                    const fileName = `${formData.value.company || '사업장'}_${formData.value.year}년_${formData.value.quarter}분기_${docNameMap[formData.value.docType] || '문서'}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
-
-                    const opt = {
-                        margin: 0,
-                        filename: fileName,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true, logging: false },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        isGeneratingPDF.value = false; fitPreview();
-                        showToast('PDF 파일을 저장했습니다.');
-                    }).catch(() => {
-                        isGeneratingPDF.value = false; fitPreview();
-                        showToast("PDF를 만들지 못했습니다. '인쇄 / PDF 저장'을 이용하세요.", 'error');
-                    });
+                    try { await html2pdf().set(opt).from(element).save(); done(true); } catch (e) { done(false); }
                 };
 
-                // Return reactive bindings
                 return {
-                    docTypes,
-                    formData,
-                    employerReps,
-                    employeeReps,
-                    photoDataUrl,
-                    isGeneratingPDF,
-                    toast,
-                    formattedEmployerReps,
-                    formattedEmployeeReps,
-                    totalRepsCount,
-                    maxRepCount,
-                    formattedDatetime,
-                    formatJustDate,
-                    addRep,
-                    removeRep,
-                    changeDocType,
-                    handleFileUpload,
-                    removePhoto,
-                    resetToDefault,
-                    resetNoticeInstructions,
-                    isAiModalOpen,
-                    isResolutionsModalOpen,
-                    currentAiOptions,
-                    currentResolutionsOptions,
-                    openAiModal,
-                    openResolutionsModal,
-                    refreshAiOptions,
-                    refreshResolutionsOptions,
-                    selectAiOption,
-                    selectResolutionOption,
-                    downloadPDF,
-                    printDoc, saveMsg, presentEmployer, presentEmployee, presentCount, balanced, quorumOk, titlePrefix
+                    docTypes, formData, employerReps, employeeReps, items, prev, actions, history, historyView, HIST_MAX, APPR_KEY, PHOTO_DOC, hasADoc,
+                    saveMsg, toast, steps, open, allOpen, toggleStep, toggleAll, goNext, tab, setTab, changeDocType, docLabel,
+                    touch, unsetManual, manualList, bodyName, noticeDateEff, reportDateEff, noticeNoEff, setDate, setNoticeNo,
+                    presentEmployer, presentEmployee, presentCount, totalRepsCount, balanced, quorumOk, repStatus, setRepStatus, repName, repRows, repGroups,
+                    formattedEmployerReps, formattedEmployeeReps, absentNames, addRep, removeRep, moveRow,
+                    anyResult, itemsTitled, addItem, removeItem, resetItems, clearItemContents, resetNoticeInstructions,
+                    prevFilled, actionsFilled, addPrev, addAction, suggestNext, formattedDatetime, fmtDate, shortDate, nextText,
+                    T, setL, isOver, resetLabel, overCount, resetAllLabels, noteKeys, showAppr, apprOn, setShowAppr,
+                    photoCount, pickPhoto, archiveOnly, archiveAndNext, openHistory, deleteHistory, resetAll,
+                    examples, isExOpen, openExModal, applyExample, printDoc, downloadPDF, isGeneratingPDF
                 };
             }
-        }).mount('#app');
+        });
+        app.component('ed', Ed);
+        // 공통 모듈(assets/docs.js)이 그리는 자리. Vue는 이 요소 안쪽을 건드리지 않는다.
+        app.directive('appr', { mounted(el, b) { if (window.ADoc) ADoc.mountApproval(el, b.value); } });
+        app.directive('photos', { mounted(el, b) { if (window.ADoc) ADoc.mountPhotos(el, b.value, { title: '회의 사진', cols: 2 }); } });
+        app.mount('#app');
     </script>
 </body>
 </html>

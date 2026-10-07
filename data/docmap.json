@@ -4,7 +4,7 @@
   "groups": [
     {"id": "org", "title": "조직·선임", "docs": [
       {"name": "안전보건관리책임자·관리감독자 지정(선임) 문서", "basis": "법 제15조·제16조", "href": "tools/forms/appoint/"},
-      {"name": "안전관리자·보건관리자 선임 보고서(선임 후 14일 이내)", "basis": "영 제16조제6항·제20조제3항 · 규칙 별지 제2호서식", "href": "resources/?q=선임 등 보고서", "cond": "선임 대상"},
+      {"name": "안전관리자·보건관리자 선임 보고서(선임 후 14일 이내)", "basis": "영 제16조제6항·제20조제3항 · 규칙 별지 제2호서식", "href": "resources/f/form-appoint-report/", "cond": "선임 대상"},
       {"name": "안전관리·보건관리 위탁 계약서(위탁 시)", "basis": "법 제17조제5항·제18조제5항", "href": "resources/?q=업무계약서", "cond": "위탁 시"},
       {"name": "안전보건 관계자 자격·직무교육 이수 관리대장", "basis": "법 제32조 · 규칙 제29조", "href": "tools/forms/edu-ledger/"},
       {"name": "직무분장표(직무·책임 분담)", "basis": "법 제15조~제19조 · 영 제15조·제18조·제22조·제25조", "href": "tools/duties/"}
@@ -20,7 +20,7 @@
       {"name": "안전 및 보건에 관한 협의체 회의록(매월)", "basis": "법 제64조제1항제1호 · 규칙 제79조", "href": "tools/council/", "cond": "도급 시"}
     ]},
     {"id": "risk", "title": "위험성평가", "docs": [
-      {"name": "위험성평가 실시 규정(절차)", "basis": "사업장 위험성평가에 관한 지침", "href": "resources/?q=위험성평가"},
+      {"name": "위험성평가 실시 규정(절차)", "basis": "사업장 위험성평가에 관한 지침", "href": "resources/?q=위험성평가에 관한 지침"},
       {"name": "위험성평가 결과서(최초·정기·수시)와 근로자 참여·공유 기록", "basis": "법 제36조 · 규칙 제37조·제37조의4(3년 보존)", "href": "tools/risk/"},
       {"name": "작업 전 안전점검회의(TBM) 기록", "basis": "법 제36조제4항(상시 주지 노력)", "href": "tools/tbm/"}
     ]},
@@ -43,20 +43,20 @@
       {"name": "폭염작업 체감온도 기록", "basis": "기준규칙 제559조·제560조·제562조", "href": "tools/heat/", "cond": "폭염 작업"}
     ]},
     {"id": "ppe", "title": "보호구·표지", "docs": [
-      {"name": "보호구 지급 대장", "basis": "기준규칙 제32조", "href": "resources/?q=보호구"},
+      {"name": "보호구 지급 대장", "basis": "기준규칙 제32조", "href": "laws/krule/#j32"},
       {"name": "안전보건표지 설치(외국인근로자 모국어 포함)", "basis": "법 제37조", "href": "resources/signs/"}
     ]},
     {"id": "chem", "title": "화학물질·작업환경", "docs": [
       {"name": "MSDS 비치·게시, 경고표지, 작업공정별 관리요령", "basis": "법 제114조·제115조", "href": "tools/msds/", "cond": "화학물질 취급"},
       {"name": "작업환경측정 결과보고서(5년 보존, 일부 30년)", "basis": "법 제125조 · 법 제164조", "href": "tools/retention/", "cond": "측정 대상 작업장"},
-      {"name": "특별관리물질 취급일지", "basis": "기준규칙 제439조", "href": "resources/?q=특별관리물질", "cond": "해당 물질 취급"}
+      {"name": "특별관리물질 취급일지", "basis": "기준규칙 제439조", "href": "laws/krule/#j439", "cond": "해당 물질 취급"}
     ]},
     {"id": "health", "title": "건강관리", "docs": [
       {"name": "일반·특수·배치전 건강진단 결과표(5년 보존, 일부 30년)", "basis": "법 제129조~제133조 · 법 제164조", "href": "tools/retention/"},
       {"name": "뇌·심혈관질환 발병위험도 평가", "basis": "기준규칙 제669조(직무스트레스 등)", "href": "tools/cvd/", "cond": "필요 시"}
     ]},
     {"id": "accident", "title": "재해·비상대응", "docs": [
-      {"name": "산업재해조사표(재해 발생일부터 1개월 이내)", "basis": "법 제57조 · 규칙 제73조", "href": "resources/?q=산업재해조사표"},
+      {"name": "산업재해조사표(재해 발생일부터 1개월 이내)", "basis": "법 제57조 · 규칙 제73조", "href": "resources/f/form-accident-report/"},
       {"name": "중대산업재해 대응 매뉴얼과 반기 점검", "basis": "중처법 영 제4조제8호", "href": "tools/forms/sapa-emergency/", "cond": "5명 이상"},
       {"name": "아차사고·재해 발생 기록과 재발방지 대책", "basis": "법 제57조 · 중처법 제4조제1항제2호", "href": "tools/forms/log-safety/"}
     ]},

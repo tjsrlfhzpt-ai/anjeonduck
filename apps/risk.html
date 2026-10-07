@@ -6,136 +6,228 @@
 <title>위험성평가서 작성기 | SafePlum</title>
 <meta name="description" content="빈도×강도(5×4) 방식 위험성평가서를 업종별 위험요인으로 빠르게 작성하고 A4로 인쇄하세요. 무료, 회원가입 없음.">
 <link rel="icon" href="../../assets/favicon.png" type="image/png">
+<style id="pgSize">@page { size: A4 portrait; margin: 10mm; }</style>
 <style>
-  @page { size: A4; margin: 0; }
   :root { --ink: #222; --line: #b9c2cc; --head: #263746; --blue: #3182ce; }
   body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; margin: 0; padding: 0; background-color: #555; }
-
   .sitebar { background:#fff; border-bottom:1px solid #d8dee8; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
-  .sitebar a { color:#1F6FD1; text-decoration:none; font-weight:700; }
+  .sitebar a { color:#1F6FD1; text-decoration:none; font-weight:700; white-space:nowrap; }
   .sitebar span { color:#5b6b80; }
 
-  .control-panel {
-    background-color: #1b365d; color: white; padding: 12px; text-align: center;
-    position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #002244;
-    display: flex; justify-content: center; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  }
-  .ctrl-note { width:100%; font-size:12px; color:#c9d6ea; margin:0; }
-  .btn { padding: 8px 16px; cursor: pointer; border-radius: 5px; font-weight: bold; border: none; font-size: 14px; }
-  .btn:hover { filter: brightness(1.1); }
-  .btn-green { background: #27ae60; color: white; }
-  .btn-blue { background: #2980b9; color: white; }
-  .btn-red { background: #c0392b; color: white; }
-  .dept-select-wrap { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 5px; display: flex; align-items: center; gap: 10px; }
-  .dept-select-wrap select { padding: 6px; font-size: 14px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+  .control-panel { background:#1b365d; color:#fff; padding:10px 12px; position:sticky; top:0; z-index:100; border-bottom:2px solid #002244;
+    display:flex; justify-content:center; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 4px 6px rgba(0,0,0,.3); }
+  .ctrl-note { width:100%; font-size:12px; color:#c9d6ea; margin:0; text-align:center; }
+  .ctrl-note:empty { display:none; }
+  .btn { padding:8px 14px; cursor:pointer; border-radius:5px; font-weight:bold; border:none; font-size:14px; font-family:inherit; }
+  .btn:hover { filter:brightness(1.1); }
+  .btn-green { background:#27ae60; color:#fff; } .btn-blue { background:#2980b9; color:#fff; } .btn-red { background:#c0392b; color:#fff; } .btn-grey { background:#5b6b80; color:#fff; }
+  .btn-sm { padding:4px 10px; font-size:12px; }
+  .dept-select-wrap { background:rgba(255,255,255,.1); padding:5px 12px; border-radius:5px; display:flex; align-items:center; gap:8px; font-size:14px; }
+  .dept-select-wrap select { padding:6px; font-size:14px; border-radius:4px; font-weight:bold; cursor:pointer; max-width:100%; }
+  .more { position:relative; }
+  .more > summary { list-style:none; display:inline-block; }
+  .more > summary::-webkit-details-marker { display:none; }
+  .more-box { position:absolute; right:0; top:calc(100% + 8px); width:300px; background:#fff; color:#222; border:1px solid #1b365d; border-radius:8px; padding:12px; text-align:left; box-shadow:0 10px 30px rgba(0,0,0,.4); font-size:13px; display:flex; flex-direction:column; gap:8px; z-index:5; }
+  .more-box label { display:flex; align-items:center; gap:8px; font-weight:600; }
+  .more-box select { height:30px; border:1px solid #c7ccd4; border-radius:5px; font:inherit; flex:1; }
+  .more-box .btn { text-align:center; font-size:13px; padding:7px 10px; }
+  .more-box p { margin:0; font-size:11.5px; color:#555; line-height:1.5; }
+  .mtabs { display:none; }
 
-  .page-container {
-    background-color: white; width: 210mm; min-height: 297mm;
-    margin: 10mm auto; padding: 12mm; box-sizing: border-box;
-    box-shadow: 0 0 20px rgba(0,0,0,0.7); position: relative; color: var(--ink);
+  .page-container { background:#fff; width:210mm; min-height:297mm; margin:10mm auto; padding:12mm; box-sizing:border-box; box-shadow:0 0 20px rgba(0,0,0,.7); position:relative; color:var(--ink); }
+  body.land .page-container { width:297mm; min-height:210mm; }
+
+  .doc-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; border-bottom:3px double #1b365d; padding-bottom:8px; margin-bottom:8px; }
+  .doc-head > div:first-child { flex:1; min-width:0; }
+  h1 { margin:0; font-size:26px; letter-spacing:.1em; color:#1b365d; }
+  .sub-title { color:#667085; font-size:12px; margin:0 0 10px; }
+  .section-title { font-size:15px; font-weight:800; border-left:4px solid #1b365d; padding-left:8px; margin:18px 0 8px; color:#1b365d; display:flex; align-items:center; gap:8px; }
+  .section-title > [data-lb] { flex:1; min-width:0; }
+  .sec-tg { display:none; }
+
+  table { width:100%; border-collapse:collapse; table-layout:fixed; margin-bottom:10px; }
+  th, td { border:1px solid var(--line); padding:6px; vertical-align:middle; font-size:11px; line-height:1.4; word-break:keep-all; overflow-wrap:anywhere; }
+  th { background:var(--head); color:#fff; text-align:center; font-weight:bold; }
+
+  .ed { min-height:20px; outline:0; padding:3px; border-radius:3px; text-align:center; white-space:pre-wrap; }
+  .ed.left { text-align:left; }
+  .ed:focus, [data-lb]:focus { background:#fffde7; box-shadow:inset 0 0 0 1px var(--blue); color:#111; }
+  .ed:empty::before { content:attr(data-ph); color:#a0aab6; }
+  [data-lb] { outline:0; white-space:pre-wrap; border-radius:3px; }
+  [data-lb]:empty::before { content:"(비움)"; color:#b3bcc7; font-weight:400; }
+  @media (hover:hover) { [data-lb]:hover { box-shadow:inset 0 0 0 1px #9db7d6; cursor:text; } }
+  .ed.inline { display:inline-block; min-width:80px; border-bottom:1px solid #999; }
+
+  .method { font-size:11.5px; margin:0 0 6px; display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; }
+  .method .ed { flex:1; min-width:200px; border-bottom:1px solid #999; }
+  .linkbtn { background:none; border:0; padding:0; font:inherit; font-size:11px; color:#1F6FD1; cursor:pointer; text-decoration:underline; }
+  .own-mark { font-size:10.5px; color:#8a5a00; }
+  .sec-note { font-size:11px; color:#555; margin:0 0 6px; }
+  .criteria-box { border:2px solid var(--line); padding:8px; border-radius:4px; background:#fafbfc; margin-bottom:10px; display:flex; gap:10px; align-items:flex-start; }
+  .matrix-table { width:40%; margin:0; } .level-table { width:60%; margin:0; }
+  .matrix-table th, .level-table th, .step-table th { background:#aeb8c2; color:#111; font-size:10px; padding:4px; }
+  .matrix-table td, .level-table td { text-align:center; font-weight:bold; font-size:10px; padding:4px; }
+  .level-table td.desc { text-align:left; font-weight:normal; }
+  .step-table td { font-size:10px; padding:3px 5px; } .step-table td:first-child { text-align:center; font-weight:bold; }
+
+  .risk20 { background:#d90000 !important; color:#fff !important; }
+  .risk15 { background:#d35a00 !important; color:#fff !important; }
+  .risk9 { background:#d49b00 !important; color:#fff !important; }
+  .risk8 { background:#d6db00 !important; color:#111 !important; }
+  .risk4 { background:#7eaa59 !important; color:#111 !important; }
+  .risk1 { background:#6ea340 !important; color:#fff !important; }
+  .risk0 { background:#eef1f5 !important; color:#8a96a6 !important; }
+
+  #ra th { background:linear-gradient(to bottom,#e8f4f8 0%,#d1e8f0 100%); color:#1b365d; border-color:#a0b8c8; font-size:11.5px; }
+  #ra td { padding:8px 4px; border-color:#a0b8c8; }
+  #ra th { padding:6px 2px; }
+  #ra .ed { font-size:11.5px; } #ra label.done { font-size:11px; white-space:nowrap; }
+  .scoreSel { display:flex; justify-content:center; gap:3px; align-items:center; flex-wrap:wrap; }
+  .scoreSel select { width:42px; padding:3px; border:1px solid #cbd5e0; border-radius:4px; text-align:center; font-weight:bold; font-size:10.5px; cursor:pointer; background:#fff; color:#111; }
+  .score-badge { display:inline-block; min-width:50px; padding:4px; border-radius:4px; text-align:center; font-weight:800; font-size:11px; margin-top:3px; }
+  .row-ctl { display:flex; flex-wrap:wrap; justify-content:center; gap:1px 3px; margin-top:4px; }
+  .row-ctl button { cursor:pointer; color:#2980b9; font-size:10px; background:none; border:0; padding:1px; font-family:inherit; }
+  .row-ctl button:hover { color:#c0392b; } .row-ctl button:disabled { color:#c5ccd5; cursor:default; }
+  .row-sum { display:none; }
+  .people td { height:26px; }
+  .ra-foot { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin:-4px 0 0; }
+  .ra-sum { margin:0; font-size:11px; color:#333; font-weight:700; }
+  .ra-warn { margin:2px 0 0; font-size:11px; color:#b45309; } .ra-warn:empty { display:none; }
+  .foot-acts { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+  .law-check td label { display:inline-block; margin:1px 8px 1px 0; font-size:12px; }
+  .law-check .law-ref { font-size:10.5px; color:#444; }
+  .type-box label { margin-right:10px; white-space:nowrap; display:inline-block; }
+  .foot-note { font-size:10.5px; color:#444; margin:6px 0 0; text-align:left; }
+  .form-status { font-size:10.5px; color:#777; margin-top:6px; }
+
+  .cfg { border:1px dashed #9aa3af; border-radius:6px; padding:6px 10px; margin:6px 0; font-size:12px; background:#fafbfc; }
+  .cfg summary { cursor:pointer; font-weight:700; }
+  .cfg-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0; }
+  .cfg-grid label { display:flex; flex-direction:column; gap:3px; font-weight:600; }
+  .cfg select, .cfg input { box-sizing:border-box; height:28px; border:1px solid #c7ccd4; border-radius:5px; padding:0 6px; font:inherit; width:100%; min-width:0; }
+  .cfg-cuts { width:100%; margin:4px 0; } .cfg-cuts th, .cfg-cuts td { padding:2px 4px; border:0; font-size:12px; }
+  .cfg-cuts th { background:#e5e9ee; color:#222; }
+  .cfg-note { font-size:11.5px; color:#555; margin:6px 0 2px; line-height:1.55; }
+  .cfg-warn { font-size:11.5px; color:#b45309; margin:4px 0; font-weight:700; } .cfg-warn:empty { display:none; }
+  .cfg h4 { margin:10px 0 2px; font-size:12px; }
+
+  .photo-page { height:auto !important; min-height:0 !important; overflow:visible !important; page-break-after:auto !important; }
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000; justify-content:center; align-items:center; }
+  .modal-content { background:#fff; width:min(640px,92vw); max-height:85%; padding:20px; border-radius:8px; display:flex; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,.4); border:1px solid #1b365d; box-sizing:border-box; }
+  .modal-header { font-size:18px; font-weight:bold; margin-bottom:12px; color:#1b365d; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2980b9; padding-bottom:8px; }
+  .modal-close { cursor:pointer; font-size:26px; font-weight:bold; color:#aaa; background:none; border:0; }
+  .modal-body { overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+  .doc-item { border:1px solid #d8dee8; border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:8px; }
+  .doc-meta { display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; font-size:13px; color:#2c3e50; }
+  .doc-meta span { color:#5b6b80; font-size:12px; }
+  .doc-meta .doc-cur { background:#27ae60; color:#fff; border-radius:3px; padding:0 5px; font-size:11px; }
+  .doc-acts { display:flex; flex-wrap:wrap; gap:6px; } .doc-acts .btn { font-size:12px; padding:5px 10px; }
+  .doc-empty { font-size:13px; color:#5b6b80; line-height:1.6; margin:0; }
+  .pick-bar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .pick-bar select, .pick-bar input { height:34px; border:1px solid #c7ccd4; border-radius:5px; padding:0 8px; font:inherit; font-size:14px; flex:1; min-width:120px; box-sizing:border-box; }
+  .pick-item { display:flex; gap:10px; align-items:flex-start; border:1px solid #d8dee8; border-radius:6px; padding:8px 10px; font-size:13px; line-height:1.45; cursor:pointer; }
+  .pick-item input { margin-top:3px; width:16px; height:16px; flex:none; }
+  .pick-item small { display:block; color:#5b6b80; font-size:12px; }
+  .pick-item.in { background:#f3f5f8; color:#7b8794; cursor:default; }
+  .pick-foot { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; font-size:13px; }
+
+  @media screen { .page-container { zoom:var(--pz,1); } .page-container.no-appr .risk-appr { opacity:.35; } }
+  @media screen and (max-width:820px) {
+    .control-panel { position:static; gap:6px; padding:8px; }
+    .sitebar { font-size:11.5px; padding:6px 10px; }
+    .btn { padding:8px 10px; font-size:13px; }
+    .dept-select-wrap { width:100%; box-sizing:border-box; } .dept-select-wrap select { flex:1; min-width:0; }
+    .more { position:static; } .more-box { position:static; width:auto; margin-top:8px; }
+    .more[open] { width:100%; text-align:center; }
+    .mtabs { display:flex; position:sticky; top:0; z-index:90; background:#12284a; padding:6px 8px; gap:6px; }
+    .mtabs button { flex:1; height:36px; border:0; border-radius:6px; background:#2b4470; color:#dbe6f5; font:inherit; font-size:13.5px; font-weight:700; }
+    .mtabs button[aria-pressed="true"] { background:#fff; color:#12284a; }
+    .mtabs button.x { flex:0 0 auto; padding:0 10px; font-weight:600; }
+    .page-container { margin:6px auto; }
+  }
+  /* 좁은 화면 입력 모드(html.m): A4를 줄여 보여 주는 대신 표를 카드로 풀어 제 크기 글자로 입력한다. 인쇄에는 적용하지 않는다 */
+  @media screen {
+    html.m body { background:#eef1f5; }
+    html.m .page-container { width:auto !important; min-height:0 !important; margin:0; padding:12px; box-shadow:none; }
+    html.m th, html.m td { font-size:14px; }
+    html.m .ed { font-size:15px; min-height:24px; padding:7px 8px; border:1px solid #cfd6df; border-radius:6px; background:#fff; text-align:left; }
+    html.m .ed.inline { min-width:130px; }
+    html.m .doc-head { flex-direction:column; align-items:stretch; }
+    html.m h1 { font-size:22px; }
+    html.m .risk-appr { width:auto; }
+    html.m .risk-appr .ad-appr { font-size:12px; } html.m .risk-appr .ad-appr td.ad-s { height:36px; } html.m .risk-appr .ad-appr td.ad-nm { height:22px; font-size:12px; }
+    html.m .risk-appr .ad-ctl { font-size:13px; gap:4px 14px; }
+    html.m .section-title { font-size:16px; margin:14px -12px 8px; padding:10px 12px; border-left:0; background:#e3eaf3; }
+    html.m .sec-tg { display:flex; align-items:center; gap:6px; flex:none; max-width:55%; background:none; border:0; font:inherit; font-size:12px; font-weight:600; color:#3d5573; padding:4px 0; text-align:right; }
+    html.m .sec-tg i { font-style:normal; font-size:16px; transition:transform .15s; }
+    html.m .sec.closed .sec-tg i { transform:rotate(-90deg); }
+    html.m .sec.closed .sec-body { display:none; }
+    html.m .info, html.m .info tbody, html.m .info tr, html.m .info th, html.m .info td { display:block; width:auto; border:0; padding:0; }
+    html.m .info th { background:none; color:#3d5573; text-align:left; font-size:12.5px; margin:8px 0 3px; }
+    html.m .type-box { text-align:left !important; } html.m .type-box label { padding:6px 0; font-size:15px; }
+    html.m .method { font-size:13px; } html.m .sec-note { font-size:12px; }
+    html.m .criteria-box { flex-direction:column; padding:6px; } html.m .matrix-table, html.m .level-table { width:100%; }
+    html.m .matrix-table td, html.m .level-table td, html.m .matrix-table th, html.m .level-table th, html.m .step-table td, html.m .step-table th { font-size:12px; }
+    html.m .cfg { font-size:13px; } html.m .cfg-grid { grid-template-columns:1fr 1fr; } html.m .cfg select, html.m .cfg input { height:36px; font-size:14px; }
+    html.m .cfg-cuts th, html.m .cfg-cuts td { padding:2px; }
+    html.m #ra, html.m #ra tbody { display:block; } html.m #ra thead, html.m #ra colgroup { display:none; }
+    html.m #ra tr { display:block; border:1px solid #b7c4d3; border-radius:8px; margin-bottom:8px; background:#fff; overflow:hidden; }
+    html.m #ra td { display:block; border:0; padding:6px 10px; text-align:left !important; }
+    html.m #ra td[data-l]::before { content:attr(data-l); display:block; font-size:12px; font-weight:700; color:#3d5573; margin-bottom:3px; white-space:pre-wrap; }
+    html.m #ra td.c0 { padding:0; background:#f4f7fb; }
+    html.m #ra td.c0 .row-num { display:none; }
+    html.m #ra tr:not(.open) td:not(.c0) { display:none; }
+    html.m .row-sum { display:flex; width:100%; align-items:center; gap:8px; border:0; background:none; padding:10px; font:inherit; font-size:14px; text-align:left; color:#1b2b3d; }
+    html.m .row-sum b { flex:none; width:22px; height:22px; border-radius:50%; background:#1b365d; color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; }
+    html.m .row-sum span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    html.m .row-sum em { flex:none; font-style:normal; font-size:12px; font-weight:800; border-radius:4px; padding:3px 6px; }
+    html.m #ra tr.open .row-sum span { white-space:normal; }
+    html.m .row-ctl { display:none; justify-content:flex-end; gap:14px; padding:0 10px 8px; margin:0; } html.m #ra tr.open .row-ctl { display:flex; }
+    html.m .row-ctl button { font-size:13px; padding:4px 2px; }
+    html.m .scoreSel { justify-content:flex-start; gap:8px; }
+    html.m .scoreSel select { width:64px; height:38px; font-size:16px; }
+    html.m .score-badge { font-size:13px; padding:8px 10px; margin:0; }
+    html.m #ra .ed { font-size:15px; } html.m #ra label.done { font-size:15px; display:inline-block; padding:4px 0 8px; }
+    html.m #ra td .ed + .ed { margin-top:6px; }
+    html.m .ra-foot { flex-direction:column; margin:0; } html.m .ra-sum, html.m .ra-warn { font-size:13px; }
+    html.m .foot-acts { justify-content:flex-start; } html.m .foot-acts .btn { padding:9px 12px; font-size:13.5px; }
+    html.m .people thead, html.m .people colgroup { display:none; } html.m .people, html.m .people tbody { display:block; }
+    html.m .people tr { display:grid; grid-template-columns:26px 1fr 1fr; gap:6px; align-items:center; margin-bottom:6px; }
+    html.m .people td { border:0; padding:0; height:auto; } html.m .people td.sg { display:none; }
+    html.m .law-check, html.m .law-check tbody, html.m .law-check tr, html.m .law-check th, html.m .law-check td { display:block; width:auto; }
+    html.m .law-check tr { border:1px solid #b7c4d3; border-radius:8px; margin-bottom:8px; overflow:hidden; }
+    html.m .law-check th, html.m .law-check td { border:0; } html.m .law-check th { text-align:left; padding:8px 10px; }
+    html.m .law-check td label { font-size:15px; display:block; padding:5px 0; margin:0; }
+    html.m .law-check .law-ref { font-size:12px; background:#f4f7fb; }
+    html.m .foot-note { font-size:12.5px; } html.m .form-status { font-size:11.5px; }
+    html.m .photo-page { margin-top:8px; }
   }
   @media print {
-    body { background-color: white; }
-    .page-container { margin: 0; padding: 8mm 10mm; min-height: 0; box-shadow: none; border: none; }
-    .control-panel, .no-print, .sitebar { display: none !important; }
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .scoreSel select { border: 0 !important; appearance: none; -webkit-appearance: none; padding: 0 !important; width: 22px !important; }
-    #ra tr { break-inside: avoid; }
-    .ed:empty::before { content: none !important; }
-    .section-title { margin: 10px 0 5px; }
-    .sub-title { margin-bottom: 4px; }
-    #ra td { padding: 4px !important; }
-    .score-badge { margin-top: 1px; padding: 2px 4px; }
-    .people td { height: 22px; }
-    .people { margin-bottom: 0; }
-    .approval td { height: 30px; }
+    body { background:#fff; }
+    .page-container { width:auto !important; margin:0; padding:0; min-height:0 !important; box-shadow:none; border:none; }
+    .control-panel, .no-print, .sitebar, .mtabs, .form-status, .modal-overlay { display:none !important; }
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    .scoreSel select { border:0 !important; appearance:none; -webkit-appearance:none; padding:0 !important; width:20px !important; background:none; }
+    .scoreSel.none select { color:transparent; } .scoreSel.none .score-badge { visibility:hidden; }
+    thead { display:table-header-group; }
+    tr { break-inside:avoid; page-break-inside:avoid; }
+    .ed:empty::before, [data-lb]:empty::before { content:none !important; }
+    .sub-title:empty, .foot-note:empty, .section-title:has(> [data-lb]:empty) { display:none; }
+    .section-title { margin:10px 0 5px; break-after:avoid; page-break-after:avoid; }
+    .sub-title { margin-bottom:4px; }
+    #ra td { padding:4px !important; }
+    #ra .ed { min-height:14px; padding:1px 3px; }
+    .score-badge { margin-top:1px; padding:2px 4px; }
+    .people td { height:22px; } .people { margin-bottom:0; }
+    .people, .law-check, .criteria-box, .step-table { break-inside:avoid; page-break-inside:avoid; }
+    .ra-foot { margin:0 0 4px; }
+    .page-container.no-appr .risk-appr { display:none; }
+    .method .ed { border-bottom:0; } .ed.inline { border-bottom:1px solid #999; }
+    .photo-page:not(.has-photos) { display:none !important; } .photo-page { page-break-before:always; }
   }
-
-  .doc-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; border-bottom: 3px double #1b365d; padding-bottom: 8px; margin-bottom: 8px; }
-  h1 { margin: 0; font-size: 26px; letter-spacing: 0.1em; color: #1b365d; }
-  .sub-title { color: #667085; font-size: 12px; margin: 0 0 10px; }
-  .approval { width: 62mm; margin: 0; }
-  .approval th { background:#eef2f6; color:#263746; font-size:10.5px; padding:3px; }
-  .approval td { height: 38px; }
-  .section-title { font-size: 15px; font-weight: 800; border-left: 4px solid #1b365d; padding-left: 8px; margin: 18px 0 8px; color: #1b365d; }
-
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 10px; }
-  th, td { border: 1px solid var(--line); padding: 6px; vertical-align: middle; font-size: 11px; line-height: 1.4; word-break: keep-all; }
-  th { background: var(--head); color: #fff; text-align: center; font-weight: bold; }
-
-  .ed { min-height: 20px; outline: 0; padding: 3px; border-radius: 3px; text-align: center; }
-  .ed.left { text-align: left; }
-  .ed:focus { background: #fffde7; box-shadow: inset 0 0 0 1px var(--blue); }
-  .ed:empty::before { content: attr(data-ph); color: #a0aab6; }
-
-  .criteria-box { border: 2px solid var(--line); padding: 8px; border-radius: 4px; background: #fafbfc; margin-bottom: 10px; display: flex; gap: 10px; }
-  .matrix-table { width: 40%; margin: 0; }
-  .level-table { width: 60%; margin: 0; }
-  .matrix-table th, .level-table th { background: #aeb8c2; color: #111; font-size: 10px; padding: 4px; }
-  .matrix-table td, .level-table td { text-align: center; font-weight: bold; font-size: 10px; padding: 4px; }
-  .level-table td.desc { text-align: left; font-weight: normal; }
-
-  .risk20 { background: #d90000 !important; color: #fff !important; }
-  .risk15 { background: #d35a00 !important; color: #fff !important; }
-  .risk12, .risk10, .risk9 { background: #d49b00 !important; color: #fff !important; }
-  .risk8 { background: #d6db00 !important; color: #111 !important; }
-  .risk6, .risk5 { background: #a8b89c !important; color: #111 !important; }
-  .risk4 { background: #7eaa59 !important; color: #111 !important; }
-  .risk3, .risk2, .risk1 { background: #6ea340 !important; color: #fff !important; }
-  .risk0 { background: #eef1f5 !important; color: #8a96a6 !important; }
-
-  #ra th { background: linear-gradient(to bottom, #e8f4f8 0%, #d1e8f0 100%); color: #1b365d; border-color: #a0b8c8; font-size: 11.5px; }
-  #ra td { padding: 8px 4px; border-color: #a0b8c8; }
-  .scoreSel { display: flex; justify-content: center; gap: 3px; align-items: center; flex-wrap: wrap; }
-  .scoreSel select { width: 42px; padding: 3px; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center; font-weight: bold; font-size: 10.5px; cursor: pointer; background:#fff; }
-  .score-badge { display: inline-block; min-width: 50px; padding: 4px; border-radius: 4px; text-align: center; font-weight: 800; font-size: 11px; margin-top: 3px; }
-  .del-btn { cursor: pointer; color: #2980b9; font-weight: bold; text-decoration: underline; font-size: 10px; display: block; margin-top: 5px; background:none; border:0; width:100%; }
-  .del-btn:hover { color: #c0392b; }
-  .people td { height: 26px; }
 </style>
 <script src="../../assets/docs.js"></script>
-<style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746}.risk-appr .ad-appr td.ad-s{height:24px}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}.risk-appr .ad-appr th{padding:1px 3px}</style>
-<style>
-  .photo-page{height:auto !important;min-height:0 !important;overflow:visible !important;page-break-after:auto !important}
-  .sec-note{font-size:11px;font-weight:500;color:#555;margin-left:6px}
-  .cfg{border:1px dashed #9aa3af;border-radius:6px;padding:6px 10px;margin:6px 0;font-size:12px;background:#fafbfc}
-  .cfg summary{cursor:pointer;font-weight:700}
-  .cfg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
-  .cfg-grid label{display:flex;flex-direction:column;gap:3px;font-weight:600}
-  .cfg select,.cfg input{box-sizing:border-box;height:28px;border:1px solid #c7ccd4;border-radius:5px;padding:0 6px;font:inherit;width:100%}
-  .cfg-cuts{width:100%;margin:4px 0}.cfg-cuts th,.cfg-cuts td{padding:2px 4px;border:0;font-size:12px}
-  .cfg-note{font-size:11.5px;color:#555;margin-top:4px}
-  .law-check td label{display:inline-block;margin:1px 8px 1px 0;font-size:12px}
-  .law-check .law-ref{font-size:10.5px;color:#444}
-  .ed.inline{display:inline-block;min-width:80px;border-bottom:1px solid #999}
-  .form-status{font-size:10.5px;color:#555;margin-top:6px}
-  @media print{.form-status{display:none !important}}
-  #ra .ed{font-size:11.5px}#ra label.done{font-size:11px;white-space:nowrap}
-  @media print{.photo-page:not(.has-photos){display:none !important}.photo-page{page-break-before:always}}
-  .ctrl-note:empty{display:none}
-  .btn-grey{background:#5b6b80;color:#fff}
-  .ra-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:-4px 0 0}
-  .ra-sum{margin:0;font-size:11px;color:#333;font-weight:700}
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;justify-content:center;align-items:center}
-  .modal-content{background:#fff;width:min(640px,92vw);max-height:85%;padding:20px;border-radius:8px;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.4);border:1px solid #1b365d;box-sizing:border-box}
-  .modal-header{font-size:18px;font-weight:bold;margin-bottom:12px;color:#1b365d;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #2980b9;padding-bottom:8px}
-  .modal-close{cursor:pointer;font-size:26px;font-weight:bold;color:#aaa;background:none;border:0}
-  .modal-body{overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-  .doc-item{border:1px solid #d8dee8;border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px}
-  .doc-meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13px;color:#2c3e50}
-  .doc-meta span{color:#5b6b80;font-size:12px}
-  .doc-meta .doc-cur{background:#27ae60;color:#fff;border-radius:3px;padding:0 5px;font-size:11px}
-  .doc-acts{display:flex;flex-wrap:wrap;gap:6px}.doc-acts .btn{font-size:12px;padding:5px 10px}
-  .doc-empty{font-size:13px;color:#5b6b80;line-height:1.6;margin:0}
-  /* 좁은 화면: A4 쪽을 화면 폭에 맞춰 줄여 보여 준다(값은 스크립트가 넣음). 인쇄에는 적용하지 않는다 */
-  @media screen{.page-container{zoom:var(--pz,1)}}
-  @media screen and (max-width:820px){.page-container{margin:6px auto}.control-panel{position:static;gap:8px;padding:10px}.sitebar{font-size:12px;padding:6px 10px}.btn{padding:7px 12px;font-size:13px}}
-  @media print{
-    .section-title{break-after:avoid;page-break-after:avoid}
-    .people,.law-check,.criteria-box{break-inside:avoid;page-break-inside:avoid}
-    .ra-foot{margin:0 0 4px}
-  }
-</style>
+<style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746;padding:1px 3px}.risk-appr .ad-appr td.ad-s{height:24px}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}</style>
 </head>
 <body>
 
@@ -149,14 +241,29 @@
     <label for="globalWorkType">공종(부서)</label>
     <select id="globalWorkType" onchange="applyAutoData(false)"></select>
   </div>
-  <button class="btn btn-blue" onclick="applyAutoData(true)">🔄 기본 항목 다시 채우기</button>
-  <button class="btn btn-blue" id="docsBtn" onclick="openDocs()">📂 저장된 평가서</button>
-  <button class="btn btn-blue" onclick="newDoc()">＋ 새 평가서</button>
-  <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">📷 사진 첨부</button>
-  <button class="btn btn-green" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
-  <button class="btn btn-red" onclick="resetForm()">↻ 초기화</button>
-  <p class="ctrl-note">현재 위험성과 감소대책은 기본 목록으로 미리 채운 <b>SafePlum 추천값</b>입니다(법정 문구 아님). 현장을 보고 수정하세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
+  <button class="btn btn-blue" id="pickBtn" onclick="openPick()">＋ 유해·위험요인 불러오기</button>
+  <button class="btn btn-blue" id="docsBtn" onclick="openDocs()">저장된 평가서</button>
+  <button class="btn btn-blue" onclick="newDoc()">새 평가서</button>
+  <button class="btn btn-green" onclick="window.print()">인쇄 / PDF 저장</button>
+  <details class="more" id="moreBox">
+    <summary class="btn btn-grey">설정 · 더보기</summary>
+    <div class="more-box">
+      <label>용지 방향 <select id="optOrient"><option value="p">A4 세로</option><option value="l">A4 가로 (표를 넓게)</option></select></label>
+      <label><input type="checkbox" id="optAppr" checked> 결재란 인쇄</label>
+      <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">사진 첨부</button>
+      <button class="btn btn-blue" onclick="applyAutoData(true)">3번 표를 공종 기본 항목으로 다시 채우기</button>
+      <button class="btn btn-grey" onclick="resetLabels()">제목·항목 이름·아래 문구를 기본으로</button>
+      <button class="btn btn-red" onclick="resetForm()">이 평가서 초기화</button>
+      <p>문서 제목, 표 머리글, 구역 제목, 근거 문구는 문서에서 눌러 바로 고치거나 지울 수 있습니다. 고친 이름과 평가기준은 새 평가서에도 그대로 쓰입니다.</p>
+    </div>
+  </details>
+  <p class="ctrl-note">현재 위험성과 감소대책은 기본 목록으로 미리 채운 추천값입니다. 현장을 보고 고치세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b></p>
   <p class="ctrl-note" id="saveStatus" role="status" aria-live="polite"></p>
+</div>
+<div class="mtabs no-print" id="mtabs">
+  <button type="button" data-v="in" aria-pressed="true">입력</button>
+  <button type="button" data-v="pv" aria-pressed="false">미리보기(A4)</button>
+  <button type="button" class="x" id="allTg">모두 펼치기</button>
 </div>
 
 <div id="docsModal" class="modal-overlay no-print" onclick="if(event.target===this)closeDocs()">
@@ -165,101 +272,130 @@
     <div id="docsList" class="modal-body"></div>
   </div>
 </div>
+<div id="pickModal" class="modal-overlay no-print" onclick="if(event.target===this)closePick()">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <div class="modal-header"><span id="pickTitle">유해·위험요인 불러오기</span><button type="button" class="modal-close" onclick="closePick()" aria-label="닫기">×</button></div>
+    <div class="pick-bar"><select id="pickGroup" aria-label="공종"></select><input type="search" id="pickQ" placeholder="검색 (예: 추락, 지게차)" aria-label="검색"></div>
+    <div id="pickList" class="modal-body"></div>
+    <div class="pick-foot"><span id="pickCount">0건 선택</span><button type="button" class="btn btn-green" id="pickAdd" onclick="addPicked()">표에 추가</button></div>
+  </div>
+</div>
 
 <div class="page-container" id="page1">
   <div class="doc-head">
-    <div>
-      <h1>위 험 성 평 가 서</h1>
-    </div>
-    <div class="risk-appr" data-appr="tool.risk"></div>
+    <div><h1 data-lb="title" contenteditable>위 험 성 평 가 서</h1></div>
+    <div class="risk-appr" id="apprBox"></div>
   </div>
-  <p class="sub-title">작업별 유해·위험요인을 파악하고 위험성을 결정한 뒤 감소대책을 수립·이행하기 위한 기록</p>
+  <p class="sub-title" data-lb="sub" contenteditable>작업별 유해·위험요인을 파악하고 위험성을 결정한 뒤 감소대책을 수립·이행하기 위한 기록</p>
 
-  <div class="section-title">1. 기본정보</div>
-  <table>
+  <section class="sec" data-sec="1">
+  <div class="section-title"><span data-lb="s1" contenteditable>1. 기본정보</span><button type="button" class="sec-tg no-print"><span class="sec-sum"></span><i>▾</i></button></div>
+  <div class="sec-body">
+  <table class="info">
     <colgroup><col style="width:12%"><col style="width:21%"><col style="width:12%"><col style="width:21%"><col style="width:12%"><col style="width:22%"></colgroup>
     <tbody>
       <tr>
-        <th>평가일자</th><td><div class="ed" id="evalDate" contenteditable></div></td>
-        <th>작성자</th><td><div class="ed" id="fWriter" contenteditable data-ph="성명"></div></td>
-        <th>사업장명</th><td><div class="ed" id="fSite" contenteditable data-ph="사업장명"></div></td>
+        <th data-lb="iDate" contenteditable>평가일자</th><td><div class="ed" id="evalDate" contenteditable data-ph="YYYY-MM-DD"></div></td>
+        <th data-lb="iWriter" contenteditable>작성자</th><td><div class="ed" id="fWriter" contenteditable data-ph="성명"></div></td>
+        <th data-lb="iSite" contenteditable>사업장명</th><td><div class="ed" id="fSite" contenteditable data-ph="사업장명"></div></td>
       </tr>
       <tr>
-        <th>평가대상(부서)</th><td><div id="dispDept" class="ed" contenteditable></div></td>
-        <th>평가구분</th>
-        <td colspan="3" style="text-align:center;" id="fType">
-          <label><input type="radio" name="type"> 최초</label> &nbsp;
-          <label><input type="radio" name="type" checked> 정기</label> &nbsp;
-          <label><input type="radio" name="type"> 수시</label> &nbsp;
-          <label><input type="radio" name="type"> 상시</label>
-        </td>
+        <th data-lb="iDept" contenteditable>평가대상(부서)</th><td><div id="dispDept" class="ed" contenteditable data-ph="부서·공정·작업"></div></td>
+        <th data-lb="iType" contenteditable>평가구분</th>
+        <td colspan="3" style="text-align:center;" class="type-box"><span id="fType"></span><button type="button" class="linkbtn no-print" onclick="editTypes()">구분 고치기</button></td>
       </tr>
     </tbody>
   </table>
+  </div></section>
 
-  <div class="section-title">2. 위험성 평가기준 <span class="sec-note">SafePlum 기본 위험성평가 예시 기준 — 평가기법은 사업장의 위험성평가 방법에 맞게 설정</span></div>
+  <section class="sec closed" data-sec="2">
+  <div class="section-title"><span data-lb="s2" contenteditable>2. 위험성 평가기준</span><button type="button" class="sec-tg no-print"><span class="sec-sum"></span><i>▾</i></button></div>
+  <div class="sec-body">
+  <p class="method"><b data-lb="mLabel" contenteditable>평가 방법</b><span class="ed left" id="fMethod" contenteditable></span><span class="own-mark no-print" id="mOwn" hidden>직접 고침 · <button type="button" class="linkbtn" onclick="methodAuto()">자동으로 되돌리기</button></span></p>
+  <p class="sec-note no-print" id="defNote">SafePlum 기본 위험성평가 예시 기준입니다. 사업장 위험성평가 규정에서 정한 기준이 있으면 아래 '평가기준 바꾸기'에서 맞추세요.</p>
   <div class="cfg no-print" id="cfgBox">
-    <details><summary>평가기준 바꾸기 (단계 수·계산 방식·등급 구간·허용 기준)</summary>
+    <details><summary>평가기준 바꾸기 (단계 수 · 계산 방식 · 등급 구간 · 허용 기준 · 단계별 기준)</summary>
       <div class="cfg-grid">
-        <label>가능성(빈도) 단계 <select id="cfgP"><option>3</option><option>4</option><option selected>5</option></select></label>
-        <label>중대성(강도) 단계 <select id="cfgC"><option>3</option><option selected>4</option><option>5</option></select></label>
-        <label>점수 계산 <select id="cfgM"><option value="mul" selected>가능성 × 중대성</option><option value="add">가능성 + 중대성</option></select></label>
-        <label>허용 가능한 최대 점수 <input type="number" id="cfgA" min="1" value="6"></label>
+        <label>세로축 이름 <input id="cfgPn" maxlength="20"></label>
+        <label>가로축 이름 <input id="cfgCn" maxlength="20"></label>
+        <label>세로축 단계 수 <select id="cfgP"><option>3</option><option>4</option><option>5</option></select></label>
+        <label>가로축 단계 수 <select id="cfgC"><option>3</option><option>4</option><option>5</option></select></label>
+        <label>점수 계산 <select id="cfgM"><option value="mul">곱하기 (×)</option><option value="add">더하기 (+)</option></select></label>
+        <label>허용 가능한 최대 점수 <input type="number" id="cfgA" min="1" max="99"></label>
       </div>
-      <table class="cfg-cuts"><thead><tr><th>등급 이름</th><th>이 점수 이상</th><th>관리기준</th></tr></thead><tbody id="cfgCuts"></tbody></table>
-      <p class="cfg-note">법령은 특정 점수표를 정하고 있지 않습니다. 사업장 위험성평가 실시 규정에서 정한 방법(빈도·강도법, 체크리스트, 3단계 판단법, 핵심요인 기술법 등)에 맞게 고쳐 쓰세요. <button type="button" class="btn btn-blue" style="padding:3px 10px;font-size:12px" onclick="resetCfg()">SafePlum 기본 예시로 되돌리기</button></p>
+      <table class="cfg-cuts"><colgroup><col style="width:24%"><col style="width:18%"><col style="width:22%"><col><col style="width:34px"></colgroup>
+        <thead><tr><th>등급 이름</th><th>이 점수 이상</th><th>관리기준</th><th>허용 여부 문구 (비우면 자동)</th><th></th></tr></thead><tbody id="cfgCuts"></tbody></table>
+      <button type="button" class="btn btn-blue btn-sm" id="cfgAdd">+ 등급 추가</button>
+      <p class="cfg-warn" id="cfgWarn" role="status"></p>
+      <h4>단계별 판단 기준 (적으면 문서에 표로 인쇄됩니다 · 비우면 생략)</h4>
+      <table class="cfg-cuts"><colgroup><col style="width:40px"><col><col></colgroup><thead><tr><th>단계</th><th id="cfgPdH"></th><th id="cfgCdH"></th></tr></thead><tbody id="cfgSteps"></tbody></table>
+      <p class="cfg-note">산업안전보건법 제36조와 시행규칙 제37조는 특정 점수표를 정하고 있지 않으며, 방법·절차·시기의 세부 사항은 고용노동부 고시로 정하도록 하고 있습니다(시행규칙 제37조제3항). 사업장 위험성평가 규정에서 정한 방법과 기준에 맞게 고쳐 쓰세요. 가장 낮은 등급은 그 아래 점수를 모두 포함합니다.
+        <button type="button" class="btn btn-blue btn-sm" onclick="resetCfg()">SafePlum 기본 예시로 되돌리기</button></p>
     </details>
   </div>
   <div class="criteria-box">
     <table class="matrix-table" id="matrixTable"></table>
     <table class="level-table">
       <colgroup><col style="width:30%"><col style="width:20%"><col style="width:50%"></colgroup>
-      <thead><tr><th>위험성 수준</th><th>관리기준</th><th>허용 여부</th></tr></thead>
+      <thead><tr><th data-lb="lv0" contenteditable>위험성 수준</th><th data-lb="lv1" contenteditable>관리기준</th><th data-lb="lv2" contenteditable>허용 여부</th></tr></thead>
       <tbody id="levelBody"></tbody>
     </table>
   </div>
+  <table class="step-table" id="stepTable" hidden></table>
+  </div></section>
 
-  <div class="section-title">3. 위험성평가 및 감소대책</div>
+  <section class="sec" data-sec="3">
+  <div class="section-title"><span data-lb="s3" contenteditable>3. 위험성평가 및 감소대책</span><button type="button" class="sec-tg no-print"><span class="sec-sum"></span><i>▾</i></button></div>
+  <div class="sec-body">
   <table id="ra">
-    <colgroup><col style="width:4%"><col style="width:19%"><col style="width:15%"><col style="width:12%"><col style="width:19%"><col style="width:11%"><col style="width:12%"><col style="width:8%"></colgroup>
+    <colgroup><col style="width:5%"><col style="width:19%"><col style="width:15%"><col style="width:12%"><col style="width:18%"><col style="width:11%"><col style="width:12%"><col style="width:8%"></colgroup>
     <thead>
-      <tr><th>연번</th><th>유해·위험요인</th><th>현재 안전보건조치</th><th>현재 위험성</th><th>추가 감소대책</th><th>담당자<br>개선기한</th><th>개선 후 위험성</th><th>완료<br>확인</th></tr>
+      <tr><th data-lb="h0" contenteditable>연번</th><th data-lb="h1" contenteditable>유해·위험요인</th><th data-lb="h2" contenteditable>현재 안전보건조치</th><th data-lb="h3" contenteditable>현재 위험성</th><th data-lb="h4" contenteditable>추가 감소대책</th><th data-lb="h5" contenteditable>담당자&#10;개선기한</th><th data-lb="h6" contenteditable>개선 후 위험성</th><th data-lb="h7" contenteditable>완료&#10;확인</th></tr>
     </thead>
     <tbody id="ra-tbody"></tbody>
   </table>
   <div class="ra-foot">
-    <p id="raSummary" class="ra-sum" aria-live="polite"></p>
-    <button class="btn btn-blue no-print" style="padding:4px 10px;font-size:12px;" onclick="addEmptyRow()">+ 빈 줄 추가</button>
+    <div><p id="raSummary" class="ra-sum" aria-live="polite"></p><p id="raWarn" class="ra-warn no-print"></p></div>
+    <div class="foot-acts no-print"><button class="btn btn-blue btn-sm" onclick="openPick()">+ 목록에서 불러오기</button><button class="btn btn-blue btn-sm" onclick="addEmptyRow()">+ 빈 줄 추가</button></div>
   </div>
+  </div></section>
 
-  <div class="section-title">4. 평가 참여자 (참여한 근로자·근로자대표)</div>
+  <section class="sec closed" data-sec="4">
+  <div class="section-title"><span data-lb="s4" contenteditable>4. 평가 참여자 (참여한 근로자·근로자대표)</span><button type="button" class="sec-tg no-print"><span class="sec-sum"></span><i>▾</i></button></div>
+  <div class="sec-body">
   <table class="people">
     <colgroup><col style="width:6%"><col style="width:17%"><col style="width:15%"><col style="width:12%"><col style="width:6%"><col style="width:17%"><col style="width:15%"><col style="width:12%"></colgroup>
-    <thead><tr><th>No</th><th>소속</th><th>성명</th><th>서명</th><th>No</th><th>소속</th><th>성명</th><th>서명</th></tr></thead>
+    <thead><tr><th>No</th><th data-lb="pOrg" contenteditable>소속</th><th data-lb="pName" contenteditable>성명</th><th data-lb="pSign" contenteditable>서명</th><th>No</th><th data-mir="pOrg"></th><th data-mir="pName"></th><th data-mir="pSign"></th></tr></thead>
     <tbody id="people-tbody"></tbody>
   </table>
+  <div class="foot-acts no-print"><button class="btn btn-blue btn-sm" onclick="morePeople(2)">+ 참여자 칸 추가</button><button class="btn btn-grey btn-sm" onclick="morePeople(-2)">− 칸 줄이기</button></div>
+  </div></section>
 
-  <div class="section-title">5. 근로자 참여 · 결과 공유 · 기록</div>
+  <section class="sec closed" data-sec="5">
+  <div class="section-title"><span data-lb="s5" contenteditable>5. 근로자 참여 · 결과 공유 · 기록</span><button type="button" class="sec-tg no-print"><span class="sec-sum"></span><i>▾</i></button></div>
+  <div class="sec-body">
   <table class="law-check" id="lawCheck">
     <colgroup><col style="width:16%"><col style="width:54%"><col style="width:30%"></colgroup>
     <tbody>
-      <tr><th>근로자 참여</th><td>
+      <tr><th data-lb="c1" contenteditable>근로자 참여</th><td>
         <label><input type="checkbox"> 사업장 순회 점검에 근로자 참여</label>
         <label><input type="checkbox"> 설문조사</label> <label><input type="checkbox"> 면담</label> <label><input type="checkbox"> 그 밖의 의견 수렴</label>
         <div class="ed left" id="fWhy" contenteditable data-ph="순회 점검에 참여시킬 수 없는 특별한 사정이 있으면 적으세요"></div></td>
-        <td class="law-ref">법 제36조제2항 · 규칙 제37조의2<br>근로자대표가 요구하면 근로자대표 참여(법 제36조제3항)</td></tr>
-      <tr><th>결과 공유</th><td>
+        <td class="law-ref" data-lb="r1" contenteditable>법 제36조제2항 · 규칙 제37조의2&#10;근로자대표가 요구하면 근로자대표 참여(법 제36조제3항)</td></tr>
+      <tr><th data-lb="c2" contenteditable>결과 공유</th><td>
         <label><input type="checkbox"> 실시 전: 평가 일정을 알림</label>
         <label><input type="checkbox"> 실시 후: 유해·위험요인, 위험성 수준, 개선대책과 이행 결과를 알림</label><br>
         방법 <label><input type="checkbox"> 안전보건교육</label> <label><input type="checkbox"> 설명회</label> <label><input type="checkbox"> 사업장 게시</label> <label><input type="checkbox"> 서면·전자</label> <label><input type="checkbox"> 작업 전 안전점검회의</label></td>
-        <td class="law-ref">법 제36조제4항 · 규칙 제37조의3</td></tr>
-      <tr><th>기록·보존</th><td>
+        <td class="law-ref" data-lb="r2" contenteditable>법 제36조제4항 · 규칙 제37조의3</td></tr>
+      <tr><th data-lb="c3" contenteditable>기록·보존</th><td>
         <label><input type="checkbox"> 실시 시기·담당자</label> <label><input type="checkbox"> 참여 근로자·근로자대표</label> <label><input type="checkbox"> 요인·수준·대책·이행 결과</label><br>
         보존 시작일 <span class="ed inline" id="fKeep" contenteditable data-ph="YYYY-MM-DD"></span> — 3년간 보존</td>
-        <td class="law-ref">법 제36조제5항 · 규칙 제37조의4</td></tr>
+        <td class="law-ref" data-lb="r3" contenteditable>법 제36조제5항 · 규칙 제37조의4</td></tr>
     </tbody>
   </table>
-  <p class="form-status">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — 위험성평가 결과에 적어야 할 사항(규칙 제37조의4)을 담은 보조 양식입니다. 근거 확인일 2026-10-05(고용노동부령 제477호).</p>
+  </div></section>
+  <p class="foot-note" data-lb="foot" contenteditable>근거: 산업안전보건법 제36조, 같은 법 시행규칙 제37조·제37조의2~제37조의4 · 위험성평가 결과 기록은 3년간 보존(시행규칙 제37조의4제2항)</p>
+  <p class="form-status">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — 위험성평가 결과에 적어야 할 사항(규칙 제37조의4)을 담은 양식입니다. 근거 확인일 2026-10-05(고용노동부령 제477호). 이 안내는 인쇄되지 않습니다.</p>
 </div>
 
 <div class="page-container photo-page" id="riskPhotosPage"><div id="riskPhotos"></div></div>
@@ -275,66 +411,213 @@
 </script>
 <script>
   var HAZARD_DB = /*@HAZARDS@*/null;
-  if (!HAZARD_DB) HAZARD_DB = { groups: ["공통"], items: [] };
+  if (!HAZARD_DB || !Array.isArray(HAZARD_DB.items)) HAZARD_DB = { groups: ["공통"], items: [] };
   var MARKS = ["①","②","③","④","⑤"];
-
+  var $ = function (id) { return document.getElementById(id); };
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  function str(v, max) { return typeof v === "string" ? v.slice(0, max || 2000) : (typeof v === "number" ? String(v) : ""); }
+  function num(v, lo, hi, def) { v = Math.round(+v); return isFinite(v) && v !== 0 || v === 0 && lo <= 0 ? Math.min(hi, Math.max(lo, v)) : def; }
+  function lsGet(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   function today() {
     var d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
-  var DEF_CFG = { p: 5, c: 4, mode: "mul", accept: 6, cuts: [["매우높음", 16, "즉시개선"], ["높음", 15, "즉시개선"], ["보통", 8, "개선"], ["낮음", 4, "현상유지"], ["매우낮음", 1, "현상유지"]] };
-  var CLS = ["risk20", "risk15", "risk9", "risk4", "risk1"], CFG_KEY = "safetake.risk.cfg", CFG;
-  try { CFG = JSON.parse(localStorage.getItem(CFG_KEY) || "null"); } catch (e) { CFG = null; }
-  if (!CFG || !CFG.cuts || CFG.cuts.length !== 5) CFG = JSON.parse(JSON.stringify(DEF_CFG));
+  // 글자만 입력받는 편집 칸(지원하는 브라우저에서는 plaintext-only)
+  var CE = (function () { var t = document.createElement("div"); t.setAttribute("contenteditable", "plaintext-only"); return t.contentEditable === "plaintext-only" ? "plaintext-only" : "true"; })();
+  function txt(el) {
+    if (!el) return "";
+    var s = el.getClientRects().length ? el.innerText : el.textContent;
+    return String(s || "").replace(/ /g, " ").replace(/\n+$/, "");
+  }
+
+  // ---------- 평가기준 ----------
+  var DEF_CFG = { p: 5, c: 4, mode: "mul", accept: 6, pn: "가능성(빈도)", cn: "중대성(강도)", pd: [], cd: [],
+    cuts: [["매우높음", 16, "즉시개선", ""], ["높음", 15, "즉시개선", ""], ["보통", 8, "개선", ""], ["낮음", 4, "현상유지", ""], ["매우낮음", 1, "현상유지", ""]] };
+  var PAL = { 2: ["risk20", "risk1"], 3: ["risk20", "risk9", "risk1"], 4: ["risk20", "risk15", "risk9", "risk1"], 5: ["risk20", "risk15", "risk9", "risk4", "risk1"], 6: ["risk20", "risk15", "risk9", "risk8", "risk4", "risk1"] };
+  var CFG_KEY = "safetake.risk.cfg", TPL_KEY = "safetake.risk.tpl", CFG;
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function cleanCfg(x) {
+    var d = clone(DEF_CFG);
+    if (!x || typeof x !== "object") return d;
+    var o = { p: num(x.p, 3, 5, d.p), c: num(x.c, 3, 5, d.c), mode: x.mode === "add" ? "add" : "mul", accept: num(x.accept, 1, 99, d.accept),
+      pn: str(x.pn, 20).trim() || d.pn, cn: str(x.cn, 20).trim() || d.cn };
+    function steps(a) { var r = []; for (var i = 0; i < 5; i++) r.push(Array.isArray(a) ? str(a[i], 200) : ""); return r; }
+    o.pd = steps(x.pd); o.cd = steps(x.cd);
+    var cuts = Array.isArray(x.cuts) ? x.cuts.filter(Array.isArray).slice(0, 6).map(function (c) { return [str(c[0], 20), num(c[1], 1, 99, 1), str(c[2], 30), str(c[3], 80)]; }) : [];
+    o.cuts = cuts.length >= 2 ? cuts : d.cuts;
+    o.cuts.sort(function (a, b) { return b[1] - a[1]; });
+    return o;
+  }
+  function isDefCfg() { var a = cleanCfg(CFG), b = cleanCfg(DEF_CFG); return JSON.stringify(a) === JSON.stringify(b); }
+  function opChar() { return CFG.mode === "add" ? "+" : "×"; }
   function scoreOf(p, c) { return p && c ? (CFG.mode === "add" ? p + c : p * c) : 0; }
+  function minScore() { return scoreOf(1, 1); }
+  function maxScore() { return scoreOf(CFG.p, CFG.c); }
+  // 높은 점수 순으로 정렬한 등급(색은 순위로 정한다). 입력 칸의 순서는 건드리지 않는다
+  function sortedCuts() {
+    var a = CFG.cuts.map(function (c, i) { return { name: c[0], min: +c[1] || 1, mng: c[2], desc: c[3] || "", i: i }; });
+    a.sort(function (x, y) { return y.min - x.min || x.i - y.i; });
+    var pal = PAL[a.length] || PAL[5];
+    a.forEach(function (c, k) { c.cls = pal[k] || "risk1"; });
+    return a;
+  }
   function levelInfo(score) {
     if (!score) return { text: "미평가", cls: "risk0" };
-    for (var i = 0; i < CFG.cuts.length; i++) if (score >= +CFG.cuts[i][1]) return { text: CFG.cuts[i][0], cls: CLS[i] };
-    return { text: CFG.cuts[4][0], cls: CLS[4] };
+    var a = sortedCuts();
+    for (var i = 0; i < a.length; i++) if (score >= a[i].min) return { text: a[i].name, cls: a[i].cls };
+    return { text: a[a.length - 1].name, cls: a[a.length - 1].cls };
   }
-  // 기본 목록의 상/중/하 → 현재 위험성 추천값(가능성, 중대성). 단계 수가 바뀌면 비율로 맞춘다.
+  // 기본 목록의 상/중/하 → 현재 위험성 추천값. 기본 5×4에서 상=4×4, 중=3×3, 하=2×2가 되도록 비율로 맞춘다
   function suggest(level) {
-    // 상 → 높은 등급(기본 5×4에서 4×4=16), 중 → 보통(3×3=9), 하 → 낮음(2×2=4)이 되도록 맞춘다
     var r = level === "상" ? [0.8, 1] : level === "중" ? [0.6, 0.75] : level === "하" ? [0.4, 0.5] : null;
     return r ? { p: Math.max(1, Math.round(CFG.p * r[0])), c: Math.max(1, Math.round(CFG.c * r[1])) } : { p: 0, c: 0 };
   }
-  function renderCfg() {
-    var h = "<thead><tr><th>가능성 ↓ \\ 중대성 →</th>";
-    for (var c = CFG.c; c >= 1; c--) h += "<th>" + MARKS[c - 1] + "</th>";
-    h += "</tr></thead><tbody>";
-    for (var p = CFG.p; p >= 1; p--) { h += "<tr><th>" + MARKS[p - 1] + "</th>"; for (var c2 = CFG.c; c2 >= 1; c2--) { var sc = scoreOf(p, c2); h += '<td class="' + levelInfo(sc).cls + '">' + sc + "</td>"; } h += "</tr>"; }
-    document.getElementById("matrixTable").innerHTML = h + "</tbody>";
-    var max = scoreOf(CFG.p, CFG.c);
-    document.getElementById("levelBody").innerHTML = CFG.cuts.map(function (x, i) {
-      var hi = i === 0 ? max : +CFG.cuts[i - 1][1] - 1, lo = +x[1];
-      return '<tr><td class="' + CLS[i] + '">' + (lo >= hi ? lo : lo + "~" + hi) + " (" + esc(x[0]) + ')</td><td class="' + CLS[i] + '">' + esc(x[2]) + '</td><td class="desc">' + (lo > +CFG.accept ? "허용 불가 — 감소대책 수립·이행" : hi <= +CFG.accept ? "허용 가능 — 현재 조치 유지" : "일부 허용(" + CFG.accept + "점 이하)") + "</td></tr>";
-    }).join("");
-    document.getElementById("cfgP").value = CFG.p; document.getElementById("cfgC").value = CFG.c; document.getElementById("cfgM").value = CFG.mode; document.getElementById("cfgA").value = CFG.accept;
-    document.getElementById("cfgCuts").innerHTML = CFG.cuts.map(function (x, i) {
-      return '<tr><td><input data-cut="' + i + '" data-f="0" value="' + esc(x[0]) + '"></td><td><input type="number" min="1" data-cut="' + i + '" data-f="1" value="' + esc(x[1]) + '"></td><td><input data-cut="' + i + '" data-f="2" value="' + esc(x[2]) + '"></td></tr>';
-    }).join("");
+  function autoMethod() { return CFG.pn + " " + CFG.p + "단계 " + opChar() + " " + CFG.cn + " " + CFG.c + "단계 · 허용 가능 " + CFG.accept + "점 이하"; }
+  var methodOwn = false;
+  function syncMethod() {
+    var el = $("fMethod");
+    if (!methodOwn) el.textContent = autoMethod();
+    $("mOwn").hidden = !methodOwn;
   }
-  function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); } catch (e) { /* 저장 못 해도 화면에는 반영 */ } }
-  function resetCfg() { CFG = JSON.parse(JSON.stringify(DEF_CFG)); saveCfg(); renderCfg(); rebuildSelects(); }
+  function methodAuto() { methodOwn = false; syncMethod(); markTouched(); }
+  function renderCrit() {
+    var h = "<thead><tr><th>" + esc(CFG.pn) + " \\ " + esc(CFG.cn) + "</th>", c, p;
+    for (c = CFG.c; c >= 1; c--) h += "<th>" + MARKS[c - 1] + "</th>";
+    h += "</tr></thead><tbody>";
+    for (p = CFG.p; p >= 1; p--) { h += "<tr><th>" + MARKS[p - 1] + "</th>"; for (c = CFG.c; c >= 1; c--) { var sc = scoreOf(p, c); h += '<td class="' + levelInfo(sc).cls + '">' + sc + "</td>"; } h += "</tr>"; }
+    $("matrixTable").innerHTML = h + "</tbody>";
+    var a = sortedCuts(), max = maxScore(), lowest = minScore(), acc = +CFG.accept, warn = [];
+    $("levelBody").innerHTML = a.map(function (x, i) {
+      var hi = i === 0 ? max : a[i - 1].min - 1, lo = i === a.length - 1 ? Math.min(lowest, x.min) : x.min;
+      var range = lo > hi ? "—" : lo === hi ? String(lo) : lo + "~" + hi;
+      if (lo > hi) warn.push("'" + (x.name || "이름 없음") + "' 등급에 해당하는 점수가 없습니다(구간이 겹치거나 최고 점수 " + max + "점보다 큼).");
+      var auto = lo > acc ? "허용 불가 — 감소대책 수립·이행" : hi <= acc ? "허용 가능 — 현재 조치 유지" : "일부 허용(" + acc + "점 이하)";
+      return '<tr><td class="' + x.cls + '">' + range + " (" + esc(x.name) + ')</td><td class="' + x.cls + '">' + esc(x.mng) + '</td><td class="desc">' + esc(x.desc.trim() || auto) + "</td></tr>";
+    }).join("");
+    if (acc >= max) warn.push("허용 가능한 최대 점수(" + acc + "점)가 최고 점수(" + max + "점) 이상이라 모든 요인이 허용 가능으로 나옵니다.");
+    $("cfgWarn").textContent = warn.join(" ");
+    // 단계별 판단 기준(적은 것이 있을 때만 문서에 넣는다)
+    var st = $("stepTable"), n = Math.max(CFG.p, CFG.c), any = false, rows = "";
+    for (var k = n; k >= 1; k--) {
+      var a1 = k <= CFG.p ? CFG.pd[k - 1] || "" : "", a2 = k <= CFG.c ? CFG.cd[k - 1] || "" : "";
+      if (a1.trim() || a2.trim()) any = true;
+      rows += "<tr><td>" + MARKS[k - 1] + "</td><td>" + esc(a1) + "</td><td>" + esc(a2) + "</td></tr>";
+    }
+    st.hidden = !any;
+    st.innerHTML = any ? '<colgroup><col style="width:8%"><col style="width:46%"><col style="width:46%"></colgroup><thead><tr><th>단계</th><th>' + esc(CFG.pn) + "</th><th>" + esc(CFG.cn) + "</th></tr></thead><tbody>" + rows + "</tbody>" : "";
+    $("defNote").hidden = !isDefCfg();
+    syncMethod();
+  }
+  function renderCfgForm() {
+    $("cfgP").value = CFG.p; $("cfgC").value = CFG.c; $("cfgM").value = CFG.mode; $("cfgA").value = CFG.accept; $("cfgPn").value = CFG.pn; $("cfgCn").value = CFG.cn;
+    $("cfgCuts").innerHTML = CFG.cuts.map(function (x, i) {
+      return '<tr><td><input data-cut="' + i + '" data-f="0" maxlength="20" aria-label="등급 이름" value="' + esc(x[0]) + '"></td><td><input type="number" min="1" max="99" data-cut="' + i + '" data-f="1" aria-label="이 점수 이상" value="' + esc(x[1]) + '"></td><td><input data-cut="' + i + '" data-f="2" maxlength="30" aria-label="관리기준" value="' + esc(x[2]) + '"></td><td><input data-cut="' + i + '" data-f="3" maxlength="80" aria-label="허용 여부 문구" placeholder="자동" value="' + esc(x[3] || "") + '"></td><td><button type="button" class="linkbtn" data-cutdel="' + i + '" aria-label="이 등급 삭제"' + (CFG.cuts.length <= 2 ? " disabled" : "") + ">삭제</button></td></tr>";
+    }).join("");
+    $("cfgAdd").disabled = CFG.cuts.length >= 6;
+    $("cfgPdH").textContent = CFG.pn; $("cfgCdH").textContent = CFG.cn;
+    var h = "";
+    for (var k = Math.max(CFG.p, CFG.c); k >= 1; k--) h += "<tr><td style=\"text-align:center\">" + MARKS[k - 1] + "</td><td>" + (k <= CFG.p ? '<input data-step="pd" data-k="' + (k - 1) + '" maxlength="200" placeholder="예: 기준을 적으세요" value="' + esc(CFG.pd[k - 1] || "") + '">' : "") + "</td><td>" + (k <= CFG.c ? '<input data-step="cd" data-k="' + (k - 1) + '" maxlength="200" placeholder="예: 기준을 적으세요" value="' + esc(CFG.cd[k - 1] || "") + '">' : "") + "</td></tr>";
+    $("cfgSteps").innerHTML = h;
+  }
+  function cfgChanged(structural) {
+    lsSet(CFG_KEY, CFG);
+    renderCrit(); if (structural) renderCfgForm();
+    rebuildSelects(); markTouched();
+  }
+  function resetCfg() {
+    if (!isDefCfg() && !confirm("평가기준을 SafePlum 기본 예시(5×4, 5등급)로 되돌릴까요? 고친 등급 구간과 단계별 기준이 지워집니다.")) return;
+    CFG = clone(DEF_CFG); cfgChanged(true);
+  }
+  function overCount(np, nc) {
+    var n = 0;
+    document.querySelectorAll(".scoreSel").forEach(function (w) { var s = w.querySelectorAll("select"); if (+s[0].value > np || +s[1].value > nc) n++; });
+    return n;
+  }
   function rebuildSelects() {
     document.querySelectorAll(".scoreSel").forEach(function (w) {
-      var ss = w.querySelectorAll("select"), pv = Math.min(+ss[0].value, CFG.p), cv = Math.min(+ss[1].value, CFG.c);
-      w.innerHTML = sel(pv, CFG.p, "가능성") + (CFG.mode === "add" ? " + " : " × ") + sel(cv, CFG.c, "중대성") + '<div class="score-badge"></div>';
+      var ss = w.querySelectorAll("select"), k = w.dataset.k;
+      w.innerHTML = scoreHtml(Math.min(+ss[0].value, CFG.p), Math.min(+ss[1].value, CFG.c), k);
     });
     updateAll();
   }
-  document.getElementById("cfgBox").addEventListener("change", function (ev) {
+  $("cfgBox").addEventListener("change", function (ev) {
     var t = ev.target;
-    if (t.dataset.cut != null) CFG.cuts[+t.dataset.cut][+t.dataset.f] = t.dataset.f === "1" ? Math.max(1, +t.value || 1) : t.value;
-    else { CFG.p = +document.getElementById("cfgP").value; CFG.c = +document.getElementById("cfgC").value; CFG.mode = document.getElementById("cfgM").value; CFG.accept = Math.max(1, +document.getElementById("cfgA").value || 1); }
-    CFG.cuts.sort(function (x, y) { return y[1] - x[1]; });
-    saveCfg(); renderCfg(); rebuildSelects();
+    if (t.dataset.cut != null) { CFG.cuts[+t.dataset.cut][+t.dataset.f] = t.dataset.f === "1" ? num(t.value, 1, 99, 1) : t.value; if (t.dataset.f === "1") t.value = CFG.cuts[+t.dataset.cut][1]; cfgChanged(false); return; }
+    if (t.dataset.step) { CFG[t.dataset.step][+t.dataset.k] = t.value; cfgChanged(false); return; }
+    var np = +$("cfgP").value, nc = +$("cfgC").value, over = overCount(np, nc);
+    if (over && !confirm("단계 수를 줄이면 이미 고른 점수 " + over + "건이 새 최고 단계로 바뀝니다. 계속할까요?")) { $("cfgP").value = CFG.p; $("cfgC").value = CFG.c; return; }
+    var st = np !== CFG.p || nc !== CFG.c;
+    CFG.p = np; CFG.c = nc; CFG.mode = $("cfgM").value; CFG.accept = num($("cfgA").value, 1, 99, CFG.accept); $("cfgA").value = CFG.accept;
+    CFG.pn = $("cfgPn").value.trim() || DEF_CFG.pn; CFG.cn = $("cfgCn").value.trim() || DEF_CFG.cn;
+    $("cfgPdH").textContent = CFG.pn; $("cfgCdH").textContent = CFG.cn;
+    cfgChanged(st);
   });
+  $("cfgBox").addEventListener("click", function (ev) {
+    var d = ev.target.closest("[data-cutdel]");
+    if (d) { if (CFG.cuts.length > 2) { CFG.cuts.splice(+d.dataset.cutdel, 1); cfgChanged(true); } return; }
+    if (ev.target.id === "cfgAdd" && CFG.cuts.length < 6) { CFG.cuts.push(["새 등급", minScore(), "", ""]); cfgChanged(true); var ins = $("cfgCuts").querySelectorAll('input[data-f="0"]'); ins[ins.length - 1].focus(); ins[ins.length - 1].select(); }
+  });
+
+  // ---------- 제목·항목 이름(문서에서 바로 고침) ----------
+  var DEF_LB = {}, DEF_TYPES = ["최초", "정기", "수시"], TYPES = DEF_TYPES.slice(), ORIENT = "p", APPR_ON = true;
+  function lbEls() { return document.querySelectorAll("#page1 [data-lb]"); }
+  function collectLb() { var o = {}; lbEls().forEach(function (el) { var v = txt(el), k = el.dataset.lb; if (v !== DEF_LB[k]) o[k] = v; }); return o; }
+  function applyLb(lb) {
+    lb = lb && typeof lb === "object" ? lb : {};
+    lbEls().forEach(function (el) { var k = el.dataset.lb; el.textContent = typeof lb[k] === "string" ? lb[k].slice(0, 400) : DEF_LB[k]; });
+    syncLabels();
+  }
+  function headText(k) { var el = document.querySelector('#page1 [data-lb="' + k + '"]'); return el ? txt(el).replace(/\s*\n\s*/g, " · ") : ""; }
+  function syncLabels() {
+    document.querySelectorAll("[data-mir]").forEach(function (el) { el.textContent = txt(document.querySelector('[data-lb="' + el.dataset.mir + '"]')); });
+    var hs = []; for (var i = 0; i < 8; i++) hs.push(headText("h" + i));
+    document.querySelectorAll("#ra-tbody tr").forEach(function (tr) { [].forEach.call(tr.children, function (td, i) { if (i) td.dataset.l = hs[i]; }); });
+    var o = headText("pOrg") || "소속", n = headText("pName") || "성명";
+    document.querySelectorAll("#people-tbody [data-pf]").forEach(function (el) { el.dataset.ph = el.dataset.pf === "org" ? o : n; });
+  }
+  function saveTpl() { lsSet(TPL_KEY, { lb: collectLb(), types: TYPES, orient: ORIENT, appr: APPR_ON }); }
+  function loadTpl() { var t = lsGet(TPL_KEY); return t && typeof t === "object" ? t : {}; }
+  function cleanTypes(a) { a = Array.isArray(a) ? a.map(function (x) { return str(x, 20).trim(); }).filter(Boolean).slice(0, 8) : []; return a.length ? a : null; }
+  function resetLabels() {
+    if (!confirm("문서 제목, 구역·표 머리글, 평가구분, 근거 문구를 기본값으로 되돌릴까요?\n(적어 둔 평가 내용은 그대로입니다)")) return;
+    var sel = typeIndex(), name = TYPES[sel];
+    TYPES = DEF_TYPES.slice(); renderTypes(Math.max(0, TYPES.indexOf(name) >= 0 ? TYPES.indexOf(name) : 1));
+    applyLb({}); methodOwn = false; syncMethod(); saveTpl(); markTouched(); $("moreBox").open = false; setStatus("제목·항목 이름·문구를 기본값으로 되돌렸습니다.");
+  }
+  function typeIndex() { return [].map.call(document.querySelectorAll("#fType input"), function (r) { return r.checked; }).indexOf(true); }
+  function renderTypes(sel) {
+    $("fType").innerHTML = TYPES.map(function (t, i) { return '<label><input type="radio" name="type"' + (i === sel ? " checked" : "") + "> " + esc(t) + "</label>"; }).join(" ");
+  }
+  function editTypes() {
+    var v = prompt("평가구분 항목을 쉼표로 나누어 적으세요.\n(예: 최초, 정기, 수시 — 사업장 규정에 있는 구분을 더하거나 이름을 바꿀 수 있습니다)", TYPES.join(", "));
+    if (v == null) return;
+    var a = cleanTypes(v.split(/[,，、\n]/)); if (!a) return;
+    var name = TYPES[typeIndex()], i = a.indexOf(name);
+    TYPES = a; renderTypes(i); saveTpl(); markTouched();
+  }
+  function setOrient(o) {
+    ORIENT = o === "l" ? "l" : "p";
+    $("pgSize").textContent = "@page { size: A4 " + (ORIENT === "l" ? "landscape" : "portrait") + "; margin: 10mm; }";
+    document.body.classList.toggle("land", ORIENT === "l"); $("optOrient").value = ORIENT; fitScreen();
+  }
+  function setAppr(on) { APPR_ON = on !== false; $("page1").classList.toggle("no-appr", !APPR_ON); $("optAppr").checked = APPR_ON; }
+
+  // ---------- 결재란(공통 모듈). 평가서마다 따로 보관해 다른 평가서의 서명이 섞이지 않게 한다 ----------
+  var APPR_KEY = "safetake.appr.tool.risk", apprH = null, apprMute = false;
+  function apprSet(v) {
+    apprMute = true;
+    try { if (v && Array.isArray(v.cols) && v.cols.length) localStorage.setItem(APPR_KEY, JSON.stringify({ cols: v.cols.slice(0, 6).map(function (x) { return str(x, 30); }), names: (v.names || []).slice(0, 6).map(function (x) { return str(x, 30); }), signs: (Array.isArray(v.signs) ? v.signs : []).slice(0, 6).map(function (x) { return typeof x === "string" && /^data:image\/png;base64,/.test(x) ? x : null; }), dates: (Array.isArray(v.dates) ? v.dates : []).slice(0, 6).map(function (x) { return x ? str(x, 10) : null; }) })); else localStorage.removeItem(APPR_KEY); } catch (e) { /* 저장소를 못 쓰는 환경 */ }
+    if (apprH) apprH.redraw();
+    setTimeout(function () { apprMute = false; }, 0);
+  }
+  function apprNoSigns(v) { if (v && v.cols) { v = clone(v); v.signs = []; v.dates = []; } return v; }
+
+  // ---------- 3번 표 ----------
   function itemsFor(dept, n) {
     var own = HAZARD_DB.items.filter(function (i) { return i.group === dept; });
     var common = dept === "공통" ? [] : HAZARD_DB.items.filter(function (i) { return i.group === "공통"; });
@@ -343,27 +626,29 @@
     return list;
   }
   function sel(val, max, label) {
-    var h = '<select onchange="updateScore(this)" aria-label="' + label + '"><option value="0"' + (val ? "" : " selected") + '>-</option>';
+    var h = '<select onchange="updateScore(this)" aria-label="' + esc(label) + '"><option value="0"' + (val ? "" : " selected") + '>-</option>';
     for (var i = 1; i <= max; i++) h += '<option value="' + i + '"' + (i === val ? " selected" : "") + '>' + MARKS[i - 1] + '</option>';
     return h + '</select>';
   }
+  function scoreHtml(p, c, k) { var w = k === "2" ? "개선 후 " : "현재 "; return sel(p, CFG.p, w + CFG.pn) + '<span class="op">' + opChar() + "</span>" + sel(c, CFG.c, w + CFG.cn) + '<div class="score-badge"></div>'; }
   function appendRow(tbody, no, r) {
-    r = r || {};
-    var tr = document.createElement("tr"), op = CFG.mode === "add" ? " + " : " × ";
-    function cl(v, max) { v = parseInt(v, 10) || 0; return v > max ? max : v; }
+    r = r && typeof r === "object" ? r : {};
+    var tr = document.createElement("tr");
+    function cl(v, max) { v = parseInt(v, 10) || 0; return v > max ? max : v < 0 ? 0 : v; }
+    function ed(f, ph, cls) { return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="' + CE + '" data-f="' + f + '" data-ph="' + ph + '">' + esc(str(r[f])) + "</div>"; }
     tr.innerHTML =
-      '<td style="text-align:center;"><span class="row-num">' + no + '</span>' +
-        '<button type="button" class="del-btn no-print" onclick="delRow(this)">삭제</button></td>' +
-      '<td><div class="ed left" contenteditable data-f="hazard" data-ph="유해·위험요인">' + esc(r.hazard) + '</div></td>' +
-      '<td><div class="ed left" contenteditable data-f="cur" data-ph="지금 하고 있는 조치">' + esc(r.cur) + '</div></td>' +
-      '<td><div class="scoreSel">' + sel(cl(r.p, CFG.p), CFG.p, "현재 가능성") + op + sel(cl(r.c, CFG.c), CFG.c, "현재 중대성") + '<div class="score-badge"></div></div></td>' +
-      '<td><div class="ed left" contenteditable data-f="measure" data-ph="추가 감소대책">' + esc(r.measure) + '</div></td>' +
-      '<td><div class="ed" contenteditable data-f="owner" data-ph="담당자">' + esc(r.owner) + '</div><div class="ed" contenteditable data-f="due" data-ph="기한">' + esc(r.due) + '</div></td>' +
-      '<td><div class="scoreSel">' + sel(cl(r.p2, CFG.p), CFG.p, "개선 후 가능성") + op + sel(cl(r.c2, CFG.c), CFG.c, "개선 후 중대성") + '<div class="score-badge"></div></div></td>' +
-      '<td style="text-align:center"><label class="done"><input type="checkbox" data-f="done" aria-label="개선 완료"' + (r.done ? " checked" : "") + '> 완료</label><div class="ed" contenteditable data-f="checker" data-ph="확인자">' + esc(r.checker) + '</div></td>';
+      '<td class="c0" style="text-align:center;"><button type="button" class="row-sum no-print" aria-expanded="false"><b></b><span></span><em></em></button><span class="row-num">' + no + '</span>' +
+        '<div class="row-ctl no-print"><button type="button" data-mv="-1" aria-label="위로">▲</button><button type="button" data-mv="1" aria-label="아래로">▼</button><button type="button" data-del>삭제</button></div></td>' +
+      "<td>" + ed("hazard", "유해·위험요인", "left") + "</td>" +
+      "<td>" + ed("cur", "지금 하고 있는 조치", "left") + "</td>" +
+      '<td><div class="scoreSel" data-k="1">' + scoreHtml(cl(r.p, CFG.p), cl(r.c, CFG.c), "1") + "</div></td>" +
+      "<td>" + ed("measure", "추가 감소대책", "left") + "</td>" +
+      "<td>" + ed("owner", "담당자") + ed("due", "기한") + "</td>" +
+      '<td><div class="scoreSel" data-k="2">' + scoreHtml(cl(r.p2, CFG.p), cl(r.c2, CFG.c), "2") + "</div></td>" +
+      '<td style="text-align:center"><label class="done"><input type="checkbox" data-f="done" aria-label="개선 완료"' + (r.done ? " checked" : "") + "> 완료</label>" + ed("checker", "확인자") + "</td>";
     tbody.appendChild(tr);
+    return tr;
   }
-  function txt(el) { return el ? String(el.innerText || "").replace(/ /g, " ").replace(/\n+$/, "") : ""; }
   function rowData(tr) {
     var s = tr.querySelectorAll(".scoreSel select"), o = {};
     ["hazard", "cur", "measure", "owner", "due", "checker"].forEach(function (f) { o[f] = txt(tr.querySelector('[data-f="' + f + '"]')); });
@@ -371,9 +656,9 @@
     o.done = tr.querySelector('[data-f="done"]').checked;
     return o;
   }
-  function defaultRows(dept) {
-    return itemsFor(dept, 6).map(function (it) { var s = suggest(it.level); return { hazard: it.risk, p: s.p, c: s.c, measure: it.measure }; });
-  }
+  function rowBlank(r) { return !r.hazard && !r.cur && !r.measure && !r.owner && !r.due && !r.checker && !r.done && !r.p && !r.c && !r.p2 && !r.c2; }
+  function hazRow(it) { var s = suggest(it.level); return { hazard: it.risk, p: s.p, c: s.c, measure: it.measure }; }
+  function defaultRows(dept) { return itemsFor(dept, 6).map(hazRow); }
   // 기본 목록에서 채운 그대로가 아닌 줄(직접 적거나 고친 줄)이 있는지
   function rowsEdited() {
     return [].some.call(document.querySelectorAll("#ra-tbody tr"), function (tr) {
@@ -385,65 +670,167 @@
   }
   var lastDept = "";
   function applyAutoData(fromButton) {
-    var gs = document.getElementById("globalWorkType"), dept = gs.value;
-    if (rowsEdited() && !confirm("3번 표를 '" + dept + "' 기본 항목으로 다시 채웁니다.\n직접 적은 유해·위험요인, 조치, 점수, 담당자는 지워집니다. 계속할까요?")) { gs.value = lastDept || gs.value; return; }
+    var gs = $("globalWorkType"), dept = gs.value;
+    if (rowsEdited() && !confirm("3번 표를 '" + dept + "' 기본 항목으로 다시 채웁니다.\n직접 적은 유해·위험요인, 조치, 점수, 담당자는 지워집니다. 계속할까요?\n\n(지금 표에 항목을 더하기만 하려면 취소하고 '유해·위험요인 불러오기'를 쓰세요)")) { gs.value = lastDept || gs.value; return; }
     lastDept = dept;
     // 평가대상(부서) 칸은 비어 있거나 공종 이름 그대로일 때만 바꾼다(직접 적은 부서명은 유지)
-    var dd = document.getElementById("dispDept"), cur = txt(dd);
-    if (!cur || HAZARD_DB.groups.indexOf(cur) >= 0) dd.innerText = dept;
+    var dd = $("dispDept"), cur = txt(dd);
+    if (!cur || HAZARD_DB.groups.indexOf(cur) >= 0) dd.textContent = dept;
     fillRows(defaultRows(dept));
-    if (fromButton !== null) markTouched();
+    $("moreBox").open = false;
+    markTouched();
   }
   function fillRows(rows) {
-    var tbody = document.getElementById("ra-tbody");
+    var tbody = $("ra-tbody");
     tbody.innerHTML = "";
-    rows.forEach(function (r, i) { appendRow(tbody, i + 1, r); });
-    updateAll();
+    rows.slice(0, 200).forEach(function (r, i) { appendRow(tbody, i + 1, r); });
+    syncLabels(); updateAll();
   }
   function addEmptyRow() {
-    var tbody = document.getElementById("ra-tbody");
-    appendRow(tbody, tbody.children.length + 1, {});
-    updateAll(); markTouched();
-    var ed = tbody.lastElementChild.querySelector('[data-f="hazard"]'); if (ed) ed.focus();
+    var tbody = $("ra-tbody");
+    var tr = appendRow(tbody, tbody.children.length + 1, {});
+    tr.classList.add("open"); syncLabels(); updateAll(); markTouched();
+    var ed = tr.querySelector('[data-f="hazard"]'); if (ed) ed.focus();
   }
-  function delRow(btn) {
-    var tr = btn.closest("tr"), r = rowData(tr);
-    if ((r.hazard || r.cur || r.measure) && !confirm("이 줄을 삭제할까요?")) return;
-    tr.remove(); renumber(); updateSummary(); markTouched();
-  }
+  $("ra-tbody").addEventListener("click", function (ev) {
+    var tr = ev.target.closest("tr"); if (!tr) return;
+    var sm = ev.target.closest(".row-sum");
+    if (sm) { var on = tr.classList.toggle("open"); sm.setAttribute("aria-expanded", on ? "true" : "false"); return; }
+    if (ev.target.closest("[data-del]")) {
+      var r = rowData(tr);
+      if (!rowBlank(r) && !confirm("이 줄을 삭제할까요?")) return;
+      tr.remove(); updateAll(); markTouched(); return;
+    }
+    var mv = ev.target.closest("[data-mv]");
+    if (mv) {
+      var up = mv.dataset.mv === "-1", o = up ? tr.previousElementSibling : tr.nextElementSibling; if (!o) return;
+      tr.parentNode.insertBefore(up ? tr : o, up ? o : tr); updateAll(); markTouched();
+      var b = tr.querySelector('[data-mv="' + mv.dataset.mv + '"]'); if (b && !b.disabled) b.focus();
+    }
+  });
   function updateScore(el) {
     var wrap = el.closest(".scoreSel");
     var s = wrap.querySelectorAll("select");
-    var p = parseInt(s[0].value, 10), c = parseInt(s[1].value, 10);
-    var score = scoreOf(p, c);
+    var score = scoreOf(parseInt(s[0].value, 10), parseInt(s[1].value, 10));
     var info = levelInfo(score);
     var badge = wrap.querySelector(".score-badge");
-    badge.innerText = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
+    badge.textContent = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
     badge.className = "score-badge " + info.cls;
+    wrap.classList.toggle("none", !score);
+    rowSum(wrap.closest("tr")); updateSummary();
+  }
+  function rowSum(tr) {
+    if (!tr) return;
+    var b = tr.querySelector(".row-sum"), bd = tr.querySelector(".score-badge"), hz = txt(tr.querySelector('[data-f="hazard"]'));
+    b.children[0].textContent = tr.querySelector(".row-num").textContent;
+    b.children[1].textContent = hz || "(유해·위험요인을 적으세요)";
+    b.children[2].textContent = bd.textContent; b.children[2].className = bd.className.replace("score-badge", "").trim();
+  }
+  function updateAll() {
+    var trs = document.querySelectorAll("#ra-tbody tr");
+    trs.forEach(function (tr, i) {
+      tr.querySelector(".row-num").textContent = i + 1;
+      tr.querySelector('[data-mv="-1"]').disabled = i === 0; tr.querySelector('[data-mv="1"]').disabled = i === trs.length - 1;
+    });
+    document.querySelectorAll(".scoreSel").forEach(function (w) { updateScore(w.querySelector("select")); });
     updateSummary();
   }
-  function updateAll() { document.querySelectorAll(".scoreSel").forEach(function (w) { updateScore(w.querySelector("select")); }); updateSummary(); }
-  function renumber() { document.querySelectorAll("#ra-tbody tr").forEach(function (tr, i) { tr.querySelector(".row-num").innerText = i + 1; }); }
   // 집계: 평가한 요인 수, 허용 기준을 넘는 요인 수, 개선 후에도 넘는 요인 수, 완료 수
   function updateSummary() {
-    var el = document.getElementById("raSummary"); if (!el) return;
-    var n = 0, bad = 0, still = 0, done = 0, noPlan = 0;
+    var el = $("raSummary"); if (!el) return;
+    var n = 0, bad = 0, still = 0, done = 0, noPlan = 0, noScore = 0;
     document.querySelectorAll("#ra-tbody tr").forEach(function (tr) {
       var r = rowData(tr), s1 = scoreOf(r.p, r.c), s2 = scoreOf(r.p2, r.c2);
       if (!r.hazard && !s1) return;
       n++;
+      if (!s1) noScore++;
       if (s1 > +CFG.accept) { bad++; if (!r.measure) noPlan++; if (r.done) done++; if (s2 > +CFG.accept) still++; }
     });
     el.textContent = n ? "평가 " + n + "건 · 허용 기준(" + CFG.accept + "점) 초과 " + bad + "건" + (bad ? " (개선 완료 " + done + "건" + (still ? ", 개선 후에도 초과 " + still + "건" : "") + ")" : "") : "";
-    el.title = noPlan ? "허용 기준을 넘는데 추가 감소대책이 비어 있는 줄이 " + noPlan + "건 있습니다." : "";
+    var w = [];
+    if (noScore) w.push("현재 위험성을 고르지 않은 줄 " + noScore + "건");
+    if (noPlan) w.push("허용 기준을 넘는데 추가 감소대책이 비어 있는 줄 " + noPlan + "건");
+    $("raWarn").textContent = w.join(" · ");
+    secSums(n, bad, w.length);
   }
-  function peopleRows(list) {
-    list = list || [];
-    function c(i, f) { return '<td><div class="ed" contenteditable data-pi="' + i + '" data-pf="' + f + '">' + esc((list[i] || {})[f]) + '</div></td>'; }
+  function secSums(n, bad, warn) {
+    function set(k, t, w) { var s = document.querySelector('.sec[data-sec="' + k + '"] .sec-sum'); if (s) { s.textContent = t; s.style.color = w ? "#b45309" : ""; } }
+    set(1, [txt($("dispDept")), txt($("evalDate"))].filter(Boolean).join(" · "));
+    set(2, CFG.p + opChar() + CFG.c + " · 허용 " + CFG.accept + "점 이하");
+    if (n != null) set(3, n ? "평가 " + n + "건 · 초과 " + bad + "건" + (warn ? " · 확인할 줄 있음" : "") : "아직 없음", warn);
+    var pn = [].filter.call(document.querySelectorAll('#people-tbody [data-pf="name"]'), function (e) { return txt(e); }).length;
+    set(4, "참여자 " + pn + "명");
+    var cs = document.querySelectorAll("#lawCheck input[type=checkbox]");
+    set(5, "확인 " + [].filter.call(cs, function (c) { return c.checked; }).length + "/" + cs.length);
+  }
+
+  // ---------- 참여자 ----------
+  var NP = 6;
+  function peopleRows(list, n) {
+    list = Array.isArray(list) ? list : [];
+    NP = Math.min(60, Math.max(2, n || NP)); if (NP % 2) NP++;
+    var half = NP / 2;
+    function c(i, f) { var v = list[i] && typeof list[i] === "object" ? str(list[i][f], 100) : ""; return '<td><div class="ed" contenteditable="' + CE + '" data-pi="' + i + '" data-pf="' + f + '">' + esc(v) + '</div></td>'; }
     var h = "";
-    for (var i = 0; i < 3; i++) h += '<tr><td style="text-align:center">' + (i + 1) + '</td>' + c(i, "org") + c(i, "name") + '<td></td>' +
-      '<td style="text-align:center">' + (i + 4) + '</td>' + c(i + 3, "org") + c(i + 3, "name") + '<td></td></tr>';
-    document.getElementById("people-tbody").innerHTML = h;
+    for (var i = 0; i < half; i++) h += '<tr><td style="text-align:center">' + (i + 1) + '</td>' + c(i, "org") + c(i, "name") + '<td class="sg"></td>' +
+      '<td style="text-align:center">' + (i + half + 1) + '</td>' + c(i + half, "org") + c(i + half, "name") + '<td class="sg"></td></tr>';
+    $("people-tbody").innerHTML = h;
+    syncLabels();
+  }
+  function collectPeople() {
+    var people = [];
+    document.querySelectorAll("#people-tbody [data-pi]").forEach(function (el) { var i = +el.dataset.pi; (people[i] = people[i] || { org: "", name: "" })[el.dataset.pf] = txt(el); });
+    return people;
+  }
+  function morePeople(d) {
+    // 왼쪽 1~n/2, 오른쪽 n/2+1~n 순서를 지키도록 적힌 사람을 앞에서부터 다시 채운다
+    var ps = collectPeople(), filled = ps.filter(function (p) { return p.org || p.name; });
+    var n = NP + d;
+    if (n < 2) return;
+    if (d < 0 && filled.length > n) { setStatus("적힌 참여자가 " + filled.length + "명이라 칸을 더 줄일 수 없습니다.", true); return; }
+    if (n > 60) { setStatus("참여자 칸은 60명까지 둘 수 있습니다.", true); return; }
+    peopleRows(d < 0 ? filled : ps.slice(0, NP / 2).concat(Array(d / 2).fill({}), ps.slice(NP / 2)), n);
+    updateSummary(); markTouched();
+  }
+
+  // ---------- 유해·위험요인 불러오기 ----------
+  function closePick() { $("pickModal").style.display = "none"; }
+  function openPick() {
+    var g = $("pickGroup"), cur = $("globalWorkType").value;
+    g.innerHTML = '<option value="">전체 공종</option>' + HAZARD_DB.groups.map(function (x) { return '<option value="' + esc(x) + '"' + (x === cur ? " selected" : "") + ">" + esc(x) + "</option>"; }).join("");
+    $("pickQ").value = ""; drawPick(); $("pickModal").style.display = "flex"; $("moreBox").open = false;
+  }
+  function drawPick() {
+    var g = $("pickGroup").value, q = $("pickQ").value.trim().toLowerCase();
+    var have = [].map.call(document.querySelectorAll('#ra-tbody [data-f="hazard"]'), txt);
+    var list = HAZARD_DB.items.map(function (it, i) { return { it: it, i: i }; }).filter(function (x) {
+      var it = x.it;
+      if (g && it.group !== g && !(it.group === "공통")) return false;
+      return !q || (it.risk + " " + it.measure + " " + (it.type || "") + " " + it.group).toLowerCase().indexOf(q) >= 0;
+    });
+    if (g) list.sort(function (a, b) { return (a.it.group === g ? 0 : 1) - (b.it.group === g ? 0 : 1) || a.i - b.i; });
+    $("pickList").innerHTML = list.length ? list.map(function (x) {
+      var it = x.it, inn = have.indexOf(it.risk) >= 0;
+      return '<label class="pick-item' + (inn ? " in" : "") + '"><input type="checkbox" value="' + x.i + '"' + (inn ? " disabled" : "") + "><span>" + esc(it.risk) + "<small>" + esc(it.group) + (it.type ? " · " + esc(it.type) : "") + (inn ? " · 이미 표에 있음" : "") + "</small><small>대책 예: " + esc(it.measure) + "</small></span></label>";
+    }).join("") : '<p class="doc-empty">조건에 맞는 항목이 없습니다. 표의 \'+ 빈 줄 추가\'로 직접 적을 수 있습니다.</p>';
+    pickCount();
+  }
+  function pickCount() { var n = document.querySelectorAll("#pickList input:checked").length; $("pickCount").textContent = n + "건 선택"; $("pickAdd").disabled = !n; }
+  $("pickGroup").addEventListener("change", drawPick); $("pickQ").addEventListener("input", drawPick); $("pickList").addEventListener("change", pickCount);
+  function addPicked() {
+    var ids = [].map.call(document.querySelectorAll("#pickList input:checked"), function (c) { return +c.value; });
+    if (!ids.length) return;
+    var tbody = $("ra-tbody"), rows = [].map.call(tbody.children, rowData), k = 0;
+    ids.forEach(function (i) {
+      var it = HAZARD_DB.items[i]; if (!it) return;
+      while (k < rows.length && !rowBlank(rows[k])) k++;
+      if (k < rows.length) rows[k] = hazRow(it); else rows.push(hazRow(it));
+      k++;
+    });
+    var open = [].map.call(tbody.children, function (tr) { return tr.classList.contains("open"); });
+    fillRows(rows);
+    [].forEach.call(tbody.children, function (tr, i) { if (open[i]) tr.classList.add("open"); });
+    closePick(); markTouched(); setStatus("유해·위험요인 " + ids.length + "건을 표에 넣었습니다. 점수와 대책은 추천값이니 현장에 맞게 고치세요.");
   }
 
   // ---------- 저장·불러오기 (이 기기 브라우저) ----------
@@ -457,46 +844,54 @@
     } catch (e) { return {}; }
   }
   function collect() {
-    var people = [];
-    document.querySelectorAll("#people-tbody [data-pi]").forEach(function (el) { var i = +el.dataset.pi; (people[i] = people[i] || { org: "", name: "" })[el.dataset.pf] = txt(el); });
-    return {
-      date: txt(document.getElementById("evalDate")), writer: txt(document.getElementById("fWriter")), site: txt(document.getElementById("fSite")),
-      dept: txt(document.getElementById("dispDept")), group: document.getElementById("globalWorkType").value,
-      type: [].map.call(document.querySelectorAll('#fType input'), function (r) { return r.checked; }).indexOf(true),
-      rows: [].map.call(document.querySelectorAll("#ra-tbody tr"), rowData), people: people,
+    var d = {
+      v: 2, date: txt($("evalDate")), writer: txt($("fWriter")), site: txt($("fSite")),
+      dept: txt($("dispDept")), group: $("globalWorkType").value, type: typeIndex(), types: TYPES.slice(),
+      rows: [].map.call(document.querySelectorAll("#ra-tbody tr"), rowData), people: collectPeople(), np: NP,
       checks: [].map.call(document.querySelectorAll("#lawCheck input[type=checkbox]"), function (c) { return c.checked; }),
-      why: txt(document.getElementById("fWhy")), keep: txt(document.getElementById("fKeep"))
+      why: txt($("fWhy")), keep: txt($("fKeep")),
+      cfg: clone(CFG), lb: collectLb(), orient: ORIENT, apprOn: APPR_ON, appr: lsGet(APPR_KEY)
     };
+    if (methodOwn) d.method = txt($("fMethod"));
+    return d;
   }
   function apply(d) {
-    d = d || {};
-    var gs = document.getElementById("globalWorkType");
+    d = d && typeof d === "object" ? d : {};
+    var t = loadTpl(), gs = $("globalWorkType");
+    CFG = cleanCfg(d.cfg || lsGet(CFG_KEY)); renderCfgForm();
+    methodOwn = typeof d.method === "string"; if (methodOwn) $("fMethod").textContent = d.method.slice(0, 300);
+    renderCrit();
     gs.value = HAZARD_DB.groups.indexOf(d.group) >= 0 ? d.group : HAZARD_DB.groups[0]; lastDept = gs.value;
-    document.getElementById("evalDate").innerText = d.date || today();
-    document.getElementById("fWriter").innerText = d.writer || "";
-    document.getElementById("fSite").innerText = d.site || "";
-    document.getElementById("dispDept").innerText = d.dept || gs.value;
-    var radios = document.querySelectorAll("#fType input"), ti = d.type >= 0 && d.type < radios.length ? d.type : 1;
-    radios.forEach(function (r, i) { r.checked = i === ti; });
+    $("evalDate").textContent = str(d.date) || today();
+    $("fWriter").textContent = str(d.writer);
+    $("fSite").textContent = str(d.site);
+    $("dispDept").textContent = str(d.dept) || gs.value;
+    // 평가구분: 예전 저장값(구분 목록 없이 순번만 저장)은 당시 목록(최초·정기·수시·상시)으로 읽는다
+    TYPES = cleanTypes(d.types) || (!d.v && d.type === 3 ? ["최초", "정기", "수시", "상시"] : cleanTypes(t.types) || DEF_TYPES.slice());
+    renderTypes(d.type >= 0 && d.type < TYPES.length ? d.type : d.type === -1 && d.v ? -1 : Math.min(1, TYPES.length - 1));
+    applyLb(d.lb || t.lb);
+    setOrient(d.orient || t.orient); setAppr(d.apprOn != null ? d.apprOn : t.appr);
     fillRows(Array.isArray(d.rows) ? d.rows : defaultRows(gs.value));
-    peopleRows(d.people);
-    document.querySelectorAll("#lawCheck input[type=checkbox]").forEach(function (c, i) { c.checked = !!(d.checks || [])[i]; });
-    document.getElementById("fWhy").innerText = d.why || "";
-    document.getElementById("fKeep").innerText = d.keep || "";
+    peopleRows(d.people, num(d.np, 2, 60, Math.max(6, Array.isArray(d.people) ? d.people.length : 0)));
+    document.querySelectorAll("#lawCheck input[type=checkbox]").forEach(function (c, i) { c.checked = !!(Array.isArray(d.checks) ? d.checks : [])[i]; });
+    $("fWhy").textContent = str(d.why);
+    $("fKeep").textContent = str(d.keep);
+    if (d.v >= 2) apprSet(d.appr);
+    updateSummary();
   }
   function blankDoc() {
     var p = profile();
-    return { date: today(), writer: p.manager || "", site: p.company || "", group: HAZARD_DB.groups[0], type: 1 };
+    return { date: today(), writer: str(p.manager), site: str(p.company), group: HAZARD_DB.groups[0], type: 1 };
   }
   function loadDocs() {
-    try { var a = JSON.parse(localStorage.getItem(DOCS_KEY) || "[]"); return Array.isArray(a) ? a.filter(function (x) { return x && x.id && x.data; }) : []; } catch (e) { return []; }
+    try { var a = JSON.parse(localStorage.getItem(DOCS_KEY) || "[]"); return Array.isArray(a) ? a.filter(function (x) { return x && typeof x.id === "string" && x.data && typeof x.data === "object"; }) : []; } catch (e) { return []; }
   }
   function writeDocs(a) {
     a.sort(function (x, y) { return (y.saved || 0) - (x.saved || 0); });
     try { localStorage.setItem(DOCS_KEY, JSON.stringify(a.slice(0, MAX_DOCS))); return true; } catch (e) { return false; }
   }
-  function setStatus(m, bad) { var el = document.getElementById("saveStatus"); if (el) { el.textContent = m; el.style.color = bad ? "#ffb4a9" : ""; } }
-  function updateDocsBtn() { var n = loadDocs().length, b = document.getElementById("docsBtn"); if (b) b.textContent = "📂 저장된 평가서" + (n ? " (" + n + ")" : ""); }
+  function setStatus(m, bad) { var el = $("saveStatus"); if (el) { el.textContent = m; el.style.color = bad ? "#ffb4a9" : ""; } }
+  function updateDocsBtn() { var n = loadDocs().length, b = $("docsBtn"); if (b) b.textContent = "저장된 평가서" + (n ? " (" + n + ")" : ""); }
   function saveNow() {
     clearTimeout(saveTimer); saveTimer = null;
     if (!touched) return;
@@ -507,74 +902,115 @@
     updateDocsBtn();
   }
   function markTouched() { touched = true; clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 500); }
-  function newDoc() {
-    saveNow();
-    docId = newId(); touched = false; apply(blankDoc());
-    setStatus("새 평가서를 시작했습니다. 이전 평가서는 '저장된 평가서'에 있습니다."); window.scrollTo(0, 0);
+  function startBlank(msg) {
+    var keep = apprNoSigns(lsGet(APPR_KEY));   // 결재 칸 이름·성명은 이어 쓰고 서명만 비운다
+    docId = newId(); touched = false; apply(blankDoc()); apprSet(keep);
+    setStatus(msg); updateDocsBtn();
   }
+  function newDoc() { saveNow(); startBlank("새 평가서를 시작했습니다. 이전 평가서는 '저장된 평가서'에 있습니다."); window.scrollTo(0, 0); }
   function resetForm() {
-    if (!confirm("지금 작성 중인 평가서를 지우고 처음 상태로 되돌릴까요?\n(저장된 다른 평가서는 지워지지 않습니다)")) return;
+    if (!confirm("지금 작성 중인 평가서를 지우고 처음 상태로 되돌릴까요?\n(저장된 다른 평가서, 평가기준, 고친 제목·항목 이름은 그대로입니다)")) return;
     clearTimeout(saveTimer); saveTimer = null;
     writeDocs(loadDocs().filter(function (x) { return x.id !== docId; }));
-    docId = newId(); touched = false; apply(blankDoc());
-    setStatus("처음 상태로 되돌렸습니다."); updateDocsBtn();
+    $("moreBox").open = false;
+    startBlank("처음 상태로 되돌렸습니다.");
   }
-  function closeDocs() { document.getElementById("docsModal").style.display = "none"; }
+  function closeDocs() { $("docsModal").style.display = "none"; }
   function openDocs() {
     saveNow();
-    var a = loadDocs(), box = document.getElementById("docsList");
+    var a = loadDocs(), box = $("docsList");
     box.innerHTML = a.length ? a.map(function (x) {
-      var d = x.data, cur = x.id === docId, n = (d.rows || []).filter(function (r) { return r.hazard; }).length;
-      return '<div class="doc-item"><div class="doc-meta"><b>' + esc(d.dept || "부서 미입력") + '</b>' + (cur ? ' <span class="doc-cur">작성 중</span>' : "") +
-        '<span>평가일 ' + esc(d.date || "-") + " · " + esc(["최초", "정기", "수시", "상시"][d.type] || "") + " · 요인 " + n + "건" + (d.site ? " · " + esc(d.site) : "") + '</span></div>' +
+      var d = x.data, cur = x.id === docId, n = (Array.isArray(d.rows) ? d.rows : []).filter(function (r) { return r && r.hazard; }).length;
+      var tn = (cleanTypes(d.types) || ["최초", "정기", "수시", "상시"])[d.type] || "";
+      return '<div class="doc-item"><div class="doc-meta"><b>' + esc(str(d.dept) || "부서 미입력") + '</b>' + (cur ? ' <span class="doc-cur">작성 중</span>' : "") +
+        '<span>평가일 ' + esc(str(d.date) || "-") + (tn ? " · " + esc(tn) : "") + " · 요인 " + n + "건" + (d.site ? " · " + esc(str(d.site)) : "") + '</span></div>' +
         '<div class="doc-acts">' + (cur ? "" : '<button type="button" class="btn btn-blue" data-doc="open" data-id="' + esc(x.id) + '">열기</button>') +
         '<button type="button" class="btn btn-grey" data-doc="copy" data-id="' + esc(x.id) + '">복사해서 새 평가서</button>' +
         (cur ? "" : '<button type="button" class="btn btn-red" data-doc="del" data-id="' + esc(x.id) + '">삭제</button>') + '</div></div>';
     }).join("") : '<p class="doc-empty">아직 저장된 평가서가 없습니다. 내용을 적으면 자동으로 저장되고, 부서별로 여러 건을 보관할 수 있습니다(이 기기에 최근 ' + MAX_DOCS + '건).</p>';
-    document.getElementById("docsModal").style.display = "flex";
+    $("docsModal").style.display = "flex";
   }
-  document.getElementById("docsList").addEventListener("click", function (ev) {
+  $("docsList").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-doc]"); if (!b) return;
     var a = loadDocs(), x = a.filter(function (y) { return y.id === b.dataset.id; })[0]; if (!x) return;
+    var nm = (str(x.data.dept) || "부서 미입력") + " " + str(x.data.date);
     if (b.dataset.doc === "del") {
-      if (!confirm("'" + (x.data.dept || "부서 미입력") + " " + (x.data.date || "") + "' 평가서를 삭제할까요? 되돌릴 수 없습니다.")) return;
+      if (!confirm("'" + nm + "' 평가서를 삭제할까요? 되돌릴 수 없습니다.")) return;
       writeDocs(a.filter(function (y) { return y.id !== x.id; })); updateDocsBtn(); openDocs(); return;
     }
-    if (b.dataset.doc === "open") { docId = x.id; touched = true; apply(x.data); setStatus("'" + (x.data.dept || "부서 미입력") + " " + (x.data.date || "") + "' 평가서를 열었습니다."); }
+    if (b.dataset.doc === "open") { docId = x.id; touched = true; apply(x.data); setStatus("'" + nm + "' 평가서를 열었습니다."); }
     else {
-      // 지난 평가서를 바탕으로 새로: 날짜는 오늘, 개선 후 위험성·완료 표시·참여자 확인란은 비운다
-      var d = JSON.parse(JSON.stringify(x.data)); d.date = today(); d.checks = []; d.keep = "";
-      (d.rows || []).forEach(function (r) { r.p2 = 0; r.c2 = 0; r.done = false; r.checker = ""; r.due = ""; });
+      // 지난 평가서를 바탕으로 새로: 날짜는 오늘, 개선 후 위험성·완료 표시·확인란·결재 서명은 비운다
+      var d = clone(x.data); d.date = today(); d.checks = []; d.keep = "";
+      (Array.isArray(d.rows) ? d.rows : []).forEach(function (r) { if (r) { r.p2 = 0; r.c2 = 0; r.done = false; r.checker = ""; r.due = ""; } });
+      d.appr = apprNoSigns(d.v >= 2 ? d.appr : lsGet(APPR_KEY)); d.v = 2;
       docId = newId(); apply(d); touched = true; saveNow();
-      setStatus("복사해서 새 평가서를 만들었습니다. 평가일은 오늘로, 개선 후 위험성·기한·완료 표시는 비웠습니다.");
+      setStatus("복사해서 새 평가서를 만들었습니다. 평가일은 오늘로, 개선 후 위험성·기한·완료 표시·결재 서명은 비웠습니다.");
     }
     closeDocs(); window.scrollTo(0, 0);
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDocs(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeDocs(); closePick(); } });
+
+  // ---------- 화면 맞춤: 넓은 화면은 A4 그대로, 좁은 화면은 입력 모드(카드) / 미리보기(A4 축소) ----------
+  var view = "in";
   function fitScreen() {
-    var w = document.documentElement.clientWidth, a4 = 210 * 96 / 25.4;
-    document.documentElement.style.setProperty("--pz", String(Math.min(1, Math.max(0.3, (w - 12) / a4))));
+    var w = document.documentElement.clientWidth, narrow = w <= 820, pw = (ORIENT === "l" ? 297 : 210) * 96 / 25.4;
+    var m = narrow && view === "in";
+    document.documentElement.classList.toggle("m", m);
+    document.documentElement.style.setProperty("--pz", m ? "1" : String(Math.min(1, Math.max(0.3, (w - 12) / pw))));
   }
+  $("mtabs").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    if (b.id === "allTg") {
+      var secs = document.querySelectorAll(".sec"), anyClosed = [].some.call(secs, function (s) { return s.classList.contains("closed"); });
+      secs.forEach(function (s) { s.classList.toggle("closed", !anyClosed); });
+      document.querySelectorAll("#ra-tbody tr").forEach(function (tr) { tr.classList.toggle("open", anyClosed); });
+      b.textContent = anyClosed ? "모두 접기" : "모두 펼치기"; return;
+    }
+    view = b.dataset.v;
+    document.querySelectorAll("#mtabs [data-v]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    $("allTg").hidden = view !== "in";
+    fitScreen(); window.scrollTo(0, 0);
+  });
+
   (function init() {
-    var gs = document.getElementById("globalWorkType");
+    var page = $("page1"), gs = $("globalWorkType");
+    lbEls().forEach(function (el) { DEF_LB[el.dataset.lb] = el.textContent; });
+    page.querySelectorAll("[contenteditable]").forEach(function (el) { el.setAttribute("contenteditable", CE); });
     gs.innerHTML = HAZARD_DB.groups.map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join("");
-    renderCfg(); fitScreen();
+    if (window.ADoc) { var ab = $("apprBox"); ab.dataset.mounted = "1"; apprH = ADoc.mountApproval(ab, "tool.risk"); }
     // 가장 최근에 저장한 평가서를 이어서 연다. 없으면 새 평가서(사업장 정보가 있으면 사업장명·작성자를 채움)
     var a = loadDocs();
     a.sort(function (x, y) { return (y.saved || 0) - (x.saved || 0); });
-    if (a[0]) { docId = a[0].id; touched = true; apply(a[0].data); setStatus("마지막으로 작성하던 평가서를 이어서 엽니다 · " + (a[0].data.dept || "부서 미입력") + " " + (a[0].data.date || "")); }
-    else { docId = newId(); apply(blankDoc()); }
-    updateDocsBtn();
-    var page = document.getElementById("page1");
-    page.addEventListener("input", function (ev) { if (ev.target.closest("#cfgBox") || ev.target.closest("[data-appr]")) return; markTouched(); });
-    page.addEventListener("change", function (ev) { if (ev.target.closest("#cfgBox") || ev.target.closest("[data-appr]")) return; updateSummary(); markTouched(); });
+    try {
+      if (a[0]) { docId = a[0].id; touched = true; apply(a[0].data); setStatus("마지막으로 작성하던 평가서를 이어서 엽니다 · " + (str(a[0].data.dept) || "부서 미입력") + " " + str(a[0].data.date)); }
+      else { docId = newId(); apply(blankDoc()); }
+    } catch (e) { docId = newId(); touched = false; apply(blankDoc()); setStatus("저장된 평가서를 읽지 못해 새 평가서로 시작합니다.", true); }
+    updateDocsBtn(); fitScreen();
+    if (window.MutationObserver) new MutationObserver(function () { if (!apprMute) markTouched(); }).observe($("apprBox"), { childList: true, subtree: true, characterData: true });
+    page.addEventListener("input", function (ev) {
+      var t = ev.target; if (!t.closest || t.closest("#cfgBox") || t.closest("#apprBox")) return;
+      if (t.dataset.lb) { syncLabels(); saveTpl(); }
+      if (t.id === "fMethod") { methodOwn = txt(t) !== autoMethod(); $("mOwn").hidden = !methodOwn; }
+      if (t.dataset.f === "hazard") rowSum(t.closest("tr"));
+      updateSummary(); markTouched();
+    });
+    page.addEventListener("change", function (ev) { if (ev.target.closest("#cfgBox") || ev.target.closest("#apprBox")) return; updateSummary(); markTouched(); });
+    // 편집 칸을 떠날 때 글자만 남긴다(줄바꿈은 유지, 빈 칸은 안내 글이 다시 보이게)
+    page.addEventListener("focusout", function (ev) {
+      var t = ev.target; if (!t.closest || t.closest("#apprBox") || !t.isContentEditable) return;
+      if (t.children.length || !txt(t)) t.textContent = txt(t);
+    });
     // 붙여넣기는 서식 없이 글자만 넣는다(표가 깨지지 않게)
     page.addEventListener("paste", function (ev) {
-      if (!ev.target.closest || !ev.target.closest(".ed")) return;
+      var t = ev.target.closest && ev.target.closest("[contenteditable]"); if (!t || t.closest("#apprBox")) return;
       ev.preventDefault();
-      var t = (ev.clipboardData || window.clipboardData).getData("text");
-      document.execCommand("insertText", false, t);
+      document.execCommand("insertText", false, (ev.clipboardData || window.clipboardData).getData("text"));
     });
+    page.addEventListener("click", function (ev) { var b = ev.target.closest(".sec-tg"); if (b) b.closest(".sec").classList.toggle("closed"); });
+    $("optOrient").addEventListener("change", function () { setOrient(this.value); saveTpl(); markTouched(); });
+    $("optAppr").addEventListener("change", function () { setAppr(this.checked); saveTpl(); markTouched(); });
+    document.addEventListener("click", function (ev) { var m = $("moreBox"); if (m.open && !m.contains(ev.target)) m.open = false; });
     window.addEventListener("resize", fitScreen);
     window.addEventListener("pagehide", function () { if (saveTimer) saveNow(); });
     document.addEventListener("visibilitychange", function () { if (document.hidden && saveTimer) saveNow(); });

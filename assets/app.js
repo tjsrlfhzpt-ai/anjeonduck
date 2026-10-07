@@ -128,6 +128,7 @@
     });
     facets(terms, sel);
     if (countEl) countEl.textContent = shown;
+    qhead(terms, sel, shown);
     if (moreWrap) {
       moreWrap.hidden = !(pageSize > 0 && shown > limit);
       if (moreBtn) moreBtn.textContent = "더 보기 (" + Math.min(limit, shown) + " / " + shown + ")";
@@ -139,7 +140,42 @@
       if (p) p.textContent = (onlyFav && onlyFav.checked && favs.length === 0)
         ? "아직 즐겨찾기한 자료가 없습니다. 목록 오른쪽 ☆를 눌러 추가하세요."
         : p.getAttribute("data-default");
+      var rawq = q && q.value ? q.value.trim() : "";
+      emptyEl.querySelectorAll("[data-q-href]").forEach(function (a) { a.setAttribute("href", a.getAttribute("data-q-href") + (rawq ? "?q=" + encodeURIComponent(rawq) : "")); });
     }
+  }
+
+  // 검색어·필터가 걸려 있으면 목록 바로 위에 "‘…’ 검색 결과 n건 · 전체 보기"를 보여 준다.
+  // 주소(?q= ?topic= ?cat=)로 들어온 경우에는 안내용 덩어리([data-landing])를 접어 결과가 첫 화면에 오게 한다.
+  var qh = null, arrived = false, baseTitle = document.title;
+  function qhead(terms, sel, shown) {
+    var parts = [];
+    var raw = q && q.value ? q.value.trim() : "";
+    if (raw) parts.push("\u2018" + raw + "\u2019");
+    Object.keys(sel).forEach(function (k) { if (sel[k]) parts.push(sel[k]); });
+    if (onlyFav && onlyFav.checked) parts.push("즐겨찾기");
+    var on = parts.length > 0;
+    if (!on) arrived = false;
+    document.body.classList.toggle("is-arrived", arrived);
+    if (!qh) {
+      if (!on || !countEl) return;
+      var cp = countEl.closest(".count") || countEl.parentNode;
+      qh = document.createElement("div"); qh.className = "qhead"; qh.setAttribute("data-qhead", "");
+      qh.setAttribute("role", "status");
+      qh.innerHTML = '<h2 class="qhead-t"></h2><button type="button" class="btn btn-sm btn-ghost" data-reset>전체 보기</button>';
+      cp.parentNode.insertBefore(qh, cp);
+    }
+    qh.hidden = !on;
+    var cp2 = countEl && (countEl.closest(".count") || countEl.parentNode);
+    if (cp2) cp2.hidden = on;
+    if (on) {
+      var t = qh.querySelector(".qhead-t"); t.textContent = "";
+      var b = document.createElement("span"); b.className = "qhead-k"; b.textContent = parts.join(" · ");
+      var n = document.createElement("strong"); n.textContent = shown;
+      t.appendChild(b); t.appendChild(document.createTextNode(raw ? " 검색 결과 " : " 자료 "));
+      t.appendChild(n); t.appendChild(document.createTextNode("건"));
+    }
+    document.title = on && arrived ? parts.join(" · ") + " 검색 결과 — " + baseTitle : baseTitle;
   }
 
   // 눌러도 결과가 0건인 선택지는 숨긴다(다른 필터·검색어 조건은 그대로 둔 채, 그 선택지를 골랐을 때의 건수로 판단)
@@ -174,6 +210,7 @@
       var open = g.classList.contains("show-zero");
       mb.hidden = zero === 0; mb.setAttribute("aria-expanded", String(open));
       mb.textContent = open ? "접기" : "더보기 +" + zero;
+      mb.title = open ? "" : "지금 조건에서는 0건인 항목입니다. 고르면 검색어와 다른 필터를 풀고 그 항목을 보여 줍니다.";
     });
   }
 
@@ -198,6 +235,14 @@
   document.addEventListener("click", function (ev) {
     var c = ev.target.closest(".chip");
     if (c && c.parentNode.hasAttribute("data-filter")) {
+      // 지금 조건에서 0건인 선택지를 누르면 막다른 길이 되지 않게 검색어·다른 필터를 풀고 그 항목만 보여 준다
+      if (c.classList.contains("chip-zero")) {
+        if (q) q.value = "";
+        document.querySelectorAll("[data-filter]").forEach(function (g) {
+          g.classList.remove("show-zero");
+          g.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-value") === "" ? "true" : "false"); });
+        });
+      }
       c.parentNode.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
       c.setAttribute("aria-pressed", "true");
       limit = pageSize; apply();
@@ -224,7 +269,9 @@
         });
       });
       if (q) q.value = "";
-      apply();
+      if (onlyFav) onlyFav.checked = false;
+      try { if (location.search) history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
+      limit = pageSize; apply();
     }
   });
   function applyReset() { limit = pageSize; apply(); }
@@ -240,11 +287,13 @@
   // 홈 검색창에서 넘어온 ?q= 반영
   try {
     var pq = new URLSearchParams(location.search).get("q");
-    if (pq && q) q.value = pq;
+    if (pq && q) { q.value = pq; arrived = true; }
     var sp = new URLSearchParams(location.search);
     ["topic", "cat"].forEach(function (k) {
       var v = sp.get(k), g = document.querySelector('[data-filter="' + k + '"]');
       if (!v || !g) return;
+      if (!g.querySelector('.chip[data-value="' + v.replace(/["\\]/g, "") + '"]')) return; // 없는 값이면 전체로 둔다
+      arrived = true;
       g.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-value") === v ? "true" : "false"); });
     });
   } catch (e) { /* 구형 브라우저: 무시 */ }

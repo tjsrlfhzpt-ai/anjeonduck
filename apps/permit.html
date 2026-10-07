@@ -59,6 +59,10 @@
         @media print {
             body { background: white; padding: 0; }
             .no-print { display: none !important; }
+            .pd-signph { visibility: hidden; }
+            #app { height: auto !important; overflow: visible !important; }
+            .pw-pane { overflow: visible !important; height: auto !important; max-height: none !important; padding: 0 !important; }
+            #preview-col { display: block !important; }
             .a4-container { box-shadow: none; margin: 0; width: 100%; min-height: 0; border: 0 !important; padding: 0 !important; }
             #app { min-height: 0 !important; display: block !important; }
             main { display: block !important; padding: 0 !important; max-width: none !important; }
@@ -124,7 +128,111 @@
         .pw-item-n { background: #fff7ed; box-shadow: inset 4px 0 0 #ea580c; }
         .pw-item-t { font-size: 13px; line-height: 1.55; color: #1e293b; margin: 0 0 7px; overflow-wrap: anywhere; }
         .pw-cite { display: inline-block; font-size: 11px; color: #1d4ed8; text-decoration: underline; white-space: nowrap; }
-        .pw-rec { display: inline-block; font-size: 10.5px; font-weight: 700; color: #6d28d9; background: #ede9fe; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+        .pw-rec { font-size: 11px; font-weight: 500; color: #64748b; white-space: nowrap; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        .pw-own { font-size: 11px; font-weight: 500; color: #b45309; margin-left: 4px; }
+        .pw-linkb { font-size: 12px; color: #1d4ed8; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; font-family: inherit; }
+        .pw-sep { border-top: 1px solid #e2e8f0; padding-top: 12px; }
+        .pw-card-s { padding: 10px; }
+        .pw-mvs { display: inline-flex; flex: none; align-items: center; }
+        .pw-mv { flex: none; width: 30px; height: 36px; font-size: 14px; font-weight: 700; color: #64748b; background: none; border: 0; border-radius: 8px; cursor: pointer; font-family: inherit; }
+        .pw-mv:hover:not(:disabled) { color: #0f766e; background: #f0fdfa; }
+        .pw-mv:disabled, .pw-x:disabled { opacity: .3; cursor: default; }
+        .cm-todo { font-size: 12px; line-height: 1.55; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 9px; margin: 0; }
+
+        /* ---- 화면 배치: 넓은 화면은 입력 칸과 미리보기가 각자 스크롤, 좁은 화면은 탭으로 전환 */
+        #app { min-height: 100vh; }
+        .pw-pane > * + * { margin-top: 10px; }
+        .pw-prev { display: flex; flex-direction: column; align-items: center; }
+        .pw-tabs { display: none; }
+        @media screen and (min-width: 1024px) {
+            #app { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
+            #app > main { min-height: 0; grid-template-rows: minmax(0, 1fr); padding-top: 16px; padding-bottom: 0; }
+            .pw-pane { overflow-y: auto; min-height: 0; height: 100%; padding: 0 6px 28px 0; overscroll-behavior: contain; scrollbar-width: thin; }
+        }
+        @media screen and (max-width: 1023.98px) {
+            .pw-tabs { display: flex; position: sticky; top: 0; z-index: 30; background: #fff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+            .pw-tabs button { flex: 1; min-height: 46px; font-size: 14px; font-weight: 700; color: #64748b; background: none; border: 0; border-bottom: 3px solid transparent; cursor: pointer; font-family: inherit; }
+            .pw-tabs button[aria-selected="true"] { color: #047857; border-bottom-color: #059669; }
+            .pw-tabs small { font-size: 11px; font-weight: 500; color: #b45309; }
+            .pw-hide-m { display: none !important; }
+            .ac { scroll-margin-top: 54px; }
+        }
+
+        /* ---- 접이식 입력 단계 */
+        .ac { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); scroll-margin-top: 6px; }
+        .ac-open { border-color: #94a3b8; }
+        .ac-hw { margin: 0; }
+        .ac-h { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 8px 12px; background: none; border: 0; border-radius: 12px; text-align: left; cursor: pointer; font-family: inherit; color: #1e293b; }
+        .ac-h:hover { background: #f8fafc; }
+        .ac-no { flex: none; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: #e2e8f0; color: #475569; }
+        .ac-no.ac-done { background: #059669; color: #fff; }
+        .ac-no.ac-bad { background: #dc2626; color: #fff; }
+        .ac-tt { flex: 1; min-width: 0; }
+        .ac-tt b { display: block; font-size: 14px; line-height: 1.3; }
+        .ac-tt small { display: block; font-size: 11.5px; color: #64748b; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ac-al { flex: none; font-size: 11.5px; font-weight: 700; color: #b45309; }
+        .ac-al.ac-al-stop { color: #b91c1c; }
+        .ck-car { flex: none; width: 8px; height: 8px; border-right: 2px solid #94a3b8; border-bottom: 2px solid #94a3b8; transform: rotate(-45deg); transition: transform .15s; margin: 0 4px; }
+        [aria-expanded="true"] > .ck-car { transform: rotate(45deg); }
+        .ac-b { padding: 4px 12px 12px; }
+        .ac-next { display: flex; justify-content: flex-end; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+        .ac-tools { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: #64748b; padding: 0 2px; }
+        .ac-tools .pw-add, .ck-bar .pw-add { padding: 4px 6px; font-size: 11.5px; }
+
+        /* ---- 자동 점검 요약 */
+        .sm-box { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+        .sm-box.sm-stop { border-color: #fca5a5; background: #fef2f2; }
+        .sm-box.sm-warn { border-color: #fcd34d; background: #fffbeb; }
+        .sm-box.sm-ok { border-color: #6ee7b7; background: #ecfdf5; }
+        .sm-h { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; padding: 6px 12px; background: none; border: 0; text-align: left; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #1e293b; }
+        .sm-t { flex: 1; min-width: 0; color: #475569; }
+        .sm-stop .sm-t { color: #b91c1c; font-weight: 700; }
+        .sm-b { display: grid; gap: 6px; padding: 0 10px 10px; }
+        .sm-go { font-size: 11px; color: #1d4ed8; background: none; border: 0; padding: 0 0 0 4px; cursor: pointer; text-decoration: underline; font-family: inherit; font-weight: 500; white-space: nowrap; }
+
+        /* ---- 확인 항목(묶음별 접기·진행 표시·일괄 표시) */
+        .ck-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+        .ck-filter { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+        .ck-filter button { min-height: 34px; padding: 0 10px; font-size: 12px; font-weight: 700; color: #475569; background: #fff; border: 0; cursor: pointer; font-family: inherit; }
+        .ck-filter button + button { border-left: 1px solid #cbd5e1; }
+        .ck-filter button[aria-pressed="true"] { background: #0f766e; color: #fff; }
+        .pw-sec + .pw-sec { margin-top: 8px; }
+        .pw-sec-n { border-color: #fdba74; }
+        .ck-gh { width: 100%; border: 0; cursor: pointer; font-family: inherit; text-align: left; position: relative; min-height: 42px; flex-wrap: nowrap; justify-content: flex-start; padding-bottom: 10px; }
+        .ck-gl { flex: 1; min-width: 0; }
+        .ck-gp { flex: none; font-size: 11.5px; font-weight: 500; color: #475569; white-space: nowrap; }
+        .pw-sec-n .ck-gp { color: #c2410c; font-weight: 700; }
+        .ck-prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #e2e8f0; }
+        .ck-prog i { display: block; height: 100%; background: #059669; transition: width .15s; }
+        .ck-acts { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px; border-top: 1px solid #e2e8f0; }
+        .ck-acts button { font-size: 11.5px; font-weight: 700; color: #0f766e; background: #fff; border: 1px solid #99f6e4; border-radius: 999px; min-height: 30px; padding: 0 10px; cursor: pointer; font-family: inherit; }
+        .ck-acts button:hover:not(:disabled) { background: #f0fdfa; }
+        .ck-acts button:disabled { color: #94a3b8; border-color: #e2e8f0; cursor: default; }
+        .ck-acts button[data-act="clear"], .ck-acts button[data-act="undo"] { color: #475569; border-color: #cbd5e1; }
+        .ck-empty { font-size: 11.5px; color: #64748b; margin: 0; padding: 8px 10px; border-top: 1px solid #e2e8f0; }
+        .pw-item { padding: 8px 10px; }
+        .pw-item-t { margin: 0 0 6px; }
+        .ck-ans { display: flex; align-items: center; gap: 8px; }
+        .ck-noteb { font-size: 11px; color: #64748b; background: none; border: 0; padding: 0 2px; margin-left: 2px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+        .ck-noteb:hover { color: #0f766e; text-decoration: underline; }
+        .ck-note { margin-top: 6px; padding: 7px 9px; }
+        .pw-seg button { min-width: 0; min-height: 36px; padding: 0 9px; white-space: nowrap; }
+        @media (min-width: 1280px) {
+            .ck-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+            .ck-row .pw-item-t { margin: 0; }
+        }
+
+        /* ---- 결재란 편집 */
+        .ap-row { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 6px; align-items: center; }
+        .ap-row + .ap-row { margin-top: 6px; }
+        .ap-head { font-size: 11px; color: #64748b; }
+        .ap-head span:last-child { width: 96px; }
+        @media (max-width: 640px) {
+            .ap-head { display: none; }
+            .ap-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 8px; border: 1px solid #e2e8f0; border-radius: 10px; }
+            .ap-row .pw-mvs { justify-content: flex-end; }
+        }
         .pw-ansrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
         .pw-seg { display: inline-flex; flex: none; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
         .pw-seg button { min-width: 58px; min-height: 38px; padding: 0 10px; font-size: 12px; font-weight: 700; color: #475569; background: #fff; border: 0; border-left: 1px solid #cbd5e1; cursor: pointer; font-family: inherit; }
@@ -175,6 +283,11 @@
             #app > header { position: static; padding: 10px 14px; }   /* 좁은 화면에서는 머리띠가 화면을 가리지 않게 고정하지 않는다 */
             .pw-seg { flex: 1 1 100%; }
             .pw-seg button { flex: 1; min-height: 44px; font-size: 13px; }
+            .ck-ans .pw-seg { flex: 1 1 auto; }
+            .ck-noteb { padding: 6px 4px; }
+            .ck-gh { flex-wrap: wrap; }
+            .ck-gp { flex-basis: 100%; padding-left: 20px; white-space: normal; }
+            .pw-tabs { top: 0; }
             .pw-ansrow .pw-in { flex-basis: 100%; }
         }
         @media (max-width: 430px) {
@@ -197,10 +310,17 @@
         .pd-t .cap { background: #e2e8f0; font-size: 11.5px; text-align: left; }
         .pd-t .cap small { font-weight: 400; color: #475569; }
         .pd-sign { border-collapse: collapse; flex: none; }
-        .pd-sign th, .pd-sign td { border: 1px solid #1e293b; text-align: center; width: 27mm; font-size: 10px; padding: 2px; }
-        .pd-sign th { background: #f1f5f9; font-weight: 700; }
-        .pd-sign td { height: 12mm; vertical-align: bottom; color: #334155; overflow-wrap: anywhere; }
-        .pd-sign .who { height: auto; font-size: 9.5px; color: #475569; vertical-align: middle; }
+        .pd-sign { table-layout: fixed; }
+        .pd-sign th, .pd-sign td { border: 1px solid #1e293b; text-align: center; width: 27mm; font-size: 10px; padding: 2px; overflow-wrap: anywhere; word-break: break-word; }
+        .pd-sign-1 th, .pd-sign-1 td, .pd-sign-2 th, .pd-sign-2 td { width: 29mm; }
+        .pd-sign-4 th, .pd-sign-4 td { width: 23mm; }
+        .pd-sign-5 th, .pd-sign-5 td { width: 20mm; }
+        .pd-sign-6 th, .pd-sign-6 td { width: 18mm; }
+        .pd-sign th { background: #f1f5f9; font-weight: 700; line-height: 1.25; }
+        .pd-sign th small { display: block; font-size: 8.5px; font-weight: 400; color: #475569; }
+        .pd-sign td { height: 12mm; vertical-align: bottom; color: #334155; }
+        .pd-sign .who { height: 5.2mm; font-size: 9.5px; color: #0f172a; vertical-align: middle; }
+        .pd-signph { color: #cbd5e1; font-size: 9px; }
         .pd-pre { white-space: pre-wrap; }
         .pd-box { display: inline-block; width: 10px; height: 10px; border: 1.2px solid #0f172a; margin-right: 3px; vertical-align: -1px; text-align: center; font-size: 9px; line-height: 9px; font-weight: 900; }
         .pd-ty { display: inline-block; margin-right: 12px; white-space: nowrap; }
@@ -229,7 +349,7 @@
     </style>
 </head>
 <body class="text-slate-800">
-    <div id="app" class="min-h-screen flex flex-col" v-cloak>
+    <div id="app" class="flex flex-col" v-cloak>
         <header class="bg-slate-900 text-white py-3.5 px-6 shadow-md no-print sticky top-0 z-40">
             <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
                 <div class="flex items-center space-x-3">
@@ -256,9 +376,15 @@
             </div>
         </header>
 
+        <!-- 좁은 화면: 입력 | 미리보기 전환 -->
+        <div class="pw-tabs no-print" role="tablist" aria-label="화면 전환">
+            <button type="button" id="tabInput" role="tab" :aria-selected="view === 'input' ? 'true' : 'false'" @click="setView('input')">입력</button>
+            <button type="button" id="tabPreview" role="tab" :aria-selected="view === 'preview' ? 'true' : 'false'" @click="setView('preview')">미리보기<small v-if="alertCount"> · 확인 {{ alertCount }}</small></button>
+        </div>
+
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- 입력 -->
-            <div class="lg:col-span-5 no-print pw-stack" style="min-width:0">
+            <div id="input-col" class="lg:col-span-5 no-print pw-pane" :class="{ 'pw-hide-m': view !== 'input' }" style="min-width:0">
                 <div v-if="oldFormAvailable" class="pw-old">
                     <p>예전 <b>안전작업허가서 서식</b>에 적어 둔 내용이 이 기기에 남아 있습니다. 여기로 가져올 수 있습니다(예전 내용은 지워지지 않습니다).</p>
                     <div class="pw-row">
@@ -267,11 +393,8 @@
                     </div>
                 </div>
 
-                <p class="pw-notice">안전작업허가서는 일반 사업장에서는 <b>법정 서식이 아닌 사내 절차 문서</b>입니다(공정안전보고서 대상 사업장은 안전운전계획에 안전작업허가가 포함됩니다). 아래 확인 항목에는 근거가 되는 「산업안전보건기준에 관한 규칙」 조문을 붙였고, 조문에 없는 항목은 <span class="pw-rec">권장(사내 기준)</span>으로 표시했습니다.</p>
-
                 <!-- 문서 종류 -->
-                <div class="pw-card">
-                    <span class="pw-lb" style="font-weight:700">문서 종류 선택</span>
+                <div class="pw-card pw-card-s">
                     <div class="pw-docs">
                         <button v-for="item in docTypes" :key="item.value" type="button" class="pw-doc" :data-doc="item.value" @click="changeDocType(item.value)" :aria-pressed="form.docType === item.value ? 'true' : 'false'">
                             <i :class="[item.icon, 'text-base']"></i>
@@ -279,20 +402,39 @@
                         </button>
                     </div>
                     <p v-if="form.docType === 'post'" class="pw-hint">작업 장소에 붙이는 큰 글씨 요약입니다. 화재위험작업은 작업내용·작업일시·안전점검 및 조치 사항을 작업장소에 서면으로 게시해야 하고(기준규칙 제241조제4항), 밀폐공간 작업은 작업 시작 전 확인 사항을 출입구에 게시해야 합니다(제619조제3항).</p>
-                    <p v-if="form.docType === 'ledger'" class="pw-hint">아래 "보관"한 허가서와 지금 작성 중인 허가서를 모은 목록입니다. 내용을 고치려면 기록 목록에서 해당 허가서를 여세요.</p>
+                    <p v-if="form.docType === 'ledger'" class="pw-hint">"보관"한 허가서와 지금 작성 중인 허가서를 모은 목록입니다(이 기기 브라우저에 보관한 것만). 내용을 고치려면 기록 목록에서 해당 허가서를 여세요.</p>
                 </div>
 
-                <!-- 1. 기본 정보 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-fill ph-info text-blue-500"></i> 1. 작업 개요</span>
+                <!-- 자동 점검 요약 -->
+                <div class="sm-box" :class="'sm-' + sumLv">
+                    <button type="button" id="sumToggle" class="sm-h" :aria-expanded="sumOpen ? 'true' : 'false'" aria-controls="autoChecks" @click="sumOpen = !sumOpen">
+                        <b>자동 점검</b><span class="sm-t">{{ sumText }}</span><span class="ck-car" aria-hidden="true"></span>
+                    </button>
+                    <div id="autoChecks" v-show="sumOpen" class="sm-b">
+                        <p v-for="(c, i) in checksOut" :key="'chk-' + i" :class="c.lv === 'ok' ? 'cm-ok' : c.lv === 'stop' ? 'cm-stop' : c.lv === 'todo' ? 'cm-todo' : 'cm-warn'">{{ c.text }}
+                            <button v-if="c.step" type="button" class="sm-go" @click="goStep(c.step)">{{ stepName(c.step) }} 열기</button></p>
+                    </div>
+                </div>
+
+                <div class="ac-tools">
+                    <span>입력 단계 {{ stepList.length }}개</span>
+                    <span>
+                        <button type="button" id="acOpenAll" class="pw-add" @click="setAllSteps(true)">모두 펼치기</button>
+                        <button type="button" id="acCloseAll" class="pw-add" @click="setAllSteps(false)">모두 접기</button>
+                    </span>
+                </div>
+
+                <!-- 작업 개요 -->
+                <acc-step v-bind="sp.base" @toggle="toggleStep" @next="nextStep">
+                    <div class="pw-row" style="justify-content:flex-end;margin-bottom:8px">
                         <button type="button" id="openEx" @click="openExModal" class="pw-btn pw-btn-sm"><i class="ph-fill ph-magic-wand"></i> 예시 불러오기</button>
-                    </h3>
+                    </div>
                     <div class="pw-g2 pw-fold">
                         <div>
-                            <label class="pw-lb" for="pNo">허가번호</label>
+                            <label class="pw-lb" for="pNo">허가번호 <span v-if="!form.noAuto" class="pw-own">직접 입력함</span></label>
                             <div class="pw-line">
                                 <input id="pNo" :value="form.no" @input="onNoInput" type="text" class="pw-in" autocomplete="off">
-                                <button v-if="!form.noAuto" type="button" class="pw-btn pw-btn-sm" @click="autoNo" title="연도-일련번호로 다시 매깁니다">자동</button>
+                                <button v-if="!form.noAuto" type="button" id="noAutoBtn" class="pw-btn pw-btn-sm" @click="autoNo" title="연도-일련번호로 다시 매깁니다">자동으로</button>
                             </div>
                         </div>
                         <div>
@@ -346,17 +488,17 @@
                             <input id="pEnd" v-model="form.end" type="datetime-local" class="pw-in">
                         </div>
                     </div>
-                    <p class="pw-hint">허가 유효 시간을 당일·해당 작업조로 한정하고 야간·연장·다음 날 작업은 다시 허가받게 하는 것은 법령이 아니라 <b>사내 기준</b>으로 정하는 사항입니다.</p>
+                    <p class="pw-hint">허가 유효 시간을 당일·해당 작업조로 한정하고 야간·연장·다음 날 작업은 다시 허가받게 하는 것은 법령이 아니라 <b>사내 기준</b>으로 정하는 사항입니다. 시작 날짜를 바꾸면 같은 날이던 종료 날짜도 함께 옮겨집니다.</p>
                     <p v-for="(c, i) in timeChecks" :key="'tc-' + i" class="cm-warn pw-mt">{{ c }}</p>
-                </div>
+                </acc-step>
 
-                <!-- 2. 작업 종류 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-bold ph-warning text-amber-600"></i> 2. 작업 종류 (여러 개 선택)</span><small>고르면 해당 확인 항목이 붙습니다</small></h3>
+                <!-- 작업 종류 -->
+                <acc-step v-bind="sp.type" @toggle="toggleStep" @next="nextStep">
+                    <p class="pw-hint" style="margin:0 0 8px">여러 개를 고를 수 있습니다. 고르면 그 작업의 확인 항목이 '안전조치 확인' 단계에 붙습니다.</p>
                     <div class="pw-types">
                         <button v-for="t in TYPES" :key="t.id" type="button" class="pw-type" :data-type="t.id" @click="toggleType(t.id)" :aria-pressed="hasType(t.id) ? 'true' : 'false'">
                             <i aria-hidden="true">{{ hasType(t.id) ? '✓' : '' }}</i>
-                            <span><b>{{ t.label }}</b><small>{{ t.sub }}</small></span>
+                            <span><b>{{ t.label }}</b><small>{{ t.sub }}<template v-if="t.items.length"> · {{ t.items.length }}항목</template></small></span>
                         </button>
                     </div>
                     <div v-if="hasType('etc')" class="pw-mt">
@@ -367,11 +509,10 @@
                         <label class="pw-lb" for="pHaz">주요 위험요인</label>
                         <textarea id="pHaz" v-model="form.hazards" rows="2" placeholder="예: 잔류 유증기 폭발, 산소결핍, 불티 비산, 추락" class="pw-in"></textarea>
                     </div>
-                </div>
+                </acc-step>
 
-                <!-- 3. 인원·지정 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-fill ph-users-three text-emerald-600"></i> 3. 작업 인원 · 지정</span><small>작업자 {{ workerCount }}명</small></h3>
+                <!-- 인원·지정 -->
+                <acc-step v-bind="sp.people" @toggle="toggleStep" @next="nextStep">
                     <div class="pw-g2 pw-fold">
                         <div v-if="hasType('hot')">
                             <label class="pw-lb" for="pFw">화재감시자 <a class="pw-cite" href="../../laws/krule/#j241-2" target="_blank" rel="noopener">기준규칙 제241조의2</a></label>
@@ -404,14 +545,18 @@
                     </div>
                     <div class="pw-mt">
                         <div class="pw-row" style="justify-content:space-between">
-                            <span class="pw-lb" style="margin:0;font-weight:700">작업자 명단</span>
+                            <span class="pw-lb" style="margin:0;font-weight:700">작업자 명단 <span style="font-weight:400;color:#64748b">{{ workerCount }}명</span></span>
                             <button type="button" id="addWorker" class="pw-add" @click="addWorker"><i class="ph-bold ph-plus-circle"></i> 작업자 추가</button>
                         </div>
                         <p v-if="!workers.length" class="pw-hint" style="margin-top:0">명단을 비워 두면 인쇄물에 손으로 적을 빈 칸 4줄이 나옵니다.</p>
                         <div v-for="(w, i) in workers" :key="'w-' + i" class="pw-line">
                             <input v-model="w.org" type="text" placeholder="소속" aria-label="작업자 소속" class="pw-in pw-w30">
                             <input v-model="w.name" type="text" placeholder="성명" aria-label="작업자 성명" class="pw-in">
-                            <button type="button" class="pw-x" @click="workers.splice(i, 1)" aria-label="이 작업자 삭제"><i class="ph-bold ph-x"></i></button>
+                            <span class="pw-mvs">
+                                <button type="button" class="pw-mv" :disabled="i === 0" @click="moveRow(workers, i, -1)" aria-label="이 작업자를 위로">↑</button>
+                                <button type="button" class="pw-mv" :disabled="i === workers.length - 1" @click="moveRow(workers, i, 1)" aria-label="이 작업자를 아래로">↓</button>
+                                <button type="button" class="pw-x" @click="workers.splice(i, 1)" aria-label="이 작업자 삭제"><i class="ph-bold ph-x"></i></button>
+                            </span>
                         </div>
                     </div>
                     <div class="pw-mt">
@@ -425,53 +570,94 @@
                         <input v-model="form.ppeEtc" type="text" placeholder="그 밖의 보호구 (예: 용접용 가죽장갑, 귀마개)" aria-label="그 밖의 보호구" class="pw-in pw-mt">
                         <p class="pw-hint">보호구는 작업조건에 맞는 것을 작업하는 근로자 수 이상으로 지급해야 합니다(<a class="pw-a" href="../../laws/krule/#j32" target="_blank" rel="noopener">기준규칙 제32조제1항</a>).</p>
                     </div>
-                </div>
+                </acc-step>
 
-                <!-- 4. 확인 항목 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-bold ph-check text-emerald-600"></i> 4. 작업 전 안전조치 확인</span><small>예 {{ tally.Y }} · 아니오 {{ tally.N }} · 해당없음 {{ tally.NA }} · 미확인 {{ tally.blank }}</small></h3>
-                    <p v-if="!activeTypes.length" class="cm-warn" style="margin-bottom:10px">작업 종류를 고르면 그 작업의 확인 항목이 여기에 붙습니다.</p>
-                    <p class="pw-hint pw-hint-r" style="margin:0 0 10px">현장에서 실제로 확인한 뒤에 표시하세요. '아니오'가 하나라도 있으면 조치 후 다시 확인하기 전에는 승인하지 않는 것이 원칙입니다(사내 기준).</p>
-                    <div v-for="sec in sections" :key="sec.id" class="pw-sec" :data-sec="sec.id">
-                        <div class="pw-sec-h"><span>{{ sec.label }}</span><small>{{ sec.items.length }}항목</small></div>
-                        <div v-for="it in sec.items" :key="it.id" class="pw-item" :class="{ 'pw-item-n': checks[it.id].v === 'N' }" :data-item="it.id">
-                            <p class="pw-item-t">{{ it.t }}
-                                <a v-if="it.c" class="pw-cite" v-bind="{ href: it.href }" target="_blank" rel="noopener">{{ it.cite }}</a>
-                                <span v-else class="pw-rec">권장(사내 기준)</span>
-                            </p>
-                            <div class="pw-ansrow">
-                                <div class="pw-seg" role="group" :aria-label="it.t">
-                                    <button v-for="o in ANS" :key="o.v" type="button" :data-v="o.v" @click="setAns(checks[it.id], o.v)" :aria-pressed="checks[it.id].v === o.v ? 'true' : 'false'">{{ o.l }}</button>
+                <!-- 확인 항목 -->
+                <acc-step v-bind="sp.check" @toggle="toggleStep" @next="nextStep">
+                    <p v-if="!activeTypes.length" class="cm-warn" style="margin-bottom:8px">작업 종류를 고르면 그 작업의 확인 항목이 여기에 붙습니다.</p>
+                    <p class="pw-hint pw-hint-r" style="margin:0 0 8px">현장에서 실제로 확인한 뒤에 표시하세요. '아니오'가 하나라도 있으면 조치 후 다시 확인하기 전에는 승인하지 않는 것이 원칙입니다(사내 기준).</p>
+                    <div class="ck-bar">
+                        <div class="ck-filter" role="group" aria-label="표시할 항목">
+                            <button type="button" id="ckAll" :aria-pressed="ckTodoOnly ? 'false' : 'true'" @click="setCkFilter(false)">전체 {{ tally.total }}</button>
+                            <button type="button" id="ckTodo" :aria-pressed="ckTodoOnly ? 'true' : 'false'" @click="setCkFilter(true)">미확인·아니오만 {{ tally.blank + tally.N }}</button>
+                        </div>
+                        <span>
+                            <button type="button" id="ckOpenAll" class="pw-add" @click="setAllGroups(true)">묶음 모두 펼치기</button>
+                            <button type="button" id="ckCloseAll" class="pw-add" @click="setAllGroups(false)">접기</button>
+                        </span>
+                    </div>
+                    <div v-for="g in groups" :key="g.id" class="pw-sec" :class="{ 'pw-sec-n': g.N }" :data-sec="g.id">
+                        <button type="button" class="pw-sec-h ck-gh" :aria-expanded="groupOpen[g.id] ? 'true' : 'false'" @click="toggleGroup(g.id)">
+                            <span class="ck-car" aria-hidden="true"></span>
+                            <span class="ck-gl">{{ g.label }}</span>
+                            <span class="ck-gp" :data-prog="g.id">예 {{ g.Y }} / 아니오 {{ g.N }} / 미확인 {{ g.blank }}<template v-if="g.NA"> / 해당없음 {{ g.NA }}</template></span>
+                            <span class="ck-prog" aria-hidden="true"><i :style="{ width: g.pct + '%' }"></i></span>
+                        </button>
+                        <div v-show="groupOpen[g.id]" class="ck-gb">
+                            <div class="ck-acts">
+                                <button type="button" data-act="allY" :disabled="!g.blank" @click="bulkAns(g.id, 'Y')">남은 항목 모두 '예'</button>
+                                <button type="button" data-act="allNA" :disabled="!g.blank" @click="bulkAns(g.id, 'NA')">남은 항목 '해당없음'</button>
+                                <button v-if="bulkUndo && bulkUndo.gid === g.id" type="button" data-act="undo" @click="undoBulk">방금 표시 되돌리기</button>
+                                <button v-if="g.total - g.blank" type="button" data-act="clear" @click="clearGroup(g.id)">표시 지우기</button>
+                            </div>
+                            <p v-if="ckTodoOnly && !g.shown" class="ck-empty">남은 항목이 없습니다.</p>
+                            <div v-for="it in g.items" :key="it.id" v-show="itemShown(it.id)" class="pw-item" :class="{ 'pw-item-n': checks[it.id].v === 'N' }" :data-item="it.id">
+                                <div class="ck-row">
+                                    <p class="pw-item-t">{{ it.t }}
+                                        <a v-if="it.c" class="pw-cite" v-bind="{ href: it.href }" target="_blank" rel="noopener">{{ it.cite }}</a>
+                                        <span v-else class="pw-rec">권장(사내 기준)</span>
+                                        <button v-if="!noteShown(it.id)" type="button" class="ck-noteb" @click="openNote(it.id)">＋비고</button>
+                                    </p>
+                                    <div class="ck-ans">
+                                        <div class="pw-seg" role="group" :aria-label="it.t">
+                                            <button v-for="o in ANS" :key="o.v" type="button" :data-v="o.v" @click="setAns(checks[it.id], o.v, it.id)" :aria-pressed="checks[it.id].v === o.v ? 'true' : 'false'">{{ o.l }}</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <input v-model="checks[it.id].note" type="text" :placeholder="checks[it.id].v === 'N' ? '미충족 사유·조치 계획' : '비고'" :aria-label="it.t + ' — 비고'" class="pw-in">
+                                <input v-if="noteShown(it.id)" v-model="checks[it.id].note" @focus="openNote(it.id)" type="text" :placeholder="checks[it.id].v === 'N' ? '미충족 사유·조치 계획' : '비고'" :aria-label="it.t + ' — 비고'" class="pw-in ck-note">
                             </div>
                         </div>
                     </div>
-                    <div class="pw-sec" data-sec="custom">
-                        <div class="pw-sec-h"><span>사업장 추가 확인 항목 <span class="pw-rec">사내 기준</span></span>
-                            <button type="button" id="addCustom" class="pw-add" style="padding:2px 4px" @click="addCustom"><i class="ph-bold ph-plus-circle"></i> 항목 추가</button>
-                        </div>
-                        <p v-if="!custom.length" class="pw-hint" style="padding:8px 10px;margin:0">사업장 규정에 있는 확인 항목을 더할 수 있습니다.</p>
-                        <div v-for="(c, i) in custom" :key="'cu-' + i" class="pw-item" :class="{ 'pw-item-n': c.v === 'N' }">
-                            <div class="pw-line" style="margin-bottom:7px">
-                                <input v-model="c.t" type="text" placeholder="확인 항목" aria-label="추가 확인 항목" class="pw-in">
-                                <button type="button" class="pw-x" @click="custom.splice(i, 1)" aria-label="이 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                    <div class="pw-sec" :class="{ 'pw-sec-n': customG.N }" data-sec="custom">
+                        <button type="button" class="pw-sec-h ck-gh" :aria-expanded="groupOpen.custom ? 'true' : 'false'" @click="toggleGroup('custom')">
+                            <span class="ck-car" aria-hidden="true"></span>
+                            <span class="ck-gl">사업장 추가 확인 항목</span>
+                            <span class="ck-gp" data-prog="custom"><template v-if="customG.total">예 {{ customG.Y }} / 아니오 {{ customG.N }} / 미확인 {{ customG.blank }}<template v-if="customG.NA"> / 해당없음 {{ customG.NA }}</template></template><template v-else>없음</template></span>
+                            <span class="ck-prog" aria-hidden="true"><i :style="{ width: customG.pct + '%' }"></i></span>
+                        </button>
+                        <div v-show="groupOpen.custom" class="ck-gb">
+                            <div class="ck-acts">
+                                <button type="button" id="addCustom" data-act="add" @click="addCustom">＋ 항목 추가</button>
+                                <button v-if="customG.total" type="button" data-act="allY" :disabled="!customG.blank" @click="bulkAns('custom', 'Y')">남은 항목 모두 '예'</button>
+                                <button v-if="customG.total" type="button" data-act="allNA" :disabled="!customG.blank" @click="bulkAns('custom', 'NA')">남은 항목 '해당없음'</button>
+                                <button v-if="bulkUndo && bulkUndo.gid === 'custom'" type="button" data-act="undo" @click="undoBulk">방금 표시 되돌리기</button>
                             </div>
-                            <div class="pw-ansrow">
-                                <div class="pw-seg" role="group" aria-label="추가 확인 항목 결과">
-                                    <button v-for="o in ANS" :key="o.v" type="button" :data-v="o.v" @click="setAns(c, o.v)" :aria-pressed="c.v === o.v ? 'true' : 'false'">{{ o.l }}</button>
+                            <p v-if="!custom.length" class="ck-empty">사업장 규정에 있는 확인 항목을 더할 수 있습니다. 더한 항목은 새 허가서에도 그대로 따라갑니다(확인 결과는 비움).</p>
+                            <div v-for="(c, i) in custom" :key="'cu-' + i" class="pw-item" :class="{ 'pw-item-n': c.v === 'N' }">
+                                <div class="pw-line" style="margin-bottom:7px">
+                                    <input v-model="c.t" type="text" placeholder="확인 항목" aria-label="추가 확인 항목" class="pw-in">
+                                    <span class="pw-mvs">
+                                        <button type="button" class="pw-mv" :disabled="i === 0" @click="moveRow(custom, i, -1)" aria-label="이 항목을 위로">↑</button>
+                                        <button type="button" class="pw-mv" :disabled="i === custom.length - 1" @click="moveRow(custom, i, 1)" aria-label="이 항목을 아래로">↓</button>
+                                        <button type="button" class="pw-x" @click="custom.splice(i, 1)" aria-label="이 항목 삭제"><i class="ph-bold ph-x"></i></button>
+                                    </span>
                                 </div>
-                                <input v-model="c.note" type="text" placeholder="비고" aria-label="추가 확인 항목 비고" class="pw-in">
+                                <div class="pw-ansrow">
+                                    <div class="pw-seg" role="group" aria-label="추가 확인 항목 결과">
+                                        <button v-for="o in ANS" :key="o.v" type="button" :data-v="o.v" @click="setAns(c, o.v)" :aria-pressed="c.v === o.v ? 'true' : 'false'">{{ o.l }}</button>
+                                    </div>
+                                    <input v-model="c.note" type="text" placeholder="비고" aria-label="추가 확인 항목 비고" class="pw-in">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </acc-step>
 
-                <!-- 5. 가스 농도 -->
-                <div v-if="showGas" class="pw-card" id="gasCard">
-                    <h3 class="pw-h"><span><i class="ph-fill ph-warning-circle text-rose-600"></i> 5. 산소·유해가스 농도 측정 기록</span>
+                <!-- 가스 농도 -->
+                <acc-step v-if="showGas" id="gasCard" v-bind="sp.gas" @toggle="toggleStep" @next="nextStep">
+                    <div class="pw-row" style="justify-content:flex-end;margin-bottom:6px">
                         <button type="button" id="addGas" class="pw-add" style="padding:2px 4px" @click="addGas"><i class="ph-bold ph-plus-circle"></i> 측정 추가</button>
-                    </h3>
+                    </div>
                     <p class="pw-hint" style="margin:0 0 8px"><b>적정공기</b>(<a class="pw-a" href="../../laws/krule/#j618" target="_blank" rel="noopener">기준규칙 제618조제3호</a>): 산소 18% 이상 23.5% 미만 · 이산화탄소 1.5% 미만 · 일산화탄소 30ppm 미만 · 황화수소 10ppm 미만. 작업을 시작하기 전(일시 중단 후 다시 시작할 때 포함) 측정합니다(제619조의2제1항). 가연성가스(%LEL)는 적정공기 항목이 아니며 사내 기준으로 적는 칸입니다.</p>
                     <p v-if="!gas.length" class="cm-warn">측정 기록이 없습니다.</p>
                     <div v-for="(g, i) in gasView" :key="'g-' + i" class="pw-gas" :class="{ 'pw-gas-bad': g.j.bad }">
@@ -491,15 +677,14 @@
                         <p class="pw-verdict" :class="g.j.bad ? 'pw-v-bad' : g.j.full ? 'pw-v-ok' : 'pw-v-none'">{{ g.j.text }}</p>
                     </div>
                     <p v-if="gasState.bad" id="gasStop" class="cm-stop pw-mt" role="alert">작업 불가 — 가장 최근 측정값이 적정공기 기준을 벗어났습니다({{ gasState.why }}). 환기하거나 공기호흡기 또는 송기마스크를 지급해 착용하게 하는 등 조치한 뒤 다시 측정하세요(기준규칙 제619조의2제3항).</p>
-                </div>
+                </acc-step>
 
-                <!-- 6. 에너지 차단·관련 문서 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-bold ph-file-text text-slate-600"></i> {{ showGas ? 6 : 5 }}. 에너지 차단 · 관련 문서</span></h3>
+                <!-- 에너지 차단·관련 문서 -->
+                <acc-step v-bind="sp.energy" @toggle="toggleStep" @next="nextStep">
                     <label class="pw-lb" for="pLoto">에너지 차단·잠금 내용 (전기·기계·배관 등)</label>
                     <textarea id="pLoto" v-model="form.loto" rows="2" placeholder="예: MCC-3 차단기 OFF·잠금·꼬리표(홍길동), 입·출구 밸브 닫고 맹판 설치" class="pw-in"></textarea>
-                    <label class="pw-ck"><input type="checkbox" v-model="form.refRisk"> 이 작업의 위험성평가를 확인(첨부)했다</label>
-                    <label class="pw-ck"><input type="checkbox" v-model="form.refTbm"> 작업 전 안전점검회의(TBM)를 했다</label>
+                    <label class="pw-ck"><input type="checkbox" id="pRefRisk" v-model="form.refRisk"> 이 작업의 위험성평가를 확인(첨부)했다</label>
+                    <label class="pw-ck"><input type="checkbox" id="pRefTbm" v-model="form.refTbm"> 작업 전 안전점검회의(TBM)를 했다</label>
                     <div class="pw-row pw-mt">
                         <a class="pw-btn pw-btn-sm" href="../loto/" target="_blank" rel="noopener">잠금·표지(LOTO) 도구 <i class="ph-bold ph-arrow-right"></i></a>
                         <a class="pw-btn pw-btn-sm" href="../risk/" target="_blank" rel="noopener">위험성평가 <i class="ph-bold ph-arrow-right"></i></a>
@@ -509,43 +694,80 @@
                         <label class="pw-lb" for="pCond">허가 조건 · 특이사항</label>
                         <textarea id="pCond" v-model="form.conditions" rows="2" placeholder="예: 강풍 시 작업 중지, 점심시간 화기 작업 금지" class="pw-in"></textarea>
                     </div>
-                </div>
+                </acc-step>
 
-                <!-- 7. 결재 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-bold ph-users text-slate-600"></i> {{ showGas ? 7 : 6 }}. 신청 → 검토 → 승인</span></h3>
-                    <div class="pw-g3">
-                        <div>
-                            <span class="pw-lb">신청 (작업 책임자)</span>
-                            <input :value="form.lead" type="text" class="pw-in" disabled aria-label="신청자(작업 책임자)" placeholder="1번 칸에서 입력">
-                        </div>
-                        <div>
-                            <label class="pw-lb" for="pReviewer">검토 (안전관리자 등)</label>
-                            <input id="pReviewer" v-model="form.reviewer" type="text" placeholder="직책·성명" class="pw-in">
-                        </div>
-                        <div>
-                            <label class="pw-lb" for="pApprover">승인 (허가권자)</label>
-                            <input id="pApprover" v-model="form.approver" type="text" placeholder="직책·성명" class="pw-in">
+                <!-- 결재·문서 설정 -->
+                <acc-step v-bind="sp.appr" @toggle="toggleStep" @next="nextStep">
+                    <div class="pw-row" style="justify-content:space-between">
+                        <span class="pw-lb" style="margin:0;font-weight:700">결재란 <span style="font-weight:400;color:#64748b">— 칸 이름·직책·성명을 고치고, 칸을 더하거나 뺄 수 있습니다(최대 {{ APPR_MAX }}칸)</span></span>
+                    </div>
+                    <div id="apprRows" class="pw-mt">
+                        <div class="ap-row ap-head" aria-hidden="true"><span>칸 이름</span><span>직책</span><span>성명</span><span></span></div>
+                        <div v-for="(s, i) in appr.steps" :key="'ap-' + i" class="ap-row" :data-appr-row="i">
+                            <input :value="s.t" @input="onApprField(i, 't', $event)" type="text" maxlength="20" class="pw-in" :aria-label="'결재 칸 ' + (i + 1) + ' 이름'" placeholder="예: 검토">
+                            <input :value="s.role" @input="onApprField(i, 'role', $event)" type="text" maxlength="30" class="pw-in" :aria-label="'결재 칸 ' + (i + 1) + ' 직책'" placeholder="예: 안전관리자">
+                            <input :value="apprName(i)" @input="onApprField(i, 'name', $event)" type="text" maxlength="40" class="pw-in" :aria-label="'결재 칸 ' + (i + 1) + ' 성명'" :placeholder="i === 0 && appr.leadAuto ? '작업 책임자를 따라감' : '성명'">
+                            <span class="pw-mvs">
+                                <button type="button" class="pw-mv" :disabled="i === 0" @click="apprMove(i, -1)" :aria-label="'결재 칸 ' + (i + 1) + ' 앞으로'">↑</button>
+                                <button type="button" class="pw-mv" :disabled="i === appr.steps.length - 1" @click="apprMove(i, 1)" :aria-label="'결재 칸 ' + (i + 1) + ' 뒤로'">↓</button>
+                                <button type="button" class="pw-x" :disabled="appr.steps.length <= 1" @click="apprDel(i)" :aria-label="'결재 칸 ' + (i + 1) + ' 삭제'"><i class="ph-bold ph-x"></i></button>
+                            </span>
                         </div>
                     </div>
-                    <div class="pw-mt">
-                        <label class="pw-lb" for="pFoot">문서 맨 아래 문구 <span style="font-weight:500;color:#64748b">— 고치거나 모두 지울 수 있습니다</span></label>
-                        <textarea id="pFoot" v-model="form.footNote" rows="2" maxlength="400" class="pw-in" placeholder="비워 두면 문서에 나오지 않습니다"></textarea>
-                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:6px">
-                            <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#334155"><input type="checkbox" v-model="form.showBasis"> 근거 조문 줄 표시</label>
-                            <button type="button" class="pw-link" style="font-size:13px;color:#2563eb;background:none;border:0;cursor:pointer;padding:0" @click="resetFoot">기본 문구로 되돌리기</button>
-                        </div>
+                    <p class="pw-hint" v-if="appr.leadAuto">첫 칸 성명은 '작업 책임자(신청자)'에 적은 이름을 따라갑니다. 직접 적으면 그 값이 유지됩니다.</p>
+                    <p class="pw-hint" v-else>첫 칸 성명을 직접 입력했습니다. <button type="button" id="apprLeadAuto" class="pw-linkb" @click="apprLeadBack">작업 책임자 이름으로 되돌리기</button></p>
+                    <div class="ck-acts" style="padding:8px 0 0;border:0">
+                        <button type="button" id="apprAdd" :disabled="appr.steps.length >= APPR_MAX" @click="apprAdd">＋ 칸 추가</button>
+                        <button type="button" id="apprBuiltin" @click="apprReset('builtin')">신청·검토·승인으로</button>
+                        <button type="button" id="apprSite" @click="apprReset('site')" title="다른 서식에서 '모든 서식 기본으로' 저장해 둔 결재란을 가져옵니다">사이트 기본 결재란 따르기</button>
+                        <button type="button" id="apprToSite" @click="apprToSite" title="지금 결재란(칸 이름·성명)을 SafePlum의 모든 서식 기본값으로 저장합니다">모든 서식 기본으로</button>
                     </div>
-                    <div id="autoChecks" class="pw-mt" style="display:grid;gap:6px">
-                        <p v-for="(c, i) in checksOut" :key="'chk-' + i" :class="c.lv === 'ok' ? 'cm-ok' : c.lv === 'stop' ? 'cm-stop' : 'cm-warn'">{{ c.text }}</p>
-                    </div>
-                </div>
+                    <label class="pw-ck"><input type="checkbox" id="apprHide" :checked="appr.hide" @change="onApprHide"> 허가서에 결재란을 넣지 않는다</label>
 
-                <!-- 8. 작업 중·완료 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-bold ph-arrows-clockwise text-slate-600"></i> {{ showGas ? 8 : 7 }}. 작업 중 점검 · 완료 확인</span>
+                    <div class="pw-mt pw-sep">
+                        <template v-if="form.docType === 'permit'">
+                            <label class="pw-lb" for="pDocTitle">문서 제목</label>
+                            <div class="pw-line">
+                                <input id="pDocTitle" v-model="form.docTitle" type="text" maxlength="40" class="pw-in" :placeholder="DOC_TITLE.permit">
+                                <button v-if="form.docTitle !== DOC_TITLE.permit" type="button" class="pw-btn pw-btn-sm" @click="form.docTitle = DOC_TITLE.permit">기본으로</button>
+                            </div>
+                            <label class="pw-lb pw-mt" for="pFoot">문서 맨 아래 문구 <span style="font-weight:500;color:#64748b">— 고치거나 모두 지울 수 있습니다</span></label>
+                            <textarea id="pFoot" v-model="form.footNote" rows="2" maxlength="400" class="pw-in" placeholder="비워 두면 문서에 나오지 않습니다"></textarea>
+                            <div class="pw-row" style="gap:12px;margin-top:6px">
+                                <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#334155"><input type="checkbox" id="pShowBasis" v-model="form.showBasis"> 근거 조문 줄 표시</label>
+                                <button type="button" id="resetFoot" class="pw-linkb" @click="resetFoot">기본 문구로 되돌리기</button>
+                            </div>
+                        </template>
+                        <template v-else-if="form.docType === 'post'">
+                            <label class="pw-lb" for="pPostTitle">게시물 제목</label>
+                            <div class="pw-line">
+                                <input id="pPostTitle" v-model="form.postTitle" type="text" maxlength="30" class="pw-in" :placeholder="DOC_TITLE.post">
+                                <button v-if="form.postTitle !== DOC_TITLE.post" type="button" class="pw-btn pw-btn-sm" @click="form.postTitle = DOC_TITLE.post">기본으로</button>
+                            </div>
+                            <label class="pw-lb pw-mt" for="pPostNote">게시물 맨 아래 문구 <span style="font-weight:500;color:#64748b">— 고치거나 모두 지울 수 있습니다</span></label>
+                            <textarea id="pPostNote" v-model="form.postNote" rows="3" maxlength="400" class="pw-in" placeholder="비워 두면 게시물에 나오지 않습니다"></textarea>
+                            <div class="pw-row" style="margin-top:6px"><button type="button" id="resetPostNote" class="pw-linkb" @click="form.postNote = POST_DEFAULT">기본 문구로 되돌리기</button></div>
+                        </template>
+                        <template v-else>
+                            <label class="pw-lb" for="pLedgerTitle">대장 제목</label>
+                            <div class="pw-line">
+                                <input id="pLedgerTitle" v-model="form.ledgerTitle" type="text" maxlength="40" class="pw-in" :placeholder="DOC_TITLE.ledger">
+                                <button v-if="form.ledgerTitle !== DOC_TITLE.ledger" type="button" class="pw-btn pw-btn-sm" @click="form.ledgerTitle = DOC_TITLE.ledger">기본으로</button>
+                            </div>
+                            <label class="pw-lb pw-mt" for="pLedgerNote">대장 맨 아래 문구 <span style="font-weight:500;color:#64748b">— 고치거나 모두 지울 수 있습니다</span></label>
+                            <textarea id="pLedgerNote" v-model="form.ledgerNote" rows="2" maxlength="400" class="pw-in" placeholder="비워 두면 대장에 나오지 않습니다"></textarea>
+                            <div class="pw-row" style="margin-top:6px"><button type="button" id="resetLedgerNote" class="pw-linkb" @click="form.ledgerNote = LEDGER_DEFAULT">기본 문구로 되돌리기</button></div>
+                        </template>
+                        <p class="pw-hint">제목·맨 아래 문구·결재란은 새 허가서를 써도 그대로 따라갑니다. 문서 종류(허가서·게시용·대장)마다 따로 정합니다.</p>
+                    </div>
+                </acc-step>
+
+                <!-- 작업 중·완료 -->
+                <acc-step v-bind="sp.done" @toggle="toggleStep" @next="nextStep">
+                    <div class="pw-row" style="justify-content:space-between">
+                        <span class="pw-lb" style="margin:0;font-weight:700">작업 중 점검 기록</span>
                         <button type="button" id="addMid" class="pw-add" style="padding:2px 4px" @click="addMid"><i class="ph-bold ph-plus-circle"></i> 점검 기록 추가</button>
-                    </h3>
+                    </div>
                     <p v-if="!mid.length" class="pw-hint" style="margin-top:0">작업 중 순회 점검한 시각과 내용을 적습니다. 비워 두면 인쇄물에 빈 칸 2줄이 나옵니다.</p>
                     <div v-for="(m, i) in mid" :key="'m-' + i" class="pw-line">
                         <input v-model="m.time" type="time" aria-label="점검 시각" class="pw-in pw-w30">
@@ -553,12 +775,12 @@
                         <input v-model="m.by" type="text" placeholder="점검자" aria-label="점검자" class="pw-in pw-w30">
                         <button type="button" class="pw-x" @click="mid.splice(i, 1)" aria-label="이 점검 기록 삭제"><i class="ph-bold ph-x"></i></button>
                     </div>
-                    <div style="border-top:1px solid #f1f5f9;margin-top:12px;padding-top:6px">
+                    <div class="pw-sep" style="margin-top:12px;padding-top:6px">
                         <label v-if="hasType('hot')" class="pw-ck"><input type="checkbox" id="dFire" v-model="form.doneFire"> 잔불·불티가 없음을 확인했다 <span class="pw-rec">권장(사내 기준)</span></label>
-                        <label v-if="hasType('conf')" class="pw-ck"><input type="checkbox" v-model="form.doneCount"> 퇴장 인원을 점검해 전원 나온 것을 확인했다 (제621조)</label>
-                        <label v-if="hasType('elec')" class="pw-ck"><input type="checkbox" v-model="form.doneLoto"> 작업기구·단락 접지기구를 제거하고, 잠금장치·꼬리표는 설치한 사람이 직접 철거했다 (제319조제3항)</label>
-                        <label class="pw-ck"><input type="checkbox" v-model="form.doneTidy"> 작업장 정리정돈, 자재·공구 회수를 확인했다 <span class="pw-rec">권장(사내 기준)</span></label>
-                        <label class="pw-ck"><input type="checkbox" v-model="form.doneRestore"> 떼어 낸 방호장치·덮개·안전난간 등을 원래대로 복구했다 <span class="pw-rec">권장(사내 기준)</span></label>
+                        <label v-if="hasType('conf')" class="pw-ck"><input type="checkbox" id="dCount" v-model="form.doneCount"> 퇴장 인원을 점검해 전원 나온 것을 확인했다 (제621조)</label>
+                        <label v-if="hasType('elec')" class="pw-ck"><input type="checkbox" id="dLoto" v-model="form.doneLoto"> 작업기구·단락 접지기구를 제거하고, 잠금장치·꼬리표는 설치한 사람이 직접 철거했다 (제319조제3항)</label>
+                        <label class="pw-ck"><input type="checkbox" id="dTidy" v-model="form.doneTidy"> 작업장 정리정돈, 자재·공구 회수를 확인했다 <span class="pw-rec">권장(사내 기준)</span></label>
+                        <label class="pw-ck"><input type="checkbox" id="dRestore" v-model="form.doneRestore"> 떼어 낸 방호장치·덮개·안전난간 등을 원래대로 복구했다 <span class="pw-rec">권장(사내 기준)</span></label>
                     </div>
                     <div class="pw-g2 pw-fold pw-mt">
                         <div>
@@ -577,11 +799,11 @@
                             <input id="dNote" v-model="form.doneNote" type="text" placeholder="예: 17:40 잔불 감시 종료, 맹판 제거 후 인계" class="pw-in">
                         </div>
                     </div>
-                </div>
+                </acc-step>
 
-                <!-- 사진 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-fill ph-camera text-slate-600"></i> 현장 사진 첨부</span><small>저장되지 않음</small></h3>
+                <!-- 사진·보관 -->
+                <acc-step v-bind="sp.keep" @toggle="toggleStep" @next="nextStep">
+                    <span class="pw-lb" style="font-weight:700">현장 사진 첨부 <span style="font-weight:400;color:#64748b">— 저장되지 않음</span></span>
                     <div class="pw-row">
                         <input type="file" accept="image/*" @change="handleFileUpload" id="photo-input" class="hidden">
                         <label for="photo-input" class="pw-btn"><i class="ph-bold ph-upload-simple"></i> 사진 파일 선택</label>
@@ -589,33 +811,33 @@
                         <button v-if="photoDataUrl" type="button" class="pw-btn pw-btn-sm" @click="removePhoto">삭제</button>
                     </div>
                     <p class="pw-hint">사진은 지금 화면의 허가서 인쇄·PDF에만 들어가고 이 기기에 저장되지 않습니다. 새로 고치면 사라집니다.</p>
-                </div>
 
-                <!-- 보관 -->
-                <div class="pw-card">
-                    <h3 class="pw-h"><span><i class="ph-bold ph-floppy-disk text-slate-600"></i> 보관 · 허가 기록</span><small>{{ history.length }} / {{ HIST_MAX }}건</small></h3>
-                    <div class="pw-row">
-                        <button type="button" id="archiveOnly" class="pw-btn pw-btn-pri" @click="archiveOnly">이 허가서 보관</button>
-                        <button type="button" id="archiveNew" class="pw-btn" @click="archiveAndNew">보관하고 새 허가서</button>
-                        <button type="button" id="dupCur" class="pw-btn" @click="duplicateCurrent">복제해서 새 허가 작성</button>
-                        <button type="button" id="resetBtn" class="pw-btn" @click="resetToBlank"><i class="ph-bold ph-arrow-counter-clockwise"></i> 새로 쓰기</button>
+                    <div class="pw-sep pw-mt">
+                        <span class="pw-lb" style="font-weight:700">보관 · 허가 기록 <span style="font-weight:400;color:#64748b">{{ history.length }} / {{ HIST_MAX }}건</span></span>
+                        <div class="pw-row">
+                            <button type="button" id="archiveOnly" class="pw-btn pw-btn-pri" @click="archiveOnly">이 허가서 보관</button>
+                            <button type="button" id="archiveNew" class="pw-btn" @click="archiveAndNew">보관하고 새 허가서</button>
+                            <button type="button" id="dupCur" class="pw-btn" @click="duplicateCurrent">복제해서 새 허가 작성</button>
+                            <button type="button" id="resetBtn" class="pw-btn" @click="resetToBlank"><i class="ph-bold ph-arrow-counter-clockwise"></i> 새로 쓰기</button>
+                        </div>
+                        <p class="pw-hint">보관한 허가서는 "허가 대장"에 모입니다. <b>복제</b>하면 작업 개요·인원·보호구는 그대로 두고, 확인 결과·가스 측정·완료 기록은 비운 새 허가서(새 번호·오늘 날짜)가 됩니다 — 반복 작업도 매번 다시 확인해야 하기 때문입니다. 이 기기 브라우저에만 최대 {{ HIST_MAX }}건 보관합니다.</p>
+                        <ul v-if="history.length" class="pw-hist pw-mt">
+                            <li v-for="h in history" :key="h.id">
+                                <span class="pw-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
+                                <button type="button" class="pw-btn pw-btn-sm" @click="openHistory(h.id)">열기</button>
+                                <button type="button" class="pw-btn pw-btn-sm" @click="duplicateHistory(h.id)">복제</button>
+                                <button type="button" class="pw-btn pw-btn-sm" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
+                            </li>
+                        </ul>
+                        <p v-else class="pw-hint">보관한 허가서가 아직 없습니다.</p>
                     </div>
-                    <p class="pw-hint">보관한 허가서는 "허가 대장"에 모입니다. <b>복제</b>하면 작업 개요·인원·보호구는 그대로 두고, 확인 결과·가스 측정·결재·완료 기록은 비운 새 허가서(새 번호·오늘 날짜)가 됩니다 — 반복 작업도 매번 다시 확인해야 하기 때문입니다. 이 기기 브라우저에만 최대 {{ HIST_MAX }}건 보관합니다.</p>
-                    <ul v-if="history.length" class="pw-hist pw-mt">
-                        <li v-for="h in history" :key="h.id">
-                            <span class="pw-hist-t">{{ h.title }}<small>{{ h.sub }}</small></span>
-                            <button type="button" class="pw-btn pw-btn-sm" @click="openHistory(h.id)">열기</button>
-                            <button type="button" class="pw-btn pw-btn-sm" @click="duplicateHistory(h.id)">복제</button>
-                            <button type="button" class="pw-btn pw-btn-sm" @click="deleteHistory(h.id)" :aria-label="h.title + ' 기록 삭제'">삭제</button>
-                        </li>
-                    </ul>
-                    <p v-else class="pw-hint">보관한 허가서가 아직 없습니다.</p>
-                </div>
+                </acc-step>
 
-                <div class="pw-card">
-                    <h3 class="pw-h"><span>법령 메모</span></h3>
+                <!-- 법령 메모 -->
+                <acc-step v-bind="sp.law" @toggle="toggleStep" @next="nextStep">
                     <ul class="cm-law">
                         <li>일반 사업장의 "안전작업허가서"는 법정 서식이 아니라 사내 절차 문서입니다. 공정안전보고서 제출 대상 사업장은 보고서의 안전운전계획에 안전작업허가가 포함됩니다(<a class="pw-a" href="../../laws/rule/#j50" target="_blank" rel="noopener">산업안전보건법 시행규칙 제50조제1항제3호다목</a>).</li>
+                        <li>확인 항목에는 근거가 되는 「산업안전보건기준에 관한 규칙」 조문을 붙였고, 조문에 없는 항목은 "권장(사내 기준)"으로 적었습니다.</li>
                         <li>화재위험작업: 가연성물질이 있는 장소에서는 작업시작 전에 제241조제2항 각 호의 사항을 확인하고 안전조치를 이행한 후 작업하게 해야 합니다(<a class="pw-a" href="../../laws/krule/#j241" target="_blank" rel="noopener">기준규칙 제241조제3항</a>).</li>
                         <li>화재감시자: 작업반경 11미터 이내에 가연성물질이 있는 장소 등에서 용접·용단 작업을 하게 하는 경우 지정·배치해야 합니다. 같은 장소에서 상시·반복적으로 용접·용단작업을 할 때 경보용 설비·기구, 소화설비 또는 소화기가 갖추어진 경우에는 배치하지 않을 수 있습니다(<a class="pw-a" href="../../laws/krule/#j241-2" target="_blank" rel="noopener">제241조의2제1항</a>).</li>
                         <li>밀폐공간: 산소 및 유해가스 농도의 측정·평가 결과는 측정·평가한 사람의 성명, 일시·장소 및 결과 등을 기록해 3년간 보존해야 합니다(<a class="pw-a" href="../../laws/krule/#j619-2" target="_blank" rel="noopener">제619조의2제4항</a>). 이 도구의 저장은 브라우저에만 남으므로 인쇄·PDF로 따로 보존하세요.</li>
@@ -623,11 +845,11 @@
                         <li>허가 유효 시간, 재허가, 결재 단계, 허가서 보존기간(밀폐공간 측정 기록 제외)은 법령에 정해져 있지 않으므로 사내 규정으로 정해 두세요.</li>
                     </ul>
                     <p class="pw-hint">입력 내용은 이 기기 브라우저에만 저장됩니다(첨부 사진은 저장되지 않음).</p>
-                </div>
+                </acc-step>
             </div>
 
             <!-- 미리보기 -->
-            <div id="preview-col" class="lg:col-span-7 flex flex-col items-center" style="min-width:0">
+            <div id="preview-col" class="lg:col-span-7 pw-pane pw-prev" :class="{ 'pw-hide-m': view !== 'preview' }" style="min-width:0">
                 <div class="pw-prevbar no-print">
                     <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> A4 실시간 미리보기</span>
                     <small>A4 (210mm × 297mm)</small>
@@ -639,18 +861,18 @@
                     <div v-if="form.docType === 'permit'" id="doc-permit">
                         <div class="pd-top">
                             <div style="min-width:0">
-                                <h2 class="pd-title">안전작업허가서</h2>
-                                <p class="pd-no">허가번호 <b>{{ form.no || '—' }}</b> &nbsp;·&nbsp; 상태 {{ form.status }}</p>
+                                <h2 class="pd-title" id="pdTitle">{{ docTitleText }}</h2>
+                                <p class="pd-no">허가번호 <b>{{ form.no || '—' }}</b><span v-if="form.status !== '작성 중'" id="pdStatus"> &nbsp;·&nbsp; 상태 {{ form.status }}</span></p>
                             </div>
-                            <table class="pd-sign" aria-label="결재">
-                                <tr><th>신청</th><th>검토</th><th>승인</th></tr>
-                                <tr><td>(서명)</td><td>(서명)</td><td>(서명)</td></tr>
-                                <tr><td class="who">{{ form.lead || '작업 책임자' }}</td><td class="who">{{ form.reviewer || '안전관리자 등' }}</td><td class="who">{{ form.approver || '허가권자' }}</td></tr>
+                            <table v-if="!appr.hide" id="pd-sign" class="pd-sign" :class="'pd-sign-' + apprView.length" aria-label="결재란">
+                                <tr><th v-for="(a, i) in apprView" :key="'ah-' + i">{{ a.t }}<small v-if="a.role">{{ a.role }}</small></th></tr>
+                                <tr><td v-for="(a, i) in apprView" :key="'as-' + i"><span class="pd-signph">(서명)</span></td></tr>
+                                <tr><td v-for="(a, i) in apprView" :key="'an-' + i" class="who">{{ a.name }}</td></tr>
                             </table>
                         </div>
 
                         <p v-if="gasState.bad" class="pd-alert">작업 불가 — 최근 측정값이 적정공기 기준을 벗어남({{ gasState.why }}). 조치 후 다시 측정할 것.</p>
-                        <p v-else-if="tally.N" class="pd-alert">허가 조건 미충족 항목 {{ tally.N }}개 — 조치하고 다시 확인하기 전에는 승인하지 않음.</p>
+                        <p v-else-if="tally.N" class="pd-alert">허가 조건 미충족 항목 {{ tally.N }}개 — 조치하고 다시 확인한 뒤 승인.</p>
 
                         <table class="pd-t">
                             <tr><th class="w14">사업장</th><td>{{ form.company }}</td><th class="w14">작업명</th><td>{{ form.title }}</td></tr>
@@ -751,7 +973,7 @@
 
                     <!-- [DOC 2] 현장 게시용 -->
                     <div v-else-if="form.docType === 'post'" id="doc-post">
-                        <p class="pp-band">안전작업허가 — {{ postState }}<small>허가번호 {{ form.no || '—' }} · {{ form.company || '사업장' }}</small></p>
+                        <p class="pp-band"><span id="ppTitle">{{ postTitleText }}</span> — {{ postState }}<small>허가번호 {{ form.no || '—' }} · {{ form.company || '사업장' }}</small></p>
                         <p v-if="gasState.bad" class="pd-alert" style="margin-top:10px;font-size:16px">작업 불가 — 최근 측정값이 적정공기 기준을 벗어남({{ gasState.why }})</p>
                         <table class="pp-t" style="margin-top:10px">
                             <tr><th>작업명</th><td class="big">{{ form.title || '(작업명)' }}</td></tr>
@@ -772,25 +994,24 @@
                                 <ul class="pp-list" v-if="postMeasures.length"><li v-for="(m, i) in postMeasures" :key="'pmz-' + i">{{ m }}</li></ul>
                                 <div v-if="form.conditions" class="pd-pre">허가 조건: {{ form.conditions }}</div>
                             </td></tr>
-                            <tr><th>승인</th><td>{{ form.approver || '(허가권자)' }} <span class="pd-dim" style="font-size:13px">(서명)</span></td></tr>
+                            <tr id="pp-appr"><th>{{ lastAppr.t || '승인' }}</th><td>{{ lastAppr.name || (lastAppr.role ? '(' + lastAppr.role + ')' : '') }} <span class="pd-dim pd-signph" style="font-size:13px">(서명)</span></td></tr>
                         </table>
-                        <div class="pd-foot" style="font-size:11px">
-                            <p>허가서에 적힌 작업·장소·시간 밖의 작업은 할 수 없습니다. 조건이 바뀌면 작업을 멈추고 다시 허가받으세요(사내 기준).</p>
-                            <p>게시 근거: 화재위험작업 — 기준규칙 제241조제4항 / 밀폐공간 작업 — 제619조제3항.</p>
+                        <div class="pd-foot" id="pp-foot" style="font-size:11px" v-if="postLines.length">
+                            <p v-for="(ln, i) in postLines" :key="'pf-' + i">{{ ln }}</p>
                         </div>
                     </div>
 
                     <!-- [DOC 3] 허가 대장 -->
                     <div v-else id="doc-ledger">
                         <div class="pd-top">
-                            <div><h2 class="pd-title" style="font-size:22px">안전작업허가 대장</h2>
-                                <p class="pd-sub">{{ form.company || '사업장' }} · {{ todayText }} 기준 · 이 기기에 보관된 {{ ledgerRows.length }}건 (사내 관리 대장)</p></div>
+                            <div><h2 class="pd-title" id="plTitle" style="font-size:22px">{{ ledgerTitleText }}</h2>
+                                <p class="pd-sub"><template v-if="form.company">{{ form.company }} · </template>{{ todayText }} 기준 · {{ ledgerRows.length }}건</p></div>
                         </div>
                         <table class="pd-t" id="pd-ledger">
                             <thead><tr><th class="w12">허가번호</th><th class="w14">작업일시</th><th>작업명 · 장소</th><th class="w16">작업 종류</th><th class="w14">업체 · 책임자</th><th class="w10">상태</th></tr></thead>
                             <tbody>
                                 <tr v-for="r in ledgerRows" :key="r.id">
-                                    <td class="c">{{ r.no }}<span v-if="r.live" class="pd-dim"><br>(작성 중·미보관)</span></td>
+                                    <td class="c">{{ r.no }}<span v-if="r.live" class="pd-dim"><br>(작성 중)</span></td>
                                     <td class="c">{{ r.when }}</td>
                                     <td>{{ r.title }}<span v-if="r.place"> · {{ r.place }}</span></td>
                                     <td class="c">{{ r.types }}</td>
@@ -800,7 +1021,7 @@
                                 <tr v-if="!ledgerRows.length"><td colspan="6" class="c pd-dim" style="padding:20px">보관한 허가서가 없습니다.</td></tr>
                             </tbody>
                         </table>
-                        <div class="pd-foot"><p>이 대장은 이 기기 브라우저에 보관한 허가서만 모은 것입니다. 허가서 보존기간은 사내 규정에 따르되, 밀폐공간 농도 측정·평가 결과는 3년간 보존해야 합니다(기준규칙 제619조의2제4항).</p></div>
+                        <div class="pd-foot" id="pl-foot" v-if="ledgerLines.length"><p v-for="(ln, i) in ledgerLines" :key="'lf-' + i">{{ ln }}</p></div>
                     </div>
                 </div>
             </div>
@@ -842,6 +1063,12 @@
         const STORE_KEY = 'safetake.permit.v1';
         const OLD_FORM_KEY = 'safetake.form.permit';   // 예전 일반 서식(tools/forms/permit/)의 저장값 — 읽기만 하고 지우지 않는다
         const HIST_MAX = 60;
+        // 결재란: 사이트 공통 모듈(assets/docs.js)과 같은 저장 키·형식(cols, names)을 쓴다. roles·hide·leadAuto는 이 작성기에서 더한 값이다.
+        const APPR_KEY = 'safetake.appr.tool.permit';
+        const APPR_DEF_KEY = 'safetake.appr.default';
+        const APPR_MAX = 6;
+        const APPR_BUILTIN = [{ t: '신청', role: '작업 책임자' }, { t: '검토', role: '안전관리자' }, { t: '승인', role: '허가권자' }];
+        const DOC_TITLE = { permit: '안전작업허가서', post: '안전작업허가', ledger: '안전작업허가 대장' };
         function readProfile() {
             try {
                 const p = JSON.parse(localStorage.getItem('safetake.profile') || '{}') || {};
@@ -1018,7 +1245,26 @@
             return j;
         }
 
+        // ---- 접이식 입력 단계
+        const AccStep = {
+            props: { sid: String, no: Number, title: String, sum: String, state: String, al: Number, stop: Boolean, open: Boolean, last: Boolean },
+            emits: ['toggle', 'next'],
+            template: `<section class="ac" :class="{ 'ac-open': open }" :data-step="sid">
+                <h3 class="ac-hw"><button type="button" class="ac-h" :id="'ach-' + sid" :aria-expanded="open ? 'true' : 'false'" :aria-controls="'acb-' + sid" @click="$emit('toggle', sid)">
+                    <span class="ac-no" :class="'ac-' + state">{{ state === 'done' ? '✓' : no }}<span v-if="state === 'done'" class="sr-only"> 완료</span></span>
+                    <span class="ac-tt"><b>{{ title }}</b><small v-if="sum">{{ sum }}</small></span>
+                    <span v-if="al" class="ac-al" :class="{ 'ac-al-stop': stop }">{{ stop ? '조치 필요' : '확인' }} {{ al }}건</span>
+                    <span class="ck-car" aria-hidden="true"></span>
+                </button></h3>
+                <div class="ac-b" :id="'acb-' + sid" role="region" :aria-labelledby="'ach-' + sid" v-show="open">
+                    <slot></slot>
+                    <div v-if="!last" class="ac-next"><button type="button" class="pw-btn pw-btn-sm" data-next @click="$emit('next', sid)">다음 단계 <i class="ph-bold ph-arrow-right"></i></button></div>
+                </div>
+            </section>`
+        };
+
         createApp({
+            components: { AccStep },
             setup() {
                 const docTypes = [
                     { label: '안전작업허가서', value: 'permit', icon: 'ph-bold ph-shield-check' },
@@ -1032,8 +1278,18 @@
                 const todayAt = (h, m) => toLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m || 0));
                 // 문서 맨 아래 문구: 기본값을 넣어 두되 사용자가 고치거나 지울 수 있다
                 const FOOT_DEFAULT = '허가 유효 시간·재허가·결재 단계는 사내 규정에 따릅니다. 밀폐공간 농도 측정·평가 결과는 3년간 보존(기준규칙 제619조의2제4항).';
-                const footLines = computed(() => String(form.value.footNote || '').split(/\n/).map(x => x.trim()).filter(Boolean));
+                const POST_DEFAULT = '허가서에 적힌 작업·장소·시간 밖의 작업은 할 수 없습니다. 조건이 바뀌면 작업을 멈추고 다시 허가받으세요.\n게시 근거: 화재위험작업 — 기준규칙 제241조제4항 / 밀폐공간 작업 — 제619조제3항.';
+                const LEDGER_DEFAULT = '허가서 보존기간은 사내 규정에 따릅니다. 밀폐공간 농도 측정·평가 결과는 3년간 보존(기준규칙 제619조의2제4항).';
+                const lines = (v) => String(v || '').split(/\n/).map(x => x.trim()).filter(Boolean);
+                const footLines = computed(() => lines(form.value.footNote));
+                const postLines = computed(() => lines(form.value.postNote));
+                const ledgerLines = computed(() => lines(form.value.ledgerNote));
+                const docTitleText = computed(() => form.value.docTitle.trim() || DOC_TITLE.permit);
+                const postTitleText = computed(() => form.value.postTitle.trim() || DOC_TITLE.post);
+                const ledgerTitleText = computed(() => form.value.ledgerTitle.trim() || DOC_TITLE.ledger);
                 const resetFoot = () => { form.value.footNote = FOOT_DEFAULT; form.value.showBasis = true; };
+                // 새 허가서로 넘어가도 유지하는 문서 설정
+                const DOC_KEEP = ['company', 'oldDismissed', 'docTitle', 'postTitle', 'ledgerTitle', 'footNote', 'showBasis', 'postNote', 'ledgerNote'];
                 const freshForm = () => ({
                     pid: newId(), docType: 'permit', no: '', noAuto: true, status: '작성 중',
                     company: str(profile.company), title: '', place: '', equip: '', desc: '',
@@ -1045,6 +1301,7 @@
                     reviewer: str(profile.manager), approver: '',
                     doneFire: false, doneCount: false, doneLoto: false, doneTidy: false, doneRestore: false, doneTime: '', doneBy: '', doneNote: '',
                     showBasis: true, footNote: FOOT_DEFAULT,
+                    docTitle: DOC_TITLE.permit, postTitle: DOC_TITLE.post, ledgerTitle: DOC_TITLE.ledger, postNote: POST_DEFAULT, ledgerNote: LEDGER_DEFAULT,
                     oldDismissed: false
                 });
                 const freshChecks = () => { const o = {}; ALL_ITEM_IDS.forEach(id => { o[id] = { v: '', note: '' }; }); return o; };
@@ -1075,10 +1332,30 @@
                 const cleanGas = (a) => arr(a, r => ({ time: str(r.time), place: str(r.place), o2: str(r.o2), co2: str(r.co2), co: str(r.co), h2s: str(r.h2s), lel: str(r.lel), by: str(r.by) }));
                 const cleanMid = (a) => arr(a, r => ({ time: str(r.time), note: str(r.note), by: str(r.by) }));
                 const cleanWorkers = (a) => arr(a, r => ({ org: str(r.org), name: str(r.name) }));
-                const cleanSnap = (s) => ({
-                    form: cleanForm(s && s.form), checks: cleanChecks(s && s.checks), custom: cleanCustom(s && s.custom),
-                    gas: cleanGas(s && s.gas), mid: cleanMid(s && s.mid), workers: cleanWorkers(s && s.workers)
-                });
+                // ---- 결재란. 저장된 허가서에 결재란이 없으면(예전 저장값) 신청·검토·승인에 예전 검토자·승인자 이름을 옮긴다
+                const cleanSteps = (a) => (Array.isArray(a) ? a.filter(x => x && typeof x === 'object').slice(0, APPR_MAX).map(x => ({ t: str(x.t).slice(0, 20), role: str(x.role).slice(0, 30), name: str(x.name).slice(0, 40) })) : []);
+                const builtinAppr = (f) => ({ hide: false, leadAuto: true, steps: APPR_BUILTIN.map((b, i) => ({ t: b.t, role: b.role, name: i === 1 ? str(f && f.reviewer) : i === 2 ? str(f && f.approver) : '' })) });
+                const colsToSteps = (o, withRoles) => (Array.isArray(o && o.cols) ? o.cols.slice(0, APPR_MAX).map((c, i) => ({ t: str(c).slice(0, 20), role: withRoles && Array.isArray(o.roles) ? str(o.roles[i]).slice(0, 30) : '', name: Array.isArray(o.names) ? str(o.names[i]).slice(0, 40) : '' })) : []);
+                const layoutAppr = (f) => {   // 새 허가서: 이 작성기에서 마지막으로 쓴 결재란 → 사이트 기본 결재란 → 신청·검토·승인
+                    const own = readJson(APPR_KEY), st = colsToSteps(own, true);
+                    if (st.length) return { hide: own.hide === true, leadAuto: own.leadAuto !== false, steps: st };
+                    const d = colsToSteps(readJson(APPR_DEF_KEY), false);
+                    if (d.length) return { hide: false, leadAuto: !d[0].name, steps: d };
+                    return builtinAppr(f);
+                };
+                const cleanAppr = (a, f, isNew) => {
+                    const st = cleanSteps(a && a.steps);
+                    if (st.length) return { hide: a.hide === true, leadAuto: a.leadAuto !== false, steps: st };
+                    return isNew ? layoutAppr(f) : builtinAppr(f);
+                };
+                const cleanSnap = (s) => {
+                    const form = cleanForm(s && s.form);
+                    return {
+                        form, checks: cleanChecks(s && s.checks), custom: cleanCustom(s && s.custom),
+                        gas: cleanGas(s && s.gas), mid: cleanMid(s && s.mid), workers: cleanWorkers(s && s.workers),
+                        appr: cleanAppr(s && s.appr, form, !(s && s.form && typeof s.form === 'object'))
+                    };
+                };
 
                 const init = cleanSnap(saved);
                 const form = ref(init.form);
@@ -1087,6 +1364,7 @@
                 const gas = ref(init.gas);
                 const mid = ref(init.mid);
                 const workers = ref(init.workers);
+                const appr = ref(init.appr);
                 const historyRaw = ref(Array.isArray(saved && saved.history)
                     ? saved.history.filter(h => h && typeof h === 'object' && h.snap && typeof h.snap === 'object').slice(0, HIST_MAX).map(h => { const s = cleanSnap(h.snap); return { id: str(h.id) || s.form.pid, saved: Number(h.saved) || 0, snap: s }; })
                     : []);
@@ -1104,15 +1382,25 @@
                     });
                     return `${y}-${String(max + 1).padStart(3, '0')}`;
                 };
-                if (form.value.noAuto || !form.value.no) { form.value.no = nextNo(form.value.start, form.value.pid); form.value.noAuto = true; }
-                watch(() => form.value.start, (v) => { if (form.value.noAuto) form.value.no = nextNo(v, form.value.pid); });
+                // 자동 번호는 아직 보관하지 않은 허가서에만 다시 매긴다(보관한 허가서를 열거나 새로 고쳐도 번호가 바뀌지 않게)
+                const inHistory = (pid) => historyRaw.value.some(h => h.id === pid);
+                if (!form.value.no || (form.value.noAuto && !inHistory(form.value.pid))) { form.value.no = nextNo(form.value.start, form.value.pid); form.value.noAuto = true; }
+                watch(() => [form.value.pid, form.value.start], ([pid, v], [oldPid, old]) => {
+                    if (pid !== oldPid) return;   // 다른 허가서를 연 것이지 날짜를 고친 것이 아니다
+                    if (form.value.noAuto && !inHistory(pid)) form.value.no = nextNo(v, pid);
+                    // 시작 날짜를 바꾸면, 같은 날이던 종료 날짜도 함께 옮긴다(시각은 그대로)
+                    const a = parseDt(old), b = parseDt(v), e = parseDt(form.value.end);
+                    if (a && b && e && a.toDateString() === e.toDateString() && a.toDateString() !== b.toDateString()) {
+                        form.value.end = toLocal(new Date(b.getFullYear(), b.getMonth(), b.getDate(), e.getHours(), e.getMinutes()));
+                    }
+                });
                 const onNoInput = (e) => { form.value.no = e.target.value; form.value.noAuto = false; };
                 const autoNo = () => { form.value.noAuto = true; form.value.no = nextNo(form.value.start, form.value.pid); };
 
                 // ---- 저장
                 const saveMsg = ref(restored ? '지난번 내용을 이어서 엽니다' : '');
                 let saveTimer = null;
-                const snapshot = () => JSON.parse(JSON.stringify({ form: form.value, checks: checks.value, custom: custom.value, gas: gas.value, mid: mid.value, workers: workers.value }));
+                const snapshot = () => JSON.parse(JSON.stringify({ form: form.value, checks: checks.value, custom: custom.value, gas: gas.value, mid: mid.value, workers: workers.value, appr: appr.value }));
                 const persist = () => {
                     saveTimer = null;
                     try {
@@ -1121,7 +1409,7 @@
                         return true;
                     } catch (e) { saveMsg.value = '저장하지 못했습니다(저장 공간 부족)'; return false; }
                 };
-                watch([form, checks, custom, gas, mid, workers], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
+                watch([form, checks, custom, gas, mid, workers, appr], () => { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 500); }, { deep: true });
                 window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); persist(); } });
 
                 // ---- 작업 종류·확인 항목
@@ -1139,9 +1427,46 @@
                         form.value.types = TYPE_IDS.filter(x => x === id || form.value.types.includes(x));
                     }
                 };
-                const setAns = (st, v) => { st.v = st.v === v ? '' : v; };
-                const addCustom = () => custom.value.push({ t: '', v: '', note: '' });
+                // 확인 항목 화면 상태(저장하지 않음): 묶음 펼침, '미확인·아니오만' 보기, 비고 칸 열림
+                const groupOpen = ref({ common: true });
+                const ckTodoOnly = ref(false);
+                const ckKeep = ref({});     // '미확인·아니오만' 보기에서 방금 답한 항목은 보기 방식을 바꿀 때까지 남겨 둔다(잘못 누른 것을 바로 고칠 수 있게)
+                const noteOpen = ref({});
+                const bulkUndo = ref(null);
+                const setAns = (st, v, id) => { st.v = st.v === v ? '' : v; if (id && ckTodoOnly.value) ckKeep.value[id] = true; bulkUndo.value = null; };
+                const addCustom = () => { custom.value.push({ t: '', v: '', note: '' }); groupOpen.value.custom = true; };
                 const customRows = computed(() => custom.value.filter(c => c.t.trim()));
+                const count = (states) => {
+                    const o = { Y: 0, N: 0, NA: 0, blank: 0, total: states.length, pct: 0 };
+                    states.forEach(st => { if (st.v) o[st.v]++; else o.blank++; });
+                    o.pct = o.total ? Math.round((o.total - o.blank) / o.total * 100) : 0;
+                    return o;
+                };
+                const itemShown = (id) => !ckTodoOnly.value || !checks.value[id].v || checks.value[id].v === 'N' || !!ckKeep.value[id];
+                const groups = computed(() => sections.value.map(s => Object.assign(count(s.items.map(it => checks.value[it.id])), { id: s.id, label: s.label, items: s.items, shown: s.items.filter(it => itemShown(it.id)).length })));
+                const customG = computed(() => count(customRows.value));
+                const toggleGroup = (id) => { groupOpen.value[id] = !groupOpen.value[id]; };
+                const setAllGroups = (on) => { const o = {}; if (on) sections.value.forEach(s => { o[s.id] = true; }); if (on) o.custom = true; groupOpen.value = o; };
+                const setCkFilter = (on) => { ckTodoOnly.value = on; ckKeep.value = {}; if (on) sections.value.forEach(s => { if (s.items.some(it => !checks.value[it.id].v || checks.value[it.id].v === 'N')) groupOpen.value[s.id] = true; }); };
+                const noteShown = (id) => checks.value[id].v === 'N' || !!checks.value[id].note || !!noteOpen.value[id];
+                const openNote = (id) => { noteOpen.value[id] = true; };
+                const groupStates = (gid) => (gid === 'custom' ? customRows.value : (sections.value.find(s => s.id === gid) || { items: [] }).items.map(it => checks.value[it.id]));
+                // 묶음의 미확인 항목을 한꺼번에 표시한다('아니오'로 표시한 항목은 건드리지 않는다). 바로 되돌릴 수 있다.
+                const bulkAns = (gid, v) => {
+                    const hit = groupStates(gid).filter(st => !st.v);
+                    if (!hit.length) return;
+                    hit.forEach(st => { st.v = v; });
+                    bulkUndo.value = { gid, list: hit };
+                    showToast(`미확인 ${hit.length}개를 '${ANS_LABEL[v]}'${v === 'Y' ? '로' : '으로'} 표시했습니다. 현장에서 확인한 항목만 남기세요.`);
+                };
+                const undoBulk = () => { if (!bulkUndo.value) return; bulkUndo.value.list.forEach(st => { st.v = ''; }); bulkUndo.value = null; };
+                const clearGroup = (gid) => {
+                    if (!window.confirm('이 묶음의 확인 결과 표시와 비고를 모두 지울까요?')) return;
+                    groupStates(gid).forEach(st => { st.v = ''; st.note = ''; });
+                    bulkUndo.value = null;
+                };
+                // 행 순서 바꾸기(작업자·추가 확인 항목)
+                const moveRow = (list, i, d) => { const j = i + d; if (j < 0 || j >= list.length) return; const x = list.splice(i, 1)[0]; list.splice(j, 0, x); };
                 const tally = computed(() => {
                     const o = { Y: 0, N: 0, NA: 0, blank: 0, total: 0 };
                     const add = (v) => { o.total++; if (v) o[v]++; else o.blank++; };
@@ -1251,43 +1576,160 @@
                     else if ((e - s) / 3600000 > 12) out.push('허가 시간이 12시간을 넘습니다 — 작업조가 바뀌면 다시 허가받는 것을 권장합니다(사내 기준).');
                     return out;
                 });
+                // ---- 결재란
+                const apprName = (i) => (i === 0 && appr.value.leadAuto ? form.value.lead : appr.value.steps[i].name);
+                const apprView = computed(() => appr.value.steps.map((st, i) => ({ t: st.t.trim(), role: st.role.trim(), name: str(apprName(i)).trim() })));
+                const lastAppr = computed(() => apprView.value[apprView.value.length - 1] || { t: '', role: '', name: '' });
+                // 고친 결재란은 이 작성기의 기본값으로 남겨, 새 허가서도 같은 결재란으로 시작한다(성명 포함 — 첫 칸이 작업 책임자를 따라갈 때는 비움)
+                const saveApprLayout = () => {
+                    const a = appr.value;
+                    try {
+                        localStorage.setItem(APPR_KEY, JSON.stringify({ cols: a.steps.map(x => x.t), names: a.steps.map((x, i) => (i === 0 && a.leadAuto ? '' : x.name)), signs: [], dates: [], roles: a.steps.map(x => x.role), hide: a.hide, leadAuto: a.leadAuto }));
+                    } catch (e) { /* 저장 공간이 없으면 이 허가서에만 남는다 */ }
+                };
+                const onApprField = (i, k, e) => {
+                    const st = appr.value.steps[i];
+                    if (!st) return;
+                    if (k === 'name' && i === 0) appr.value.leadAuto = false;
+                    st[k] = e.target.value;
+                    saveApprLayout();
+                };
+                const apprLeadBack = () => { appr.value.leadAuto = true; appr.value.steps[0].name = ''; saveApprLayout(); };
+                const apprAdd = () => {
+                    const st = appr.value.steps;
+                    if (st.length >= APPR_MAX) { showToast(`결재 칸은 ${APPR_MAX}개까지 둘 수 있습니다.`, 'error'); return; }
+                    st.splice(Math.max(1, st.length - 1), 0, { t: '확인', role: '', name: '' });   // 마지막 칸(승인) 앞에 넣는다
+                    saveApprLayout();
+                };
+                const apprDel = (i) => {
+                    const st = appr.value.steps;
+                    if (st.length <= 1) return;
+                    if (i === 0 && appr.value.leadAuto) { appr.value.leadAuto = false; }
+                    st.splice(i, 1);
+                    saveApprLayout();
+                };
+                const apprMove = (i, d) => {
+                    const st = appr.value.steps, j = i + d;
+                    if (j < 0 || j >= st.length) return;
+                    if (appr.value.leadAuto && (i === 0 || j === 0)) { st[0].name = form.value.lead; appr.value.leadAuto = false; }   // 첫 칸이 바뀌면 자동 연결을 풀고 이름은 그대로 둔다
+                    const x = st.splice(i, 1)[0]; st.splice(j, 0, x);
+                    saveApprLayout();
+                };
+                const onApprHide = (e) => { appr.value.hide = e.target.checked; saveApprLayout(); };
+                const apprReset = (kind) => {
+                    if (kind === 'site') {
+                        const d = colsToSteps(readJson(APPR_DEF_KEY), false);
+                        if (!d.length) { showToast("사이트 기본 결재란이 아직 없습니다. '모든 서식 기본으로'를 누르면 만들어집니다.", 'error'); return; }
+                        appr.value = { hide: appr.value.hide, leadAuto: !d[0].name, steps: d };
+                        try { localStorage.removeItem(APPR_KEY); } catch (e) { /* 무시 */ }
+                        if (appr.value.hide) saveApprLayout();
+                        showToast('사이트 기본 결재란을 가져왔습니다.');
+                        return;
+                    }
+                    const b = builtinAppr(null);
+                    b.hide = appr.value.hide;
+                    appr.value = b;
+                    saveApprLayout();
+                    showToast('결재란을 신청·검토·승인으로 되돌렸습니다.');
+                };
+                const apprToSite = () => {
+                    const a = appr.value;
+                    try {
+                        localStorage.setItem(APPR_DEF_KEY, JSON.stringify({ cols: a.steps.map(x => x.t), names: a.steps.map((x, i) => (i === 0 && a.leadAuto ? '' : x.name)) }));
+                        showToast('이 결재란을 모든 서식의 기본값으로 저장했습니다. 이미 고친 서식은 그대로입니다.');
+                    } catch (e) { showToast('저장하지 못했습니다(저장 공간 부족).', 'error'); }
+                };
+
+                // lv: stop(조치 전에는 작업·승인 불가) · warn(앞뒤가 안 맞음) · todo(아직 안 적음). step = 고칠 수 있는 입력 단계
                 const checksOut = computed(() => {
                     const f = form.value, out = [], t = tally.value;
-                    const W = (text) => out.push({ lv: 'warn', text }), S = (text) => out.push({ lv: 'stop', text });
-                    if (!f.types.length) W('작업 종류를 하나 이상 고르세요.');
-                    if (!f.title.trim() || !f.place.trim()) W('작업명과 작업 장소를 적으세요.');
-                    if (!f.lead.trim()) W('작업 책임자(신청자)가 비어 있습니다.');
-                    if (f.isContract && !f.contractor.trim()) W('도급 작업인데 작업 업체명이 비어 있습니다.');
-                    if (t.N) S(`허가 조건 미충족 항목 ${t.N}개 — '아니오'로 표시한 항목을 조치하고 다시 확인하기 전에는 승인하지 마세요(사내 기준).`);
-                    if (t.blank) W(`아직 확인하지 않은 항목이 ${t.blank}개 있습니다.`);
+                    const push = (lv) => (text, step) => out.push({ lv, text, step: step || '' });
+                    const W = push('warn'), S = push('stop'), T = push('todo');
+                    if (!f.types.length) T('작업 종류를 하나 이상 고르세요.', 'type');
+                    if (!f.title.trim() || !f.place.trim()) T('작업명과 작업 장소를 적으세요.', 'base');
+                    if (!f.lead.trim()) T('작업 책임자(신청자)가 비어 있습니다.', 'base');
+                    if (f.isContract && !f.contractor.trim()) W('도급 작업인데 작업 업체명이 비어 있습니다.', 'base');
+                    if (t.N) S(`허가 조건 미충족 항목 ${t.N}개 — '아니오'로 표시한 항목을 조치하고 다시 확인하기 전에는 승인하지 마세요(사내 기준).`, 'check');
+                    if (t.blank) T(`아직 확인하지 않은 항목이 ${t.blank}개 있습니다.`, 'check');
                     const nNoNote = printSections.value.reduce((n, s) => n + s.items.filter(it => it.v === 'N' && !it.note.trim()).length, 0);
-                    if (nNoNote) W(`'아니오' 항목 ${nNoNote}개에 미충족 사유·조치 계획이 없습니다.`);
+                    if (nNoNote) W(`'아니오' 항목 ${nNoNote}개에 미충족 사유·조치 계획이 없습니다.`, 'check');
                     if (hasType('hot')) {
-                        if (checks.value.hot11.v === 'Y' && !f.fireWatch.trim()) W('화재감시자를 배치했다고 표시했지만 성명이 비어 있습니다(기준규칙 제241조의2제1항).');
-                        if (!f.extinguisher.trim()) W('소화기구 비치 내용이 비어 있습니다(기준규칙 제241조제2항제3호).');
+                        if (checks.value.hot11.v === 'Y' && !f.fireWatch.trim()) W('화재감시자를 배치했다고 표시했지만 성명이 비어 있습니다(기준규칙 제241조의2제1항).', 'people');
+                        if (!f.extinguisher.trim()) T('소화기구 비치 내용이 비어 있습니다(기준규칙 제241조제2항제3호).', 'people');
                     }
                     if (hasType('conf')) {
-                        if (!f.attendant.trim()) W('밀폐공간 외부에 배치할 감시인이 지정되지 않았습니다(기준규칙 제623조제1항).');
-                        if (!f.gasTester.trim()) W('산소·유해가스 농도 측정자가 지정되지 않았습니다(기준규칙 제619조의2제1항).');
-                        if (!f.emergency.trim()) W('비상연락체계가 비어 있습니다(기준규칙 제619조제2항제6호).');
-                        if (!gasState.value.has) W('산소·유해가스 농도 측정 기록이 없습니다 — 작업을 시작하기 전에 측정해야 합니다(기준규칙 제619조의2제1항).');
-                        else if (!gasState.value.bad && !gasState.value.full) W('가장 최근 측정에 빠진 항목이 있습니다 — 적정공기는 산소·이산화탄소·일산화탄소·황화수소 기준을 모두 봅니다(기준규칙 제618조제3호).');
+                        if (!f.attendant.trim()) T('밀폐공간 외부에 배치할 감시인이 지정되지 않았습니다(기준규칙 제623조제1항).', 'people');
+                        if (!f.gasTester.trim()) T('산소·유해가스 농도 측정자가 지정되지 않았습니다(기준규칙 제619조의2제1항).', 'people');
+                        if (!f.emergency.trim()) T('비상연락체계가 비어 있습니다(기준규칙 제619조제2항제6호).', 'people');
+                        if (!gasState.value.has) T('산소·유해가스 농도 측정 기록이 없습니다 — 작업을 시작하기 전에 측정해야 합니다(기준규칙 제619조의2제1항).', 'gas');
+                        else if (!gasState.value.bad && !gasState.value.full) W('가장 최근 측정에 빠진 항목이 있습니다 — 적정공기는 산소·이산화탄소·일산화탄소·황화수소 기준을 모두 봅니다(기준규칙 제618조제3호).', 'gas');
                     }
-                    if (gasState.value.bad) S(`작업 불가 — 가장 최근 측정값이 적정공기 기준을 벗어났습니다(${gasState.value.why}). 환기 등 조치 후 다시 측정하세요(기준규칙 제619조의2제3항).`);
+                    if (gasState.value.bad) S(`작업 불가 — 가장 최근 측정값이 적정공기 기준을 벗어났습니다(${gasState.value.why}). 환기 등 조치 후 다시 측정하세요(기준규칙 제619조의2제3항).`, 'gas');
                     const approved = ['승인', '작업 중', '완료'].includes(f.status);
-                    if (approved && !f.approver.trim()) W('승인 이후 상태인데 승인자(허가권자)가 비어 있습니다.');
-                    if (approved && f.status !== '완료' && (t.N || gasState.value.bad)) S('미충족 항목이나 부적정 측정값이 있는데 상태가 "' + f.status + '"입니다. 조치가 끝났는지 확인하세요.');
+                    const la = lastAppr.value;
+                    if (approved && !la.name) W(`승인 이후 상태인데 결재란 마지막 칸(${la.t || '승인'}) 성명이 비어 있습니다.`, 'appr');
+                    if (approved && f.status !== '완료' && (t.N || gasState.value.bad)) S('미충족 항목이나 부적정 측정값이 있는데 상태가 "' + f.status + '"입니다. 조치가 끝났는지 확인하세요.', 'base');
                     if (f.status === '완료') {
-                        if (!f.doneTime) W('상태가 "완료"인데 작업 완료 시각이 비어 있습니다.');
-                        if (hasType('hot') && !f.doneFire) W('화기작업 완료 확인에 잔불 확인이 표시되지 않았습니다(사내 기준).');
-                        if (hasType('conf') && !f.doneCount) W('밀폐공간 퇴장 인원 점검이 표시되지 않았습니다(기준규칙 제621조).');
-                    } else if (f.doneTime) W('작업 완료 시각이 적혀 있습니다 — 진행 상태를 "완료"로 바꾸세요.');
+                        if (!f.doneTime) W('상태가 "완료"인데 작업 완료 시각이 비어 있습니다.', 'done');
+                        if (hasType('hot') && !f.doneFire) W('화기작업 완료 확인에 잔불 확인이 표시되지 않았습니다(사내 기준).', 'done');
+                        if (hasType('conf') && !f.doneCount) W('밀폐공간 퇴장 인원 점검이 표시되지 않았습니다(기준규칙 제621조).', 'done');
+                    } else if (f.doneTime) W('작업 완료 시각이 적혀 있습니다 — 진행 상태를 "완료"로 바꾸세요.', 'base');
                     const dup = historyRaw.value.find(h => h.id !== f.pid && str(h.snap.form.no).trim() && str(h.snap.form.no).trim() === f.no.trim());
-                    if (dup) W(`허가번호 ${f.no}가 보관된 다른 허가서와 같습니다.`);
-                    timeChecks.value.forEach(W);
-                    if (!out.length) out.push({ lv: 'ok', text: `확인 항목 ${t.total}개를 모두 확인했고 미충족 항목이 없습니다. 현장 상태가 바뀌면 다시 확인하세요.` });
+                    if (dup) W(`허가번호 ${f.no}가 보관된 다른 허가서와 같습니다.`, 'base');
+                    timeChecks.value.forEach(x => (/넣으세요/.test(x) ? T : W)(x, 'base'));
+                    if (!out.length) out.push({ lv: 'ok', text: `확인 항목 ${t.total}개를 모두 확인했고 미충족 항목이 없습니다. 현장 상태가 바뀌면 다시 확인하세요.`, step: '' });
                     return out;
                 });
+                const sumCount = computed(() => { const o = { stop: 0, warn: 0, todo: 0, ok: 0 }; checksOut.value.forEach(c => { o[c.lv]++; }); return o; });
+                const alertCount = computed(() => sumCount.value.stop + sumCount.value.warn);
+                const sumLv = computed(() => (sumCount.value.stop ? 'stop' : sumCount.value.warn ? 'warn' : sumCount.value.ok ? 'ok' : 'todo'));
+                const sumText = computed(() => {
+                    const c = sumCount.value;
+                    if (c.ok) return '모두 확인했고 미충족 항목이 없습니다';
+                    return [c.stop && `조치 필요 ${c.stop}건`, c.warn && `확인 ${c.warn}건`, c.todo && `남은 입력 ${c.todo}건`].filter(Boolean).join(' · ');
+                });
+                const sumOpen = ref(false);
+
+                // ---- 입력 단계(접이식). 펼침 상태는 저장하지 않는다
+                const openSteps = ref({ base: true });
+                const view = ref('input');   // 좁은 화면의 '입력 | 미리보기'
+                const stepList = computed(() => {
+                    const f = form.value, t = tally.value, gs = gasState.value;
+                    const sd = parseDt(f.start);
+                    const list = [
+                        { sid: 'base', title: '작업 개요', sum: [f.title.trim() || '작업명 미입력', sd ? `${pad(sd.getMonth() + 1)}.${pad(sd.getDate())} ${pad(sd.getHours())}:${pad(sd.getMinutes())}` : ''].filter(Boolean).join(' · '), ok: !!(f.title.trim() && f.place.trim() && f.lead.trim()) },
+                        { sid: 'type', title: '작업 종류 · 위험요인', sum: typeText.value || '선택 안 함', ok: f.types.length > 0 },
+                        { sid: 'people', title: '작업 인원 · 보호구', sum: `작업자 ${workerCount.value}명 · 보호구 ${f.ppe.length + (f.ppeEtc.trim() ? 1 : 0)}종`, ok: workerCount.value > 0 || f.ppe.length > 0 },
+                        { sid: 'check', title: '작업 전 안전조치 확인', sum: `예 ${t.Y} / 아니오 ${t.N} / 미확인 ${t.blank}` + (t.NA ? ` / 해당없음 ${t.NA}` : ''), ok: t.total > 0 && !t.blank && !t.N }
+                    ];
+                    if (showGas.value) list.push({ sid: 'gas', title: '산소·유해가스 농도 측정', sum: gas.value.length ? `측정 ${gas.value.length}회` + (gs.bad ? ' · 적정공기 아님' : gs.full ? ' · 적정공기 기준 이내' : '') : '측정 기록 없음', ok: gs.has && gs.full && !gs.bad });
+                    list.push(
+                        { sid: 'energy', title: '에너지 차단 · 관련 문서', sum: [f.loto.trim() && '차단 내용 적음', f.refRisk && '위험성평가', f.refTbm && 'TBM', f.conditions.trim() && '허가 조건'].filter(Boolean).join(' · ') || '미입력', ok: !!(f.loto.trim() || f.refRisk || f.refTbm || f.conditions.trim()) },
+                        { sid: 'appr', title: '결재란 · 문서 제목 · 하단 문구', sum: (appr.value.hide ? '결재란 없음' : apprView.value.map(a => a.t || '(이름 없음)').join(' → ')), ok: appr.value.hide || apprView.value.every(a => a.name) },
+                        { sid: 'done', title: '작업 중 점검 · 완료 확인', sum: `${f.status} · 점검 ${mid.value.length}회` + (f.doneTime ? ' · 완료 ' + doneTimeText.value.slice(5) : ''), ok: f.status === '완료' && !!f.doneTime },
+                        { sid: 'keep', title: '사진 · 보관 · 허가 기록', sum: `보관 ${historyRaw.value.length}건` + (inHistory(f.pid) ? ' · 이 허가서 보관됨' : ''), ok: inHistory(f.pid) },
+                        { sid: 'law', title: '법령 메모', sum: '', ok: false }
+                    );
+                    return list.map((x, i) => {
+                        const mine = checksOut.value.filter(c => c.step === x.sid);
+                        const stop = mine.some(c => c.lv === 'stop'), al = mine.filter(c => c.lv === 'stop' || c.lv === 'warn').length;
+                        const todo = mine.some(c => c.lv === 'todo');
+                        return { sid: x.sid, no: i + 1, title: x.title, sum: x.sum, state: stop ? 'bad' : x.ok && !al && !todo ? 'done' : 'todo', al, stop, open: !!openSteps.value[x.sid], last: i === list.length - 1 };
+                    });
+                });
+                const sp = computed(() => { const o = {}; stepList.value.forEach(x => { o[x.sid] = x; }); if (!o.gas) o.gas = { sid: 'gas', no: 0, title: '', sum: '', state: 'todo', al: 0, stop: false, open: false, last: false }; return o; });
+                const stepName = (sid) => { const x = sp.value[sid]; return x ? x.title : ''; };
+                const scrollToStep = (sid) => nextTick(() => { const el = document.querySelector(`.ac[data-step="${sid}"]`); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'auto' }); });
+                const toggleStep = (sid) => { openSteps.value[sid] = !openSteps.value[sid]; };
+                const nextStep = (sid) => {
+                    const l = stepList.value, i = l.findIndex(x => x.sid === sid);
+                    if (i < 0 || i >= l.length - 1) return;
+                    openSteps.value[sid] = false; openSteps.value[l[i + 1].sid] = true;
+                    scrollToStep(l[i + 1].sid);
+                };
+                const goStep = (sid) => { view.value = 'input'; openSteps.value[sid] = true; scrollToStep(sid); };
+                const setAllSteps = (on) => { const o = {}; if (on) stepList.value.forEach(x => { o[x.sid] = true; }); openSteps.value = o; };
+                const setView = (v) => { view.value = v; nextTick(() => { fitPreview(); window.scrollTo(0, 0); }); };
 
                 // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
                 const fitPreview = () => {
@@ -1334,23 +1776,31 @@
 
                 // ---- 화면 내용 바꾸기
                 const load = (s) => {
-                    form.value = s.form; checks.value = s.checks; custom.value = s.custom; gas.value = s.gas; mid.value = s.mid; workers.value = s.workers;
+                    form.value = s.form; checks.value = s.checks; custom.value = s.custom; gas.value = s.gas; mid.value = s.mid; workers.value = s.workers; appr.value = s.appr;
                     photoDataUrl.value = null;
+                    const fi = document.getElementById('photo-input'); if (fi) fi.value = '';
+                    ckKeep.value = {}; noteOpen.value = {}; bulkUndo.value = null; groupOpen.value = { common: true };
+                    openSteps.value = { base: true }; view.value = 'input';
                     window.scrollTo(0, 0);
+                    ['input-col', 'preview-col'].forEach(id => { const el = document.getElementById(id); if (el) el.scrollTop = 0; });
                 };
                 const isBusy = () => {
                     const f = form.value;
-                    return !!(f.title.trim() || f.place.trim() || f.desc.trim() || f.types.length || gas.value.length || workers.value.length || tally.value.total !== tally.value.blank);
+                    return !!(f.title.trim() || f.place.trim() || f.desc.trim() || f.equip.trim() || f.contractor.trim() || f.lead.trim() || f.hazards.trim() || f.loto.trim() || f.conditions.trim()
+                        || f.types.length || gas.value.length || workers.value.length || mid.value.length || tally.value.total !== tally.value.blank);
                 };
                 const blankSnap = () => {
+                    // 새 허가서: 사업장명, 문서 제목·하단 문구, 결재란(칸·직책·성명), 사업장 추가 확인 항목(결과는 비움)은 그대로 둔다
                     const s = cleanSnap(null);
-                    s.form.company = form.value.company; s.form.reviewer = form.value.reviewer; s.form.approver = form.value.approver;
-                    s.form.oldDismissed = form.value.oldDismissed;
+                    DOC_KEEP.forEach(k => { s.form[k] = form.value[k]; });
+                    s.appr = JSON.parse(JSON.stringify(appr.value));
+                    if (s.appr.leadAuto) s.appr.steps[0].name = '';
+                    s.custom = custom.value.filter(c => c.t.trim()).map(c => ({ t: c.t, v: '', note: '' }));
                     s.form.no = nextNo(s.form.start, s.form.pid);
                     return s;
                 };
                 const resetToBlank = () => {
-                    if (isBusy() && !window.confirm('지금 작성 중인 내용을 지우고 새 허가서를 쓸까요?\n(보관하지 않은 내용은 사라집니다. 사업장명·검토자·승인자는 그대로 둡니다)')) return;
+                    if (isBusy() && !window.confirm('지금 작성 중인 내용을 지우고 새 허가서를 쓸까요?\n(보관하지 않은 내용은 사라집니다. 사업장명·결재란·문서 제목과 하단 문구·추가 확인 항목은 그대로 둡니다)')) return;
                     load(blankSnap());
                     showToast('새 허가서를 열었습니다.');
                 };
@@ -1495,7 +1945,7 @@
                     if (OLD_KIND[g('f.kind')]) f.types = [OLD_KIND[g('f.kind')]];
                     f.title = g('f.desc').split('\n')[0].slice(0, 40);
                     f.desc = g('f.desc'); f.place = g('f.place'); f.equip = g('f.equip'); f.contractor = g('f.company'); f.lead = g('f.lead');
-                    if (g('f.approver')) f.approver = g('f.approver');
+                    if (g('f.approver')) { const la = s.appr.steps[s.appr.steps.length - 1]; if (s.appr.steps.length > 1 || !s.appr.leadAuto) la.name = g('f.approver'); }
                     if (oldDt(g('f.from'))) f.start = oldDt(g('f.from'));
                     if (oldDt(g('f.to'))) f.end = oldDt(g('f.to'));
                     if (g('f.no')) { f.no = g('f.no'); f.noAuto = false; } else f.no = nextNo(f.start, f.pid);
@@ -1532,6 +1982,7 @@
                 const downloadPDF = async () => {
                     const element = document.getElementById('print-area');
                     if (!element) return;
+                    if (view.value !== 'preview') { view.value = 'preview'; await nextTick(); }   // 좁은 화면에서 미리보기가 가려져 있으면 빈 종이가 찍힌다
                     isGeneratingPDF.value = true;
                     showToast('PDF를 만들고 있습니다…', 'info');
                     try { await loadHtml2pdf(); } catch (e) {
@@ -1562,7 +2013,11 @@
                 };
 
                 return {
-                    HIST_MAX, TYPES, ANS, ANS_LABEL, STATUSES, PPE, docTypes, form, checks, custom, gas, mid, workers, history: historyView,
+                    HIST_MAX, APPR_MAX, DOC_TITLE, POST_DEFAULT, LEDGER_DEFAULT, TYPES, ANS, ANS_LABEL, STATUSES, PPE, docTypes, form, checks, custom, gas, mid, workers, appr, history: historyView,
+                    groupOpen, ckTodoOnly, bulkUndo, groups, customG, itemShown, toggleGroup, setAllGroups, setCkFilter, noteShown, openNote, bulkAns, undoBulk, clearGroup, moveRow,
+                    apprName, apprView, lastAppr, onApprField, apprLeadBack, apprAdd, apprDel, apprMove, onApprHide, apprReset, apprToSite,
+                    docTitleText, postTitleText, ledgerTitleText, postLines, ledgerLines,
+                    sumLv, sumText, sumOpen, alertCount, stepList, sp, stepName, toggleStep, nextStep, goStep, setAllSteps, view, setView,
                     photoDataUrl, isGeneratingPDF, toast, saveMsg,
                     hasType, activeTypes, sections, printSections, tally, typeText, needsDirector, basisText, footLines, resetFoot,
                     toggleType, setAns, addCustom, togglePpe, suggestPpe, ppeText,
