@@ -731,5 +731,12 @@ end $$;
 revoke execute on function public.admin_stats(), public.admin_delete_user(uuid, text, boolean, boolean), public.block_banned_signup(), public.mask_email(text), public.email_hash(text) from public, anon;
 grant execute on function public.admin_stats(), public.admin_delete_user(uuid, text, boolean, boolean) to authenticated;
 
+-- 가입을 처리하는 Supabase 내부 역할이 가입 차단 확인 함수를 확실히 쓸 수 있게 한다(없는 환경에서는 건너뛴다).
+do $$ begin
+  if exists (select 1 from pg_roles where rolname = 'supabase_auth_admin') then
+    grant execute on function public.block_banned_signup(), public.email_hash(text) to supabase_auth_admin;
+  end if;
+end $$;
+
 -- ------------------------------------------------------------ 운영자 지정 (가입한 뒤 한 번만, 이메일을 바꿔서 따로 실행)
 -- update public.profiles set role = 'admin' where id = (select id from auth.users where email = '운영자 이메일');
