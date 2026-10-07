@@ -747,7 +747,12 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
             _v = str(_sv.get(_k) or "").strip()
             if re.match(r"^[A-Za-z0-9_-]{8,120}$", _v):
                 canon_tags += f'\n<meta name="{_n}" content="{_v}">'
-    full_title = f"{title} | {site['name']}" if title != site["name"] else f"{site['name']} | {site['tagline']}"
+    _brand = f"{site.get('name_ko')} {site['name']}" if site.get("name_ko") else site["name"]   # 한글 이름으로 검색해도 잡히도록 제목에 함께 쓴다
+    full_title = f"{title} | {_brand}" if title != site["name"] else (site.get("home_title") or f"{site['name']} | {site['tagline']}")
+    if path == "" and base:
+        _ld = {"@context": "https://schema.org", "@type": "WebSite", "name": site["name"], "alternateName": [x for x in (site.get("name_ko"), "세이프 플럼", "safeplum") if x],
+               "url": base + "/", "inLanguage": "ko", "description": site.get("description", "")}
+        canon_tags += '\n<script type="application/ld+json">' + json.dumps(_ld, ensure_ascii=False).replace("</", "<\\/") + "</script>"
     cur = ' aria-current="page"'
     on_news = (site.get("features") or {}).get("public_api", False)
     nav = gnb_html(site, rel_root, active)
@@ -1005,6 +1010,8 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         css = (ROOT / t["css"]).read_text(encoding="utf-8").replace("</style", "<\\/style")
         assert "/*@TAILWIND@*/" in src, t["src"]
         src = src.replace("/*@TAILWIND@*/", css)
+    if site.get("name_ko") and f"| {site['name']}</title>" in src:   # 단독 화면 제목에도 한글 이름
+        src = src.replace(f"| {site['name']}</title>", f"| {site['name_ko']} {site['name']}</title>", 1)
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
@@ -1442,7 +1449,7 @@ def build(out, today):
 <section class="hero2">
   <div class="wrap hero2-in">
     <img class="hero2-duck" src="assets/img/plum/hero.webp" width="150" height="150" alt="손을 흔드는 SafePlum 캐릭터" fetchpriority="high">
-    <p class="hero2-eye">SafePlum · 현장 안전지식 공유 커뮤니티</p>
+    <p class="hero2-eye">세이프플럼 SafePlum · 현장 안전지식 공유 커뮤니티</p>
     <h1>안전관리 서류, 여기서 바로</h1>
     <div class="uq" role="search">
       <label for="uq" class="sr">통합 검색</label>
