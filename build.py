@@ -944,6 +944,34 @@ def filter_group(group, values, label):
             f'<button type="button" class="chip" data-value="" aria-pressed="true">전체</button>{items}</div></div>')
 
 
+def acc_trend_html(auto_acc, today, days=7):
+    """사고사망 속보(공단 게시 기준)를 날짜별·유형별 건수로 묶은 옆 상자. 발생일을 읽은 자료가 없으면 '' (상자를 만들지 않음)."""
+    import collections, datetime as _dt
+    items = [a for a in auto_acc.get("items", []) if a.get("date")]
+    if not items:
+        if auto_acc.get("items"):
+            warn("사고사망 속보: 발생일을 읽은 항목이 없어 동향 상자를 만들지 않음(scripts/fetch_public.py 의 acc_date 확인)")
+        return ""
+    today = str(today)[:10]
+    since = (_dt.date.fromisoformat(today) - _dt.timedelta(days=days - 1)).isoformat()
+    recent = [a for a in items if since <= a["date"] <= today]
+    by_day = collections.defaultdict(collections.Counter)
+    total = collections.Counter()
+    for a in recent:
+        t = a.get("type") or "기타"
+        by_day[a["date"]][t] += 1
+        total[t] += 1
+    cnt = lambda c: " · ".join(f"{e(k)} {v}건" for k, v in c.most_common())
+    if recent:
+        rows = "".join(f'<li><time datetime="{e(d)}">{int(d[5:7])}월 {int(d[8:10])}일</time> — {cnt(by_day[d])}</li>' for d in sorted(by_day, reverse=True))
+        body = f'<ul class="alist">{rows}</ul><p class="hint">최근 {days}일 합계 {len(recent)}건: {cnt(total)}</p>'
+    else:
+        body = f'<p class="hint">최근 {days}일 동안 게시된 사고사망 속보가 없습니다.</p>'
+    return (f'<div class="side-box"><h2 class="h-sm">사고사망 속보 동향</h2>{body}'
+            f'<p class="src-line">출처: 한국산업안전보건공단 사고사망 속보(공공데이터포털 API) · 수집일 {e(auto_acc.get("fetched", ""))}. '
+            f'공단이 속보로 게시한 건을 발생일·재해유형으로 자동 분류한 것으로, 공식 산업재해 통계가 아니며 누락·분류 오류가 있을 수 있습니다.</p></div>')
+
+
 def sec_head(title, href=None, more="전체 보기", sub=None):
     link = f'<a class="more" href="{href}">{e(more)} <span aria-hidden="true">→</span></a>' if href else ""
     return f'<div class="sec-head"><div><h2>{e(title)}</h2>{f"<p>{e(sub)}</p>" if sub else ""}</div>{link}</div>'
@@ -1553,6 +1581,7 @@ def build(out, today):
     else:
         arch, brief_main = "", board_html
     brief_side = f"""<aside class="col-side stack">
+    {acc_trend_html(auto_acc, today)}
     <div class="side-box"><h2 class="h-sm">지난 브리핑</h2><ul class="br-arch">{arch or '<li>없음</li>'}</ul></div>
     <div class="side-box"><h2 class="h-sm">브리핑은 이렇게 만듭니다</h2><ul class="bul hint">
       <li>국가법령정보센터, 고용노동부, 안전보건공단, 정부 부처·국회·공공기관의 공식 발표만 근거로 씁니다.</li>
@@ -1985,6 +2014,7 @@ def build(out, today):
     <ul class="ulist">{"".join(update_row(u) for u in updates[:5])}</ul></div>
   </section>
   <aside class="col-side">
+    {acc_trend_html(auto_acc, today)}
     <section class="side-box">{sec_head("사고사망 속보")}{acc_list}</section>
     <section class="side-box"><p class="hint">SafePlum은 기사 본문을 옮기지 않습니다. 제목·부제·부처·날짜만 싣고 원문으로 연결합니다. 민간 언론사 기사와 다른 사이트의 게시물은 싣지 않습니다.</p></section>
   </aside>

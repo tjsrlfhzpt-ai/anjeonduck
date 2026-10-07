@@ -200,6 +200,54 @@ def fetch_news(days=30):
 
 
 # ------------------------------------------------------------ 3) 공단 사고사망 속보
+# 재해 발생형태 분류(안전보건공단 용어 기준). 앞에 있는 규칙이 먼저 적용되고, 어느 것에도 안 맞으면 '기타'로 둔다(추측하지 않음).
+ACC_TYPES = (("질식", r"질식|산소\s*결핍|중독"),
+             ("감전", r"감전"),
+             ("화재·폭발", r"화재|폭발|파열|불이\s*나|화상"),
+             ("무너짐(붕괴)", r"무너|붕괴|도괴"),
+             ("깔림·뒤집힘", r"깔림|깔려|깔리|뒤집|전도"),
+             ("끼임", r"끼임|끼여|끼어|끼이|협착|말려"),
+             ("떨어짐(추락)", r"떨어짐|떨어져|떨어지|추락"),
+             ("맞음(낙하·비래)", r"맞음|맞아|맞고|낙하|비래|날아온"),
+             ("부딪힘", r"부딪|충돌|치여|치임|충격"),
+             ("넘어짐", r"넘어짐|넘어져|넘어지|미끄러"),
+             ("빠짐·익사", r"빠짐|빠져|익사|익수"))
+ACC_TYPE_RE = tuple((name, re.compile(pat)) for name, pat in ACC_TYPES)
+
+
+def acc_type(text):
+    for name, rx in ACC_TYPE_RE:
+        if rx.search(text):
+            return name
+    return "기타"
+
+
+def acc_date(text, extra="", today=None):
+    """속보 문장(또는 API의 날짜 항목)에서 발생일을 찾는다. 못 찾으면 '' — 지어내지 않는다.
+    연도가 없는 '10/7', '10.7.', '10월 7일' 은 오늘 기준 가장 가까운 과거 날짜로 본다."""
+    today = today or TODAY
+    for src in (extra, text):
+        src = str(src or "")
+        m = re.search(r"(20\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})", src) or re.fullmatch(r"\s*(20\d{2})(\d{2})(\d{2})\d*\s*", src)
+        if m:
+            try:
+                d = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+            except ValueError:
+                continue
+            if d <= today + dt.timedelta(days=1):
+                return d.isoformat()
+    m = re.search(r"(?<!\d)(\d{1,2})\s*(?:[./]|월)\s*(\d{1,2})(?!\d)", str(text or "")[:40])
+    if m:
+        for y in (today.year, today.year - 1):
+            try:
+                d = dt.date(y, int(m.group(1)), int(m.group(2)))
+            except ValueError:
+                break
+            if d <= today + dt.timedelta(days=1):
+                return d.isoformat()
+    return ""
+
+
 def fetch_accidents(rows=60):
     url = "https://apis.data.go.kr/B552468/news_api02/getNews_api02"
     raw = get(url, {"callApiId": "1040", "pageNo": 1, "numOfRows": rows})
@@ -208,12 +256,21 @@ def fetch_accidents(rows=60):
     if code and code not in ("0", "00", "200"):
         raise RuntimeError(f"resultCode={code} {root.findtext('.//resultMsg')}")
     out = []
-    for it in root.iter("item"):
+    for i, it in enumerate(root.iter("item")):
         g = lambda k: (it.findtext(k) or "").strip()
+        if i == 0:  # 응답 구조가 바뀌면 로그에서 바로 알 수 있게 항목 이름만 남긴다
+            print("  사고사망 속보 응답 항목:", ", ".join(f"{c.tag}({len((c.text or '').strip())}자)" for c in it))
         text = re.sub(r"\s+", " ", g("keyword"))
         if not text:
             continue
-        out.append({"id": g("arno"), "text": text, "image": g("contents") if g("contents").startswith("https://") else ""})
+        # API에 날짜 항목이 따로 있으면 그것을 먼저, 없으면 문장 속 날짜를 쓴다
+        extra = next((g(k) for k in ("occrrncDe", "acdntDe", "occurDate", "date") if g(k)), "")
+        out.append({"id": g("arno"), "text": text, "date": acc_date(text, extra), "type": acc_type(text),
+                    "image": g("contents") if g("contents").startswith("https://") else ""})
+    dated = sum(1 for o in out if o["date"])
+    print(f"  사고사망 속보: 발생일 인식 {dated}/{len(out)}건, 유형 '기타' {sum(1 for o in out if o['type'] == '기타')}건")
+    if out:
+        print("  예시:", snippet(out[0]["text"], 80), "→", out[0]["date"] or "(날짜 못 찾음)", "/", out[0]["type"])
     save("accidents.json", {"fetched": TODAY.isoformat(), "source": "한국산업안전보건공단_사고사망 게시판 정보 조회서비스(공공데이터포털)",
                             "license": "이용허락범위 제한 없음", "items": out})
 
