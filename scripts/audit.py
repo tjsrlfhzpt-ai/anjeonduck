@@ -176,7 +176,7 @@ def check_site(site_dir):
         h = p.read_text(encoding="utf-8")
         if t.get("kind") == "page" and 'class="lawver"' not in h:
             ERR.append(f"도구 {t['id']}: 하단 법령 버전 표기 없음")
-        if t.get("kind") != "page" and "법정 지정서식이 아님" not in h:
+        if t.get("kind") != "page" and "실무용 보조양식" not in h:
             ERR.append(f"도구 {t['id']}: 양식 지위 표기 없음")
     need = {
         "tools/selection/index.html": ["관할 행정기관의 공식 해석·처분을 대체하지 않습니다"],
@@ -197,7 +197,7 @@ def check_site(site_dir):
             if w not in h:
                 ERR.append(f"{rel}: 필수 안내 문구 없음 — '{w}'")
     forms = list((sd / "tools/forms").glob("*/index.html"))
-    bad = [p.parent.name for p in forms if "법정 지정서식이 아님" not in p.read_text(encoding="utf-8")]
+    bad = [p.parent.name for p in forms if "실무용 보조양식" not in p.read_text(encoding="utf-8")]
     if bad:
         ERR.append("서식 작성기 양식 지위 표기 없음: " + ", ".join(bad[:8]))
     print(f"  도구 {len(site.get('free_tools', []))}개 · 서식 {len(forms)}종 표기 검사")

@@ -20,7 +20,7 @@
   <div id="iList" class="im-list"></div>
   <div class="btns"><button type="button" class="btn" id="iAdd">+ 지적사항 추가</button><button type="button" class="btn btn-ghost" id="iPrint2">인쇄 · PDF 저장</button></div>
   <section class="lawbox"><h3>이 문서의 지위</h3>
-    <p>사진대지는 법령이 정한 서식이 아닙니다. 안전관리자·보건관리자의 업무인 '사업장 순회점검, 지도 및 조치 건의'(시행령 제18조제1항제5호, 제22조제1항제9호)와 '업무 수행 내용의 기록·유지'(제18조제1항제9호, 제22조제1항제13호)를 뒷받침하는 사내 증빙으로 씁니다. 지적 근거 조문은 직접 확인해 적으세요.</p>
+    <p>사진대지는 사내 증빙용 실무 보조양식입니다(법령 별지 서식과는 별개). 안전관리자·보건관리자의 업무인 '사업장 순회점검, 지도 및 조치 건의'(시행령 제18조제1항제5호, 제22조제1항제9호)와 '업무 수행 내용의 기록·유지'(제18조제1항제9호, 제22조제1항제13호)를 뒷받침하는 사내 증빙으로 씁니다. 지적 근거 조문은 직접 확인해 적으세요.</p>
     <p class="src-line">사진은 긴 변 1600px로 줄여 이 브라우저 저장소(IndexedDB)에 보관합니다. 다른 기기에서는 보이지 않으며, 브라우저 데이터를 지우면 함께 지워집니다. 인쇄 창에서 'PDF로 저장'을 골라 보관하세요. 사람 얼굴 등 개인을 알아볼 수 있는 사진은 필요한 범위에서만 쓰세요.</p></section>
 </div>
 <article class="paper print-doc" id="iPaper"></article>
@@ -173,7 +173,7 @@
           '<tr><th>지적 내용</th><td class="im-txt">' + nl(it.found) + '</td><th>조치 내용</th><td class="im-txt">' + nl(it.action) + "</td></tr>" +
           "<tr><th>근거</th><td>" + esc(it.basis) + "</td><th>조치일·조치자</th><td>" + esc([it.adate, it.aby].filter(Boolean).join(" · ")) + "</td></tr></tbody></table>";
       }).join("");
-      $("iPaper").innerHTML = head + body + '<p class="paper-foot">SafePlum 개선 전·후 사진대지 · 사내 증빙용(법령이 정한 서식이 아님)</p>';
+      $("iPaper").innerHTML = head + body + '<p class="paper-foot">SafePlum 개선 전·후 사진대지 · 사내 증빙용 보조양식</p>';
       var imgs = [].slice.call($("iPaper").querySelectorAll("img"));
       return Promise.all(imgs.map(function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); }));
     });

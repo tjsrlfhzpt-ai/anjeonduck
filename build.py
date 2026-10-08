@@ -1104,7 +1104,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
-        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — '
+        note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 실무용 보조양식 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')
         assert "</body>" in src
