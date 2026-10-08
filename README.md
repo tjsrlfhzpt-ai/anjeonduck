@@ -38,6 +38,8 @@ templates/*.csv       구글 시트 머리글 서식
 | `/tools/machines/` 기계·기구 법정 의무(안전인증·자율안전확인·안전검사·방호조치·작업 전 점검) | `apps/machines.body.html` | `data/machines.json` |
 | `/tools/hpp/` 유해위험방지계획서 대상 진단 | `apps/hpp.body.html` | `data/hpp.json` |
 | `/tools/loto/` LOTO 작업금지 태그(A4 가로 3개·양면) | `apps/loto.body.html` | 공통 틀 |
+| `/tools/improve/` 지적사항 개선 전·후 사진대지 | `apps/improve.body.html` | 공통 틀 (사진은 `assets/docs.js` 의 IndexedDB 저장소, 문서 키 `improve:<항목>:b|a`) |
+| `/tools/confined/` 밀폐공간 산소·유해가스 농도 측정 기록부 | `apps/confined.body.html` | 공통 틀 (적정공기 기준은 파일 안 `GAS`) |
 | `/tools/docmap/` 안전보건 서류 체계·감독 대비 자가점검 | `apps/docmap.body.html` | `data/docmap.json` |
 | `/tools/forms/<id>/` 서식 작성기 45종(업무일지 3종 포함) | `apps/form.body.html` (서식 엔진 1개) | `data/forms.json` 23종 + 별표 3에서 자동 생성한 작업시작 전 점검표 19종 |
 | `/tools/` 법령 순서 카탈로그 | `build.py` | `data/catalog.json` (벤치마킹 목록 78개와 상태) |
@@ -61,6 +63,8 @@ templates/*.csv       구글 시트 머리글 서식
 | 유해위험방지계획서 | 법·영·규칙 제42조, 고용노동부고시 제2023-50호 제2·3·6·7조 — 원문 확인 2026-10-01 | `data/hpp.json` |
 | 적용범위(공통의무·공시·중처법) | 법 제10조의2·제14조·제36조·부칙(법률 제21374호), 영 제12조의2·제13조, 중처법 제3~7조·영 제4·5조 | `apps/selection.body.html` 의 calc() |
 | 서류 체계 | 각 서류의 `basis` | `data/docmap.json` |
+| 밀폐공간 측정 기록 | 기준규칙 제618조제3호(적정공기)·제619조·제619조의2(2025.12.1 개정, 3년 보존) — 원문 확인 2026-10-08 | `apps/confined.body.html` 의 `GAS`·`ACTS`·`LAW` |
+| 보건관리자 업무일지 · 보호구 지급대장 · 재해 조사 기록 | 영 제22조 / 기준규칙 제32조~제34조·영 제74조제1항제3호 / 법 제54조·제57조·제164조, 규칙 제67조·제72조·제73조 — 원문 확인 2026-10-08 | `data/forms.json` (`log-health`, `ppe-ledger`, `accident`) |
 
 - 위험요인은 `data/hazards.json` 한 곳만 고치면 두 도구에 같이 반영됩니다(업종 `groups`, 항목 `items`).
 - 회의록 도구의 화면 클래스(Tailwind)를 바꿨다면 CSS를 다시 만들어야 합니다:
@@ -284,3 +288,7 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 ## 운영 관리 화면 열기
 
 게시판을 이미 연 프로젝트라면 SQL Editor 에 `supabase/admin.sql` 을 한 번 실행합니다. 운영자(admin) 계정으로 로그인하면 게시판 오른쪽 위에 "운영 관리"가 보입니다(`/board/admin/`). 신고 처리, 회원 글쓰기 정지·해제, 삭제한 글 복구, 처리 기록을 다룹니다. 모든 관리 기능은 서버 함수가 운영자인지 다시 확인합니다.
+
+## 홈 '자주 쓰는 작성기' 탭
+
+`build.py` 의 `WRITE_TOOLS`(무료 도구 id)와 `HOME_WRITE_FORMS`(서식 작성기 id·아이콘) 순서대로 카드가 나옵니다. 서식 작성기를 탭에 올리려면 `HOME_WRITE_FORMS` 에 `(id, 아이콘 파일명)` 을 추가합니다.

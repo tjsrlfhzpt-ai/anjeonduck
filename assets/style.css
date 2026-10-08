@@ -1665,3 +1665,60 @@ body.is-arrived [data-landing]{display:none!important}
 .qhead-t{font-size:16px;font-weight:700;color:var(--text);margin:0;min-width:0;overflow-wrap:anywhere}
 .qhead-k{color:var(--blue)}
 .qhead-t strong{color:var(--navy)}
+
+/* 밀폐공간 가스농도 측정 기록 */
+.gas-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.gas-grid .label .muted{display:block;font-size:12px;font-weight:500}
+.gas-tab td,.gas-tab th{font-size:11.5px}
+.gas-tab td.num b{text-decoration:underline}
+@media (max-width:900px){.gas-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{body.pr-confined #cPaper{display:block}}
+
+/* 개선 전·후 사진대지 */
+.im-list{display:flex;flex-direction:column;gap:14px}
+.im-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px}
+.im-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.im-h strong{color:var(--navy);font-size:15.5px;white-space:nowrap}
+.im-h input[type=text]{flex:1 1 220px;min-width:0;height:42px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;font-size:15px;font-weight:700}
+.im-h .sort{height:42px}
+.im-ctl{display:inline-flex;gap:10px;align-items:center;margin-left:auto}
+.im-ctl button[disabled]{opacity:.35;cursor:default}
+.im-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.im-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.im-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.im-card textarea,.im-card .field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;font-size:15px}
+.im-card .field input{height:44px;padding:0 12px}
+.im-card textarea{resize:vertical;min-height:84px;line-height:1.5}
+.im-card textarea:focus,.im-card input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-100)}
+.im-zone{display:flex;flex-direction:column;gap:6px}
+.im-zh{display:flex;align-items:center;gap:12px;min-height:28px}
+.im-zh label.linkbtn{cursor:pointer}
+.im-tag{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:6px;font-size:12.5px}
+.im-b{background:var(--red-50);color:var(--red)}
+.im-a{background:color-mix(in srgb,var(--green) 14%,var(--surface));color:var(--green)}
+.im-pic{aspect-ratio:4/3;border:2px dashed var(--line);border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;text-align:center}
+.im-pic:hover,.im-zone.over .im-pic{border-color:var(--blue);background:var(--blue-50)}
+.im-pic:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.im-pic.has{border-style:solid;background:#111}
+.im-pic img{width:100%;height:100%;object-fit:contain;display:block}
+.im-ph{color:var(--muted);font-size:14px;font-weight:600;line-height:1.6;padding:12px}
+.im-ph small{font-weight:500;font-size:12.5px}
+.im-cam{display:none}
+@media (hover:none) and (pointer:coarse){.im-cam{display:inline}}
+@media (max-width:720px){.im-2{grid-template-columns:1fr}.im-ctl{margin-left:0;width:100%;justify-content:flex-end}}
+.paper .im-info{margin-bottom:10px}
+.paper .im-info th{width:12%;background:#F1F3F5;font-size:12px}
+.paper .im-pt{margin-top:10px;break-inside:avoid;page-break-inside:avoid}
+.paper .im-pt th{background:#F1F3F5;font-size:11.5px;text-align:center;white-space:nowrap}
+.paper .im-pt .im-pb,.paper .im-pt .im-pa{letter-spacing:.3em;font-size:12.5px}
+.paper .im-pcell{padding:3px;text-align:center;height:58mm}
+.paper .im-per3 .im-pcell{height:32mm}
+.paper .im-pcell img{max-width:100%;max-height:56mm;object-fit:contain;display:block;margin:0 auto}
+.paper .im-per3 .im-pcell img{max-height:30mm}
+.paper .im-nop{color:#999;font-size:12px}
+.paper .im-txt{height:14mm;vertical-align:top;font-size:12px}
+.paper .im-per3 .im-txt{height:10mm}
+.paper .im-per3{margin-top:7px}
+@media print{body.pr-improve #iPaper{display:block}}
+.heat-acts #cActs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px 16px}
+.calc input[type=time]{height:44px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;font-size:15px;width:100%}

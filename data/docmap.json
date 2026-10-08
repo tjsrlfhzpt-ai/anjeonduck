@@ -58,7 +58,7 @@
     {"id": "accident", "title": "재해·비상대응", "docs": [
       {"name": "산업재해조사표(재해 발생일부터 1개월 이내)", "basis": "법 제57조 · 규칙 제73조", "href": "resources/f/form-accident-report/"},
       {"name": "중대산업재해 대응 매뉴얼과 반기 점검", "basis": "중처법 영 제4조제8호", "href": "tools/forms/sapa-emergency/", "cond": "5명 이상"},
-      {"name": "아차사고·재해 발생 기록과 재발방지 대책", "basis": "법 제57조 · 중처법 제4조제1항제2호", "href": "tools/forms/log-safety/"}
+      {"name": "아차사고·재해 발생 기록과 재발방지 대책", "basis": "법 제57조 · 중처법 제4조제1항제2호", "href": "tools/forms/accident/"}
     ]},
     {"id": "sapa", "title": "중대재해처벌법 반기 점검", "docs": [
       {"name": "안전보건관리책임자등 업무수행 평가(반기 1회)", "basis": "중처법 영 제4조제5호", "href": "tools/forms/sapa-eval/", "cond": "5명 이상"},

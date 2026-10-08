@@ -108,6 +108,20 @@
      "status": "ok",
      "link": "selection/",
      "note": "작성 대상 조회 제공 · 표준안은 준비 중"
+    },
+    {
+     "name": "보건관리자 업무일지",
+     "basis": "영 제22조제1항",
+     "status": "ok",
+     "link": "forms/log-health/",
+     "note": ""
+    },
+    {
+     "name": "지적사항 개선 전·후 사진대지",
+     "basis": "영 제18조제1항제5호 · 제22조제1항제9호",
+     "status": "ok",
+     "link": "improve/",
+     "note": "법정 서식 아님 — 사내 증빙용"
     }
    ]
   },
@@ -232,6 +246,20 @@
      "status": "external",
      "link": "../resources/library/",
      "note": "공단 자료실로 연결"
+    },
+    {
+     "name": "산업재해·아차사고 조사 기록",
+     "basis": "법 제57조 · 규칙 제72조",
+     "status": "ok",
+     "link": "forms/accident/",
+     "note": ""
+    },
+    {
+     "name": "보호구 지급·관리대장",
+     "basis": "기준규칙 제32조~제34조",
+     "status": "ok",
+     "link": "forms/ppe-ledger/",
+     "note": "법정 서식 아님 — 사내 관리대장"
     }
    ]
   },
@@ -368,6 +396,13 @@
      "status": "planned",
      "link": "",
      "note": ""
+    },
+    {
+     "name": "밀폐공간 산소·유해가스 농도 측정 기록부",
+     "basis": "기준규칙 제618조 · 제619조의2",
+     "status": "ok",
+     "link": "confined/",
+     "note": "측정값을 적정공기 기준과 비교(3년 보존 기록)"
     }
    ]
   },

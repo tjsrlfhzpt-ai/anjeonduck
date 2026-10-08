@@ -1,0 +1,191 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>개선 전·후 사진대지</p>
+  <h1>지적사항 개선 전 · 후 사진대지</h1>
+  <p>순회점검·합동점검에서 나온 지적사항마다 개선 전 사진과 개선 후 사진을 나란히 붙이고 지적 내용, 조치 내용, 조치일을 적어 A4 조치결과 보고서로 인쇄합니다. 사진은 줄여서 이 기기에만 저장하며 서버로 보내지 않습니다.</p>
+</div></section>
+<div class="wrap stack no-print" style="padding-top:8px;padding-bottom:40px">
+  <div class="calc" style="gap:12px">
+    <div class="grid3">
+      <label class="field" style="grid-column:1/-1"><span class="label">문서 제목</span><input type="text" id="iTitle" data-h="title" placeholder="안전점검 지적사항 조치결과 보고서"></label>
+      <label class="field"><span class="label">점검일</span><input type="date" id="iDate" data-h="date"></label>
+      <label class="field"><span class="label">점검 구분</span><input type="text" data-h="kind" list="iKinds" placeholder="예: 순회점검"><datalist id="iKinds"><option>순회점검</option><option>합동 안전·보건점검</option><option>작업시작 전 점검</option><option>정기 안전점검</option><option>외부 점검·감독 지적</option></datalist></label>
+      <label class="field"><span class="label">점검자</span><input type="text" data-h="insp" placeholder="소속·성명"></label>
+      <label class="field"><span class="label">대상(현장·공정)</span><input type="text" data-h="site" placeholder="예: 2공장 가공라인"></label>
+      <label class="field"><span class="label">조치 부서·업체</span><input type="text" data-h="dept" placeholder="예: 생산2팀 / ○○기업"></label>
+      <label class="field"><span class="label">한 쪽에 넣을 건수</span><select class="sort" data-h="per" style="width:100%"><option value="2">2건 (사진 크게)</option><option value="3">3건</option></select></label>
+    </div>
+    <div class="appr-panel"><p class="appr-panel-l">인쇄할 결재란 <span class="muted">— 칸 이름·성명을 고치고, 서명 칸을 눌러 서명하세요</span></p><div data-appr="tool.improve"></div></div>
+  </div>
+  <div class="listbar"><strong id="iSum"></strong><span class="grow"></span><div class="btns"><button type="button" class="btn btn-ghost" id="iNew">새 보고서</button><button type="button" class="btn" id="iPrint">인쇄 · PDF 저장</button></div></div>
+  <div id="iList" class="im-list"></div>
+  <div class="btns"><button type="button" class="btn" id="iAdd">+ 지적사항 추가</button><button type="button" class="btn btn-ghost" id="iPrint2">인쇄 · PDF 저장</button></div>
+  <section class="lawbox"><h3>이 문서의 지위</h3>
+    <p>사진대지는 법령이 정한 서식이 아닙니다. 안전관리자·보건관리자의 업무인 '사업장 순회점검, 지도 및 조치 건의'(시행령 제18조제1항제5호, 제22조제1항제9호)와 '업무 수행 내용의 기록·유지'(제18조제1항제9호, 제22조제1항제13호)를 뒷받침하는 사내 증빙으로 씁니다. 지적 근거 조문은 직접 확인해 적으세요.</p>
+    <p class="src-line">사진은 긴 변 1600px로 줄여 이 브라우저 저장소(IndexedDB)에 보관합니다. 다른 기기에서는 보이지 않으며, 브라우저 데이터를 지우면 함께 지워집니다. 인쇄 창에서 'PDF로 저장'을 골라 보관하세요. 사람 얼굴 등 개인을 알아볼 수 있는 사진은 필요한 범위에서만 쓰세요.</p></section>
+</div>
+<article class="paper print-doc" id="iPaper"></article>
+<script>
+(function () {
+  "use strict";
+  var KEY = "safetake.improve", DEF_TITLE = "안전점검 지적사항 조치결과 보고서", STATUS = ["조치 완료", "조치 중", "조치 계획"];
+  var $ = function (id) { return document.getElementById(id); };
+  var A = window.ADoc || null;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function ymd(x) { x = x || new Date(); return x.getFullYear() + "-" + ("0" + (x.getMonth() + 1)).slice(-2) + "-" + ("0" + x.getDate()).slice(-2); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function toast(m) { if (A) A.toast(m); }
+  var st = null;
+  try { st = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { st = null; }
+  if (!st || typeof st !== "object" || !Array.isArray(st.items)) st = { h: { date: ymd(), per: "2" }, items: [] };
+  st.h = st.h || {};
+  function blank() { return { id: uid(), place: "", found: "", basis: "", action: "", adate: "", aby: "", status: STATUS[0] }; }
+  if (!st.items.length) st.items.push(blank());
+  var saveFailed = false;
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(st)); saveFailed = false; return true; }
+    catch (e) { if (!saveFailed) toast("이 브라우저에 저장하지 못했습니다. 지금 인쇄(PDF)해서 보관하세요."); saveFailed = true; return false; }
+  }
+  var tm; function saveSoon() { clearTimeout(tm); tm = setTimeout(save, 250); }
+  function pdoc(id, side) { return "improve:" + id + ":" + side; }
+  function getPhoto(id, side) { return A ? A.listPhotos(pdoc(id, side)).then(function (ps) { return ps[0] || null; }).catch(function () { return null; }) : Promise.resolve(null); }
+  function setPhoto(id, side, file) {
+    if (!A) return Promise.resolve(false);
+    var doc = pdoc(id, side);
+    return A.shrink(file).then(function (data) {
+      // 칸마다 사진은 한 장: 같은 키로 덮어쓴다
+      return A.putPhoto({ id: doc, doc: doc, data: data, caption: "", rel: side === "b" ? "개선 전" : "개선 후", taken: file.lastModified ? ymd(new Date(file.lastModified)) : ymd(), ord: 1, added: ymd() }).then(function () { return true; });
+    }).catch(function (e) { toast((e && e.message) || "사진을 저장하지 못했습니다. 기기 저장 공간을 확인하세요."); return false; });
+  }
+  function dropPhoto(id, side) { return A ? A.delPhoto(pdoc(id, side)).catch(function () {}) : Promise.resolve(); }
+
+  // ---- 머리말
+  [].forEach.call(document.querySelectorAll("[data-h]"), function (el) {
+    var k = el.dataset.h; if (st.h[k] != null) el.value = st.h[k];
+    el.addEventListener("input", function () { st.h[k] = el.value; saveSoon(); });
+    el.addEventListener("change", function () { st.h[k] = el.value; save(); });
+  });
+
+  // ---- 항목 목록
+  function zone(it, side) {
+    var lab = side === "b" ? "개선 전" : "개선 후";
+    return '<div class="im-zone" data-side="' + side + '"><div class="im-zh"><b class="im-tag im-' + side + '">' + lab + '</b><span class="grow"></span>' +
+      '<label class="linkbtn">사진 선택<input type="file" accept="image/*" hidden></label><label class="linkbtn im-cam">카메라<input type="file" accept="image/*" capture="environment" hidden></label><button type="button" class="linkbtn im-rm" data-rm hidden>삭제</button></div>' +
+      '<div class="im-pic" data-pic tabindex="0" role="button" aria-label="' + lab + ' 사진 넣기"><span class="im-ph">' + lab + " 사진을 넣으세요<br><small>눌러서 선택 · 끌어다 놓기</small></span></div></div>";
+  }
+  function card(it, i, n) {
+    return '<section class="im-card" data-id="' + esc(it.id) + '"><header class="im-h"><strong>No. ' + (i + 1) + '</strong><input type="text" data-f="place" value="' + esc(it.place) + '" placeholder="장소·설비 (예: 2층 개구부, 프레스 3호기)" aria-label="장소·설비">' +
+      '<select class="sort" data-f="status" aria-label="조치 상태">' + STATUS.map(function (s) { return "<option" + (s === it.status ? " selected" : "") + ">" + s + "</option>"; }).join("") + "</select>" +
+      '<span class="im-ctl"><button type="button" class="linkbtn" data-mv="-1"' + (i ? "" : " disabled") + ' aria-label="위로">↑</button><button type="button" class="linkbtn" data-mv="1"' + (i < n - 1 ? "" : " disabled") + ' aria-label="아래로">↓</button><button type="button" class="linkbtn" data-del style="color:var(--red)">삭제</button></span></header>' +
+      '<div class="im-2">' +
+      '<div class="im-col">' + zone(it, "b") + '<label class="field"><span class="label">지적 내용</span><textarea data-f="found" rows="3" placeholder="예: 개구부 덮개가 없고 안전난간이 설치되지 않음">' + esc(it.found) + '</textarea></label>' +
+      '<label class="field"><span class="label">근거 <span class="muted">선택</span></span><input type="text" data-f="basis" value="' + esc(it.basis) + '" placeholder="예: 안전보건규칙 제43조"></label></div>' +
+      '<div class="im-col">' + zone(it, "a") + '<label class="field"><span class="label">조치 내용</span><textarea data-f="action" rows="3" placeholder="예: 덮개 설치 후 고정, 개구부 표지 부착">' + esc(it.action) + '</textarea></label>' +
+      '<div class="im-row"><label class="field"><span class="label">조치일</span><input type="date" data-f="adate" value="' + esc(it.adate) + '"></label><label class="field"><span class="label">조치자</span><input type="text" data-f="aby" value="' + esc(it.aby) + '" placeholder="소속·성명"></label></div></div>' +
+      "</div></section>";
+  }
+  function paint(cardEl, side) {
+    var id = cardEl.dataset.id, z = cardEl.querySelector('.im-zone[data-side="' + side + '"]'), pic = z.querySelector("[data-pic]"), lab = side === "b" ? "개선 전" : "개선 후";
+    return getPhoto(id, side).then(function (p) {
+      z.querySelector("[data-rm]").hidden = !p;
+      pic.classList.toggle("has", !!p);
+      pic.innerHTML = p ? '<img src="' + p.data + '" alt="' + lab + ' 사진">' : '<span class="im-ph">' + lab + " 사진을 넣으세요<br><small>눌러서 선택 · 끌어다 놓기</small></span>";
+    });
+  }
+  function sum() {
+    var n = st.items.length, c = {}; STATUS.forEach(function (s) { c[s] = 0; });
+    st.items.forEach(function (it) { c[it.status] = (c[it.status] || 0) + 1; });
+    $("iSum").textContent = "지적사항 " + n + "건 · " + STATUS.map(function (s) { return s + " " + c[s]; }).join(" · ");
+  }
+  function render() {
+    var n = st.items.length;
+    $("iList").innerHTML = st.items.map(function (it, i) { return card(it, i, n); }).join("");
+    [].forEach.call($("iList").querySelectorAll(".im-card"), function (c) { paint(c, "b"); paint(c, "a"); });
+    sum();
+  }
+  function itemOf(el) { var c = el.closest(".im-card"); if (!c) return null; var id = c.dataset.id; return { card: c, it: st.items.filter(function (x) { return x.id === id; })[0], idx: st.items.findIndex(function (x) { return x.id === id; }) }; }
+  function put(o, side, file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { toast("이미지 파일만 넣을 수 있습니다."); return; }
+    toast("사진을 줄여서 저장하는 중…");
+    setPhoto(o.it.id, side, file).then(function (ok) { if (!ok) return; paint(o.card, side); toast((side === "b" ? "개선 전" : "개선 후") + " 사진을 넣었습니다."); });
+  }
+  var L = $("iList");
+  L.addEventListener("input", function (ev) { var t = ev.target, o = itemOf(t); if (!o || !o.it || !t.dataset.f) return; o.it[t.dataset.f] = t.value; saveSoon(); if (t.dataset.f === "status") sum(); });
+  L.addEventListener("change", function (ev) {
+    var t = ev.target, o = itemOf(t); if (!o || !o.it) return;
+    if (t.type === "file") { put(o, t.closest(".im-zone").dataset.side, t.files[0]); t.value = ""; return; }
+    if (t.dataset.f) { o.it[t.dataset.f] = t.value; save(); if (t.dataset.f === "status") sum(); }
+  });
+  L.addEventListener("click", function (ev) {
+    var t = ev.target, o = itemOf(t); if (!o || !o.it) return;
+    var pic = t.closest("[data-pic]");
+    if (pic) { pic.closest(".im-zone").querySelector('input[type=file]:not([capture])').click(); return; }
+    if (t.closest("[data-rm]")) {
+      var side = t.closest(".im-zone").dataset.side;
+      if (!window.confirm((side === "b" ? "개선 전" : "개선 후") + " 사진을 삭제할까요?")) return;
+      dropPhoto(o.it.id, side).then(function () { paint(o.card, side); }); return;
+    }
+    var mv = t.closest("[data-mv]");
+    if (mv) { var j = o.idx + (+mv.dataset.mv); if (j < 0 || j >= st.items.length) return; var x = st.items[o.idx]; st.items[o.idx] = st.items[j]; st.items[j] = x; save(); render(); return; }
+    if (t.closest("[data-del]")) {
+      if (!window.confirm("No. " + (o.idx + 1) + " 지적사항과 사진을 삭제할까요? 되돌릴 수 없습니다.")) return;
+      Promise.all([dropPhoto(o.it.id, "b"), dropPhoto(o.it.id, "a")]).then(function () { st.items.splice(o.idx, 1); if (!st.items.length) st.items.push(blank()); save(); render(); });
+    }
+  });
+  L.addEventListener("keydown", function (ev) { if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches("[data-pic]")) { ev.preventDefault(); ev.target.click(); } });
+  L.addEventListener("dragover", function (ev) { var z = ev.target.closest(".im-zone"); if (z) { ev.preventDefault(); z.classList.add("over"); } });
+  L.addEventListener("dragleave", function (ev) { var z = ev.target.closest(".im-zone"); if (z) z.classList.remove("over"); });
+  L.addEventListener("drop", function (ev) {
+    var z = ev.target.closest(".im-zone"); if (!z) return; ev.preventDefault(); z.classList.remove("over");
+    var o = itemOf(z), f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]; if (o && o.it && f) put(o, z.dataset.side, f);
+  });
+  $("iAdd").addEventListener("click", function () {
+    var it = blank(), last = st.items[st.items.length - 1]; if (last) it.aby = last.aby || "";
+    st.items.push(it); save(); render();
+    var c = L.lastElementChild; if (c) { c.scrollIntoView({ behavior: "smooth", block: "center" }); var f = c.querySelector('[data-f="place"]'); if (f) f.focus({ preventScroll: true }); }
+  });
+  $("iNew").addEventListener("click", function () {
+    if (!window.confirm("지금 작성 중인 지적사항 " + st.items.length + "건과 사진을 모두 지우고 새 보고서를 시작할까요? 되돌릴 수 없으니 먼저 인쇄(PDF)해 두세요.")) return;
+    var old = st.items.slice(), keep = { insp: st.h.insp, site: st.h.site, dept: st.h.dept, per: st.h.per, kind: st.h.kind, date: ymd() };
+    Promise.all(old.map(function (it) { return Promise.all([dropPhoto(it.id, "b"), dropPhoto(it.id, "a")]); })).then(function () {
+      st = { h: keep, items: [blank()] }; save();
+      [].forEach.call(document.querySelectorAll("[data-h]"), function (el) { el.value = st.h[el.dataset.h] == null ? (el.tagName === "SELECT" ? "2" : "") : st.h[el.dataset.h]; });
+      render(); window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  // ---- 인쇄
+  function nl(s) { return esc(s).replace(/\n/g, "<br>"); }
+  function build() {
+    var co = ""; try { co = localStorage.getItem("safetake.company") || ""; } catch (e) {}
+    var per = st.h.per === "3" ? 3 : 2, n = st.items.length, c = {}; STATUS.forEach(function (s) { c[s] = 0; });
+    st.items.forEach(function (it) { c[it.status] = (c[it.status] || 0) + 1; });
+    return Promise.all(st.items.map(function (it) { return Promise.all([getPhoto(it.id, "b"), getPhoto(it.id, "a")]); })).then(function (ph) {
+      var head = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">' + esc((st.h.title || "").trim() || DEF_TITLE) + "</h2>" + (A ? A.apprHTML("tool.improve") : "") + "</header>" +
+        '<table class="ftab im-info"><tbody><tr><th>점검일</th><td>' + esc(st.h.date || "") + "</td><th>점검 구분</th><td>" + esc(st.h.kind || "") + "</td><th>점검자</th><td>" + esc(st.h.insp || "") + "</td></tr>" +
+        "<tr><th>대상</th><td>" + esc(st.h.site || "") + "</td><th>조치 부서</th><td>" + esc(st.h.dept || "") + "</td><th>조치 현황</th><td>" + n + "건 중 완료 " + c[STATUS[0]] + (c[STATUS[1]] ? " · 조치 중 " + c[STATUS[1]] : "") + (c[STATUS[2]] ? " · 계획 " + c[STATUS[2]] : "") + "</td></tr></tbody></table>";
+      var body = st.items.map(function (it, i) {
+        function img(p, lab) { return p ? '<img src="' + p.data + '" alt="' + lab + ' 사진">' : '<span class="im-nop">' + lab + " 사진 없음</span>"; }
+        return '<table class="gtab im-pt im-per' + per + '"><colgroup><col style="width:13%"><col style="width:37%"><col style="width:13%"><col style="width:37%"></colgroup><tbody>' +
+          '<tr class="grp"><th>No. ' + (i + 1) + "</th><td>" + esc(it.place) + "</td><th>상태</th><td>" + esc(it.status) + "</td></tr>" +
+          '<tr><th colspan="2" class="im-pb">개선 전</th><th colspan="2" class="im-pa">개선 후</th></tr>' +
+          '<tr><td colspan="2" class="im-pcell">' + img(ph[i][0], "개선 전") + '</td><td colspan="2" class="im-pcell">' + img(ph[i][1], "개선 후") + "</td></tr>" +
+          '<tr><th>지적 내용</th><td class="im-txt">' + nl(it.found) + '</td><th>조치 내용</th><td class="im-txt">' + nl(it.action) + "</td></tr>" +
+          "<tr><th>근거</th><td>" + esc(it.basis) + "</td><th>조치일·조치자</th><td>" + esc([it.adate, it.aby].filter(Boolean).join(" · ")) + "</td></tr></tbody></table>";
+      }).join("");
+      $("iPaper").innerHTML = head + body + '<p class="paper-foot">SafePlum 개선 전·후 사진대지 · 사내 증빙용(법령이 정한 서식이 아님)</p>';
+      var imgs = [].slice.call($("iPaper").querySelectorAll("img"));
+      return Promise.all(imgs.map(function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); }));
+    });
+  }
+  window.__improveBuild = build;
+  function print() {
+    clearTimeout(tm); save();
+    if (!st.items.some(function (it) { return it.place || it.found || it.action; })) toast("내용이 빈 상태로 인쇄합니다. 지적 내용과 사진을 넣으세요.");
+    build().then(function () { document.body.classList.add("pr-improve"); window.print(); setTimeout(function () { document.body.classList.remove("pr-improve"); }, 500); });
+  }
+  $("iPrint").addEventListener("click", print); $("iPrint2").addEventListener("click", print);
+  if (!A) { var w = document.createElement("p"); w.className = "empty"; w.textContent = "사진 기능을 불러오지 못했습니다. 새로고침해 주세요."; L.before(w); }
+  render();
+})();
+</script>

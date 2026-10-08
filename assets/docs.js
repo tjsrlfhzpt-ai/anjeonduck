@@ -482,5 +482,6 @@
   document.addEventListener("click", function (ev) { if (ev.target.closest && ev.target.closest("[data-mydata]")) { ev.preventDefault(); openDataModal(); } });
 
   window.ADoc = { mountApproval: mountApproval, apprHTML: apprHTML, mountAll: mountAll, mountPhotos: mountPhotos, pickPhoto: pick, addFiles: addFiles, countPhotos: countPhotos, onPhotos: onPhotos, clearPhotos: clearPhotos,
+    listPhotos: listPhotos, putPhoto: putPhoto, delPhoto: delPhoto, shrink: shrink,
     exportAll: exportAll, importAll: importAll, openDataModal: openDataModal, toast: toast, esc: esc, ymd: ymd };
 })();

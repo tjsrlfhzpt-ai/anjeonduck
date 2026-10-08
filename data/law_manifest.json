@@ -233,7 +233,8 @@
     "machines",
     "hpp",
     "inspect",
-    "forms"
+    "forms",
+    "improve"
    ],
    "note": ""
   },
@@ -377,7 +378,8 @@
     "machines",
     "schedule",
     "cvd",
-    "hpp"
+    "hpp",
+    "confined"
    ],
    "note": ""
   },
