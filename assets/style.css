@@ -1754,3 +1754,9 @@ body.is-arrived [data-landing]{display:none!important}
 .flay-mv{display:inline-flex;gap:12px;margin-left:auto}
 .flay-mv button{min-width:24px;min-height:28px}
 .flay-mv button[disabled]{opacity:.3;cursor:default}
+
+/* 선택 칸 직접 입력 */
+.paper .fi-cus{display:flex;align-items:center;gap:4px}
+.paper .fi-cus .fi{flex:1;min-width:0}
+.paper .fi-back{flex:none;border:1px solid #C9CED6;background:#fff;color:#1D4ED8;border-radius:4px;font:inherit;font-size:11px;font-weight:700;padding:2px 5px;cursor:pointer;line-height:1.4}
+.paper .fi-back:hover{background:#EFF4FF}

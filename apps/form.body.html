@@ -133,7 +133,11 @@
   }
   function inp(f, k) {
     var v = val(k, f.default);
-    if (f.type === "select") return '<select class="fi" data-k="' + esc(k) + '">' + ['<option value=""></option>'].concat(f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; })).join("") + '</select><span class="fi-print" aria-hidden="true">' + esc(v) + "</span>";
+    if (f.type === "select") {
+      // 목록에 없는 값은 직접 입력: '직접 입력…'을 고르면 글 칸으로 바뀌고, '목록' 버튼으로 되돌아온다
+      if (state["_c." + k] || (v && f.options.indexOf(v) < 0)) return '<span class="fi-cus"><input type="text" class="fi" data-k="' + esc(k) + '" value="' + esc(v) + '" placeholder="직접 입력" aria-label="직접 입력"><button type="button" class="fi-back no-print" data-cback="' + esc(k) + '" title="목록에서 고르기">목록</button></span>';
+      return '<select class="fi" data-k="' + esc(k) + '">' + ['<option value=""></option>'].concat(f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; })).join("") + '<option value="__custom__">직접 입력…</option></select><span class="fi-print" aria-hidden="true">' + esc(v) + "</span>";
+    }
     if (f.type === "date") return '<input class="fi" type="date" data-k="' + esc(k) + '" value="' + esc(v) + '"' + (v ? "" : " data-empty") + ">";
     if (f.type === "radio") return '<span class="radios">' + f.options.map(function (o) { return '<label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (o === v ? " checked" : "") + ">" + esc(o) + "</label>"; }).join("") + "</span>";
     return ed(k, f.default, f.multi ? "multi" : "", f.ph);
@@ -457,7 +461,18 @@
     (A.pickers || []).forEach(function (pk) { pk.options.forEach(function (o) { if (hit || o.variants) return; if ((pk.target === k && o.label === v) || (o.set && o.set[k] === v)) hit = [pk, o]; }); });
     if (hit) applyOption(hit[0], hit[1]);
   }
-  paper.addEventListener("change", function (ev) { var t = ev.target; if (t.dataset.k && !t.isContentEditable) { state[t.dataset.k] = t.value; if (t.type === "date") t.toggleAttribute("data-empty", !t.value); if (t.type === "radio") refreshTally(t.dataset.k.split(".")[1]); if (t.tagName === "SELECT" && t.nextElementSibling && t.nextElementSibling.className === "fi-print") t.nextElementSibling.textContent = t.value; keepToday(); runCalc(); save(); if (t.tagName === "SELECT" && t.value) pickFromPaper(t.dataset.k, t.value); } });
+  paper.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-cback]"); if (!b) return;
+    var ck = b.dataset.cback; delete state["_c." + ck]; state[ck] = ""; runCalc(); save(); render();
+    var sel = paper.querySelector('select[data-k="' + ck.replace(/"/g, "") + '"]'); if (sel) sel.focus();
+  });
+  paper.addEventListener("change", function (ev) { var t = ev.target;
+    if (t.tagName === "SELECT" && t.dataset.k && t.value === "__custom__") {
+      var uk = t.dataset.k; state["_c." + uk] = 1; state[uk] = ""; runCalc(); save(); render();
+      var inp = paper.querySelector('input[data-k="' + uk.replace(/"/g, "") + '"]'); if (inp) inp.focus();
+      return;
+    }
+    if (t.dataset.k && !t.isContentEditable) { state[t.dataset.k] = t.value; if (t.type === "date") t.toggleAttribute("data-empty", !t.value); if (t.type === "radio") refreshTally(t.dataset.k.split(".")[1]); if (t.tagName === "SELECT" && t.nextElementSibling && t.nextElementSibling.className === "fi-print") t.nextElementSibling.textContent = t.value; keepToday(); runCalc(); save(); if (t.tagName === "SELECT" && t.value) pickFromPaper(t.dataset.k, t.value); } });
   paper.addEventListener("paste", function (ev) {
     var t = ev.target.closest && ev.target.closest("[contenteditable]"); if (!t) return;
     ev.preventDefault();
