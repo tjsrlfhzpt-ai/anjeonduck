@@ -259,9 +259,9 @@
     var rows = items.map(function (it, i) {
       var k = "c." + s.k + "." + i;
       if (typeof it === "object" && it.group) return '<tr class="grp"><th colspan="' + (3 + opts.length) + '">' + lab("cg." + s.k + "." + i, it.group) + "</th></tr>";
-      var no = i + 1 - items.slice(0, i).filter(function (x) { return typeof x === "object"; }).length, lab = itemLabel(s, i, no);
-      var pc = PHOTO_REL[lab] || 0;
-      return '<tr><td class="num">' + no + '</td><td class="item">' + ed("ci." + s.k + "." + i, it, "multi", "점검 항목 입력") + '<button type="button" class="ad-cam" data-cam="' + esc(lab) + '" aria-label="' + esc(no + "번 항목 사진 첨부") + '">📷' + (pc ? " <b>" + pc + "</b>" : "") + "</button></td>" +
+      var no = i + 1 - items.slice(0, i).filter(function (x) { return typeof x === "object"; }).length, ilab = itemLabel(s, i, no);
+      var pc = PHOTO_REL[ilab] || 0;
+      return '<tr><td class="num">' + no + '</td><td class="item">' + ed("ci." + s.k + "." + i, it, "multi", "점검 항목 입력") + '<button type="button" class="ad-cam" data-cam="' + esc(ilab) + '" aria-label="' + esc(no + "번 항목 사진 첨부") + '">📷' + (pc ? " <b>" + pc + "</b>" : "") + "</button></td>" +
         opts.map(function (o) { var on = val(k) === o; return '<td class="opt"><label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (on ? " checked" : "") + '><span class="sr">' + esc(o) + "</span></label></td>"; }).join("") +
         "<td>" + ed(k + ".r", "") + "</td></tr>";
     }).join("");
@@ -333,6 +333,13 @@
         var line = "합계 — 편성 " + tp.toLocaleString("ko-KR") + " · 집행 " + te.toLocaleString("ko-KR") + " · 집행률 " + (tp ? Math.round(te / tp * 1000) / 10 + "%" : "—");
         if (!el && sec) { el = document.createElement("p"); el.id = "fSum"; el.className = "paper-sum"; sec.parentNode.parentNode.insertBefore(el, sec.parentNode); }
         if (el) el.textContent = line;
+      } else if (c.type === "sum") {
+        // 한 열의 숫자 합계를 표 아래에 한 줄로 보여 준다(예: 출력 인원 계)
+        var ts = 0, any = false;
+        for (var rs = 0; rs < n; rs++) { var v = num(cell(c.table, rs, c.col)); if (v != null) { ts += v; any = true; } }
+        var es = document.getElementById("fSum-" + c.table), secS = document.querySelector('[data-add="' + c.table + '"]');
+        if (!es && secS) { es = document.createElement("p"); es.id = "fSum-" + c.table; es.className = "paper-sum"; secS.parentNode.parentNode.insertBefore(es, secS.parentNode); }
+        if (es) es.textContent = any ? (c.label || "합계") + " " + ts.toLocaleString("ko-KR") + (c.unit || "") : "";
       } else if (c.type === "product") {
         // 빈도 × 강도 = 위험성 (행마다). grades: [[최솟값, "등급"], ...] 큰 값부터
         for (var rp = 0; rp < n; rp++) {
