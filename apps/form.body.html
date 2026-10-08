@@ -9,6 +9,7 @@
     <button type="button" class="btn" id="fPrint">인쇄 · PDF 저장</button>
     <button type="button" class="btn btn-ghost" id="fSample" hidden>예시로 채우기</button>
     <button type="button" class="btn btn-ghost" id="fPhotoBtn">사진 첨부</button>
+    <button type="button" class="btn btn-ghost" id="fLayoutBtn" aria-expanded="false" aria-controls="fLayout" title="구역을 넣고 빼거나 순서, 점검 판정 방식을 바꿉니다">구성 바꾸기</button>
     <button type="button" class="btn btn-ghost" id="fProfileBtn" aria-expanded="false" aria-controls="fProfile">사업장 정보</button>
     <button type="button" class="btn btn-ghost" id="fArchive" title="지금 문서를 보관함에 넣고 빈 서식으로 시작합니다">보관하고 새로 작성</button>
     <button type="button" class="btn btn-ghost" id="fHistBtn" aria-expanded="false" aria-controls="fHist">지난 문서 <span class="n" id="fHistN"></span></button>
@@ -21,6 +22,11 @@
     <h2 class="h-sm">사업장 정보 <span class="muted">— 한 번 넣으면 모든 서식의 해당 칸에 자동으로 들어갑니다(이 브라우저에만 저장)</span></h2>
     <div class="fprof-grid" id="fProfFields"></div>
   </section>
+  <section class="fprof no-print" id="fLayout" hidden>
+    <h2 class="h-sm">구성 바꾸기 <span class="muted">— 쓸 구역만 켜고, 순서와 점검 판정 방식을 정하세요. 꺼 둔 구역은 인쇄되지 않고, 적어 둔 내용은 지워지지 않습니다</span></h2>
+    <ul class="flay" id="fLayList"></ul>
+    <div class="btns" style="margin-top:10px"><button type="button" class="btn btn-sm btn-ghost" id="fLayAdd">+ 자유 기재 칸 추가</button><button type="button" class="btn btn-sm btn-ghost" id="fLayReset">처음 구성으로</button></div>
+  </section>
   <section class="fprof no-print" id="fHist" hidden>
     <h2 class="h-sm">지난 문서 <span class="muted">— 이 브라우저에 최근 60건까지 보관합니다. 결재 서명과 사진은 보관되지 않습니다</span></h2>
     <div id="fHistList"></div>
@@ -32,6 +38,7 @@
   <section class="note no-print" style="margin-top:20px">
     <h2 class="h-sm">사용 안내</h2>
     <ul class="bul">
+      <li>"구성 바꾸기"에서 쓸 구역만 켜고, 구역 순서와 점검표 판정 방식(양호·불량, 양호·보통·불량, 적합·부적합 등)을 정하고, 자유 기재 칸을 넣을 수 있습니다. 꺼 둔 구역은 인쇄되지 않으며 적어 둔 내용은 남아 있습니다.</li>
       <li>회색 칸은 모두 고칠 수 있습니다 — 점검 항목 문구, 표의 기본 문구까지. 행·점검 항목도 추가할 수 있습니다.</li>
       <li>문서 제목, 구역 제목, 칸 이름(예: "관리감독자(성명)"), 표 머리글, 회색 안내 상자의 문구도 눌러서 사업장에 맞게 고칠 수 있습니다. 안내 상자는 다 지우면 인쇄되지 않습니다. 고친 이름은 이 서식에 계속 남고, "제목·항목 이름 되돌리기"로 처음 상태가 됩니다.</li>
       <li>표의 각 줄 오른쪽 ↑ · ×로 줄 순서를 바꾸거나 그 줄만 지울 수 있습니다. 자동 계산 칸(집행률·위험성·다음 교육일 등)을 직접 고치면 주황색 점선으로 표시되고 그 값이 유지됩니다. 칸을 비우거나 "자동 계산으로 되돌리기"를 누르면 다시 자동 계산합니다.</li>
@@ -201,6 +208,33 @@
     for (var x = 0; x < extra; x++) items.push("");
     return items;
   }
+  // ---------- 구성(구역 켜기·끄기, 순서, 점검 판정 방식, 자유 기재 칸) — 서식마다 이 브라우저에 저장
+  var YK = "safetake.formlayout." + F.id, LY = {};
+  try { LY = JSON.parse(localStorage.getItem(YK) || "{}") || {}; } catch (e) { LY = {}; }
+  if (typeof LY !== "object" || Array.isArray(LY)) LY = {};
+  var OPTSETS = [["양호", "불량"], ["양호", "보통", "불량"], ["양호", "보통", "불량", "해당없음"], ["양호", "불량", "해당없음"], ["적합", "부적합", "해당없음"], ["○", "△", "×"]];
+  function laySave() { try { if (Object.keys(LY).length) localStorage.setItem(YK, JSON.stringify(LY)); else localStorage.removeItem(YK); return true; } catch (e) { say("구성을 저장하지 못했습니다(이번 화면에는 적용됨)"); return false; } }
+  function sid(s, si) { return s.k || "s" + si; }
+  function optsOf(s) { var i = LY.opts ? LY.opts[s.k] : null; return (i != null && OPTSETS[i]) || s.opts || ["적합", "부적합", "해당없음"]; }
+  function secOn(id, s) { if (LY.on && Object.prototype.hasOwnProperty.call(LY.on, id)) return !!LY.on[id]; return !(s && s.off); }
+  // 화면에 그릴 순서: [{id, si}] (si 는 원래 구역 번호 — 이름표 저장 키가 번호 기준이라 순서를 바꿔도 번호는 그대로 쓴다) 또는 [{id, extra}]
+  function layItems() {
+    var base = F.sections.map(function (s, si) { return { id: sid(s, si), si: si, s: s }; });
+    var extra = (LY.extra || []).map(function (x) { return { id: "u_" + x.id, extra: x }; });
+    var all = base.concat(extra), by = {}; all.forEach(function (x) { by[x.id] = x; });
+    var out = []; (LY.order || []).forEach(function (id) { if (by[id]) { out.push(by[id]); delete by[id]; } });
+    // 저장된 순서에 없는 구역(새로 생긴 구역·자유 기재 칸): 원래 자리 바로 앞 구역 뒤에 끼운다
+    all.forEach(function (x, i) {
+      if (!by[x.id]) return;
+      var prev = null; for (var j = i - 1; j >= 0 && prev == null; j--) { var at = out.indexOf(all[j]); if (at >= 0) prev = at; }
+      if (prev == null) out.unshift(x); else out.splice(prev + 1, 0, x);
+    });
+    return out;
+  }
+  function secName(x) {
+    if (x.extra) return lb("s." + x.id, x.extra.title || "자유 기재");
+    var s = x.s; return s.title ? lb("s." + x.si, s.title) : s.type === "note" ? "안내 문구" : s.type === "fields" ? "기본 정보" : s.type === "table" ? "표" : s.type === "text" ? "기재 칸" : "구역";
+  }
   function checkTally(s, items, opts) {
     var c = {}, none = 0, total = 0;
     opts.forEach(function (o) { c[o] = 0; });
@@ -209,7 +243,7 @@
   }
   function refreshTally(k) {
     var s = F.sections.filter(function (x) { return x.k === k && x.type === "check"; })[0]; if (!s) return;
-    var el = document.getElementById("tally-" + k); if (el) el.innerHTML = checkTally(s, checkItems(s), s.opts || ["적합", "부적합", "해당없음"]);
+    var el = document.getElementById("tally-" + k); if (el) el.innerHTML = checkTally(s, checkItems(s), optsOf(s));
   }
   function unchecked() {
     var n = 0;
@@ -217,7 +251,7 @@
     return n;
   }
   function allOk(k) {
-    var s = F.sections.filter(function (x) { return x.k === k; })[0], o = (s.opts || ["적합"])[0], n = 0;
+    var s = F.sections.filter(function (x) { return x.k === k; })[0], o = optsOf(s)[0], n = 0;
     checkItems(s).forEach(function (it, i) { if (typeof it === "object" || !itemText(s, i, it)) return; if (!val("c." + k + "." + i, "")) { state["c." + k + "." + i] = o; n++; } });
     save(); render(); say(n ? "빈 항목 " + n + "개를 '" + o + "'(으)로 채웠습니다 — 실제로 확인한 항목만 두고 나머지는 고치세요" : "빈 항목이 없습니다");
   }
@@ -252,7 +286,7 @@
     return out;
   }
   function secCheck(s) {
-    var opts = s.opts || ["적합", "부적합", "해당없음"];
+    var opts = optsOf(s);
     var over = null; try { over = state["cx." + s.k] ? JSON.parse(state["cx." + s.k]) : null; } catch (e) { over = null; }
     var extra = +val("cn." + s.k, 0), items = (over || s.items).slice();
     for (var x = 0; x < extra; x++) items.push("");
@@ -279,7 +313,10 @@
   function render() {
     var h = '<header class="paper-h"><div class="paper-co">' + '<div class="ed co" contenteditable="true" role="textbox" data-co="1" data-ph="회사·현장명">' + esc(company) + "</div></div>" +
       '<h2 class="paper-t">' + lab("title", F.doc_title || F.title) + "</h2>" + approval() + "</header>";
-    F.sections.forEach(function (s, si) {
+    layItems().forEach(function (x) {
+      if (!secOn(x.id, x.s)) return;
+      if (x.extra) { h += '<h3 class="sec-t">' + lab("s." + x.id, x.extra.title || "자유 기재") + "</h3>" + ed("x." + x.id, "", "multi box", "내용 입력"); return; }
+      var s = x.s, si = x.si;
       var t = s.title ? '<h3 class="sec-t">' + lab("s." + si, s.title) + "</h3>" : "";
       if (s.type === "fields") h += t + secFields(s, si);
       else if (s.type === "text") h += t + ed("x." + s.k, s.default, "multi box" + (s.tall ? " tall" : ""), s.ph);
@@ -544,6 +581,64 @@
     var sb = document.getElementById("fSample"); sb.hidden = false;
     sb.addEventListener("click", function () { Object.keys(F.sample).forEach(function (k) { state[k] = F.sample[k]; }); save(); render(); });
   }
+  // ---------- 구성 바꾸기 패널
+  var lyb = document.getElementById("fLayoutBtn"), lyp = document.getElementById("fLayout"), lyl = document.getElementById("fLayList");
+  var TYPE_KO = { fields: "입력 칸", table: "표", check: "점검표", text: "기재 칸", note: "안내", signs: "서명", list: "목록" };
+  function layDraw() {
+    var its = layItems();
+    lyl.innerHTML = its.map(function (x, i) {
+      var on = secOn(x.id, x.s), isChk = x.s && x.s.type === "check", cur = LY.opts && LY.opts[x.s && x.s.k] != null ? String(LY.opts[x.s.k]) : "";
+      return '<li class="flay-row' + (on ? "" : " off") + '" data-id="' + esc(x.id) + '"><label class="flay-on"><input type="checkbox" data-lon' + (on ? " checked" : "") + "><span>" + esc(secName(x)) + '</span></label><span class="flay-t">' + (x.extra ? "자유 기재" : TYPE_KO[x.s.type] || "") + (x.s && x.s.off ? " · 선택" : "") + "</span>" +
+        (isChk ? '<label class="flay-opt">판정 <select class="sort" data-lopt><option value="">기본 (' + esc((x.s.opts || ["적합", "부적합", "해당없음"]).join("·")) + ")</option>" + OPTSETS.map(function (o, oi) { return '<option value="' + oi + '"' + (cur === String(oi) ? " selected" : "") + ">" + esc(o.join(" · ")) + "</option>"; }).join("") + "</select></label>" : "") +
+        '<span class="flay-mv"><button type="button" class="linkbtn" data-lmv="-1"' + (i ? "" : " disabled") + ' aria-label="위로">↑</button><button type="button" class="linkbtn" data-lmv="1"' + (i < its.length - 1 ? "" : " disabled") + ' aria-label="아래로">↓</button>' + (x.extra ? '<button type="button" class="linkbtn" data-ldel style="color:var(--red)">삭제</button>' : "") + "</span></li>";
+    }).join("");
+  }
+  function layApply(msg) { laySave(); layDraw(); render(); if (msg) say(msg); }
+  lyb.addEventListener("click", function () { lyp.hidden = !lyp.hidden; lyb.setAttribute("aria-expanded", String(!lyp.hidden)); if (!lyp.hidden) layDraw(); });
+  lyl.addEventListener("change", function (ev) {
+    var t = ev.target, row = t.closest("[data-id]"); if (!row) return; var id = row.dataset.id;
+    if (t.dataset.lon != null) {
+      var x = layItems().filter(function (y) { return y.id === id; })[0], def = !(x && x.s && x.s.off);
+      LY.on = LY.on || {}; if (t.checked === def) delete LY.on[id]; else LY.on[id] = t.checked;
+      if (!Object.keys(LY.on).length) delete LY.on;
+      layApply(t.checked ? "구역을 켰습니다" : "구역을 껐습니다 — 적어 둔 내용은 그대로 남아 있습니다");
+    } else if (t.dataset.lopt != null) {
+      LY.opts = LY.opts || {}; if (t.value === "") delete LY.opts[id]; else LY.opts[id] = +t.value;
+      if (!Object.keys(LY.opts).length) delete LY.opts;
+      layApply("판정 방식을 바꿨습니다 — 새 방식에 없는 기존 판정은 미점검으로 표시됩니다");
+    }
+  });
+  lyl.addEventListener("click", function (ev) {
+    var row = ev.target.closest("[data-id]"); if (!row) return; var id = row.dataset.id;
+    var mv = ev.target.closest("[data-lmv]");
+    if (mv) {
+      var ids = layItems().map(function (x) { return x.id; }), i = ids.indexOf(id), j = i + (+mv.dataset.lmv);
+      if (i < 0 || j < 0 || j >= ids.length) return;
+      ids[i] = ids[j]; ids[j] = id; LY.order = ids; layApply(); return;
+    }
+    if (ev.target.closest("[data-ldel]")) {
+      if (!window.confirm("이 자유 기재 칸과 적어 둔 내용을 삭제할까요?")) return;
+      LY.extra = (LY.extra || []).filter(function (x) { return "u_" + x.id !== id; }); if (!LY.extra.length) delete LY.extra;
+      if (LY.order) LY.order = LY.order.filter(function (y) { return y !== id; });
+      delete state["x." + id]; delete L["s." + id]; save(); layApply("자유 기재 칸을 삭제했습니다");
+    }
+  });
+  document.getElementById("fLayAdd").addEventListener("click", function () {
+    LY.extra = LY.extra || [];
+    if (LY.extra.length >= 10) { say("자유 기재 칸은 10개까지 넣을 수 있습니다"); return; }
+    var nid = Date.now().toString(36); LY.extra.push({ id: nid, title: "자유 기재 " + (LY.extra.length + 1) });
+    // 안내 문구(마지막 note) 앞에 놓는다
+    var ids = layItems().map(function (x) { return x.id; }).filter(function (y) { return y !== "u_" + nid; }), at = ids.length;
+    for (var q = ids.length - 1; q >= 0; q--) { var sx = F.sections.filter(function (s, si) { return sid(s, si) === ids[q]; })[0]; if (sx && sx.type === "note") at = q; else break; }
+    ids.splice(at, 0, "u_" + nid); LY.order = ids;
+    layApply("자유 기재 칸을 넣었습니다 — 제목을 눌러 고치세요");
+  });
+  document.getElementById("fLayReset").addEventListener("click", function () {
+    if (!Object.keys(LY).length) { say("이미 처음 구성입니다"); return; }
+    if (!window.confirm("구역 켜기·끄기, 순서, 판정 방식을 처음 구성으로 되돌릴까요? 적어 둔 내용은 지워지지 않습니다." + (LY.extra ? " 자유 기재 칸은 화면에서 빠집니다." : ""))) return;
+    LY = {}; layApply("처음 구성으로 되돌렸습니다");
+  });
+
   // ---------- 사업장 정보
   var pb = document.getElementById("fProfileBtn"), pp = document.getElementById("fProfile");
   document.getElementById("fProfFields").innerHTML = PROF.map(function (p) {

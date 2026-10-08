@@ -298,3 +298,7 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 `data/forms.json` 의 `log-safety`·`log-safety-w`·`log-safety-m`·`log-health`·`log-health-w`·`log-health-m` 여섯 서식은 `family` 값(`role`: safety/health, `period`: day/week/month)으로 묶여 있고, 화면 위쪽 선택 버튼으로 서로 오갑니다(`build.py` 의 `FAMILY`, 서식 엔진의 `F.switch`). 서식마다 입력값은 따로 저장됩니다.
 
 업종별 예시는 `data/form_auto.json` 의 각 서식 `pickers`(id `ex`)에 있습니다. `replace: true` 인 채우기는 채우는 표를 먼저 비운 뒤 넣습니다. 예시 문구는 SafePlum이 만든 것으로 법령 문구가 아닙니다.
+
+## 서식 구성 바꾸기 (모든 서식 공통)
+
+서식 화면의 "구성 바꾸기"에서 구역 켜기·끄기, 순서, 점검표 판정 방식, 자유 기재 칸(최대 10개)을 정합니다. 값은 `safetake.formlayout.<서식 id>` 에 저장되고 백업에 포함됩니다. `data/forms.json` 의 구역에 `"off": true` 를 주면 기본으로 꺼진 선택 구역이 됩니다. 판정 방식 목록은 `apps/form.body.html` 의 `OPTSETS`.
