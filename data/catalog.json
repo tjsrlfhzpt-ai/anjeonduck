@@ -110,10 +110,10 @@
      "note": "작성 대상 조회 제공 · 표준안은 준비 중"
     },
     {
-     "name": "보건관리자 업무일지",
-     "basis": "영 제22조제1항",
+     "name": "안전·보건관리자 업무일지 (일일·주간·월간)",
+     "basis": "영 제18조제1항 · 제22조제1항",
      "status": "ok",
-     "link": "forms/log-health/",
+     "link": "forms/log-safety/",
      "note": ""
     },
     {

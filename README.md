@@ -292,3 +292,9 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 ## 홈 '자주 쓰는 작성기' 탭
 
 `build.py` 의 `WRITE_TOOLS`(무료 도구 id)와 `HOME_WRITE_FORMS`(서식 작성기 id·아이콘) 순서대로 카드가 나옵니다. 서식 작성기를 탭에 올리려면 `HOME_WRITE_FORMS` 에 `(id, 아이콘 파일명)` 을 추가합니다.
+
+## 안전·보건관리자 업무일지 (묶음 서식)
+
+`data/forms.json` 의 `log-safety`·`log-safety-w`·`log-safety-m`·`log-health`·`log-health-w`·`log-health-m` 여섯 서식은 `family` 값(`role`: safety/health, `period`: day/week/month)으로 묶여 있고, 화면 위쪽 선택 버튼으로 서로 오갑니다(`build.py` 의 `FAMILY`, 서식 엔진의 `F.switch`). 서식마다 입력값은 따로 저장됩니다.
+
+업종별 예시는 `data/form_auto.json` 의 각 서식 `pickers`(id `ex`)에 있습니다. `replace: true` 인 채우기는 채우는 표를 먼저 비운 뒤 넣습니다. 예시 문구는 SafePlum이 만든 것으로 법령 문구가 아닙니다.

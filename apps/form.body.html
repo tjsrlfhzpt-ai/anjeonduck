@@ -2,7 +2,7 @@
   <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">무료 도구</a><span>/</span><a href="../">서식 작성기</a><span>/</span><span id="fCrumb"></span></p>
   <h1 id="fTitle"></h1>
   <p id="fDesc"></p>
-  <p><span class="fkind fkind-b">SafePlum 자체 제공 양식</span> <span class="fkind">법정 지정서식이 아님</span></p>
+  <div class="fswitch" id="fSwitch" hidden></div>
 </div></section>
 <div class="wrap form-wrap">
   <div class="form-bar no-print" role="toolbar" aria-label="서식 도구">
@@ -32,6 +32,7 @@
   <section class="note no-print" style="margin-top:20px">
     <h2 class="h-sm">사용 안내</h2>
     <ul class="bul">
+      <li>SafePlum 자체 제공 양식 · 법정 지정서식이 아님 — 법령이 요구하는 기재 사항을 담아 만든 참고 양식입니다. 관공서에 내는 법령 별지 서식은 서식·자료 메뉴에서 원본을 받으세요.</li>
       <li>회색 칸은 모두 고칠 수 있습니다 — 점검 항목 문구, 표의 기본 문구까지. 행·점검 항목도 추가할 수 있습니다.</li>
       <li>문서 제목, 구역 제목, 칸 이름(예: "관리감독자(성명)"), 표 머리글, 회색 안내 상자의 문구도 눌러서 사업장에 맞게 고칠 수 있습니다. 안내 상자는 다 지우면 인쇄되지 않습니다. 고친 이름은 이 서식에 계속 남고, "제목·항목 이름 되돌리기"로 처음 상태가 됩니다.</li>
       <li>표의 각 줄 오른쪽 ↑ · ×로 줄 순서를 바꾸거나 그 줄만 지울 수 있습니다. 자동 계산 칸(집행률·위험성·다음 교육일 등)을 직접 고치면 주황색 점선으로 표시되고 그 값이 유지됩니다. 칸을 비우거나 "자동 계산으로 되돌리기"를 누르면 다시 자동 계산합니다.</li>
@@ -567,13 +568,15 @@
       if (Object.keys(state).some(function (k) { return (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) && String(state[k] || "").trim(); })) touched.push("c." + ck);
     });
     Object.keys(changes).forEach(function (k) { if (k.charAt(0) !== "n" && state[k] && state[k] !== changes[k] && String(state[k]).trim()) touched.push(k); });
-    if (touched.length && !window.confirm("이미 입력한 내용(점검 결과 포함) 일부가 법령 기준 문구로 바뀝니다. 계속할까요?")) { render(); return; }
+    if (touched.length && !window.confirm(A.pick_confirm || "이미 입력한 내용(점검 결과 포함) 일부가 법령 기준 문구로 바뀝니다. 계속할까요?")) { render(); return; }
     wipe.forEach(function (ck) {
       Object.keys(state).forEach(function (k) { if (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) delete state[k]; });
       delete state["cn." + ck];
       var items = o.checks[ck];
       if (items.length) changes["cx." + ck] = JSON.stringify(items); else delete state["cx." + ck];
     });
+    // replace: 예시를 바꿔 채울 때 앞서 채운 표의 칸이 섞여 남지 않게, 채우는 표는 먼저 비운다
+    if (pk.replace) Object.keys(o.rows || {}).forEach(function (tk) { Object.keys(state).forEach(function (k) { if (k.indexOf("t." + tk + ".") === 0) delete state[k]; }); });
     Object.keys(changes).forEach(function (k) { state[k] = changes[k]; });
     save(); render();
     document.getElementById("fSaved").textContent = "'" + o.label + "' 기준으로 채웠습니다 — 현장에 맞게 고쳐 쓰세요";
@@ -581,14 +584,14 @@
   if (A.pickers && A.pickers.length) {
     var box = document.getElementById("fAuto");
     box.hidden = false;
-    box.innerHTML = '<h2 class="h-sm">자동 채우기 <span class="muted">— 법령 원문 기준 문구가 들어갑니다</span></h2>' + A.pickers.map(function (pk, i) {
+    box.innerHTML = '<h2 class="h-sm">' + esc(A.pick_title || "자동 채우기") + ' <span class="muted">— ' + esc(A.pick_sub || "법령 원문 기준 문구가 들어갑니다") + "</span></h2>" + A.pickers.map(function (pk, i) {
       var single = pk.options.length === 1;
       return '<div class="fauto-row"><label class="field"><span class="label">' + esc(pk.label) + "</span>" +
         (single ? '<span class="fauto-one">' + esc(pk.options[0].label) + "</span>" :
           '<select class="sort" data-pick="' + i + '"><option value="">선택하세요</option>' + pk.options.map(function (o, j) { return '<option value="' + j + '">' + esc(o.label) + "</option>"; }).join("") + "</select>") +
         '</label><button type="button" class="btn btn-sm" data-apply="' + i + '">' + esc(pk.button || "채우기") + "</button>" +
         (pk.hint ? '<p class="hint">' + esc(pk.hint) + "</p>" : "") + "</div>";
-    }).join("") + (A.source ? '<p class="src-line">기준: ' + esc(A.source) + (A.checked ? " · 확인 " + esc(A.checked) : "") + "</p>" : "");
+    }).join("") + (A.source ? '<p class="src-line">' + (A.pick_title ? esc(A.source) : "기준: " + esc(A.source) + (A.checked ? " · 확인 " + esc(A.checked) : "")) + "</p>" : "");
     box.addEventListener("click", function (ev) {
       var b = ev.target.closest("[data-apply]"); if (!b) return;
       var pk = A.pickers[+b.dataset.apply], sel = box.querySelector('[data-pick="' + b.dataset.apply + '"]');
@@ -598,7 +601,16 @@
     });
   }
 
-  document.getElementById("fTitle").textContent = F.title;
+  document.getElementById("fTitle").textContent = F.switch ? F.switch.title : F.title;
+  // 같은 묶음의 서식(예: 안전·보건 × 일일·주간·월간)을 오가는 선택 버튼. 서식마다 입력값은 따로 저장된다
+  if (F.switch) {
+    var sw = document.getElementById("fSwitch"); sw.hidden = false;
+    sw.innerHTML = F.switch.groups.map(function (g) {
+      return '<div class="fswitch-g"><span class="fswitch-l">' + esc(g.label) + '</span><div class="seg" role="group" aria-label="' + esc(g.label) + '">' + g.options.map(function (o) {
+        return o.on ? '<button type="button" aria-pressed="true">' + esc(o.label) + "</button>" : '<a class="fswitch-a" href="' + esc(o.href) + '">' + esc(o.label) + "</a>";
+      }).join("") + "</div></div>";
+    }).join("") + '<p class="fswitch-now">지금 서식: <b>' + esc(F.doc_title || F.title) + "</b></p>";
+  }
   document.getElementById("fCrumb").textContent = F.short || F.title;
   document.getElementById("fDesc").textContent = F.desc || "";
   // 전용 작성기가 따로 생긴 서식은 그쪽으로 안내한다(이 서식과 저장값은 그대로 둔다)

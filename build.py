@@ -576,7 +576,7 @@ TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "
               "schedule": "calendar", "duties": "briefcase", "retention": "folder", "inspect": "search", "docmap": "audit"}
 WRITE_TOOLS = ["tbm", "risk", "improve", "patrol", "joint", "edu-log", "permit", "confined", "council", "committee", "msds", "loto", "heat"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
-HOME_WRITE_FORMS = [("log-safety", "salute"), ("log-health", "aid"), ("accident", "alarm"), ("ppe-ledger", "goggles")]
+HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"), ("accident", "alarm"), ("ppe-ledger", "goggles")]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
@@ -1139,6 +1139,9 @@ def precheck_forms(lawref):
     return out
 
 
+FAMILY = {"worklog": {"title": "안전 · 보건관리자 업무일지", "roles": [("safety", "안전관리자"), ("health", "보건관리자")], "periods": [("day", "일일"), ("week", "주간"), ("month", "월간")]}}
+
+
 def all_forms(lawref):
     fj = load("data/forms.json")
     forms = fj["forms"] + precheck_forms(lawref)
@@ -1151,6 +1154,13 @@ def all_forms(lawref):
         if f.get("src_law"):
             f["source_url"] = law_url(f["src_law"])
         f["auto"] = auto.get(f["id"], {"source": "", "checked": ""})
+        fam = f.get("family")
+        if fam:   # 같은 묶음(직무 × 주기)을 화면 안에서 오가는 선택 버튼
+            sib = [x for x in forms if (x.get("family") or {}).get("name") == fam["name"]]
+            pick = lambda role, period: next((x["id"] for x in sib if x["family"]["role"] == role and x["family"]["period"] == period), None)
+            f["switch"] = {"title": FAMILY[fam["name"]]["title"], "groups": [
+                {"label": "직무", "options": [{"label": lb, "on": k == fam["role"], "href": f"../{pick(k, fam['period'])}/"} for k, lb in FAMILY[fam["name"]]["roles"] if pick(k, fam["period"])]},
+                {"label": "작성 주기", "options": [{"label": lb, "on": k == fam["period"], "href": f"../{pick(fam['role'], k)}/"} for k, lb in FAMILY[fam["name"]]["periods"] if pick(fam["role"], k)]}]}
         f.pop("approval", None)  # 결재란은 공통(담당·검토·승인, 사용자가 고침) — assets/docs.js
         if f["id"] == "patrol":
             f["flow"] = {"chk": {"bad": ["불량"], "to": "fix", "col": 1, "label": "지적 사항 표"}}
@@ -1423,7 +1433,7 @@ def build(out, today):
         law_rows += bd_row("laws/#updates", short_law(u.get("law", "")) + " " + u["title"].split(" — ")[0], md(u.get("effective") or u.get("date")), "시행 중")
     bd_laws = board(f"법령 현황 · 기준일 {md(man.get('checked_at'))}", "laws/", law_rows)
     _unused = board("법령 개정", "laws/#updates", "".join(bd_row(f"laws/#updates", u["title"], md(u.get("date")), u.get("law", "").replace("산업안전보건법 ", "").replace("산업안전보건", "산안")[:6]) for u in updates[:5]))
-    FORM_PICKS = ["log-safety", "log-health", "accident", "ppe-ledger", "log-sup", "wp-forklift"]
+    FORM_PICKS = ["log-safety", "log-safety-w", "log-health", "accident", "ppe-ledger", "log-sup"]
     fby = {f["id"]: f for f in _forms}
     bd_forms = board(f"서식 작성기 {n_forms}종", "tools/forms/", "".join(bd_row(f"tools/forms/{i}/", fby[i]["title"], "", fby[i]["group"][:5]) for i in FORM_PICKS if i in fby))
     bd_res = board("자주 찾는 법정 서식", "resources/", "".join(bd_row(f"resources/{r['detail']}" if r.get("detail") else "resources/", r["title"], "", "서식" if r.get("category") == "법정 서식" else "고시") for r in popular[:6]))
@@ -1442,7 +1452,7 @@ def build(out, today):
                 f'<span class="hc-d">{e(desc)}</span></span><span class="hc-g">{e(badge)}</span></a>')
     def tcards(ids):
         return "".join(mcard(f"tools/{i}/", (f'<img src="assets/img/ico/{TOOL_DUCKS[i]}.webp" width="44" height="44" alt="" loading="lazy">' if i in TOOL_DUCKS else TOOL_ICONS.get(i, "📄")), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
-    tab1 = tcards(WRITE_TOOLS) + "".join(mcard(f"tools/forms/{i}/", f'<img src="assets/img/ico/{ic}.webp" width="44" height="44" alt="" loading="lazy">', fby[i].get("short") or fby[i]["title"], one_line(fby[i].get("desc", "")), (fby[i].get("law") or "무료").replace("산업안전보건기준에 관한 규칙", "기준규칙").replace("산업안전보건법", "산안법").split(" · ")[0][:22]) for i, ic in HOME_WRITE_FORMS if i in fby)
+    tab1 = tcards(WRITE_TOOLS) + "".join(mcard(f"tools/forms/{i}/", f'<img src="assets/img/ico/{ic}.webp" width="44" height="44" alt="" loading="lazy">', (x[2] if len(x) > 2 else fby[i].get("short") or fby[i]["title"]), (x[3] if len(x) > 3 else one_line(fby[i].get("desc", ""))), ("시행령 제18조·제22조" if len(x) > 2 else (fby[i].get("law") or "무료").replace("산업안전보건기준에 관한 규칙", "기준규칙").replace("산업안전보건법", "산안법").split(" · ")[0][:22])) for x in HOME_WRITE_FORMS for i, ic in [x[:2]] if i in fby)
     tab2 = tcards(CALC_TOOLS)
     look = "".join(f'<a href="tools/{i}/"><img src="assets/img/ico/{TOOL_DUCKS[i]}.webp" width="20" height="20" alt="" loading="lazy"> {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
     form_rows = "".join(f'<li data-s="{e((f["title"] + " " + f.get("group", "")).lower())}"><a href="tools/forms/{e(f["id"])}/"><span class="fl-g">{e(f.get("group", "")[:10])}</span>{e(f["title"])}</a><span class="fkind fkind-b">웹 작성</span></li>' for f in _forms)
