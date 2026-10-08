@@ -591,7 +591,7 @@ def nav_cols(site, rel):
         "lib": [("작성기", tl(WRITE_TOOLS) + [(f"{rel}tools/forms/", "서식 작성기 전체")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS)),
                 ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}tools/", "도구 전체 보기")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
-                ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")])],
+                ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [],
         "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
@@ -659,6 +659,25 @@ def chat_banner(cls=""):
             f'<span class="cm-chat-go">카카오톡으로 참여 ↗</span></a>')
 
 
+def _blog():
+    c = (json.loads((ROOT / "config/site.json").read_text(encoding="utf-8")).get("community") or {}).get("blog") or {}
+    u = str(c.get("url") or "")
+    if not re.match(r"^https://(m\.)?blog\.naver\.com/[A-Za-z0-9_-]+/?$", u):
+        return None
+    return {"url": u, "title": str(c.get("title") or "네이버 블로그"), "desc": str(c.get("desc") or "")}
+
+
+BLOG = _blog()  # 공식 네이버 블로그. 주소가 없으면 배너·메뉴·푸터에서 모두 빠진다
+
+
+def blog_banner(cls=""):
+    if not BLOG:
+        return ""
+    return (f'<a class="cm-chat cm-blog {cls}" href="{html.escape(BLOG["url"])}" target="_blank" rel="noopener">'
+            f'<span class="cm-chat-t">{html.escape(BLOG["title"])}</span><span class="cm-chat-d">{html.escape(BLOG["desc"])}</span>'
+            f'<span class="cm-chat-go">네이버 블로그 보기 ↗</span></a>')
+
+
 ASSET_VER = _asset_ver()  # 스타일·스크립트가 바뀌면 주소가 바뀌어 브라우저가 예전 파일을 쓰지 않는다
 _MAN = None
 
@@ -714,7 +733,8 @@ def operator_html(site, rel_root):
     url = op.get("contact_url") or ""
     ok = url.startswith("mailto:") or safe_url(url)
     link = f'<a href="{e(url)}"{"" if url.startswith("mailto:") else " target=_blank rel=noopener"}>{e(op.get("contact_label") or "문의하기")}</a>' if ok else "문의 채널 준비 중"
-    return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}'
+    blog = f' · <a href="{e(BLOG["url"])}" target=_blank rel=noopener>네이버 블로그</a>' if BLOG else ""
+    return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}{blog}'
 
 
 def og_image_tags(site):
@@ -762,6 +782,8 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     if path == "" and base:
         _ld = {"@context": "https://schema.org", "@type": "WebSite", "name": site["name"], "alternateName": [x for x in (site.get("name_ko"), "세이프 플럼", "safeplum") if x],
                "url": base + "/", "inLanguage": "ko", "description": site.get("description", "")}
+        if BLOG:
+            _ld["sameAs"] = [BLOG["url"]]
         canon_tags += '\n<script type="application/ld+json">' + json.dumps(_ld, ensure_ascii=False).replace("</", "<\\/") + "</script>"
     cur = ' aria-current="page"'
     on_news = (site.get("features") or {}).get("public_api", False)
@@ -1562,6 +1584,7 @@ def build(out, today):
   <aside class="home2-side">
     {month_box}
     {chat_banner("cm-chat-side")}
+    {blog_banner("cm-chat-side")}
     <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/ico/write.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
@@ -1593,6 +1616,7 @@ def build(out, today):
         arch, brief_main = "", board_html
     brief_side = f"""<aside class="col-side stack">
     {acc_trend_html(auto_acc, today)}
+    {blog_banner("cm-chat-side")}
     <div class="side-box"><h2 class="h-sm">지난 브리핑</h2><ul class="br-arch">{arch or '<li>없음</li>'}</ul></div>
     <div class="side-box"><h2 class="h-sm">브리핑은 이렇게 만듭니다</h2><ul class="bul hint">
       <li>국가법령정보센터, 고용노동부, 안전보건공단, 정부 부처·국회·공공기관의 공식 발표만 근거로 씁니다.</li>

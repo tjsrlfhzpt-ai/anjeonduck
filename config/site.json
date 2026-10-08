@@ -412,6 +412,12 @@
       "title": "안전·보건관리자 실무·취업 오픈채팅방",
       "desc": "채용정보가 매일매일 올라옵니다. 실무 고민과 이직 이야기도 편하게 나눠요.",
       "_comment": "홍보용 오픈채팅방(문의 창구 operator.contact_url 과 다름). url 을 비우면 배너가 사라집니다."
+    },
+    "blog": {
+      "url": "https://blog.naver.com/safeplum",
+      "title": "SafePlum 네이버 블로그",
+      "desc": "입법예고·법령 개정안을 조문별로 풀어 정리합니다.",
+      "_comment": "공식 네이버 블로그. 홈·브리핑 옆 배너, 법령 메뉴, 푸터에 나갑니다. url 을 비우면 모두 사라집니다."
     }
   },
   "features": {

@@ -279,6 +279,8 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 
 홍보용 오픈채팅방 배너는 `config/site.json` 의 `community.openchat.url` 로 켜고 끕니다(문의 창구 `operator.contact_url` 과 별개).
 
+공식 네이버 블로그 링크는 `community.blog.url` 로 켜고 끕니다. 홈·안전 브리핑 옆 배너, 법령 메뉴, 푸터, 홈 구조화 데이터(`sameAs`)에 함께 나갑니다.
+
 ## 운영 관리 화면 열기
 
 게시판을 이미 연 프로젝트라면 SQL Editor 에 `supabase/admin.sql` 을 한 번 실행합니다. 운영자(admin) 계정으로 로그인하면 게시판 오른쪽 위에 "운영 관리"가 보입니다(`/board/admin/`). 신고 처리, 회원 글쓰기 정지·해제, 삭제한 글 복구, 처리 기록을 다룹니다. 모든 관리 기능은 서버 함수가 운영자인지 다시 확인합니다.
