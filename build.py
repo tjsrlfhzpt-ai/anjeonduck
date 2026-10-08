@@ -582,7 +582,7 @@ LOOKUP_TOOLS = ["schedule", "duties", "retention", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
 NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "board/?b=job"), ("board", "게시판", "board/")]
-ACTIVE_GROUP = {"tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
+ACTIVE_GROUP = {"videos/": "brief", "tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
 
 
 def nav_cols(site, rel):
@@ -594,7 +594,7 @@ def nav_cols(site, rel):
                 ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}tools/", "도구 전체 보기")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
-        "brief": [],
+        "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")]), ("영상", [(f"{rel}videos/", "안전보건 영상")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else []))],
         "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
@@ -678,6 +678,39 @@ def blog_banner(cls=""):
     return (f'<a class="cm-chat cm-blog {cls}" href="{html.escape(BLOG["url"])}" target="_blank" rel="noopener">'
             f'<span class="cm-chat-t">{html.escape(BLOG["title"])}</span><span class="cm-chat-d">{html.escape(BLOG["desc"])}</span>'
             f'<span class="cm-chat-go">네이버 블로그 보기 ↗</span></a>')
+
+
+def _videos():
+    p = ROOT / "data/videos.json"
+    if not p.exists():
+        return []
+    out = []
+    for v in json.loads(p.read_text(encoding="utf-8")).get("items", []):
+        if v.get("platform") == "tiktok" and re.match(r"^\d{15,25}$", str(v.get("id", ""))) and v.get("title"):
+            v["poster"] = f"assets/img/videos/{v['id']}.webp" if (ROOT / f"assets/img/videos/{v['id']}.webp").exists() else ""
+            v["url"] = f"https://www.tiktok.com/@{v.get('account', '')}/video/{v['id']}" if re.match(r"^[\w.]{2,30}$", str(v.get("account", ""))) else f"https://www.tiktok.com/video/{v['id']}"
+            out.append(v)
+    return out
+
+
+VIDEOS = _videos()   # 안전보건 영상(틱톡). 재생을 누르기 전에는 틱톡에 접속하지 않는다(자체 썸네일 → 클릭 시 iframe)
+
+
+def video_card(v, rel, big=False):
+    poster = f'<img src="{rel}{e(v["poster"])}" alt="" loading="lazy" width="540" height="960">' if v.get("poster") else ""
+    rl = "".join(f'<a href="{rel}{e(u)}">{e(n)}</a>' for u, n in v.get("related", []) if not str(u).startswith(("http", "/", "javascript")))
+    return (f'<article class="vcard" id="v-{e(v["id"])}"><div class="vplayer" data-tiktok="{e(v["id"])}">{poster}'
+            f'<button type="button" class="vplay" aria-label="{e(v["title"])} 재생"><span aria-hidden="true">▶</span></button>'
+            f'<span class="vbadge">TikTok</span></div><div class="vmeta"><p class="vtopic">{e(v.get("topic", ""))} · {e(fmt_date(v.get("date", "")))}</p>'
+            f'<h2 class="vtitle">{e(v["title"])}</h2>' + (f'<p class="vsum">{e(v.get("summary", ""))}</p>' if big else "")
+            + (f'<p class="vlaw">근거: {e(v["law"])}</p>' if v.get("law") and big else "")
+            + (f'<p class="vrel">{rl}</p>' if rl and big else "")
+            + f'<a class="vext" href="{e(v["url"])}" target="_blank" rel="noopener">틱톡에서 보기 ↗</a></div></article>')
+
+
+VIDEO_JS = """<script>(function(){document.addEventListener("click",function(ev){var b=ev.target.closest(".vplay");if(!b)return;var box=b.closest("[data-tiktok]"),id=box.getAttribute("data-tiktok");if(!/^\\d{15,25}$/.test(id))return;
+var f=document.createElement("iframe");f.src="https://www.tiktok.com/player/v1/"+id+"?autoplay=1&rel=0&music_info=0&description=0";f.title="TikTok 영상";f.allow="autoplay; fullscreen; encrypted-media; picture-in-picture";f.allowFullscreen=true;f.loading="eager";f.referrerPolicy="strict-origin-when-cross-origin";
+box.innerHTML="";box.appendChild(f);box.classList.add("on");});})();</script>"""
 
 
 ASSET_VER = _asset_ver()  # 스타일·스크립트가 바뀌면 주소가 바뀌어 브라우저가 예전 파일을 쓰지 않는다
@@ -1597,6 +1630,7 @@ def build(out, today):
     {month_box}
     {chat_banner("cm-chat-side")}
     {blog_banner("cm-chat-side")}
+    {(f'<section class="side-box vside"><div class="bd-h"><h2 class="h-sm">안전보건 영상</h2><a class="more" href="videos/">전체 {len(VIDEOS)}편 →</a></div>' + video_card(VIDEOS[0], "") + '</section>' + VIDEO_JS) if VIDEOS else ""}
     <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/ico/write.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
 </div>
@@ -1647,6 +1681,12 @@ def build(out, today):
   <h1>안전 브리핑·소식</h1>
   <p>고용노동부·안전보건공단의 점검·감독 예정, 지원사업, 공모전·대회, 법령·정책, 통계 발표를 한 게시판에 모았습니다. 제목을 누르면 요약과 실무 포인트, 공식 출처가 열립니다.</p>
 </div></section>"""
+    if VIDEOS:
+        vbody = ('<section class="phead"><div class="wrap"><p class="crumbs"><a href="../">홈</a><span>/</span>안전보건 영상</p><h1>안전보건 영상</h1>'
+                 '<p>1분 안팎의 짧은 영상으로 현장 안전보건 수칙과 법령을 정리합니다. 영상마다 근거 조문을 적었습니다. 재생 버튼을 누르면 틱톡 플레이어가 열리고 소리와 함께 재생됩니다.</p></div></section>'
+                 f'<div class="wrap vgrid">{"".join(video_card(v, "../", True) for v in VIDEOS)}</div>'
+                 '<aside class="wrap"><p class="hint vnote">영상은 틱톡(TikTok)에 올린 것을 틱톡이 제공하는 플레이어로 보여 줍니다. 재생 버튼을 누르기 전에는 틱톡에 접속하지 않으며, 재생하면 틱톡의 개인정보 처리방침이 적용됩니다.</p></aside>' + VIDEO_JS)
+        write("videos/index.html", page(site, "../", "videos/", "안전보건 영상", vbody, desc="밀폐공간·끼임 등 현장 안전보건 수칙을 1분 영상으로 정리하고 근거 조문을 함께 적었습니다.", active="videos/"))
     write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
           brief_head.format(up="../", crumb="안전 브리핑") + f'<div class="wrap layout-detail"><section class="col-main">{brief_main}</section>{brief_side}</div>',
           desc="산업안전 법령·정책·감독·사고 소식을 매일 요약하고 실무 포인트를 정리한 SafePlum 브리핑.", active="brief/"))
@@ -1791,6 +1831,7 @@ def build(out, today):
   </tbody></table></div>
   <p>근거: 「개인정보 보호법」 제28조의8제1항제3호(계약 이행을 위한 처리위탁·보관으로서 처리방침에 공개하는 경우).</p>
   <p>법령에 따른 요청이 있는 경우를 빼고 제3자에게 제공하지 않습니다.</p>
+  <p>'안전보건 영상'은 틱톡(TikTok)이 제공하는 플레이어로 보여 줍니다. 방문자가 재생 버튼을 누르기 전에는 틱톡에 접속하지 않으며, 재생하면 틱톡이 쿠키 등으로 정보를 수집할 수 있고 이에는 틱톡의 개인정보 처리방침이 적용됩니다. SafePlum은 이 과정에서 회원 정보를 틱톡에 보내지 않습니다.</p>
   <h2>4. 회원의 권리</h2>
   <p>'마이페이지'에서 닉네임·비밀번호를 바꾸고 탈퇴(삭제)할 수 있습니다. 열람·정정·삭제·처리정지를 직접 하기 어려우면 아래 문의 창구로 요청하세요. 만 14세 미만은 가입할 수 없습니다.</p>
   <h2>5. 안전 조치</h2>
