@@ -685,12 +685,23 @@ def _videos():
     if not p.exists():
         return []
     out = []
-    for v in json.loads(p.read_text(encoding="utf-8")).get("items", []):
-        if v.get("platform") == "tiktok" and re.match(r"^\d{15,25}$", str(v.get("id", ""))) and v.get("title"):
-            v["poster"] = f"assets/img/videos/{v['id']}.webp" if (ROOT / f"assets/img/videos/{v['id']}.webp").exists() else ""
-            v["url"] = f"https://www.tiktok.com/@{v.get('account', '')}/video/{v['id']}" if re.match(r"^[\w.]{2,30}$", str(v.get("account", ""))) else f"https://www.tiktok.com/video/{v['id']}"
-            out.append(v)
+    data = json.loads(p.read_text(encoding="utf-8"))
+    global VIDEO_CHANNELS
+    VIDEO_CHANNELS = {k: u for k, u in (data.get("channels") or {}).items() if safe_url(u)}
+    for v in data.get("items", []):
+        tk = str(v.get("id", "")) if re.match(r"^\d{15,25}$", str(v.get("id", ""))) else ""
+        yt = str(v.get("youtube", "")) if re.match(r"^[A-Za-z0-9_-]{11}$", str(v.get("youtube", ""))) else ""
+        if not (tk or yt) or not v.get("title"):
+            continue
+        v["key"] = yt or tk
+        v["poster"] = next((f"assets/img/videos/{x}.webp" for x in (yt, tk) if x and (ROOT / f"assets/img/videos/{x}.webp").exists()), "")
+        v["tt_url"] = (f"https://www.tiktok.com/@{v.get('account', '')}/video/{tk}" if re.match(r"^[\w.]{2,30}$", str(v.get("account", ""))) else f"https://www.tiktok.com/video/{tk}") if tk else ""
+        v["yt_url"] = f"https://www.youtube.com/shorts/{yt}" if yt else ""
+        out.append(v)
     return out
+
+
+VIDEO_CHANNELS = {}
 
 
 VIDEOS = _videos()   # 안전보건 영상(틱톡). 재생을 누르기 전에는 틱톡에 접속하지 않는다(자체 썸네일 → 클릭 시 iframe)
@@ -699,17 +710,20 @@ VIDEOS = _videos()   # 안전보건 영상(틱톡). 재생을 누르기 전에�
 def video_card(v, rel, big=False):
     poster = f'<img src="{rel}{e(v["poster"])}" alt="" loading="lazy" width="540" height="960">' if v.get("poster") else ""
     rl = "".join(f'<a href="{rel}{e(u)}">{e(n)}</a>' for u, n in v.get("related", []) if not str(u).startswith(("http", "/", "javascript")))
-    return (f'<article class="vcard" id="v-{e(v["id"])}"><div class="vplayer" data-tiktok="{e(v["id"])}">{poster}'
+    src = f'data-youtube="{e(v["youtube"])}"' if v.get("yt_url") else f'data-tiktok="{e(v["id"])}"'
+    return (f'<article class="vcard" id="v-{e(v["key"])}"><div class="vplayer" {src}>{poster}'
             f'<button type="button" class="vplay" aria-label="{e(v["title"])} 재생"><span aria-hidden="true">▶</span></button>'
-            f'<span class="vbadge">TikTok</span></div><div class="vmeta"><p class="vtopic">{e(v.get("topic", ""))} · {e(fmt_date(v.get("date", "")))}</p>'
+            f'<span class="vbadge">{"YouTube · 음성 해설" if v.get("yt_url") else "TikTok"}</span></div><div class="vmeta"><p class="vtopic">{e(v.get("topic", ""))} · {e(fmt_date(v.get("date", "")))}</p>'
             f'<h2 class="vtitle">{e(v["title"])}</h2>' + (f'<p class="vsum">{e(v.get("summary", ""))}</p>' if big else "")
             + (f'<p class="vlaw">근거: {e(v["law"])}</p>' if v.get("law") and big else "")
             + (f'<p class="vrel">{rl}</p>' if rl and big else "")
-            + f'<a class="vext" href="{e(v["url"])}" target="_blank" rel="noopener">틱톡에서 보기 ↗</a></div></article>')
+            + '<p class="vexts">' + (f'<a class="vext" href="{e(v["yt_url"])}" target="_blank" rel="noopener">유튜브에서 보기 ↗</a>' if v.get("yt_url") else "")
+            + (f'<a class="vext" href="{e(v["tt_url"])}" target="_blank" rel="noopener">틱톡에서 보기 ↗</a>' if v.get("tt_url") else "") + "</p></div></article>")
 
 
-VIDEO_JS = """<script>(function(){document.addEventListener("click",function(ev){var b=ev.target.closest(".vplay");if(!b)return;var box=b.closest("[data-tiktok]"),id=box.getAttribute("data-tiktok");if(!/^\\d{15,25}$/.test(id))return;
-var f=document.createElement("iframe");f.src="https://www.tiktok.com/player/v1/"+id+"?autoplay=1&rel=0&music_info=0&description=0";f.title="TikTok 영상";f.allow="autoplay; fullscreen; encrypted-media; picture-in-picture";f.allowFullscreen=true;f.loading="eager";f.referrerPolicy="strict-origin-when-cross-origin";
+VIDEO_JS = """<script>(function(){if(window.__vjs)return;window.__vjs=1;document.addEventListener("click",function(ev){var b=ev.target.closest(".vplay");if(!b)return;var box=b.closest(".vplayer"),yt=box.getAttribute("data-youtube"),tk=box.getAttribute("data-tiktok"),src="";
+if(yt&&/^[A-Za-z0-9_-]{11}$/.test(yt))src="https://www.youtube-nocookie.com/embed/"+yt+"?autoplay=1&playsinline=1&rel=0";else if(tk&&/^\\d{15,25}$/.test(tk))src="https://www.tiktok.com/player/v1/"+tk+"?autoplay=1&rel=0&music_info=0&description=0";if(!src)return;
+var f=document.createElement("iframe");f.src=src;f.title=yt?"YouTube 영상":"TikTok 영상";f.allow="autoplay; fullscreen; encrypted-media; picture-in-picture";f.allowFullscreen=true;f.loading="eager";f.referrerPolicy="strict-origin-when-cross-origin";
 box.innerHTML="";box.appendChild(f);box.classList.add("on");});})();</script>"""
 
 
@@ -1683,9 +1697,10 @@ def build(out, today):
 </div></section>"""
     if VIDEOS:
         vbody = ('<section class="phead"><div class="wrap"><p class="crumbs"><a href="../">홈</a><span>/</span>안전보건 영상</p><h1>안전보건 영상</h1>'
-                 '<p>1분 안팎의 짧은 영상으로 현장 안전보건 수칙과 법령을 정리합니다. 영상마다 근거 조문을 적었습니다. 재생 버튼을 누르면 틱톡 플레이어가 열리고 소리와 함께 재생됩니다.</p></div></section>'
+                 '<p>1분 안팎의 짧은 영상으로 현장 안전보건 수칙과 법령을 정리합니다. 영상마다 근거 조문을 적었습니다. 재생 버튼을 누르면 음성 해설과 함께 재생됩니다.</p>'
+                 + ('<p class="vch">' + "".join(f'<a class="btn btn-sm btn-ghost" href="{e(u)}" target="_blank" rel="noopener">{n} 채널 ↗</a>' for k, n in (("youtube", "유튜브"), ("tiktok", "틱톡")) for u in [VIDEO_CHANNELS.get(k)] if u) + "</p>" if VIDEO_CHANNELS else "") + '</div></section>'
                  f'<div class="wrap vgrid">{"".join(video_card(v, "../", True) for v in VIDEOS)}</div>'
-                 '<aside class="wrap"><p class="hint vnote">영상은 틱톡(TikTok)에 올린 것을 틱톡이 제공하는 플레이어로 보여 줍니다. 재생 버튼을 누르기 전에는 틱톡에 접속하지 않으며, 재생하면 틱톡의 개인정보 처리방침이 적용됩니다.</p></aside>' + VIDEO_JS)
+                 '<aside class="wrap"><p class="hint vnote">영상은 유튜브·틱톡에 올린 것을 각 서비스가 제공하는 플레이어로 보여 줍니다. 재생 버튼을 누르기 전에는 유튜브·틱톡에 접속하지 않으며, 재생하면 해당 서비스의 개인정보 처리방침이 적용됩니다.</p></aside>' + VIDEO_JS)
         write("videos/index.html", page(site, "../", "videos/", "안전보건 영상", vbody, desc="밀폐공간·끼임 등 현장 안전보건 수칙을 1분 영상으로 정리하고 근거 조문을 함께 적었습니다.", active="videos/"))
     write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
           brief_head.format(up="../", crumb="안전 브리핑") + f'<div class="wrap layout-detail"><section class="col-main">{brief_main}</section>{brief_side}</div>',
@@ -1831,7 +1846,7 @@ def build(out, today):
   </tbody></table></div>
   <p>근거: 「개인정보 보호법」 제28조의8제1항제3호(계약 이행을 위한 처리위탁·보관으로서 처리방침에 공개하는 경우).</p>
   <p>법령에 따른 요청이 있는 경우를 빼고 제3자에게 제공하지 않습니다.</p>
-  <p>'안전보건 영상'은 틱톡(TikTok)이 제공하는 플레이어로 보여 줍니다. 방문자가 재생 버튼을 누르기 전에는 틱톡에 접속하지 않으며, 재생하면 틱톡이 쿠키 등으로 정보를 수집할 수 있고 이에는 틱톡의 개인정보 처리방침이 적용됩니다. SafePlum은 이 과정에서 회원 정보를 틱톡에 보내지 않습니다.</p>
+  <p>'안전보건 영상'은 유튜브(YouTube, 개인정보 보호 강화 모드)·틱톡(TikTok)이 제공하는 플레이어로 보여 줍니다. 방문자가 재생 버튼을 누르기 전에는 유튜브·틱톡에 접속하지 않으며, 재생하면 해당 서비스가 쿠키 등으로 정보를 수집할 수 있고 이에는 각 서비스의 개인정보 처리방침이 적용됩니다. SafePlum은 이 과정에서 회원 정보를 보내지 않습니다.</p>
   <h2>4. 회원의 권리</h2>
   <p>'마이페이지'에서 닉네임·비밀번호를 바꾸고 탈퇴(삭제)할 수 있습니다. 열람·정정·삭제·처리정지를 직접 하기 어려우면 아래 문의 창구로 요청하세요. 만 14세 미만은 가입할 수 없습니다.</p>
   <h2>5. 안전 조치</h2>

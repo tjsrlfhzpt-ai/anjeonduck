@@ -1783,3 +1783,5 @@ body.is-arrived [data-landing]{display:none!important}
 .vside .vmeta{padding:10px 2px 0}
 .vside .vtitle{font-size:15px}
 .vnote{padding-bottom:40px}
+.vexts{display:flex;flex-wrap:wrap;gap:4px 14px}
+.vch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
