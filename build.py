@@ -416,7 +416,7 @@ def resource_detail(r, all_res, idx, files, site):
       {tool}
       {file_note}
       <button class="btn btn-block btn-ghost fav-big" type="button" data-fav="{e(r["id"])}" aria-pressed="false">☆ 즐겨찾기</button>
-      <p class="hint">법령 서식은 저작권법 제7조에 따라 누구나 자유롭게 이용할 수 있습니다. 개정되면 원본 버튼이 최신본을 엽니다.</p>
+      <p class="hint">법령 서식은 누구나 무료로 내려받아 쓸 수 있습니다. 개정되면 원본 버튼이 최신본을 엽니다.</p>
     </div>
   </aside>
 </div>"""
@@ -1342,7 +1342,7 @@ def duck_signs_html(site, write):
   <p class="btns" style="margin-top:14px"><button type="button" class="btn" onclick="window.print()">A4 인쇄 · PDF 저장</button>
   <a class="btn btn-ghost" href="../../../{e(it["print"])}" download="SafePlum_{e(it["title"])}.png">원본 이미지 내려받기</a>
   {f'<a class="btn btn-ghost" href="../../../{e(it["law_href"])}">근거 조문 보기</a>' if it.get("law_href") else ""}</p>
-  <p class="hint" style="margin-top:10px">근거: {e(it.get("basis", ""))} · 현장 안내용 게시물입니다. 법정 안전보건표지(시행규칙 별표 6)는 별도로 붙여 주세요.</p>
+  <p class="hint" style="margin-top:10px">근거: {e(it.get("basis", ""))} · 법정 안전보건표지(시행규칙 별표 6)와 함께 게시하는 현장 안내물입니다.</p>
 </div></section>
 <div class="dk-sheet"><img src="../../../{e(it["print"])}" alt="{e(it["title"])} 안내 게시물"></div>"""
         write(f"{pid}index.html", page(site, "../../../", pid, f'{it["title"]} 안내 게시물', body, desc=it.get("desc"), active="resources/"))
@@ -1943,7 +1943,7 @@ def build(out, today):
   <h2 id="calc">4. SafePlum 계산 결과의 성격</h2>
   <p>과태료, 산업안전보건관리비, 상시근로자 수, 교육시간, 체감온도 등의 계산 결과는 참고 계산입니다. 과태료의 최종 처분 금액은 실제 위반사실과 감경·가중사유를 기준으로 관할 행정기관이 판단합니다. 상시근로자 수 산정방법은 적용 법령별로 별도 확인이 필요합니다. 위험성평가의 가능성·중대성 척도와 등급 구간은 'SafePlum 기본 위험성평가 예시 기준'이며 사업장이 정한 방법으로 바꿔 쓸 수 있습니다.</p>
   <h2 id="health">5. 건강정보 도구 안내</h2>
-  <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 참고용이며, 진단은 의사 등 보건의료 전문가가 합니다. 업무 적합성과 사후관리 판단은 의사 등 보건의료 전문가의 평가가 필요하고, 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
+  <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 건강관리를 돕는 참고 자료입니다. 정확한 진단과 업무 적합성·사후관리 판단은 의사 등 보건의료 전문가의 평가를 받으세요. 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
   <h2 id="forms">6. SafePlum 자체 양식의 법적 지위</h2>
   <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafePlum 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 관련 조문을 참고해 만든 실무용 보조양식입니다(법령 별지 서식과는 별개). <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 실제 내용으로 바꿔 쓰는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
   <p>결재란의 서명은 인쇄용 서명 이미지입니다. 기관에 전자로 제출할 때는 해당 기관이 정한 인증·서명 방식을 따르세요.</p>
@@ -2120,7 +2120,7 @@ def build(out, today):
     <ul class="rlist" data-list data-page-size="30">{''.join(resource_row(r, site, '../') for r in resources)}</ul>
     <p class="more-wrap" data-more-wrap hidden><button type="button" class="btn btn-ghost btn-block" data-more>더 보기</button></p>
     {empty_box("조건에 맞는 서식·자료가 없습니다. 낱말을 줄이거나 다른 말로 찾아보세요.", '<div class="btns"><button type="button" class="btn btn-sm" data-reset>전체 자료 보기</button><a class="btn btn-sm btn-ghost" href="library/" data-q-href="library/">공단 자료실에서 찾기</a><a class="btn btn-sm btn-ghost" href="../tools/">무료 도구에서 찾기</a></div>').replace('class="empty"', 'class="empty" data-empty hidden')}
-    <p class="src-line" style="margin-top:14px">법정 서식·별표 목록 확인일 {e(load("data/lawforms.json")["checked"])} · 국가법령정보센터 법령 본문의 별표·서식 목록 기준. 법령 원문은 저작권법 제7조에 따라 누구나 자유롭게 이용할 수 있습니다.</p>
+    <p class="src-line" style="margin-top:14px">법정 서식·별표 목록 확인일 {e(load("data/lawforms.json")["checked"])} · 국가법령정보센터 법령 본문의 별표·서식 목록 기준. 법령 원문은 누구나 자유롭게 인용·활용할 수 있습니다.</p>
   </section>
 </div>"""
     for pid, src, name, title, desc in [
