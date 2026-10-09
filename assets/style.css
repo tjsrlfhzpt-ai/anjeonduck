@@ -1785,3 +1785,4 @@ body.is-arrived [data-landing]{display:none!important}
 .vnote{padding-bottom:40px}
 .vexts{display:flex;flex-wrap:wrap;gap:4px 14px}
 .vch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.mc-ind{width:100%;height:38px;margin:0 0 8px;font-size:14px}

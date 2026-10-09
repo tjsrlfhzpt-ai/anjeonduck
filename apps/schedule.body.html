@@ -6,6 +6,9 @@
 <div class="wrap layout-detail layout-calc sched">
   <section class="col-main stack">
     <div class="calc" style="gap:14px">
+      <div class="field"><span class="label">우리 사업장 업종</span>
+        <div class="seg" role="radiogroup" aria-label="업종" id="sInd"></div>
+        <p class="hint" id="sIndNote" style="margin-top:4px"></p></div>
       <div class="field"><span class="label">보기</span>
         <div class="seg" role="radiogroup" aria-label="보기" data-seg="view">
           <button type="button" data-v="list" aria-pressed="true">주기별 목록</button>
@@ -160,11 +163,16 @@
   function dayDiff(a, b) { return Math.round((Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 864e5); }
   function hhmm(t) { var m = /^(\d{1,2}):(\d{2})$/.exec(t.time || ""); return m && +m[1] < 24 && +m[2] < 60 ? pad(+m[1]) + ":" + m[2] : ""; }
 
+  // 업종: 홈 달력과 같은 저장값(safetake.industry). 업종이 정해진 업무(ind)는 고른 업종에 맞을 때만 기본으로 켠다
+  var IK = "safetake.industry", IND = "";
+  try { IND = localStorage.getItem(IK) || ""; } catch (e) { IND = ""; }
+  if (!(D.industries || []).some(function (x) { return x[0] === IND; })) IND = "";
+  function indOn(t, base) { if (!IND || !Array.isArray(t.ind)) return base; return t.ind.indexOf(IND) >= 0; }
   function tasks() {
     var base = D.tasks.map(function (t) {
       var o = S.ov[t.key] || {};
       var x = {}; Object.keys(t).forEach(function (k) { x[k] = t[k]; }); Object.keys(o).forEach(function (k) { x[k] = o[k]; });
-      x.on = o.hasOwnProperty("on") ? o.on : !t.off; x.edited = Object.keys(o).some(function (k) { return k !== "on"; });
+      x.on = o.hasOwnProperty("on") ? o.on : indOn(t, !t.off); x.indNo = !!(IND && Array.isArray(t.ind) && t.ind.indexOf(IND) < 0); x.edited = Object.keys(o).some(function (k) { return k !== "on"; });
       return x;
     });
     return base.concat(S.custom.map(function (c) { var x = {}; Object.keys(c).forEach(function (k) { x[k] = c[k]; }); x.status = "custom"; x.custom = true; if (!x.hasOwnProperty("on")) x.on = true; return x; }));
@@ -225,7 +233,7 @@
     var links = (t.form ? '<a href="' + LINK.form(t.form) + '">서식 작성 →</a>' : "") + (t.tool ? '<a href="' + LINK.tool(t.tool) + '">도구 열기 →</a>' : "");
     return '<li class="task' + (t.on ? "" : " off") + '">' +
       '<div class="task-top"><label class="switch" title="우리 사업장 해당"><input type="checkbox" data-on="' + esc(t.key) + '"' + (t.on ? " checked" : "") + '><span class="sr">사용</span></label>' +
-      '<div class="task-main"><p class="task-when">' + esc(when(t)) + (t.time ? " · " + esc(t.time) : "") + ' <span class="' + (/^lst/.test(b[0]) ? b[0] : "badge " + b[0]) + '"' + (b[0] === "lst-chk" ? ' tabindex="0"' : "") + '>' + b[1] + "</span>" + (t.edited ? ' <span class="badge badge-line">수정함</span>' : "") + "</p>" +
+      '<div class="task-main"><p class="task-when">' + esc(when(t)) + (t.time ? " · " + esc(t.time) : "") + ' <span class="' + (/^lst/.test(b[0]) ? b[0] : "badge " + b[0]) + '"' + (b[0] === "lst-chk" ? ' tabindex="0"' : "") + '>' + b[1] + "</span>" + (t.edited ? ' <span class="badge badge-line">수정함</span>' : "") + (Array.isArray(t.ind) && !t.custom ? ' <span class="badge ' + (t.indNo ? "badge-muted" : "badge-blue") + '">' + esc(t.ind.map(function (k) { return (D.industries || []).filter(function (x) { return x[0] === k; }).map(function (x) { return x[1]; })[0] || k; }).join("·")) + (t.indNo ? " 해당" : "") + "</span>" : "") + "</p>" +
       '<h3 class="task-title">' + esc(t.title) + "</h3>" +
       (t.basis ? '<p class="task-basis">' + esc(t.basis) + (laws ? ' <span class="task-laws">조문 ' + laws + "</span>" : "") + "</p>" : "") +
       (t.cond ? '<p class="task-cond">대상: ' + esc(t.cond) + "</p>" : "") +
@@ -328,6 +336,20 @@
     var ag = agenda(); renderDue(ag); renderNow(ag);
   }
 
+  // 업종 선택
+  (function () {
+    var box = document.getElementById("sInd"); if (!box) return;
+    function draw() {
+      box.innerHTML = (D.industries || []).map(function (x) { return '<button type="button" data-ind="' + esc(x[0]) + '" aria-pressed="' + (x[0] === IND) + '">' + esc(x[1]) + "</button>"; }).join("");
+      document.getElementById("sIndNote").textContent = IND ? (D.industry_note || "") : "업종을 고르면 순회점검·합동점검 주기와 업종 전용 업무가 맞게 켜지고 꺼집니다. 홈 달력에도 같이 적용됩니다.";
+    }
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest("[data-ind]"); if (!b) return;
+      IND = b.dataset.ind; try { if (IND) localStorage.setItem(IK, IND); else localStorage.removeItem(IK); } catch (e) {}
+      draw(); render();
+    });
+    draw();
+  })();
   // 세그먼트
   document.querySelectorAll("[data-seg]").forEach(function (g) {
     g.addEventListener("click", function (ev) {

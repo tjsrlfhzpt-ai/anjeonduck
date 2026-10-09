@@ -32,6 +32,17 @@
   }
   function routine(t) { return t.freq === "daily" || t.freq === "every2"; }
 
+  // 업종(법정 주기업무 달력과 같은 저장값): 업종이 정해진 업무는 고른 업종에 맞을 때만 보인다
+  var IK = "safetake.industry", IND = "", INDS = window.ST_IND || [];
+  try { IND = localStorage.getItem(IK) || ""; } catch (e) { IND = ""; }
+  if (!INDS.some(function (x) { return x[0] === IND; })) IND = "";
+  (function () {
+    if (!INDS.length) return;
+    var sel = document.createElement("select"); sel.className = "sort mc-ind"; sel.setAttribute("aria-label", "업종");
+    INDS.forEach(function (x) { var o = document.createElement("option"); o.value = x[0]; o.textContent = x[0] ? x[1] : "업종 전체"; if (x[0] === IND) o.selected = true; sel.appendChild(o); });
+    sel.addEventListener("change", function () { IND = sel.value; try { if (IND) localStorage.setItem(IK, IND); else localStorage.removeItem(IK); } catch (e) {} T = tasks(); draw(); });
+    box.insertBefore(sel, cal);
+  })();
   // 기본 업무 + 사용자가 법정 주기업무 달력에서 바꾼 값
   var mine = false;
   function tasks() {
@@ -44,7 +55,7 @@
       var o = ov[t.key] || {}, x = {}, k;
       for (k in t) x[k] = t[k];
       for (k in o) if (Object.prototype.hasOwnProperty.call(o, k)) x[k] = o[k];
-      x.on = Object.prototype.hasOwnProperty.call(o, "on") ? o.on : !t.off;
+      x.on = Object.prototype.hasOwnProperty.call(o, "on") ? o.on : (IND && Array.isArray(t.ind) ? t.ind.indexOf(IND) >= 0 : !t.off);
       if (x.on) out.push(x);
     });
     custom.forEach(function (c) {

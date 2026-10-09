@@ -1405,7 +1405,7 @@ def build(out, today):
   </div>
 </section>"""
     sched = load("data/schedule.json")
-    MO_KEYS = ("key", "title", "freq", "month", "day", "weekday", "qmonth", "hmonth", "m0", "anchor", "work", "time", "tool", "form", "off")
+    MO_KEYS = ("key", "title", "freq", "month", "day", "weekday", "qmonth", "hmonth", "m0", "anchor", "work", "time", "tool", "form", "off", "ind")
     mo_tasks = [{k: t[k] for k in MO_KEYS if k in t} for t in sched["tasks"]]
     mo_json = json.dumps(mo_tasks, ensure_ascii=False).replace("</", "<\\/")
     month_box = f"""<section class="side-box" id="moBox">
@@ -1416,7 +1416,7 @@ def build(out, today):
       <p class="hint" id="moMine" hidden style="margin-top:8px">이 브라우저에서 바꾼 주기업무 설정을 반영했습니다.</p>
       <p class="hint" style="margin-top:8px">날짜를 누르면 그날 업무가 바뀝니다. 날짜는 권장 기준일이며 <a href="tools/schedule/">법정 주기업무 달력</a>에서 사업장에 맞게 바꿀 수 있습니다.</p>
       <noscript><p class="hint">달력을 보려면 자바스크립트를 켜야 합니다.</p></noscript>
-      <script>window.ST_MO={mo_json};</script>
+      <script>window.ST_MO={mo_json};window.ST_IND={json.dumps(sched.get("industries", []), ensure_ascii=False)};</script>
       <script src="assets/home-cal.js?v={ASSET_VER}"></script>
     </section>"""
     # ---- 홈

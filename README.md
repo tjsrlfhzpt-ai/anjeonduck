@@ -306,3 +306,7 @@ python3 scripts/audit.py --online       # 국가법령정보센터 연혁과 공
 ## 안전보건 영상 (틱톡)
 
 `data/videos.json` 의 `items` 맨 위에 유튜브 영상 id(`youtube`, 대사 있는 판 — 있으면 이것으로 재생)·틱톡 게시물 id(`id`)·제목·근거를 넣고, 표지 이미지를 `assets/img/videos/<id>.webp`(세로 540×960 권장)로 두면 `/videos/` 페이지와 홈 오른쪽 '안전보건 영상' 칸에 나옵니다. 방문자가 재생을 누르기 전에는 틱톡에 접속하지 않고 자체 표지만 보여 주며, 누르면 틱톡 공식 플레이어(`tiktok.com/player/v1/<id>`)가 열립니다. 개인정보 처리방침에 해당 안내가 있습니다.
+
+## 업종별 달력
+
+`data/schedule.json` 의 업무에 `ind`(construction·manufacturing·service)를 주면 '법정 주기업무 달력'과 홈 달력에서 고른 업종에 맞을 때만 기본으로 켜집니다(`ind` 가 없는 업무는 모든 업종 공통). 업종 목록은 `industries`, 선택값은 브라우저의 `safetake.industry` 에 저장되어 두 달력이 함께 씁니다. 사용자가 직접 켜고 끈 설정이 업종보다 우선합니다.
