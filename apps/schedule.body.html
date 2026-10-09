@@ -239,7 +239,7 @@
       (t.cond ? '<p class="task-cond">대상: ' + esc(t.cond) + "</p>" : "") +
       (t.memo ? '<p class="task-memo">' + esc(t.memo) + "</p>" : "") +
       '<p class="task-links">' + links + '<button type="button" class="linkbtn" data-edit="' + esc(t.key) + '">설정 바꾸기</button></p></div>' +
-      (t.on && t.freq !== "daily" ? '<label class="task-done' + (late ? " late" : unsure ? " unsure" : "") + '"><input type="checkbox" data-done="' + esc(t.key) + '" data-p="' + esc(p.id) + '"' + (done ? " checked" : "") + '><span>' + (done ? "이번 회차 완료" + doneOn(t.key + "|" + p.id) : (late ? "기한 지남 " : unsure ? "했는지 확인 " : "이번 기한 ") + (p.due.getMonth() + 1) + "/" + p.due.getDate()) + "</span></label>" : "") +
+      (t.on && t.freq !== "daily" ? '<label class="task-done' + (late ? " late" : unsure ? " unsure" : "") + '"><input type="checkbox" data-done="' + esc(t.key) + '" data-p="' + esc(p.id) + '"' + (done ? " checked" : "") + '><span>' + (done ? "이번 회차 완료" + doneOn(t.key + "|" + p.id) : (late ? "기한 지남 " : unsure ? "실시 여부 확인 · 기한 " : "이번 기한 ") + (p.due.getMonth() + 1) + "/" + p.due.getDate()) + "</span></label>" : "") +
       "</div></li>";
   }
   function doneOn(k) { var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(S.done[k] || ""); return m ? " (" + (+m[1]) + "/" + (+m[2]) + ")" : ""; }
@@ -310,7 +310,7 @@
     var row = function (x, color) { return "<div><dt>" + esc(short(x.t)) + "</dt><dd style=\"white-space:nowrap" + (color ? ";color:" + color : "") + '">' + md(x.d) + "</dd></div>"; };
     document.getElementById("sDue").innerHTML = late.map(function (x) { return row(x, "var(--red)"); }).join("") + soon.slice(0, 10).map(function (x) { return row(x); }).join("") +
       (soon.length > 10 ? "<div><dt>그 밖에</dt><dd>" + (soon.length - 10) + "건</dd></div>" : "") +
-      (unsure.length ? '<div><dt>처음 쓰기 전 기한이 지난 업무 — 했는지 확인</dt><dd style="color:var(--orange)">' + unsure.length + "건</dd></div>" : "") +
+      (unsure.length ? '<div><dt>달력 사용 전 기한 경과 · 실시 여부 확인 필요</dt><dd style="color:var(--orange)">' + unsure.length + "건</dd></div>" : "") +
       (!late.length && !soon.length && !unsure.length ? "<div><dt>30일 안에 기한이 오는 업무가 없습니다.</dt><dd></dd></div>" : "");
   }
   function renderNow(list) {
@@ -324,7 +324,7 @@
     var col = function (cls, label, arr, none) { return '<div class="sc-col' + cls + '"><h3>' + label + " <b>" + arr.length + "건</b></h3>" + (arr.length ? "<ul>" + arr.map(li).join("") + "</ul>" : '<p class="none">' + none + "</p>") + "</div>"; };
     document.getElementById("sNow").innerHTML = '<div class="sc-now-h"><h2 class="h-sm">오늘 기준 할 일</h2><span class="muted">' + t0.getFullYear() + ". " + (t0.getMonth() + 1) + ". " + t0.getDate() + ". (" + WD[t0.getDay()] + ") · 끝낸 업무는 체크하면 다음 회차로 넘어갑니다</span></div>" +
       '<div class="sc-now-g">' + col(late.length ? " late" : "", "기한 지남", late, "없습니다.") + col("", "이번 주 (~" + md(wkEnd) + ")", week, "없습니다.") + col("", "이번 달 남은 기간 (~" + md(moEnd) + ")", month, wkEnd >= moEnd ? "이번 주에 포함됩니다." : "없습니다.") + "</div>" +
-      (unsure.length || nDaily ? '<p class="sc-now-f">' + [unsure.length ? "이 달력을 쓰기 전에 기한이 지난 업무 " + unsure.length + "건은 아래 목록에서 '했는지 확인'으로 표시됩니다." : "", nDaily ? "매일 하는 업무 " + nDaily + "건은 여기에 넣지 않았습니다." : ""].filter(Boolean).join(" ") + "</p>" : "");
+      (unsure.length || nDaily ? '<p class="sc-now-f">' + [unsure.length ? "달력을 쓰기 시작한 날 이전에 기한이 지난 업무 " + unsure.length + "건은 실시했는지 알 수 없어 아래 목록에 '실시 여부 확인'으로 표시했습니다. 이미 했다면 완료로 체크하세요." : "", nDaily ? "매일 하는 업무 " + nDaily + "건은 여기에 넣지 않았습니다." : ""].filter(Boolean).join(" ") + "</p>" : "");
   }
   function render() {
     document.querySelectorAll("[data-for=list]").forEach(function (el) { el.hidden = view !== "list"; });
