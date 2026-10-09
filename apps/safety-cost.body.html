@@ -139,7 +139,7 @@
     var rows = [];
     if (base <= 0 && supply <= 0) { $("rTotal").textContent = "—"; $("rDetail").innerHTML = "<div><dt>안내</dt><dd>금액을 넣으면 바로 계산합니다.</dd></div>"; $("copyBtn").disabled = true; return; }
     // 총공사금액 2천만 원 미만은 고시 적용 대상이 아님(제3조) — 총공사금액을 직접 넣은 경우에만 알 수 있음
-    if (state.mode === "total" && num($("total")) < 20000000) { $("err").textContent = "총공사금액이 2천만 원 미만이면 이 고시의 적용 대상이 아닙니다(제3조). 아래 금액은 참고용입니다."; $("err").hidden = false; }
+    if (state.mode === "total" && num($("total")) < 20000000) { $("err").textContent = "총공사금액이 2천만 원 미만이면 이 고시의 적용 대상에서 제외됩니다(제3조). 아래 금액은 참고용입니다."; $("err").hidden = false; }
     var result, used;
     if (supply > 0) {
       var inc = costOf(base + supply, r, health), exc = costOf(base, r, health);

@@ -658,7 +658,7 @@
                     <div class="pw-row" style="justify-content:flex-end;margin-bottom:6px">
                         <button type="button" id="addGas" class="pw-add" style="padding:2px 4px" @click="addGas"><i class="ph-bold ph-plus-circle"></i> 측정 추가</button>
                     </div>
-                    <p class="pw-hint" style="margin:0 0 8px"><b>적정공기</b>(<a class="pw-a" href="../../laws/krule/#j618" target="_blank" rel="noopener">기준규칙 제618조제3호</a>): 산소 18% 이상 23.5% 미만 · 이산화탄소 1.5% 미만 · 일산화탄소 30ppm 미만 · 황화수소 10ppm 미만. 작업을 시작하기 전(일시 중단 후 다시 시작할 때 포함) 측정합니다(제619조의2제1항). 가연성가스(%LEL)는 적정공기 항목이 아니며 사내 기준으로 적는 칸입니다.</p>
+                    <p class="pw-hint" style="margin:0 0 8px"><b>적정공기</b>(<a class="pw-a" href="../../laws/krule/#j618" target="_blank" rel="noopener">기준규칙 제618조제3호</a>): 산소 18% 이상 23.5% 미만 · 이산화탄소 1.5% 미만 · 일산화탄소 30ppm 미만 · 황화수소 10ppm 미만. 작업을 시작하기 전(일시 중단 후 다시 시작할 때 포함) 측정합니다(제619조의2제1항). 가연성가스(%LEL)는 사내 기준으로 적는 칸입니다(적정공기 기준 항목과 별도).</p>
                     <p v-if="!gas.length" class="cm-warn">측정 기록이 없습니다.</p>
                     <div v-for="(g, i) in gasView" :key="'g-' + i" class="pw-gas" :class="{ 'pw-gas-bad': g.j.bad }">
                         <div class="pw-gas-head"><span>측정 {{ i + 1 }}</span>
@@ -1237,7 +1237,7 @@
             j.bad = bads.length > 0;
             j.full = !j.bad && !missing.length && !invalid.length;
             j.why = bads.join(', ');
-            if (j.bad) { j.text = `적정공기 아님 — ${j.why}`; j.short = '부적정'; }
+            if (j.bad) { j.text = `적정공기 기준 벗어남 — ${j.why}`; j.short = '부적정'; }
             else if (invalid.length) { j.text = `숫자로 적어 주세요: ${invalid.join(', ')}`; j.short = ''; }
             else if (!j.any) { j.text = '측정값을 적으면 적정공기 기준과 비교합니다.'; }
             else if (missing.length) { j.text = `적은 값은 기준 이내 · 미측정: ${missing.join(', ')}`; j.short = '일부 측정'; }
@@ -1528,7 +1528,7 @@
                     if (!last) return { bad: false, has: false, why: '', summary: '측정 기록 없음' };
                     const r = last.r;
                     const vals = [r.o2 && `O₂ ${r.o2}%`, r.co2 && `CO₂ ${r.co2}%`, r.co && `CO ${r.co}ppm`, r.h2s && `H₂S ${r.h2s}ppm`, r.lel && `가연성 ${r.lel}%LEL`].filter(Boolean).join(' · ');
-                    return { bad: last.j.bad, has: true, full: last.j.full, why: last.j.why, summary: `${r.time ? r.time + ' ' : ''}${vals} → ${last.j.bad ? '적정공기 아님(작업 불가)' : last.j.full ? '적정공기 기준 이내' : '일부 항목만 측정'}${r.by ? ' · 측정자 ' + r.by : ''}` };
+                    return { bad: last.j.bad, has: true, full: last.j.full, why: last.j.why, summary: `${r.time ? r.time + ' ' : ''}${vals} → ${last.j.bad ? '적정공기 기준 벗어남(작업 불가)' : last.j.full ? '적정공기 기준 이내' : '일부 항목만 측정'}${r.by ? ' · 측정자 ' + r.by : ''}` };
                 });
                 const gasBlankRows = computed(() => Math.max(0, 3 - gas.value.length));
 
@@ -1702,7 +1702,7 @@
                         { sid: 'people', title: '작업 인원 · 보호구', sum: `작업자 ${workerCount.value}명 · 보호구 ${f.ppe.length + (f.ppeEtc.trim() ? 1 : 0)}종`, ok: workerCount.value > 0 || f.ppe.length > 0 },
                         { sid: 'check', title: '작업 전 안전조치 확인', sum: `예 ${t.Y} / 아니오 ${t.N} / 미확인 ${t.blank}` + (t.NA ? ` / 해당없음 ${t.NA}` : ''), ok: t.total > 0 && !t.blank && !t.N }
                     ];
-                    if (showGas.value) list.push({ sid: 'gas', title: '산소·유해가스 농도 측정', sum: gas.value.length ? `측정 ${gas.value.length}회` + (gs.bad ? ' · 적정공기 아님' : gs.full ? ' · 적정공기 기준 이내' : '') : '측정 기록 없음', ok: gs.has && gs.full && !gs.bad });
+                    if (showGas.value) list.push({ sid: 'gas', title: '산소·유해가스 농도 측정', sum: gas.value.length ? `측정 ${gas.value.length}회` + (gs.bad ? ' · 적정공기 기준 벗어남' : gs.full ? ' · 적정공기 기준 이내' : '') : '측정 기록 없음', ok: gs.has && gs.full && !gs.bad });
                     list.push(
                         { sid: 'energy', title: '에너지 차단 · 관련 문서', sum: [f.loto.trim() && '차단 내용 적음', f.refRisk && '위험성평가', f.refTbm && 'TBM', f.conditions.trim() && '허가 조건'].filter(Boolean).join(' · ') || '미입력', ok: !!(f.loto.trim() || f.refRisk || f.refTbm || f.conditions.trim()) },
                         { sid: 'appr', title: '결재란 · 문서 제목 · 하단 문구', sum: (appr.value.hide ? '결재란 없음' : apprView.value.map(a => a.t || '(이름 없음)').join(' → ')), ok: appr.value.hide || apprView.value.every(a => a.name) },

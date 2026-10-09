@@ -525,7 +525,7 @@
                         <label class="pt-ck"><input id="editItems" type="checkbox" v-model="editItems"> 항목 고치기 (문구 · 추가 · 삭제 · 순서)</label>
                         <button type="button" id="openEx" @click="openExModal" class="pt-btn" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px"><i class="ph-fill ph-magic-wand"></i> 업종별 예시 항목</button>
                     </div>
-                    <p class="pt-hint pt-hint-red">직접 확인한 항목만 표시하세요. 점검 항목은 법령에 정해진 것이 아니라 사업장에 맞게 고쳐 쓰는 예시입니다.</p>
+                    <p class="pt-hint pt-hint-red">직접 확인한 항목만 표시하세요. 점검 항목은 사업장에 맞게 고쳐 쓰는 실무 예시입니다.</p>
                     <div id="itemsCard">
                     <template v-for="(g, gi) in groups" :key="'g-' + gi">
                         <div class="pt-grp" v-if="editItems || g.shown">
@@ -958,7 +958,7 @@
                 <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
                     <div>
                         <h3 id="exTitle" class="font-bold text-base text-slate-900">업종별 점검 항목 예시</h3>
-                        <p class="text-xs text-slate-500">법정 항목이 아닌 예시입니다. 적용한 뒤 사업장 작업에 맞게 고쳐 쓰세요.</p>
+                        <p class="text-xs text-slate-500">실무 예시 항목입니다. 적용한 뒤 사업장 작업에 맞게 고쳐 쓰세요.</p>
                     </div>
                     <button type="button" id="exClose" @click="isExModalOpen = false" aria-label="닫기" class="text-slate-400 hover:text-slate-700 p-1"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>

@@ -39,7 +39,7 @@
       </div>
       <details class="lawbox" id="sRowsBox"><summary><strong>표마다 적용할 업종 행 확인·변경</strong> <span class="muted" id="sRowsSum"></span></summary><div class="stack" id="sRows" style="margin-top:10px"></div></details>
     </form>
-    <p class="sc-disc" role="note">이 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 관할 행정기관의 공식 해석·처분을 대체하지 않습니다.</p>
+    <p class="sc-disc" role="note">이 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 최종 판단은 관할 행정기관의 해석과 처분을 따릅니다.</p>
     <div class="sc-sum" id="sSum" aria-live="polite"></div>
     <div class="btns no-print"><button type="button" class="btn btn-sm btn-ghost" id="sCopy">결과 요약 복사</button><button type="button" class="btn btn-sm btn-ghost" id="sPrint">결과 인쇄</button><button type="button" class="btn btn-sm btn-ghost" id="sClear">입력 지우기</button></div>
     <p class="hint no-print">입력한 내용은 이 브라우저에만 저장되어 다음에 열어도 남아 있습니다.</p>
@@ -150,7 +150,7 @@
     if ($("sOffice").checked) EX.push(D.b1.office);
     if (N != null && N < 5) EX.push(D.b1.under5);
     if ($("sPub").checked) EX.push(D.b1.public);
-    function noRow(t, byl) { return manual[t] ? [EXC, "별표 " + byl + "에 해당하는 사업이 없다고 직접 선택함 — 별표에 없는 사업은 대상이 아닙니다."] : [CHK, "업종명으로 별표 " + byl + "의 행을 찾지 못했습니다. 위 '표마다 적용할 업종 행'에서 직접 고르세요."]; }
+    function noRow(t, byl) { return manual[t] ? [EXC, "별표 " + byl + "에 해당하는 사업이 없다고 직접 선택함 — 별표에 없는 사업은 대상에서 제외됩니다."] : [CHK, "업종명으로 별표 " + byl + "의 행을 찾지 못했습니다. 위 '표마다 적용할 업종 행'에서 직접 고르세요."]; }
     var NE = num("sEnt") != null ? num("sEnt") : N;
     var yes = YES("선임 대상"), no = EXC, need = '<span class="sv sv-chk">확인 필요 · 입력</span>';
     grp("공통 의무 (영 별표 1의 적용 제외에 해당하지 않는 한)");

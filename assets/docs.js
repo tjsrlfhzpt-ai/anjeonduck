@@ -185,7 +185,7 @@
   function openPad(o, done) {
     var m = document.createElement("div");
     m.className = "ad-modal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-label", o.title);
-    m.innerHTML = '<div class="ad-box"><h2>' + esc(o.title) + '</h2><p>손가락이나 마우스로 아래 칸에 서명하세요. 서명 이미지는 이 기기의 브라우저에만 저장됩니다.</p><p style="font-size:12.5px;color:#6B788C">이 기능은 인쇄용 서명 표시 기능이며, 모든 법정 전자서명 또는 전자문서 제출 요건을 충족한다는 의미가 아닙니다. 기관의 전자 제출 시스템이 요구하는 인증·서명은 따로 확인하세요.</p>' +
+    m.innerHTML = '<div class="ad-box"><h2>' + esc(o.title) + '</h2><p>손가락이나 마우스로 아래 칸에 서명하세요. 서명 이미지는 이 기기의 브라우저에만 저장됩니다.</p><p style="font-size:12.5px;color:#6B788C">이 기능은 인쇄용 서명 이미지를 넣는 기능입니다. 기관 전자 제출 시스템이 요구하는 인증·서명은 해당 기관 안내를 따르세요.</p>' +
       '<canvas class="ad-cv" aria-label="서명 칸"></canvas>' +
       '<div class="ad-row">' + (o.name ? '<button type="button" class="ad-btn g" data-b="stamp">성명 도장으로</button>' : "") +
       (o.has ? '<button type="button" class="ad-btn r" data-b="remove">서명 지우기</button>' : "") +

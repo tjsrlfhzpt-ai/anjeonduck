@@ -287,7 +287,7 @@ def law_page(k, laws, rev, byl_href, law_url, manifest=None, today=""):
     <div class="lbody">{"".join(body)}</div>
     {add_html}
     <p class="src-line">원문: 국가법령정보센터 <a href="{e(d["url"])}" target="_blank" rel="noopener">{e(d["law"])} ({e(d["version"])}) ↗</a> · 확인일 {e(d["checked"])}.
-    별표 본문과 2024년 이전 부칙은 원문에서 확인하세요. 법령 원문은 저작권 보호 대상이 아닙니다(저작권법 제7조). 파란 글씨 조문 번호를 누르면 해당 조문으로 이동합니다.</p>
+    별표 본문과 2024년 이전 부칙은 원문에서 확인하세요. 법령 원문은 저작권법 제7조에 따라 누구나 자유롭게 이용할 수 있습니다. 파란 글씨 조문 번호를 누르면 해당 조문으로 이동합니다.</p>
   </section>
 </div>
 <script>{LAW_JS}</script>"""
@@ -445,7 +445,7 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html, m
   <ul class="lups">{up or '<li class="lup"><div></div><div><p>확인된 시행 예정 개정이 없습니다.</p></div></li>'}</ul>
 </section>
 <section class="wrap lstat" id="bills">
-  <div class="sec-head"><div><h2>입법 동향</h2><p>국회 통과안·입법예고는 <strong>현행 법령이 아닙니다.</strong> 공포돼야 법령이 되고, 내용과 시행일은 공포문으로 확정됩니다.</p></div></div>
+  <div class="sec-head"><div><h2>입법 동향</h2><p>국회 통과안·입법예고는 <strong>공포돼야 법령이 됩니다.</strong> 내용과 시행일은 공포문으로 확정됩니다.</p></div></div>
   <ul class="lups">{bills or '<li class="lup"><div></div><div><p>등록된 입법 동향이 없습니다.</p></div></li>'}</ul>
 </section>"""
     return f"""

@@ -363,7 +363,7 @@
       } else form = h("p", { class: "cm-note" }, word + "을 쓰려면 ", h("a", { href: url("account", { next: location.pathname + location.search }) }, "로그인"), "이 필요합니다.");
       show(tabs(post.board), art, h("h3", { class: "h-sm cm-cms-h" }, word + " " + cms.length), cms.length ? clist : h("p", { class: "hint" }, "아직 " + word + "이 없습니다."), form,
         job ? h("p", { class: "src-note" }, "이 공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않습니다. 지원 전 회사와 조건을 직접 확인하고, 금전이나 통장·비밀번호를 요구하면 응하지 말고 신고해 주세요.") : null,
-        qna ? h("p", { class: "src-note" }, "답변은 회원 개인의 의견이며 법령 해석이나 공식 답변이 아닙니다. 법 적용 여부는 법령 원문과 고용노동부 등 소관 기관에서 확인하세요.") : null,
+        qna ? h("p", { class: "src-note" }, "답변은 회원 개인의 의견입니다. 법 적용 여부는 법령 원문과 고용노동부 등 소관 기관에서 확인하세요.") : null,
         h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("", { b: post.board }) }, "목록으로")));
     }, function (e) { show(note(msg(e), "err")); });
   }

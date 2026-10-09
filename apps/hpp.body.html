@@ -100,7 +100,7 @@
     var ind = $("hInd").value, kw = num("hKw");
     if (ind !== "" && act) {
       if (kw == null) need.push("1번: 전기 계약용량을 넣으세요.");
-      else if (kw < D.kw_min) notes.push("1번: 전기 계약용량 " + kw + "kW — 300kW 미만이라 제1호 대상이 아닙니다.");
+      else if (kw < D.kw_min) notes.push("1번: 전기 계약용량 " + kw + "kW — 300kW 미만이라 제1호 대상에 해당하지 않습니다.");
       else if (act === "chg") {
         var ck = num("hChgKw");
         if (ck == null) need.push("1번: 변경되는 설비의 전기 정격용량 합계를 넣으세요.");
@@ -141,16 +141,16 @@
       if (groups.con) body += "<h3>제출 — 건설공사</h3><p class=\"hint\">" + esc(S.con) + '</p><p class="hint" style="margin-top:6px">' + esc(P.con) + "</p>";
       body += "<h3>그 밖에</h3><ul class=\"hp-list\">" + (groups.mfg1 || groups.mfg2 ? "<li>" + esc(S.writer) + "</li>" : "") + (groups.mfg1 && groups.mfg2 ? "<li>" + esc(S.exempt) + "</li>" : "") + "<li>" + esc(S.psm) + "</li><li>" + esc(S.keep) + " — " + esc(P.keep) + "</li></ul>";
       body += '<p class="hint" style="margin-top:10px"><a href="../penalty/?q=' + encodeURIComponent("제42조") + '">과태료 부과기준에서 제42조 항목 보기 →</a></p>';
-    } else if (!need.length) body += "<p class=\"hint\">입력한 내용으로는 제출 대상이 아닙니다. 계획이 바뀌거나 설비가 추가되면 다시 확인하세요.</p>";
+    } else if (!need.length) body += "<p class=\"hint\">입력한 내용으로는 제출 대상에 해당하지 않습니다. 계획이 바뀌거나 설비가 추가되면 다시 확인하세요.</p>";
     if (need.length) body += "<h3>더 넣어야 할 값</h3><ul class=\"hp-list\">" + need.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
     if (notes.length) body += "<h3>참고</h3><ul class=\"hp-list\">" + notes.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
-    var vText = yes ? "제출 대상" : need.length ? "판정 보류" : "대상 아님";
+    var vText = yes ? "제출 대상" : need.length ? "판정 보류" : "대상 해당 없음";
     lastText = "[유해위험방지계획서 제출 대상 자가진단] " + vText + "\n" +
       (yes ? "해당 근거:\n" + hits.map(function (h) { return "- " + h.t; }).join("\n") + "\n" + (groups.mfg1 || groups.mfg2 ? "제출(제조업 등): " + S.mfg + "\n" + P.mfg + "\n" : "") + (groups.con ? "제출(건설공사): " + S.con + "\n" + P.con + "\n" : "") : "") +
       (need.length ? "더 넣어야 할 값:\n" + need.map(function (x) { return "- " + x; }).join("\n") + "\n" : "") +
       (notes.length ? "참고:\n" + notes.map(function (x) { return "- " + x; }).join("\n") + "\n" : "") + "(자가진단 참고 결과 · 원문 확인 " + D.checked + ")";
     $("hCopy").disabled = $("hPrint").disabled = false;
-    $("hOut").innerHTML = '<div class="hp-verdict ' + (yes ? "yes" : need.length ? "" : "no") + '"><b>' + (yes ? "제출 대상" : need.length ? "판정 보류" : "대상 아님") + '</b><span class="hint">' + (yes ? hits.length + "개 근거에 해당" : need.length ? "값을 더 넣어 주세요" : "입력 기준") + '</span></div><div class="hp-body">' + body + "</div>";
+    $("hOut").innerHTML = '<div class="hp-verdict ' + (yes ? "yes" : need.length ? "" : "no") + '"><b>' + (yes ? "제출 대상" : need.length ? "판정 보류" : "대상 해당 없음") + '</b><span class="hint">' + (yes ? hits.length + "개 근거에 해당" : need.length ? "값을 더 넣어 주세요" : "입력 기준") + '</span></div><div class="hp-body">' + body + "</div>";
   }
   var KEY = "safetake.hpp.v1", ready = false, lastText = "";
   function save() {

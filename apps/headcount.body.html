@@ -131,9 +131,9 @@
     else {
       var half = under * 2 < days; // 미달 일수 < 가동일수의 1/2
       if (avgOk && half) { verdict = "적용 사업장"; why = "평균이 기준 이상이고, 미달 일수가 절반 미만입니다."; }
-      else if (avgOk && !half) { verdict = "적용 사업장 아님"; why = "평균은 기준 이상이지만 미달 일수가 절반 이상입니다(제7조의2제2항제2호)."; }
+      else if (avgOk && !half) { verdict = "적용 사업장 해당 없음"; why = "평균은 기준 이상이지만 미달 일수가 절반 이상입니다(제7조의2제2항제2호)."; }
       else if (!avgOk && half) { verdict = "적용 사업장"; why = "평균은 기준 미만이지만 미달 일수가 절반 미만입니다(제7조의2제2항제1호)."; }
-      else { verdict = "적용 사업장 아님"; why = "평균이 기준 미만이고 미달 일수도 절반 이상입니다."; }
+      else { verdict = "적용 사업장 해당 없음"; why = "평균이 기준 미만이고 미달 일수도 절반 이상입니다."; }
     }
     $("hVerdict").textContent = verdict;
     var avgTxt = (Math.floor(avg * 100 + 1e-9) / 100).toLocaleString("ko-KR") + "명";

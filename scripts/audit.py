@@ -179,7 +179,7 @@ def check_site(site_dir):
         if t.get("kind") != "page" and "실무용 보조양식" not in h:
             ERR.append(f"도구 {t['id']}: 양식 지위 표기 없음")
     need = {
-        "tools/selection/index.html": ["관할 행정기관의 공식 해석·처분을 대체하지 않습니다"],
+        "tools/selection/index.html": ["최종 판단은 관할 행정기관의 해석과 처분을 따릅니다"],
         "tools/cvd/index.html": ["참고용 계산 기능", "고용상 불이익"],
         "tools/penalty/index.html": ["관할 행정기관이 판단합니다"],
         "tools/headcount/index.html": ["적용 법령별로 별도 확인이 필요합니다"],

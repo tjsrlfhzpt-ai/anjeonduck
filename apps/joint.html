@@ -467,7 +467,7 @@
                 <!-- 4. 점검표 -->
                 <jt-step v-if="S.check" :s="S.check">
                     <p v-for="(c, i) in chk.check" :key="'cc-' + i" :class="['jt-chk', c.ok ? 'cm-ok' : 'cm-warn']">{{ c.text }}</p>
-                    <p class="jt-hint" style="color:#be123c">아래 점검 항목은 SafePlum이 만든 <b style="color:#be123c">예시(사내 기준용)</b>이며 법령에 정해진 점검 항목이 아닙니다. 사업장 작업에 맞게 고치거나 지우고, 실제로 점검한 결과만 표시하세요.</p>
+                    <p class="jt-hint" style="color:#be123c">아래 점검 항목은 SafePlum이 만든 <b style="color:#be123c">예시(사내 기준용)</b>이며, 사업장 작업에 맞춰 쓰는 실무 예시 항목입니다. 사업장 작업에 맞게 고치거나 지우고, 실제로 점검한 결과만 표시하세요.</p>
                     <div class="jt-row">
                         <div class="jt-stat" id="jStat">
                             <span class="s-ok">적합 {{ stat.ok }}</span><span class="s-bad">부적합 {{ stat.bad }}</span><span>해당없음 {{ stat.na }}</span><span class="s-todo" v-if="stat.todo">미점검 {{ stat.todo }}</span>
@@ -915,7 +915,7 @@
                         <div class="bg-purple-100 text-purple-700 p-1.5 rounded-lg"><i class="ph-bold ph-magic-wand text-lg"></i></div>
                         <div>
                             <h3 id="exTitle" class="font-bold text-base text-slate-900">점검 항목 예시 세트</h3>
-                            <p class="text-xs text-slate-500">법령에 정해진 항목이 아닌 예시입니다. 적용한 뒤 사업장에 맞게 고쳐 쓰세요.</p>
+                            <p class="text-xs text-slate-500">실무 예시 항목입니다. 적용한 뒤 사업장에 맞게 고쳐 쓰세요.</p>
                         </div>
                     </div>
                     <button type="button" @click="isExModalOpen = false" aria-label="닫기" class="text-slate-400 hover:text-slate-700 p-1"><i class="ph-bold ph-x text-lg"></i></button>

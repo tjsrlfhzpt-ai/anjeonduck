@@ -138,7 +138,7 @@ def brief_article(b, rel):
     todo_sec = f'<section class="br-todo"><h3>이번 주 챙길 일</h3><ul class="bul">{todo}</ul></section>' if todo else ""
     return (f'{lead}{"".join(item(it) for it in b["items"])}{todo_sec}'
             f'<p class="src-note">{BRIEF_PENDING if b.get("review") != "verified" else ""}SafePlum이 공식 원문을 요약한 참고 콘텐츠입니다. 원문을 옮겨 싣지 않으며, 숫자·조문·시행일은 공식 출처 원문이 우선합니다. '
-            f'국회 통과안·입법예고는 현행 법령이 아닙니다. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
+            f'국회 통과안·입법예고 내용은 공포·시행 때 확정됩니다. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
 
 
 # ---------------------------------------------------------------- 검증
@@ -416,7 +416,7 @@ def resource_detail(r, all_res, idx, files, site):
       {tool}
       {file_note}
       <button class="btn btn-block btn-ghost fav-big" type="button" data-fav="{e(r["id"])}" aria-pressed="false">☆ 즐겨찾기</button>
-      <p class="hint">법령 서식은 저작권 보호 대상이 아닙니다(저작권법 제7조). 개정되면 원본 버튼이 최신본을 엽니다.</p>
+      <p class="hint">법령 서식은 저작권법 제7조에 따라 누구나 자유롭게 이용할 수 있습니다. 개정되면 원본 버튼이 최신본을 엽니다.</p>
     </div>
   </aside>
 </div>"""
@@ -773,7 +773,7 @@ def lawver_html(tool_id, rel_root, fallback=""):
     warn_s = ' <span class="stale">· 확인일이 오래되었습니다 — 공식 원문 재확인 필요</span>' if stale(oldest) else ""
     return (f'<aside class="wrap"><p class="lawver"><b>법적 근거 확인일</b> {e(oldest)}{warn_s}<br><b>적용 법령 버전</b> ' + " / ".join(rows)
             + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#status">법령 버전·시행 예정 보기</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a>'
-            + '<br>이 화면의 판정·계산·예시 문구는 SafePlum이 정리한 참고 자료이며 법령 원문이 아닙니다.</p></aside>')
+            + '<br>이 화면의 판정·계산·예시 문구는 SafePlum이 법령 원문을 바탕으로 정리한 참고 자료입니다.</p></aside>')
 
 
 def operator_html(site, rel_root):
@@ -886,9 +886,9 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     <ul class="ft-notes">
       <li>서식·법령은 국가법령정보센터 등 기관 원본으로 연결됩니다.</li>
       <li>채용 조건과 마감일은 공고 원문이 우선합니다.</li>
-      <li>게시판의 글과 답변은 회원 개인의 의견이며 SafePlum의 공식 견해나 법령 해석이 아닙니다. <a href="{rel_root}board/rules/">이용수칙</a> · <a href="{rel_root}privacy/">개인정보 처리방침</a></li>
+      <li>게시판의 글과 답변은 회원 개인의 의견입니다. 법령 해석은 원문과 관할 기관 안내를 기준으로 하세요. <a href="{rel_root}board/rules/">이용수칙</a> · <a href="{rel_root}privacy/">개인정보 처리방침</a></li>
       <li>작성 도구는 입력한 문서 내용을 SafePlum 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
-      <li>판정·계산 결과는 자가진단용 참고 자료이며 행정기관의 공식 해석·처분을 대체하지 않습니다. <a href="{rel_root}legal/">법령정보·면책 안내</a></li>
+      <li>판정·계산 결과는 자가진단용 참고 자료이며, 최종 판단은 관할 행정기관의 해석을 따릅니다. <a href="{rel_root}legal/">법령정보·면책 안내</a></li>
     </ul>
     <p class="ft-op">{operator_html(site, rel_root)}</p>
     <p class="ft-disc">Disclaimer: SafePlum에서 제공하는 안전보건 정보 및 문서 양식은 현장 참고용이며, 실제 적용 시 발생하는 법적 책임은 지지 않습니다.</p>
@@ -1049,9 +1049,9 @@ def acc_trend_html(auto_acc, today, days=7):
         body = f'<p class="hint">최근 {days}일 동안 게시된 사고사망 속보가 없습니다.</p>'
         badge = f'<span class="badge badge-muted">최근 {days}일 0건</span>'
     return (f'<div class="side-box acc-box"><div class="acc-head"><h2 class="h-sm">사고사망 속보 동향</h2>{badge}</div>{body}'
-            f'<details class="acc-src"><summary>공단 속보 기준 · 자동 분류 · 공식 통계 아님</summary>'
+            f'<details class="acc-src"><summary>안전보건공단 속보 기준 · SafePlum 자동 집계</summary>'
             f'<p>출처: 한국산업안전보건공단 사고사망 속보(공공데이터포털 API) · 수집일 {e(auto_acc.get("fetched", ""))}. '
-            f'공단이 속보로 게시한 건을 발생일·재해유형으로 자동 분류한 것으로, 공식 산업재해 통계가 아니며 누락·분류 오류가 있을 수 있습니다.</p></details></div>')
+            f'공단이 속보로 게시한 건을 발생일·재해유형으로 자동 분류한 참고 집계입니다. 공식 산업재해 통계는 고용노동부 발표를 확인하세요. 누락·분류 오류가 있을 수 있습니다.</p></details></div>')
 
 
 def sec_head(title, href=None, more="전체 보기", sub=None):
@@ -1285,12 +1285,12 @@ def duck_signs_html(site, write):
   <p class="btns" style="margin-top:14px"><button type="button" class="btn" onclick="window.print()">A4 인쇄 · PDF 저장</button>
   <a class="btn btn-ghost" href="../../../{e(it["print"])}" download="SafePlum_{e(it["title"])}.png">원본 이미지 내려받기</a>
   {f'<a class="btn btn-ghost" href="../../../{e(it["law_href"])}">근거 조문 보기</a>' if it.get("law_href") else ""}</p>
-  <p class="hint" style="margin-top:10px">근거: {e(it.get("basis", ""))} · 법정 안전보건표지(시행규칙 별표 6)가 아니라 현장 안내용 게시물입니다.</p>
+  <p class="hint" style="margin-top:10px">근거: {e(it.get("basis", ""))} · 현장 안내용 게시물입니다. 법정 안전보건표지(시행규칙 별표 6)는 별도로 붙여 주세요.</p>
 </div></section>
 <div class="dk-sheet"><img src="../../../{e(it["print"])}" alt="{e(it["title"])} 안내 게시물"></div>"""
         write(f"{pid}index.html", page(site, "../../../", pid, f'{it["title"]} 안내 게시물', body, desc=it.get("desc"), active="resources/"))
     return (f'<section class="dk-sec" id="duck"><div class="dk-head"><div><h2>SafePlum 현장 안내 게시물</h2>'
-            f'<p>SafePlum이 자체 제작·자체 번역한 다국어 안내 게시물입니다(공식 번역 아님). 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
+            f'<p>SafePlum이 자체 제작·SafePlum이 번역한 다국어 안내 게시물입니다. 누르면 A4 한 장으로 인쇄할 수 있습니다. 법정 안전보건표지(아래 40종)를 대신하지는 않습니다.</p></div></div>'
             f'<ul class="dk-grid">{"".join(cards)}</ul></section>')
 
 
@@ -1784,7 +1784,7 @@ def build(out, today):
     <li>욕설·혐오·차별 표현, 음란물, 불법 행위를 권하거나 법 위반을 숨기는 방법을 알려 주는 글</li>
   </ul>
   <h2>3. 질문과 답변</h2>
-  <p>Q&amp;A의 답변은 회원 개인의 경험과 의견이며, SafePlum의 공식 견해나 법령 해석이 아닙니다. 답변할 때는 근거(법 조문·고시·공식 자료)를 함께 적어 주세요. 법 적용 여부와 행정 처분에 관한 판단은 법령 원문과 고용노동부 등 소관 기관에서 확인해야 합니다.</p>
+  <p>Q&amp;A의 답변은 회원 개인의 경험과 의견입니다. 법령 해석은 원문과 관할 기관 안내를 기준으로 하세요. 답변할 때는 근거(법 조문·고시·공식 자료)를 함께 적어 주세요. 법 적용 여부와 행정 처분에 관한 판단은 법령 원문과 고용노동부 등 소관 기관에서 확인해야 합니다.</p>
   <h2>4. 채용공고</h2>
   <p>채용공고 게시판에는 회원이 자기 회사(또는 채용을 맡은 회사)의 안전·보건 직무 공고를 직접 올립니다. SafePlum은 구인자와 구직자를 소개·알선하지 않으며, 공고 내용의 사실 여부를 보증하지 않습니다.</p>
   <ul class="bul">
@@ -1882,14 +1882,14 @@ def build(out, today):
   <div class="table-wrap"><table class="lvt"><thead><tr><th>법령·고시</th><th>SafePlum이 쓰는 버전</th><th>공식 확인일</th><th>원문</th></tr></thead><tbody>{src_rows}</tbody></table></div>
   <p>법적 근거로는 국가법령정보센터, 고용노동부, 한국산업안전보건공단 등 공식 기관의 자료만 사용합니다. 언론 보도는 '참고 보도'로만 표시하며 법령·정책의 근거로 쓰지 않습니다. 확인일로부터 {int(man.get("stale_after_days", 45))}일이 지나면 화면에 '공식 원문 재확인 필요'가 표시됩니다.</p>
   <h2 id="limit">3. 자가진단 도구의 한계</h2>
-  <p>적용범위 판정, 유해위험방지계획서 대상 확인, 기계·설비 의무 조회 등의 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 관할 행정기관의 공식 해석·처분을 대체하지 않습니다. 업종 분류, 상시근로자 수 산정, 도급 관계처럼 사실관계 판단이 필요한 부분은 도구가 대신 판단할 수 없습니다. 결과는 적용 · 조건부 · 확인 필요 · 적용 제외 네 단계로만 표시합니다.</p>
+  <p>적용범위 판정, 유해위험방지계획서 대상 확인, 기계·설비 의무 조회 등의 결과는 입력조건과 현행 법령 데이터를 이용한 자가진단 결과이며, 최종 판단은 관할 행정기관의 해석과 처분을 따릅니다. 업종 분류, 상시근로자 수 산정, 도급 관계처럼 사실관계 판단이 필요한 부분은 도구가 대신 판단할 수 없습니다. 결과는 적용 · 조건부 · 확인 필요 · 적용 제외 네 단계로만 표시합니다.</p>
   <h2 id="calc">4. SafePlum 계산 결과의 성격</h2>
   <p>과태료, 산업안전보건관리비, 상시근로자 수, 교육시간, 체감온도 등의 계산 결과는 참고 계산입니다. 과태료의 최종 처분 금액은 실제 위반사실과 감경·가중사유를 기준으로 관할 행정기관이 판단합니다. 상시근로자 수 산정방법은 적용 법령별로 별도 확인이 필요합니다. 위험성평가의 가능성·중대성 척도와 등급 구간은 'SafePlum 기본 위험성평가 예시 기준'이며 사업장이 정한 방법으로 바꿔 쓸 수 있습니다.</p>
   <h2 id="health">5. 건강정보 도구 안내</h2>
-  <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 참고용이며 의학적 진단이 아닙니다. 업무 적합성과 사후관리 판단은 의사 등 보건의료 전문가의 평가가 필요하고, 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
+  <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 참고용이며, 진단은 의사 등 보건의료 전문가가 합니다. 업무 적합성과 사후관리 판단은 의사 등 보건의료 전문가의 평가가 필요하고, 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
   <h2 id="forms">6. SafePlum 자체 양식의 법적 지위</h2>
-  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafePlum 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 법정 지정서식이 아니며, 관련 조문을 참고해 만든 보조양식입니다. <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 그대로 쓰는 것이 아니라 실제 내용으로 바꿔야 하는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
-  <p>결재란의 서명은 인쇄용 서명 이미지이며, 모든 법정 전자서명 또는 전자문서 제출 요건을 충족한다는 의미가 아닙니다.</p>
+  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafePlum 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 관련 조문을 참고해 만든 실무용 보조양식입니다(법령 별지 서식과는 별개). <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 실제 내용으로 바꿔 쓰는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
+  <p>결재란의 서명은 인쇄용 서명 이미지입니다. 기관에 전자로 제출할 때는 해당 기관이 정한 인증·서명 방식을 따르세요.</p>
   <h2 id="links">7. 외부 링크 책임범위</h2>
   <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, SafePlum은 외부 사이트의 내용을 보증하지 않습니다.</p>
   <h2 id="jobs">8. 채용공고 책임범위</h2>
@@ -2063,7 +2063,7 @@ def build(out, today):
     <ul class="rlist" data-list data-page-size="30">{''.join(resource_row(r, site, '../') for r in resources)}</ul>
     <p class="more-wrap" data-more-wrap hidden><button type="button" class="btn btn-ghost btn-block" data-more>더 보기</button></p>
     {empty_box("조건에 맞는 서식·자료가 없습니다. 낱말을 줄이거나 다른 말로 찾아보세요.", '<div class="btns"><button type="button" class="btn btn-sm" data-reset>전체 자료 보기</button><a class="btn btn-sm btn-ghost" href="library/" data-q-href="library/">공단 자료실에서 찾기</a><a class="btn btn-sm btn-ghost" href="../tools/">무료 도구에서 찾기</a></div>').replace('class="empty"', 'class="empty" data-empty hidden')}
-    <p class="src-line" style="margin-top:14px">법정 서식·별표 목록 확인일 {e(load("data/lawforms.json")["checked"])} · 국가법령정보센터 법령 본문의 별표·서식 목록 기준. 법령 원문은 저작권 보호 대상이 아닙니다(저작권법 제7조).</p>
+    <p class="src-line" style="margin-top:14px">법정 서식·별표 목록 확인일 {e(load("data/lawforms.json")["checked"])} · 국가법령정보센터 법령 본문의 별표·서식 목록 기준. 법령 원문은 저작권법 제7조에 따라 누구나 자유롭게 이용할 수 있습니다.</p>
   </section>
 </div>"""
     for pid, src, name, title, desc in [
