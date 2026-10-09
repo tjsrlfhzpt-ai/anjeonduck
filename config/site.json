@@ -448,6 +448,8 @@
   },
   "features": {
     "public_api": false,
+    "job_posting": false,
+    "_job_posting_comment": "job_posting: 회원 채용공고 등록. false 면 등록 버튼·메뉴·글쓰기 화면에서 채용공고를 닫습니다(이미 올라온 공고 열람·수정·삭제는 그대로). 서버에서도 막으려면 supabase/jobs_pause.sql 실행. 다시 열 때는 true + jobs_pause.sql 맨 아래 '다시 열기' 실행",
     "_comment": "public_api: 공공데이터포털(정책뉴스·공공기관 채용·사고사망 속보) 수집·안전뉴스 메뉴. 켜려면 true + 저장소 변수 PUBLIC_API=true"
   },
   "_base_url_comment": "커스텀 도메인이 정해지면 https://도메인 을 넣습니다. 비어 있으면 canonical·og:url·sitemap 을 만들지 않고 모든 링크를 상대 경로로 둡니다.",

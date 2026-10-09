@@ -7,6 +7,8 @@
   if (!root) return;
   var PAGE = root.dataset.page, REL = CFG.root || "../", PER = 20;
   var BOARDS = { free: "커뮤니티", qna: "Q&A", job: "채용공고" };
+  // 회원 채용공고 등록을 열어 둘지(config/site.json features.job_posting). 닫혀 있어도 이미 올라온 공고의 열람·수정·삭제는 된다.
+  var JOB_POST = CFG.jobPost !== false, JOB_PAUSED = "채용공고 등록은 현재 준비 중입니다. 준비가 끝나면 다시 열겠습니다.";
   var ERR = {
     LOGIN_REQUIRED: "로그인이 필요합니다.", RATE_LIMIT: "너무 빠르게 연속으로 등록했습니다. 잠시 뒤 다시 시도하세요.",
     DAILY_LIMIT: "하루 등록 한도를 넘었습니다. 내일 다시 시도하세요.", SUSPENDED: "글쓰기가 정지된 계정입니다. 마이페이지에서 기간과 사유를 확인할 수 있습니다.", ADMIN_ONLY: "운영자만 쓸 수 있는 기능입니다.",
@@ -15,6 +17,7 @@
     NOT_ALLOWED: "권한이 없거나 이미 삭제된 글입니다.",
     POST_NOT_FOUND: "삭제되었거나 없는 글입니다.", NICKNAME_INVALID: "닉네임은 한글·영문·숫자·밑줄 2~12자이며 운영자를 연상시키는 이름은 쓸 수 없습니다.",
     NICKNAME_TAKEN: "이미 쓰고 있는 닉네임입니다.", NICKNAME_COOLDOWN: "닉네임은 7일에 한 번만 바꿀 수 있습니다.",
+    JOB_PAUSED: JOB_PAUSED,
     JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", IMAGES_INVALID: "사진은 3장까지, 이 화면에서 올린 사진만 붙일 수 있습니다.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.",
     "Invalid login credentials": "이메일 또는 비밀번호가 맞지 않습니다.", "Email not confirmed": "이메일 인증이 끝나지 않았습니다. 받은 메일의 인증 링크를 눌러 주세요.",
     "rate limit": "요청이 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도하세요.", "posts_title_check": "제목은 2~80자로 적어 주세요.",
@@ -252,7 +255,8 @@
           cats.map(function (c) { return h("a", { class: "chip", href: url("", { b: b, c: c, q: kw }), "aria-current": c === cat ? "true" : null }, c); }))),
         h("form", { class: "cm-search", role: "search", onsubmit: function (ev) { ev.preventDefault(); location.href = url("", { b: b, c: cat, q: this.q.value.trim() }); } },
           h("input", { type: "search", name: "q", value: kw, placeholder: "제목 검색", "aria-label": "제목 검색", maxlength: "40" }), h("button", { type: "submit", class: "btn btn-sm btn-ghost" }, "검색")),
-        h("a", { class: "btn btn-sm", href: ME ? url("write", { b: b }) : url("account", { next: url("write", { b: b }) }) }, b === "qna" ? "질문하기" : job ? "공고 등록" : "글쓰기"));
+        job && !JOB_POST ? h("span", { class: "cm-paused" }, "공고 등록 준비 중")
+          : h("a", { class: "btn btn-sm", href: ME ? url("write", { b: b }) : url("account", { next: url("write", { b: b }) }) }, b === "qna" ? "질문하기" : job ? "공고 등록" : "글쓰기"));
       var list = h("ul", { class: "cm-list" }, rows.map(function (x) {
         var state = b === "qna" ? h("span", { class: "cm-st " + (x.accepted_comment_id ? "cm-st-ok" : x.comment_count ? "cm-st-ans" : "cm-st-wait") }, x.accepted_comment_id ? "채택 완료" : x.comment_count ? "답변 " + x.comment_count : "답변 대기") : null;
         if (job && !x.notice) {
@@ -267,7 +271,7 @@
           h("span", { class: "cm-t" }, x.title, b !== "qna" && x.comment_count ? h("em", { "aria-label": "댓글 " + x.comment_count + "개" }, " [" + x.comment_count + "]") : null),
           state, h("span", { class: "cm-meta" }, nick(x), " · ", h("time", { datetime: x.created_at }, when(x.created_at)))));
       }));
-      var empty = !rows.length ? h("div", { class: "empty" }, kw || cat ? null : h("img", { class: "cm-empty-i", src: REL + "assets/img/ico/" + (b === "qna" ? "ask" : job ? "helmet" : "chat") + ".webp", width: "96", height: "96", alt: "" }), h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : job ? "아직 등록된 채용공고가 없습니다. 회원이면 누구나 공고를 올릴 수 있습니다." : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
+      var empty = !rows.length ? h("div", { class: "empty" }, kw || cat ? null : h("img", { class: "cm-empty-i", src: REL + "assets/img/ico/" + (b === "qna" ? "ask" : job ? "helmet" : "chat") + ".webp", width: "96", height: "96", alt: "" }), h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : job ? (JOB_POST ? "아직 등록된 채용공고가 없습니다. 회원이면 누구나 공고를 올릴 수 있습니다." : "아직 등록된 채용공고가 없습니다. " + JOB_PAUSED) : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
       var pager = pages > 1 ? h("nav", { class: "cm-pager", "aria-label": "페이지" },
         p > 1 ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p - 1 }) }, "← 이전") : null,
         h("span", null, p + " / " + pages), p < pages ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p + 1 }) }, "다음 →") : null) : null;
@@ -370,12 +374,17 @@
 
   // ---------------------------------------------------------------- 글쓰기·수정
   function pageWrite() {
-    if (!ME) { location.replace(url("account", { next: location.pathname + location.search })); return; }
     var id = parseInt(qs("id"), 10) || 0, b0 = BOARDS[qs("b")] ? qs("b") : "free";
+    if (!id && b0 === "job" && !JOB_POST) {  // 새 채용공고는 받지 않는다(주소로 바로 들어온 경우 포함)
+      navJob(true);
+      return show(h("div", { class: "empty" }, h("p", { class: "cm-empty-t" }, "채용공고 등록 준비 중"), h("p", null, JOB_PAUSED),
+        h("p", { class: "btns" }, h("a", { class: "btn", href: url("", { b: "job" }) }, "채용공고 보기"), h("a", { class: "btn btn-ghost", href: REL + "jobs/" }, "다른 채용 사이트에서 찾기"))));
+    }
+    if (!ME) { location.replace(url("account", { next: location.pathname + location.search })); return; }
     function form(post) {
       var b = post ? post.board : b0, key = "st.cm.draft." + (id || "new");
       var saved = draft(key) || {};
-      var selB = h("select", { name: "board", "aria-label": "게시판", disabled: !!post }, Object.keys(BOARDS).map(function (k) { return h("option", { value: k }, BOARDS[k]); }));
+      var selB = h("select", { name: "board", "aria-label": "게시판", disabled: !!post }, Object.keys(BOARDS).filter(function (k) { return JOB_POST || k !== "job" || (post && post.board === "job"); }).map(function (k) { return h("option", { value: k }, BOARDS[k]); }));
       selB.value = b;
       var selC = h("select", { name: "category", "aria-label": "분류" });
       function fillCats() {
@@ -443,6 +452,7 @@
         if (t.length < 2) { out.textContent = ERR.posts_title_check; out.hidden = false; title.focus(); return; }
         if (bd.length < 5) { out.textContent = ERR.posts_body_check; out.hidden = false; body.focus(); return; }
         var isJob = selB.value === "job", mt = isJob ? jmeta() : null;
+        if (isJob && !post && !JOB_POST) { out.textContent = JOB_PAUSED; out.hidden = false; return; }
         if (isJob && (mt.company.length < 2 || mt.apply.length < 5)) { out.textContent = ERR.JOB_META_INVALID; out.hidden = false; (mt.company.length < 2 ? J.company : J.apply).focus(); return; }
         if (isJob && /^http:\/\//i.test(mt.apply)) { out.textContent = "지원 페이지 주소는 https:// 로 시작해야 합니다."; out.hidden = false; J.apply.focus(); return; }
         busy(btn, true, "저장 중…"); out.hidden = true;
@@ -554,7 +564,7 @@
     // 어디서 넘어왔는지에 맞춰 왜 로그인이 필요한지 한 줄로 알려 준다
     function why() {
       var n = qs("next"), t = "";
-      if (/board\/write\/.*b=job/.test(n)) t = "채용공고는 회원이면 누구나 무료로 등록할 수 있습니다. 로그인하거나 무료로 가입해 주세요.";
+      if (/board\/write\/.*b=job/.test(n)) t = !JOB_POST ? "" : "채용공고는 회원이면 누구나 무료로 등록할 수 있습니다. 로그인하거나 무료로 가입해 주세요.";
       else if (/board\/write\/.*b=qna/.test(n)) t = "질문은 회원이면 누구나 올릴 수 있습니다. 로그인하거나 무료로 가입해 주세요.";
       else if (/board\/write\//.test(n)) t = "글쓰기는 회원이면 누구나 할 수 있습니다. 로그인하거나 무료로 가입해 주세요.";
       else if (/board\/view\//.test(n)) t = "댓글·신고는 로그인한 뒤에 할 수 있습니다.";

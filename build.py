@@ -595,7 +595,7 @@ def nav_cols(site, rel):
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")]), ("영상", [(f"{rel}videos/", "안전보건 영상")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else []))],
-        "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
+        "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")][:2 if (site.get("features") or {}).get("job_posting", True) else 1] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
@@ -1018,6 +1018,9 @@ def filter_group(group, values, label):
 ACC_PAGE = "accidents/"  # 사고사망 속보 목록(상세) 페이지 주소
 
 
+JOB_POST = True  # main() 에서 config/site.json features.job_posting 으로 정한다
+
+
 def acc_key(a, i):
     """속보 한 건의 페이지 안 위치 이름(#a-...). 공단 게시물 번호가 없으면 순번을 쓴다."""
     k = re.sub(r"[^0-9A-Za-z_-]", "", str(a.get("id") or ""))
@@ -1355,6 +1358,8 @@ def duck_signs_html(site, write):
 
 def build(out, today):
     site = load("config/site.json")
+    global JOB_POST
+    JOB_POST = bool((site.get("features") or {}).get("job_posting", True))  # 회원 채용공고 등록을 열어 둘지
     base_res = load("data/resources.json")
     _groups, _forms = all_forms(load("data/lawref.json"))
     web_forms = [{"id": "wf-" + f["id"], "category": "웹 작성 서식", "title": f["title"], "law": "", "form_no": f.get("group", ""),
@@ -1783,13 +1788,13 @@ def build(out, today):
     cm_cats = cmc.get("categories") or {}
 
     def cm_page(sub, kind, title, lead, rel, desc, wide=False):
-        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT}, ensure_ascii=False).replace("</", "<\\/")
+        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST}, ensure_ascii=False).replace("</", "<\\/")
         crumb = f'<a href="{rel}board/">게시판</a><span>/</span>{e(title)}' if sub else "게시판"
         side = f"""<aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint">
       <li><b>커뮤니티</b> — 현장 이야기, 정보 공유, 자료 요청.</li>
       <li><b>Q&amp;A</b> — 실무·법령 질문과 답변. 질문자가 답변을 채택할 수 있습니다.</li>
-      <li><b>채용공고</b> — 회원이 직접 올리는 안전·보건 직무 공고. 하루 5건까지.</li>
+      <li><b>채용공고</b> — {"회원이 직접 올리는 안전·보건 직무 공고. 하루 5건까지." if JOB_POST else "안전·보건 직무 공고. 공고 등록은 현재 준비 중입니다."}</li>
       <li>읽기는 누구나, 쓰기는 이메일 인증을 마친 회원만 할 수 있습니다. 이름·전화번호는 받지 않습니다.</li>
       <li>개인·사업장을 알아볼 수 있는 정보는 적지 마세요.</li>
     </ul><p class="btns" style="margin-top:12px"><a class="btn btn-sm btn-ghost" href="{rel}board/rules/">이용수칙</a></p></div>
@@ -1843,7 +1848,7 @@ def build(out, today):
   <h2>3. 질문과 답변</h2>
   <p>Q&amp;A의 답변은 회원 개인의 경험과 의견입니다. 법령 해석은 원문과 관할 기관 안내를 기준으로 하세요. 답변할 때는 근거(법 조문·고시·공식 자료)를 함께 적어 주세요. 법 적용 여부와 행정 처분에 관한 판단은 법령 원문과 고용노동부 등 소관 기관에서 확인해야 합니다.</p>
   <h2>4. 채용공고</h2>
-  <p>채용공고 게시판에는 회원이 자기 회사(또는 채용을 맡은 회사)의 안전·보건 직무 공고를 직접 올립니다. SafePlum은 구인자와 구직자를 소개·알선하지 않으며, 공고 내용의 사실 여부를 보증하지 않습니다.</p>
+  {"" if JOB_POST else "<p><b>채용공고 등록은 현재 준비 중이며, 준비가 끝나면 다시 엽니다.</b> 아래 내용은 등록이 열려 있을 때 적용됩니다.</p>"}<p>채용공고 게시판에는 회원이 자기 회사(또는 채용을 맡은 회사)의 안전·보건 직무 공고를 직접 올립니다. SafePlum은 구인자와 구직자를 소개·알선하지 않으며, 공고 내용의 사실 여부를 보증하지 않습니다.</p>
   <ul class="bul">
     <li>회사명, 지원 방법(채용 페이지 주소 등)을 반드시 적고, 근무 조건은 사실대로 적습니다. 거짓·과장 공고는 삭제합니다.</li>
     <li>성별·나이·출신 지역·신체 조건·혼인 여부 등 직무와 관계없는 조건으로 차별하는 공고는 올릴 수 없습니다.</li>
@@ -2009,7 +2014,7 @@ def build(out, today):
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
   <section class="col-list">{chat_banner()}
-    <p class="job-member"><b>우리 회사 공고를 직접 올릴 수 있습니다.</b> 회원이면 누구나 무료로 등록합니다. <a class="btn btn-sm" href="../board/?b=job">회원 채용공고 보기 · 등록</a></p>
+    {'<p class="job-member"><b>우리 회사 공고를 직접 올릴 수 있습니다.</b> 회원이면 누구나 무료로 등록합니다. <a class="btn btn-sm" href="../board/?b=job">회원 채용공고 보기 · 등록</a></p>' if JOB_POST else '<p class="job-member"><b>회원 채용공고 등록은 현재 준비 중입니다.</b> 준비가 끝나면 다시 열겠습니다. <a class="btn btn-sm btn-ghost" href="../board/?b=job">회원 채용공고 보기</a></p>'}
     {main}
     {f'<div class="more-box"><p>다른 채용 사이트에서 더 찾기</p><div class="jchips">{job_chips}</div></div>' if jobs else ''}
   </section>

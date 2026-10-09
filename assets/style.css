@@ -775,6 +775,7 @@ details.lawbox summary{cursor:pointer}
 .acc-btns{display:flex;flex-wrap:wrap;gap:8px}
 @media (max-width:560px){.arow{padding:14px 16px}}
 
+.cm-paused{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:8px;background:var(--line-2);color:var(--muted);font-size:13px;font-weight:700;white-space:nowrap}
 /* 서식 자동화 */
 .fprof,.fauto{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;margin:0 0 14px}
 .fprof-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;margin-top:10px}
