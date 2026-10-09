@@ -1015,43 +1015,100 @@ def filter_group(group, values, label):
             f'<button type="button" class="chip" data-value="" aria-pressed="true">전체</button>{items}</div></div>')
 
 
-def acc_trend_html(auto_acc, today, days=7):
-    """사고사망 속보(공단 게시 기준)를 날짜별·유형별 건수로 묶은 옆 상자. 발생일을 읽은 자료가 없으면 '' (상자를 만들지 않음)."""
+ACC_PAGE = "accidents/"  # 사고사망 속보 목록(상세) 페이지 주소
+
+
+def acc_key(a, i):
+    """속보 한 건의 페이지 안 위치 이름(#a-...). 공단 게시물 번호가 없으면 순번을 쓴다."""
+    k = re.sub(r"[^0-9A-Za-z_-]", "", str(a.get("id") or ""))
+    return "a-" + (k or f"n{i}")
+
+
+def acc_trend_html(auto_acc, today, days=7, rel="../"):
+    """사고사망 속보(공단 게시 기준) 옆 상자: 최근 며칠의 속보를 한 건씩 보여 주고, 누르면 속보 목록 페이지의 해당 건으로 간다.
+    발생일을 읽은 자료가 없으면 '' (상자를 만들지 않음)."""
     import collections, datetime as _dt
-    items = [a for a in auto_acc.get("items", []) if a.get("date")]
+    from urllib.parse import quote
+    allitems = auto_acc.get("items", [])
+    items = [(i, a) for i, a in enumerate(allitems) if a.get("date")]
     if not items:
-        if auto_acc.get("items"):
+        if allitems:
             warn("사고사망 속보: 발생일을 읽은 항목이 없어 동향 상자를 만들지 않음(scripts/fetch_public.py 의 acc_date 확인)")
         return ""
     today = str(today)[:10]
     since = (_dt.date.fromisoformat(today) - _dt.timedelta(days=days - 1)).isoformat()
-    recent = [a for a in items if since <= a["date"] <= today]
-    by_day = collections.defaultdict(collections.Counter)
-    total = collections.Counter()
-    for a in recent:
-        t = a.get("type") or "기타"
-        by_day[a["date"]][t] += 1
-        total[t] += 1
+    recent = sorted(((i, a) for i, a in items if since <= a["date"] <= today), key=lambda x: x[1]["date"], reverse=True)
+    total = collections.Counter((a.get("type") or "기타") for _, a in recent)
     WD = "월화수목금토일"
+    href = rel + ACC_PAGE
     if recent:
-        top = max(total.values())
-        bars = "".join(
-            f'<li><span class="acc-k">{e(k)}</span><span class="acc-bar" aria-hidden="true"><i style="width:{round(v / top * 100)}%"></i></span><span class="acc-n">{v}건</span></li>'
-            for k, v in total.most_common())
-        days_html = "".join(
-            f'<li><time datetime="{e(d)}">{int(d[5:7])}.{int(d[8:10])} <span>{WD[_dt.date.fromisoformat(d).weekday()]}</span></time>'
-            f'<span class="acc-tags">{"".join(f"""<span class="tag">{e(k)}{f" {v}건" if v > 1 else ""}</span>""" for k, v in by_day[d].most_common())}</span></li>'
-            for d in sorted(by_day, reverse=True))
-        body = (f'<ul class="acc-sum" aria-label="최근 {days}일 재해유형별 건수">{bars}</ul>'
-                f'<h3 class="acc-h">날짜별</h3><ul class="acc-days">{days_html}</ul>')
+        # 유형별 합계는 같은 유형이 2건 이상일 때만(전부 1건이면 아래 목록과 같은 내용이라 생략)
+        summ = ""
+        if max(total.values()) > 1:
+            summ = ('<ul class="acc-sum" aria-label="최근 %d일 재해유형별 건수">' % days) + "".join(
+                f'<li><a href="{href}?cat={quote(k)}"><span class="acc-k">{e(k)}</span><span class="acc-bar" aria-hidden="true"><i style="width:{round(v / len(recent) * 100)}%"></i></span><span class="acc-n">{v}건</span></a></li>'
+                for k, v in total.most_common()) + "</ul>"
+        MAX = 6
+        rows = "".join(
+            f'<li><a href="{href}#{acc_key(a, i)}"><time datetime="{e(a["date"])}">{int(a["date"][5:7])}.{int(a["date"][8:10])} <span>{WD[_dt.date.fromisoformat(a["date"]).weekday()]}</span></time>'
+            f'<span class="acc-b"><span class="tag tag-acc">{e(a.get("type") or "기타")}</span><span class="acc-t">{e(a.get("text", ""))}</span></span>'
+            f'<span class="acc-go" aria-hidden="true">›</span></a></li>'
+            for i, a in recent[:MAX])
+        rest = f'<p class="acc-rest">외 {len(recent) - MAX}건</p>' if len(recent) > MAX else ""
+        body = f'{summ}<ul class="acc-days">{rows}</ul>{rest}'
         badge = f'<span class="badge badge-red">최근 {days}일 {len(recent)}건</span>'
     else:
         body = f'<p class="hint">최근 {days}일 동안 게시된 사고사망 속보가 없습니다.</p>'
         badge = f'<span class="badge badge-muted">최근 {days}일 0건</span>'
     return (f'<div class="side-box acc-box"><div class="acc-head"><h2 class="h-sm">사고사망 속보 동향</h2>{badge}</div>{body}'
-            f'<details class="acc-src"><summary>안전보건공단 속보 기준 · SafePlum 자동 집계</summary>'
-            f'<p>출처: 한국산업안전보건공단 사고사망 속보(공공데이터포털 API) · 수집일 {e(auto_acc.get("fetched", ""))}. '
-            f'공단이 속보로 게시한 건을 발생일·재해유형으로 자동 분류한 참고 집계입니다. 공식 산업재해 통계는 고용노동부 발표를 확인하세요. 누락·분류 오류가 있을 수 있습니다.</p></details></div>')
+            f'<a class="acc-all" href="{href}">속보 전체 보기 <span aria-hidden="true">→</span></a>'
+            f'<p class="acc-src">안전보건공단 속보 기준 · 자동 분류 · 수집일 {e(auto_acc.get("fetched", ""))}</p></div>')
+
+
+def acc_page_body(auto_acc, today):
+    """사고사망 속보 목록 페이지 본문. 공단 속보 문장을 그대로 싣고 발생일·재해유형으로 거를 수 있게 한다."""
+    import collections, datetime as _dt
+    WD = "월화수목금토일"
+    items = list(enumerate(auto_acc.get("items", [])))
+    items.sort(key=lambda x: x[1].get("date") or "", reverse=True)  # 발생일 최신순, 발생일을 못 읽은 건은 뒤로
+    cnt = collections.Counter((a.get("type") or "기타") for _, a in items)
+
+    def row(i, a):
+        d, t = a.get("date") or "", a.get("type") or "기타"
+        when = (f'<time datetime="{e(d)}">{fmt_date(d)} <span>{WD[_dt.date.fromisoformat(d).weekday()]}</span></time>' if d else '<time>발생일 확인 필요</time>')
+        img = safe_url(a.get("image"))
+        src = f'<a class="link-ext" href="{e(img)}" target="_blank" rel="noopener">공단 속보 원본 이미지 ↗</a>' if img else ""
+        return (f'<li class="arow" id="{acc_key(a, i)}" data-item data-cat="{e(t)}" data-text="{e(a.get("text", "") + " " + t)}">'
+                f'<div class="arow-h">{when}<span class="tag tag-acc">{e(t)}</span></div>'
+                f'<p class="arow-t">{e(a.get("text", ""))}</p>{f"<p class=arow-f>{src}</p>" if src else ""}</li>')
+    chips = "".join(f'<button type="button" class="chip" data-value="{e(k)}" aria-pressed="false">{e(k)} <span class="n">{v}</span></button>' for k, v in cnt.most_common())
+    if items:
+        main = (f'<div class="listbar"><div class="search-inline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
+                f'<input type="search" class="filter-q" placeholder="예: 지게차, 사다리, 굴착기" aria-label="속보 검색"></div></div>'
+                f'<div class="chips acc-chips" data-filter="cat" role="group" aria-label="재해유형"><button type="button" class="chip" data-value="" aria-pressed="true">전체</button>{chips}</div>'
+                f'<p class="count" aria-live="polite">속보 <strong data-count>{len(items)}</strong>건</p>'
+                f'<ul class="arows" data-list>{"".join(row(i, a) for i, a in items)}</ul>'
+                + empty_box("조건에 맞는 속보가 없습니다.").replace('class="empty"', 'class="empty" data-empty hidden'))
+    else:
+        main = empty_box("사고사망 속보를 아직 받아 오지 못했습니다. 공단 산업안전포털에서 확인해 주세요.",
+                         '<div class="btns"><a class="btn btn-sm btn-ghost" href="https://portal.kosha.or.kr/" target="_blank" rel="noopener">산업안전포털 ↗</a></div>')
+    return f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../">홈</a><span>/</span><a href="../brief/">안전 브리핑</a><span>/</span>사고사망 속보</p>
+  <h1>사고사망 속보</h1>
+  <p>안전보건공단이 게시한 사고사망 속보를 발생일·재해유형별로 모았습니다. 같은 작업이 있는 현장은 TBM·위험성평가에 바로 반영해 보세요.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main">{main}</section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">현장에 바로 반영하기</h2>
+      <div class="btns acc-btns"><a class="btn btn-sm" href="../tools/tbm/">TBM 일지 작성</a><a class="btn btn-sm btn-ghost" href="../tools/risk/">위험성평가서 작성</a></div></div>
+    <div class="side-box"><h2 class="h-sm">자료 안내</h2>
+      <p class="hint">출처: 한국산업안전보건공단 사고사망 게시판(공공데이터포털 API, 이용허락범위 제한 없음) · 수집일 {e(auto_acc.get("fetched", ""))}</p>
+      <p class="hint">속보 문장은 공단 게시 내용 그대로이며, 발생일·재해유형은 SafePlum이 문장에서 자동으로 읽어 분류한 참고 정보입니다. 누락·분류 오류가 있을 수 있고, 공식 산업재해 통계는 고용노동부 발표를 확인하세요.</p>
+      <p><a class="link-ext" href="https://portal.kosha.or.kr/" target="_blank" rel="noopener">안전보건공단 산업안전포털 ↗</a></p></div>
+  </aside>
+</div>"""
 
 
 def sec_head(title, href=None, more="전체 보기", sub=None):
@@ -1708,7 +1765,7 @@ def build(out, today):
     for b in briefs:
         body = (brief_head.format(up="../../", crumb='<a href="../">안전 브리핑</a><span>/</span>' + fmt_date(b["date"]))
                 + f'<div class="wrap layout-detail"><section class="col-main"><article class="br"><p class="br-date">{fmt_date(b["date"])} 브리핑</p><h2 class="br-title">{e(b["title"])}</h2>{brief_article(b, "../../")}</article></section>'
-                + brief_side.replace('href="../laws/', 'href="../../laws/').replace('<a href="20', '<a href="../20') + "</div>")
+                + brief_side.replace('href="../laws/', 'href="../../laws/').replace('href="../accidents/', 'href="../../accidents/').replace('<a href="20', '<a href="../20') + "</div>")
         write(f"brief/{b['date']}/index.html", page(site, "../../", f"brief/{b['date']}/", f'{fmt_date(b["date"])} 안전 브리핑 — {b["title"]}', body,
               desc=(b.get("lead") or b["title"])[:150], active="brief/"))
 
@@ -2118,10 +2175,13 @@ def build(out, today):
   </section>
   <aside class="col-side">
     {acc_trend_html(auto_acc, today)}
-    <section class="side-box">{sec_head("사고사망 속보")}{acc_list}</section>
+    <section class="side-box">{sec_head("사고사망 속보", ("../" + ACC_PAGE) if acc_items else None)}{acc_list}</section>
     <section class="side-box"><p class="hint">SafePlum은 기사 본문을 옮기지 않습니다. 제목·부제·부처·날짜만 싣고 원문으로 연결합니다. 민간 언론사 기사와 다른 사이트의 게시물은 싣지 않습니다.</p></section>
   </aside>
 </div>"""
+    if auto_acc.get("items"):
+        write(ACC_PAGE + "index.html", page(site, "../", ACC_PAGE, "사고사망 속보", acc_page_body(auto_acc, today),
+                                            desc="안전보건공단 사고사망 속보를 발생일·재해유형별로 정리 — 최근 사고 사례를 TBM·위험성평가에 반영하세요.", active="brief/"))
     if (site.get("features") or {}).get("public_api", False):
       write("news/index.html", page(site, "../", "news/", "안전뉴스", news_body,
                                   desc="산업안전 관련 정부 정책뉴스와 안전보건공단 사고사망 속보 — 공식 공공데이터 API로 수집.", active="news/"))
