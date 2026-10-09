@@ -70,7 +70,7 @@
 .paper .rowx:hover:not(:disabled){background:#F1F5FB}
 .paper .rowx:disabled{opacity:.3;cursor:default}
 /* 좁은 화면: 칸이 많은 표는 가로로 밀어서 본다(칸이 20px로 찌그러져 입력할 수 없던 문제) */
-.tsc{max-width:100%}
+.tsc{max-width:100%;position:relative}
 @media (max-width:760px){.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch}.tsc>table{min-width:var(--mw,0)}}
 @media print{
   .tsc{overflow:visible!important}.tsc>table{min-width:0!important}

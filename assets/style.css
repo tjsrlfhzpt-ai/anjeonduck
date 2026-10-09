@@ -647,8 +647,8 @@ details.lawbox summary{cursor:pointer}
 .heat-b.lv0{background:var(--gray-50,#f5f5f4)}
 .heat-b.lv1{background:var(--orange-50)}
 .heat-b.lv2{background:var(--red-50);color:var(--red)}
-.heat-acts{border:0;padding:0;margin:0;display:grid;gap:4px}
-.heat-acts #hActs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px 16px}
+.heat-acts{border:0;padding:0;margin:0;display:grid;gap:4px;min-width:0}
+.heat-acts #hActs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:4px 16px}
 @media print{body.pr-heat #hPaper{display:block}}
 /* 서식·자료 주제 칩: 줄바꿈 배치, 모바일은 가로 스크롤 */
 .topicnav{flex-wrap:wrap;gap:6px}
@@ -1468,7 +1468,7 @@ img.logo-mark{width:36px;height:36px;object-fit:contain;border-radius:0}
   .cm-list .cm-st{grid-column:2;grid-row:3;justify-self:end}
   .cm-post{padding:18px 16px}.cm-post-t{font-size:19px}
   .cm-row2{grid-template-columns:1fr}
-  .cm-search{flex:1}.cm-search input{flex:1;width:auto;min-width:0}
+  .cm-search{flex:1 1 180px;min-width:0}.cm-search input{flex:1;width:0;min-width:0}
   .cm-auth{padding:18px 16px}
   .cm-form input,.cm-form select,.cm-form textarea,.cm-search input{font-size:16px}
   .dock a{font-size:10.5px}
@@ -1720,7 +1720,7 @@ body.is-arrived [data-landing]{display:none!important}
 .paper .im-per3 .im-txt{height:10mm}
 .paper .im-per3{margin-top:7px}
 @media print{body.pr-improve #iPaper{display:block}}
-.heat-acts #cActs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px 16px}
+.heat-acts #cActs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:4px 16px}
 .calc input[type=time]{height:44px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;font-size:15px;width:100%}
 
 /* 법령 기준 표(용어 — 내용): 두 칸 표로 정렬 */
@@ -1762,7 +1762,7 @@ body.is-arrived [data-landing]{display:none!important}
 .paper .fi-back:hover{background:#EFF4FF}
 
 /* 안전보건 영상 */
-.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;padding-top:24px;padding-bottom:40px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:24px;padding-top:24px;padding-bottom:40px}
 .vcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column}
 .vplayer{position:relative;aspect-ratio:9/16;background:#111;max-height:640px}
 .vplayer img{width:100%;height:100%;object-fit:cover;display:block}
@@ -1786,3 +1786,6 @@ body.is-arrived [data-landing]{display:none!important}
 .vexts{display:flex;flex-wrap:wrap;gap:4px 14px}
 .vch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .mc-ind{width:100%;height:38px;margin:0 0 8px;font-size:14px}
+
+/* 모바일 가로 넘침 방지: 표 스크롤 상자 안의 화면낭독 전용 글자(절대 위치)가 밖으로 새지 않게 */
+.table-wrap{position:relative}
