@@ -1790,6 +1790,11 @@ body.is-arrived [data-landing]{display:none!important}
 .vplayer{position:relative;aspect-ratio:9/16;background:#111;max-height:640px}
 .vplayer img{width:100%;height:100%;object-fit:cover;display:block}
 .vplayer iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vcard.wide .vplayer{aspect-ratio:16/9;max-height:none}
+.vfeat{align-self:flex-start;font-size:12px;font-weight:800;color:#fff;background:#5B2A91;padding:3px 9px;border-radius:999px}
+.vgrid .vlead{grid-column:1/-1}
+@media(min-width:860px){.vgrid .vlead.wide{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}.vgrid .vlead.wide .vmeta{padding:24px 26px;justify-content:center;gap:10px}.vgrid .vlead .vtitle{font-size:22px}.vgrid .vlead .vsum{font-size:15px}}
+@media(max-width:859px){.vgrid .vlead:not(.wide){grid-column:auto}}
 .vplay{position:absolute;inset:0;margin:auto;width:96px;height:96px;border-radius:50%;border:0;background:rgba(27,21,48,.78);color:#fff;font-size:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding-left:6px;transition:transform .15s}
 .vplay:hover,.vplay:focus-visible{transform:scale(1.08);background:#5B2A91;outline:none}
 .vbadge{position:absolute;left:12px;top:12px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;font-weight:800;padding:4px 8px;border-radius:6px}
