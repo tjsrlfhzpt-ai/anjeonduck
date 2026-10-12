@@ -82,6 +82,8 @@
   #ra td { padding:8px 4px; border-color:#a0b8c8; }
   #ra th { padding:6px 2px; }
   #ra .ed { font-size:11.5px; } #ra label.done { font-size:11px; white-space:nowrap; }
+  #ra td.sp select { width:100%; max-width:46px; padding:3px 0; border:1px solid #cbd5e0; border-radius:4px; text-align:center; font-weight:bold; font-size:10.5px; cursor:pointer; background:#fff; color:#111; }
+  #ra td.sp, #ra td.sb { text-align:center; } #ra .score-badge { font-size:10px; }
   .scoreSel { display:flex; justify-content:center; gap:3px; align-items:center; flex-wrap:wrap; }
   .scoreSel select { width:42px; padding:3px; border:1px solid #cbd5e0; border-radius:4px; text-align:center; font-weight:bold; font-size:10.5px; cursor:pointer; background:#fff; color:#111; }
   .score-badge { display:inline-block; min-width:50px; padding:4px; border-radius:4px; text-align:center; font-weight:800; font-size:11px; margin-top:3px; }
@@ -184,7 +186,7 @@
     html.m #ra tr.open .row-sum span { white-space:normal; }
     html.m .row-ctl { display:none; justify-content:flex-end; gap:14px; padding:0 10px 8px; margin:0; } html.m #ra tr.open .row-ctl { display:flex; }
     html.m .row-ctl button { font-size:13px; padding:4px 2px; }
-    html.m .scoreSel { justify-content:flex-start; gap:8px; }
+    html.m .scoreSel { justify-content:flex-start; gap:8px; } html.m #ra td.sp select { width:64px; max-width:none; height:38px; font-size:16px; }
     html.m .scoreSel select { width:64px; height:38px; font-size:16px; }
     html.m .score-badge { font-size:13px; padding:8px 10px; margin:0; }
     html.m #ra .ed { font-size:15px; } html.m #ra label.done { font-size:15px; display:inline-block; padding:4px 0 8px; }
@@ -207,8 +209,8 @@
     .page-container { width:auto !important; margin:0; padding:0; min-height:0 !important; box-shadow:none; border:none; }
     .control-panel, .no-print, .sitebar, .mtabs, .form-status, .modal-overlay { display:none !important; }
     * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-    .scoreSel select { border:0 !important; appearance:none; -webkit-appearance:none; padding:0 !important; width:20px !important; background:none; }
-    .scoreSel.none select { color:transparent; } .scoreSel.none .score-badge { visibility:hidden; }
+    #ra td.sp select { border:0 !important; appearance:none; -webkit-appearance:none; padding:0 !important; width:100% !important; background:none; text-align:center; text-align-last:center; }
+    #ra tr.none .score-badge { visibility:hidden; }
     thead { display:table-header-group; }
     tr { break-inside:avoid; page-break-inside:avoid; }
     .ed:empty::before, [data-lb]:empty::before { content:none !important; }
@@ -349,9 +351,10 @@
   <div class="section-title"><span data-lb="s3" contenteditable>3. 위험성평가 및 감소대책</span><button type="button" class="sec-tg no-print"><span class="sec-sum"></span><i>▾</i></button></div>
   <div class="sec-body">
   <table id="ra">
-    <colgroup><col style="width:5%"><col style="width:19%"><col style="width:15%"><col style="width:12%"><col style="width:18%"><col style="width:11%"><col style="width:12%"><col style="width:8%"></colgroup>
+    <colgroup><col style="width:3%"><col style="width:7%"><col style="width:6%"><col style="width:8%"><col style="width:14%"><col style="width:9%"><col style="width:9%"><col style="width:4%"><col style="width:4%"><col style="width:6%"><col style="width:12%"><col style="width:5%"><col style="width:5%"><col style="width:4.5%"><col style="width:3.5%"></colgroup>
     <thead>
-      <tr><th data-lb="h0" contenteditable>연번</th><th data-lb="h1" contenteditable>유해·위험요인</th><th data-lb="h2" contenteditable>현재 안전보건조치</th><th data-lb="h3" contenteditable>현재 위험성</th><th data-lb="h4" contenteditable>추가 감소대책</th><th data-lb="h5" contenteditable>담당자&#10;개선기한</th><th data-lb="h6" contenteditable>개선 후 위험성</th><th data-lb="h7" contenteditable>완료&#10;확인</th></tr>
+      <tr><th rowspan="2" data-lb="k0" contenteditable>연번</th><th rowspan="2" data-lb="k1" contenteditable>작업내용</th><th colspan="3" data-lb="kg1" contenteditable>유해위험요인 파악</th><th rowspan="2" data-lb="k5" contenteditable>관련근거&#10;(법적기준)</th><th rowspan="2" data-lb="k6" contenteditable>현재상태&#10;및 조치</th><th colspan="3" data-lb="kg2" contenteditable>현재 위험성</th><th rowspan="2" data-lb="k10" contenteditable>감소대책</th><th rowspan="2" data-lb="k11" contenteditable>개선일</th><th rowspan="2" data-lb="k12" contenteditable>완료일</th><th rowspan="2" data-lb="k13" contenteditable>담당자</th><th rowspan="2" data-lb="k14" contenteditable>비고</th></tr>
+      <tr><th data-lb="k2" contenteditable>분류</th><th data-lb="k3" contenteditable>원인</th><th data-lb="k4" contenteditable>유해위험요인</th><th data-lb="k7" contenteditable>가능성&#10;(빈도)</th><th data-lb="k8" contenteditable>중대성&#10;(강도)</th><th data-lb="k9" contenteditable>위험성</th></tr>
     </thead>
     <tbody id="ra-tbody"></tbody>
   </table>
@@ -413,7 +416,7 @@
 <script>
   var HAZARD_DB = /*@HAZARDS@*/null;
   if (!HAZARD_DB || !Array.isArray(HAZARD_DB.items)) HAZARD_DB = { groups: ["공통"], items: [] };
-  var MARKS = ["①","②","③","④","⑤"];
+  var MARKS = ["1","2","3","4","5"];
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -536,13 +539,14 @@
   }
   function overCount(np, nc) {
     var n = 0;
-    document.querySelectorAll(".scoreSel").forEach(function (w) { var s = w.querySelectorAll("select"); if (+s[0].value > np || +s[1].value > nc) n++; });
+    document.querySelectorAll("#ra-tbody tr").forEach(function (w) { var s = w.querySelectorAll("td.sp select"); if (s.length > 1 && (+s[0].value > np || +s[1].value > nc)) n++; });
     return n;
   }
   function rebuildSelects() {
-    document.querySelectorAll(".scoreSel").forEach(function (w) {
-      var ss = w.querySelectorAll("select"), k = w.dataset.k;
-      w.innerHTML = scoreHtml(Math.min(+ss[0].value, CFG.p), Math.min(+ss[1].value, CFG.c), k);
+    document.querySelectorAll("#ra-tbody tr").forEach(function (w) {
+      var ss = w.querySelectorAll("td.sp select"); if (ss.length < 2) return;
+      var p = Math.min(+ss[0].value, CFG.p), c = Math.min(+ss[1].value, CFG.c);
+      ss[0].parentNode.innerHTML = sel(p, CFG.p, CFG.pn); ss[1].parentNode.innerHTML = sel(c, CFG.c, CFG.cn);
     });
     updateAll();
   }
@@ -565,7 +569,7 @@
   });
 
   // ---------- 제목·항목 이름(문서에서 바로 고침) ----------
-  var DEF_LB = {}, DEF_TYPES = ["최초", "정기", "수시"], TYPES = DEF_TYPES.slice(), ORIENT = "p", APPR_ON = true;
+  var DEF_LB = {}, DEF_TYPES = ["최초", "정기", "수시"], TYPES = DEF_TYPES.slice(), ORIENT = "l", APPR_ON = true;
   function lbEls() { return document.querySelectorAll("#page1 [data-lb]"); }
   function collectLb() { var o = {}; lbEls().forEach(function (el) { var v = txt(el), k = el.dataset.lb; if (v !== DEF_LB[k]) o[k] = v; }); return o; }
   function applyLb(lb) {
@@ -576,7 +580,7 @@
   function headText(k) { var el = document.querySelector('#page1 [data-lb="' + k + '"]'); return el ? txt(el).replace(/\s*\n\s*/g, " · ") : ""; }
   function syncLabels() {
     document.querySelectorAll("[data-mir]").forEach(function (el) { el.textContent = txt(document.querySelector('[data-lb="' + el.dataset.mir + '"]')); });
-    var hs = []; for (var i = 0; i < 8; i++) hs.push(headText("h" + i));
+    var hs = COLS.map(headText);
     document.querySelectorAll("#ra-tbody tr").forEach(function (tr) { [].forEach.call(tr.children, function (td, i) { if (i) td.dataset.l = hs[i]; }); });
     var o = headText("pOrg") || "소속", n = headText("pName") || "성명";
     document.querySelectorAll("#people-tbody [data-pf]").forEach(function (el) { el.dataset.ph = el.dataset.pf === "org" ? o : n; });
@@ -636,40 +640,77 @@
     for (var i = 1; i <= max; i++) h += '<option value="' + i + '"' + (i === val ? " selected" : "") + '>' + MARKS[i - 1] + '</option>';
     return h + '</select>';
   }
-  function scoreHtml(p, c, k) { var w = k === "2" ? "개선 후 " : "현재 "; return sel(p, CFG.p, w + CFG.pn) + '<span class="op">' + opChar() + "</span>" + sel(c, CFG.c, w + CFG.cn) + '<div class="score-badge"></div>'; }
+  // 재해형태 → 정석 양식의 분류·원인·관련근거 예시(안전보건규칙 조문 제목은 국가법령정보센터 원문 기준). 현장에 맞게 고쳐 쓴다
+  var KRULE = "안전보건규칙 ";
+  var TYPE_MAP = {
+    "추락": ["기계적 요인", "추락위험 부분(개구부 등)", KRULE + "제42조(추락의 방지)·제43조(개구부 등의 방호 조치)"],
+    "끼임": ["기계적 요인", "협착위험 부분(감김·끼임)", KRULE + "제87조(원동기·회전축 등의 위험 방지)·제92조(정비 등의 작업 시의 운전정지 등)"],
+    "절단·베임": ["기계적 요인", "절단·베임 위험 부분", KRULE + "제32조(보호구의 지급 등)"],
+    "충돌": ["기계적 요인", "충돌위험 부분(차량·운반기계)", KRULE + "제98조(제한속도의 지정 등)"],
+    "낙하": ["기계적 요인", "낙하·비래 위험 부분", KRULE + "제14조(낙하물에 의한 위험의 방지)"],
+    "비래": ["기계적 요인", "낙하·비래 위험 부분", KRULE + "제14조(낙하물에 의한 위험의 방지)"],
+    "전도": ["기계적 요인", "미끄럽거나 요철 있는 바닥(넘어짐)", KRULE + "제3조(전도의 방지)"],
+    "무너짐": ["기계적 요인", "붕괴위험 부분", KRULE + "제339조(굴착면의 붕괴 등에 의한 위험방지)"],
+    "감전": ["전기적 요인", "감전(안전전압 초과)", KRULE + "제301조(전기 기계·기구 등의 충전부 방호)·제304조(누전차단기에 의한 감전방지)"],
+    "화재": ["화학(물질)적 요인", "화재·폭발 위험", KRULE + "제241조(화재위험작업 시의 준수사항)"],
+    "폭발": ["화학(물질)적 요인", "화재·폭발 위험", KRULE + "제232조(폭발 또는 화재 등의 예방)"],
+    "화학물질": ["화학(물질)적 요인", "유해물질(가스·증기·액체) 노출", KRULE + "제450조(호흡용 보호구의 지급 등)"],
+    "질식": ["작업환경 요인", "산소결핍·유해가스(밀폐공간)", KRULE + "제619조의2(산소 및 유해가스 농도의 측정 및 기록 등)·제620조(환기 등)"],
+    "근골격계": ["작업특성 요인", "중량물 취급·불안정한 작업자세", KRULE + "제663조(중량물의 제한)·제666조(작업자세 등)"],
+    "한랭": ["작업환경 요인", "한랭(저온) 작업", KRULE + "제563조(한랭장해 예방 조치)"],
+    "이상온도": ["작업환경 요인", "고열·폭염", KRULE + "제562조(고열·폭염장해 예방 조치)"],
+    "화상": ["작업환경 요인", "고온물·고온부 접촉", KRULE + "제32조(보호구의 지급 등)"],
+    "부상": ["작업특성 요인", "보호구 미착용", KRULE + "제32조(보호구의 지급 등)"]
+  };
+  var COLS = ["k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10", "k11", "k12", "k13", "k14"];
   function appendRow(tbody, no, r) {
     r = r && typeof r === "object" ? r : {};
     var tr = document.createElement("tr");
     function cl(v, max) { v = parseInt(v, 10) || 0; return v > max ? max : v < 0 ? 0 : v; }
     function ed(f, ph, cls) { return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="' + CE + '" data-f="' + f + '" data-ph="' + ph + '">' + esc(str(r[f])) + "</div>"; }
+    // 예전 형식(완료 체크·개선 후 위험성·확인자)으로 저장된 값은 화면에 없는 칸이라도 지우지 않고 그대로 들고 다닌다
+    tr._keep = { p2: r.p2 || 0, c2: r.c2 || 0, checker: str(r.checker) };
+    var doneDate = str(r.doneDate) || (r.done ? "완료" : "");
     tr.innerHTML =
       '<td class="c0" style="text-align:center;"><button type="button" class="row-sum no-print" aria-expanded="false"><b></b><span></span><em></em></button><span class="row-num">' + no + '</span>' +
         '<div class="row-ctl no-print"><button type="button" data-mv="-1" aria-label="위로">▲</button><button type="button" data-mv="1" aria-label="아래로">▼</button><button type="button" data-del>삭제</button></div></td>' +
+      "<td>" + ed("work", "작업내용") + "</td>" +
+      "<td>" + ed("cat", "분류") + "</td>" +
+      "<td>" + ed("cause", "원인", "left") + "</td>" +
       "<td>" + ed("hazard", "유해·위험요인", "left") + "</td>" +
-      "<td>" + ed("cur", "지금 하고 있는 조치", "left") + "</td>" +
-      '<td><div class="scoreSel" data-k="1">' + scoreHtml(cl(r.p, CFG.p), cl(r.c, CFG.c), "1") + "</div></td>" +
-      "<td>" + ed("measure", "추가 감소대책", "left") + "</td>" +
-      "<td>" + ed("owner", "담당자") + ed("due", "기한") + "</td>" +
-      '<td><div class="scoreSel" data-k="2">' + scoreHtml(cl(r.p2, CFG.p), cl(r.c2, CFG.c), "2") + "</div></td>" +
-      '<td style="text-align:center"><label class="done"><input type="checkbox" data-f="done" aria-label="개선 완료"' + (r.done ? " checked" : "") + "> 완료</label>" + ed("checker", "확인자") + "</td>";
+      "<td>" + ed("law", "법적기준", "left") + "</td>" +
+      "<td>" + ed("cur", "현재상태·조치", "left") + "</td>" +
+      '<td class="sp">' + sel(cl(r.p, CFG.p), CFG.p, CFG.pn) + "</td>" +
+      '<td class="sp">' + sel(cl(r.c, CFG.c), CFG.c, CFG.cn) + "</td>" +
+      '<td class="sb"><div class="score-badge"></div></td>' +
+      "<td>" + ed("measure", "감소대책", "left") + "</td>" +
+      "<td>" + ed("due", "개선일") + "</td>" +
+      "<td>" + ed("doneDate", "완료일").replace(">" + esc(str(r.doneDate)) + "<", ">" + esc(doneDate) + "<") + "</td>" +
+      "<td>" + ed("owner", "담당자") + "</td>" +
+      "<td>" + ed("note", "비고") + "</td>";
     tbody.appendChild(tr);
     return tr;
   }
+  var FIELDS = ["work", "cat", "cause", "hazard", "law", "cur", "measure", "due", "doneDate", "owner", "note"];
   function rowData(tr) {
-    var s = tr.querySelectorAll(".scoreSel select"), o = {};
-    ["hazard", "cur", "measure", "owner", "due", "checker"].forEach(function (f) { o[f] = txt(tr.querySelector('[data-f="' + f + '"]')); });
-    o.p = +s[0].value; o.c = +s[1].value; o.p2 = +s[2].value; o.c2 = +s[3].value;
-    o.done = tr.querySelector('[data-f="done"]').checked;
+    var s = tr.querySelectorAll("td.sp select"), o = {};
+    FIELDS.forEach(function (f) { o[f] = txt(tr.querySelector('[data-f="' + f + '"]')); });
+    o.p = +s[0].value; o.c = +s[1].value;
+    o.done = !!o.doneDate;
+    var k = tr._keep || {}; o.p2 = k.p2 || 0; o.c2 = k.c2 || 0; o.checker = k.checker || "";
     return o;
   }
-  function rowBlank(r) { return !r.hazard && !r.cur && !r.measure && !r.owner && !r.due && !r.checker && !r.done && !r.p && !r.c && !r.p2 && !r.c2; }
-  function hazRow(it) { var s = suggest(it.level); return { hazard: it.risk, p: s.p, c: s.c, measure: it.measure }; }
+  function rowBlank(r) { return !FIELDS.some(function (f) { return r[f]; }) && !r.p && !r.c; }
+  function hazRow(it) {
+    var s = suggest(it.level), m = TYPE_MAP[it.type] || (/소음/.test(it.risk) ? ["작업특성 요인", "소음", KRULE + "제516조(청력보호구의 지급 등)"] : /아크|자외선|광선/.test(it.risk) ? ["작업환경 요인", "유해광선", KRULE + "제32조(보호구의 지급 등)"] : /감염|병원체|인수공통|벌|뱀/.test(it.risk) ? ["생물학적 요인", "병원체·동식물", ""] : ["기타 요인", "", ""]);
+    return { work: txt($("dispDept")) || it.group || "", cat: m[0], cause: m[1], hazard: it.risk, law: m[2], p: s.p, c: s.c, measure: it.measure };
+  }
   function defaultRows(dept) { return itemsFor(dept, 6).map(hazRow); }
   // 기본 목록에서 채운 그대로가 아닌 줄(직접 적거나 고친 줄)이 있는지
   function rowsEdited() {
     return [].some.call(document.querySelectorAll("#ra-tbody tr"), function (tr) {
       var r = rowData(tr);
-      if (r.cur || r.owner || r.due || r.checker || r.done || r.p2 || r.c2) return true;
+      if (r.cur || r.owner || r.due || r.doneDate || r.note) return true;
       if (!r.hazard && !r.measure) return false;
       return !HAZARD_DB.items.some(function (i) { return i.risk === r.hazard && i.measure === r.measure; });
     });
@@ -723,15 +764,15 @@
     }
   });
   function updateScore(el) {
-    var wrap = el.closest(".scoreSel");
-    var s = wrap.querySelectorAll("select");
+    var wrap = el.closest("tr");
+    var s = wrap.querySelectorAll("td.sp select");
     var score = scoreOf(parseInt(s[0].value, 10), parseInt(s[1].value, 10));
     var info = levelInfo(score);
     var badge = wrap.querySelector(".score-badge");
     badge.textContent = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
     badge.className = "score-badge " + info.cls;
     wrap.classList.toggle("none", !score);
-    rowSum(wrap.closest("tr")); updateSummary();
+    rowSum(wrap); updateSummary();
   }
   function rowSum(tr) {
     if (!tr) return;
@@ -746,7 +787,7 @@
       tr.querySelector(".row-num").textContent = i + 1;
       tr.querySelector('[data-mv="-1"]').disabled = i === 0; tr.querySelector('[data-mv="1"]').disabled = i === trs.length - 1;
     });
-    document.querySelectorAll(".scoreSel").forEach(function (w) { updateScore(w.querySelector("select")); });
+    trs.forEach(function (tr) { var s0 = tr.querySelector("td.sp select"); if (s0) updateScore(s0); });
     updateSummary();
   }
   // 집계: 평가한 요인 수, 허용 기준을 넘는 요인 수, 개선 후에도 넘는 요인 수, 완료 수
@@ -754,16 +795,16 @@
     var el = $("raSummary"); if (!el) return;
     var n = 0, bad = 0, still = 0, done = 0, noPlan = 0, noScore = 0;
     document.querySelectorAll("#ra-tbody tr").forEach(function (tr) {
-      var r = rowData(tr), s1 = scoreOf(r.p, r.c), s2 = scoreOf(r.p2, r.c2);
+      var r = rowData(tr), s1 = scoreOf(r.p, r.c);
       if (!r.hazard && !s1) return;
       n++;
       if (!s1) noScore++;
-      if (s1 > +CFG.accept) { bad++; if (!r.measure) noPlan++; if (r.done) done++; if (s2 > +CFG.accept) still++; }
+      if (s1 > +CFG.accept) { bad++; if (!r.measure) noPlan++; if (r.doneDate) done++; }
     });
     el.textContent = n ? "평가 " + n + "건 · 허용 기준(" + CFG.accept + "점) 초과 " + bad + "건" + (bad ? " (개선 완료 " + done + "건" + (still ? ", 개선 후에도 초과 " + still + "건" : "") + ")" : "") : "";
     var w = [];
     if (noScore) w.push("현재 위험성을 고르지 않은 줄 " + noScore + "건");
-    if (noPlan) w.push("허용 기준을 넘는데 추가 감소대책이 비어 있는 줄 " + noPlan + "건");
+    if (noPlan) w.push("허용 기준을 넘는데 감소대책이 비어 있는 줄 " + noPlan + "건");
     $("raWarn").textContent = w.join(" · ");
     secSums(n, bad, w.length);
   }
@@ -956,10 +997,10 @@
     else {
       // 지난 평가서를 바탕으로 새로: 날짜는 오늘, 개선 후 위험성·완료 표시·확인란·결재 서명은 비운다
       var d = clone(x.data); d.date = today(); d.checks = []; d.keep = "";
-      (Array.isArray(d.rows) ? d.rows : []).forEach(function (r) { if (r) { r.p2 = 0; r.c2 = 0; r.done = false; r.checker = ""; r.due = ""; } });
+      (Array.isArray(d.rows) ? d.rows : []).forEach(function (r) { if (r) { r.p2 = 0; r.c2 = 0; r.done = false; r.checker = ""; r.due = ""; r.doneDate = ""; } });
       d.appr = apprNoSigns(d.v >= 2 ? d.appr : lsGet(APPR_KEY)); d.v = 2;
       docId = newId(); apply(d); touched = true; saveNow();
-      setStatus("복사해서 새 평가서를 만들었습니다. 평가일은 오늘로, 개선 후 위험성·기한·완료 표시·결재 서명은 비웠습니다.");
+      setStatus("복사해서 새 평가서를 만들었습니다. 평가일은 오늘로, 개선일·완료일·결재 서명은 비웠습니다.");
     }
     closeDocs(); window.scrollTo(0, 0);
   });
