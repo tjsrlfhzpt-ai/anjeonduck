@@ -82,8 +82,12 @@
   #ra td { padding:8px 4px; border-color:#a0b8c8; }
   #ra th { padding:6px 2px; }
   #ra .ed { font-size:11.5px; } #ra label.done { font-size:11px; white-space:nowrap; }
-  #ra td.sp select { width:100%; max-width:46px; padding:3px 0; border:1px solid #cbd5e0; border-radius:4px; text-align:center; font-weight:bold; font-size:10.5px; cursor:pointer; background:#fff; color:#111; }
-  #ra td.sp, #ra td.sb { text-align:center; } #ra .score-badge { font-size:10px; }
+  #ra td.sp select { -webkit-appearance:none; appearance:none; width:100%; max-width:46px; min-width:20px; height:26px; padding:0; border:1px solid #9fb3c8; border-radius:4px; text-align:center; text-align-last:center; font-weight:800; font-size:12px; cursor:pointer; background:#fff; color:#111; }
+  #ra td.sp { padding-left:2px !important; padding-right:2px !important; }
+  #ra td.sp, #ra td.sb { text-align:center; } #ra td.sb { padding-left:2px !important; padding-right:2px !important; }
+  #ra .score-badge { display:block; min-width:0; width:100%; box-sizing:border-box; margin:0; padding:3px 1px; font-size:10px; line-height:1.25; white-space:normal; word-break:keep-all; overflow-wrap:anywhere; }
+  #ra .score-badge small { display:block; font-size:9px; font-weight:700; opacity:.9; }
+  body:not(.land) #ra .score-badge { font-size:9px; } body:not(.land) #ra .ed { font-size:10.5px; }
   .scoreSel { display:flex; justify-content:center; gap:3px; align-items:center; flex-wrap:wrap; }
   .scoreSel select { width:42px; padding:3px; border:1px solid #cbd5e0; border-radius:4px; text-align:center; font-weight:bold; font-size:10.5px; cursor:pointer; background:#fff; color:#111; }
   .score-badge { display:inline-block; min-width:50px; padding:4px; border-radius:4px; text-align:center; font-weight:800; font-size:11px; margin-top:3px; }
@@ -585,7 +589,7 @@
     var o = headText("pOrg") || "소속", n = headText("pName") || "성명";
     document.querySelectorAll("#people-tbody [data-pf]").forEach(function (el) { el.dataset.ph = el.dataset.pf === "org" ? o : n; });
   }
-  function saveTpl() { lsSet(TPL_KEY, { lb: collectLb(), types: TYPES, orient: ORIENT, appr: APPR_ON }); }
+  function saveTpl() { lsSet(TPL_KEY, { lb: collectLb(), types: TYPES, orient: ORIENT, ov: 3, appr: APPR_ON }); }
   function loadTpl() { var t = lsGet(TPL_KEY); return t && typeof t === "object" ? t : {}; }
   function cleanTypes(a) { a = Array.isArray(a) ? a.map(function (x) { return str(x, 20).trim(); }).filter(Boolean).slice(0, 8) : []; return a.length ? a : null; }
   function resetLabels() {
@@ -769,7 +773,8 @@
     var score = scoreOf(parseInt(s[0].value, 10), parseInt(s[1].value, 10));
     var info = levelInfo(score);
     var badge = wrap.querySelector(".score-badge");
-    badge.textContent = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
+    badge.dataset.t = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
+    badge.innerHTML = score ? score + " (" + esc(info.text) + ")" + (score > +CFG.accept ? "<small>개선</small>" : "") : esc(info.text);
     badge.className = "score-badge " + info.cls;
     wrap.classList.toggle("none", !score);
     rowSum(wrap); updateSummary();
@@ -779,7 +784,7 @@
     var b = tr.querySelector(".row-sum"), bd = tr.querySelector(".score-badge"), hz = txt(tr.querySelector('[data-f="hazard"]'));
     b.children[0].textContent = tr.querySelector(".row-num").textContent;
     b.children[1].textContent = hz || "(유해·위험요인을 적으세요)";
-    b.children[2].textContent = bd.textContent; b.children[2].className = bd.className.replace("score-badge", "").trim();
+    b.children[2].textContent = bd.dataset.t || bd.textContent; b.children[2].className = bd.className.replace("score-badge", "").trim();
   }
   function updateAll() {
     var trs = document.querySelectorAll("#ra-tbody tr");
@@ -900,7 +905,7 @@
   }
   function collect() {
     var d = {
-      v: 2, date: txt($("evalDate")), writer: txt($("fWriter")), site: txt($("fSite")),
+      v: 3, date: txt($("evalDate")), writer: txt($("fWriter")), site: txt($("fSite")),
       dept: txt($("dispDept")), group: $("globalWorkType").value, type: typeIndex(), types: TYPES.slice(),
       rows: [].map.call(document.querySelectorAll("#ra-tbody tr"), rowData), people: collectPeople(), np: NP,
       checks: [].map.call(document.querySelectorAll("#lawCheck input[type=checkbox]"), function (c) { return c.checked; }),
@@ -925,7 +930,7 @@
     TYPES = cleanTypes(d.types) || (!d.v && d.type === 3 ? ["최초", "정기", "수시", "상시"] : cleanTypes(t.types) || DEF_TYPES.slice());
     renderTypes(d.type >= 0 && d.type < TYPES.length ? d.type : d.type === -1 && d.v ? -1 : Math.min(1, TYPES.length - 1));
     applyLb(d.lb || t.lb);
-    setOrient(d.orient || t.orient); setAppr(d.apprOn != null ? d.apprOn : t.appr);
+    setOrient((d.v >= 3 && d.orient) || (t.ov >= 3 && t.orient) || "l"); setAppr(d.apprOn != null ? d.apprOn : t.appr);
     fillRows(Array.isArray(d.rows) ? d.rows : defaultRows(gs.value));
     peopleRows(d.people, num(d.np, 2, 60, Math.max(6, Array.isArray(d.people) ? d.people.length : 0)));
     document.querySelectorAll("#lawCheck input[type=checkbox]").forEach(function (c, i) { c.checked = !!(Array.isArray(d.checks) ? d.checks : [])[i]; });
@@ -998,7 +1003,7 @@
       // 지난 평가서를 바탕으로 새로: 날짜는 오늘, 개선 후 위험성·완료 표시·확인란·결재 서명은 비운다
       var d = clone(x.data); d.date = today(); d.checks = []; d.keep = "";
       (Array.isArray(d.rows) ? d.rows : []).forEach(function (r) { if (r) { r.p2 = 0; r.c2 = 0; r.done = false; r.checker = ""; r.due = ""; r.doneDate = ""; } });
-      d.appr = apprNoSigns(d.v >= 2 ? d.appr : lsGet(APPR_KEY)); d.v = 2;
+      d.appr = apprNoSigns(d.v >= 2 ? d.appr : lsGet(APPR_KEY)); d.v = 3;
       docId = newId(); apply(d); touched = true; saveNow();
       setStatus("복사해서 새 평가서를 만들었습니다. 평가일은 오늘로, 개선일·완료일·결재 서명은 비웠습니다.");
     }
