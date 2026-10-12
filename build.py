@@ -2279,7 +2279,21 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input type="search" class="filter-q" placeholder="법령명, 내용" aria-label="개정 소식 검색"></div></div>"""
     in_force = [u for u in updates if not u.get("effective") or u["effective"] <= today]
-    law_body = lawpages.hub_page(LAWS, "".join(update_row(u, today=today) for u in in_force), len(in_force), statutes, upd_filter, MANIFEST, today)
+    def upd_brow(n, u):
+        src = safe_url(u.get("source_url"))
+        arts = " · ".join(e(x) for x in u.get("affected_articles", []) or [])
+        det = (f'<p>{e(u.get("summary"))}</p>' + (f'<p><b>대상 조문</b> {arts}</p>' if arts else "")
+               + (f'<p><b>실무 영향</b> {e(u["practical_impact"])}</p>' if u.get("practical_impact") else "")
+               + '<p class="brow-f">' + " · ".join(x for x in (
+                   f'<a href="{e(src)}" target="_blank" rel="noopener">{e(u.get("source_name") or "원문")} ↗</a>' if src else "",
+                   f'근거 {e(u["basis"])}' if u.get("basis") else "",
+                   '<span class="brow-chk">확인 필요</span>' if u.get("verify") else "",
+                   f'원문 확인 {fmt_date(u.get("checked"))}' if u.get("checked") else "") if x) + "</p>")
+        meta = " · ".join(x for x in (e(u.get("kind") or ""), ("시행 " + lawpages.kdate(u["effective"])) if u.get("effective") else "", "공포일 순") if x and x != "공포일 순")
+        d = u.get("date", "")
+        return lawpages.brow(n, f'{e(u.get("law"))} <span class="brow-s">{e(u["title"])}</span>', meta, ("공포 " + lawpages.kdate(d)) if d else "", det,
+                             attrs=f' data-item data-text="{e(u.get("title", "") + " " + u.get("summary", "") + " " + u.get("law", ""))}"')
+    law_body = lawpages.hub_page(LAWS, "".join(upd_brow(len(in_force) - i, u) for i, u in enumerate(in_force)), len(in_force), statutes, upd_filter, MANIFEST, today)
     write("laws/index.html", page(site, "../", "laws/", "법령", law_body,
                                   desc="산업안전보건법·시행령·시행규칙·안전보건규칙·중대재해처벌법 현행 전문 검색, 주제별 조문, 개정 소식.", active="laws/"))
 

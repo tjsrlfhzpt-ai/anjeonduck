@@ -1845,3 +1845,29 @@ body.is-arrived [data-landing]{display:none!important}
 .bdr li a:hover{background:var(--surface-2);text-decoration:none}
 .bdr time{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
 @media (max-width:560px){.bdv-t th{width:5.5em;padding:12px}.bdv-t td{padding:12px 14px}.bdn{grid-template-columns:1fr}.bdn-next{grid-column:1;text-align:left}}
+
+/* 법령 현황 게시판형 목록 (kshec 게시판 참고: 번호 · 제목 · 날짜) */
+.blist{list-style:none;margin:0;padding:0;border-top:2px solid var(--navy);background:var(--surface)}
+.brow{border-bottom:1px solid var(--line)}
+.brow[hidden]{display:none}
+.brow-r{display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;gap:16px;padding:20px 16px;color:var(--text);list-style:none;cursor:pointer}
+div.brow-r{cursor:default}
+.brow-r::-webkit-details-marker{display:none}
+a.brow-r:hover,summary.brow-r:hover{background:var(--surface-2);text-decoration:none}
+a.brow-r:hover .brow-t,summary.brow-r:hover .brow-t{text-decoration:underline;text-underline-offset:3px}
+.brow-n{text-align:center;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.brow-b{display:flex;flex-direction:column;gap:4px;min-width:0}
+.brow-t{font-size:16px;font-weight:500;color:var(--text);line-height:1.45}
+.brow-m{font-size:12.5px;color:var(--muted);line-height:1.5}
+.brow-d{font-size:13.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.brow-up{color:var(--orange)}
+.brow-chk{color:var(--red)}
+details[open]>.brow-r{background:var(--surface-2)}
+.brow-x{padding:4px 16px 20px 88px;font-size:14px;line-height:1.75;color:var(--text-2)}
+.brow-x p{margin:6px 0}
+.brow-x b{color:var(--text);margin-right:6px}
+.brow-f{font-size:13px;color:var(--muted)}
+.brow-empty{padding:28px 16px;text-align:center;color:var(--muted);border-bottom:1px solid var(--line)}
+.lstat .blist{margin-top:4px}
+@media (max-width:640px){.brow-r{grid-template-columns:32px minmax(0,1fr);gap:10px;padding:16px 8px}.brow-d{grid-column:2;font-size:12.5px}.brow-n{font-size:12.5px}.brow-t{font-size:15px}.brow-x{padding:4px 8px 16px 50px}}
+.brow-s{color:var(--text-2)}

@@ -362,23 +362,41 @@ def search_index(laws):
 STAGES = ["법안", "국회 통과", "공포", "시행 예정", "시행 중"]
 
 
+def brow(n, title, meta="", right="", detail="", href="", attrs=""):
+    """게시판형 한 줄(번호 · 제목/보조줄 · 오른쪽 날짜). detail 이 있으면 눌러서 펼친다."""
+    num = f'<span class="brow-n">{n}</span>'
+    body = f'<span class="brow-b"><span class="brow-t">{title}</span>{f"<span class=brow-m>{meta}</span>" if meta else ""}</span>'
+    rt = f'<span class="brow-d">{right}</span>'
+    if href:
+        return f'<li class="brow"{attrs}><a class="brow-r" href="{href}">{num}{body}{rt}</a></li>'
+    if detail:
+        return f'<li class="brow"{attrs}><details><summary class="brow-r">{num}{body}{rt}</summary><div class="brow-x">{detail}</div></details></li>'
+    return f'<li class="brow"{attrs}><div class="brow-r">{num}{body}{rt}</div></li>'
+
+
+def blist(rows, empty):
+    return f'<ul class="blist">{rows or f"<li class=brow-empty>{empty}</li>"}</ul>'
+
+
 def status_panel(laws, manifest, today, rel=""):
-    """법령별 현재 시행본·시행 예정본 표. 홈과 법령 허브가 같이 쓴다."""
-    rows, n_up, n_chk = "", 0, 0
+    """법령별 현재 시행본 목록(게시판형). 홈과 법령 허브가 같이 쓴다."""
+    rows, n_up, n_chk, i = "", 0, 0, 0
     for l in manifest["laws"]:
         if l["key"] not in laws:
             continue
+        i += 1
         c = l["current"]
-        ups = [u for u in l.get("upcoming", []) if u["effective"] > today]
+        ups = sorted((u for u in l.get("upcoming", []) if u["effective"] > today), key=lambda x: x["effective"])
         n_up += len(ups)
-        chk = "확인 필요" if "확인 필요" in (l.get("note") or "") else ""
+        chk = "확인 필요" in (l.get("note") or "")
         n_chk += 1 if chk else 0
-        chk_html = f'<br><span class="lst-chk" tabindex="0">확인 필요</span> <span class="muted">{e(l["note"])}</span>' if chk else ""
-        up_txt = "<br>".join(f'<span class="lst lst-next">시행 예정</span> {e(kdate(u["effective"]))} {e(u["no"])}' for u in sorted(ups, key=lambda x: x["effective"])) or '<span class="muted">확인된 시행 예정 없음</span>'
-        rows += (f'<tr><th><a href="{rel}{l["key"]}/">{e(l["name"])}</a></th><td><span class="lst lst-cur">현재 시행</span> {e(kdate(c["effective"]))}<br><span class="muted">{e(c["no"])} · {e(kdate(c["promulgated"]))} {e(c["kind"])}</span></td>'
-                 f'<td>{up_txt}{chk_html}</td><td>{e(l["checked_at"])}</td></tr>')
-    table = f'<div class="table-wrap"><table class="lvt lvt-hub"><thead><tr><th>법령</th><th>현재 시행본</th><th>시행 예정</th><th>공식 확인일</th></tr></thead><tbody>{rows}</tbody></table></div>'
-    return table, n_up, n_chk
+        meta = f'{e(c["no"])} · {e(kdate(c["promulgated"]))} {e(c["kind"])}'
+        if ups:
+            meta += f' · <span class="brow-up">시행 예정 개정 {len(ups)}건 (다음 {e(kdate(ups[0]["effective"]))})</span>'
+        if chk:
+            meta += f' · <span class="brow-chk" title="{e(l["note"])}">시행 예정본 확인 필요</span>'
+        rows += brow(i, e(l["name"]), meta, f'시행 {e(kdate(c["effective"]))}', href=f'{rel}{l["key"]}/')
+    return blist(rows, "등록된 법령이 없습니다."), n_up, n_chk
 
 
 def upcoming_html(manifest, today, rel=""):
@@ -388,23 +406,23 @@ def upcoming_html(manifest, today, rel=""):
             if u["effective"] > today:
                 items.append((u["effective"], l, u))
     out = ""
-    for eff, l, u in sorted(items, key=lambda x: x[0]):
+    for n, (eff, l, u) in enumerate(sorted(items, key=lambda x: x[0]), 1):
         arts = " · ".join(e(x) for x in u.get("articles", []))
-        imp = f'<p class="lup-i"><b>실무 영향</b> {e(u["impact"])}</p>' if u.get("impact") else ""
-        out += (f'<li class="lup"><div class="lup-d"><span class="lst lst-next">시행 예정</span><b>{e(kdate(eff))}</b></div><div><p class="lup-t"><a href="{rel}{l["key"]}/#versions">{e(l["name"])}</a> <span class="muted">{e(u["no"])} · {e(kdate(u["promulgated"]))} {e(u["kind"])}</span></p>'
-                f'<p>{e(u.get("summary", ""))}</p>{f"<p class=lup-a>대상 조문: {arts}</p>" if arts else ""}{imp}'
-                f'<p class="urow-foot"><a class="link-ext" href="{e(u["source_url"])}" target="_blank" rel="noopener">국가법령정보센터 ↗</a><span>근거 {e(u.get("basis", ""))}</span>'
-                f'<span>{"본문에 함께 수록" if u.get("text") == "inline" else "개정 조문 본문은 원문에서 확인"}</span></p></div></li>')
+        det = (f'<p>{e(u.get("summary", ""))}</p>'
+               + (f'<p><b>대상 조문</b> {arts}</p>' if arts else "")
+               + (f'<p><b>실무 영향</b> {e(u["impact"])}</p>' if u.get("impact") else "")
+               + f'<p class="brow-f"><a href="{e(u["source_url"])}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a> · <a href="{rel}{l["key"]}/#versions">{e(l["name"])} 전문</a> · 근거 {e(u.get("basis", ""))}</p>')
+        out += brow(n, f'{e(l["name"])} {e(u["kind"])}', f'{e(u["no"])} · {e(kdate(u["promulgated"]))} 공포', f'시행 {e(kdate(eff))}', det)
     return out, len(items)
 
 
 def bills_html(manifest):
     out = ""
-    for b in manifest.get("bills", []):
-        steps = "".join(f'<span class="lstage{" on" if st == b.get("stage") else ""}">{e(st)}</span>' for st in STAGES)
-        src = f'<a class="link-ext" href="{e(b["source_url"])}" target="_blank" rel="noopener">{e(b.get("source_name") or "출처")} ↗</a>' if str(b.get("source_url", "")).startswith("https://") else '<span class="lst-chk" tabindex="0">확인 필요</span> <span class="muted">공식 출처</span>'
-        out += (f'<li class="lup"><div class="lup-d"><span class="lst lst-bill">입법 동향</span><b>{e(kdate(b["stage_date"]))}</b></div><div><p class="lup-t">{e(b["title"])}</p><p class="lstages">{steps}</p>'
-                f'<p>{e(b.get("summary", ""))}</p><p class="urow-foot">{src}<span>{e(b.get("note", ""))}</span></p></div></li>')
+    for n, b in enumerate(manifest.get("bills", []), 1):
+        src = (f'<a href="{e(b["source_url"])}" target="_blank" rel="noopener">{e(b.get("source_name") or "출처")} ↗</a>' if str(b.get("source_url", "")).startswith("https://")
+               else '<span class="brow-chk">공식 출처 확인 필요</span>')
+        det = f'<p>{e(b.get("summary", ""))}</p><p class="brow-f">{src}{(" · " + e(b["note"])) if b.get("note") else ""}</p>'
+        out += brow(n, e(b["title"]), f'{e(b.get("stage", ""))} · {e(b.get("agency") or b.get("law", ""))}', e(kdate(b["stage_date"])), det)
     return out
 
 
@@ -437,16 +455,16 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html, m
         up, _ = upcoming_html(manifest, today)
         bills = bills_html(manifest)
         status_sec = f"""<section class="wrap lstat" id="status">
-  <div class="sec-head"><div><h2>A · 현재 시행 법령</h2><p>법령 데이터 기준일 <strong>{e(manifest["checked_at"])}</strong> · 국가법령정보센터 연혁과 대조. 조문마다 시행일이 다르면 법령 전체 시행일 하나로 표시하지 않고 조문에 '시행 예정'을 따로 붙입니다.</p></div></div>
+  <div class="sec-head"><div><h2>현행 법령</h2><p>국가법령정보센터 연혁과 대조 · 기준일 {e(manifest["checked_at"])}</p></div></div>
   {table}
 </section>
 <section class="wrap lstat" id="upcoming">
-  <div class="sec-head"><div><h2>B · 공포됐지만 아직 시행 전</h2><p>이미 공포돼 시행일이 정해진 개정입니다. 시행일 전에는 적용되지 않습니다.</p></div></div>
-  <ul class="lups">{up or '<li class="lup"><div></div><div><p>확인된 시행 예정 개정이 없습니다.</p></div></li>'}</ul>
+  <div class="sec-head"><div><h2>시행 예정 개정</h2><p>공포됐지만 시행일 전인 개정 · 제목을 누르면 내용이 열립니다</p></div></div>
+  {blist(up, "확인된 시행 예정 개정이 없습니다.")}
 </section>
 <section class="wrap lstat" id="bills">
-  <div class="sec-head"><div><h2>입법 동향</h2><p>국회 통과안·입법예고는 <strong>공포돼야 법령이 됩니다.</strong> 내용과 시행일은 공포문으로 확정됩니다.</p></div></div>
-  <ul class="lups">{bills or '<li class="lup"><div></div><div><p>등록된 입법 동향이 없습니다.</p></div></li>'}</ul>
+  <div class="sec-head"><div><h2>입법 동향</h2><p>국회 통과안·입법예고 · 공포돼야 법령이 되며 내용과 시행일은 공포문으로 확정됩니다</p></div></div>
+  {blist(bills, "등록된 입법 동향이 없습니다.")}
 </section>"""
     return f"""
 <section class="phead lhero"><div class="wrap">
@@ -480,13 +498,13 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html, m
 </section>
 <div class="wrap layout-detail" style="padding-top:28px">
   <section class="col-main" id="updates">
-    <div class="sec-head"><div><h2>C · 시행 중인 최근 개정</h2><p>공포일 순서. 요약은 조문 개정 표기와 부칙을 읽고 정리한 것입니다. 적용 여부는 원문으로 확인하세요.</p></div></div>
+    <div class="sec-head"><div><h2>최근 개정</h2><p>시행 중인 개정 · 공포일 순 · 적용 여부는 원문으로 확인하세요</p></div></div>
     {update_filter_html}
-    <ul class="ulist" data-list>{updates_html}</ul>
+    <ul class="blist" data-list>{updates_html}</ul>
     <div class="empty" data-empty hidden><p>검색 결과가 없습니다.</p></div>
   </section>
   <aside class="col-side">
-    <section class="side-box" id="past"><div class="sec-head"><div><h2>D · 과거 법령</h2></div></div><p>개정 전 조문과 연혁은 SafePlum에 싣지 않습니다. 각 법령 페이지의 '국가법령정보센터 연혁'에서 시행일별 본문을 확인하세요.</p></section>
+    <section class="side-box" id="past"><div class="sec-head"><div><h2>과거 법령</h2></div></div><p>개정 전 조문과 연혁은 SafePlum에 싣지 않습니다. 각 법령 페이지의 '국가법령정보센터 연혁'에서 시행일별 본문을 확인하세요.</p></section>
     <section class="side-box" id="statutes"><div class="sec-head"><div><h2>고시·관련 법령 원문</h2></div></div><ul class="llist">{statutes_html}</ul></section>
   </aside>
 </div>
