@@ -590,7 +590,8 @@ def nav_cols(site, rel):
     def tl(ids):
         return [(f'{rel}tools/{i}/', by[i].get("menu") or by[i].get("short") or by[i]["name"]) for i in ids if i in by]
     return {
-        "lib": [("작성기", tl(WRITE_TOOLS) + [(f"{rel}tools/forms/", "＋ 기본 서식 52종 (일지·점검표·계획서)"), (f"{rel}tools/", "→ 작성기·계산기·조회 전체 목록")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS)),
+        "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}", n) for g, n in (("업무일지", "안전·보건 업무일지"), ("작업계획서", "작업계획서"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표"), ("중대재해처벌법 이행", "중대재해법 이행 서식"))]
+                 + [(f"{rel}tools/forms/", f"작성기 전체 {WRITER_N}종 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
                 ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
@@ -1155,6 +1156,34 @@ TOOL_KINDS = [("작성기", "k-write", "바로 작성해 A4로 인쇄·PDF 저�
 ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
 
 
+# 작성기 하나로 통합(2026-10-12): 전용 작성기(config free_tools, cat=작성기)를 서식 작성기 묶음 속에 넣어 /tools/forms/ 한 곳에서 찾는다.
+WRITER_LEAD = ("위험성평가·TBM", ["tbm", "risk"])          # 맨 앞 묶음(서식에는 없는 묶음)
+WRITER_TOOLS_IN = {"교육·회의": ["edu-log", "committee", "council"],
+                   "점검·허가": ["patrol", "joint", "permit", "improve", "confined", "heat", "loto"],
+                   "관리대장": ["msds"]}
+WRITER_GID = {"위험성평가·TBM": "w-risk", "교육·회의": "w-edu", "점검·허가": "w-check", "재해·사고 조사": "w-acc", "업무일지": "w-log",
+              "작업계획서": "w-plan", "작업시작 전 점검(별표 3)": "pre", "조직·발령": "w-org", "관리대장": "w-ledger", "중대재해처벌법 이행": "w-sapa"}
+WRITER_N = 0  # main() 에서 계산: 전용 작성기 + 서식 - 겹치는 것
+
+
+def writer_groups(site, groups, forms):
+    """[(묶음 이름, [('tool', t) | ('form', f)])]. 같은 id 의 전용 작성기가 있으면 서식 카드는 빼고 전용 작성기만 보인다."""
+    tools = {t["id"]: t for t in site.get("free_tools", []) if t.get("cat") == "작성기"}
+    dup = set(tools) & {f["id"] for f in forms}
+    out = [(WRITER_LEAD[0], [("tool", tools[i]) for i in WRITER_LEAD[1] if i in tools])]
+    used = set(WRITER_LEAD[1])
+    for g in groups:
+        items = [("tool", tools[i]) for i in WRITER_TOOLS_IN.get(g, []) if i in tools]
+        used |= set(WRITER_TOOLS_IN.get(g, []))
+        items += [("form", f) for f in forms if f["group"] == g and f["id"] not in dup]
+        if items:
+            out.append((g, items))
+    rest = [("tool", t) for i, t in tools.items() if i not in used]
+    if rest:
+        out.append(("기타", rest))
+    return out
+
+
 def tool_card(href, kind, name, desc, law="", sub="", ico=""):
     cls = next((c for k, c, _ in TOOL_KINDS if k == kind), "k-write")
     pic = f'<img class="tcard-i" src="{ico}" width="52" height="52" alt="" loading="lazy">' if ico else ""
@@ -1374,6 +1403,8 @@ def build(out, today):
     JOB_POST = bool((site.get("features") or {}).get("job_posting", True))  # 회원 채용공고 등록을 열어 둘지
     base_res = load("data/resources.json")
     _groups, _forms = all_forms(load("data/lawref.json"))
+    global WRITER_N
+    WRITER_N = sum(len(items) for _, items in writer_groups(site, _groups, _forms))
     web_forms = [{"id": "wf-" + f["id"], "category": "웹 작성 서식", "title": f["title"], "law": "", "form_no": f.get("group", ""),
                   "summary": f.get("desc", ""), "tags": [f.get("group", ""), f.get("short", "")], "topic": WF_TOPIC.get(f.get("group", ""), "기타"),
                   "free_tool": "forms/" + f["id"], "basis": f.get("law", "")} for f in _forms]
@@ -1556,7 +1587,7 @@ def build(out, today):
     _unused = board("법령 개정", "laws/#updates", "".join(bd_row(f"laws/#updates", u["title"], md(u.get("date")), u.get("law", "").replace("산업안전보건법 ", "").replace("산업안전보건", "산안")[:6]) for u in updates[:5]))
     FORM_PICKS = ["log-safety", "log-safety-w", "log-health", "accident", "ppe-ledger", "log-sup"]
     fby = {f["id"]: f for f in _forms}
-    bd_forms = board(f"서식 작성기 {n_forms}종", "tools/forms/", "".join(bd_row(f"tools/forms/{i}/", fby[i]["title"], "", fby[i]["group"][:5]) for i in FORM_PICKS if i in fby))
+    bd_forms = board(f"작성기 {WRITER_N}종", "tools/forms/", "".join(bd_row(f"tools/forms/{i}/", fby[i]["title"], "", fby[i]["group"][:5]) for i in FORM_PICKS if i in fby))
     bd_res = board("자주 찾는 법정 서식", "resources/", "".join(bd_row(f"resources/{r['detail']}" if r.get("detail") else "resources/", r["title"], "", "서식" if r.get("category") == "법정 서식" else "고시") for r in popular[:6]))
     lib = load("data/library.json")
     bd_lib = board("안전보건 자료실", "resources/library/", "".join(bd_row(safe_url(x["url"]), x["name"], "", "공식", ext=True) for x in lib.get("official", [])[:3] if safe_url(x.get("url")))
@@ -1698,7 +1729,7 @@ def build(out, today):
     </div>
     <div class="hub-pane" role="tabpanel" id="pane-write" data-pane="write">
       <div class="hc-grid">{tab1}</div>
-      <p class="hub-more"><a href="tools/forms/">교육일지·점검표·작업계획서 등 서식 작성기 {n_forms}종 →</a></p>
+      <p class="hub-more"><a href="tools/forms/">교육일지·점검표·작업계획서 등 작성기 전체 {WRITER_N}종 →</a></p>
     </div>
     <div class="hub-pane" role="tabpanel" id="pane-calc" data-pane="calc" hidden>
       <div class="hc-grid">{tab2}</div>
@@ -2011,7 +2042,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
   <h2 id="health">5. 건강정보 도구 안내</h2>
   <p>뇌·심혈관질환 발병위험도 평가 등 건강 관련 도구의 결과는 건강관리를 돕는 참고 자료입니다. 정확한 진단과 업무 적합성·사후관리 판단은 의사 등 보건의료 전문가의 평가를 받으세요. 이 결과만을 근거로 채용·배치·해고 등 고용상 불이익을 주어서는 안 됩니다. 건강정보는 민감정보이므로 다른 사람의 정보를 입력할 때에는 사업장에서 정한 절차와 본인 동의 등 개인정보 보호법상 요건을 사업장이 직접 확인해야 합니다. 공용 PC에서는 사용 후 '작성 내용 백업 · 삭제'에서 데이터를 지우세요.</p>
   <h2 id="forms">6. SafePlum 자체 양식의 법적 지위</h2>
-  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafePlum 자체 제공 양식</span>(웹 서식 작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 관련 조문을 참고해 만든 실무용 보조양식입니다(법령 별지 서식과는 별개). <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 실제 내용으로 바꿔 쓰는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
+  <p>서식은 세 가지로 구분합니다. <span class="fkind fkind-a">법령 별지 서식 원본</span>은 국가법령정보센터의 별지 서식 파일로 연결됩니다. <span class="fkind fkind-b">SafePlum 자체 제공 양식</span>(작성기, TBM 일지, 위험성평가서, 산업안전보건위원회 회의록, LOTO 꼬리표, 현장 안내 게시물 등)은 관련 조문을 참고해 만든 실무용 보조양식입니다(법령 별지 서식과는 별개). <span class="fkind fkind-c">사업장 예시</span>(예시로 채우기, 자동 입력 문구)는 실제 내용으로 바꿔 쓰는 예시입니다. 자체 양식을 작성한 것만으로 법령상 의무를 이행했다고 볼 수 없습니다.</p>
   <p>결재란의 서명은 인쇄용 서명 이미지입니다. 기관에 전자로 제출할 때는 해당 기관이 정한 인증·서명 방식을 따르세요.</p>
   <h2 id="links">7. 외부 링크 책임범위</h2>
   <p>기관 누리집, 채용 플랫폼, 공단 자료 등 외부 링크의 내용과 접속 가능 여부는 각 운영 주체가 관리합니다. 주소가 바뀌거나 내용이 달라질 수 있으며, SafePlum은 외부 사이트의 내용을 보증하지 않습니다.</p>
@@ -2160,7 +2191,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
 <section class="wrap" style="padding-top:16px" data-landing>{tools_cta.format(rel="../")}</section>
 <section class="wrap ftools-page" style="padding-top:8px" data-landing>
   <div class="ftools">
-    <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>웹 서식 작성기 {n_web}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
+    <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>작성기 {WRITER_N}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>안전보건 자료실</strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
@@ -2298,7 +2329,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     write("laws/index.html", page(site, "../", "laws/", "법령", law_body,
                                   desc="산업안전보건법·시행령·시행규칙·안전보건규칙·중대재해처벌법 현행 전문 검색, 주제별 조문, 개정 소식.", active="laws/"))
 
-    # ---- 서식 작성기 (data/forms.json + 별표 3 점검표)
+    # ---- 작성기 허브 (전용 작성기 + data/forms.json + 별표 3 점검표)
     lawref = load("data/lawref.json")
     catalog = load("data/catalog.json")
     # '제공 안 함'(skip) 항목은 화면에 싣지 않는다 — 데이터에는 이유와 함께 남겨 둔다(같은 기능 요청이 오면 참고)
@@ -2310,23 +2341,27 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     for f in forms:
         body = form_src.replace("/*@DATA@*/null", json.dumps(f, ensure_ascii=False).replace("</", "<\\/")) + lawver_html("forms", "../../../")
         write(f"tools/forms/{f['id']}/index.html", page(site, "../../../", f"tools/forms/{f['id']}/", f["title"], body, desc=f.get("desc"), active="tools/"))
-    gid = {"작업시작 전 점검(별표 3)": "pre"}
-    fsecs = []
-    for g in groups:
-        fs = [f for f in forms if f["group"] == g]
-        if not fs:
-            continue
-        cards = "".join(f'''<a class="ftool" href="{e(f["id"])}/">{'<span class="ftool-tag">자동 채우기</span>' if f.get("auto", {}).get("pickers") else ('<span class="ftool-tag">자동 계산</span>' if f.get("auto", {}).get("calc") or f.get("auto", {}).get("next") else '')}<strong>{e(f["title"].replace("작업시작 전 점검표 — ", ""))}</strong><span class="ftool-desc">{e(f.get("desc",""))}</span><span class="ftool-law">{e(f.get("law",""))}</span><span class="ftool-go">바로 작성 →</span></a>''' for f in fs)
-        fsecs.append(f'<section class="wrap ftools-page" id="{gid.get(g, "g" + str(groups.index(g)))}">{sec_head(g + " (" + str(len(fs)) + ")")}<div class="ftools">{cards}</div></section>')
+    def wcard(kind, x):
+        if kind == "tool":
+            return (f'<a class="ftool" href="../{e(x["id"])}/"><strong>{e(x["name"].replace(" 작성기", ""))}</strong><span class="ftool-desc">{e(x.get("desc", ""))}</span>'
+                    f'<span class="ftool-law">{e(x.get("law", ""))}</span><span class="ftool-go">바로 작성 →</span></a>')
+        f = x
+        tag = '<span class="ftool-tag">자동 채우기</span>' if f.get("auto", {}).get("pickers") else ('<span class="ftool-tag">자동 계산</span>' if f.get("auto", {}).get("calc") or f.get("auto", {}).get("next") else '')
+        return (f'<a class="ftool" href="{e(f["id"])}/">{tag}<strong>{e(f["title"].replace("작업시작 전 점검표 — ", ""))}</strong><span class="ftool-desc">{e(f.get("desc",""))}</span>'
+                f'<span class="ftool-law">{e(f.get("law",""))}</span><span class="ftool-go">바로 작성 →</span></a>')
+    wg = writer_groups(site, groups, forms)
+    fsecs = [f'<section class="wrap ftools-page" id="{WRITER_GID.get(g, "w" + str(i))}">{sec_head(g + " (" + str(len(items)) + ")")}<div class="ftools">{"".join(wcard(k, x) for k, x in items)}</div></section>'
+             for i, (g, items) in enumerate(wg)]
+    wjump = "".join(f'<a href="#{WRITER_GID.get(g, "w" + str(i))}">{e(g)} <span>{len(items)}</span></a>' for i, (g, items) in enumerate(wg))
     forms_body = f"""
 <section class="phead"><div class="wrap">
-  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>서식 작성기</p>
-  <h1>서식 작성기</h1>
-  <p>법령이 요구하는 기재 사항을 빠짐없이 담은 A4 서식 {len(forms)}종입니다. 화면에서 바로 채우고 인쇄하거나 PDF로 저장하세요. 결재란·점검 항목·표 문구까지 모두 고칠 수 있고, 입력 내용은 이 브라우저에만 저장됩니다.</p>
-  <p class="hint">한 장짜리 기본 서식을 모은 곳입니다. TBM 일지·위험성평가서처럼 자동 채우기·계산 기능이 많은 작성기와 계산기·조회 도구는 <a href="../">무료 도구 전체 목록</a>에 있습니다.</p>
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>작성기</p>
+  <h1>작성기 {WRITER_N}종</h1>
+  <p>TBM 일지·위험성평가서부터 교육일지·점검표·작업계획서·중대재해처벌법 이행 서식까지, 화면에서 채우고 A4로 인쇄하거나 PDF로 저장합니다. 회원가입 없이 쓰고, 입력 내용은 이 브라우저에만 저장됩니다.</p>
+  <nav class="wjump" aria-label="작성기 묶음">{wjump}</nav>
 </div></section>
 {"".join(fsecs)}"""
-    write("tools/forms/index.html", page(site, "../../", "tools/forms/", "서식 작성기", forms_body,
+    write("tools/forms/index.html", page(site, "../../", "tools/forms/", "작성기", forms_body,
                                          desc=f"교육일지, 협의체 회의록, 순회점검표, 작업계획서, 작업시작 전 점검표 등 안전보건 서식 {len(forms)}종을 무료로 작성·인쇄.", active="tools/"))
 
     # ---- 도구
@@ -2334,18 +2369,18 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     n_all = sum(len(c["items"]) for c in catalog["categories"])
     kind_secs = ""
     for k, c, sub in TOOL_KINDS:
-        extra = (tool_card("forms/", "작성기", f"서식 작성기 {len(forms)}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식까지. 결재·서명·사진 첨부.",
+        extra = (tool_card("forms/", "작성기", f"작성기 전체 {WRITER_N}종", "업무일지·교육일지·회의록·점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식까지 한곳에.",
                            "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진", ico="../assets/img/ico/write.webp") if k == "작성기" else "")
-        kind_secs += f'<section class="wrap ftools-page" id="{c}">{sec_head(k, sub=sub)}<div class="tgrid">{free_tool_cards(site, "../", kind=k)}{extra}</div></section>'
+        kind_secs += f'<section class="wrap ftools-page" id="{c}">{sec_head(k, sub=sub)}<div class="tgrid">{free_tool_cards(site, "../", kind=k, ids=(["tbm", "risk", "edu-log", "patrol", "permit"] if k == "작성기" else None))}{extra}</div></section>'
     tools_body = f"""
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>무료 도구</p>
   <h1>무료 안전관리 도구</h1>
   <p>회원가입도 서버도 없습니다. 입력한 내용은 내 브라우저 안에서만 처리됩니다. 법령 원문을 기준으로 만들었고 각 도구에 근거 조문과 확인일을 적어 두었습니다.</p>
-  <p class="hint">작성기·계산기·조회 도구 전체 목록입니다. 교육일지·점검표·계획서 같은 한 장짜리 기본 서식 {len(forms)}종은 <a href="forms/">서식 작성기</a>에 모아 두었습니다.</p>
+  <p class="hint">작성기는 <a href="forms/">작성기 {WRITER_N}종</a> 한 곳에 모두 모았습니다. 아래에는 자주 쓰는 작성기와 계산기·조회 도구를 보여 줍니다.</p>
 </div></section>
 <section class="wrap ftools-page">
-  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("cat") == k) + (1 if k == "작성기" else 0)}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
+  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("cat") == k) + (1 if k == "작성기" else 0) if k != "작성기" else WRITER_N}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
 </section>
 {kind_secs}
 <section class="wrap ftools-page" id="catalog">

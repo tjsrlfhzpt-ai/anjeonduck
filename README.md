@@ -44,6 +44,9 @@ templates/*.csv       구글 시트 머리글 서식
 | `/tools/forms/<id>/` 서식 작성기 45종(업무일지 3종 포함) | `apps/form.body.html` (서식 엔진 1개) | `data/forms.json` 23종 + 별표 3에서 자동 생성한 작업시작 전 점검표 19종 |
 | `/tools/` 법령 순서 카탈로그 | `build.py` | `data/catalog.json` (벤치마킹 목록 78개와 상태) |
 
+### 작성기 허브 (`/tools/forms/`)
+전용 작성기(`config/site.json` free_tools 중 cat=작성기)와 서식 작성기(`data/forms.json` + 별표 3 점검표)를 한 페이지에서 묶음별로 보여 줍니다. 전용 작성기를 어느 묶음에 넣을지는 `build.py` 의 `WRITER_LEAD`·`WRITER_TOOLS_IN`, 묶음 앵커는 `WRITER_GID`. 같은 id 의 서식이 있으면(교육일지·협의체·순회점검·합동점검·작업허가서) 목록에는 전용 작성기만 보이고 서식 페이지 주소는 그대로 남습니다.
+
 ### 서식 추가하는 법
 `data/forms.json` 의 `forms` 에 하나 더 넣으면 빌드 때 페이지가 생깁니다. 칸 종류: `fields`(라벨·입력, `type`: text/date/select/radio), `text`(긴 글), `table`(행 추가 가능, `defaults`로 기본 문구), `check`(점검표, `opts`로 판정 칸), `signs`(서명줄), `note`(법령 안내문). 사용자는 결재란 이름·점검 항목 문구·표 기본 문구를 화면에서 고칠 수 있고 행·점검 항목을 늘릴 수 있습니다.
 

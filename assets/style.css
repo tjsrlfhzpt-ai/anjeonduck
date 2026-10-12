@@ -1906,3 +1906,10 @@ details[open]>.brow-r{background:var(--surface-2)}
 .st-planned .ct-n>span:first-child,.st-skip .ct-n>span:first-child{color:var(--muted)}
 .ct-r:hover td{background:var(--surface-2)}
 @media (max-width:640px){.ct thead{display:none}.ct-r{display:grid;grid-template-columns:minmax(0,1fr) auto;border-bottom:1px solid var(--line-2)}.ct-r td{border:0;padding:4px 12px}.ct-r td.ct-n{padding-top:12px}.ct-b{grid-column:1;width:auto;padding-bottom:12px!important}.ct-s{grid-row:1;grid-column:2;padding-top:12px!important}.ct-g th{padding:12px}}
+
+/* 작성기 허브 묶음 바로가기 */
+.wjump{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.wjump a{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text-2);font-size:14px;font-weight:600}
+.wjump a span{font-size:12px;color:var(--muted);font-weight:700}
+.wjump a:hover{border-color:var(--blue-100);background:var(--blue-50);color:var(--blue);text-decoration:none}
+.ftools-page[id]{scroll-margin-top:calc(var(--hd-h) + 12px)}
