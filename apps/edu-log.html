@@ -280,6 +280,13 @@
             .el-pb { break-before: page; page-break-before: always; }
             .el-doc { font-size: 12px; }
         }
+    /* 미리보기에서 바로 고치기 */
+        .pv { outline: none; border-radius: 2px; min-width: .6em; white-space: pre-wrap; word-break: break-all; }
+        .pv:empty { display: inline-block; min-width: 3em; }
+        .pv:empty::before { content: attr(data-ph); color: #a0aab6; }
+        @media (hover: hover) { .pv:hover { box-shadow: inset 0 0 0 1px #9db7d6; cursor: text; } }
+        .pv:focus { background: #fffde7; box-shadow: inset 0 0 0 1px #3182ce; }
+        @media print { .pv:empty::before { content: none; } .pv:hover, .pv:focus { box-shadow: none !important; background: none !important; } }
     </style>
 </head>
 <body class="text-slate-800">
@@ -760,23 +767,23 @@
                         <table class="el-tb">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
-                                <th><ed k="h.company"></ed></th><td>{{ companyText }}</td>
+                                <th><ed k="h.company"></ed></th><td><pv :o="f" k="company" ph="회사"></pv> <pv :o="f" k="siteName"></pv></td>
                                 <th><ed k="h.course"></ed></th><td>{{ courseLabel }}</td>
                             </tr>
                             <tr>
-                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b">{{ f.title }}</td>
+                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b"><pv :o="f" k="title"></pv></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.when"></ed></th><td>{{ dateText }}<br>{{ timeText }}</td>
                                 <th><ed k="h.dur"></ed></th><td class="el-b">{{ timeInfo.ok ? durationText : '' }}</td>
                             </tr>
                             <tr>
-                                <th><ed k="h.place"></ed></th><td>{{ f.place }}</td>
-                                <th><ed k="h.method"></ed></th><td>{{ f.method }}</td>
+                                <th><ed k="h.place"></ed></th><td><pv :o="f" k="place"></pv></td>
+                                <th><ed k="h.method"></ed></th><td><pv :o="f" k="method"></pv></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.teacher"></ed></th><td>{{ teacherText }}</td>
-                                <th><ed k="h.dept"></ed></th><td>{{ f.dept || targetShort }}</td>
+                                <th><ed k="h.dept"></ed></th><td><pv :o="f" k="dept" :def="targetShort"></pv></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.count"></ed></th>
@@ -795,24 +802,24 @@
                                     <ul v-if="docTopics.length" class="el-dl">
                                         <li v-for="(t, i) in docTopics" :key="'dt-' + i">{{ t }}</li>
                                     </ul>
-                                    <div v-if="f.detail" class="el-pre" :class="{ 'el-sep': docTopics.length }">{{ f.detail }}</div>
+                                    <div v-if="f.detail" class="el-pre" :class="{ 'el-sep': docTopics.length }"><pv :o="f" k="detail" multi></pv></div>
                                     <div v-if="!docTopics.length && !f.detail" class="el-gap"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <th><ed k="h.mat"></ed></th>
-                                <td class="el-top"><div class="el-pre el-min1">{{ f.materials }}</div></td>
+                                <td class="el-top"><div class="el-pre el-min1"><pv :o="f" k="materials" multi></pv></div></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.eval"></ed></th>
-                                <td class="el-top"><div class="el-pre el-min2">{{ f.evalText }}</div></td>
+                                <td class="el-top"><div class="el-pre el-min2"><pv :o="f" k="evalText" multi></pv></div></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.absent"></ed></th>
                                 <td class="el-top">
                                     <div v-if="absentList.length" class="el-sm">미참석 {{ absentList.length }}명: <span v-for="(a, i) in absentList" :key="'ab-' + i">{{ i ? ', ' : '' }}{{ a.label }}</span></div>
                                     <div v-else-if="counts.total" class="el-sm">미참석자 없음</div>
-                                    <div class="el-pre" :class="{ 'el-min1': !absentList.length && !counts.total }">{{ f.absentPlan }}</div>
+                                    <div class="el-pre" :class="{ 'el-min1': !absentList.length && !counts.total }"><pv :o="f" k="absentPlan" multi></pv></div>
                                 </td>
                             </tr>
                         </table>
@@ -823,7 +830,7 @@
                         <div class="el-foot">
                             <p :class="{ 'el-emp': !L('p.done') }"><ed k="p.done"></ed></p>
                             <p class="el-fd">{{ dateText }}</p>
-                            <p class="el-fs"><span :class="{ 'el-emp': !L('p.teacher') }"><ed k="p.teacher"></ed> : {{ f.teacherName }} <i><ed k="p.sig"></ed></i></span><span :class="{ 'el-emp': !L('p.writer') }"><ed k="p.writer"></ed> : {{ f.writer }} <i><ed k="p.sig"></ed></i></span></p>
+                            <p class="el-fs"><span :class="{ 'el-emp': !L('p.teacher') }"><ed k="p.teacher"></ed> : <pv :o="f" k="teacherName"></pv> <i><ed k="p.sig"></ed></i></span><span :class="{ 'el-emp': !L('p.writer') }"><ed k="p.writer"></ed> : <pv :o="f" k="writer"></pv> <i><ed k="p.sig"></ed></i></span></p>
                         </div>
                     </div>
 
@@ -836,7 +843,7 @@
                         <table class="el-tb">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
-                                <th><ed k="h.to"></ed></th><td>{{ f.noticeTo }}</td>
+                                <th><ed k="h.to"></ed></th><td><pv :o="f" k="noticeTo"></pv></td>
                                 <th><ed k="h.ndate"></ed></th><td>{{ noticeDateText }}</td>
                             </tr>
                             <tr>
@@ -848,22 +855,22 @@
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
                                 <th><ed k="h.course"></ed></th><td>{{ courseLabel }}</td>
-                                <th><ed k="h.method"></ed></th><td>{{ f.method }}</td>
+                                <th><ed k="h.method"></ed></th><td><pv :o="f" k="method"></pv></td>
                             </tr>
                             <tr>
-                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b">{{ f.title }}</td>
+                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b"><pv :o="f" k="title"></pv></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.when"></ed></th><td>{{ dateText }}<br>{{ timeText }}</td>
                                 <th><ed k="h.dur"></ed></th><td class="el-b">{{ timeInfo.ok ? durationText : '' }}</td>
                             </tr>
                             <tr>
-                                <th><ed k="h.place"></ed></th><td>{{ f.place }}</td>
+                                <th><ed k="h.place"></ed></th><td><pv :o="f" k="place"></pv></td>
                                 <th><ed k="h.teacher"></ed></th><td>{{ teacherText }}</td>
                             </tr>
                             <tr>
                                 <th><ed k="h.dept"></ed></th>
-                                <td colspan="3">{{ f.dept || targetShort }}{{ counts.total ? ' (' + counts.total + '명)' : '' }}</td>
+                                <td colspan="3"><pv :o="f" k="dept" :def="targetShort"></pv>{{ counts.total ? ' (' + counts.total + '명)' : '' }}</td>
                             </tr>
                             <tr v-if="f.showLegal">
                                 <th><ed k="h.legal"></ed></th>
@@ -880,7 +887,7 @@
                             </tr>
                             <tr>
                                 <th><ed k="h.note"></ed></th>
-                                <td colspan="3" class="el-top"><div class="el-pre el-min2">{{ f.noticeNote }}</div></td>
+                                <td colspan="3" class="el-top"><div class="el-pre el-min2"><pv :o="f" k="noticeNote" multi></pv></div></td>
                             </tr>
                         </table>
                         <template v-if="f.noticeList && noticeRows.length">
@@ -891,9 +898,9 @@
                                 <tbody>
                                     <tr v-for="(r, i) in noticeRows" :key="'nr-' + i">
                                         <td class="el-c">{{ i + 1 }}</td>
-                                        <td class="el-c">{{ r.org }}</td>
-                                        <td class="el-c">{{ r.pos }}</td>
-                                        <td class="el-c el-b">{{ r.name }}</td>
+                                        <td class="el-c"><pv v-if="r.src" :o="r.src" k="org"></pv><template v-else>{{ r.org }}</template></td>
+                                        <td class="el-c"><pv v-if="r.src" :o="r.src" k="pos"></pv><template v-else>{{ r.pos }}</template></td>
+                                        <td class="el-c el-b"><pv v-if="r.src" :o="r.src" k="name"></pv><template v-else>{{ r.name }}</template></td>
                                         <td></td>
                                     </tr>
                                 </tbody>
@@ -901,7 +908,7 @@
                         </template>
                         <div class="el-foot">
                             <p class="el-fd">{{ noticeDateText }}</p>
-                            <p class="el-fs"><span>{{ companyText }}</span></p>
+                            <p class="el-fs"><span><pv :o="f" k="company" ph="회사"></pv> <pv :o="f" k="siteName"></pv></span></p>
                         </div>
                     </div>
 
@@ -915,14 +922,14 @@
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
                             <tr>
                                 <th><ed k="h.course"></ed></th><td>{{ courseLabel }}</td>
-                                <th><ed k="h.company"></ed></th><td>{{ companyText }}</td>
+                                <th><ed k="h.company"></ed></th><td><pv :o="f" k="company" ph="회사"></pv> <pv :o="f" k="siteName"></pv></td>
                             </tr>
                             <tr>
-                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b">{{ f.title }}</td>
+                                <th><ed k="h.title"></ed></th><td colspan="3" class="el-b"><pv :o="f" k="title"></pv></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.when"></ed></th><td>{{ dateText }} {{ timeText }}{{ timeInfo.ok ? ' (' + durationText + ')' : '' }}</td>
-                                <th><ed k="h.place"></ed></th><td>{{ f.place }}</td>
+                                <th><ed k="h.place"></ed></th><td><pv :o="f" k="place"></pv></td>
                             </tr>
                             <tr>
                                 <th><ed k="h.teacher"></ed></th><td>{{ teacherText }}</td>
@@ -938,15 +945,15 @@
                             <tbody>
                                 <tr v-for="(r, i) in signRows" :key="'sr-' + i">
                                     <td class="el-c">{{ i + 1 }}</td>
-                                    <td class="el-c">{{ r.org }}</td>
-                                    <td class="el-c">{{ r.pos }}</td>
-                                    <td class="el-c el-b">{{ r.name }}</td>
+                                    <td class="el-c"><pv v-if="r.src" :o="r.src" k="org"></pv><template v-else>{{ r.org }}</template></td>
+                                    <td class="el-c"><pv v-if="r.src" :o="r.src" k="pos"></pv><template v-else>{{ r.pos }}</template></td>
+                                    <td class="el-c el-b"><pv v-if="r.src" :o="r.src" k="name"></pv><template v-else>{{ r.name }}</template></td>
                                     <td class="el-c el-mut">{{ r.absent ? '미참석' : '' }}</td>
                                     <td class="el-c el-xs">{{ r.absent ? r.reason : '' }}</td>
                                 </tr>
                             </tbody>
                         </table>
-                        <p class="el-say el-r" :class="{ 'el-emp': !L('p.signer') }"><ed k="p.signer"></ed> : {{ f.teacherName }} <i><ed k="p.sig"></ed></i></p>
+                        <p class="el-say el-r" :class="{ 'el-emp': !L('p.signer') }"><ed k="p.signer"></ed> : <pv :o="f" k="teacherName"></pv> <i><ed k="p.sig"></ed></i></p>
                     </div>
 
                     <!-- [DOC 3] 실시 대장·누계 -->
@@ -955,7 +962,7 @@
                             <h2>{{ f.ledgerYear }}년 <ed k="t.ledger"></ed></h2>
                             <div v-if="f.apprShow && f.apprAll" class="el-apprbox" v-appr></div>
                         </div>
-                        <p class="el-say">{{ companyText || '(사업장명)' }} · 작성일 {{ todayText }} · 기록 {{ ledgerRows.length }}건</p>
+                        <p class="el-say"><pv :o="f" k="company" def="(사업장명)"></pv> <pv :o="f" k="siteName"></pv> · 작성일 {{ todayText }} · 기록 {{ ledgerRows.length }}건</p>
                         <h4 class="el-h4">1. 교육 실시 내역</h4>
                         <table class="el-tb el-led" id="ledTable">
                             <colgroup><col style="width:5%"><col style="width:13%"><col style="width:18%"><col><col style="width:11%"><col style="width:12%"><col style="width:13%"></colgroup>
@@ -1059,6 +1066,23 @@
             throw new Error('Vue not loaded');
         }
         const { createApp, ref, reactive, computed, watch, nextTick, onMounted } = Vue;
+        // ---- 미리보기(오른쪽 문서)에서 바로 고치기: 왼쪽 입력칸과 같은 값을 함께 바꾼다
+        const Pv = {
+            props: { o: Object, k: [String, Number], def: String, ph: String, multi: Boolean },
+            setup(props) {
+                const el = ref(null);
+                const cur = () => { const v = props.o ? props.o[props.k] : ''; const s = v == null ? '' : String(v); return s || props.def || ''; };
+                const put = () => { const e = el.value; if (e && document.activeElement !== e && e.innerText !== cur()) e.textContent = cur(); };
+                onMounted(put); watch(() => [props.o && props.o[props.k], props.def], put, { flush: 'post' });
+                const inp = () => { const e = el.value; if (!e || !props.o) return; let t = e.innerText.replace(/\n$/, ''); if (!props.multi) t = t.replace(/\n/g, ' '); props.o[props.k] = (props.def && t === props.def) ? '' : t; };
+                const out = () => { const e = el.value; if (e && !e.innerText.trim()) { e.innerHTML = ''; put(); } };
+                const paste = (ev) => { ev.preventDefault(); let t = ((ev.clipboardData || window.clipboardData).getData('text') || '').replace(/\r/g, ''); if (!props.multi) t = t.replace(/\n/g, ' '); document.execCommand('insertText', false, t); };
+                const key = (ev) => { if (!props.multi && ev.key === 'Enter') { ev.preventDefault(); ev.target.blur(); } };
+                return { el, inp, out, paste, key };
+            },
+            template: '<span ref="el" class="pv" :class="{ \'pv-m\': multi }" contenteditable="true" spellcheck="false" role="textbox" :data-ph="ph || \'\'" title="눌러서 바로 고칠 수 있습니다" @input="inp" @blur="out" @paste="paste" @keydown="key"></span>'
+        };
+
         const STORE_KEY = 'safetake.edulog.v1';
         const OLD_FORM_KEY = 'safetake.form.edu-log';   // 예전 일반 서식(tools/forms/edu-log/)의 저장값 — 읽기만 하고 지우지 않는다
         const APPR_KEY = 'tool.edu-log';                // 결재란 저장 키: safetake.appr.tool.edu-log (assets/docs.js)
@@ -1429,7 +1453,7 @@
                     return { total, absent, present: total - absent };
                 });
                 const rateText = computed(() => (counts.value.total ? (Math.round(counts.value.present / counts.value.total * 1000) / 10) + '%' : ''));
-                const noticeRows = computed(() => named.value.map(a => ({ org: a.org, pos: a.pos, name: a.name })));
+                const noticeRows = computed(() => named.value.map(a => ({ src: a, org: a.org, pos: a.pos, name: a.name })));
                 const noticeDateText = computed(() => {
                     if (!isYmd(f.value.noticeDate)) return '';
                     const d = new Date(f.value.noticeDate + 'T00:00');
@@ -1439,7 +1463,7 @@
                 const absentNames = computed(() => absentList.value.map(a => a.label).join(', '));
                 const signBlank = 20;
                 const signRows = computed(() => {
-                    const rows = named.value.filter(a => f.value.signAbsent || !a.absent).map(a => ({ org: a.org, pos: a.pos, name: a.name, absent: a.absent, reason: a.reason }));
+                    const rows = named.value.filter(a => f.value.signAbsent || !a.absent).map(a => ({ src: a, org: a.org, pos: a.pos, name: a.name, absent: a.absent, reason: a.reason }));
                     const blanks = rows.length ? f.value.blankRows : signBlank;
                     for (let i = 0; i < blanks; i++) rows.push({ org: '', pos: '', name: '', absent: false, reason: '' });
                     return rows;
@@ -1985,6 +2009,7 @@
         app.component('ed', Ed);
         app.component('st-head', StHead);
         app.directive('appr', vAppr);
+        app.component('pv', Pv);
         app.mount('#app');
     </script>
 </body>
