@@ -1871,3 +1871,17 @@ details[open]>.brow-r{background:var(--surface-2)}
 .lstat .blist{margin-top:4px}
 @media (max-width:640px){.brow-r{grid-template-columns:32px minmax(0,1fr);gap:10px;padding:16px 8px}.brow-d{grid-column:2;font-size:12.5px}.brow-n{font-size:12.5px}.brow-t{font-size:15px}.brow-x{padding:4px 8px 16px 50px}}
 .brow-s{color:var(--text-2)}
+
+/* 상태 표시 단순화 (2026-10-12): 색 알약·이모지·경고 삼각형 대신 색 글자만 쓴다 */
+.lst,.lst-chk,.lst-chk:not(.lst-keep){display:inline;height:auto;width:auto;padding:0;gap:0;border:0;border-radius:0;background:none;font-size:12.5px;font-weight:700;vertical-align:baseline;white-space:nowrap;position:static;cursor:default;overflow:visible}
+.lst::before,.lst-chk::before,.lst-chk:not(.lst-keep)::before,.lst-chk:not(.lst-keep)::after{content:none;display:none}
+.lst-cur{color:#0B7A55}.lst-next{color:#A15C00}.lst-bill{color:#1F5FBF}.lst-rec{color:#5B6676}.lst-chk,.lst-chk:not(.lst-keep){color:#B3261E}
+.lst-chk:not(.lst-keep):not(:empty){font-size:12.5px}
+:root[data-theme="dark"] .lst-cur{color:#5FD3A8}:root[data-theme="dark"] .lst-next{color:#F2C55C}:root[data-theme="dark"] .lst-bill{color:#8DB6F5}:root[data-theme="dark"] .lst-rec{color:#B6C1D1}:root[data-theme="dark"] .lst-chk{color:#F28B82}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lst-cur{color:#5FD3A8}:root:not([data-theme="light"]) .lst-next{color:#F2C55C}:root:not([data-theme="light"]) .lst-bill{color:#8DB6F5}:root:not([data-theme="light"]) .lst-rec{color:#B6C1D1}:root:not([data-theme="light"]) .lst-chk{color:#F28B82}}
+.asof .lst{background:none;color:#fff}
+.lst-note .chk-svg{display:none}
+.lst-note b{color:#B3261E}
+.chk-txt{display:inline;font-size:12px;font-weight:700;color:#B3261E;margin-left:6px;cursor:help;white-space:nowrap;vertical-align:baseline}
+.chk-txt svg{display:none}
+.chk-i.chk-txt{display:inline;width:auto;height:auto;border-radius:0;position:relative}

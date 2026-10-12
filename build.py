@@ -608,8 +608,8 @@ CHK_SVG = '<svg class="chk-svg" viewBox="0 0 24 24" width="18" height="18" aria-
 
 
 def chk_icon(tip):
-    """'확인 필요' 표시: 빨간 경고 삼각형만 보이고, 마우스를 올리거나 누르면(포커스) 설명이 뜬다."""
-    return f'<span class="chk-i" tabindex="0" role="img" aria-label="{e(tip)}" data-tip="{e(tip)}">{CHK_SVG}</span>'
+    """'확인 필요' 표시: 작은 빨간 글자. 마우스를 올리거나 누르면(포커스) 설명이 뜬다."""
+    return f'<span class="chk-i chk-txt" tabindex="0" aria-label="확인 필요: {e(tip)}" data-tip="{e(tip)}">확인 필요</span>'
 
 
 def gnb_html(site, rel, active):
@@ -1999,7 +1999,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
 <div class="wrap legal-doc" style="max-width:860px;padding-bottom:48px">
   <h2 id="info">1. 법령정보 안내</h2>
   <p>SafePlum의 법령 본문·별표·서식은 국가법령정보센터에 공개된 원문을 옮겨 실은 것이고, 그 밖의 요약·분류·판정 기준·계산식·예시 문구는 SafePlum이 정리한 참고 자료입니다. 두 가지는 화면에서 구분해 표시합니다. 현재 시행 중인 내용, 공포되었지만 아직 시행 전인 내용, 국회를 통과했거나 입법예고 중인 내용은 서로 다른 상태로 나누어 보여 줍니다.</p>
-  <p>상태 표시: <span class="lst lst-cur">현재 시행</span> <span class="lst lst-next">시행 예정</span> <span class="lst lst-bill">법안·입법 동향</span> <span class="lst lst-rec">권장사항</span> <span class="lst lst-chk" tabindex="0">확인 필요</span> 확인 필요</p>
+  <p class="lst-legend">상태 표시: <span class="lst lst-cur">현재 시행</span> · <span class="lst lst-next">시행 예정</span> · <span class="lst lst-bill">법안·입법 동향</span> · <span class="lst lst-rec">권장사항</span> · <span class="lst lst-chk lst-keep">확인 필요</span></p>
   <h2 id="source">2. 법령 원문 출처</h2>
   <div class="table-wrap"><table class="lvt"><thead><tr><th>법령·고시</th><th>SafePlum이 쓰는 버전</th><th>공식 확인일</th><th>원문</th></tr></thead><tbody>{src_rows}</tbody></table></div>
   <p>법적 근거로는 국가법령정보센터, 고용노동부, 한국산업안전보건공단 등 공식 기관의 자료만 사용합니다. 언론 보도는 '참고 보도'로만 표시하며 법령·정책의 근거로 쓰지 않습니다. 확인일로부터 {int(man.get("stale_after_days", 45))}일이 지나면 화면에 '공식 원문 재확인 필요'가 표시됩니다.</p>
