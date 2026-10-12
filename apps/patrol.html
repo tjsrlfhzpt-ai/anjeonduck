@@ -518,8 +518,8 @@
                 <!-- 점검 항목 -->
                 <pt-step :s="S.items" @toggle="toggle('items')" @next="goNext('items')">
                     <div class="pt-row">
-                        <button v-if="tally.none" type="button" id="fillGood" class="pt-btn pt-btn-pri" @click="fillGood">남은 {{ tally.none }}개 모두 양호</button>
-                        <span class="text-[11px] text-slate-500">양호 {{ tally.good }} · 미흡 {{ tally.bad }} · 해당없음 {{ tally.na }} · 미확인 {{ tally.none }}</span>
+                        <button v-if="tally.none" type="button" id="fillGood" class="pt-btn pt-btn-pri" @click="fillGood">남은 {{ tally.none }}개 모두 {{ L.lGood }}</button>
+                        <span class="text-[11px] text-slate-500">{{ L.lGood }} {{ tally.good }} · {{ L.lBad }} {{ tally.bad }} · {{ L.lNa }} {{ tally.na }} · 미확인 {{ tally.none }}</span>
                     </div>
                     <div class="pt-row">
                         <label class="pt-ck"><input id="editItems" type="checkbox" v-model="editItems"> 항목 고치기 (문구 · 추가 · 삭제 · 순서)</label>
@@ -543,9 +543,9 @@
                             </div>
                             <span v-else class="pt-item-s">{{ items[it.i].text }}</span>
                             <div class="pt-seg" role="group" :aria-label="(items[it.i].text || '항목') + ' 점검 결과'">
-                                <button type="button" class="pt-good" :aria-pressed="items[it.i].result === '양호' ? 'true' : 'false'" @click="setResult(it.i, '양호')">양호</button>
-                                <button type="button" class="pt-bad" :aria-pressed="items[it.i].result === '미흡' ? 'true' : 'false'" @click="setResult(it.i, '미흡')">미흡</button>
-                                <button type="button" class="pt-na" :aria-pressed="items[it.i].result === '해당없음' ? 'true' : 'false'" @click="setResult(it.i, '해당없음')">해당없음</button>
+                                <button type="button" class="pt-good" :aria-pressed="items[it.i].result === '양호' ? 'true' : 'false'" @click="setResult(it.i, '양호')">{{ L.lGood }}</button>
+                                <button type="button" class="pt-bad" :aria-pressed="items[it.i].result === '미흡' ? 'true' : 'false'" @click="setResult(it.i, '미흡')">{{ L.lBad }}</button>
+                                <button type="button" class="pt-na" :aria-pressed="items[it.i].result === '해당없음' ? 'true' : 'false'" @click="setResult(it.i, '해당없음')">{{ L.lNa }}</button>
                             </div>
                             <button v-if="items[it.i].result === '미흡' && !hasFindingFor(items[it.i].text)" type="button" class="pt-chip" @click="findingFromItem(it.i)">+ 지적사항으로 옮기기</button>
                         </div>
@@ -580,7 +580,8 @@
                         </div>
                         <label class="pt-ck"><input type="checkbox" v-model="f.immediate" @change="onImmediate(f)"> 현장에서 즉시 조치함</label>
                     </div>
-                    <button type="button" id="addFinding" class="pt-add" @click="addFinding()"><i class="ph-bold ph-plus-circle"></i> 지적사항 추가</button>
+                    <div class="pt-row"><button type="button" id="addFinding" class="pt-add" @click="addFinding()"><i class="ph-bold ph-plus-circle"></i> 지적사항 추가</button>
+                    <button type="button" id="addExFinding" class="pt-btn" style="margin-left:auto" @click="addExFinding" title="자주 나오는 지적사항 예시를 무작위로 하나 넣습니다">🔀 지적사항 예시 넣기</button></div>
                     <datalist id="ptOwners"><option v-for="n in ownerNames" :key="n" :value="n"></option></datalist>
                     <datalist id="ptZones"><option v-for="n in zoneNames" :key="n" :value="n"></option></datalist>
                 </pt-step>
@@ -783,14 +784,14 @@
                         <table class="pd-t" id="docItems">
                             <colgroup><col style="width:6%"><col><col style="width:9%"><col style="width:9%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th>번호</th><th>{{ L.lItems }}</th><th>양호</th><th>미흡</th><th>해당없음</th></tr>
+                                <tr><th>번호</th><th>{{ L.lItems }}</th><th>{{ L.lGood }}</th><th>{{ L.lBad }}</th><th>{{ L.lNa }}</th></tr>
                             </thead>
                             <tbody>
                                 <template v-for="(g, gi) in docGroups" :key="'dg-' + gi">
                                     <tr v-if="g.name"><td colspan="5" class="grp">{{ g.name }}</td></tr>
                                     <tr v-for="it in g.rows" :key="'di-' + it.i">
                                         <td class="c">{{ it.no }}</td><td>{{ it.text }}</td>
-                                        <td class="c">{{ it.result === '양호' ? '○' : '' }}</td><td class="c">{{ it.result === '미흡' ? '○' : '' }}</td><td class="c">{{ it.result === '해당없음' ? '○' : '' }}</td>
+                                        <td class="c">{{ it.result === '양호' ? L.lMark : '' }}</td><td class="c">{{ it.result === '미흡' ? L.lMark : '' }}</td><td class="c">{{ it.result === '해당없음' ? L.lMark : '' }}</td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -959,10 +960,16 @@
                     <div>
                         <h3 id="exTitle" class="font-bold text-base text-slate-900">업종별 점검 항목 예시</h3>
                         <p class="text-xs text-slate-500">실무 예시 항목입니다. 적용한 뒤 사업장 작업에 맞게 고쳐 쓰세요.</p>
+                        <label class="pt-ck" style="margin-top:6px"><input type="checkbox" v-model="exAppend"> 지금 항목에 더하기 (지우지 않고 뒤에 붙임 · 겹치는 항목 제외)</label>
                     </div>
                     <button type="button" id="exClose" @click="isExModalOpen = false" aria-label="닫기" class="text-slate-400 hover:text-slate-700 p-1"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
                 <div class="space-y-3 overflow-y-auto pr-1" style="max-height:60vh">
+                    <button type="button" @click="mixEx" class="pt-opt pt-exopt p-4 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer transition space-y-2 group">
+                        <span class="flex justify-between items-center"><span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">🔀 섞기</span><span class="text-xs text-slate-400 font-bold">적용하기 →</span></span>
+                        <span class="block font-bold text-sm text-slate-800">여러 업종 예시에서 무작위 12개</span>
+                        <span class="block text-xs text-slate-500">누를 때마다 지금 목록에 없는 항목으로 새로 뽑습니다</span>
+                    </button>
                     <button type="button" v-for="(opt, idx) in exPool" :key="'ex-' + idx" @click="selectEx(opt)" class="pt-opt pt-exopt p-4 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer transition space-y-2 group">
                         <span class="flex justify-between items-center">
                             <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{{ opt.badge }}</span>
@@ -1059,7 +1066,8 @@
             { k: 'lCycle', def: '점검 주기' }, { k: 'lZones', def: '순회 구역 및 관계수급인' }, { k: 'lZone', def: '구역·공정' }, { k: 'lSub', def: '관계수급인' },
             { k: 'lWork', def: '작업 내용' }, { k: 'lComp', def: '동행·확인자 (서명)' }, { k: 'lPrev', def: '지난 지적사항 이행 확인' }, { k: 'lItems', def: '점검 항목' },
             { k: 'lFind', def: '지적사항 및 시정 요구' }, { k: 'lNote', def: '특이사항' }, { k: 'lNext', def: '다음 순회' }, { k: 'lConfirm', def: '확인' },
-            { k: 'lConfirmRole', def: '안전보건총괄책임자' }
+            { k: 'lConfirmRole', def: '안전보건총괄책임자' },
+            { k: 'lGood', def: '양호' }, { k: 'lBad', def: '미흡' }, { k: 'lNa', def: '해당없음' }, { k: 'lMark', def: '○' }
         ];
         const NULLABLE = ['footLog', 'footSum', 'footDemand', 'demandBody', 'seal'];   // null = 기본 문구, '' = 지움
         // 결재란은 사이트 공통 모듈(assets/docs.js)의 저장 키를 쓴다
@@ -1641,6 +1649,28 @@
                 };
                 const blankFinding = () => ({ fid: newId('f'), zone: '', hazard: '', demand: '', owner: '', due: '', immediate: false, status: '시정 요구' });
                 const addFinding = (init) => { findings.value.push(Object.assign(blankFinding(), init || {})); };
+                // 자주 나오는 지적사항 예시(위험요인 → 시정 요구). 누를 때마다 아직 없는 것을 무작위로 하나 넣는다
+                const EX_FIND = [
+                    ['2층 개구부 덮개가 열린 채 방치됨', '덮개 고정 및 \'추락주의\' 표지 부착'], ['비계 작업발판 일부가 고정되지 않음', '발판 고정 후 작업, 고정 전 출입 통제'],
+                    ['안전대를 착용했으나 걸지 않고 고소작업', '안전대 체결 후 작업, 부착설비 위치 재안내'], ['이동식 사다리 최상단에서 작업', '작업발판 또는 고소작업대로 변경'],
+                    ['임시 분전반 문이 열려 있고 잠금장치 없음', '분전반 잠금, 충전부 방호, 관리자 지정'], ['이동전선 피복 손상 부위 테이프로 임시 보수', '손상 전선 교체, 사용 전 점검'],
+                    ['용접 작업 장소에 소화기 미비치', '소화기 비치 및 화재감시자 배치'], ['용접 불티 비산방지포 미설치', '방화포 설치, 하부 가연물 제거'],
+                    ['컨베이어 회전부 덮개 탈거 상태로 운전', '덮개 복구 후 운전, 임의 해체 금지 교육'], ['정비 중 전원 잠금·표지(LOTO) 미실시', '전원 차단·잠금·표지 후 정비 재개'],
+                    ['지게차 운행 구역에 보행자 통로 미구획', '보행 통로 구획선 표시, 교차 지점 반사경 설치'], ['지게차 후진경보기 작동 불량', '수리 전 사용 중지, 유도자 배치'],
+                    ['통로에 자재가 적치되어 통행 방해', '자재 이동, 적치 구역 지정'], ['비상구 앞 적재물로 대피로 막힘', '즉시 이동, 비상구 앞 적치 금지 표지'],
+                    ['화학물질 소분 용기에 경고표지 없음', '경고표지 부착, MSDS 게시'], ['보호구(보안경) 미착용 상태로 그라인더 작업', '보안경 착용 후 작업, 보호구 지급 확인'],
+                    ['밀폐공간 출입 전 가스 농도 측정 기록 없음', '측정 후 기록하고 작업, 감시인 배치'], ['굴착면 상부에 자재 적치', '자재 이동, 굴착면 주변 적치 금지 구획'],
+                    ['인양 작업 중 하부 출입 통제 없음', '하부 출입 금지 구획, 신호수 배치'], ['혼재작업 구간 작업 시간 미조정', '협의체에서 작업 시간·순서 조정']
+                ];
+                const addExFinding = () => {
+                    const have = new Set(findings.value.map(f => f.hazard.trim()));
+                    const cand = EX_FIND.filter(x => !have.has(x[0]));
+                    if (!cand.length) { showToast('예시를 모두 넣었습니다. 직접 적어 주세요.'); return; }
+                    const x = cand[Math.floor(Math.random() * cand.length)];
+                    const single = zoneRows.value.length === 1 ? zoneRows.value[0] : null;
+                    addFinding({ hazard: x[0], demand: x[1], zone: single ? single.zone : '', owner: single ? single.company : '' });
+                    showToast('지적사항 예시를 넣었습니다 — 실제 확인한 내용으로 고쳐 쓰세요.');
+                };
                 const itemMark = (t) => `[미흡] ${t.trim()}`;
                 const hasFindingFor = (t) => !!t.trim() && findings.value.some(f => f.hazard.indexOf(itemMark(t)) === 0);
                 const findingFromItem = (i) => {
@@ -1738,6 +1768,23 @@
                         ['컨베이어·적재', ['컨베이어 비상정지장치·덮개가 정상이고 끼임 위험 부위가 방호되어 있는가', '랙·파렛트 적재 높이·하중이 기준 안이고 무너질 위험이 없는가', '롤테이너·대차 운반 시 과적·시야 가림이 없는가']],
                         ['근골격계·온열·기타', ['중량물 취급 시 보조기구 사용 또는 2인 1조 작업이 지켜지는가', '폭염·한파 시 물·휴식·보냉(방한) 조치가 되어 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
                     ] },
+                    { badge: '식품 제조 예시', title: '식품·육가공 공장 협력업체', description: '세척·위생·설비 보전·냉동창고 협력업체가 있는 식품 공장', sets: [
+                        ['작업 일반', ['작업 전 TBM을 실시하고 그날 위험요인을 공유했는가', '미끄럼 방지 장화·방검장갑·방한복 등 작업에 맞는 보호구를 착용했는가', '물 사용 구역 바닥 물기·배수 상태가 양호한가']],
+                        ['식품 설비', ['절단기·분쇄기·혼합기 투입구와 회전부에 덮개·연동장치가 작동하는가', '설비 세척·이물 제거 때 전원을 차단하고 잠금·표지(LOTO)를 하는가', '포장기·컨베이어 비상정지장치가 손 닿는 곳에 있고 작동하는가']],
+                        ['냉동·냉매·고온', ['냉동창고 내부 개방장치·비상벨이 작동하는가', '암모니아 등 냉매 누출 감지기와 방독마스크 비치 상태가 양호한가', '증기·가열 설비 고온부에 접촉 방지 조치와 표시가 있는가']],
+                        ['화학물질·기타', ['세척제·소독제 용기에 경고표지가 있고 섞어 쓰지 않는가', '같은 라인의 생산·세척·정비 작업 시간이 조정되어 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
+                    ] },
+                    { badge: '화학·도장 예시', title: '화학공장·도장 라인 협력업체', description: '인화성·유해 화학물질을 다루는 정비·도장 협력업체', sets: [
+                        ['작업 일반', ['작업 전 TBM과 작업허가(화기·밀폐·정전) 확인을 했는가', '방독마스크·내화학 장갑·보안경 등 물질에 맞는 보호구를 착용했는가', 'MSDS가 게시되어 있고 작업자가 내용을 알고 있는가']],
+                        ['화재·폭발', ['인화성 물질 취급 장소에 점화원(불꽃·정전기)이 없는가', '화기작업 전 가스 농도를 측정하고 화재감시자를 두었는가', '도장 부스·저장소 환기와 방폭 설비 상태가 양호한가']],
+                        ['배관·설비', ['배관·밸브 해체 전 잔압·잔류물 제거와 차단 확인을 했는가', '누출 감지기·세안설비·비상샤워가 작동하는가']],
+                        ['혼재작업·기타', ['같은 구역의 운전·정비 작업 순서가 조정되어 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
+                    ] },
+                    { badge: '밀폐공간 예시', title: '폐수·정화조·탱크 청소 용역', description: '밀폐공간 출입과 유해가스 위험이 있는 청소·보수 작업', sets: [
+                        ['밀폐공간 출입', ['출입 전 산소·황화수소 등 유해가스 농도를 측정하고 기록했는가', '작업 전·중 환기를 하고 있는가', '감시인을 배치하고 출입 인원을 확인하는가', '송기마스크·구조 장비를 비치했는가', '밀폐공간 작업 허가를 받았는가']],
+                        ['추락·전기', ['맨홀·개구부 주변 안전난간·덮개와 출입 통제 표지가 있는가', '수중펌프·이동전선이 누전차단기를 거쳐 연결되어 있는가']],
+                        ['기타', ['비상 연락 체계와 구조 절차를 작업자가 알고 있는가', '휴게시설·세면시설 등 위생시설을 이용할 수 있는가']]
+                    ] },
                     { badge: '시설관리 예시', title: '건물 시설관리·미화·경비 용역', description: '기계실·전기실·외벽·청소 작업이 있는 건물', sets: [
                         ['작업 일반', ['작업 전 그날 작업 내용과 위험요인을 공유했는가', '작업에 맞는 보호구(안전모·절연장갑·미끄럼방지화 등)를 착용했는가', '작업 구역에 안내 표지·출입통제(이용자 동선 분리)가 되어 있는가']],
                         ['고소·사다리', ['사다리 작업 시 2인 1조·전도방지·안전모 착용이 지켜지는가', '외벽·유리창 청소 시 달비계 로프·구명줄·안전대 체결 상태가 양호한가', '고소작업대 사용 시 안전난간·아웃트리거·과상승방지장치가 정상인가']],
@@ -1748,10 +1795,27 @@
                 ];
 
                 const exPool = exSets.map(s => Object.assign({ count: s.sets.reduce((n, g) => n + g[1].length, 0) }, s));
+                const exAppend = ref(false);   // 바꾸지 않고 지금 항목 뒤에 더하기
+                // 여러 업종 예시에서 무작위로 섞은 세트(같은 분류끼리 묶어서)
+                const mixEx = () => {
+                    const pool = []; exSets.forEach(x => x.sets.forEach(g => g[1].forEach(t => pool.push([g[0], t]))));
+                    const seen = new Set(items.value.map(it => it.text.trim()));
+                    const cand = pool.filter(x => !seen.has(x[1])).sort(() => Math.random() - 0.5).slice(0, 12);
+                    const byG = []; cand.forEach(x => { let g = byG.find(y => y[0] === x[0]); if (!g) { g = [x[0], []]; byG.push(g); } g[1].push(x[1]); });
+                    selectEx({ title: '여러 업종에서 무작위 12개', sets: byG });
+                };
                 const openExModal = () => { isExModalOpen.value = true; nextTick(() => { const b = document.getElementById('exClose'); if (b) b.focus(); }); };
                 const selectEx = (opt) => {
+                    if (exAppend.value) {
+                        const have = new Set(items.value.map(it => it.text.trim()));
+                        const add = flatItems(opt.sets).filter(it => !have.has(it.text.trim()));
+                        items.value = items.value.concat(add);
+                        isExModalOpen.value = false;
+                        showToast(add.length ? `[${opt.title}]에서 ${add.length}개 항목을 더했습니다. 겹치는 항목은 뺐습니다.` : '이미 모두 들어 있는 항목입니다.');
+                        return;
+                    }
                     const touched = items.value.some(it => it.result) || JSON.stringify(items.value.map(it => [it.group, it.text])) !== JSON.stringify(freshItems().map(it => [it.group, it.text]));
-                    if (touched && !window.confirm('지금 점검 항목과 표시해 둔 결과를 지우고 예시 항목으로 바꿉니다. 계속할까요?')) return;
+                    if (touched && !window.confirm('지금 점검 항목과 표시해 둔 결과를 지우고 예시 항목으로 바꿉니다. 계속할까요?\n(지우지 않고 더하려면 취소한 뒤 \'지금 항목에 더하기\'를 켜세요)')) return;
                     items.value = flatItems(opt.sets);
                     isExModalOpen.value = false;
                     showToast(`[${opt.title}] 예시 항목을 넣었습니다. 사업장에 맞게 고쳐 쓰세요.`);
@@ -1952,7 +2016,7 @@
                     S, view, setView, toggle, goNext, toggleAll, allOpen, warnN, gotoWarn, archState, archText,
                     setToday, setNow, moveRow, addZone, removeZone, addItem, removeItem, moveItem, renameGroup, addGroup, setResult, fillGood, addFinding, hasFindingFor, findingFromItem, removeFinding, removePrev,
                     onImmediate, onStatus, addPrev, suggestNext, changeDocType, handleFileUpload, resetResults,
-                    exPool, isExModalOpen, openExModal, selectEx,
+                    exPool, isExModalOpen, openExModal, selectEx, exAppend, mixEx, addExFinding,
                     archiveOnly, archiveAndNext, openHistory, copyHistory, deleteHistory, lastRec, copyLabel, copyLast,
                     oldFormAvailable, dismissOld, importOldForm,
                     printDoc, downloadPDF
