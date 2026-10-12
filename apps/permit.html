@@ -346,6 +346,13 @@
         .pp-t td.sm { font-size: 14px; font-weight: 500; line-height: 1.55; }
         .pp-t td.red { color: #b91c1c; }
         .pp-list { margin: 0; padding-left: 18px; list-style: disc; font-size: 13px; font-weight: 500; line-height: 1.6; }
+    /* 미리보기에서 바로 고치기 */
+        .pv { outline: none; border-radius: 2px; min-width: .6em; white-space: pre-wrap; word-break: break-all; }
+        .pv:empty { display: inline-block; min-width: 3em; }
+        .pv:empty::before { content: attr(data-ph); color: #a0aab6; }
+        @media (hover: hover) { .pv:hover { box-shadow: inset 0 0 0 1px #9db7d6; cursor: text; } }
+        .pv:focus { background: #fffde7; box-shadow: inset 0 0 0 1px #3182ce; }
+        @media print { .pv:empty::before { content: none; } .pv:hover, .pv:focus { box-shadow: none !important; background: none !important; } }
     </style>
 </head>
 <body class="text-slate-800">
@@ -861,8 +868,8 @@
                     <div v-if="form.docType === 'permit'" id="doc-permit">
                         <div class="pd-top">
                             <div style="min-width:0">
-                                <h2 class="pd-title" id="pdTitle">{{ docTitleText }}</h2>
-                                <p class="pd-no">허가번호 <b>{{ form.no || '—' }}</b><span v-if="form.status !== '작성 중'" id="pdStatus"> &nbsp;·&nbsp; 상태 {{ form.status }}</span></p>
+                                <h2 class="pd-title" id="pdTitle"><pv :o="form" k="docTitle" :def="DOC_TITLE.permit"></pv></h2>
+                                <p class="pd-no">허가번호 <b><pv :o="form" k="no" def="—"></pv></b><span v-if="form.status !== '작성 중'" id="pdStatus"> &nbsp;·&nbsp; 상태 <pv :o="form" k="status"></pv></span></p>
                             </div>
                             <table v-if="!appr.hide" id="pd-sign" class="pd-sign" :class="'pd-sign-' + apprView.length" aria-label="결재란">
                                 <tr><th v-for="(a, i) in apprView" :key="'ah-' + i">{{ a.t }}<small v-if="a.role">{{ a.role }}</small></th></tr>
@@ -875,22 +882,22 @@
                         <p v-else-if="tally.N" class="pd-alert">허가 조건 미충족 항목 {{ tally.N }}개 — 조치하고 다시 확인한 뒤 승인.</p>
 
                         <table class="pd-t">
-                            <tr><th class="w14">사업장</th><td>{{ form.company }}</td><th class="w14">작업명</th><td>{{ form.title }}</td></tr>
-                            <tr><th>작업 장소</th><td>{{ form.place }}</td><th>대상 설비</th><td>{{ form.equip }}</td></tr>
+                            <tr><th class="w14">사업장</th><td><pv :o="form" k="company"></pv></td><th class="w14">작업명</th><td><pv :o="form" k="title"></pv></td></tr>
+                            <tr><th>작업 장소</th><td><pv :o="form" k="place"></pv></td><th>대상 설비</th><td><pv :o="form" k="equip"></pv></td></tr>
                             <tr><th>허가 유효 시간</th><td colspan="3"><b>{{ periodText }}</b></td></tr>
-                            <tr><th>작업 업체</th><td>{{ form.contractor }}<span v-if="form.isContract"> (도급)</span></td><th>작업 책임자</th><td>{{ form.lead }}<span v-if="form.leadTel"> · {{ form.leadTel }}</span></td></tr>
+                            <tr><th>작업 업체</th><td><pv :o="form" k="contractor"></pv><span v-if="form.isContract"> (도급)</span></td><th>작업 책임자</th><td><pv :o="form" k="lead"></pv><span v-if="form.leadTel"> · <pv :o="form" k="leadTel"></pv></span></td></tr>
                             <tr><th>작업 종류</th><td colspan="3"><span v-for="t in TYPES" :key="t.id" class="pd-ty"><span class="pd-box">{{ hasType(t.id) ? '✓' : '' }}</span>{{ t.id === 'etc' && form.etcName ? '기타(' + form.etcName + ')' : t.short }}</span></td></tr>
-                            <tr><th>작업 내용</th><td colspan="3" class="pd-pre">{{ form.desc }}</td></tr>
-                            <tr><th>주요 위험요인</th><td colspan="3" class="pd-pre">{{ form.hazards }}</td></tr>
+                            <tr><th>작업 내용</th><td colspan="3" class="pd-pre"><pv :o="form" k="desc" multi></pv></td></tr>
+                            <tr><th>주요 위험요인</th><td colspan="3" class="pd-pre"><pv :o="form" k="hazards" multi></pv></td></tr>
                             <tr><th>필요 보호구</th><td colspan="3">{{ ppeText }}</td></tr>
-                            <tr v-if="hasType('hot')"><th>화재감시자</th><td>{{ form.fireWatch }}</td><th>소화기구</th><td>{{ form.extinguisher }}</td></tr>
-                            <tr v-if="hasType('conf')"><th>감시인</th><td>{{ form.attendant }}</td><th>농도 측정자</th><td>{{ form.gasTester }}</td></tr>
-                            <tr v-if="hasType('conf')"><th>가스 누출·유입 검토</th><td colspan="3" class="pd-pre">{{ form.gasRisk }}</td></tr>
-                            <tr v-if="needsDirector"><th>지휘자·유도자</th><td colspan="3">{{ form.director }}</td></tr>
-                            <tr><th>비상연락·대피</th><td colspan="3">{{ form.emergency }}</td></tr>
-                            <tr><th>에너지 차단</th><td colspan="3" class="pd-pre">{{ form.loto }}</td></tr>
+                            <tr v-if="hasType('hot')"><th>화재감시자</th><td><pv :o="form" k="fireWatch"></pv></td><th>소화기구</th><td><pv :o="form" k="extinguisher"></pv></td></tr>
+                            <tr v-if="hasType('conf')"><th>감시인</th><td><pv :o="form" k="attendant"></pv></td><th>농도 측정자</th><td><pv :o="form" k="gasTester"></pv></td></tr>
+                            <tr v-if="hasType('conf')"><th>가스 누출·유입 검토</th><td colspan="3" class="pd-pre"><pv :o="form" k="gasRisk"></pv></td></tr>
+                            <tr v-if="needsDirector"><th>지휘자·유도자</th><td colspan="3"><pv :o="form" k="director"></pv></td></tr>
+                            <tr><th>비상연락·대피</th><td colspan="3"><pv :o="form" k="emergency"></pv></td></tr>
+                            <tr><th>에너지 차단</th><td colspan="3" class="pd-pre"><pv :o="form" k="loto"></pv></td></tr>
                             <tr><th>관련 문서</th><td colspan="3"><span class="pd-ty"><span class="pd-box">{{ form.refRisk ? '✓' : '' }}</span>위험성평가 확인</span><span class="pd-ty"><span class="pd-box">{{ form.refTbm ? '✓' : '' }}</span>작업 전 안전점검회의(TBM)</span></td></tr>
-                            <tr v-if="form.conditions"><th>허가 조건</th><td colspan="3" class="pd-pre">{{ form.conditions }}</td></tr>
+                            <tr v-if="form.conditions"><th>허가 조건</th><td colspan="3" class="pd-pre"><pv :o="form" k="conditions" multi></pv></td></tr>
                         </table>
 
                         <table class="pd-t" id="pd-checks">
@@ -917,13 +924,13 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(g, i) in gasView" :key="'pg-' + i">
-                                    <td class="c">{{ g.r.time }}</td><td>{{ g.r.place }}</td>
-                                    <td class="c" :class="{ 'pd-bad': g.j.o2 === 'bad' }">{{ g.r.o2 }}</td>
-                                    <td class="c" :class="{ 'pd-bad': g.j.co2 === 'bad' }">{{ g.r.co2 }}</td>
-                                    <td class="c" :class="{ 'pd-bad': g.j.co === 'bad' }">{{ g.r.co }}</td>
-                                    <td class="c" :class="{ 'pd-bad': g.j.h2s === 'bad' }">{{ g.r.h2s }}</td>
-                                    <td class="c">{{ g.r.lel }}</td>
-                                    <td class="c">{{ g.r.by }}<span v-if="g.j.short"> / <b :class="{ 'pd-n': g.j.bad }">{{ g.j.short }}</b></span></td>
+                                    <td class="c"><pv :o="g.r" k="time"></pv></td><td><pv :o="g.r" k="place"></pv></td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.o2 === 'bad' }"><pv :o="g.r" k="o2"></pv></td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.co2 === 'bad' }"><pv :o="g.r" k="co2"></pv></td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.co === 'bad' }"><pv :o="g.r" k="co"></pv></td>
+                                    <td class="c" :class="{ 'pd-bad': g.j.h2s === 'bad' }"><pv :o="g.r" k="h2s"></pv></td>
+                                    <td class="c"><pv :o="g.r" k="lel"></pv></td>
+                                    <td class="c"><pv :o="g.r" k="by"></pv><span v-if="g.j.short"> / <b :class="{ 'pd-n': g.j.bad }">{{ g.j.short }}</b></span></td>
                                 </tr>
                                 <tr v-for="n in gasBlankRows" :key="'pgb-' + n"><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                             </tbody>
@@ -946,7 +953,7 @@
                             <thead><tr><th colspan="3" class="cap">작업 중 점검 기록</th></tr>
                                 <tr><th class="w14">시각</th><th>점검 내용·지적 사항</th><th class="w20">점검자</th></tr></thead>
                             <tbody>
-                                <tr v-for="(m, i) in midRows" :key="'pm-' + i"><td class="c">{{ m.time }}&nbsp;</td><td>{{ m.note }}</td><td class="c">{{ m.by }}</td></tr>
+                                <tr v-for="(m, i) in midRows" :key="'pm-' + i"><td class="c"><pv :o="m" k="time"></pv>&nbsp;</td><td><pv :o="m" k="note" multi></pv></td><td class="c"><pv :o="m" k="by"></pv></td></tr>
                             </tbody>
                         </table>
 
@@ -956,8 +963,8 @@
                             <tr><th class="w14">확인 사항</th><td colspan="3">
                                 <span v-for="d in doneItems" :key="d.k" class="pd-ty" style="white-space:normal"><span class="pd-box">{{ d.on ? '✓' : '' }}</span>{{ d.label }}</span>
                             </td></tr>
-                            <tr><th>완료 시각</th><td>{{ doneTimeText }}</td><th class="w14">확인자</th><td>{{ form.doneBy }} <span class="pd-dim">(서명)</span></td></tr>
-                            <tr v-if="form.doneNote"><th>메모</th><td colspan="3">{{ form.doneNote }}</td></tr>
+                            <tr><th>완료 시각</th><td>{{ doneTimeText }}</td><th class="w14">확인자</th><td><pv :o="form" k="doneBy"></pv> <span class="pd-dim">(서명)</span></td></tr>
+                            <tr v-if="form.doneNote"><th>메모</th><td colspan="3"><pv :o="form" k="doneNote" multi></pv></td></tr>
                         </table>
 
                         <div v-if="photoDataUrl" class="pd-photo pd-keep">
@@ -973,26 +980,26 @@
 
                     <!-- [DOC 2] 현장 게시용 -->
                     <div v-else-if="form.docType === 'post'" id="doc-post">
-                        <p class="pp-band"><span id="ppTitle">{{ postTitleText }}</span> — {{ postState }}<small>허가번호 {{ form.no || '—' }} · {{ form.company || '사업장' }}</small></p>
+                        <p class="pp-band"><span id="ppTitle"><pv :o="form" k="postTitle" :def="DOC_TITLE.post"></pv></span> — {{ postState }}<small>허가번호 <pv :o="form" k="no" def="—"></pv> · <pv :o="form" k="company" def="사업장"></pv></small></p>
                         <p v-if="gasState.bad" class="pd-alert" style="margin-top:10px;font-size:16px">작업 불가 — 최근 측정값이 적정공기 기준을 벗어남({{ gasState.why }})</p>
                         <table class="pp-t" style="margin-top:10px">
-                            <tr><th>작업명</th><td class="big">{{ form.title || '(작업명)' }}</td></tr>
+                            <tr><th>작업명</th><td class="big"><pv :o="form" k="title" def="(작업명)"></pv></td></tr>
                             <tr><th>작업 종류</th><td>{{ typeText || '(작업 종류)' }}</td></tr>
-                            <tr><th>작업 내용</th><td class="sm pd-pre">{{ form.desc }}</td></tr>
+                            <tr><th>작업 내용</th><td class="sm pd-pre"><pv :o="form" k="desc" multi></pv></td></tr>
                             <tr><th>장소 · 설비</th><td>{{ [form.place, form.equip].filter(Boolean).join(' · ') }}</td></tr>
                             <tr><th>허가 유효 시간</th><td class="big red">{{ periodText }}</td></tr>
                             <tr><th>작업 업체<br>책임자</th><td>{{ [form.contractor, form.lead, form.leadTel].filter(Boolean).join(' · ') }}</td></tr>
                             <tr v-if="workerNames"><th>작업자</th><td class="sm">{{ workerNames }} ({{ workerCount }}명)</td></tr>
-                            <tr v-if="hasType('hot')"><th>화재감시자</th><td>{{ form.fireWatch || '(지정 필요 여부 확인)' }}</td></tr>
-                            <tr v-if="hasType('conf')"><th>감시인</th><td>{{ form.attendant || '(지정)' }}</td></tr>
-                            <tr v-if="needsDirector && form.director"><th>지휘자·유도자</th><td>{{ form.director }}</td></tr>
-                            <tr><th>비상연락<br>대피 장소</th><td class="red">{{ form.emergency || '(비상연락처)' }}</td></tr>
+                            <tr v-if="hasType('hot')"><th>화재감시자</th><td><pv :o="form" k="fireWatch" def="(지정 필요 여부 확인)"></pv></td></tr>
+                            <tr v-if="hasType('conf')"><th>감시인</th><td><pv :o="form" k="attendant" def="(지정)"></pv></td></tr>
+                            <tr v-if="needsDirector && form.director"><th>지휘자·유도자</th><td><pv :o="form" k="director"></pv></td></tr>
+                            <tr><th>비상연락<br>대피 장소</th><td class="red"><pv :o="form" k="emergency" def="(비상연락처)"></pv></td></tr>
                             <tr><th>보호구</th><td class="sm">{{ ppeText }}</td></tr>
-                            <tr v-if="showGas"><th>농도 측정 결과<br>(최근)</th><td class="sm">{{ gasState.summary }}<span v-if="form.gasRisk"><br>가스 누출·유입 검토: {{ form.gasRisk }}</span></td></tr>
+                            <tr v-if="showGas"><th>농도 측정 결과<br>(최근)</th><td class="sm">{{ gasState.summary }}<span v-if="form.gasRisk"><br>가스 누출·유입 검토: <pv :o="form" k="gasRisk"></pv></span></td></tr>
                             <tr><th>안전점검<br>및 조치</th><td class="sm">
                                 확인 항목 {{ tally.total }}개 중 예 {{ tally.Y }} · 아니오 {{ tally.N }} · 해당없음 {{ tally.NA }} · 미확인 {{ tally.blank }}
                                 <ul class="pp-list" v-if="postMeasures.length"><li v-for="(m, i) in postMeasures" :key="'pmz-' + i">{{ m }}</li></ul>
-                                <div v-if="form.conditions" class="pd-pre">허가 조건: {{ form.conditions }}</div>
+                                <div v-if="form.conditions" class="pd-pre">허가 조건: <pv :o="form" k="conditions" multi></pv></div>
                             </td></tr>
                             <tr id="pp-appr"><th>{{ lastAppr.t || '승인' }}</th><td>{{ lastAppr.name || (lastAppr.role ? '(' + lastAppr.role + ')' : '') }} <span class="pd-dim pd-signph" style="font-size:13px">(서명)</span></td></tr>
                         </table>
@@ -1004,8 +1011,8 @@
                     <!-- [DOC 3] 허가 대장 -->
                     <div v-else id="doc-ledger">
                         <div class="pd-top">
-                            <div><h2 class="pd-title" id="plTitle" style="font-size:22px">{{ ledgerTitleText }}</h2>
-                                <p class="pd-sub"><template v-if="form.company">{{ form.company }} · </template>{{ todayText }} 기준 · {{ ledgerRows.length }}건</p></div>
+                            <div><h2 class="pd-title" id="plTitle" style="font-size:22px"><pv :o="form" k="ledgerTitle" :def="DOC_TITLE.ledger"></pv></h2>
+                                <p class="pd-sub"><template v-if="form.company"><pv :o="form" k="company"></pv> · </template>{{ todayText }} 기준 · {{ ledgerRows.length }}건</p></div>
                         </div>
                         <table class="pd-t" id="pd-ledger">
                             <thead><tr><th class="w12">허가번호</th><th class="w14">작업일시</th><th>작업명 · 장소</th><th class="w16">작업 종류</th><th class="w14">업체 · 책임자</th><th class="w10">상태</th></tr></thead>
@@ -1060,6 +1067,23 @@
             throw new Error('Vue not loaded');
         }
         const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        // ---- 미리보기(오른쪽 문서)에서 바로 고치기: 왼쪽 입력칸과 같은 값을 함께 바꾼다
+        const Pv = {
+            props: { o: Object, k: [String, Number], def: String, ph: String, multi: Boolean },
+            setup(props) {
+                const el = ref(null);
+                const cur = () => { const v = props.o ? props.o[props.k] : ''; const s = v == null ? '' : String(v); return s || props.def || ''; };
+                const put = () => { const e = el.value; if (e && document.activeElement !== e && e.innerText !== cur()) e.textContent = cur(); };
+                onMounted(put); watch(() => [props.o && props.o[props.k], props.def], put, { flush: 'post' });
+                const inp = () => { const e = el.value; if (!e || !props.o) return; let t = e.innerText.replace(/\n$/, ''); if (!props.multi) t = t.replace(/\n/g, ' '); props.o[props.k] = (props.def && t === props.def) ? '' : t; };
+                const out = () => { const e = el.value; if (e && !e.innerText.trim()) { e.innerHTML = ''; put(); } };
+                const paste = (ev) => { ev.preventDefault(); let t = ((ev.clipboardData || window.clipboardData).getData('text') || '').replace(/\r/g, ''); if (!props.multi) t = t.replace(/\n/g, ' '); document.execCommand('insertText', false, t); };
+                const key = (ev) => { if (!props.multi && ev.key === 'Enter') { ev.preventDefault(); ev.target.blur(); } };
+                return { el, inp, out, paste, key };
+            },
+            template: '<span ref="el" class="pv" :class="{ \'pv-m\': multi }" contenteditable="true" spellcheck="false" role="textbox" :data-ph="ph || \'\'" title="눌러서 바로 고칠 수 있습니다" @input="inp" @blur="out" @paste="paste" @keydown="key"></span>'
+        };
+
         const STORE_KEY = 'safetake.permit.v1';
         const OLD_FORM_KEY = 'safetake.form.permit';   // 예전 일반 서식(tools/forms/permit/)의 저장값 — 읽기만 하고 지우지 않는다
         const HIST_MAX = 60;
@@ -2032,7 +2056,7 @@
                     printDoc, downloadPDF
                 };
             }
-        }).mount('#app');
+        }).component('pv', Pv).mount('#app');
     </script>
 </body>
 </html>
