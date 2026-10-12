@@ -267,6 +267,13 @@
             .cc-h4 { break-after: avoid; page-break-after: avoid; }
             .cc-dh, .cc-sig { break-inside: avoid; }
         }
+    /* 미리보기에서 바로 고치기 */
+        .pv { outline: none; border-radius: 2px; min-width: .6em; white-space: pre-wrap; word-break: break-all; }
+        .pv:empty { display: inline-block; min-width: 3em; }
+        .pv:empty::before { content: attr(data-ph); color: #a0aab6; }
+        @media (hover: hover) { .pv:hover { box-shadow: inset 0 0 0 1px #9db7d6; cursor: text; } }
+        .pv:focus { background: #fffde7; box-shadow: inset 0 0 0 1px #3182ce; }
+        @media print { .pv:empty::before { content: none; } .pv:hover, .pv:focus { box-shadow: none !important; background: none !important; } }
     </style>
     <!-- 결재란(칸 이름·칸 수·성명·서명) 공통 모듈 — 사이트의 다른 서식과 같은 저장 키를 쓴다 -->
     <script src="../../assets/docs.js"></script>
@@ -653,7 +660,7 @@
                                     <th><cc-ed k="h.dt"></cc-ed></th>
                                     <td>{{ formattedDatetime }}</td>
                                     <th><cc-ed k="h.loc"></cc-ed></th>
-                                    <td>{{ formData.location }}</td>
+                                    <td><pv :o="formData" k="location"></pv></td>
                                 </tr>
                                 <tr>
                                     <th><cc-ed k="h.att"></cc-ed></th>
@@ -678,10 +685,10 @@
                             <tbody>
                                 <tr v-for="(r, i) in rosterRows" :key="'ro-' + i" class="cc-rr">
                                     <td class="cc-s11">{{ r.host ? L('ro.host') : L('ro.sub') }}</td>
-                                    <td>{{ r.company }}</td>
-                                    <td class="cc-s11">{{ r.work }}</td>
-                                    <td class="cc-s11">{{ r.title }}</td>
-                                    <td>{{ r.name }}</td>
+                                    <td><pv :o="r.host ? formData : r.src" k="company"></pv></td>
+                                    <td class="cc-s11"><pv :o="r.src" k="work"></pv></td>
+                                    <td class="cc-s11"><pv :o="r.src" k="title"></pv></td>
+                                    <td><pv :o="r.src" k="name"></pv></td>
                                     <td class="cc-s10" :style="{ color: r.absent ? '#475569' : '#cbd5e1' }">{{ r.absent ? ('불참' + (r.reason ? ' · ' + r.reason : '')) : L('ro.signph') }}</td>
                                 </tr>
                             </tbody>
@@ -697,10 +704,10 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(p, i) in prevRows" :key="'pv-' + i">
-                                    <td>{{ p.content }}</td>
-                                    <td class="cc-c">{{ p.owner }}</td>
-                                    <td class="cc-c cc-s11">{{ p.due }}</td>
-                                    <td class="cc-c cc-s11">{{ p.result }}</td>
+                                    <td><pv :o="p" k="content" multi></pv></td>
+                                    <td class="cc-c"><pv :o="p" k="owner"></pv></td>
+                                    <td class="cc-c cc-s11"><pv :o="p" k="due"></pv></td>
+                                    <td class="cc-c cc-s11"><pv :o="p" k="result"></pv></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -712,8 +719,8 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(t, i) in topics" :key="'dt-' + i">
-                                    <td class="cc-top-a">{{ i + 1 }}. {{ t.label || '(안건)' }}</td>
-                                    <td class="cc-top-a"><div class="cc-pre cc-s11 cc-min">{{ t.content }}</div></td>
+                                    <td class="cc-top-a">{{ i + 1 }}. <pv :o="t" k="label" def="(안건)"></pv></td>
+                                    <td class="cc-top-a"><div class="cc-pre cc-s11 cc-min"><pv :o="t" k="content" multi></pv></div></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -728,10 +735,10 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(a, i) in actionRows" :key="'ar-' + i">
-                                    <td>{{ a.content }}</td>
-                                    <td class="cc-c">{{ a.owner }}</td>
-                                    <td class="cc-c cc-s11">{{ a.due }}</td>
-                                    <td class="cc-c cc-s11">{{ a.status }}</td>
+                                    <td><pv :o="a" k="content" multi></pv></td>
+                                    <td class="cc-c"><pv :o="a" k="owner"></pv></td>
+                                    <td class="cc-c cc-s11"><pv :o="a" k="due"></pv></td>
+                                    <td class="cc-c cc-s11"><pv :o="a" k="status"></pv></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -741,7 +748,7 @@
                             <tbody>
                                 <tr v-if="formData.others">
                                     <th><cc-ed k="h.others"></cc-ed></th>
-                                    <td class="cc-top-a"><div class="cc-pre cc-s11">{{ formData.others }}</div></td>
+                                    <td class="cc-top-a"><div class="cc-pre cc-s11"><pv :o="formData" k="others" multi></pv></div></td>
                                 </tr>
                                 <tr v-if="formData.nextDatetime">
                                     <th><cc-ed k="h.next"></cc-ed></th>
@@ -779,7 +786,7 @@
                                 </tr>
                                 <tr>
                                     <th><cc-ed k="nt.loc"></cc-ed></th>
-                                    <td style="font-weight:500">{{ formData.location }}</td>
+                                    <td style="font-weight:500"><pv :o="formData" k="location"></pv></td>
                                 </tr>
                                 <tr>
                                     <th><cc-ed k="nt.who"></cc-ed></th>
@@ -787,19 +794,19 @@
                                         <p style="font-weight:500">도급인 및 수급인 {{ subs.length }}개 업체</p>
                                         <div class="cc-s11 cc-who">
                                             <p>• {{ L('ro.host') }}: {{ formattedHost }}</p>
-                                            <p v-for="(s, i) in subs" :key="'ns-' + i">• {{ s.company || '(수급인 ' + (i + 1) + ')' }}{{ s.work ? ' — ' + s.work : '' }}{{ s.title || s.name ? ' · ' + [s.title, s.name].filter(Boolean).join(' ') : '' }}</p>
+                                            <p v-for="(s, i) in subs" :key="'ns-' + i">• <pv :o="s" k="company" :def="'(수급인 ' + (i + 1) + ')'"></pv>{{ s.work ? ' — ' + s.work : '' }}{{ s.title || s.name ? ' · ' + [s.title, s.name].filter(Boolean).join(' ') : '' }}</p>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th><cc-ed k="nt.topics"></cc-ed></th>
-                                    <td class="cc-s11"><p v-for="(t, i) in topics" :key="'nt-' + i">{{ i + 1 }}) {{ t.label || '(안건)' }}</p></td>
+                                    <td class="cc-s11"><p v-for="(t, i) in topics" :key="'nt-' + i">{{ i + 1 }}) <pv :o="t" k="label" def="(안건)"></pv></p></td>
                                 </tr>
                                 <tr v-if="formData.noticeInstructions || formData.others">
                                     <th><cc-ed k="nt.inst"></cc-ed></th>
                                     <td class="cc-s11">
-                                        <div class="cc-pre">{{ formData.noticeInstructions }}</div>
-                                        <div v-if="formData.others" class="cc-pre" :style="formData.noticeInstructions ? 'margin-top:6px;padding-top:6px;border-top:1px solid #cbd5e1' : ''">{{ formData.others }}</div>
+                                        <div class="cc-pre"><pv :o="formData" k="noticeInstructions" multi></pv></div>
+                                        <div v-if="formData.others" class="cc-pre" :style="formData.noticeInstructions ? 'margin-top:6px;padding-top:6px;border-top:1px solid #cbd5e1' : ''"><pv :o="formData" k="others" multi></pv></div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -807,7 +814,7 @@
 
                         <div class="cc-sig">
                             <p class="cc-sigd">{{ noticeDateText }}</p>
-                            <p class="cc-sign"><span v-if="formData.company">{{ formData.company }}</span><span v-else class="cc-ph">(도급인명)</span> <cc-ed f="noticeFooter"></cc-ed> <small><cc-ed k="nt.stamp"></cc-ed></small></p>
+                            <p class="cc-sign"><span v-if="formData.company"><pv :o="formData" k="company"></pv></span><span v-else class="cc-ph">(도급인명)</span> <cc-ed f="noticeFooter"></cc-ed> <small><cc-ed k="nt.stamp"></cc-ed></small></p>
                         </div>
                         <p class="cc-foot"><cc-ed k="foot.notice" ml></cc-ed></p>
                     </div>
@@ -843,8 +850,8 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(t, i) in topics" :key="'rt-' + i">
-                                    <td class="cc-top-a" style="font-weight:700;background:#f8fafc">{{ i + 1 }}. {{ t.label || '(안건)' }}</td>
-                                    <td class="cc-top-a"><div class="cc-pre cc-s11 cc-min">{{ t.content }}</div></td>
+                                    <td class="cc-top-a" style="font-weight:700;background:#f8fafc">{{ i + 1 }}. <pv :o="t" k="label" def="(안건)"></pv></td>
+                                    <td class="cc-top-a"><div class="cc-pre cc-s11 cc-min"><pv :o="t" k="content" multi></pv></div></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -858,10 +865,10 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(p, i) in prevRows" :key="'rp-' + i">
-                                        <td>{{ p.content }}</td>
-                                        <td class="cc-c">{{ p.owner }}</td>
-                                        <td class="cc-c cc-s11">{{ p.due }}</td>
-                                        <td class="cc-c cc-s11">{{ p.result }}</td>
+                                        <td><pv :o="p" k="content" multi></pv></td>
+                                        <td class="cc-c"><pv :o="p" k="owner"></pv></td>
+                                        <td class="cc-c cc-s11"><pv :o="p" k="due"></pv></td>
+                                        <td class="cc-c cc-s11"><pv :o="p" k="result"></pv></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -875,10 +882,10 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(a, i) in actionRows" :key="'ra-' + i">
-                                    <td>{{ a.content }}</td>
-                                    <td class="cc-c">{{ a.owner }}</td>
-                                    <td class="cc-c cc-s11">{{ a.due }}</td>
-                                    <td class="cc-c cc-s11">{{ a.status }}</td>
+                                    <td><pv :o="a" k="content" multi></pv></td>
+                                    <td class="cc-c"><pv :o="a" k="owner"></pv></td>
+                                    <td class="cc-c cc-s11"><pv :o="a" k="due"></pv></td>
+                                    <td class="cc-c cc-s11"><pv :o="a" k="status"></pv></td>
                                 </tr>
                                 <tr v-if="!actionRows.length"><td class="cc-c" colspan="4" style="color:#475569"><cc-ed k="rp.noact"></cc-ed></td></tr>
                             </tbody>
@@ -891,7 +898,7 @@
                                 <tbody>
                                     <tr v-if="formData.others">
                                         <th><cc-ed k="h.others"></cc-ed></th>
-                                        <td><div class="cc-pre cc-s11">{{ formData.others }}</div></td>
+                                        <td><div class="cc-pre cc-s11"><pv :o="formData" k="others" multi></pv></div></td>
                                     </tr>
                                     <tr v-if="formData.nextDatetime">
                                         <th><cc-ed k="h.next"></cc-ed></th>
@@ -909,7 +916,7 @@
                         <div class="cc-sig">
                             <p class="cc-close"><cc-ed k="rp.close" ml></cc-ed></p>
                             <p class="cc-sigd">{{ reportDateText }}</p>
-                            <p class="cc-sign"><span v-if="formData.company">{{ formData.company }}</span><span v-else class="cc-ph">(도급인명)</span> <cc-ed f="reportFooter"></cc-ed> <small><cc-ed k="rp.stamp"></cc-ed></small></p>
+                            <p class="cc-sign"><span v-if="formData.company"><pv :o="formData" k="company"></pv></span><span v-else class="cc-ph">(도급인명)</span> <cc-ed f="reportFooter"></cc-ed> <small><cc-ed k="rp.stamp"></cc-ed></small></p>
                         </div>
                         <p class="cc-foot"><cc-ed k="foot.report" ml></cc-ed></p>
                     </div>
@@ -958,6 +965,23 @@
             throw new Error('Vue not loaded');
         }
         const { createApp, ref, reactive, computed, watch, nextTick, onMounted, provide, inject, h } = Vue;
+        // ---- 미리보기(오른쪽 문서)에서 바로 고치기: 왼쪽 입력칸과 같은 값을 함께 바꾼다
+        const Pv = {
+            props: { o: Object, k: [String, Number], def: String, ph: String, multi: Boolean },
+            setup(props) {
+                const el = ref(null);
+                const cur = () => { const v = props.o ? props.o[props.k] : ''; const s = v == null ? '' : String(v); return s || props.def || ''; };
+                const put = () => { const e = el.value; if (e && document.activeElement !== e && e.innerText !== cur()) e.textContent = cur(); };
+                onMounted(put); watch(() => [props.o && props.o[props.k], props.def], put, { flush: 'post' });
+                const inp = () => { const e = el.value; if (!e || !props.o) return; let t = e.innerText.replace(/\n$/, ''); if (!props.multi) t = t.replace(/\n/g, ' '); props.o[props.k] = (props.def && t === props.def) ? '' : t; };
+                const out = () => { const e = el.value; if (e && !e.innerText.trim()) { e.innerHTML = ''; put(); } };
+                const paste = (ev) => { ev.preventDefault(); let t = ((ev.clipboardData || window.clipboardData).getData('text') || '').replace(/\r/g, ''); if (!props.multi) t = t.replace(/\n/g, ' '); document.execCommand('insertText', false, t); };
+                const key = (ev) => { if (!props.multi && ev.key === 'Enter') { ev.preventDefault(); ev.target.blur(); } };
+                return { el, inp, out, paste, key };
+            },
+            template: '<span ref="el" class="pv" :class="{ \'pv-m\': multi }" contenteditable="true" spellcheck="false" role="textbox" :data-ph="ph || \'\'" title="눌러서 바로 고칠 수 있습니다" @input="inp" @blur="out" @paste="paste" @keydown="key"></span>'
+        };
+
         const STORE_KEY = 'safetake.council.v1';
         const OLD_FORM_KEY = 'safetake.form.council';   // 예전 일반 서식(tools/forms/council/)의 저장값 — 읽기만 하고 지우지 않는다
         const HIST_MAX = 24;
@@ -1263,8 +1287,8 @@
                     return names.length ? names.join(', ') : '수급인 각 업체';
                 });
                 const rosterRows = computed(() => {
-                    const rows = hostReps.value.map(r => ({ host: true, company: formData.value.company, work: '', title: r.title, name: r.name, absent: r.absent, reason: '' }));
-                    subs.value.forEach(s => rows.push({ host: false, company: s.company, work: s.work, title: s.title, name: s.name, absent: s.absent, reason: s.reason }));
+                    const rows = hostReps.value.map(r => ({ src: r, host: true, company: formData.value.company, work: '', title: r.title, name: r.name, absent: r.absent, reason: '' }));
+                    subs.value.forEach(s => rows.push({ src: s, host: false, company: s.company, work: s.work, title: s.title, name: s.name, absent: s.absent, reason: s.reason }));
                     return rows;
                 });
                 const actionRows = computed(() => actions.value.filter(a => a.content.trim()));
@@ -1726,6 +1750,7 @@
         app.component('cc-ed', CcEd); app.component('cc-step', CcStep); app.component('cc-mv', CcMv);
         // 결재란: 사이트 공통 모듈(assets/docs.js)이 그리고 저장한다 — 칸 이름·칸 수·성명·서명
         app.directive('appr', { mounted(el) { if (window.ADoc) el._ad = window.ADoc.mountApproval(el, APPR_KEY); } });
+        app.component('pv', Pv);
         app.mount('#app');
     </script>
 </body>
