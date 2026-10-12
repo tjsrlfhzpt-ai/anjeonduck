@@ -1308,8 +1308,9 @@ STATUS_LABEL = {"ok": ("badge-green", "바로 사용"), "external": ("badge-blue
 
 
 def catalog_html(cat, rel):
-    parts = []
-    acts = []
+    """법령 순서 카탈로그: 법령별 표 하나, 장(章)은 구분 행, 항목은 이름 · 근거 · 상태 한 줄."""
+    ST = {"ok": "바로 사용", "external": "공식 자료", "planned": "준비 중", "skip": "제공 안 함"}
+    parts, acts = [], []
     for c in cat["categories"]:
         if c["act"] not in acts:
             acts.append(c["act"])
@@ -1317,22 +1318,22 @@ def catalog_html(cat, rel):
         cats = [c for c in cat["categories"] if c["act"] == act]
         n_ok = sum(1 for c in cats for x in c["items"] if x["status"] in ("ok", "external"))
         n_all = sum(len(c["items"]) for c in cats)
-        blocks = []
+        rows = []
         for c in cats:
-            rows = []
+            ok = sum(1 for x in c["items"] if x["status"] in ("ok", "external"))
+            rows.append(f'<tr class="ct-g"><th colspan="3" scope="colgroup">{e(c["cat"])} <span>{ok} / {len(c["items"])}</span></th></tr>')
             for x in c["items"]:
-                cls, lab = STATUS_LABEL[x["status"]]
-                if x["status"] == "ok":
+                st = x["status"]
+                if st == "ok":
                     name = f'<a href="{rel}{e(x["link"])}">{e(x["name"])}</a>'
-                elif x["status"] == "external":
+                elif st == "external":
                     name = f'<a href="{e(x["link"])}" target="_blank" rel="noopener">{e(x["name"])} ↗</a>'
                 else:
                     name = f'<span>{e(x["name"])}</span>'
-                note = f'<span class="cat-note">{e(x["note"])}</span>' if x.get("note") else ""
-                rows.append(f'<li class="cat-i st-{x["status"]}"><span class="badge {cls}">{lab}</span><div>{name}<span class="cat-basis">{e(x["basis"])}</span>{note}</div></li>')
-            ok = sum(1 for x in c["items"] if x["status"] in ("ok", "external"))
-            blocks.append(f'<section class="cat-box"><h3>{e(c["cat"])} <span class="muted">{ok} / {len(c["items"])}</span></h3><ul class="cat-list">{"".join(rows)}</ul></section>')
-        parts.append(f'<section class="cat-act"><h2 class="h-sm">{e(act)} <span class="muted">사용 가능 {n_ok} / 전체 {n_all}</span></h2><div class="cat-grid">{"".join(blocks)}</div></section>')
+                note = f'<span class="ct-note">{e(x["note"])}</span>' if x.get("note") else ""
+                rows.append(f'<tr class="ct-r st-{st}"><td class="ct-n">{name}{note}</td><td class="ct-b">{e(x["basis"])}</td><td class="ct-s">{ST[st]}</td></tr>')
+        parts.append(f'<section class="cat-act"><h3 class="ct-h">{e(act)} <span>사용 가능 {n_ok} / 전체 {n_all}</span></h3>'
+                     f'<table class="ct"><thead><tr><th scope="col">항목</th><th scope="col">근거</th><th scope="col">상태</th></tr></thead><tbody>{"".join(rows)}</tbody></table></section>')
     return "".join(parts)
 
 
