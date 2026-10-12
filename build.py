@@ -2301,6 +2301,10 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     # ---- 서식 작성기 (data/forms.json + 별표 3 점검표)
     lawref = load("data/lawref.json")
     catalog = load("data/catalog.json")
+    # '제공 안 함'(skip) 항목은 화면에 싣지 않는다 — 데이터에는 이유와 함께 남겨 둔다(같은 기능 요청이 오면 참고)
+    for _c in catalog["categories"]:
+        _c["items"] = [x for x in _c["items"] if x.get("status") != "skip"]
+    catalog["categories"] = [_c for _c in catalog["categories"] if _c["items"]]
     groups, forms = all_forms(lawref)
     form_src = (ROOT / "apps/form.body.html").read_text(encoding="utf-8")
     for f in forms:
