@@ -331,6 +331,7 @@
       else if (s.type === "list") h += t + '<ol class="paper-list">' + s.items.map(function (x, li) { return "<li>" + lab("li." + si + "." + li, x, true) + "</li>"; }).join("") + "</ol>";
     });
     (A.next || []).forEach(function (n, i) { h += '<p class="paper-next" id="fNext' + i + '"></p>'; });
+    if (A.judge) h += '<p class="paper-next" id="fJudgeP"></p>';
     if (F.footer !== false) {
       var fk = "safetake.foot." + F.id, fv = null; try { fv = localStorage.getItem(fk); } catch (e) {}
       h += '<p class="paper-foot" id="fFoot" contenteditable="true" spellcheck="false" data-ph="하단 문구 — 눌러서 입력(비우면 인쇄되지 않음)" title="눌러서 고치거나 지울 수 있습니다">' + esc(fv === null ? (F.law ? "관련 근거: " + F.law : "") : fv) + "</p>";
@@ -391,6 +392,18 @@
           }
           putAuto("t." + c.table + "." + rp + "." + c.target, out);
         }
+      } else if (c.type === "track") {
+        // 대책 이행 추적: 표 아래에 '대책 N건 · 완료 · 진행 · 기한 경과' 한 줄. 완료 확인일이 있으면 완료로 본다
+        var tN = 0, tD = 0, tL = 0, t0 = new Date(); t0.setHours(0, 0, 0, 0);
+        for (var rt = 0; rt < n; rt++) {
+          var hasAny = false; for (var cc = 1; cc < (s.cols || []).length; cc++) if (cell(c.table, rt, cc)) { hasAny = true; break; }
+          if (!hasAny) continue; tN++;
+          if (cell(c.table, rt, c.done)) { tD++; continue; }
+          var dd = parseD(cell(c.table, rt, c.due)); if (dd && dd < t0) tL++;
+        }
+        var et = document.getElementById("fSum-" + c.table), secT = document.querySelector('[data-add="' + c.table + '"]');
+        if (!et && secT) { et = document.createElement("p"); et.id = "fSum-" + c.table; et.className = "paper-sum"; secT.parentNode.parentNode.insertBefore(et, secT.parentNode); }
+        if (et) et.textContent = tN ? (c.label || "대책") + " " + tN + "건 · 완료 " + tD + " · 진행 " + (tN - tD) + (tL ? " · 기한 경과 " + tL + " (" + ymd(t0) + " 기준)" : "") : "";
       } else if (c.type === "due") {
         var today = new Date(); today.setHours(0, 0, 0, 0);
         for (var r3 = 0; r3 < n; r3++) {
@@ -421,8 +434,38 @@
       var due = add.months ? addM(d, add.months) : new Date(d.getFullYear(), d.getMonth(), d.getDate() + (add.days || 0));
       el.textContent = nx.label + ": " + ymd(due) + "까지  (" + nx.basis + ")";
     });
+    if (A.judge === "accident") judgeAccident();
     var ab = document.getElementById("fAutoBack");
     if (ab) { ab.hidden = !manualKeys.length; ab.textContent = "직접 고친 자동 계산 칸 " + manualKeys.length + "개 · 자동 계산으로 되돌리기"; }
+  }
+
+  // ---------- 산업재해 보고 대상 판정(조사 기록 서식). 입력값으로 산안법·중처법 요건을 대조해 화면에 안내하고, 조사표 제출 기한은 인쇄본에도 남긴다
+  function judgeAccident() {
+    var box = document.getElementById("fJudge");
+    if (!box) { box = document.createElement("section"); box.id = "fJudge"; box.className = "fjudge no-print"; box.setAttribute("aria-live", "polite"); var pa = document.getElementById("paper"); pa.parentNode.insertBefore(box, pa); }
+    var pl = document.getElementById("fJudgeP");
+    function n0(k) { var m = String(val(k, "") || "").match(/\d+/); return m ? +m[0] : null; }
+    var kind = val("f.kind", ""), date = parseD(val("f.date", "")), off = n0("f.off"), dead = n0("f.dead") || 0, hurt = n0("f.hurt"), l3 = n0("f.long3") || 0, l6 = n0("f.long6") || 0;
+    var L = [], line = "";
+    if (!kind) { box.innerHTML = '<h2 class="h-sm">보고 대상 자동 판정</h2><p class="hint">구분(산업재해·아차사고·물적 사고)을 고르면 보고 대상인지와 제출 기한을 알려 드립니다.</p>'; if (pl) pl.textContent = ""; return; }
+    if (kind !== "산업재해") {
+      L.push(["ok", "법정 보고 대상 아님", kind + "는 산업재해조사표 제출 대상이 아닙니다. 원인과 대책을 남겨 위험성평가에 반영하세요."]);
+    } else {
+      var sev = dead >= 1 || l3 >= 2 || (hurt != null && hurt >= 10);
+      if (sev) L.push(["bad", "산업안전보건법상 중대재해", "사망자 1명 이상 · 3개월 이상 요양 부상자 동시 2명 이상 · 부상자·질병자 동시 10명 이상 중 하나에 해당합니다(시행규칙 제3조). 즉시 작업을 중지하고 근로자를 대피시킨 뒤(법 제54조①), 지체 없이 관할 지방고용노동관서에 전화·팩스 등으로 보고합니다(법 제54조②, 시행규칙 제67조)."]);
+      if (dead >= 1 || l6 >= 2) L.push(["bad", "중대재해처벌법상 중대산업재해 요건", "사망자 1명 이상 또는 같은 사고로 6개월 이상 치료가 필요한 부상자 2명 이상에 해당합니다(중대재해처벌법 제2조제2호). 상시근로자 5명 이상 사업장이면 같은 법이 적용됩니다(제3조). 직업성 질병자 요건(1년 이내 3명 이상)은 이 서식으로 판정하지 않습니다."]);
+      var need = dead >= 1 || (off != null && off >= 3);
+      if (need) {
+        if (date) { var due = addM(date, 1); line = "산업재해조사표 제출 기한: " + ymd(due) + "까지 (발생일 " + ymd(date) + "부터 1개월 이내 · 시행규칙 제73조①)";
+          var t0 = new Date(); t0.setHours(0, 0, 0, 0); var left = Math.round((due - t0) / 864e5);
+          L.push([left < 0 ? "bad" : "warn", "산업재해조사표 제출 대상", (dead >= 1 ? "사망자가 발생" : "3일 이상 휴업") + "했으므로 " + ymd(due) + "까지 별지 제30호서식을 관할 지방고용노동관서에 제출합니다" + (left < 0 ? " — 기한이 " + (-left) + "일 지났습니다." : " (" + left + "일 남음).") + " 근로자대표(없으면 재해자 본인)의 확인을 받습니다(제73조③)."]);
+        } else L.push(["warn", "산업재해조사표 제출 대상", "발생일을 입력하면 제출 기한(1개월 이내)을 계산합니다."]);
+      } else if (off == null) L.push(["info", "휴업 예상일수를 적어 주세요", "사망자가 없으면 휴업 3일 이상인지에 따라 산업재해조사표 제출 대상이 정해집니다(시행규칙 제73조①)."]);
+      else L.push(["ok", "산업재해조사표 제출 대상 아님", "사망자가 없고 휴업 3일 미만입니다. 다만 산업재해 기록은 3년간 보존해야 합니다(법 제57조②·제164조)."]);
+    }
+    box.innerHTML = '<h2 class="h-sm">보고 대상 자동 판정 <span class="muted">— 입력값 기준 참고 안내입니다. 실제 판단은 원문과 관할 지방고용노동관서 안내를 따르세요</span></h2><ul>' +
+      L.map(function (x) { return '<li class="fj-' + x[0] + '"><b>' + esc(x[1]) + "</b> " + esc(x[2]) + "</li>"; }).join("") + "</ul>";
+    if (pl) pl.textContent = line;
   }
 
   var tm = null;

@@ -1913,3 +1913,12 @@ details[open]>.brow-r{background:var(--surface-2)}
 .wjump a span{font-size:12px;color:var(--muted);font-weight:700}
 .wjump a:hover{border-color:var(--blue-100);background:var(--blue-50);color:var(--blue);text-decoration:none}
 .ftools-page[id]{scroll-margin-top:calc(var(--hd-h) + 12px)}
+/* 산업재해 보고 대상 자동 판정 */
+.fjudge{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;margin:0 0 14px}
+.fjudge ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.fjudge li{font-size:14px;line-height:1.65;padding:10px 12px;border-radius:10px;background:var(--surface-2);border-left:3px solid var(--line)}
+.fjudge li b{display:block;color:var(--text)}
+.fjudge .fj-bad{border-left-color:#B3261E;background:color-mix(in srgb,#B3261E 7%,var(--surface))}
+.fjudge .fj-bad b{color:#B3261E}
+.fjudge .fj-warn{border-left-color:#A15C00;background:color-mix(in srgb,#F59E0B 10%,var(--surface))}
+.fjudge .fj-ok{border-left-color:var(--green)}
