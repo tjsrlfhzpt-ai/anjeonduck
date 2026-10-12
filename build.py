@@ -1783,7 +1783,7 @@ def build(out, today):
 <p class="empty" id="nbE" hidden>조건에 맞는 소식이 없습니다.</p>
 <p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
 <script>(function(){{var f=document.getElementById("nbF"),l=document.getElementById("nbL"),q=document.getElementById("nbQ"),n=document.getElementById("nbN"),em=document.getElementById("nbE"),c="";
-function run(){{var t=(q.value||"").toLowerCase().split(/\s+/).filter(Boolean),k=0;[].forEach.call(l.children,function(r){{var ok=(!c||r.dataset.cat===c)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});r.hidden=!ok;if(ok)k++;}});n.textContent=k;em.hidden=k>0;l.hidden=k===0;}}
+function run(){{var t=(q.value||"").toLowerCase().split(/\\s+/).filter(Boolean),k=0;[].forEach.call(l.children,function(r){{var ok=(!c||r.dataset.cat===c)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});r.hidden=!ok;if(ok)k++;}});n.textContent=k;em.hidden=k>0;l.hidden=k===0;}}
 f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;c=b.dataset.c;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});run();}});q.addEventListener("input",run);
 try{{var p=new URLSearchParams(location.search);if(p.get("q")){{q.value=p.get("q");}}var pc=p.get("c");if(pc){{var bb=[].filter.call(f.children,function(x){{return x.dataset.c===pc;}})[0];if(bb){{bb.click();}}}}run();}}catch(e){{}}
 var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="DETAILS"){{r.open=true;}}}})();</script>"""
