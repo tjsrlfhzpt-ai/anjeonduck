@@ -352,7 +352,8 @@
   }
   function lab(k) { var v = opts.labels[k]; return typeof v === "string" ? v : LDEF[k]; }
 
-  // 선택한 공종 항목 먼저, 모자라면 공통 항목으로 채움 (무작위 아님)
+  function shuffled(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  // 목록에서 고르기·다음 항목용: 선택한 공종 항목 먼저, 그다음 공통 항목 (순서 고정)
   function listFor(group) {
     var own = ITEMS.filter(function (i) { return i.group === group; });
     var common = group === "공통" ? [] : ITEMS.filter(function (i) { return i.group === "공통"; });
@@ -362,8 +363,14 @@
     r = r && typeof r === "object" ? r : {};
     return { group: S(r.group), risk: S(r.risk), type: S(r.type), level: LV.indexOf(r.level) >= 0 ? r.level : "", measure: S(r.measure) };
   }
-  function pick(group, n) {
-    var list = listFor(group).slice(0, n).map(normRow);
+  // 공종 기본 목록: 매번 같은 줄만 나오지 않게 공종 항목에서 무작위로 고르고 공통 항목을 1줄 섞는다. avoid 에 든 위험요인은 되도록 피한다
+  function pick(group, n, avoid) {
+    avoid = avoid || [];
+    function fresh(a) { var f = a.filter(function (i) { return avoid.indexOf(i.risk) < 0; }); return f.length >= Math.min(n, a.length) ? f : f.concat(a.filter(function (i) { return avoid.indexOf(i.risk) >= 0; })); }
+    var own = shuffled(ITEMS.filter(function (i) { return i.group === group; })), common = group === "공통" ? [] : shuffled(ITEMS.filter(function (i) { return i.group === "공통"; }));
+    own = fresh(own); common = fresh(common);
+    var nOwn = Math.min(own.length, common.length ? n - 1 : n);
+    var list = own.slice(0, nOwn).concat(common.slice(0, n - nOwn)).map(normRow);
     while (list.length < n) list.push(normRow());
     return list;
   }
@@ -674,7 +681,8 @@
     h += stepHTML(1, "기본 정보", b);
 
     // 2 위험요인·대책
-    b = '<p class="f-hint" style="margin-top:8px">공종을 고르면 기본 목록으로 채워집니다. 오늘 작업에 맞게 고치거나 줄을 더하고 빼세요(최대 ' + MAX_ROWS + "줄).</p>";
+    b = '<p class="f-hint" style="margin-top:8px">공종을 고르면 예시가 무작위로 채워집니다. 오늘 작업에 맞게 고치거나 줄을 더하고 빼세요(최대 ' + MAX_ROWS + "줄).</p>" +
+      '<div class="acts" style="justify-content:flex-start;margin:6px 0 4px"><button type="button" class="btn-sub" data-act="shuffle" title="같은 공종의 다른 위험요인 예시로 표 전체를 바꿉니다">🔀 다른 예시로 바꾸기</button></div>';
     p.rows.forEach(function (r, j) {
       var R = P + "r." + j + ".", n = j + 1;
       b += '<div class="rc lv-' + (r.level || "x") + '" data-ri="' + j + '"><div class="rc-h"><b>' + n + "</b>" +
@@ -999,6 +1007,11 @@
         break;
       case "pick": openPicker(pi, ri); break;
       case "next": nextItem(pi, ri); break;
+      case "shuffle":
+        if (rowsEdited(p) && !confirm("위험요인 표를 '" + p.group + "'의 다른 예시로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) return;
+        p.rows = pick(p.group, Math.max(ROWS, Math.min(p.rows.length, MAX_ROWS)), p.rows.map(function (r) { return r.risk; }));
+        renderAll(); markTouched(); toast("다른 예시로 바꿨습니다 — 오늘 작업에 맞게 고쳐 쓰세요");
+        break;
       case "rowPick": openPicker(cur, -1); break;
       case "rowBlank": if (p.rows.length < MAX_ROWS) { p.rows.push(normRow()); renderAll(); markTouched(); } break;
       case "rowUp": case "rowDown":

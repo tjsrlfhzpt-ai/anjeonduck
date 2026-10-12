@@ -241,6 +241,7 @@
     <label for="globalWorkType">공종(부서)</label>
     <select id="globalWorkType" onchange="applyAutoData(false)"></select>
   </div>
+  <button class="btn btn-blue" onclick="shuffleRows()" title="같은 공종의 다른 유해·위험요인 예시로 3번 표를 바꿉니다">🔀 다른 예시로</button>
   <button class="btn btn-blue" id="pickBtn" onclick="openPick()">＋ 유해·위험요인 불러오기</button>
   <button class="btn btn-blue" id="docsBtn" onclick="openDocs()">저장된 평가서</button>
   <button class="btn btn-blue" onclick="newDoc()">새 평가서</button>
@@ -618,10 +619,15 @@
   function apprNoSigns(v) { if (v && v.cols) { v = clone(v); v.signs = []; v.dates = []; } return v; }
 
   // ---------- 3번 표 ----------
-  function itemsFor(dept, n) {
-    var own = HAZARD_DB.items.filter(function (i) { return i.group === dept; });
-    var common = dept === "공통" ? [] : HAZARD_DB.items.filter(function (i) { return i.group === "공통"; });
-    var list = own.concat(common).slice(0, n);
+  function shuffled(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  // 공종 기본 항목: 매번 같은 줄만 나오지 않게 공종 항목에서 무작위로 고르고 공통 항목을 1줄 섞는다. avoid 에 든 위험요인은 되도록 피한다
+  function itemsFor(dept, n, avoid) {
+    avoid = avoid || [];
+    function fresh(a) { var f = a.filter(function (i) { return avoid.indexOf(i.risk) < 0; }); return f.length >= Math.min(n, a.length) ? f : f.concat(a.filter(function (i) { return avoid.indexOf(i.risk) >= 0; })); }
+    var own = fresh(shuffled(HAZARD_DB.items.filter(function (i) { return i.group === dept; })));
+    var common = dept === "공통" ? [] : fresh(shuffled(HAZARD_DB.items.filter(function (i) { return i.group === "공통"; })));
+    var nOwn = Math.min(own.length, common.length ? n - 1 : n);
+    var list = own.slice(0, nOwn).concat(common.slice(0, n - nOwn));
     while (list.length < n) list.push({ risk: "", level: "", measure: "" });
     return list;
   }
@@ -680,6 +686,14 @@
     $("moreBox").open = false;
     markTouched();
   }
+  function shuffleRows() {
+    var dept = $("globalWorkType").value, cur = [].map.call(document.querySelectorAll("#ra-tbody tr"), rowData);
+    if (rowsEdited() && !confirm("3번 표를 '" + dept + "'의 다른 예시로 바꿉니다.\n직접 적은 유해·위험요인, 조치, 점수, 담당자는 지워집니다. 계속할까요?")) return;
+    var n = Math.max(6, Math.min(cur.length, 20));
+    fillRows(itemsFor(dept, n, cur.map(function (r) { return r.hazard; })).map(hazRow));
+    markTouched(); setStatus("'" + dept + "'의 다른 예시로 바꿨습니다 — 현장에 맞게 고쳐 쓰세요.");
+  }
+  window.shuffleRows = shuffleRows;
   function fillRows(rows) {
     var tbody = $("ra-tbody");
     tbody.innerHTML = "";

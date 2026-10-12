@@ -574,7 +574,8 @@ TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "
 TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "permit": "fire", "msds": "msds", "loto": "loto", "heat": "heat", "improve": "fix", "confined": "confined",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
               "schedule": "calendar", "duties": "briefcase", "retention": "folder", "inspect": "search", "docmap": "audit"}
-WRITE_TOOLS = ["tbm", "risk", "improve", "patrol", "joint", "edu-log", "permit", "confined", "council", "committee", "msds", "loto", "heat"]
+# 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
+WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "improve"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
 HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"), ("accident", "alarm"), ("ppe-ledger", "goggles")]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
@@ -1159,7 +1160,7 @@ ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="
 # 작성기 하나로 통합(2026-10-12): 전용 작성기(config free_tools, cat=작성기)를 서식 작성기 묶음 속에 넣어 /tools/forms/ 한 곳에서 찾는다.
 WRITER_LEAD = ("위험성평가·TBM", ["tbm", "risk"])          # 맨 앞 묶음(서식에는 없는 묶음)
 WRITER_TOOLS_IN = {"교육·회의": ["edu-log", "committee", "council"],
-                   "점검·허가": ["patrol", "joint", "permit", "improve", "confined", "heat", "loto"],
+                   "점검·허가": ["patrol", "joint", "permit", "confined", "heat", "loto", "improve"],
                    "관리대장": ["msds"]}
 WRITER_GID = {"위험성평가·TBM": "w-risk", "교육·회의": "w-edu", "점검·허가": "w-check", "재해·사고 조사": "w-acc", "업무일지": "w-log",
               "작업계획서": "w-plan", "작업시작 전 점검(별표 3)": "pre", "조직·발령": "w-org", "관리대장": "w-ledger", "중대재해처벌법 이행": "w-sapa"}
