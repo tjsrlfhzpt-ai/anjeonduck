@@ -119,7 +119,7 @@
     return '<div class="lt-tag" style="--lt:' + color() + '"><span class="lt-hole">⊕</span>' +
       '<div class="lt-head"><div class="en">' + (warn ? "WARNING" : "DANGER") + '</div><div class="ko">' + (warn ? "경 고" : "위 험") + "</div></div>" +
       '<div class="lt-big"><div class="k">' + (warn ? "점검 중<br>조작 금지" : "작업 중<br>조작 금지") + '</div><div class="e">DO NOT OPERATE</div><div class="s">이 잠금장치와 꼬리표는<br>건 사람만 풀 수 있습니다.</div></div>' +
-      '<div class="lt-rows">' + [["설비", v.eq], ["작업 내용", v.job], ["잠근 사람", v.who], ["연락처", v.tel], ["잠금 일시", v.at]].map(function (r) { return '<div class="lt-row"><span>' + r[0] + "</span><b>" + esc(r[1] || "") + "</b></div>"; }).join("") + "</div>" +
+      '<div class="lt-rows">' + [["설비", v.eq, "lEq"], ["작업 내용", v.job, "lJob"], ["잠근 사람", v.who, "lWho"], ["연락처", v.tel, "lTel"], ["잠금 일시", v.at, ""]].map(function (r) { return '<div class="lt-row"><span>' + r[0] + "</span><b" + (r[2] && v.eq !== undefined ? ' data-pv="' + r[2] + '"' : "") + ">" + esc(r[1] || "") + "</b></div>"; }).join("") + "</div>" +
       '<div class="lt-foot">' + esc([v.co, v.foot].filter(Boolean).join(" · ")) + "</div></div>";
   }
   function back() {
@@ -144,9 +144,14 @@
     $("lSheet").innerHTML = html;
     $("lPrev").innerHTML = html;
     var w = $("lPrev").clientWidth - 32, scale = Math.min(1, w / (297 * 96 / 25.4));
+    // 미리보기 태그의 칸을 눌러 바로 고친다(왼쪽 입력칸과 같은 값)
+    [].forEach.call($("lPrev").querySelectorAll("[data-pv]"), function (b) { b.contentEditable = "true"; b.spellcheck = false; b.className = "pv"; b.title = "눌러서 바로 고칠 수 있습니다"; });
     [].forEach.call($("lPrev").querySelectorAll(".lt-page"), function (p) { p.style.transform = "scale(" + scale + ")"; p.style.marginBottom = (-(1 - scale) * 210 * 96 / 25.4) + "px"; p.style.marginRight = (-(1 - scale) * 297 * 96 / 25.4) + "px"; });
   }
   $("lForm").addEventListener("input", render);
+  $("lPrev").addEventListener("input", function (ev) { var t = ev.target.closest("[data-pv]"); if (!t) return; var src = $(t.dataset.pv); if (src) { src.value = t.innerText.replace(/\n/g, " ").trim(); st[src.dataset.k] = src.value; save(); } });
+  $("lPrev").addEventListener("focusout", function (ev) { if (ev.target.closest("[data-pv]")) render(); });
+  $("lPrev").addEventListener("keydown", function (ev) { if (ev.key === "Enter" && ev.target.closest("[data-pv]")) { ev.preventDefault(); ev.target.blur(); } });
   $("lForm").addEventListener("change", render);
   window.addEventListener("resize", render);
   $("lPrint").addEventListener("click", function () { render(); window.print(); });
