@@ -590,8 +590,8 @@ def nav_cols(site, rel):
     def tl(ids):
         return [(f'{rel}tools/{i}/', by[i].get("menu") or by[i].get("short") or by[i]["name"]) for i in ids if i in by]
     return {
-        "lib": [("작성기", tl(WRITE_TOOLS) + [(f"{rel}tools/forms/", "서식 작성기 전체")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS)),
-                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}tools/", "도구 전체 보기")])],
+        "lib": [("작성기", tl(WRITE_TOOLS) + [(f"{rel}tools/forms/", "＋ 기본 서식 52종 (일지·점검표·계획서)"), (f"{rel}tools/", "→ 작성기·계산기·조회 전체 목록")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS)),
+                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")]), ("영상", [(f"{rel}videos/", "안전보건 영상")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else []))],
@@ -2319,6 +2319,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>서식 작성기</p>
   <h1>서식 작성기</h1>
   <p>법령이 요구하는 기재 사항을 빠짐없이 담은 A4 서식 {len(forms)}종입니다. 화면에서 바로 채우고 인쇄하거나 PDF로 저장하세요. 결재란·점검 항목·표 문구까지 모두 고칠 수 있고, 입력 내용은 이 브라우저에만 저장됩니다.</p>
+  <p class="hint">한 장짜리 기본 서식을 모은 곳입니다. TBM 일지·위험성평가서처럼 자동 채우기·계산 기능이 많은 작성기와 계산기·조회 도구는 <a href="../">무료 도구 전체 목록</a>에 있습니다.</p>
 </div></section>
 {"".join(fsecs)}"""
     write("tools/forms/index.html", page(site, "../../", "tools/forms/", "서식 작성기", forms_body,
@@ -2337,6 +2338,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
   <p class="crumbs"><a href="../">홈</a><span>/</span>무료 도구</p>
   <h1>무료 안전관리 도구</h1>
   <p>회원가입도 서버도 없습니다. 입력한 내용은 내 브라우저 안에서만 처리됩니다. 법령 원문을 기준으로 만들었고 각 도구에 근거 조문과 확인일을 적어 두었습니다.</p>
+  <p class="hint">작성기·계산기·조회 도구 전체 목록입니다. 교육일지·점검표·계획서 같은 한 장짜리 기본 서식 {len(forms)}종은 <a href="forms/">서식 작성기</a>에 모아 두었습니다.</p>
 </div></section>
 <section class="wrap ftools-page">
   <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("cat") == k) + (1 if k == "작성기" else 0)}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
