@@ -1783,7 +1783,7 @@ def build(out, today):
 <p class="empty" id="nbE" hidden>조건에 맞는 소식이 없습니다.</p>
 <p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
 <script>(function(){{var f=document.getElementById("nbF"),l=document.getElementById("nbL"),q=document.getElementById("nbQ"),n=document.getElementById("nbN"),em=document.getElementById("nbE"),c="";
-function run(){{var t=(q.value||"").toLowerCase().split(/\s+/).filter(Boolean),k=0;[].forEach.call(l.children,function(r){{var ok=(!c||r.dataset.cat===c)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});r.hidden=!ok;if(ok)k++;}});n.textContent=k;em.hidden=k>0;l.hidden=k===0;}}
+function run(){{var t=(q.value||"").toLowerCase().split(/\\s+/).filter(Boolean),k=0;[].forEach.call(l.children,function(r){{var ok=(!c||r.dataset.cat===c)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});r.hidden=!ok;if(ok)k++;}});n.textContent=k;em.hidden=k>0;l.hidden=k===0;}}
 f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;c=b.dataset.c;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});run();}});q.addEventListener("input",run);
 try{{var p=new URLSearchParams(location.search);if(p.get("q")){{q.value=p.get("q");}}var pc=p.get("c");if(pc){{var bb=[].filter.call(f.children,function(x){{return x.dataset.c===pc;}})[0];if(bb){{bb.click();}}}}run();}}catch(e){{}}
 var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="DETAILS"){{r.open=true;}}}})();</script>"""
@@ -2324,28 +2324,61 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     write("tools/forms/index.html", page(site, "../../", "tools/forms/", "서식 작성기", forms_body,
                                          desc=f"교육일지, 협의체 회의록, 순회점검표, 작업계획서, 작업시작 전 점검표 등 안전보건 서식 {len(forms)}종을 무료로 작성·인쇄.", active="tools/"))
 
-    # ---- 도구
+    # ---- 도구 (찾기 쉬운 목록형: 검색 + 용도별/법령 순서 전환)
     n_ok = sum(1 for c in catalog["categories"] for x in c["items"] if x["status"] in ("ok", "external"))
     n_all = sum(len(c["items"]) for c in catalog["categories"])
-    kind_secs = ""
+
+    def trow(href, name, desc, tag="", ico="", q=""):
+        pic = f'<img src="{ico}" width="40" height="40" alt="" loading="lazy">' if ico else '<span class="trow-ph" aria-hidden="true"></span>'
+        return (f'<a class="trow" href="{href}" data-q="{e((q or (name + " " + desc + " " + tag)).lower())}">{pic}'
+                f'<span class="trow-b"><strong>{e(name)}</strong><span>{e(desc)}</span></span>{f"<em>{e(tag)}</em>" if tag else ""}</a>')
+    groups_html = ""
     for k, c, sub in TOOL_KINDS:
-        extra = (tool_card("forms/", "작성기", f"서식 작성기 {len(forms)}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식까지. 결재·서명·사진 첨부.",
-                           "산안법·안전보건규칙·중처법 시행령 각 조문", "결재·사진", ico="../assets/img/ico/write.webp") if k == "작성기" else "")
-        kind_secs += f'<section class="wrap ftools-page" id="{c}">{sec_head(k, sub=sub)}<div class="tgrid">{free_tool_cards(site, "../", kind=k)}{extra}</div></section>'
+        ts = [t for t in site.get("free_tools", []) if t.get("cat") == k]
+        rows = "".join(trow(f'{e(t["id"])}/', t["name"], t.get("desc", ""), t.get("tag", ""),
+                            f'../assets/img/ico/{TOOL_DUCKS[t["id"]]}.webp' if t["id"] in TOOL_DUCKS else "",
+                            " ".join([t["name"], t.get("short", ""), t.get("desc", ""), t.get("law", ""), t.get("tag", "")])) for t in ts)
+        if k == "작성기":
+            rows += trow("forms/", f"서식 작성기 {len(forms)}종", "교육일지·협의체 회의록·순회점검표·작업계획서·작업시작 전 점검표·중처법 이행 서식", "서식 모음",
+                         "../assets/img/ico/write.webp", "서식 작성기 " + " ".join(f["title"] for f in forms))
+        groups_html += (f'<section class="tgrp" id="{c}"><h2 class="tgrp-h">{e(k)} <span>{len(ts) + (1 if k == "작성기" else 0)}</span><small>{e(sub)}</small></h2>'
+                        f'<div class="tlist">{rows}</div></section>')
+    form_rows = "".join(trow(f'forms/{e(f["id"])}/', f["title"], f.get("group", ""), "서식", "", f'{f["title"]} {f.get("group", "")} 서식') for f in forms)
+    groups_html += f'<section class="tgrp tgrp-forms" hidden><h2 class="tgrp-h">서식 작성기에서 찾은 서식 <span></span></h2><div class="tlist">{form_rows}</div></section>'
     tools_body = f"""
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>무료 도구</p>
   <h1>무료 안전관리 도구</h1>
-  <p>회원가입도 서버도 없습니다. 입력한 내용은 내 브라우저 안에서만 처리됩니다. 법령 원문을 기준으로 만들었고 각 도구에 근거 조문과 확인일을 적어 두었습니다.</p>
+  <p>회원가입 없이 바로 쓰는 작성기·계산기·조회 도구입니다. 입력한 내용은 내 브라우저 안에서만 처리됩니다.</p>
 </div></section>
-<section class="wrap ftools-page">
-  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("cat") == k) + (1 if k == "작성기" else 0)}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
+<section class="wrap tfind">
+  <div class="tfind-bar">
+    <div class="search-inline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="tq" placeholder="도구·서식 찾기 (예: TBM, 밀폐공간, 과태료, 교육시간)" aria-label="도구·서식 찾기"></div>
+    <div class="seg tview" role="tablist" aria-label="보기 방식"><button type="button" role="tab" data-v="use" aria-selected="true" aria-pressed="true">용도별</button><button type="button" role="tab" data-v="law" aria-selected="false" aria-pressed="false">법령 순서</button></div>
+  </div>
+  <nav class="tjump" aria-label="바로 가기">{"".join(f'<a href="#{c}">{e(k)}</a>' for k, c, _ in TOOL_KINDS)}<a href="#catalog">법령 순서 ({n_ok}/{n_all})</a></nav>
+  <p class="tcount" id="tn" hidden></p>
+  <div id="tv-use">{groups_html}</div>
+  <section id="catalog" class="tv-law">
+    {sec_head("법령 순서로 찾기", sub=f"산업안전보건법·중대재해처벌법 조문 순서 · 바로 쓸 수 있는 것 {n_ok}개 / 전체 {n_all}개")}
+    {catalog_html(catalog, "")}
+  </section>
+  <p class="tempty" id="te" hidden>찾는 도구가 없습니다. 다른 낱말로 찾아보거나 <a href="../resources/">서식·자료</a>에서 찾아보세요.</p>
 </section>
-{kind_secs}
-<section class="wrap ftools-page" id="catalog">
-  {sec_head("법령 순서로 찾기", sub=f"산업안전보건법·중대재해처벌법 조문 순서대로 정리했습니다. 지금 바로 쓸 수 있는 것 {n_ok}개 / 전체 {n_all}개")}
-  {catalog_html(catalog, "")}
-</section>
+<script>(function(){{
+var q=document.getElementById("tq"),use=document.getElementById("tv-use"),law=document.getElementById("catalog"),n=document.getElementById("tn"),em=document.getElementById("te"),fg=use.querySelector(".tgrp-forms"),seg=document.querySelector(".tview"),view="use";
+function setView(v){{view=v;[].forEach.call(seg.children,function(b){{var on=b.dataset.v===v;b.setAttribute("aria-pressed",on);b.setAttribute("aria-selected",on);}});run();}}
+seg.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(b)setView(b.dataset.v);}});
+document.querySelector(".tjump").addEventListener("click",function(ev){{var a=ev.target.closest("a");if(!a)return;var v=a.getAttribute("href")==="#catalog"?"law":"use";if(v!==view){{setView(v);}}}});
+function run(){{var t=(q.value||"").toLowerCase().split(/\\s+/).filter(Boolean),k=0,on=t.length>0;
+ use.hidden=view!=="use";law.hidden=view!=="law";
+ if(view==="use"){{[].forEach.call(use.querySelectorAll(".tgrp"),function(g){{var c=0;[].forEach.call(g.querySelectorAll(".trow"),function(r){{var ok=t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});r.hidden=!ok;if(ok)c++;}});
+  g.hidden=g===fg?(!on||!c):!c;if(!g.hidden)k+=c;if(g===fg)g.querySelector(".tgrp-h span").textContent=c;}});}}
+ else{{[].forEach.call(law.querySelectorAll(".cat-act"),function(a){{var cnt=0,grp=null,gc=0;[].forEach.call(a.querySelectorAll("tr"),function(r){{if(r.classList.contains("ct-g")){{if(grp)grp.hidden=!gc;grp=r;gc=0;return;}}if(!r.classList.contains("ct-r"))return;var ok=t.every(function(w){{return r.textContent.toLowerCase().indexOf(w)>=0;}});r.hidden=!ok;if(ok){{gc++;cnt++;}}}});if(grp)grp.hidden=!gc;a.hidden=!cnt;k+=cnt;}});}}
+ n.hidden=!on;n.textContent="찾은 항목 "+k+"개";em.hidden=!on||k>0;}}
+q.addEventListener("input",run);
+if(location.hash==="#catalog")setView("law");else run();
+}})();</script>
 <div class="wrap layout-detail">
   <section class="col-main">{(sec_head("기록까지 관리하려면") + tool_panel(site, "../", big=True)) if tool_panel(site, "../") else ""}</section>
   <aside class="col-side"><section class="side-box">
