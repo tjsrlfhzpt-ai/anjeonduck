@@ -1817,3 +1817,31 @@ body.is-arrived [data-landing]{display:none!important}
 
 /* 모바일 가로 넘침 방지: 표 스크롤 상자 안의 화면낭독 전용 글자(절대 위치)가 밖으로 새지 않게 */
 .table-wrap{position:relative}
+
+/* 브리핑·소식 검색·상세 (kshec 벤치마킹) */
+.nb-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.nb-count{font-size:13.5px;color:var(--muted);margin:0}
+.nb-count strong{color:var(--navy)}
+.nb-list[hidden]{display:none}
+.nb-row:target summary,.nb-row[open]:target summary{box-shadow:inset 3px 0 0 var(--blue)}
+.bdm{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;font-size:13.5px;color:var(--muted);margin:0 0 8px !important}
+.bdm .nb-cat{padding:2px 8px}
+.bd-ot{font-size:13.5px;color:var(--muted) !important}
+.bdv-t{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.bdv-t th{width:7.5em;text-align:left;vertical-align:top;padding:14px 16px;background:var(--surface-2);font-size:13.5px;color:var(--text-2);font-weight:700;border-top:1px solid var(--line-2)}
+.bdv-t td{padding:14px 18px;font-size:15px;line-height:1.75;color:var(--text);border-top:1px solid var(--line-2)}
+.bdv-t tr:first-child th,.bdv-t tr:first-child td{border-top:0}
+.bdv .lst-note{margin-top:12px}
+.bdv-btns{margin-top:16px}
+.bdv .src-note{margin-top:12px}
+.bdn{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+.bdn a{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font-size:14px;font-weight:600;line-height:1.45}
+.bdn a span{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
+.bdn a:hover{border-color:var(--blue-100);background:var(--blue-50);text-decoration:none}
+.bdn-next{grid-column:2;text-align:right}
+.bdr{margin-top:28px}
+.bdr ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-2)}
+.bdr li a{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:10px;padding:10px 4px;border-bottom:1px solid var(--line-2);color:var(--text);font-size:14px}
+.bdr li a:hover{background:var(--surface-2);text-decoration:none}
+.bdr time{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.bdv-t th{width:5.5em;padding:12px}.bdv-t td{padding:12px 14px}.bdn{grid-template-columns:1fr}.bdn-next{grid-column:1;text-align:left}}

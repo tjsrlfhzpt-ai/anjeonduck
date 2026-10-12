@@ -1024,6 +1024,14 @@ ACC_PAGE = "accidents/"  # 사고사망 속보 목록(상세) 페이지 주소
 JOB_POST = True  # main() 에서 config/site.json features.job_posting 으로 정한다
 
 
+def bdate(x, long=False):
+    """브리핑·소식 날짜 표기. 게시일을 일 단위로 확인하지 못한 항목(date_prec: month)은 월까지만 적는다."""
+    d = str(x.get("date") or "")
+    if x.get("date_prec") == "month":
+        return f"{d[:4]}년 {int(d[5:7])}월" if long else d[2:7].replace("-", ".")
+    return fmt_date(d) if long else d[2:].replace("-", ".")
+
+
 def acc_key(a, i):
     """속보 한 건의 페이지 안 위치 이름(#a-...). 공단 게시물 번호가 없으면 순번을 쓴다."""
     k = re.sub(r"[^0-9A-Za-z_-]", "", str(a.get("id") or ""))
@@ -1578,8 +1586,16 @@ def build(out, today):
                           "summary": it["summary"], "point": it.get("point", ""), "period": "", "url": it["sources"][0]["url"], "href": f"{b['date']}/",
                           "verify": "" if b.get("review") == "verified" else ""})
     BOARD.sort(key=lambda x: x["date"], reverse=True)
+    import hashlib as _hl
+    _seen = set()
+    for x in BOARD:  # 상세 페이지 주소: 출처 주소+제목으로 만든 짧은 고유값(같은 글이면 빌드마다 같다)
+        k = _hl.sha1((x.get("url", "") + "|" + x["title"]).encode("utf-8")).hexdigest()[:8]
+        while k in _seen:
+            k = _hl.sha1(k.encode()).hexdigest()[:8]
+        _seen.add(k)
+        x["id"] = k
     if BOARD:
-        brief_rows = "".join(bd_row("brief/", x["title"], md(x["date"]), x["cat"]) for x in BOARD[:7])
+        brief_rows = "".join(bd_row(f"brief/n/{x['id']}/", x["title"], md(x["date"]) if x.get("date_prec") != "month" else x["date"][5:7] + "월", x["cat"]) for x in BOARD[:7])
     elif briefs:
         b0 = briefs[0]
         brief_rows = "".join(bd_row(f"brief/{b0['date']}/", it["title"], md(it.get("date") or b0["date"]), it.get("cat") or "정책") for it in b0["items"][:4])
@@ -1723,16 +1739,53 @@ def build(out, today):
         ot = f'<p class="muted">공식 제목: {e(x["official_title"])}</p>' if x.get("official_title") else ""
         vf = f'<p class="lst-note">{CHK_SVG} <b>확인 필요</b> {e(x["verify"])}</p>' if x.get("verify") else ""
         more = f' · <a href="{e(x["href"])}">브리핑 전문</a>' if x.get("href") else ""
-        return (f'<details class="nb-row" data-cat="{e(x["cat"])}"><summary><time datetime="{e(x["date"])}">{e(x["date"][2:].replace("-", "."))}</time><span class="nb-cat nb-{e(x["cat"])}">{e(x["cat"])}</span>'
+        more += f' · <a href="n/{x["id"]}/">자세히 보기</a>'
+        q = " ".join([x["title"], x.get("official_title", ""), x.get("summary", ""), x.get("agency", ""), x["cat"]])
+        return (f'<details class="nb-row" id="b-{x["id"]}" data-cat="{e(x["cat"])}" data-q="{e(q.lower())}"><summary><time datetime="{e(x["date"][:7] if x.get("date_prec") == "month" else x["date"])}">{e(bdate(x))}</time><span class="nb-cat nb-{e(x["cat"])}">{e(x["cat"])}</span>'
                 f'<span class="nb-t">{e(x["title"])}{chk}</span><span class="nb-a">{e(x.get("agency", ""))}</span></summary>'
                 f'<div class="nb-body">{ot}<p>{e(x["summary"])}</p>{per}<p><b>실무 포인트</b> {e(x.get("point", ""))}</p>{vf}'
                 f'<p><a class="link-ext" href="{e(x["url"])}" target="_blank" rel="noopener">{e(x.get("src_label") or "공식 출처")} ↗</a>{more}</p></div></details>')
+    def board_detail(x, i, side):
+        same = [y for y in BOARD if y is not x and y["cat"] == x["cat"]][:5]
+        newer, older = (BOARD[i - 1] if i > 0 else None), (BOARD[i + 1] if i + 1 < len(BOARD) else None)
+        rel = "".join(f'<li><a href="../{y["id"]}/"><time>{e(bdate(y))}</time><span>{e(y["title"])}</span></a></li>' for y in same)
+        nav = "".join(f'<a class="bdn-{k}" href="../{y["id"]}/"><span>{lab}</span>{e(y["title"])}</a>' for k, lab, y in (("prev", "← 이전 소식", newer), ("next", "다음 소식 →", older)) if y)
+        rows = [("요약", f'<p>{e(x["summary"])}</p>')]
+        if x.get("period"):
+            rows.append(("기간", f'<p>{e(x["period"])}</p>'))
+        if x.get("point"):
+            rows.append(("실무 포인트", f'<p>{e(x["point"])}</p>'))
+        tbl = "".join(f'<tr><th scope="row">{k}</th><td>{v}</td></tr>' for k, v in rows)
+        vf = f'<p class="lst-note">{CHK_SVG} <b>확인 필요</b> {e(x["verify"])}</p>' if x.get("verify") else ""
+        full = f'<a class="btn btn-ghost" href="../../{e(x["href"])}">브리핑 전문</a>' if x.get("href") else ""
+        return f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">안전 브리핑</a><span>/</span><a href="../../?c={quote(x["cat"])}">{e(x["cat"])}</a></p>
+  <p class="bdm"><span class="nb-cat nb-{e(x["cat"])}">{e(x["cat"])}</span><time datetime="{e(x["date"][:7] if x.get("date_prec") == "month" else x["date"])}">{e(bdate(x, True))}</time>{f'<span>{e(x.get("agency"))}</span>' if x.get("agency") else ''}</p>
+  <h1>{e(x["title"])}</h1>
+  {f'<p class="bd-ot">공식 제목 · {e(x["official_title"])}</p>' if x.get("official_title") else ''}
+</div></section>
+<div class="wrap layout-detail"><section class="col-main"><article class="bdv">
+  <table class="bdv-t"><tbody>{tbl}</tbody></table>
+  {vf}
+  <p class="btns bdv-btns"><a class="btn" href="{e(x["url"])}" target="_blank" rel="noopener">{e(x.get("src_label") or "공식 출처 원문")} ↗</a>{full}<a class="btn btn-ghost" href="../../#b-{x["id"]}">목록으로</a></p>
+  <p class="src-note">공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다.</p>
+  {f'<nav class="bdn" aria-label="이전·다음 소식">{nav}</nav>' if nav else ''}
+  {f'<section class="bdr"><h2 class="h-sm">같은 분류 소식 · {e(x["cat"])}</h2><ul>{rel}</ul></section>' if rel else ''}
+</article></section>{side}</div>"""
+
     cats = ["입법예고", "점검", "감독", "지원사업", "공모전·대회", "법령", "정책", "통계", "사고", "자료"]
     cat_btns = '<button type="button" data-c="" aria-pressed="true">전체</button>' + "".join(f'<button type="button" data-c="{c}" aria-pressed="false">{c} {sum(1 for x in BOARD if x["cat"] == c)}</button>' for c in cats if any(x["cat"] == c for x in BOARD))
-    board_html = f"""<div class="nb"><div class="seg nb-filter" id="nbF" role="group" aria-label="분류">{cat_btns}</div>
+    board_html = f"""<div class="nb"><div class="nb-tools"><div class="search-inline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="nbQ" placeholder="예: 위험성평가, 지게차, 보조금" aria-label="브리핑·소식 검색"></div><p class="nb-count" aria-live="polite"><strong id="nbN">{len(BOARD)}</strong>건</p></div>
+<div class="seg nb-filter" id="nbF" role="group" aria-label="분류">{cat_btns}</div>
 <div class="nb-list" id="nbL">{"".join(board_row(x) for x in BOARD)}</div>
+<p class="empty" id="nbE" hidden>조건에 맞는 소식이 없습니다.</p>
 <p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
-<script>(function(){{var f=document.getElementById("nbF"),l=document.getElementById("nbL");f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});[].forEach.call(l.children,function(r){{r.hidden=!!b.dataset.c&&r.dataset.cat!==b.dataset.c;}});}});}})();</script>"""
+<script>(function(){{var f=document.getElementById("nbF"),l=document.getElementById("nbL"),q=document.getElementById("nbQ"),n=document.getElementById("nbN"),em=document.getElementById("nbE"),c="";
+function run(){{var t=(q.value||"").toLowerCase().split(/\s+/).filter(Boolean),k=0;[].forEach.call(l.children,function(r){{var ok=(!c||r.dataset.cat===c)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});r.hidden=!ok;if(ok)k++;}});n.textContent=k;em.hidden=k>0;l.hidden=k===0;}}
+f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;c=b.dataset.c;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});run();}});q.addEventListener("input",run);
+try{{var p=new URLSearchParams(location.search);if(p.get("q")){{q.value=p.get("q");}}var pc=p.get("c");if(pc){{var bb=[].filter.call(f.children,function(x){{return x.dataset.c===pc;}})[0];if(bb){{bb.click();}}}}run();}}catch(e){{}}
+var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="DETAILS"){{r.open=true;}}}})();</script>"""
     if briefs:
         b0 = briefs[0]
         arch = "".join(f'<li><a href="{e(b["date"])}/"><time datetime="{e(b["date"])}">{fmt_date(b["date"])}</time><span>{e(b["title"])}</span></a></li>' for b in briefs)
@@ -1770,6 +1823,10 @@ def build(out, today):
     write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
           brief_head.format(up="../", crumb="안전 브리핑") + f'<div class="wrap layout-detail"><section class="col-main">{brief_main}</section>{brief_side}</div>',
           desc="산업안전 법령·정책·감독·사고 소식을 매일 요약하고 실무 포인트를 정리한 SafePlum 브리핑.", active="brief/"))
+    side2 = brief_side.replace('href="../laws/', 'href="../../../laws/').replace('href="../accidents/', 'href="../../../accidents/').replace('<a href="20', '<a href="../../20')
+    for i, x in enumerate(BOARD):
+        write(f"brief/n/{x['id']}/index.html", page(site, "../../../", f"brief/n/{x['id']}/", f'{x["title"]} — {x["cat"]}', board_detail(x, i, side2),
+              desc=f'{x["cat"]} · {x.get("agency", "")} · {bdate(x, True)} — {x["summary"]}'[:150], active="brief/"))
     for b in briefs:
         body = (brief_head.format(up="../../", crumb='<a href="../">안전 브리핑</a><span>/</span>' + fmt_date(b["date"]))
                 + f'<div class="wrap layout-detail"><section class="col-main"><article class="br"><p class="br-date">{fmt_date(b["date"])} 브리핑</p><h2 class="br-title">{e(b["title"])}</h2>{brief_article(b, "../../")}</article></section>'
