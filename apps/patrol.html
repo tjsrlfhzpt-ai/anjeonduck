@@ -283,6 +283,14 @@
             #preview-col { display: block !important; overflow: visible !important; height: auto !important; }
             .pd-head { break-inside: avoid; }
         }
+    /* 미리보기에서 바로 고치기 */
+        .pv { outline: none; border-radius: 2px; min-width: .6em; white-space: pre-wrap; word-break: break-all; }
+        .pv:empty { display: inline-block; min-width: 3em; }
+        .pv:empty::before { content: attr(data-ph); color: #a0aab6; }
+        @media (hover: hover) { .pv:hover { box-shadow: inset 0 0 0 1px #9db7d6; cursor: text; } }
+        .pv:focus { background: #fffde7; box-shadow: inset 0 0 0 1px #3182ce; }
+        @media (hover: hover) { .pv-ck:hover { background: #eef5ff; cursor: pointer; } }
+        @media print { .pv:empty::before { content: none; } .pv:hover, .pv:focus { box-shadow: none !important; background: none !important; } }
     </style>
 </head>
 <body class="text-slate-800">
@@ -736,33 +744,33 @@
                     <!-- [DOC 1] 순회점검 일지 -->
                     <div v-if="formData.docType === 'log'">
                         <div class="pd-head">
-                            <div><h2 class="pd-title">{{ titleLog }}</h2></div>
+                            <div><h2 class="pd-title"><pv :o="custom" k="titleLog" :def="DEF.titleLog"></pv></h2></div>
                             <template v-if="custom.showAppr">
                                 <div v-if="hasADoc" class="pd-apprbox" data-pappr="tool.patrol" key="da-log"></div>
                                 <table v-else class="pd-appr">
                                     <tr><th>점검자</th><th>검토</th><th>승인</th></tr>
-                                    <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
+                                    <tr><td><pv :o="formData" k="inspector"></pv></td><td></td><td></td></tr>
                                 </table>
                             </template>
                         </div>
 
                         <table class="pd-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>{{ L.lSite }}</th><td>{{ siteLabel }}</td><th>{{ L.lWhen }}</th><td>{{ dateLabel }}</td></tr>
-                            <tr><th>{{ L.lInsp }}</th><td>{{ inspLabel }}</td><th>{{ L.lWeather }}</th><td>{{ formData.weather }}</td></tr>
-                            <tr><th>{{ L.lCycle }}</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '' }}</td></tr>
+                            <tr><th><pv :o="custom.labels" k="lSite" :def="LDEF.lSite"></pv></th><td><pv :o="formData" k="company" ph="회사"></pv> <pv :o="formData" k="siteName" ph="현장"></pv></td><th><pv :o="custom.labels" k="lWhen" :def="LDEF.lWhen"></pv></th><td>{{ dateLabel }}</td></tr>
+                            <tr><th><pv :o="custom.labels" k="lInsp" :def="LDEF.lInsp"></pv></th><td><pv :o="formData" k="inspDept" ph="소속"></pv> <pv :o="formData" k="inspector" ph="성명"></pv></td><th><pv :o="custom.labels" k="lWeather" :def="LDEF.lWeather"></pv></th><td><pv :o="formData" k="weather"></pv></td></tr>
+                            <tr><th><pv :o="custom.labels" k="lCycle" :def="LDEF.lCycle"></pv></th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '' }}</td></tr>
                         </table>
 
                         <table class="pd-t" id="docZones">
                             <colgroup><col style="width:6%"><col style="width:23%"><col style="width:20%"><col><col style="width:8%"><col style="width:19%"></colgroup>
                             <thead>
-                                <tr><th colspan="6">{{ L.lZones }}</th></tr>
-                                <tr class="pd-sub"><th>번호</th><th>{{ L.lZone }}</th><th>{{ L.lSub }}</th><th>{{ L.lWork }}</th><th>인원</th><th>{{ L.lComp }}</th></tr>
+                                <tr><th colspan="6"><pv :o="custom.labels" k="lZones" :def="LDEF.lZones"></pv></th></tr>
+                                <tr class="pd-sub"><th>번호</th><th><pv :o="custom.labels" k="lZone" :def="LDEF.lZone"></pv></th><th><pv :o="custom.labels" k="lSub" :def="LDEF.lSub"></pv></th><th><pv :o="custom.labels" k="lWork" :def="LDEF.lWork"></pv></th><th>인원</th><th><pv :o="custom.labels" k="lComp" :def="LDEF.lComp"></pv></th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(z, i) in zoneRows" :key="'dz-' + i">
-                                    <td class="c">{{ i + 1 }}</td><td>{{ z.zone }}</td><td>{{ z.company }}</td><td class="s">{{ z.work }}</td><td class="c">{{ z.workers }}</td>
-                                    <td class="s">{{ z.companion }}</td>
+                                    <td class="c">{{ i + 1 }}</td><td><pv :o="z" k="zone"></pv></td><td><pv :o="z" k="company"></pv></td><td class="s"><pv :o="z" k="work"></pv></td><td class="c"><pv :o="z" k="workers"></pv></td>
+                                    <td class="s"><pv :o="z" k="companion"></pv></td>
                                 </tr>
                                 <tr v-if="!zoneRows.length"><td colspan="6" style="height:26px"></td></tr>
                             </tbody>
@@ -771,12 +779,12 @@
                         <table v-if="prevRows.length" class="pd-t" id="docPrev">
                             <colgroup><col style="width:6%"><col style="width:13%"><col><col style="width:26%"><col style="width:14%"><col style="width:12%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th colspan="7">{{ L.lPrev }}</th></tr>
+                                <tr><th colspan="7"><pv :o="custom.labels" k="lPrev" :def="LDEF.lPrev"></pv></th></tr>
                                 <tr class="pd-sub"><th>번호</th><th>지적일</th><th>지적사항</th><th>시정 요구 내용</th><th>담당</th><th>기한</th><th>결과</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(p, i) in prevRows" :key="'dp-' + i">
-                                    <td class="c">{{ i + 1 }}</td><td class="c s">{{ p.found }}</td><td class="pre">{{ p.hazard }}</td><td class="s pre">{{ p.demand }}</td><td class="c s">{{ p.owner }}</td><td class="c s">{{ p.due }}</td><td class="c s">{{ p.result }}</td>
+                                    <td class="c">{{ i + 1 }}</td><td class="c s"><pv :o="p" k="found"></pv></td><td class="pre"><pv :o="p" k="hazard" multi></pv></td><td class="s pre"><pv :o="p" k="demand" multi></pv></td><td class="c s"><pv :o="p" k="owner"></pv></td><td class="c s"><pv :o="p" k="due"></pv></td><td class="c s"><pv :o="p" k="result"></pv></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -784,14 +792,14 @@
                         <table class="pd-t" id="docItems">
                             <colgroup><col style="width:6%"><col><col style="width:9%"><col style="width:9%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th>번호</th><th>{{ L.lItems }}</th><th>{{ L.lGood }}</th><th>{{ L.lBad }}</th><th>{{ L.lNa }}</th></tr>
+                                <tr><th>번호</th><th><pv :o="custom.labels" k="lItems" :def="LDEF.lItems"></pv></th><th><pv :o="custom.labels" k="lGood" :def="LDEF.lGood"></pv></th><th><pv :o="custom.labels" k="lBad" :def="LDEF.lBad"></pv></th><th><pv :o="custom.labels" k="lNa" :def="LDEF.lNa"></pv></th></tr>
                             </thead>
                             <tbody>
                                 <template v-for="(g, gi) in docGroups" :key="'dg-' + gi">
                                     <tr v-if="g.name"><td colspan="5" class="grp">{{ g.name }}</td></tr>
                                     <tr v-for="it in g.rows" :key="'di-' + it.i">
-                                        <td class="c">{{ it.no }}</td><td>{{ it.text }}</td>
-                                        <td class="c">{{ it.result === '양호' ? L.lMark : '' }}</td><td class="c">{{ it.result === '미흡' ? L.lMark : '' }}</td><td class="c">{{ it.result === '해당없음' ? L.lMark : '' }}</td>
+                                        <td class="c">{{ it.no }}</td><td><pv :o="items[it.ix]" k="text" multi></pv></td>
+                                        <td class="c pv-ck" title="눌러서 표시" @click="setResult(it.ix, '양호')">{{ it.result === '양호' ? L.lMark : '' }}</td><td class="c pv-ck" title="눌러서 표시" @click="setResult(it.ix, '미흡')">{{ it.result === '미흡' ? L.lMark : '' }}</td><td class="c pv-ck" title="눌러서 표시" @click="setResult(it.ix, '해당없음')">{{ it.result === '해당없음' ? L.lMark : '' }}</td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -800,12 +808,12 @@
                         <table class="pd-t" id="docFindings">
                             <colgroup><col style="width:6%"><col style="width:14%"><col><col style="width:25%"><col style="width:13%"><col style="width:12%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th colspan="7">{{ L.lFind }}</th></tr>
+                                <tr><th colspan="7"><pv :o="custom.labels" k="lFind" :def="LDEF.lFind"></pv></th></tr>
                                 <tr class="pd-sub"><th>번호</th><th>위치</th><th>지적사항 (위험요인)</th><th>시정 요구 내용</th><th>담당</th><th>기한</th><th>상태</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(f, i) in findingRows" :key="'df-' + i">
-                                    <td class="c">{{ i + 1 }}</td><td class="s">{{ f.zone }}</td><td class="pre">{{ f.hazard }}</td><td class="s pre">{{ f.demand }}</td><td class="c s">{{ f.owner }}</td>
+                                    <td class="c">{{ i + 1 }}</td><td class="s"><pv :o="f" k="zone"></pv></td><td class="pre"><pv :o="f" k="hazard" multi></pv></td><td class="s pre"><pv :o="f" k="demand" multi></pv></td><td class="c s"><pv :o="f" k="owner"></pv></td>
                                     <td class="c s">{{ f.immediate ? '즉시' : f.due }}</td><td class="c s">{{ f.immediate ? '즉시 조치' : f.status }}</td>
                                 </tr>
                                 <tr v-if="!findingRows.length"><td colspan="7" class="c">지적사항 없음</td></tr>
@@ -814,17 +822,17 @@
 
                         <table v-if="formData.note || formData.nextDate" class="pd-t">
                             <colgroup><col style="width:15%"><col></colgroup>
-                            <tr v-if="formData.note"><th>{{ L.lNote }}</th><td class="pre">{{ formData.note }}</td></tr>
-                            <tr v-if="formData.nextDate"><th>{{ L.lNext }}</th><td>{{ fmtDay(formData.nextDate) }}</td></tr>
+                            <tr v-if="formData.note"><th><pv :o="custom.labels" k="lNote" :def="LDEF.lNote"></pv></th><td class="pre"><pv :o="formData" k="note" multi=""></pv></td></tr>
+                            <tr v-if="formData.nextDate"><th><pv :o="custom.labels" k="lNext" :def="LDEF.lNext"></pv></th><td>{{ fmtDay(formData.nextDate) }}</td></tr>
                         </table>
 
                         <div v-if="photos.length" class="pd-photos pt-keep">
-                            <figure v-for="(ph, i) in photos" :key="'dph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption>{{ ph.cap || '현장 사진 ' + (i + 1) }}</figcaption></figure>
+                            <figure v-for="(ph, i) in photos" :key="'dph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption><pv :o="ph" k="cap" :def="'현장 사진 ' + (i + 1)"></pv></figcaption></figure>
                         </div>
 
                         <table v-if="custom.showSign" class="pd-t pt-keep" id="docSign" style="margin-bottom:8px">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>{{ L.lInsp }}</th><td style="height:34px">{{ inspLabel }} <span style="color:#94a3b8;float:right">(서명)</span></td><th>{{ L.lConfirm }}<template v-if="L.lConfirmRole"><br><span style="font-weight:400;font-size:10px">{{ L.lConfirmRole }}</span></template></th><td><span style="color:#94a3b8;float:right">(서명)</span></td></tr>
+                            <tr><th><pv :o="custom.labels" k="lInsp" :def="LDEF.lInsp"></pv></th><td style="height:34px"><pv :o="formData" k="inspDept" ph="소속"></pv> <pv :o="formData" k="inspector" ph="성명"></pv> <span style="color:#94a3b8;float:right">(서명)</span></td><th><pv :o="custom.labels" k="lConfirm" :def="LDEF.lConfirm"></pv><template v-if="L.lConfirmRole"><br><span style="font-weight:400;font-size:10px"><pv :o="custom.labels" k="lConfirmRole" :def="LDEF.lConfirmRole"></pv></span></template></th><td><span style="color:#94a3b8;float:right">(서명)</span></td></tr>
                         </table>
                         <p v-if="footText" class="pd-foot" id="docFoot">{{ footText }}</p>
                     </div>
@@ -832,19 +840,19 @@
                     <!-- [DOC 2] 집계표 -->
                     <div v-else-if="formData.docType === 'summary'">
                         <div class="pd-head">
-                            <div><h2 class="pd-title">{{ titleSum }}</h2></div>
+                            <div><h2 class="pd-title"><pv :o="custom" k="titleSum" :def="DEF.titleSum"></pv></h2></div>
                             <template v-if="custom.showAppr">
                                 <div v-if="hasADoc" class="pd-apprbox" data-pappr="tool.patrol.sum" key="da-sum"></div>
                                 <table v-else class="pd-appr">
                                     <tr><th>작성</th><th>검토</th><th>승인</th></tr>
-                                    <tr><td>{{ formData.inspector }}</td><td></td><td></td></tr>
+                                    <tr><td><pv :o="formData" k="inspector"></pv></td><td></td><td></td></tr>
                                 </table>
                             </template>
                         </div>
                         <table class="pd-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>{{ L.lSite }}</th><td>{{ siteLabel }}</td><th>집계 기간</th><td>{{ period.label }}</td></tr>
-                            <tr><th>{{ L.lCycle }}</th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '' }}</td></tr>
+                            <tr><th><pv :o="custom.labels" k="lSite" :def="LDEF.lSite"></pv></th><td><pv :o="formData" k="company" ph="회사"></pv> <pv :o="formData" k="siteName" ph="현장"></pv></td><th>집계 기간</th><td>{{ period.label }}</td></tr>
+                            <tr><th><pv :o="custom.labels" k="lCycle" :def="LDEF.lCycle"></pv></th><td colspan="3">{{ cycle.days ? cycle.text + ' — ' + cycle.basis : '' }}</td></tr>
                         </table>
                         <div class="pd-stat" id="sumStat">
                             <div><b>{{ summary.days }}</b>순회 실시 일수</div>
@@ -856,7 +864,7 @@
                         <table class="pd-t" id="sumTable">
                             <colgroup><col style="width:15%"><col style="width:8%"><col style="width:14%"><col><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:19%"></colgroup>
                             <thead>
-                                <tr><th>날짜</th><th>실시</th><th>{{ L.lInsp }}</th><th>순회 구역 (관계수급인)</th><th>지적</th><th>완료</th><th>미조치</th><th>비고</th></tr>
+                                <tr><th>날짜</th><th>실시</th><th><pv :o="custom.labels" k="lInsp" :def="LDEF.lInsp"></pv></th><th>순회 구역 (관계수급인)</th><th>지적</th><th>완료</th><th>미조치</th><th>비고</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="d in summary.rows" :key="d.date">
@@ -883,7 +891,7 @@
                         </div>
                         <table v-if="formData.sumNote" class="pd-t">
                             <colgroup><col style="width:15%"><col></colgroup>
-                            <tr><th>비고</th><td class="pre">{{ formData.sumNote }}</td></tr>
+                            <tr><th>비고</th><td class="pre"><pv :o="formData" k="sumNote" multi=""></pv></td></tr>
                         </table>
                         <p v-if="footText" class="pd-foot" id="docFoot">{{ footText }}</p>
                     </div>
@@ -891,13 +899,13 @@
                     <!-- [DOC 3] 시정 요구서 -->
                     <div v-else-if="formData.docType === 'demand'">
                         <div style="text-align:center;margin-bottom:18px">
-                            <h2 class="pd-title">{{ titleDemand }}</h2>
+                            <h2 class="pd-title"><pv :o="custom" k="titleDemand" :def="DEF.titleDemand"></pv></h2>
                         </div>
                         <table class="pd-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>수신</th><td>{{ formData.demandTo || '관계수급인 각 업체' }} 귀중</td><th>문서 번호</th><td>{{ formData.demandNo }}</td></tr>
-                            <tr><th>발신</th><td>{{ siteLabel }}</td><th>발행일</th><td>{{ fmtDay(formData.demandDate || formData.date) }}</td></tr>
-                            <tr><th>{{ L.lWhen }}</th><td>{{ dateLabel }}</td><th>{{ L.lInsp }}</th><td>{{ inspLabel }}</td></tr>
+                            <tr><th>수신</th><td><pv :o="formData" k="demandTo" def="관계수급인 각 업체"></pv> 귀중</td><th>문서 번호</th><td><pv :o="formData" k="demandNo"></pv></td></tr>
+                            <tr><th>발신</th><td><pv :o="formData" k="company" ph="회사"></pv> <pv :o="formData" k="siteName" ph="현장"></pv></td><th>발행일</th><td>{{ fmtDay(formData.demandDate || formData.date) }}</td></tr>
+                            <tr><th><pv :o="custom.labels" k="lWhen" :def="LDEF.lWhen"></pv></th><td>{{ dateLabel }}</td><th><pv :o="custom.labels" k="lInsp" :def="LDEF.lInsp"></pv></th><td><pv :o="formData" k="inspDept" ph="소속"></pv> <pv :o="formData" k="inspector" ph="성명"></pv></td></tr>
                         </table>
                         <p v-if="demandBodyV" class="pd-body" id="demBody">{{ demandBodyV }}</p>
                         <table class="pd-t" id="demTable">
@@ -908,9 +916,9 @@
                             <tbody>
                                 <tr v-for="(r, i) in demandRows" :key="'dm-' + i">
                                     <td class="c">{{ i + 1 }}</td>
-                                    <td class="s">{{ r.zone }}<div v-if="!formData.demandTo && r.owner" style="color:#475569">[{{ r.owner }}]</div></td>
-                                    <td class="pre">{{ r.hazard }}<div v-if="r.carried" class="s" style="color:#475569">※ {{ r.found }} 지적 · 이월</div></td>
-                                    <td class="s pre">{{ r.demand }}</td>
+                                    <td class="s"><pv :o="r.src" k="zone"></pv><div v-if="!formData.demandTo && r.owner" style="color:#475569">[<pv :o="r.src" k="owner"></pv>]</div></td>
+                                    <td class="pre"><pv :o="r.src" k="hazard" multi></pv><div v-if="r.carried" class="s" style="color:#475569">※ {{ r.found }} 지적 · 이월</div></td>
+                                    <td class="s pre"><pv :o="r.src" k="demand" multi></pv></td>
                                     <td class="c s">{{ r.immediate ? '즉시 조치' : (r.due || '즉시') }}</td>
                                     <td class="s" style="height:46px">{{ r.done ? '조치 완료' : '' }}</td>
                                 </tr>
@@ -918,17 +926,17 @@
                             </tbody>
                         </table>
                         <div v-if="photos.length" class="pd-photos pt-keep">
-                            <figure v-for="(ph, i) in photos" :key="'mph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption>{{ ph.cap || '현장 사진 ' + (i + 1) }}</figcaption></figure>
+                            <figure v-for="(ph, i) in photos" :key="'mph-' + i"><img :src="ph.url" alt="현장 사진"><figcaption><pv :o="ph" k="cap" :def="'현장 사진 ' + (i + 1)"></pv></figcaption></figure>
                         </div>
                         <p v-if="footText" class="pd-foot" id="docFoot" style="margin-bottom:16px">{{ footText }}</p>
                         <div class="pt-keep" style="text-align:center;margin:22px 0 26px">
                             <p style="font-size:13px;color:#475569;margin:0 0 8px">{{ fmtDay(formData.demandDate || formData.date) }}</p>
-                            <p id="demSign" style="font-size:17px;font-weight:900;margin:0">{{ formData.company || '(도급인명)' }} {{ formData.demandFooter || '안전보건총괄책임자' }} <span v-if="sealV" style="font-size:12px;font-weight:400;color:#64748b">{{ sealV }}</span></p>
+                            <p id="demSign" style="font-size:17px;font-weight:900;margin:0"><pv :o="formData" k="company" def="(도급인명)"></pv> <pv :o="formData" k="demandFooter" def="안전보건총괄책임자"></pv> <span v-if="sealV" style="font-size:12px;font-weight:400;color:#64748b">{{ sealV }}</span></p>
                         </div>
                         <div v-if="custom.showReply" class="pd-reply pt-keep" id="demReply">
                             <b>[ 조치 결과 확인 ]</b><br>
                             위 시정 요구 사항에 대하여 조치를 마쳤음을 알립니다.<br>
-                            조치 완료일: 　　　　년 　　월 　　일　　　　관계수급인: {{ formData.demandTo || '　　　　　　　　' }}　　현장책임자: 　　　　　　　(서명)<br>
+                            조치 완료일: 　　　　년 　　월 　　일　　　　관계수급인: <pv :o="formData" k="demandTo" def="　　　　　　　　"></pv>　　현장책임자: 　　　　　　　(서명)<br>
                             도급인 확인: 　　　　년 　　월 　　일　　　　확인자: 　　　　　　　(서명)
                         </div>
                     </div>
@@ -1001,6 +1009,23 @@
             throw new Error('Vue not loaded');
         }
         const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+        // ---- 미리보기(오른쪽 문서)에서 바로 고치기: 왼쪽 입력칸과 같은 값을 함께 바꾼다
+        const Pv = {
+            props: { o: Object, k: [String, Number], def: String, ph: String, multi: Boolean },
+            setup(props) {
+                const el = ref(null);
+                const cur = () => { const v = props.o ? props.o[props.k] : ''; const s = v == null ? '' : String(v); return s || props.def || ''; };
+                const put = () => { const e = el.value; if (e && document.activeElement !== e && e.innerText !== cur()) e.textContent = cur(); };
+                onMounted(put); watch(() => [props.o && props.o[props.k], props.def], put, { flush: 'post' });
+                const inp = () => { const e = el.value; if (!e || !props.o) return; let t = e.innerText.replace(/\n$/, ''); if (!props.multi) t = t.replace(/\n/g, ' '); props.o[props.k] = (props.def && t === props.def) ? '' : t; };
+                const out = () => { const e = el.value; if (e && !e.innerText.trim()) { e.innerHTML = ''; put(); } };
+                const paste = (ev) => { ev.preventDefault(); let t = ((ev.clipboardData || window.clipboardData).getData('text') || '').replace(/\r/g, ''); if (!props.multi) t = t.replace(/\n/g, ' '); document.execCommand('insertText', false, t); };
+                const key = (ev) => { if (!props.multi && ev.key === 'Enter') { ev.preventDefault(); ev.target.blur(); } };
+                return { el, inp, out, paste, key };
+            },
+            template: '<span ref="el" class="pv" :class="{ \'pv-m\': multi }" contenteditable="true" spellcheck="false" role="textbox" :data-ph="ph || \'\'" title="눌러서 바로 고칠 수 있습니다" @input="inp" @blur="out" @paste="paste" @keydown="key"></span>'
+        };
+
         const STORE_KEY = 'safetake.patrol.v1';
         const OLD_FORM_KEY = 'safetake.form.patrol';   // 예전 일반 서식(tools/forms/patrol/)의 저장값 — 읽기만 하고 지우지 않는다
         const HIST_MAX = 120;                           // 2일에 1회 사업장 기준 약 8개월분
@@ -1250,7 +1275,7 @@
                 });
                 const docGroups = computed(() => {
                     let no = 0;
-                    return groups.value.map(g => ({ name: g.name, rows: g.rows.map(r => items.value[r.i]).filter(it => it.text.trim()).map(it => ({ i: ++no, no, text: it.text, result: it.result })) })).filter(g => g.rows.length);
+                    return groups.value.map(g => ({ name: g.name, rows: g.rows.map(r => ({ it: items.value[r.i], ix: r.i })).filter(x => x.it.text.trim()).map(x => ({ i: ++no, no, ix: x.ix, text: x.it.text, result: x.it.result })) })).filter(g => g.rows.length);
                 });
                 const tally = computed(() => {
                     const t = { good: 0, bad: 0, na: 0, none: 0 };
@@ -1367,8 +1392,8 @@
                     const to = formData.value.demandTo.trim(), all = formData.value.demandAll;
                     const hit = (o) => !to || str(o).trim() === to;
                     const rows = [];
-                    prevRows.value.forEach(p => { const dn = p.result === '조치 완료'; if (hit(p.owner) && (all || !dn)) rows.push({ zone: p.zone, hazard: p.hazard, demand: p.demand, owner: p.owner, due: p.due, immediate: false, done: dn, carried: true, found: p.found }); });
-                    findingRows.value.forEach(f => { const dn = f.status === '조치 완료'; if (hit(f.owner) && (all || !dn)) rows.push({ zone: f.zone, hazard: f.hazard, demand: f.demand, owner: f.owner, due: f.due, immediate: f.immediate, done: dn, carried: false, found: '' }); });
+                    prevRows.value.forEach(p => { const dn = p.result === '조치 완료'; if (hit(p.owner) && (all || !dn)) rows.push({ src: p, zone: p.zone, hazard: p.hazard, demand: p.demand, owner: p.owner, due: p.due, immediate: false, done: dn, carried: true, found: p.found }); });
+                    findingRows.value.forEach(f => { const dn = f.status === '조치 완료'; if (hit(f.owner) && (all || !dn)) rows.push({ src: f, zone: f.zone, hazard: f.hazard, demand: f.demand, owner: f.owner, due: f.due, immediate: f.immediate, done: dn, carried: false, found: '' }); });
                     return rows;
                 });
                 // 수신 업체가 목록에서 사라지면(업체명 수정 등) 전체로 되돌린다
@@ -2008,7 +2033,7 @@
                 };
 
                 return {
-                    HIST_MAX, PHOTO_MAX, INDUSTRIES, DEF, LABEL_DEFS, docTypes, today, formData, zones, items, findings, prev, custom, history: historyView, newGroup, editItems,
+                    HIST_MAX, PHOTO_MAX, INDUSTRIES, DEF, LABEL_DEFS, LDEF: Object.fromEntries(LABEL_DEFS.map(d => [d.k, d.def])), docTypes, today, formData, zones, items, findings, prev, custom, history: historyView, newGroup, editItems,
                     photos, isGeneratingPDF, toast, saveMsg, fmtDay,
                     cycle, nextDue, zoneRows, totalWorkers, findingRows, prevRows, ownerNames, zoneNames, groups, docGroups, tally,
                     siteLabel, inspLabel, dateLabel, period, summary, shiftPeriod, demandOwners, demandRows, checks,
@@ -2023,7 +2048,7 @@
                 };
             }
         });
-        app.component('pt-step', PtStep);
+        app.component('pt-step', PtStep); app.component('pv', Pv);
         app.mount('#app');
     </script>
 </body>
