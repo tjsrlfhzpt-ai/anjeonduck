@@ -252,6 +252,13 @@
             .jt-itemrow.jt-wrap { flex-wrap: wrap; }
             .jt-itemrow.jt-wrap .jt-in { flex-basis: 100%; }
         }
+    /* 미리보기에서 바로 고치기 */
+        .pv { outline: none; border-radius: 2px; min-width: .6em; white-space: pre-wrap; word-break: break-all; }
+        .pv:empty { display: inline-block; min-width: 3em; }
+        .pv:empty::before { content: attr(data-ph); color: #a0aab6; }
+        @media (hover: hover) { .pv:hover { box-shadow: inset 0 0 0 1px #9db7d6; cursor: text; } }
+        .pv:focus { background: #fffde7; box-shadow: inset 0 0 0 1px #3182ce; }
+        @media print { .pv:empty::before { content: none; } .pv:hover, .pv:focus { box-shadow: none !important; background: none !important; } }
     </style>
 </head>
 <body class="text-slate-800">
@@ -661,19 +668,19 @@
                                 <tr><td class="box"></td><td class="box"></td><td class="box"></td></tr>
                             </table>
                         </div>
-                        <h2 class="jt-title">{{ T('title_result') }}</h2>
+                        <h2 class="jt-title"><pv :o="formData.tx" k="title_result" :def="txDef('title_result')"></pv></h2>
                         <table class="jt-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>점 검 명</th><td colspan="3">{{ T('name') }}</td></tr>
-                            <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td><th>점검 구분</th><td>{{ formData.kind }} 점검<span v-if="formData.kind === '정기'" class="s mut"> ({{ cycle.text }})</span></td></tr>
-                            <tr><th>대상 작업장<br>·공정</th><td colspan="3">{{ formData.area }}</td></tr>
+                            <tr><th>점 검 명</th><td colspan="3"><pv :o="formData.tx" k="name" :def="txDef('name')"></pv></td></tr>
+                            <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td><th>점검 구분</th><td><pv :o="formData" k="kind"></pv> 점검<span v-if="formData.kind === '정기'" class="s mut"> ({{ cycle.text }})</span></td></tr>
+                            <tr><th>대상 작업장<br>·공정</th><td colspan="3"><pv :o="formData" k="area"></pv></td></tr>
                             <tr><th>점검 결과</th><td colspan="3">점검 항목 {{ stat.total }}개 중 적합 {{ stat.ok }} · 부적합 {{ stat.bad }} · 해당없음 {{ stat.na }}<span v-if="stat.todo"> · 미점검 {{ stat.todo }}</span> / 지적사항 {{ findingRows.length }}건(조치 완료 {{ doneCount }}건)</td></tr>
                         </table>
 
                         <table class="jt-t">
                             <colgroup><col style="width:22%"><col style="width:24%"><col style="width:18%"><col style="width:18%"><col style="width:18%"></colgroup>
                             <thead>
-                                <tr><th colspan="5">{{ T('h_team') }}</th></tr>
+                                <tr><th colspan="5"><pv :o="formData.tx" k="h_team" :def="txDef('h_team')"></pv></th></tr>
                                 <tr class="s"><th>구분</th><th>업체명</th><th>직위</th><th>성명</th><th>서명</th></tr>
                             </thead>
                             <tbody>
@@ -687,13 +694,13 @@
                         <table v-if="prevRows.length" class="jt-t">
                             <colgroup><col><col style="width:16%"><col style="width:13%"><col style="width:24%"><col style="width:12%"></colgroup>
                             <thead>
-                                <tr><th colspan="5">{{ T('h_prev') }}</th></tr>
+                                <tr><th colspan="5"><pv :o="formData.tx" k="h_prev" :def="txDef('h_prev')"></pv></th></tr>
                                 <tr class="s"><th>지적 내용</th><th>해당 업체</th><th>조치 기한</th><th>조치 내용</th><th>상태</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(p, i) in prevRows" :key="'pv-' + i">
-                                    <td>{{ p.content }}<span v-if="p.from" class="s mut"> ({{ p.from }} 지적)</span></td><td class="c">{{ p.company }}</td><td class="c s">{{ p.due }}</td>
-                                    <td class="s">{{ p.action }}</td><td class="c s">{{ p.status }}<span v-if="p.doneDate"><br>{{ p.doneDate }}</span></td>
+                                    <td><pv :o="p" k="content" multi></pv><span v-if="p.from" class="s mut"> (<pv :o="p" k="from"></pv> 지적)</span></td><td class="c"><pv :o="p" k="company"></pv></td><td class="c s"><pv :o="p" k="due"></pv></td>
+                                    <td class="s"><pv :o="p" k="action" multi></pv></td><td class="c s"><pv :o="p" k="status"></pv><span v-if="p.doneDate"><br><pv :o="p" k="doneDate"></pv></span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -701,17 +708,17 @@
                         <table v-if="checkGroups.length" class="jt-t">
                             <colgroup><col><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:28%"></colgroup>
                             <thead>
-                                <tr><th colspan="5">{{ T('h_check') }}</th></tr>
+                                <tr><th colspan="5"><pv :o="formData.tx" k="h_check" :def="txDef('h_check')"></pv></th></tr>
                                 <tr class="s"><th>점검 항목</th><th>적합</th><th>부적합</th><th>해당<br>없음</th><th>비고</th></tr>
                             </thead>
                             <tbody v-for="(g, gi) in checkGroups" :key="'cg-' + gi">
                                 <tr><th colspan="5" class="g">{{ gi + 1 }}. {{ g.title || '(구분)' }}</th></tr>
                                 <tr v-for="(it, ii) in g.items" :key="'ci-' + ii">
-                                    <td>{{ it.text }}</td>
+                                    <td><pv :o="it" k="text" multi></pv></td>
                                     <td class="c">{{ it.result === '적합' ? '○' : '' }}</td>
                                     <td class="c bad">{{ it.result === '부적합' ? '○' : '' }}</td>
                                     <td class="c">{{ it.result === '해당없음' ? '○' : '' }}</td>
-                                    <td class="s">{{ it.note }}</td>
+                                    <td class="s"><pv :o="it" k="note"></pv></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -719,13 +726,13 @@
                         <table class="jt-t">
                             <colgroup><col style="width:6%"><col><col style="width:13%"><col style="width:14%"><col style="width:8%"><col style="width:12%"><col style="width:19%"><col style="width:11%"></colgroup>
                             <thead>
-                                <tr><th colspan="8">{{ T('h_find') }}</th></tr>
-                                <tr class="s"><th>번호</th><th>지적 내용</th><th>위치</th><th>해당 업체</th><th>{{ T('h_risk') }}</th><th>조치 기한</th><th>조치 내용</th><th>상태</th></tr>
+                                <tr><th colspan="8"><pv :o="formData.tx" k="h_find" :def="txDef('h_find')"></pv></th></tr>
+                                <tr class="s"><th>번호</th><th>지적 내용</th><th>위치</th><th>해당 업체</th><th><pv :o="formData.tx" k="h_risk" :def="txDef('h_risk')"></pv></th><th>조치 기한</th><th>조치 내용</th><th>상태</th></tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(f, i) in findingRows" :key="'fr-' + i">
-                                    <td class="c">{{ i + 1 }}</td><td>{{ f.content }}</td><td class="s">{{ f.location }}</td><td class="c s">{{ f.company }}</td><td class="c">{{ f.risk }}</td>
-                                    <td class="c s">{{ f.due }}</td><td class="s">{{ f.action }}</td><td class="c s">{{ f.status }}<span v-if="f.doneDate"><br>{{ f.doneDate }}</span></td>
+                                    <td class="c">{{ i + 1 }}</td><td><pv :o="f.src || f" k="content" multi></pv></td><td class="s"><pv :o="f.src || f" k="location"></pv></td><td class="c s"><pv :o="f.src || f" k="company"></pv></td><td class="c"><pv :o="f.src || f" k="risk"></pv></td>
+                                    <td class="c s"><pv :o="f.src || f" k="due"></pv></td><td class="s"><pv :o="f.src || f" k="action" multi></pv></td><td class="c s"><pv :o="f.src || f" k="status"></pv><span v-if="f.doneDate"><br><pv :o="f.src || f" k="doneDate"></pv></span></td>
                                 </tr>
                                 <tr v-if="!findingRows.length"><td colspan="8" class="c mut">지적사항 없음</td></tr>
                             </tbody>
@@ -733,12 +740,12 @@
 
                         <table v-if="formData.summary || formData.nextDate" class="jt-t">
                             <colgroup><col style="width:15%"><col></colgroup>
-                            <tr v-if="formData.summary"><th>{{ T('h_sum') }}</th><td class="pre s">{{ formData.summary }}</td></tr>
-                            <tr v-if="formData.nextDate"><th>{{ T('h_next') }}</th><td>{{ fmtDate(formData.nextDate) }} 예정</td></tr>
+                            <tr v-if="formData.summary"><th><pv :o="formData.tx" k="h_sum" :def="txDef('h_sum')"></pv></th><td class="pre s"><pv :o="formData" k="summary" multi></pv></td></tr>
+                            <tr v-if="formData.nextDate"><th><pv :o="formData.tx" k="h_next" :def="txDef('h_next')"></pv></th><td>{{ fmtDate(formData.nextDate) }} 예정</td></tr>
                         </table>
 
                         <div v-if="photoRows.length">
-                            <p class="jt-h">{{ T('h_photo') }}</p>
+                            <p class="jt-h"><pv :o="formData.tx" k="h_photo" :def="txDef('h_photo')"></pv></p>
                             <div class="jt-phs">
                                 <figure v-for="(p, i) in photoRows" :key="'ph-' + i" class="jt-ph">
                                     <img :src="p.src" :alt="p.cap">
@@ -746,7 +753,7 @@
                                 </figure>
                             </div>
                         </div>
-                        <p v-if="T('n_result')" class="jt-note jt-note-end" data-note>{{ T('n_result') }}</p>
+                        <p v-if="T('n_result')" class="jt-note jt-note-end" data-note><pv :o="formData.tx" k="n_result" :def="txDef('n_result')"></pv></p>
                     </div>
 
                     <!-- [DOC 0] 실시 통보서 -->
@@ -759,21 +766,21 @@
                             </table>
                         </div>
                         <p class="jt-to">수신: {{ noticeTo }}</p>
-                        <h2 class="jt-title">{{ T('title_notice') }}</h2>
+                        <h2 class="jt-title"><pv :o="formData.tx" k="title_notice" :def="txDef('title_notice')"></pv></h2>
                         <p v-if="T('p_notice')" class="jt-p" data-para><template v-for="(s, i) in para('p_notice')" :key="i"><strong v-if="s.b">{{ s.t }}</strong><template v-else>{{ s.t }}</template></template></p>
                         <table class="jt-t">
                             <colgroup><col style="width:18%"><col></colgroup>
-                            <tr><th>점 검 명</th><td>{{ T('name') }}</td></tr>
+                            <tr><th>점 검 명</th><td><pv :o="formData.tx" k="name" :def="txDef('name')"></pv></td></tr>
                             <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td></tr>
-                            <tr><th>대상 작업장·공정</th><td>{{ formData.area || '-' }}</td></tr>
-                            <tr v-if="formData.meetPlace"><th>집결 장소</th><td>{{ formData.meetPlace }}</td></tr>
-                            <tr><th>점검 구분</th><td>{{ formData.kind }} 점검<span v-if="formData.kind === '정기'" class="s mut"> ({{ cycle.name }}: {{ cycle.text }}, {{ cycle.law }})</span></td></tr>
+                            <tr><th>대상 작업장·공정</th><td><pv :o="formData" k="area" def="-"></pv></td></tr>
+                            <tr v-if="formData.meetPlace"><th>집결 장소</th><td><pv :o="formData" k="meetPlace"></pv></td></tr>
+                            <tr><th>점검 구분</th><td><pv :o="formData" k="kind"></pv> 점검<span v-if="formData.kind === '정기'" class="s mut"> ({{ cycle.name }}: {{ cycle.text }}, {{ cycle.law }})</span></td></tr>
                             <tr v-if="formData.noticeItems && checkGroups.length"><th>주요 점검 내용</th><td class="s">{{ checkGroups.map(g => g.title).filter(Boolean).join(', ') || '-' }}</td></tr>
                         </table>
                         <table class="jt-t">
                             <colgroup><col style="width:26%"><col style="width:30%"><col style="width:22%"><col style="width:22%"></colgroup>
                             <thead>
-                                <tr><th colspan="4">{{ T('h_team') }}</th></tr>
+                                <tr><th colspan="4"><pv :o="formData.tx" k="h_team" :def="txDef('h_team')"></pv></th></tr>
                                 <tr class="s"><th>구분</th><th>업체명</th><th>직위</th><th>성명</th></tr>
                             </thead>
                             <tbody>
@@ -782,7 +789,7 @@
                             </tbody>
                         </table>
                                                 <div v-if="noticeLines.length">
-                            <p class="jt-h">{{ T('h_req') }}</p>
+                            <p class="jt-h"><pv :o="formData.tx" k="h_req" :def="txDef('h_req')"></pv></p>
                             <table class="jt-t">
                                 <colgroup><col style="width:7%"><col></colgroup>
                                 <tr v-for="(l, i) in noticeLines" :key="'nl-' + i"><td class="c">{{ i + 1 }}</td><td>{{ l }}</td></tr>
@@ -794,14 +801,14 @@
                                 <colgroup><col style="width:7%"><col><col style="width:20%"><col style="width:15%"><col style="width:12%"></colgroup>
                                 <thead><tr class="s"><th>번호</th><th>지적 내용</th><th>해당 업체</th><th>조치 기한</th><th>상태</th></tr></thead>
                                 <tbody>
-                                    <tr v-for="(p, i) in noticeOpen" :key="'no-' + i"><td class="c">{{ i + 1 }}</td><td>{{ p.content }}<span v-if="p.from" class="s mut"> ({{ p.from }} 지적)</span></td><td class="c s">{{ p.company }}</td><td class="c s">{{ p.due }}</td><td class="c s">{{ p.status }}</td></tr>
+                                    <tr v-for="(p, i) in noticeOpen" :key="'no-' + i"><td class="c">{{ i + 1 }}</td><td><pv :o="p" k="content" multi></pv><span v-if="p.from" class="s mut"> (<pv :o="p" k="from"></pv> 지적)</span></td><td class="c s"><pv :o="p" k="company"></pv></td><td class="c s"><pv :o="p" k="due"></pv></td><td class="c s"><pv :o="p" k="status"></pv></td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p v-if="T('n_notice')" class="jt-note jt-note-end" data-note>{{ T('n_notice') }}</p>
+                        <p v-if="T('n_notice')" class="jt-note jt-note-end" data-note><pv :o="formData.tx" k="n_notice" :def="txDef('n_notice')"></pv></p>
                         <div class="jt-foot jt-sign">
                             <p class="d">{{ docDateText }}</p>
-                            <p class="n">{{ formData.company || '(도급인명)' }} {{ formData.reqFooter || '안전보건총괄책임자' }} <small v-if="T('seal')">{{ T('seal') }}</small></p>
+                            <p class="n"><pv :o="formData" k="company" def="(도급인명)"></pv> <pv :o="formData" k="reqFooter" def="안전보건총괄책임자"></pv> <small v-if="T('seal')"><pv :o="formData.tx" k="seal" :def="txDef('seal')"></pv></small></p>
                         </div>
                     </div>
 
@@ -816,12 +823,12 @@
                                 </table>
                             </div>
                             <p class="jt-to">수신: {{ g.company }}</p>
-                            <h2 class="jt-title">{{ T('title_request') }}</h2>
+                            <h2 class="jt-title"><pv :o="formData.tx" k="title_request" :def="txDef('title_request')"></pv></h2>
                             <p v-if="T('p_request')" class="jt-p" data-para><template v-for="(s, i) in para('p_request')" :key="i"><strong v-if="s.b">{{ s.t }}</strong><template v-else>{{ s.t }}</template></template></p>
                             <div class="jt-box">
                                 <dl>
                                     <dt>점검 일시</dt><dd>{{ formattedDatetime }}</dd>
-                                    <dt>점검 대상</dt><dd>{{ formData.area || '-' }}</dd>
+                                    <dt>점검 대상</dt><dd><pv :o="formData" k="area" def="-"></pv></dd>
                                     <dt>점검반</dt><dd>{{ teamSummary }}</dd>
                                     <dt>지적사항</dt><dd>{{ g.rows.length }}건<span v-if="g.rows.length"> (위험도 상 {{ g.high }}건)</span></dd>
                                     <dt v-if="formData.replyDue">결과 회신</dt><dd v-if="formData.replyDue">{{ fmtDate(formData.replyDue) }}까지 조치 결과(조치 내용·완료일·사진)를 도급인 담당자에게 제출</dd>
@@ -829,26 +836,26 @@
                             </div>
                             <table class="jt-t">
                                 <colgroup><col style="width:7%"><col><col style="width:20%"><col style="width:9%"><col style="width:15%"></colgroup>
-                                <thead><tr><th>번호</th><th>지적 내용</th><th>위치</th><th>{{ T('h_risk') }}</th><th>조치 기한</th></tr></thead>
+                                <thead><tr><th>번호</th><th>지적 내용</th><th>위치</th><th><pv :o="formData.tx" k="h_risk" :def="txDef('h_risk')"></pv></th><th>조치 기한</th></tr></thead>
                                 <tbody>
                                     <tr v-for="(f, i) in g.rows" :key="'rr-' + i">
                                         <td class="c">{{ i + 1 }}</td>
-                                        <td>{{ f.content }}<span v-if="f.carried" class="s mut"> (지난 점검{{ f.from ? ' ' + f.from : '' }} 미조치 이월)</span></td>
-                                        <td class="s">{{ f.location }}</td><td class="c">{{ f.risk }}</td><td class="c s">{{ f.due }}</td>
+                                        <td><pv :o="f.src || f" k="content" multi></pv><span v-if="f.carried" class="s mut"> (지난 점검{{ f.from ? ' ' + f.from : '' }} 미조치 이월)</span></td>
+                                        <td class="s"><pv :o="f.src || f" k="location"></pv></td><td class="c"><pv :o="f.src || f" k="risk"></pv></td><td class="c s"><pv :o="f.src || f" k="due"></pv></td>
                                     </tr>
                                     <tr v-if="!g.rows.length"><td colspan="5" class="c mut">통보할 지적사항이 없습니다</td></tr>
                                 </tbody>
                             </table>
-                            <p v-if="T('n_request')" class="jt-note" data-note>{{ T('n_request') }}</p>
+                            <p v-if="T('n_request')" class="jt-note" data-note><pv :o="formData.tx" k="n_request" :def="txDef('n_request')"></pv></p>
                             <div v-if="g.photos.length">
-                                <p class="jt-h">{{ T('h_photo') }}</p>
+                                <p class="jt-h"><pv :o="formData.tx" k="h_photo" :def="txDef('h_photo')"></pv></p>
                                 <div class="jt-phs">
                                     <figure v-for="(p, i) in g.photos" :key="'rp-' + i" class="jt-ph"><img :src="p.src" :alt="p.cap"><figcaption>{{ p.cap }}</figcaption></figure>
                                 </div>
                             </div>
                             <div class="jt-foot jt-sign">
                                 <p class="d">{{ docDateText }}</p>
-                                <p class="n">{{ formData.company || '(도급인명)' }} {{ formData.reqFooter || '안전보건총괄책임자' }} <small v-if="T('seal')">{{ T('seal') }}</small></p>
+                                <p class="n"><pv :o="formData" k="company" def="(도급인명)"></pv> <pv :o="formData" k="reqFooter" def="안전보건총괄책임자"></pv> <small v-if="T('seal')"><pv :o="formData.tx" k="seal" :def="txDef('seal')"></pv></small></p>
                             </div>
                         </div>
                     </div>
@@ -862,23 +869,23 @@
                                 <tr><td class="box"></td><td class="box"></td><td class="box"></td></tr>
                             </table>
                         </div>
-                        <p v-if="formData.target" class="jt-to">대상 업체: {{ formData.target }}</p>
-                        <h2 class="jt-title">{{ T('title_confirm') }}</h2>
+                        <p v-if="formData.target" class="jt-to">대상 업체: <pv :o="formData" k="target"></pv></p>
+                        <h2 class="jt-title"><pv :o="formData.tx" k="title_confirm" :def="txDef('title_confirm')"></pv></h2>
                         <table class="jt-t">
                             <colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>
-                            <tr><th>점 검 명</th><td colspan="3">{{ T('name') }}</td></tr>
-                            <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td><th>대상 작업장<br>·공정</th><td>{{ formData.area }}</td></tr>
+                            <tr><th>점 검 명</th><td colspan="3"><pv :o="formData.tx" k="name" :def="txDef('name')"></pv></td></tr>
+                            <tr><th>점검 일시</th><td>{{ formattedDatetime }}</td><th>대상 작업장<br>·공정</th><td><pv :o="formData" k="area"></pv></td></tr>
                             <tr><th>조치 현황</th><td colspan="3">지적사항 {{ confRows.length }}건 중 조치 완료 {{ confDone }}건 · 조치 중 {{ confDoing }}건 · 미조치 {{ confRows.length - confDone - confDoing }}건</td></tr>
                         </table>
                         <table class="jt-t">
                             <colgroup><col style="width:6%"><col><col style="width:13%"><col style="width:8%"><col style="width:12%"><col style="width:22%"><col style="width:12%"><col style="width:10%"></colgroup>
-                            <thead><tr class="s"><th>번호</th><th>지적 내용 (위치)</th><th>해당 업체</th><th>{{ T('h_risk') }}</th><th>조치 기한</th><th>조치 내용</th><th>완료일</th><th>상태</th></tr></thead>
+                            <thead><tr class="s"><th>번호</th><th>지적 내용 (위치)</th><th>해당 업체</th><th><pv :o="formData.tx" k="h_risk" :def="txDef('h_risk')"></pv></th><th>조치 기한</th><th>조치 내용</th><th>완료일</th><th>상태</th></tr></thead>
                             <tbody>
                                 <tr v-for="(f, i) in confRows" :key="'cf-' + i">
                                     <td class="c">{{ i + 1 }}</td>
-                                    <td>{{ f.content }}<span v-if="f.location" class="s mut"> ({{ f.location }})</span><span v-if="f.carried" class="s mut"> [이월{{ f.from ? ' ' + f.from : '' }}]</span></td>
-                                    <td class="c s">{{ f.company }}</td><td class="c">{{ f.risk }}</td><td class="c s">{{ f.due }}</td>
-                                    <td class="s">{{ f.action }}</td><td class="c s">{{ f.doneDate }}</td><td class="c s" :class="f.status === '조치 완료' ? '' : 'bad'">{{ f.status }}</td>
+                                    <td><pv :o="f.src || f" k="content" multi></pv><span v-if="f.location" class="s mut"> (<pv :o="f.src || f" k="location"></pv>)</span><span v-if="f.carried" class="s mut"> [이월{{ f.from ? ' ' + f.from : '' }}]</span></td>
+                                    <td class="c s"><pv :o="f.src || f" k="company"></pv></td><td class="c"><pv :o="f.src || f" k="risk"></pv></td><td class="c s"><pv :o="f.src || f" k="due"></pv></td>
+                                    <td class="s"><pv :o="f.src || f" k="action" multi></pv></td><td class="c s"><pv :o="f.src || f" k="doneDate"></pv></td><td class="c s" :class="f.status === '조치 완료' ? '' : 'bad'"><pv :o="f.src || f" k="status"></pv></td>
                                 </tr>
                                 <tr v-if="!confRows.length"><td colspan="8" class="c mut">지적사항 없음</td></tr>
                             </tbody>
@@ -891,14 +898,14 @@
                             </div>
                         </div>
                         <div class="jt-sign">
-                            <p v-if="T('p_confirm')" class="jt-p" data-para style="text-align:center;margin-top:20px">{{ T('p_confirm') }}</p>
+                            <p v-if="T('p_confirm')" class="jt-p" data-para style="text-align:center;margin-top:20px"><pv :o="formData.tx" k="p_confirm" :def="txDef('p_confirm')"></pv></p>
                             <p style="text-align:center;font-size:12px;color:#475569;margin:0 0 12px">{{ docDateText }}</p>
                             <table class="jt-t">
                                 <colgroup><col style="width:18%"><col style="width:28%"><col style="width:18%"><col style="width:18%"><col style="width:18%"></colgroup>
                                 <thead><tr class="s"><th>구분</th><th>업체명</th><th>직위</th><th>성명</th><th>서명</th></tr></thead>
                                 <tbody>
-                                    <tr v-for="(n, i) in confCompanies" :key="'cs-' + i"><td class="c s">{{ T('lb_actor') }}</td><td class="c">{{ n }}</td><td></td><td></td><td class="sig">(서명)</td></tr>
-                                    <tr><td class="c s">{{ T('lb_conf') }}</td><td class="c">{{ formData.company }}</td><td class="c s">{{ formData.confTitle }}</td><td class="c">{{ formData.confName }}</td><td class="sig">(서명)</td></tr>
+                                    <tr v-for="(n, i) in confCompanies" :key="'cs-' + i"><td class="c s"><pv :o="formData.tx" k="lb_actor" :def="txDef('lb_actor')"></pv></td><td class="c">{{ n }}</td><td></td><td></td><td class="sig">(서명)</td></tr>
+                                    <tr><td class="c s"><pv :o="formData.tx" k="lb_conf" :def="txDef('lb_conf')"></pv></td><td class="c"><pv :o="formData" k="company"></pv></td><td class="c s"><pv :o="formData" k="confTitle"></pv></td><td class="c"><pv :o="formData" k="confName"></pv></td><td class="sig">(서명)</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -951,6 +958,23 @@
             throw new Error('Vue not loaded');
         }
         const { createApp, ref, reactive, computed, watch, nextTick, onMounted, provide, inject } = Vue;
+        // ---- 미리보기(오른쪽 문서)에서 바로 고치기: 왼쪽 입력칸과 같은 값을 함께 바꾼다
+        const Pv = {
+            props: { o: Object, k: [String, Number], def: String, ph: String, multi: Boolean },
+            setup(props) {
+                const el = ref(null);
+                const cur = () => { const v = props.o ? props.o[props.k] : ''; const s = v == null ? '' : String(v); return s || props.def || ''; };
+                const put = () => { const e = el.value; if (e && document.activeElement !== e && e.innerText !== cur()) e.textContent = cur(); };
+                onMounted(put); watch(() => [props.o && props.o[props.k], props.def], put, { flush: 'post' });
+                const inp = () => { const e = el.value; if (!e || !props.o) return; let t = e.innerText.replace(/\n$/, ''); if (!props.multi) t = t.replace(/\n/g, ' '); props.o[props.k] = (props.def && t === props.def) ? '' : t; };
+                const out = () => { const e = el.value; if (e && !e.innerText.trim()) { e.innerHTML = ''; put(); } };
+                const paste = (ev) => { ev.preventDefault(); let t = ((ev.clipboardData || window.clipboardData).getData('text') || '').replace(/\r/g, ''); if (!props.multi) t = t.replace(/\n/g, ' '); document.execCommand('insertText', false, t); };
+                const key = (ev) => { if (!props.multi && ev.key === 'Enter') { ev.preventDefault(); ev.target.blur(); } };
+                return { el, inp, out, paste, key };
+            },
+            template: '<span ref="el" class="pv" :class="{ \'pv-m\': multi }" contenteditable="true" spellcheck="false" role="textbox" :data-ph="ph || \'\'" title="눌러서 바로 고칠 수 있습니다" @input="inp" @blur="out" @paste="paste" @keydown="key"></span>'
+        };
+
         const STORE_KEY = 'safetake.joint.v1';
         const OLD_FORM_KEY = 'safetake.form.joint';   // 예전 일반 서식(tools/forms/joint/)의 저장값 — 읽기만 하고 지우지 않는다
         const HIST_MAX = 24;
@@ -1265,7 +1289,7 @@
                 const uniq = (a) => Array.from(new Set(a.map(x => (x || '').trim()).filter(Boolean)));
                 const ownerNames = computed(() => uniq([formData.value.company].concat(team.value.map(m => m.company), findings.value.map(f => f.company), prev.value.map(p => p.company))));
                 // 요구서·확인서에 함께 쓰는 줄(이월 건 포함)
-                const merged = computed(() => prevRows.value.map(p => Object.assign({}, p, { carried: true })).concat(findingRows.value.map(f => Object.assign({}, f, { carried: false }))));
+                const merged = computed(() => prevRows.value.map(p => Object.assign({}, p, { carried: true, src: p })).concat(findingRows.value.map(f => Object.assign({}, f, { carried: false, src: f }))));
                 const isHostOwn = (f) => !!hostName.value && f.company.trim() === hostName.value;
                 const reqSource = computed(() => merged.value.filter(f => !isHostOwn(f) && f.status !== '조치 완료'));
                 const reqDoneCount = computed(() => merged.value.filter(f => !isHostOwn(f) && f.status === '조치 완료').length);
@@ -1701,7 +1725,7 @@
                 return {
                     HIST_MAX, ROLES, RESULTS, STATUSES, exPool: EX_POOL, today, docTypes, formData, team, checklist, findings, prev, history: historyView,
                     isGeneratingPDF, toast, saveMsg, cycle, titlePrefix, inspName, inspShort, formattedDatetime, docDateText, fmtDate, NOTICE_DEFAULT,
-                    T, para, hintP, hintN, txCount, labelCustom, resetAllText, roleLabel, apprOn, hasADoc, docLabel, confNote,
+                    T, txDef, para, hintP, hintN, txCount, labelCustom, resetAllText, roleLabel, apprOn, hasADoc, docLabel, confNote,
                     view, setView, S, chk, stepList, warnTotal, allOpen, toggleAll, goStep, move, removeItem, removePrev, onDone, onNextInput, clearNext,
                     teamRows, teamSummary, stat, checkGroups, pendingBad, findingRows, prevRows, doneCount, ownerNames, targetNames, hostOwnCount,
                     reqGroups, reqDoneCount, showPrev, noticeTo, noticeLines, noticeOpen, confRows, confDone, confDoing, confPhotos, confCompanies, photoRows, checks,
@@ -1746,6 +1770,7 @@
         });
         // 결재란: 사이트 공통 모듈(assets/docs.js)이 그리고 저장한다
         app.directive('appr', { mounted(el) { if (window.ADoc && window.ADoc.mountApproval) window.ADoc.mountApproval(el, DOC_KEY); } });
+        app.component('pv', Pv);
         app.mount('#app');
     </script>
 </body>
