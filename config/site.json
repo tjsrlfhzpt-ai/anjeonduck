@@ -470,6 +470,7 @@
   "search_verification": {
     "naver": "bd9ade449360b8f1218d1212319b7d0fa0e2737d",
     "google": "Xt26_AhWT9cccH6R-tgL7hoIMxQzvLQycetTNGbtagg",
+    "google_file": "google7ec62ca032b5f8e7",
     "_comment": "네이버 서치어드바이저·구글 서치콘솔·빙 웹마스터에서 'HTML 태그' 방식으로 받은 content 값만 넣습니다. daum 은 다음 웹마스터도구가 주는 robots.txt 용 코드(#DaumWebMasterTool: 뒤의 값)입니다. 넣고 배포하면 홈 화면 <head>·robots.txt 에 들어갑니다.",
     "bing": "",
     "daum": ""

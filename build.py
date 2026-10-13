@@ -2452,7 +2452,10 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     if base:
         # 로그인·글쓰기·운영 관리처럼 검색에 나올 필요가 없는 화면은 사이트맵에서 뺀다
         urls = [u for u in urls if not re.match(r"^board/(admin|account|write|view)/", u)]
-        sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc><lastmod>{today}</lastmod></url>" for u in urls)
+        # lastmod 는 날짜를 아는 글(브리핑·소식)에만 넣는다. 빌드할 때마다 모든 주소를 오늘로 바꾸면 검색엔진이 lastmod 를 믿지 않게 된다
+        _lm = {f"brief/n/{x['id']}/": x["date"] for x in BOARD if re.match(r"^\d{4}-\d{2}-\d{2}$", x.get("date", ""))}
+        _lm.update({f"brief/{b['date']}/": b["date"] for b in briefs})
+        sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc>" + (f"<lastmod>{_lm[u]}</lastmod>" if u in _lm else "") + "</url>" for u in urls)
         (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>', encoding="utf-8")
     # ---- RSS (브리핑·소식). 네이버 서치어드바이저 등에 제출할 수 있다
     if base:
@@ -2473,6 +2476,10 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     _ink = str(site.get("indexnow_key") or "")
     if re.match(r"^[a-f0-9]{16,64}$", _ink):
         (out / f"{_ink}.txt").write_text(_ink, encoding="utf-8")
+    # 구글 서치콘솔 'HTML 파일' 방식 소유 확인 파일 (google<16자리>.html)
+    _gf = str((site.get("search_verification") or {}).get("google_file") or "").strip()
+    if re.match(r"^google[a-f0-9]{16}$", _gf):
+        (out / f"{_gf}.html").write_text(f"google-site-verification: {_gf}.html", encoding="utf-8")
     _daum = str((site.get("search_verification") or {}).get("daum") or "").strip()
     _daum_line = f"#DaumWebMasterTool:{_daum}\n" if re.match(r"^[A-Za-z0-9:_-]{8,200}$", _daum) else ""
     (out / "robots.txt").write_text(_daum_line + "User-agent: *\nAllow: /\nDisallow: /board/admin/\nDisallow: /board/account/\nDisallow: /board/write/\n" + (f"Sitemap: {base}/sitemap.xml\n" if base else ""), encoding="utf-8")
