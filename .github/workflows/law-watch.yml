@@ -2,10 +2,9 @@ name: 법령 변경 자동 감지
 
 # 국가법령정보센터 OPEN API(인증키: 저장소 Secret LAW_OC)로 새 공포번호를 찾아
 # data/laws.json 개정 소식에 '확인 필요' 항목으로 넣는다. 개정 내용은 운영자가 원문으로 확인한다.
+# 2026-10-13: GitHub 실행 서버에서 www.law.go.kr 접속이 모두 실패(URLError)해 주간 자동 실행을 껐다.
+# 법령 변경 확인은 주간 예약 작업(Claude, 법령 연혁 페이지 확인)이 맡는다. 수동 실행은 그대로 남긴다.
 on:
-  schedule:
-    # 매주 월요일 오전 7시 40분(KST)
-    - cron: "40 22 * * 0"
   workflow_dispatch:
     inputs:
       dry_run:
