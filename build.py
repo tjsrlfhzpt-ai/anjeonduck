@@ -1649,6 +1649,11 @@ def build(out, today):
             BOARD.append({"date": it.get("date") or b["date"], "cat": it.get("cat") or "정책", "agency": it.get("agency", ""), "title": it["title"], "official_title": it.get("official_title", ""),
                           "summary": it["summary"], "point": it.get("point", ""), "period": "", "url": it["sources"][0]["url"], "href": f"{b['date']}/",
                           "verify": "" if b.get("review") == "verified" else ""})
+    # 언론 보도 스크랩: 제목·요약·실무 포인트는 SafePlum이 쓴 문장, 원문은 링크만 (사진·기사 문장 미사용)
+    for x in load("data/scrap.json").get("items", []):
+        if x.get("title") and x.get("summary") and re.match(r"^https://", x.get("url", "")) and x.get("press"):
+            BOARD.append({"date": x["date"], "cat": "언론보도", "agency": x["press"], "title": x["title"], "summary": x["summary"], "point": x.get("point", ""),
+                          "period": "", "url": x["url"], "src_label": f'{x["press"]} 기사 원문', "press": True})
     BOARD.sort(key=lambda x: x["date"], reverse=True)
     import hashlib as _hl
     _seen = set()
@@ -1833,18 +1838,18 @@ def build(out, today):
   <table class="bdv-t"><tbody>{tbl}</tbody></table>
   {vf}
   <p class="btns bdv-btns"><a class="btn" href="{e(x["url"])}" target="_blank" rel="noopener">{e(x.get("src_label") or "공식 출처 원문")} ↗</a>{full}<a class="btn btn-ghost" href="../../#b-{x["id"]}">목록으로</a></p>
-  <p class="src-note">공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다.</p>
+  <p class="src-note">{"언론 보도를 SafePlum이 자체 문장으로 요약한 참고 콘텐츠입니다. 기사 저작권은 해당 언론사에 있으며, 자세한 내용과 사실관계는 기사 원문과 공식 발표를 확인하세요." if x.get("press") else "공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다."}</p>
   {f'<nav class="bdn" aria-label="이전·다음 소식">{nav}</nav>' if nav else ''}
   {f'<section class="bdr"><h2 class="h-sm">같은 분류 소식 · {e(x["cat"])}</h2><ul>{rel}</ul></section>' if rel else ''}
 </article></section>{side}</div>"""
 
-    cats = ["입법예고", "점검", "감독", "지원사업", "공모전·대회", "법령", "정책", "통계", "사고", "자료"]
+    cats = ["입법예고", "점검", "감독", "지원사업", "공모전·대회", "법령", "정책", "통계", "사고", "자료", "언론보도"]
     cat_btns = '<button type="button" data-c="" aria-pressed="true">전체</button>' + "".join(f'<button type="button" data-c="{c}" aria-pressed="false">{c} {sum(1 for x in BOARD if x["cat"] == c)}</button>' for c in cats if any(x["cat"] == c for x in BOARD))
     board_html = f"""<div class="nb"><div class="nb-tools"><div class="search-inline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="nbQ" placeholder="예: 위험성평가, 지게차, 보조금" aria-label="브리핑·소식 검색"></div><p class="nb-count" aria-live="polite"><strong id="nbN">{len(BOARD)}</strong>건</p></div>
 <div class="seg nb-filter" id="nbF" role="group" aria-label="분류">{cat_btns}</div>
 <div class="nb-list" id="nbL">{"".join(board_row(x) for x in BOARD)}</div>
 <p class="empty" id="nbE" hidden>조건에 맞는 소식이 없습니다.</p>
-<p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
+<p class="src-note">고용노동부·정책브리핑·국가법령정보센터 등 공식 발표를 SafePlum이 요약한 참고 콘텐츠입니다. '언론보도'는 기사 문장·사진을 옮기지 않고 SafePlum이 직접 쓴 요약과 원문 링크만 싣습니다. 자동으로 작성·게시되는 글이 있어 사실 확인이 끝나지 않은 내용이 있을 수 있습니다. 숫자·기간·대상은 공식 출처 원문이 우선합니다. 확인 {e(BOARD_CHECKED)}</p></div>
 <script>(function(){{var f=document.getElementById("nbF"),l=document.getElementById("nbL"),q=document.getElementById("nbQ"),n=document.getElementById("nbN"),em=document.getElementById("nbE"),c="";
 function run(){{var t=(q.value||"").toLowerCase().split(/\\s+/).filter(Boolean),k=0;[].forEach.call(l.children,function(r){{var ok=(!c||r.dataset.cat===c)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});r.hidden=!ok;if(ok)k++;}});n.textContent=k;em.hidden=k>0;l.hidden=k===0;}}
 f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;c=b.dataset.c;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});run();}});q.addEventListener("input",run);
