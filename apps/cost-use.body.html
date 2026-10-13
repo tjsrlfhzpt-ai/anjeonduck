@@ -1,0 +1,105 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>안전관리비 사용 가능 항목</p>
+  <h1>산업안전보건관리비, 이거 써도 될까?</h1>
+  <p>"마스크", "안전화", "신호수", "에어컨"처럼 사려는 물건이나 비용을 입력하면 「건설업 산업안전보건관리비 계상 및 사용기준」 제7조 기준으로 사용 가능 여부와 근거 조항을 보여 줍니다. 계상액은 <a href="../safety-cost/">산업안전보건관리비 계산기</a>에서 구하세요.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <div class="listbar"><div class="search-inline cu-search">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="cuQ" placeholder="예: 마스크, 안전화, 신호수, CCTV, 에어컨, 생수" aria-label="사용하려는 물건이나 비용" autocomplete="off"></div></div>
+    <div class="chips" id="cuPop" role="group" aria-label="자주 찾는 항목"></div>
+    <div id="cuOut" aria-live="polite"></div>
+    <section class="lawbox">
+      <h3>이렇게 판단합니다</h3>
+      <ol class="cu-steps">
+        <li><b>산업재해 예방이 목적인가?</b> — 제7조제1항 1~9호 중 어디에 해당하는지 찾습니다.</li>
+        <li><b>사용할 수 없는 경우인가?</b> — 공사원가의 다른 경비 항목, 다른 법령의 의무, 재해예방 외 목적이 섞인 물건, 환경관리·민원·수방대비 목적이면 쓸 수 없습니다(제2항). 다만 스마트 안전장비·소화기·감염병 예방용품·AED 등 일부는 예외입니다.</li>
+        <li><b>한도가 있는가?</b> — 스마트 안전장비 20%, 본사 전담조직 5%, 위험성평가 결정 사항 15%, 관리감독자 수당은 임금의 10% 이내입니다.</li>
+      </ol>
+    </section>
+    <details class="lawbox" id="cuAll"><summary><strong>제7조 사용기준 전체 보기</strong> <span class="muted" id="cuAllN"></span></summary><div id="cuAllBody"></div></details>
+  </section>
+  <aside class="col-side">
+    <section class="side-box">
+      <h2 class="h-sm">판정 표시</h2>
+      <ul class="cu-legend">
+        <li><span class="badge badge-green">사용 가능</span> 제7조제1항에 그대로 적혀 있음</li>
+        <li><span class="badge badge-blue">조건부 가능</span> 대상·한도·목적 조건을 지켜야 함</li>
+        <li><span class="badge badge-red">사용 불가</span> 제7조제2항 사용 불가 사유에 해당</li>
+        <li><span class="badge badge-orange">판단 필요</span> 고시에 품목이 없어 목적에 따라 갈림</li>
+      </ul>
+    </section>
+    <section class="side-box">
+      <p class="hint" id="cuSrc"></p>
+      <p class="hint">발주자가 사용기준을 따로 정한 공사(제7조제3항 단서)나 감독기관 해석이 있으면 그것이 우선합니다. 판단이 갈리는 항목은 사용 전에 발주자·감독자와 확인하세요.</p>
+    </section>
+  </aside>
+</div>
+<style>
+.cu-search{max-width:none}
+.cu-search input{font-size:17px;height:52px}
+#cuPop{margin-top:-6px}
+.cu-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.cu-card+.cu-card{margin-top:12px}
+.cu-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cu-name{font-size:18px;font-weight:800;color:var(--navy);margin:0}
+.cu-ans{font-size:15.5px;line-height:1.7;margin:0}
+.cu-note{font-size:13.5px;color:var(--text-2);margin:0}
+.cu-basis{display:flex;flex-direction:column;gap:6px;margin:2px 0 0;padding:0;list-style:none}
+.cu-basis li{font-size:13.5px;line-height:1.6;background:var(--surface-2);border-radius:10px;padding:8px 12px}
+.cu-basis b{color:var(--navy);margin-right:6px}
+.cu-lim{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;color:#b45309}
+.cu-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14.5px;line-height:1.65}
+.cu-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.cu-legend .badge{margin-right:6px}
+.cu-rules{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.6;margin-top:6px}
+.cu-rules th,.cu-rules td{border-top:1px solid var(--line-2);padding:8px 10px;text-align:left;vertical-align:top}
+.cu-rules th{white-space:nowrap;color:var(--navy)}
+.cu-rules tr.cat td{background:var(--surface-2);font-weight:700}
+.cu-none{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-lg);padding:18px 20px;font-size:14.5px;line-height:1.7}
+</style>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var V = { ok: ["badge-green", "사용 가능"], cond: ["badge-blue", "조건부 가능"], no: ["badge-red", "사용 불가"], check: ["badge-orange", "판단 필요"] };
+  var R = {}; D.rules.forEach(function (r) { R[r.id] = r; }); D.excl.forEach(function (x) { R[x.id] = { id: x.id, cat: "사용 불가 사유", text: x.text, limit: "" }; });
+  function label(id) { return id.charAt(0) === "②" ? "제7조제2항제" + id.slice(1) + "호" : "제7조제1항제" + id.replace(/[가-힣]$/, "") + "호" + (/[가-힣]$/.test(id) ? " " + id.slice(-1) + "목" : ""); }
+  function norm(s) { return String(s || "").toLowerCase().replace(/\s+/g, ""); }
+  function score(it, q) {
+    var best = 0;
+    [it.name].concat(it.q).forEach(function (k) { k = norm(k); if (!k) return; if (k === q) best = Math.max(best, 100); else if (k.indexOf(q) >= 0) best = Math.max(best, 60 + q.length); else if (q.indexOf(k) >= 0) best = Math.max(best, 40 + k.length); });
+    return best;
+  }
+  function card(it) {
+    var v = V[it.v] || V.check;
+    var basis = it.basis.map(function (b) { var r = R[b]; if (!r) return ""; return "<li><b>" + esc(label(b)) + "</b>" + esc(r.text) + (r.limit ? '<span class="cu-lim">' + esc(r.limit) + "</span>" : "") + "</li>"; }).join("");
+    return '<article class="cu-card"><div class="cu-head"><span class="badge ' + v[0] + '">' + v[1] + '</span><h2 class="cu-name">' + esc(it.name) + '</h2></div>' +
+      '<p class="cu-ans">' + esc(it.a) + "</p>" + (it.note ? '<p class="cu-note">' + esc(it.note) + "</p>" : "") + '<ul class="cu-basis">' + basis + "</ul></article>";
+  }
+  function render() {
+    var q = norm(document.getElementById("cuQ").value), out = document.getElementById("cuOut");
+    if (!q) { out.innerHTML = ""; return; }
+    var hits = D.items.map(function (it) { return [score(it, q), it]; }).filter(function (x) { return x[0] > 0; }).sort(function (a, b) { return b[0] - a[0]; }).slice(0, 4);
+    if (hits.length) { out.innerHTML = hits.map(function (x) { return card(x[1]); }).join(""); return; }
+    var rules = D.rules.filter(function (r) { return norm(r.text).indexOf(q) >= 0; });
+    out.innerHTML = '<div class="cu-none"><p><b>"' + esc(document.getElementById("cuQ").value.trim()) + '"</b>은(는) 고시에 품목으로 적혀 있지 않아 목적에 따라 판단해야 합니다. 아래 "이렇게 판단합니다" 세 가지를 차례로 확인하세요.</p>' +
+      (rules.length ? '<ul class="cu-basis">' + rules.map(function (r) { return "<li><b>" + esc(label(r.id)) + "</b>" + esc(r.text) + "</li>"; }).join("") + "</ul>" : "") + "</div>";
+  }
+  var POP = ["마스크", "안전화", "안전대", "신호수", "소화기", "CCTV", "에어컨", "생수", "방한복", "차량", "안전기원제", "AED"];
+  document.getElementById("cuPop").innerHTML = POP.map(function (w) { return '<button type="button" class="chip" data-w="' + esc(w) + '">' + esc(w) + "</button>"; }).join("");
+  document.getElementById("cuPop").addEventListener("click", function (ev) { var b = ev.target.closest(".chip"); if (!b) return; var i = document.getElementById("cuQ"); i.value = b.getAttribute("data-w"); render(); try { history.replaceState(null, "", "#q=" + encodeURIComponent(i.value)); } catch (e) {} });
+  var tmr; document.getElementById("cuQ").addEventListener("input", function () { clearTimeout(tmr); tmr = setTimeout(function () { render(); try { var v = document.getElementById("cuQ").value.trim(); history.replaceState(null, "", v ? "#q=" + encodeURIComponent(v) : location.pathname); } catch (e) {} }, 120); });
+  // 제7조 전체
+  var cat = "", rows = "";
+  D.rules.forEach(function (r) { if (r.cat !== cat) { cat = r.cat; rows += '<tr class="cat"><td colspan="2">' + esc(r.id.replace(/[가-힣]$/, "")) + ". " + esc(cat) + "</td></tr>"; } rows += "<tr><th>" + esc(/[가-힣]$/.test(r.id) ? r.id.slice(-1) + "목" : "") + "</th><td>" + esc(r.text) + (r.limit ? '<span class="cu-lim">' + esc(r.limit) + "</span>" : "") + "</td></tr>"; });
+  rows += '<tr class="cat"><td colspan="2">제2항 — 사용할 수 없는 경우 (2호 나·다목, 6호 나~마목, 9호는 예외)</td></tr>' + D.excl.map(function (x) { return "<tr><th>" + esc(x.id.slice(1)) + "호</th><td>" + esc(x.text) + "</td></tr>"; }).join("");
+  document.getElementById("cuAllBody").innerHTML = '<table class="cu-rules">' + rows + "</table>";
+  document.getElementById("cuAllN").textContent = "(" + D.rules.length + "개 항목)";
+  document.getElementById("cuSrc").innerHTML = "근거: " + esc(D.source) + ' · 확인일 ' + esc(D.checked) + ' · <a href="' + esc(D.url) + '" target="_blank" rel="noopener">원문 ↗</a>';
+  var m = /^#q=(.+)$/.exec(location.hash); if (m) { try { document.getElementById("cuQ").value = decodeURIComponent(m[1]); render(); } catch (e) {} }
+})();
+</script>
