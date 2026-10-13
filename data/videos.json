@@ -1,6 +1,6 @@
 {
  "checked": "2026-10-13",
- "_comment": "안전보건 영상 목록. 맨 위 영상이 대표 영상(홈 오른쪽 칸, /videos/ 맨 위 큰 카드). youtube: 유튜브 영상 id, id: 틱톡 게시물 id(선택). format: \"wide\" 는 가로(16:9) 일반 영상, 없으면 세로 쇼츠. voice: true 면 '음성 해설' 표시. poster 는 assets/img/videos/<유튜브 id 또는 틱톡 id>.webp(세로 540×960, 가로 960×540) — 방문자가 재생을 누르기 전에는 유튜브·틱톡에 접속하지 않도록 자체 이미지를 먼저 보여 준다. 새 영상은 items 맨 위에 추가.",
+ "_comment": "안전보건 영상 목록. \"featured\": true 인 영상이 대표 영상(홈 오른쪽 칸, /videos/ 맨 위 큰 카드), 없으면 맨 위 영상. cat 은 /videos/ 분류. youtube: 유튜브 영상 id, id: 틱톡 게시물 id(선택). format: \"wide\" 는 가로(16:9) 일반 영상, 없으면 세로 쇼츠. voice: true 면 '음성 해설' 표시. poster 는 assets/img/videos/<유튜브 id 또는 틱톡 id>.webp(세로 540×960, 가로 960×540) — 방문자가 재생을 누르기 전에는 유튜브·틱톡에 접속하지 않도록 자체 이미지를 먼저 보여 준다. 새 영상은 items 맨 위에 추가.",
  "items": [
   {
    "platform": "youtube",
@@ -20,7 +20,8 @@
      "교육일지"
     ]
    ],
-   "voice": true
+   "voice": true,
+   "cat": "위험성평가"
   },
   {
    "platform": "youtube",
@@ -40,7 +41,8 @@
      "TBM 일지"
     ]
    ],
-   "voice": true
+   "voice": true,
+   "cat": "위험성평가"
   },
   {
    "platform": "youtube",
@@ -60,7 +62,8 @@
      "지게차 법정 의무·작업계획서"
     ]
    ],
-   "voice": true
+   "voice": true,
+   "cat": "위험성평가"
   },
   {
    "platform": "youtube",
@@ -80,7 +83,8 @@
      "LOTO 작업금지 태그"
     ]
    ],
-   "voice": true
+   "voice": true,
+   "cat": "위험성평가"
   },
   {
    "platform": "youtube",
@@ -100,7 +104,8 @@
      "TBM 일지"
     ]
    ],
-   "voice": true
+   "voice": true,
+   "cat": "위험성평가"
   },
   {
    "platform": "youtube",
@@ -120,7 +125,8 @@
      "위험성평가서"
     ]
    ],
-   "voice": true
+   "voice": true,
+   "cat": "추락·보호구"
   },
   {
    "platform": "youtube",
@@ -140,7 +146,9 @@
      "tools/tbm/",
      "TBM 일지"
     ]
-   ]
+   ],
+   "cat": "지게차·운반",
+   "featured": true
   },
   {
    "platform": "youtube",
@@ -155,7 +163,8 @@
      "tools/permit/",
      "안전작업허가서(화기작업)"
     ]
-   ]
+   ],
+   "cat": "화재·밀폐공간"
   },
   {
    "platform": "youtube",
@@ -170,7 +179,8 @@
      "tools/tbm/",
      "TBM 일지"
     ]
-   ]
+   ],
+   "cat": "추락·보호구"
   },
   {
    "platform": "tiktok",
@@ -192,7 +202,8 @@
     ]
    ],
    "youtube": "9jOA_EB6b4Y",
-   "voice": true
+   "voice": true,
+   "cat": "화재·밀폐공간"
   }
  ],
  "channels": {

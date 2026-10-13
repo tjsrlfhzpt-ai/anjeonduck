@@ -595,8 +595,8 @@ def nav_cols(site, rel):
                  + [(f"{rel}tools/forms/", f"작성기 전체 {WRITER_N}종 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
                 ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
-                ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}legal/", "법령정보·면책 안내")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
-        "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")]), ("영상", [(f"{rel}videos/", "안전보건 영상")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else []))],
+                ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
+        "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
         "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")][:2 if (site.get("features") or {}).get("job_posting", True) else 1] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
@@ -701,7 +701,8 @@ def _videos():
         v["wide"] = v.get("format") == "wide"
         v["yt_url"] = (f"https://www.youtube.com/watch?v={yt}" if v["wide"] else f"https://www.youtube.com/shorts/{yt}") if yt else ""
         out.append(v)
-    return out
+    feat = [v for v in out if v.get("featured")][:1]   # 대표 영상을 맨 앞으로, 나머지는 파일 순서(최신순) 그대로
+    return feat + [v for v in out if v not in feat]
 
 
 VIDEO_CHANNELS = {}
@@ -716,7 +717,7 @@ def video_card(v, rel, big=False, lead=False):
     rl = "".join(f'<a href="{rel}{e(u)}">{e(n)}</a>' for u, n in v.get("related", []) if not str(u).startswith(("http", "/", "javascript")))
     src = f'data-youtube="{e(v["youtube"])}"' if v.get("yt_url") else f'data-tiktok="{e(v["id"])}"'
     cls = "vcard" + (" wide" if v.get("wide") else "") + (" vlead" if lead else "")
-    return (f'<article class="{cls}" id="v-{e(v["key"])}"><div class="vplayer" {src}>{poster}'
+    return (f'<article class="{cls}" id="v-{e(v["key"])}" data-cat="{e(v.get("cat") or v.get("topic", ""))}"><div class="vplayer" {src}>{poster}'
             f'<button type="button" class="vplay" aria-label="{e(v["title"])} 재생"><span aria-hidden="true">▶</span></button>'
             f'<span class="vbadge">{("YouTube · 음성 해설" if v.get("voice") else "YouTube") if v.get("yt_url") else "TikTok"}</span></div><div class="vmeta">' + ('<p class="vfeat">대표 영상</p>' if lead else "") + f'<p class="vtopic">{e(v.get("topic", ""))} · {e(fmt_date(v.get("date", "")))}</p>'
             f'<h2 class="vtitle">{e(v["title"])}</h2>' + (f'<p class="vsum">{e(v.get("summary", ""))}</p>' if big else "")
@@ -724,6 +725,27 @@ def video_card(v, rel, big=False, lead=False):
             + (f'<p class="vrel">{rl}</p>' if rl and big else "")
             + '<p class="vexts">' + (f'<a class="vext" href="{e(v["yt_url"])}" target="_blank" rel="noopener">유튜브에서 보기 ↗</a>' if v.get("yt_url") else "")
             + (f'<a class="vext" href="{e(v["tt_url"])}" target="_blank" rel="noopener">틱톡에서 보기 ↗</a>' if v.get("tt_url") else "") + "</p></div></article>")
+
+
+VIDEO_CAT_ORDER = ["위험성평가", "추락·보호구", "지게차·운반", "화재·밀폐공간", "점검·비상대응", "근골격계"]
+
+
+def video_filter(videos):
+    """/videos/ 분류 칩. 영상이 있는 분류만, 정해 둔 순서대로. 누르면 그 분류만 보이고 주소에 #cat=… 이 붙는다."""
+    import collections
+    cnt = collections.Counter(v.get("cat") or v.get("topic", "") for v in videos)
+    cats = [c for c in VIDEO_CAT_ORDER if cnt.get(c)] + sorted(c for c in cnt if c and c not in VIDEO_CAT_ORDER)
+    if len(cats) < 2:
+        return ""
+    chips = f'<button type="button" class="chip" data-vcat="" aria-pressed="true">전체 <span class="n">{len(videos)}</span></button>' + "".join(
+        f'<button type="button" class="chip" data-vcat="{e(c)}" aria-pressed="false">{e(c)} <span class="n">{cnt[c]}</span></button>' for c in cats)
+    js = """<script>(function(){var bar=document.querySelector(".vcats");if(!bar)return;
+function show(c){var cards=[].slice.call(document.querySelectorAll(".vgrid .vcard"));[].forEach.call(bar.querySelectorAll(".chip"),function(b){b.setAttribute("aria-pressed",String(b.getAttribute("data-vcat")===c));});
+cards.forEach(function(x){x.hidden=!!c&&x.getAttribute("data-cat")!==c;});}
+bar.addEventListener("click",function(ev){var b=ev.target.closest(".chip");if(!b)return;var c=b.getAttribute("data-vcat");show(c);try{history.replaceState(null,"",c?"#cat="+encodeURIComponent(c):location.pathname);}catch(e){}});
+function init(){var m=/^#cat=(.+)$/.exec(location.hash);if(m){try{show(decodeURIComponent(m[1]));}catch(e){}}}
+window.addEventListener("hashchange",init);if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();})();</script>"""
+    return f'<div class="wrap"><div class="chips vcats" role="group" aria-label="영상 분류">{chips}</div></div>' + js
 
 
 VIDEO_JS = """<script>(function(){if(window.__vjs)return;window.__vjs=1;document.addEventListener("click",function(ev){var b=ev.target.closest(".vplay");if(!b)return;var box=b.closest(".vplayer"),yt=box.getAttribute("data-youtube"),tk=box.getAttribute("data-tiktok"),src="";
@@ -773,11 +795,11 @@ def lawver_html(tool_id, rel_root, fallback=""):
         if not fallback:
             return ""
         return (f'<aside class="wrap"><p class="lawver"><b>관련 근거</b> {e(fallback)}<br><b>적용 법령 버전</b> 법령 버전 목록(law_manifest)에 등록되지 않은 근거입니다 — <span class="stale">공식 원문 재확인 필요</span><br>'
-                f'<b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a></p></aside>')
+                f'<b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#status">법령 버전 보기</a></p></aside>')
     oldest = min(d for d in dates if d)
     warn_s = ' <span class="stale">· 확인일이 오래되었습니다 — 공식 원문 재확인 필요</span>' if stale(oldest) else ""
     return (f'<aside class="wrap"><p class="lawver"><b>법적 근거 확인일</b> {e(oldest)}{warn_s}<br><b>적용 법령 버전</b> ' + " / ".join(rows)
-            + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#status">법령 버전·시행 예정 보기</a> · <a href="{rel_root}legal/">법령정보·면책 안내</a>'
+            + f'<br><b>원문</b> <a href="https://www.law.go.kr/" target="_blank" rel="noopener">국가법령정보센터</a> · <a href="{rel_root}laws/#status">법령 버전·시행 예정 보기</a>'
             + '<br>이 화면의 판정·계산·예시 문구는 SafePlum이 법령 원문을 바탕으로 정리한 참고 자료입니다.</p></aside>')
 
 
@@ -893,11 +915,11 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
       <li>채용 조건과 마감일은 공고 원문이 우선합니다.</li>
       <li>게시판의 글과 답변은 회원 개인의 의견입니다. 법령 해석은 원문과 관할 기관 안내를 기준으로 하세요. <a href="{rel_root}board/rules/">이용수칙</a> · <a href="{rel_root}privacy/">개인정보 처리방침</a></li>
       <li>작성 도구는 입력한 문서 내용을 SafePlum 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
-      <li>판정·계산 결과는 자가진단용 참고 자료이며, 최종 판단은 관할 행정기관의 해석을 따릅니다. <a href="{rel_root}legal/">법령정보·면책 안내</a></li>
+      <li>판정·계산 결과는 자가진단용 참고 자료이며, 최종 판단은 관할 행정기관의 해석을 따릅니다.</li>
     </ul>
     <p class="ft-op">{operator_html(site, rel_root)}</p>
     <p class="ft-disc">Disclaimer: SafePlum에서 제공하는 안전보건 정보 및 문서 양식은 현장 참고용이며, 실제 적용 시 발생하는 법적 책임은 지지 않습니다.</p>
-    <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''}{' · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button>' if path.startswith("tools/") and path != "tools/" else ""} · <a href="{rel_root}legal/">법령 데이터 기준일 {e(manifest().get("checked_at", ""))}</a></p>
+    <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''}{' · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button>' if path.startswith("tools/") and path != "tools/" else ""} · 법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="{rel_root}legal/">면책 안내</a></p>
   </div>
 </footer>
 {dock_html(rel_root, active)}
@@ -1052,8 +1074,17 @@ def acc_trend_html(auto_acc, today, days=7, rel="../"):
             warn("사고사망 속보: 발생일을 읽은 항목이 없어 동향 상자를 만들지 않음(scripts/fetch_public.py 의 acc_date 확인)")
         return ""
     today = str(today)[:10]
-    since = (_dt.date.fromisoformat(today) - _dt.timedelta(days=days - 1)).isoformat()
+    # 최근 N일 = 오늘 포함 N+1일 범위(예: 10.13 기준 10.6~10.13). 공단 게시가 며칠 늦어 이 범위가 비면
+    # 가장 최근 발생일 기준 1주를 보여 주고 기간을 밝힌다(0건으로 보이지 않게).
+    since = (_dt.date.fromisoformat(today) - _dt.timedelta(days=days)).isoformat()
     recent = sorted(((i, a) for i, a in items if since <= a["date"] <= today), key=lambda x: x[1]["date"], reverse=True)
+    period = f"최근 {days}일"
+    if not recent:
+        last = max(a["date"] for _, a in items if a["date"] <= today) if any(a["date"] <= today for _, a in items) else ""
+        if last:
+            s2 = (_dt.date.fromisoformat(last) - _dt.timedelta(days=days - 1)).isoformat()
+            recent = sorted(((i, a) for i, a in items if s2 <= a["date"] <= last), key=lambda x: x[1]["date"], reverse=True)
+            period = f"{int(s2[5:7])}.{int(s2[8:10])}~{int(last[5:7])}.{int(last[8:10])}"
     total = collections.Counter((a.get("type") or "기타") for _, a in recent)
     WD = "월화수목금토일"
     href = rel + ACC_PAGE
@@ -1061,7 +1092,7 @@ def acc_trend_html(auto_acc, today, days=7, rel="../"):
         # 유형별 합계는 같은 유형이 2건 이상일 때만(전부 1건이면 아래 목록과 같은 내용이라 생략)
         summ = ""
         if max(total.values()) > 1:
-            summ = ('<ul class="acc-sum" aria-label="최근 %d일 재해유형별 건수">' % days) + "".join(
+            summ = f'<ul class="acc-sum" aria-label="{period} 재해유형별 건수">' + "".join(
                 f'<li><a href="{href}?cat={quote(k)}"><span class="acc-k">{e(k)}</span><span class="acc-bar" aria-hidden="true"><i style="width:{round(v / len(recent) * 100)}%"></i></span><span class="acc-n">{v}건</span></a></li>'
                 for k, v in total.most_common()) + "</ul>"
         MAX = 6
@@ -1072,7 +1103,7 @@ def acc_trend_html(auto_acc, today, days=7, rel="../"):
             for i, a in recent[:MAX])
         rest = f'<p class="acc-rest">외 {len(recent) - MAX}건</p>' if len(recent) > MAX else ""
         body = f'{summ}<ul class="acc-days">{rows}</ul>{rest}'
-        badge = f'<span class="badge badge-red">최근 {days}일 {len(recent)}건</span>'
+        badge = f'<span class="badge badge-red">{period} {len(recent)}건</span>'
     else:
         body = f'<p class="hint">최근 {days}일 동안 게시된 사고사망 속보가 없습니다.</p>'
         badge = f'<span class="badge badge-muted">최근 {days}일 0건</span>'
@@ -1254,7 +1285,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
         note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 실무용 보조양식 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
-                f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="../../legal/">법령정보·면책 안내</a></p>')
+                f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))}</p>')
         assert "</body>" in src
         src = src.replace("</body>", note + "</body>", 1)
     return src
@@ -1572,7 +1603,7 @@ def build(out, today):
     stale_txt = ' · <b>확인일이 오래되었습니다 — 공식 원문 재확인 필요</b>' if stale(man.get("checked_at", ""), dt.date.fromisoformat(today)) else ""
     stale_txt2 = ' · <b>공식 원문 재확인 필요</b>' if stale_txt else ""
     asof_strip = (f'<p class="asof"><span class="wrap">법령 데이터 기준일 <b>{e(man.get("checked_at", ""))}</b>{stale_txt2}'
-                  f' · <a href="laws/#upcoming">시행 예정 {n_up}건</a> · <a href="legal/#check">확인 필요 {n_chk}건</a></span></p>')
+                  f' · <a href="laws/#upcoming">시행 예정 {n_up}건</a></span></p>')
     def short_law(nm):
         return nm.replace("산업안전보건기준에 관한 규칙", "안전보건규칙").replace("산업안전보건법", "산안법").replace("중대재해 처벌 등에 관한 법률", "중대재해처벌법")
     law_rows = "".join(bd_row("laws/#upcoming", f"{short_law(nm)} {lawpages.kdate(eff)} 시행 ({u['no'].split(' ')[-1]})", "", "시행 예정") for eff, nm, u in ups_all[:4])
@@ -1850,6 +1881,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
         vbody = ('<section class="phead"><div class="wrap"><p class="crumbs"><a href="../">홈</a><span>/</span>안전보건 영상</p><h1>안전보건 영상</h1>'
                  '<p>1분 안팎의 짧은 영상으로 현장 안전보건 수칙과 법령을 정리합니다. 영상마다 근거 조문을 적었습니다. 재생 버튼을 누르면 이 화면에서 바로 재생됩니다.</p>'
                  + ('<p class="vch">' + "".join(f'<a class="btn btn-sm btn-ghost" href="{e(u)}" target="_blank" rel="noopener">{n} 채널 ↗</a>' for k, n in (("youtube", "유튜브"), ("tiktok", "틱톡")) for u in [VIDEO_CHANNELS.get(k)] if u) + "</p>" if VIDEO_CHANNELS else "") + '</div></section>'
+                 + video_filter(VIDEOS) +
                  f'<div class="wrap vgrid">{"".join(video_card(v, "../", True, lead=(i == 0)) for i, v in enumerate(VIDEOS))}</div>'
                  '<aside class="wrap"><p class="hint vnote">영상은 유튜브·틱톡에 올린 것을 각 서비스가 제공하는 플레이어로 보여 줍니다. 재생 버튼을 누르기 전에는 유튜브·틱톡에 접속하지 않으며, 재생하면 해당 서비스의 개인정보 처리방침이 적용됩니다.</p></aside>' + VIDEO_JS)
         write("videos/index.html", page(site, "../", "videos/", "안전보건 영상", vbody, desc="밀폐공간·끼임 등 현장 안전보건 수칙을 1분 영상으로 정리하고 근거 조문을 함께 적었습니다.", active="videos/"))
