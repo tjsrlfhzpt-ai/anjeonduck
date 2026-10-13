@@ -154,8 +154,17 @@ def main():
     report = args[args.index("--report") + 1] if "--report" in args else None
     oc = os.environ.get("LAW_OC", "").strip()
     if not oc:
-        print("LAW_OC 가 설정되지 않았습니다 — 저장소 Settings → Secrets → Actions 에 LAW_OC 를 등록하세요.")
-        return 2
+        # 인증키가 없으면 실패(알림 메일) 대신 건너뛴다. 그동안은 주간 예약 작업이 법령 연혁 페이지로 확인한다.
+        msg = ("LAW_OC(국가법령정보센터 OPEN API 인증키)가 등록되지 않아 이번 조회를 건너뛰었습니다. "
+               "저장소 Settings → Secrets and variables → Actions 에 LAW_OC 를 등록하면 다음 실행부터 조회합니다.")
+        print(f"::notice title=법령 변경 자동 감지 건너뜀::{msg}")
+        if report:
+            pathlib.Path(report).write_text(msg + "\n", encoding="utf-8")
+        gh_out = os.environ.get("GITHUB_OUTPUT")
+        if gh_out:
+            with open(gh_out, "a", encoding="utf-8") as f:
+                f.write("new=0\nfailed=0\nskipped=1\n")
+        return 0
     manifest = json.loads((ROOT / "data/law_manifest.json").read_text(encoding="utf-8"))
     laws_path = ROOT / "data/laws.json"
     laws = json.loads(laws_path.read_text(encoding="utf-8"))
