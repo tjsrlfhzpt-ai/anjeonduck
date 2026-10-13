@@ -1,7 +1,7 @@
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>안전관리비 사용 가능 항목</p>
   <h1>산업안전보건관리비, 이거 써도 될까?</h1>
-  <p>"마스크", "안전화", "신호수", "에어컨"처럼 사려는 물건이나 비용을 입력하면 「건설업 산업안전보건관리비 계상 및 사용기준」 제7조 기준으로 사용 가능 여부와 근거 조항을 보여 줍니다. 계상액은 <a href="../safety-cost/">산업안전보건관리비 계산기</a>에서 구하세요.</p>
+  <p>"마스크", "안전화", "신호수", "에어컨"처럼 사려는 물건이나 비용을 입력하면 「건설업 산업안전보건관리비 계상 및 사용기준」 제7조 기준으로 사용 가능 여부와 근거 조항을 보여 줍니다. 산안비로 안 되는 항목이 「건설기술 진흥법」 안전관리비로 처리되는 경우도 함께 알려 드립니다. 계상액은 <a href="../safety-cost/">산업안전보건관리비 계산기</a>에서 구하세요.</p>
 </div></section>
 <div class="wrap layout-detail">
   <section class="col-main stack">
@@ -18,9 +18,12 @@
         <li><b>한도가 있는가?</b> — 스마트 안전장비 20%, 본사 전담조직 5%, 위험성평가 결정 사항 15%, 관리감독자 수당은 임금의 10% 이내입니다.</li>
       </ol>
     </section>
+    <section class="lawbox" id="cuCmp"><h3>산업안전보건관리비 vs 건설기술 진흥법 안전관리비</h3><p class="cu-note">이름이 비슷해 자주 혼동하는 두 비용입니다. 산안비로 쓸 수 없는 교통 신호수·계측·안전점검·주변 피해방지 비용은 대부분 건진법 안전관리비 항목입니다.</p><div class="cu-tblwrap" id="cuCmpBody"></div></section>
+    <section class="lawbox" id="cuDuty"><h3>사용할 때 꼭 지킬 것</h3><ul class="cu-duty" id="cuDutyBody"></ul></section>
     <details class="lawbox" id="cuAll"><summary><strong>제7조 사용기준 전체 보기</strong> <span class="muted" id="cuAllN"></span></summary><div id="cuAllBody"></div></details>
+    <details class="lawbox" id="cuCcs"><summary><strong>건설기술 진흥법 안전관리비 7개 항목 보기</strong> <span class="muted">시행규칙 제60조</span></summary><div id="cuCcsBody"></div></details>
   </section>
-  <aside class="col-side">
+  <aside class="col-side cu-side">
     <section class="side-box">
       <h2 class="h-sm">판정 표시</h2>
       <ul class="cu-legend">
@@ -28,7 +31,12 @@
         <li><span class="badge badge-blue">조건부 가능</span> 대상·한도·목적 조건을 지켜야 함</li>
         <li><span class="badge badge-red">사용 불가</span> 제7조제2항 사용 불가 사유에 해당</li>
         <li><span class="badge badge-orange">판단 필요</span> 고시에 품목이 없어 목적에 따라 갈림</li>
+        <li><span class="cu-chk">원문 확인 ↗</span> 누르면 국가법령정보센터 원문이 열립니다</li>
       </ul>
+    </section>
+    <section class="side-box">
+      <h2 class="h-sm">원문 바로 확인</h2>
+      <ul class="cu-laws" id="cuLaws"></ul>
     </section>
     <section class="side-box">
       <p class="hint" id="cuSrc"></p>
@@ -58,6 +66,26 @@
 .cu-rules th{white-space:nowrap;color:var(--navy)}
 .cu-rules tr.cat td{background:var(--surface-2);font-weight:700}
 .cu-none{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-lg);padding:18px 20px;font-size:14.5px;line-height:1.7}
+.cu-chk,.cu-verify{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;color:var(--navy);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;text-decoration:none;white-space:nowrap}
+.cu-verify:hover{border-color:var(--navy)}
+.cu-head .cu-verify{margin-left:auto}
+.cu-basis a.cu-src{margin-left:8px;font-size:12px;font-weight:700;white-space:nowrap}
+.cu-refs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--text-2)}
+.cu-alt{border-left:4px solid #2563eb;background:#eff6ff;border-radius:10px;padding:10px 14px;font-size:13.5px;line-height:1.65}
+.cu-alt b{color:#1e3a8a}
+.cu-tblwrap{overflow-x:auto}
+.cu-cmp{width:100%;min-width:520px;border-collapse:collapse;font-size:13.5px;line-height:1.6}
+.cu-cmp th,.cu-cmp td{border-top:1px solid var(--line-2);padding:8px 10px;text-align:left;vertical-align:top}
+.cu-cmp thead th{background:var(--surface-2);color:var(--navy)}
+.cu-cmp tbody th{white-space:nowrap;color:var(--navy)}
+.cu-duty{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.65}
+.cu-duty li{background:var(--surface-2);border-radius:10px;padding:10px 14px}
+.cu-duty b{color:var(--navy);margin-right:6px}
+.cu-laws{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.cu-laws a{text-decoration:none}
+.layout-detail .col-side.cu-side{order:0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cu-alt{background:rgba(37,99,235,.12)}:root:not([data-theme="light"]) .cu-alt b{color:#93c5fd}}
+:root[data-theme="dark"] .cu-alt{background:rgba(37,99,235,.12)}:root[data-theme="dark"] .cu-alt b{color:#93c5fd}
 </style>
 <script>
 (function () {
@@ -74,11 +102,19 @@
     [it.name].concat(it.q).forEach(function (k) { k = norm(k); if (!k) return; if (k === q) best = Math.max(best, 100); else if (k.indexOf(q) >= 0) best = Math.max(best, 60 + q.length); else if (q.indexOf(k) >= 0) best = Math.max(best, 40 + k.length); });
     return best;
   }
+  var LW = D.laws || {}; var C = {}; (D.ccs || []).forEach(function (c) { C[c.id] = c; });
+  function lk(key, txt, cls) { var l = LW[key]; if (!l) return ""; return '<a class="' + (cls || "cu-verify") + '" href="' + esc(l.u) + '" target="_blank" rel="noopener" title="' + esc(l.n) + ' 원문 (새 창)">' + esc(txt || l.n) + " ↗</a>"; }
+  function refsOf(it) { var out = ["gosi"]; it.basis.forEach(function (b) { ((R[b] || {}).refs || []).forEach(function (k) { if (out.indexOf(k) < 0) out.push(k); }); }); (it.refs || []).forEach(function (k) { if (out.indexOf(k) < 0) out.push(k); }); if (it.alt && out.indexOf("ctpr60") < 0) out.push("ctpr60"); return out; }
   function card(it) {
     var v = V[it.v] || V.check;
-    var basis = it.basis.map(function (b) { var r = R[b]; if (!r) return ""; return "<li><b>" + esc(label(b)) + "</b>" + esc(r.text) + (r.limit ? '<span class="cu-lim">' + esc(r.limit) + "</span>" : "") + "</li>"; }).join("");
-    return '<article class="cu-card"><div class="cu-head"><span class="badge ' + v[0] + '">' + v[1] + '</span><h2 class="cu-name">' + esc(it.name) + '</h2></div>' +
-      '<p class="cu-ans">' + esc(it.a) + "</p>" + (it.note ? '<p class="cu-note">' + esc(it.note) + "</p>" : "") + '<ul class="cu-basis">' + basis + "</ul></article>";
+    var basis = it.basis.map(function (b) { var r = R[b]; if (!r) return ""; return "<li><b>" + esc(label(b)) + "</b>" + esc(r.text) + (r.limit ? '<span class="cu-lim">' + esc(r.limit) + "</span>" : "") + lk("gosi", "원문", "cu-src") + "</li>"; }).join("");
+    var refs = refsOf(it);
+    var head = (it.v === "check" || it.v === "cond") ? lk(refs.length > 1 && it.v === "check" ? refs[1] : "gosi", it.v === "check" ? "확인 필요 · 법령 보기" : "조건 원문 보기") : "";
+    var alt = "";
+    if (it.alt && C[it.alt.id]) { var c = C[it.alt.id]; alt = '<div class="cu-alt"><b>대신 이렇게 처리합니다 →</b> 건설기술 진흥법 안전관리비 (시행규칙 제60조제1항제' + esc(it.alt.id.slice(1)) + "호) " + esc(c.text) + ". " + esc(it.alt.why) + " " + lk("ctpr60", "제60조 원문", "cu-src") + "</div>"; }
+    return '<article class="cu-card"><div class="cu-head"><span class="badge ' + v[0] + '">' + v[1] + '</span><h2 class="cu-name">' + esc(it.name) + "</h2>" + head + "</div>" +
+      '<p class="cu-ans">' + esc(it.a) + "</p>" + (it.note ? '<p class="cu-note">' + esc(it.note) + "</p>" : "") + '<ul class="cu-basis">' + basis + "</ul>" + alt +
+      '<div class="cu-refs"><span>원문으로 확인:</span>' + refs.map(function (k) { return lk(k); }).join("") + "</div></article>";
   }
   function render() {
     var q = norm(document.getElementById("cuQ").value), out = document.getElementById("cuOut");
@@ -86,20 +122,28 @@
     var hits = D.items.map(function (it) { return [score(it, q), it]; }).filter(function (x) { return x[0] > 0; }).sort(function (a, b) { return b[0] - a[0]; }).slice(0, 4);
     if (hits.length) { out.innerHTML = hits.map(function (x) { return card(x[1]); }).join(""); return; }
     var rules = D.rules.filter(function (r) { return norm(r.text).indexOf(q) >= 0; });
+    var ccs = (D.ccs || []).filter(function (c) { return q.length > 1 && norm(c.text + c.calc).indexOf(q) >= 0; });
     out.innerHTML = '<div class="cu-none"><p><b>"' + esc(document.getElementById("cuQ").value.trim()) + '"</b>은(는) 고시에 품목으로 적혀 있지 않아 목적에 따라 판단해야 합니다. 아래 "이렇게 판단합니다" 세 가지를 차례로 확인하세요.</p>' +
-      (rules.length ? '<ul class="cu-basis">' + rules.map(function (r) { return "<li><b>" + esc(label(r.id)) + "</b>" + esc(r.text) + "</li>"; }).join("") + "</ul>" : "") + "</div>";
+      (rules.length ? '<ul class="cu-basis">' + rules.map(function (r) { return "<li><b>" + esc(label(r.id)) + "</b>" + esc(r.text) + lk("gosi", "원문", "cu-src") + "</li>"; }).join("") + "</ul>" : "") +
+      (ccs.length ? '<div class="cu-alt" style="margin-top:10px"><b>건설기술 진흥법 안전관리비 항목일 수 있습니다 →</b> ' + ccs.map(function (c) { return "제60조제1항제" + esc(c.id.slice(1)) + "호 " + esc(c.text); }).join(" / ") + "</div>" : "") +
+      '<div class="cu-refs" style="margin-top:10px"><span>원문으로 확인:</span>' + lk("gosi") + lk("ctpr60") + "</div></div>";
   }
-  var POP = ["마스크", "안전화", "안전대", "신호수", "소화기", "CCTV", "에어컨", "생수", "방한복", "차량", "안전기원제", "AED"];
+  var POP = ["마스크", "안전화", "안전대", "신호수", "작업발판", "소화기", "CCTV", "계측", "에어컨", "생수", "방한복", "라바콘", "차량", "안전기원제", "AED"];
   document.getElementById("cuPop").innerHTML = POP.map(function (w) { return '<button type="button" class="chip" data-w="' + esc(w) + '">' + esc(w) + "</button>"; }).join("");
   document.getElementById("cuPop").addEventListener("click", function (ev) { var b = ev.target.closest(".chip"); if (!b) return; var i = document.getElementById("cuQ"); i.value = b.getAttribute("data-w"); render(); try { history.replaceState(null, "", "#q=" + encodeURIComponent(i.value)); } catch (e) {} });
   var tmr; document.getElementById("cuQ").addEventListener("input", function () { clearTimeout(tmr); tmr = setTimeout(function () { render(); try { var v = document.getElementById("cuQ").value.trim(); history.replaceState(null, "", v ? "#q=" + encodeURIComponent(v) : location.pathname); } catch (e) {} }, 120); });
   // 제7조 전체
   var cat = "", rows = "";
   D.rules.forEach(function (r) { if (r.cat !== cat) { cat = r.cat; rows += '<tr class="cat"><td colspan="2">' + esc(r.id.replace(/[가-힣]$/, "")) + ". " + esc(cat) + "</td></tr>"; } rows += "<tr><th>" + esc(/[가-힣]$/.test(r.id) ? r.id.slice(-1) + "목" : "") + "</th><td>" + esc(r.text) + (r.limit ? '<span class="cu-lim">' + esc(r.limit) + "</span>" : "") + "</td></tr>"; });
-  rows += '<tr class="cat"><td colspan="2">제2항 — 사용할 수 없는 경우 (2호 나·다목, 6호 나~마목, 9호는 예외)</td></tr>' + D.excl.map(function (x) { return "<tr><th>" + esc(x.id.slice(1)) + "호</th><td>" + esc(x.text) + "</td></tr>"; }).join("");
+  rows += '<tr class="cat"><td colspan="2">제2항 — 사용할 수 없는 경우 (2호 나·다목, 6호 나~마목, 9호는 예외)</td></tr>' + D.excl.map(function (x) { return "<tr><th>" + esc(x.id.slice(1)) + "호</th><td>" + esc(x.text) + ((x.refs || []).map(function (k) { return lk(k, LW[k] && LW[k].n, "cu-src"); }).join("")) + "</td></tr>"; }).join("");
   document.getElementById("cuAllBody").innerHTML = '<table class="cu-rules">' + rows + "</table>";
   document.getElementById("cuAllN").textContent = "(" + D.rules.length + "개 항목)";
+  if (D.compare) { var cm = D.compare; document.getElementById("cuCmpBody").innerHTML = '<table class="cu-cmp"><thead><tr>' + cm[0].map(function (h, i) { return "<th>" + esc(h) + (i === 1 ? " " + lk("osha72", "법", "cu-src") : i === 2 ? " " + lk("ctpa63", "법", "cu-src") : "") + "</th>"; }).join("") + "</tr></thead><tbody>" + cm.slice(1).map(function (r) { return "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td></tr>"; }).join("") + '</tbody></table><p class="cu-note" style="margin-top:8px">국토교통부·국토안전관리원은 2026. 6. 30. 「건설안전관리비 계상 및 집행 실무 매뉴얼」을 제정해 두 비용의 차이를 항목별로 정리했습니다. ' + lk("csi", "건설공사 안전관리 종합정보망", "cu-src") + "</p>"; } else document.getElementById("cuCmp").hidden = true;
+  if (D.duties) document.getElementById("cuDutyBody").innerHTML = D.duties.map(function (x) { return "<li><b>" + esc(x.t) + "</b>" + esc(x.d) + ' <span class="muted">(' + esc(x.b) + ")</span>" + lk("gosi", "원문", "cu-src") + "</li>"; }).join(""); else document.getElementById("cuDuty").hidden = true;
+  if (D.ccs) document.getElementById("cuCcsBody").innerHTML = '<table class="cu-rules">' + D.ccs.map(function (c) { return "<tr><th>" + esc(c.id.slice(1)) + "호</th><td>" + esc(c.text) + '<br><span class="muted">계상: ' + esc(c.calc) + "</span></td></tr>"; }).join("") + "</table>" + '<p class="cu-note" style="margin-top:8px">' + esc(D.ccs_note || "") + " " + lk("ctpr60", "제60조 원문", "cu-src") + "</p>";
+  var LK = ["gosi", "osha72", "enf74", "enf77", "ctpa63", "ctpr60", "ex24580"]; document.getElementById("cuLaws").innerHTML = LK.filter(function (k) { return LW[k]; }).map(function (k) { return "<li>" + lk(k, null, "cu-src") + "</li>"; }).join("");
   document.getElementById("cuSrc").innerHTML = "근거: " + esc(D.source) + ' · 확인일 ' + esc(D.checked) + ' · <a href="' + esc(D.url) + '" target="_blank" rel="noopener">원문 ↗</a>';
-  var m = /^#q=(.+)$/.exec(location.hash); if (m) { try { document.getElementById("cuQ").value = decodeURIComponent(m[1]); render(); } catch (e) {} }
+  function fromHash() { var m = /^#q=(.+)$/.exec(location.hash); if (m) { try { var v = decodeURIComponent(m[1]); var i = document.getElementById("cuQ"); if (i.value.trim() !== v) { i.value = v; render(); } } catch (e) {} } }
+  fromHash(); window.addEventListener("hashchange", fromHash);
 })();
 </script>
