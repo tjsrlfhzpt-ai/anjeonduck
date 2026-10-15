@@ -273,7 +273,7 @@ SITUATIONS = [
 CAT_RANK = {"무료 작성 도구": 0, "웹 작성 서식": 1, "법정 서식": 2, "고시·지침": 3, "법정 기준표(별표)": 4}
 
 
-SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours"], "점검·작업허가": ["improve", "docmap", "inspect", "loto"],
+SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours"], "점검·작업허가": ["improve", "docmap", "inspect", "loto", "rule-sign"],
              "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["council", "safety-cost", "cost-use", "hpp"], "기계·설비 인증·검사": ["machines", "inspect"],
              "화학물질·석면": ["msds"], "작업환경·건강": ["heat", "confined", "cvd"]}
 
@@ -298,6 +298,28 @@ def situation_cards(resources, rel, tools=None):
 
 
 # ---------------------------------------------------------------- 서식·별표 상세 페이지
+def write_lawai(out):
+    """법령 AI 질문(tools/law-ai)이 브라우저에서 내려받아 검색하는 조문 묶음. 개정 표시(<개정 …>)는 빼고 본문만 담는다."""
+    tag = re.compile(r"\s*<(?:개정|신설|전문개정|본조신설|제목개정|종전[^>]*|삭제)[^>]*>")
+    laws, arts = [], []
+    for i, (k, _n) in enumerate(LAW_MENU):
+        d = load(f"data/lawtext/{k}.json")
+        laws.append({"key": k, "law": d["law"], "short": d["short"], "version": d.get("version", ""), "url": d.get("url", "")})
+        for a in d["articles"]:
+            t = tag.sub("", a.get("text") or "").strip()
+            if not t or (t.startswith("삭제") and len(t) < 40):
+                continue
+            arts.append([i, a["jo"], a.get("title") or "", t])
+    pen = load("data/penalties.json")
+    laws.append({"key": "pen", "law": "산안법 시행령 별표 35 과태료 부과기준", "short": "과태료 기준", "version": pen.get("version", ""), "url": pen.get("source_url", "")})
+    pi = len(laws) - 1
+    for it in pen["items"]:
+        a = it.get("a") or ["", "", ""]
+        arts.append([pi, "별표35 " + it["c"], "과태료", f'{it["v"]} — 근거 {it["b"]} · 과태료(만원) 1차 {a[0]} / 2차 {a[1]} / 3차 이상 {a[2]}'])
+    (out / "assets").mkdir(parents=True, exist_ok=True)
+    (out / "assets/lawai.json").write_text(json.dumps({"laws": laws, "arts": arts}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
 def law_index():
     """법령명 → {조번호: (제목, 본문)}. data/lawtext/*.json(전문) + data/lawref.json(개별 조문)을 합친다."""
     idx = {}
@@ -567,19 +589,19 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
             ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
 
 
-TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "permit": "🔥", "msds": "🧪", "loto": "🔒", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
+TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "cost-use": "🧾", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
-              "duties": "🧑‍💼", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
+              "duties": "🧑‍💼", "law-ai": "⚖️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
-TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "permit": "fire", "msds": "msds", "loto": "loto", "heat": "heat", "improve": "fix", "confined": "confined",
+TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "heat": "heat", "improve": "fix", "confined": "confined",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "cost-use": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
-              "schedule": "calendar", "duties": "briefcase", "retention": "folder", "inspect": "search", "docmap": "audit"}
+              "schedule": "calendar", "duties": "briefcase", "law-ai": "book", "retention": "folder", "inspect": "search", "docmap": "audit"}
 # 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
-WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "improve"]
+WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "improve"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
 HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"), ("accident", "alarm"), ("ppe-ledger", "goggles")]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
-LOOKUP_TOOLS = ["schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
+LOOKUP_TOOLS = ["law-ai", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
 NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "board/?b=job"), ("board", "게시판", "board/")]
@@ -1191,7 +1213,7 @@ ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="
 # 작성기 하나로 통합(2026-10-12): 전용 작성기(config free_tools, cat=작성기)를 서식 작성기 묶음 속에 넣어 /tools/forms/ 한 곳에서 찾는다.
 WRITER_LEAD = ("위험성평가·TBM", ["tbm", "risk"])          # 맨 앞 묶음(서식에는 없는 묶음)
 WRITER_TOOLS_IN = {"교육·회의": ["edu-log", "committee", "council"],
-                   "점검·허가": ["patrol", "joint", "permit", "confined", "heat", "loto", "improve"],
+                   "점검·허가": ["patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "improve"],
                    "관리대장": ["msds"]}
 WRITER_GID = {"위험성평가·TBM": "w-risk", "교육·회의": "w-edu", "점검·허가": "w-check", "재해·사고 조사": "w-acc", "업무일지": "w-log",
               "작업계획서": "w-plan", "작업시작 전 점검(별표 3)": "pre", "조직·발령": "w-org", "관리대장": "w-ledger", "중대재해처벌법 이행": "w-sapa"}
@@ -1490,6 +1512,7 @@ def build(out, today):
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(ROOT / "assets", out / "assets")
+    write_lawai(out)
     n_kosha = build_kosha_client(out)
 
     urls = []

@@ -1,0 +1,302 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>안전작업수칙 게시물</p>
+  <h1>안전작업수칙 게시물 만들기</h1>
+  <p>작업장·설비 앞에 붙이는 <strong>안전작업수칙 게시물</strong>을 만듭니다. 안전보건공단 「표준작업 안전수칙(제조분야)」 101개 수칙에서 고르거나 직접 쓰고, 안전보건표지 그림과 회사명·로고를 넣어 A4·A3로 인쇄합니다. 내 Gemini 키가 있으면 AI로 우리 작업에 맞는 수칙 초안도 만들 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail no-print">
+  <section class="col-main stack">
+    <div class="calc">
+      <h2 class="h-sm">① 수칙 고르기</h2>
+      <div class="rs-cats" id="rsCats" role="group" aria-label="분야"></div>
+      <div class="search-inline rs-q"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="rsQ" placeholder="예: 지게차, 용접, 프레스, 사다리" aria-label="수칙 검색" autocomplete="off"></div>
+      <ul class="rs-list" id="rsList"></ul>
+      <div class="rs-ai">
+        <p class="rs-ai-h"><b>AI로 우리 작업에 맞게 만들기</b> <span class="muted">내 Gemini 키 사용 · 초안</span></p>
+        <div class="rs-ai-row"><input type="text" id="rsAiIn" placeholder="예: 식품공장 탈수기 청소 작업, 냉동창고 지게차 하역" aria-label="작업·설비 설명" autocomplete="off"><button type="button" class="btn" id="rsAiGo">AI 초안</button></div>
+        <p class="hint" id="rsAiSt" aria-live="polite">회사명·실명 같은 개인정보나 기밀은 넣지 마세요. <button type="button" class="linkbtn" id="rsAiKey">AI 키 설정</button></p>
+      </div>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">② 내용 고치기</h2>
+      <label class="field"><span class="label">제목</span><input type="text" id="rsTitle" maxlength="40" placeholder="예: 지게차 안전수칙"></label>
+      <label class="field"><span class="label">수칙 (한 줄에 하나 · 최대 15줄)</span><textarea id="rsRules" rows="10" placeholder="한 줄에 수칙 하나씩 적으세요"></textarea></label>
+      <p class="hint" id="rsCount"></p>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">③ 안전보건표지 그림 <span class="muted" id="rsSignN"></span></h2>
+      <p class="hint">최대 4개. 눌러서 넣고 빼세요.</p>
+      <div class="rs-signs" id="rsSigns"></div>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">④ 꾸미기</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">색상</span><select class="sort" id="rsTheme" style="width:100%"><option value="green">녹색 — 안전·일반</option><option value="navy">남색 — 지시·작업표준</option><option value="red">빨강 — 금지·위험</option><option value="yellow">노랑 — 경고·주의</option></select></label>
+        <label class="field"><span class="label">용지</span><select class="sort" id="rsPaper" style="width:100%"><option value="A4">A4</option><option value="A3">A3</option></select></label>
+        <label class="field"><span class="label">방향</span><select class="sort" id="rsOri" style="width:100%"><option value="p">세로</option><option value="l">가로</option></select></label>
+        <label class="field"><span class="label">회사·현장명</span><input type="text" id="rsCo" maxlength="30"></label>
+        <label class="field"><span class="label">관리감독자·담당 (선택)</span><input type="text" id="rsMgr" maxlength="30" placeholder="예: 생산1팀 김OO"></label>
+        <label class="field"><span class="label">게시일 (선택)</span><input type="date" id="rsDate"></label>
+      </div>
+      <div class="rs-logo"><span class="label">로고 (선택)</span><label class="btn btn-ghost rs-up">로고 올리기<input type="file" id="rsLogo" accept="image/*" hidden></label><button type="button" class="linkbtn" id="rsLogoDel" hidden>로고 빼기</button><img id="rsLogoPrev" alt="" hidden></div>
+      <div class="btns"><button type="button" class="btn" id="rsPrint">인쇄 · PDF 저장</button><button type="button" class="btn btn-ghost" id="rsReset">처음부터</button></div>
+      <p class="hint">입력값과 로고는 이 브라우저에만 기억됩니다. 인쇄 창에서 용지와 방향을 위와 같게, <b>배율 100%(실제 크기)</b>로 맞추세요.</p>
+    </div>
+    <h2 class="h-sm">미리보기</h2>
+    <div class="rs-prev" id="rsPrevWrap"><div class="rs-scale" id="rsScale"></div></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">게시할 때</h2><ul class="bul hint">
+      <li>해당 작업·설비 바로 앞, 작업자 눈높이에 붙이세요.</li>
+      <li>코팅하거나 아크릴 꽂이에 넣으면 오래 갑니다.</li>
+      <li>수칙은 안전보건교육·TBM 때 함께 읽고, 위험성평가 결과가 바뀌면 고쳐 다시 붙이세요.</li>
+      <li>안전보건표지의 종류·색은 산업안전보건법 시행규칙 별표 6~9 기준 그림을 그대로 씁니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">출처</h2><p class="hint" id="rsSrc"></p></div>
+    <div class="side-box"><h2 class="h-sm">이어서 쓰는 도구</h2><ul class="bul">
+      <li><a href="../../resources/signs/">안전보건표지 40종</a></li>
+      <li><a href="../tbm/">TBM 일지 작성기</a></li>
+      <li><a href="../risk/">위험성평가서 작성기</a></li>
+      <li><a href="../loto/">LOTO 작업금지 태그</a></li>
+    </ul></div>
+  </aside>
+</div>
+<div class="rs-print" id="rsSheet" aria-hidden="true"></div>
+<style id="rsPageCss"></style>
+<style>
+.rs-cats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.rs-cats button{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;color:var(--text-2);cursor:pointer}
+.rs-cats button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.rs-q{max-width:none;margin-bottom:8px}
+.rs-list{list-style:none;margin:0;padding:0;max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.rs-list li+li{border-top:1px solid var(--line-2)}
+.rs-list button{width:100%;text-align:left;background:none;border:0;padding:10px 12px;cursor:pointer;display:flex;gap:10px;align-items:baseline;font-size:14px;color:inherit}
+.rs-list button:hover,.rs-list button[aria-current=true]{background:var(--surface-2)}
+.rs-list .c{flex:none;font-size:11.5px;font-weight:800;color:var(--text-2);min-width:58px}
+.rs-list .n{margin-left:auto;font-size:12px;color:var(--text-2);flex:none}
+.rs-ai{margin-top:12px;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+.rs-ai-h{margin:0 0 6px;font-size:14px}
+.rs-ai-row{display:flex;gap:8px}
+.rs-ai-row input{flex:1;min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font-size:15px}
+.rs-signs{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
+.rs-signs button{border:2px solid var(--line);border-radius:10px;background:#fff;padding:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;line-height:1.2;color:#333;min-height:88px}
+.rs-signs button img{width:46px;height:46px}
+.rs-signs button[aria-pressed=true]{border-color:#1F6FD1;background:#EAF2FD}
+.rs-logo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.rs-logo img{max-height:40px;max-width:120px}
+.rs-up{cursor:pointer}
+.rs-prev{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;overflow:hidden}
+.rs-scale{transform-origin:top left}
+/* ---------- 게시물(실제 mm 크기) */
+.rs-page{--c:#00764E;--c2:#E6F4EE;--ink:#fff;background:#fff;color:#111;display:flex;flex-direction:column;box-sizing:border-box;padding:9mm;font-family:'Pretendard','Noto Sans KR',sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.12);overflow:hidden}
+.rs-page.t-navy{--c:#17365D;--c2:#E7EDF6}.rs-page.t-red{--c:#C8102E;--c2:#FCE8EA}.rs-page.t-yellow{--c:#111;--c2:#FFF6CC;--ink:#FFD400}
+.rs-hd{background:var(--c);color:var(--ink);border-radius:3mm;padding:6mm 8mm;display:flex;align-items:center;gap:6mm}
+.t-yellow .rs-hd{background:repeating-linear-gradient(-45deg,#111 0 7mm,#FFD400 7mm 14mm);padding:3mm}
+.t-yellow .rs-hd .rs-hin{background:#111;border-radius:2mm;padding:4mm 6mm;flex:1;display:flex;align-items:center;gap:6mm}
+.rs-hin{flex:1;display:flex;align-items:center;gap:6mm;min-width:0}
+.rs-badge{flex:none;border:0.8mm solid currentColor;border-radius:2mm;padding:1.5mm 3mm;font-weight:900;letter-spacing:.08em;font-size:var(--fb,14pt)}
+.rs-ttl{font-weight:900;line-height:1.15;font-size:var(--ft,40pt);word-break:keep-all;min-width:0}
+.rs-pics{display:flex;justify-content:center;gap:5mm;margin:6mm 0 2mm}
+.rs-pic{display:flex;flex-direction:column;align-items:center;gap:1.5mm;width:var(--pw,30mm)}
+.rs-pic img{width:100%;height:auto}
+.rs-pic span{font-size:var(--fp,10pt);font-weight:800;text-align:center;line-height:1.2;word-break:keep-all}
+.rs-body{flex:1;min-height:0;margin-top:4mm;border:0.6mm solid var(--c);border-radius:3mm;padding:5mm 7mm;background:var(--c2);overflow:hidden}
+.t-yellow .rs-body{border-color:#111}
+.rs-body ol{margin:0;padding:0;list-style:none;counter-reset:r}
+.rs-body li{counter-increment:r;display:flex;gap:3mm;font-size:var(--fr,15pt);line-height:1.38;font-weight:600;padding:var(--gap,1.6mm) 0;word-break:keep-all}
+.rs-body li::before{content:counter(r);flex:none;width:1.6em;height:1.6em;border-radius:50%;background:var(--c);color:var(--ink);font-weight:900;font-size:.8em;display:flex;align-items:center;justify-content:center;margin-top:.12em}
+.t-yellow .rs-body li::before{background:#111;color:#FFD400}
+.rs-ft{display:flex;align-items:center;gap:5mm;margin-top:5mm;font-size:var(--ff,11pt)}
+.rs-ft img{max-height:12mm;max-width:40mm}
+.rs-ft .co{font-weight:900;font-size:1.25em}
+.rs-ft .meta{margin-left:auto;text-align:right;line-height:1.4;color:#333}
+.rs-src{font-size:6.5pt;color:#777;margin-top:2mm;text-align:right}
+.rs-print{display:none}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(main){display:none!important}
+  main>*:not(.rs-print){display:none!important}
+  .rs-print{display:block!important}
+  .rs-print .rs-page{box-shadow:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (max-width:640px){.rs-ai-row{flex-direction:column}.rs-ai-row .btn{width:100%}}
+</style>
+<script src="../../assets/ai.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null, SG = /*@SIGNS@*/null;
+  if (!D || !SG) return;
+  var ROOT = "../../", KEY = "safetake.rulesign", MAXR = 15, MAXS = 4;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var SIGNS = SG.items, BYNO = {}; SIGNS.forEach(function (s) { BYNO[s.no] = s; });
+  var PAPER = { A4: [210, 297], A3: [297, 420] };
+  var BADGE = { green: "SAFETY", navy: "STANDARD", red: "DANGER", yellow: "CAUTION" };
+  function profileCo() { try { var p = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}; return p.company || localStorage.getItem("safetake.company") || ""; } catch (e) { return ""; } }
+  var st;
+  try { st = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { st = null; }
+  if (!st || typeof st !== "object") st = null;
+  function fromItem(it) { return { src: it.id, title: it.title.replace(/\(\d\)$/, "").trim(), rules: it.rules.slice(0, MAXR), signs: it.signs.slice(0, MAXS) }; }
+  if (!st) { var first = D.items.filter(function (i) { return i.id === "7-11"; })[0] || D.items[0]; st = Object.assign(fromItem(first), { theme: "green", paper: "A4", ori: "p", co: profileCo(), mgr: "", date: "", logo: "" }); }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { if (st.logo) { /* 로고가 너무 크면 로고 없이 저장 */ try { var c = Object.assign({}, st, { logo: "" }); localStorage.setItem(KEY, JSON.stringify(c)); } catch (e2) {} } } }
+
+  // ---------- ① 수칙 목록
+  var CATS = ["전체"]; D.items.forEach(function (i) { if (CATS.indexOf(i.cat) < 0) CATS.push(i.cat); });
+  var cat = "전체";
+  $("rsCats").innerHTML = CATS.map(function (c) { return '<button type="button" data-c="' + esc(c) + '" aria-pressed="' + (c === cat) + '">' + esc(c) + "</button>"; }).join("");
+  function norm(s) { return String(s || "").toLowerCase().replace(/\s+/g, ""); }
+  function list() {
+    var q = norm($("rsQ").value);
+    var rows = D.items.filter(function (i) { return (cat === "전체" || i.cat === cat) && (!q || norm(i.title + i.rules.join("")).indexOf(q) >= 0); });
+    $("rsList").innerHTML = rows.length ? rows.map(function (i) {
+      return '<li><button type="button" data-id="' + esc(i.id) + '"' + (st.src === i.id ? ' aria-current="true"' : "") + '><span class="c">' + esc(i.cat) + "</span><span>" + esc(i.title) + '</span><span class="n">' + i.rules.length + "개</span></button></li>";
+    }).join("") : '<li style="padding:12px" class="hint">찾는 수칙이 없습니다. 아래 AI 초안이나 ②에서 직접 쓰세요.</li>';
+  }
+  $("rsCats").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; cat = b.dataset.c; [].forEach.call(this.children, function (x) { x.setAttribute("aria-pressed", x === b); }); list(); });
+  $("rsQ").addEventListener("input", list);
+  $("rsList").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-id]"); if (!b) return;
+    var it = D.items.filter(function (i) { return i.id === b.dataset.id; })[0]; if (!it) return;
+    if (st.edited && !confirm("지금 고친 제목·수칙을 '" + it.title + "' 내용으로 바꿉니다. 계속할까요?")) return;
+    Object.assign(st, fromItem(it)); st.edited = false; fill(); list(); save(); render();
+  });
+
+  // ---------- ② ③ ④ 입력
+  function fill() {
+    $("rsTitle").value = st.title; $("rsRules").value = st.rules.join("\n");
+    $("rsTheme").value = st.theme; $("rsPaper").value = st.paper; $("rsOri").value = st.ori;
+    $("rsCo").value = st.co || ""; $("rsMgr").value = st.mgr || ""; $("rsDate").value = st.date || "";
+    signs(); logoUI();
+  }
+  function signs() {
+    $("rsSigns").innerHTML = SIGNS.map(function (s) {
+      return '<button type="button" data-no="' + s.no + '" aria-pressed="' + (st.signs.indexOf(s.no) >= 0) + '" title="' + esc(s.ko) + '"><img src="' + ROOT + "assets/signs/" + s.no + '.webp" alt="" loading="lazy">' + esc(s.ko.length > 9 ? s.ko.slice(0, 8) + "…" : s.ko) + "</button>";
+    }).join("");
+    $("rsSignN").textContent = "(" + st.signs.length + "/" + MAXS + ")";
+  }
+  $("rsSigns").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-no]"); if (!b) return;
+    var no = b.dataset.no, i = st.signs.indexOf(no);
+    if (i >= 0) st.signs.splice(i, 1); else { if (st.signs.length >= MAXS) { alert("그림은 " + MAXS + "개까지 넣을 수 있습니다."); return; } st.signs.push(no); }
+    signs(); save(); render();
+  });
+  function readRules() { return $("rsRules").value.split(/\n+/).map(function (s) { return s.replace(/^\s*\d{1,2}[.)]\s*/, "").trim(); }).filter(Boolean); }
+  ["rsTitle", "rsRules", "rsCo", "rsMgr", "rsDate"].forEach(function (id) {
+    $(id).addEventListener("input", function () {
+      st.title = $("rsTitle").value.trim(); st.rules = readRules().slice(0, MAXR); st.co = $("rsCo").value.trim(); st.mgr = $("rsMgr").value.trim(); st.date = $("rsDate").value;
+      if (id === "rsTitle" || id === "rsRules") st.edited = true;
+      save(); render();
+    });
+  });
+  ["rsTheme", "rsPaper", "rsOri"].forEach(function (id) { $(id).addEventListener("change", function () { st.theme = $("rsTheme").value; st.paper = $("rsPaper").value; st.ori = $("rsOri").value; save(); render(); }); });
+  function logoUI() { var has = !!st.logo; $("rsLogoPrev").hidden = !has; $("rsLogoDel").hidden = !has; if (has) $("rsLogoPrev").src = st.logo; }
+  $("rsLogo").addEventListener("change", function () {
+    var f = this.files && this.files[0]; this.value = ""; if (!f) return;
+    if (!/^image\//.test(f.type)) { alert("그림 파일만 올릴 수 있습니다."); return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        var k = Math.min(1, 600 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        st.logo = c.toDataURL("image/png"); logoUI(); save(); render();
+      };
+      im.onerror = function () { alert("이 그림을 읽지 못했습니다."); };
+      im.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  });
+  $("rsLogoDel").addEventListener("click", function () { st.logo = ""; logoUI(); save(); render(); });
+  $("rsReset").addEventListener("click", function () { if (!confirm("입력한 내용을 모두 지우고 처음 상태로 돌릴까요?")) return; try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+
+  // ---------- 게시물 그리기 (실제 mm 크기, 글자는 넘치지 않을 때까지 줄인다)
+  function dims() { var p = PAPER[st.paper] || PAPER.A4; return st.ori === "l" ? [p[1], p[0]] : p; }
+  function pageHTML() {
+    var rules = st.rules.length ? st.rules : ["수칙을 입력하세요"];
+    var pics = st.signs.map(function (no) { var s = BYNO[no]; return s ? '<div class="rs-pic"><img src="' + ROOT + "assets/signs/" + no + '.webp" alt=""><span>' + esc(s.ko) + "</span></div>" : ""; }).join("");
+    var fromLib = D.items.some(function (i) { return i.id === st.src; }) && !st.edited;
+    var src = (fromLib ? "수칙 출처: 안전보건공단 「표준작업 안전수칙(제조분야)」 · " : "") + (st.signs.length ? "표지 그림: 안전보건공단(공공누리 제4유형)" : "");
+    var meta = [st.mgr ? "관리감독자 " + esc(st.mgr) : "", st.date ? "게시일 " + esc(st.date.replace(/-/g, ". ")) : ""].filter(Boolean).join("<br>");
+    return '<div class="rs-page t-' + st.theme + '"><div class="rs-hd"><div class="rs-hin"><span class="rs-badge">' + BADGE[st.theme] + '</span><div class="rs-ttl">' + esc(st.title || "안전작업수칙") + "</div></div></div>" +
+      (pics ? '<div class="rs-pics">' + pics + "</div>" : "") +
+      '<div class="rs-body"><ol>' + rules.map(function (r) { return "<li><span>" + esc(r) + "</span></li>"; }).join("") + "</ol></div>" +
+      '<div class="rs-ft">' + (st.logo ? '<img src="' + st.logo + '" alt="">' : "") + '<span class="co">' + esc(st.co || "") + '</span><span class="meta">' + meta + "</span></div>" +
+      (src ? '<div class="rs-src">' + src + "</div>" : "") + "</div>";
+  }
+  function fit(pg) {
+    var d = dims(), base = Math.min(d[0], d[1]) / 210;   // A4 세로 폭 기준 배율
+    var n = Math.max(1, st.rules.length);
+    pg.style.width = d[0] + "mm"; pg.style.height = d[1] + "mm";
+    var landscape = st.ori === "l";
+    pg.style.setProperty("--ft", (landscape ? 36 : 40) * base + "pt");
+    pg.style.setProperty("--fb", 13 * base + "pt");
+    pg.style.setProperty("--pw", (st.signs.length > 3 ? 28 : 32) * base * (landscape ? 0.85 : 1) + "mm");
+    pg.style.setProperty("--fp", 10 * base + "pt");
+    pg.style.setProperty("--ff", 11 * base + "pt");
+    var body = pg.querySelector(".rs-body"), ol = body.querySelector("ol");
+    var fr = Math.min(22, 15 * 10 / Math.max(6, n) + 2) * base, gap = 2.2 * base;
+    for (var k = 0; k < 40; k++) {
+      pg.style.setProperty("--fr", fr + "pt"); pg.style.setProperty("--gap", gap + "mm");
+      if (ol.scrollHeight <= body.clientHeight - 2) break;
+      fr *= 0.95; gap *= 0.9;
+    }
+    var t = pg.querySelector(".rs-ttl"), ft = (landscape ? 36 : 40) * base;
+    for (var j = 0; j < 20 && t.scrollWidth > t.clientWidth + 1; j++) { ft *= 0.93; pg.style.setProperty("--ft", ft + "pt"); }
+    return { fr: fr };
+  }
+  var renderTimer = null;
+  function render() { clearTimeout(renderTimer); renderTimer = setTimeout(doRender, 60); }
+  function doRender() {
+    var wrap = $("rsPrevWrap"), sc = $("rsScale");
+    sc.innerHTML = pageHTML();
+    var pg = sc.firstChild, r = fit(pg);
+    var w = pg.offsetWidth, h = pg.offsetHeight, k = Math.min(1, (wrap.clientWidth - 28) / w);
+    sc.style.transform = "scale(" + k + ")"; sc.style.width = w + "px"; sc.style.height = h * k + "px";
+    var n = st.rules.length;
+    $("rsCount").textContent = n + "줄" + (n > 10 ? " · 줄이 많아 글자가 작아집니다(" + Math.round(r.fr) + "pt). 현장에서 읽기 좋은 것은 10줄 이내입니다." : "");
+    var d = dims();
+    $("rsPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0}}";
+    $("rsSheet").dataset.dirty = "1";
+  }
+  function fillSheet() { var sh = $("rsSheet"); sh.innerHTML = pageHTML(); fit(sh.firstChild); sh.dataset.dirty = ""; return sh; }
+  // 브라우저 메뉴·Ctrl+P로 인쇄해도 빈 종이가 나오지 않게, 내용이 바뀐 경우에만 인쇄 직전에 채운다(이미 채운 그림은 다시 만들지 않음)
+  window.addEventListener("beforeprint", function () { if ($("rsSheet").dataset.dirty !== "") fillSheet(); });
+  $("rsPrint").addEventListener("click", function () {
+    var sh = fillSheet();
+    var imgs = [].slice.call(sh.querySelectorAll("img"));
+    Promise.all(imgs.map(function (i) { return i.complete ? 1 : new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); });
+  });
+  window.addEventListener("resize", render);
+
+  // ---------- AI 초안
+  var CODES = SIGNS.map(function (s) { return s.no + " " + s.ko; }).join(", ");
+  $("rsAiKey").addEventListener("click", function () { window.SPAI && SPAI.openSettings(); });
+  $("rsAiGo").addEventListener("click", function () {
+    var job = $("rsAiIn").value.trim(), stEl = $("rsAiSt"), btn = this;
+    if (!window.SPAI) { stEl.textContent = "AI 모듈을 불러오지 못했습니다. 새로고침해 주세요."; return; }
+    if (job.length < 3) { stEl.textContent = "작업이나 설비를 조금 더 구체적으로 적어 주세요."; $("rsAiIn").focus(); return; }
+    if ((st.edited || st.src === "ai") && !confirm("지금 제목·수칙·그림을 AI 초안으로 바꿉니다. 계속할까요?")) return;
+    btn.disabled = true; stEl.innerHTML = '<span class="spai-busy">AI가 초안을 만드는 중…</span>'; SPAI.css();
+    SPAI.json({
+      system: "너는 한국 제조·물류·건설 현장의 산업안전 전문가다. 산업안전보건법과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 표준작업 안전수칙의 표현 방식을 따른다. 현장 게시용 안전작업수칙을 쓴다. 각 수칙은 한 문장, 25~45자, '~할 것' 또는 '~한다'로 끝내고, 실제로 지킬 수 있는 구체적 행동만 쓴다. 법 조문 번호는 확실한 경우가 아니면 쓰지 않는다.",
+      prompt: "작업·설비: " + job + "\n\n이 작업에 맞는 안전작업수칙을 8~10개 만들어라. 제목은 '○○ 안전수칙' 형태로 15자 이내. 함께 붙일 안전보건표지를 아래 목록에서 2~4개 골라 번호만 적어라.\n표지 목록: " + CODES,
+      schema: { type: "OBJECT", properties: { title: { type: "STRING" }, rules: { type: "ARRAY", items: { type: "STRING" } }, signs: { type: "ARRAY", items: { type: "STRING" } } }, required: ["title", "rules", "signs"] },
+      temperature: 0.5
+    }).then(function (r) {
+      var rules = (r.rules || []).map(function (x) { return String(x).replace(/^\s*\d{1,2}[.)]\s*/, "").trim(); }).filter(Boolean).slice(0, MAXR);
+      if (!rules.length) throw new Error("AI가 수칙을 만들지 못했습니다. 다시 시도해 주세요.");
+      st.title = String(r.title || "안전수칙").slice(0, 40); st.rules = rules;
+      st.signs = (r.signs || []).map(function (x) { return String(x).match(/\d{3}/) ? String(x).match(/\d{3}/)[0] : ""; }).filter(function (x, i, a) { return BYNO[x] && a.indexOf(x) === i; }).slice(0, MAXS);
+      st.src = "ai"; st.edited = false; fill(); list(); save(); render();
+      stEl.innerHTML = "<b>AI 초안을 넣었습니다.</b> " + esc(SPAI.NOTICE);
+    }).catch(function (e) {
+      stEl.textContent = (e && e.message) || "AI 초안을 만들지 못했습니다.";
+    }).then(function () { btn.disabled = false; });
+  });
+
+  $("rsSrc").innerHTML = "수칙: " + esc(D.source.org) + " 「" + esc(D.source.title) + "」 (" + D.items.length + "개 항목, 원문 문구 그대로). 사업장에 맞게 고쳐 쓰는 예시입니다.<br>표지 그림: " + esc(SG.source.org) + " 「" + esc(SG.source.title) + "」 · " + esc(SG.source.kogl) + ".";
+  fill(); list(); render();
+})();
+</script>

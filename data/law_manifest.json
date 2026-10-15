@@ -136,7 +136,9 @@
     "inspect",
     "tbm",
     "committee",
-    "risk"
+    "risk",
+    "law-ai",
+    "rule-sign"
    ],
    "note": ""
   },
@@ -234,7 +236,8 @@
     "hpp",
     "inspect",
     "forms",
-    "improve"
+    "improve",
+    "law-ai"
    ],
    "note": ""
   },
@@ -319,7 +322,9 @@
     "forms",
     "msds",
     "risk",
-    "schedule"
+    "schedule",
+    "law-ai",
+    "rule-sign"
    ],
    "note": ""
   },
@@ -379,7 +384,8 @@
     "schedule",
     "cvd",
     "hpp",
-    "confined"
+    "confined",
+    "law-ai"
    ],
    "note": ""
   },
@@ -404,7 +410,8 @@
     "selection",
     "forms",
     "schedule",
-    "docmap"
+    "docmap",
+    "law-ai"
    ],
    "note": "제정 이후 개정 없음(연혁 1건). 상시근로자 50명 미만 사업장 적용 시기는 부칙에 따름."
   },
@@ -429,7 +436,8 @@
     "selection",
     "forms",
     "schedule",
-    "docmap"
+    "docmap",
+    "law-ai"
    ],
    "note": "연혁 목록 주소(lsId)를 확인하지 못해 '현행 머리말'만 확인함 — 시행 예정본 유무는 확인 필요."
   }

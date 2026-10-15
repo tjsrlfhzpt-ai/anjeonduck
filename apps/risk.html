@@ -233,6 +233,7 @@
   }
 </style>
 <script src="../../assets/docs.js"></script>
+<script src="../../assets/ai.js"></script>
 <style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746;padding:1px 3px}.risk-appr .ad-appr td.ad-s{height:24px}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}</style>
 </head>
 <body>
@@ -248,6 +249,7 @@
     <select id="globalWorkType" onchange="applyAutoData(false)"></select>
   </div>
   <button class="btn btn-blue" onclick="shuffleRows()" title="같은 공종의 다른 유해·위험요인 예시로 3번 표를 바꿉니다">🔀 다른 예시로</button>
+  <button class="btn btn-blue" id="aiRiskBtn" onclick="aiRiskDraft()" title="내 Gemini API 키로 작업내용에 맞는 유해·위험요인 초안을 만듭니다">✨ AI 초안</button>
   <button class="btn btn-blue" id="pickBtn" onclick="openPick()">＋ 유해·위험요인 불러오기</button>
   <button class="btn btn-blue" id="docsBtn" onclick="openDocs()">저장된 평가서</button>
   <button class="btn btn-blue" onclick="newDoc()">새 평가서</button>
@@ -739,6 +741,39 @@
     markTouched(); setStatus("'" + dept + "'의 다른 예시로 바꿨습니다 — 현장에 맞게 고쳐 쓰세요.");
   }
   window.shuffleRows = shuffleRows;
+  var aiBusy = false;
+  function aiRiskDraft() {
+    if (aiBusy) return;
+    if (!window.SPAI) { setStatus("AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.", true); return; }
+    if (!SPAI.hasKey()) { SPAI.ensureKey().then(function (ok) { if (ok) aiRiskDraft(); }); return; }
+    var dept = $("globalWorkType").value, def = txt($("dispDept"));
+    var work = prompt("평가할 작업내용을 구체적으로 적어 주세요.\n예) 냉동창고 지게차 팔레트 입출고, 3m 사다리 사용 조명 교체", def && def !== dept ? def : "");
+    if (work === null) return;
+    work = String(work).trim();
+    if (work.length < 4) { setStatus("작업내용을 4자 이상 적어 주세요.", true); return; }
+    if (rowsEdited() && !confirm("3번 표를 AI 초안으로 바꿉니다.\n직접 적은 유해·위험요인, 조치, 점수, 담당자는 지워집니다. 계속할까요?")) return;
+    var keys = Object.keys(TYPE_MAP).join("·"), btn = $("aiRiskBtn");
+    aiBusy = true; if (btn) btn.disabled = true;
+    setStatus("AI가 유해·위험요인과 감소대책을 만드는 중…");
+    SPAI.json({
+      system: "너는 한국 사업장의 안전관리자다. 고용노동부 「사업장 위험성평가에 관한 지침」과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 자료의 표현을 따른다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다.",
+      prompt: "공종(부서): " + dept + "\n평가 대상 작업: " + work + "\n\n이 작업의 유해·위험요인과 감소대책을 6~10개 만들어라. 각 항목: group(세부 작업 단계, 10자 이내), risk(유해·위험요인 및 위험성, '~로 인한 ~위험' 형태 한 문장 50자 이내), type(재해형태 — 반드시 다음 중 하나: " + keys + "·소음·기타), level(현재 위험성 상·중·하), measure(감소대책 — 공학적 대책·관리적 대책·보호구 순으로 실제 행동 위주 80자 이내).",
+      schema: { type: "OBJECT", properties: { rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING", enum: ["상", "중", "하"] }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["rows"] },
+      temperature: 0.4
+    }).then(function (r) {
+      var rows = (r && r.rows || []).filter(function (x) { return x && str(x.risk).trim(); }).slice(0, 20).map(function (x) {
+        var row = hazRow({ group: str(x.group), risk: str(x.risk).trim(), type: str(x.type).trim(), level: str(x.level).trim(), measure: str(x.measure).trim() });
+        row.work = str(x.group).trim() || work.slice(0, 40);
+        return row;
+      });
+      if (!rows.length) throw new Error("AI가 항목을 만들지 못했습니다. 작업내용을 조금 더 구체적으로 적어 다시 시도해 주세요.");
+      var dd = $("dispDept"); if (!txt(dd) || HAZARD_DB.groups.indexOf(txt(dd)) >= 0) dd.textContent = work.slice(0, 40);
+      fillRows(rows); touched = true; saveNow();
+      setStatus("AI 초안 " + rows.length + "줄을 넣었습니다. " + SPAI.NOTICE);
+    }).catch(function (e) { setStatus((e && e.message) || "AI 초안을 만들지 못했습니다.", true); })
+      .then(function () { aiBusy = false; if (btn) btn.disabled = false; });
+  }
+  window.aiRiskDraft = aiRiskDraft;
   function fillRows(rows) {
     var tbody = $("ra-tbody");
     tbody.innerHTML = "";
