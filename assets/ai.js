@@ -130,7 +130,7 @@
       ov.innerHTML = '<div class="spai-m"><h3>AI 키 설정 (내 Gemini API 키)</h3>' +
         '<p>SafePlum의 AI 기능은 <b>본인의 Google Gemini API 키</b>로 동작합니다. 키는 <b>이 브라우저에만</b> 저장되고, SafePlum은 키나 입력 내용을 받지 않습니다(AI 요청은 Google로 바로 갑니다).</p>' +
         '<ol><li><a class="spai-a" href="' + KEY_GUIDE + '" target="_blank" rel="noopener">Google AI Studio API 키 페이지 ↗</a>에 구글 계정으로 로그인</li><li>「API 키 만들기」를 눌러 키 복사</li><li>아래 칸에 붙여 넣고 「연결 확인」</li></ol>' +
-        '<label>API 키<input type="password" id="spaiKey" autocomplete="off" spellcheck="false" placeholder="AIza…" value="' + esc(k) + '"></label>' +
+        '<label>API 키<input type="password" id="spaiKey" autocomplete="off" spellcheck="false" placeholder="Google AI Studio에서 복사한 키" value="' + esc(k) + '"></label>' +
         '<label class="spai-chk"><input type="checkbox" id="spaiRem"' + (remembered() ? " checked" : "") + '><span>이 기기에 기억하기 <small style="color:#667">(끄면 창을 닫을 때 지워짐 · 공용 PC에서는 끄세요)</small></span></label>' +
         '<div class="spai-note"><b>입력 주의</b> — 무료 키로 보낸 내용은 Google이 서비스 개선에 쓸 수 있고 사람이 검토할 수 있습니다(Google 약관). <b>실명·연락처·주민번호 등 개인정보와 회사 기밀은 넣지 마세요.</b> AI 결과는 초안이므로 반드시 검토 후 사용하세요.</div>' +
         '<div class="spai-st" id="spaiSt" aria-live="polite">' + (k ? "저장된 키: " + esc(maskKey(k)) : "") + '</div>' +
@@ -146,8 +146,10 @@
       ov.querySelector("#spaiCancel").onclick = function () { close(!!getKey()); };
       var del = ov.querySelector("#spaiDel"); if (del) del.onclick = function () { setKey(""); st.className = "spai-st"; st.textContent = "키를 지웠습니다."; inp.value = ""; del.remove(); };
       ok.onclick = function () {
-        var v = inp.value.trim();
-        if (!/^[A-Za-z0-9_\-]{20,}$/.test(v)) { st.className = "spai-st err"; st.textContent = "키 형식이 맞지 않습니다. Google AI Studio에서 복사한 키를 그대로 붙여 넣어 주세요."; return; }
+        // 공백·줄바꿈·따옴표·보이지 않는 문자는 지우고, 실제 유효성은 아래 연결 확인(Google 응답)으로 판단한다.
+        // 키 형식은 Google이 바꿀 수 있으므로(예: AIza…, 점이 들어간 새 형식) 글자 종류를 좁게 막지 않는다.
+        var v = inp.value.replace(/[\s\u200B-\u200D\uFEFF"'`]/g, ""); inp.value = v;
+        if (!/^[\x21-\x7E]{20,300}$/.test(v)) { st.className = "spai-st err"; st.textContent = "키 형식이 맞지 않습니다. Google AI Studio에서 복사한 키를 그대로 붙여 넣어 주세요."; return; }
         var prevS = sget(sessionStorage, K_KEY), prevL = sget(localStorage, K_KEY);
         setKey(v, ov.querySelector("#spaiRem").checked);
         ok.disabled = true; st.className = "spai-st"; st.innerHTML = '<span class="spai-busy">연결 확인 중…</span>';
