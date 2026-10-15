@@ -91,10 +91,9 @@
 .rs-page.t-navy{--c:#17365D;--c2:#E7EDF6}.rs-page.t-red{--c:#C8102E;--c2:#FCE8EA}.rs-page.t-yellow{--c:#111;--c2:#FFF6CC;--ink:#FFD400}
 .rs-hd{background:var(--c);color:var(--ink);border-radius:3mm;padding:6mm 8mm;display:flex;align-items:center;gap:6mm}
 .t-yellow .rs-hd{background:repeating-linear-gradient(-45deg,#111 0 7mm,#FFD400 7mm 14mm);padding:3mm}
-.t-yellow .rs-hd .rs-hin{background:#111;border-radius:2mm;padding:4mm 6mm;flex:1;display:flex;align-items:center;gap:6mm}
-.rs-hin{flex:1;display:flex;align-items:center;gap:6mm;min-width:0}
-.rs-badge{flex:none;border:0.8mm solid currentColor;border-radius:2mm;padding:1.5mm 3mm;font-weight:900;letter-spacing:.08em;font-size:var(--fb,14pt)}
-.rs-ttl{font-weight:900;line-height:1.15;font-size:var(--ft,40pt);word-break:keep-all;min-width:0}
+.t-yellow .rs-hd .rs-hin{background:#111;border-radius:2mm;padding:4mm 6mm;flex:1;display:flex;align-items:center;justify-content:center;gap:6mm}
+.rs-hin{flex:1;display:flex;align-items:center;justify-content:center;gap:6mm;min-width:0}
+.rs-ttl{font-weight:900;line-height:1.15;font-size:var(--ft,40pt);word-break:keep-all;min-width:0;text-align:center}
 .rs-pics{display:flex;justify-content:center;gap:5mm;margin:6mm 0 2mm}
 .rs-pic{display:flex;flex-direction:column;align-items:center;gap:1.5mm;width:var(--pw,30mm)}
 .rs-pic img{width:100%;height:auto}
@@ -132,7 +131,6 @@
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var SIGNS = SG.items, BYNO = {}; SIGNS.forEach(function (s) { BYNO[s.no] = s; });
   var PAPER = { A4: [210, 297], A3: [297, 420] };
-  var BADGE = { green: "SAFETY", navy: "STANDARD", red: "DANGER", yellow: "CAUTION" };
   function profileCo() { try { var p = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}; return p.company || localStorage.getItem("safetake.company") || ""; } catch (e) { return ""; } }
   var st;
   try { st = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { st = null; }
@@ -219,7 +217,7 @@
     var fromLib = D.items.some(function (i) { return i.id === st.src; }) && !st.edited;
     var src = (fromLib ? "수칙 출처: 안전보건공단 「표준작업 안전수칙(제조분야)」 · " : "") + (st.signs.length ? "표지 그림: 안전보건공단(공공누리 제4유형)" : "");
     var meta = [st.mgr ? "관리감독자 " + esc(st.mgr) : "", st.date ? "게시일 " + esc(st.date.replace(/-/g, ". ")) : ""].filter(Boolean).join("<br>");
-    return '<div class="rs-page t-' + st.theme + '"><div class="rs-hd"><div class="rs-hin"><span class="rs-badge">' + BADGE[st.theme] + '</span><div class="rs-ttl">' + esc(st.title || "안전작업수칙") + "</div></div></div>" +
+    return '<div class="rs-page t-' + st.theme + '"><div class="rs-hd"><div class="rs-hin"><div class="rs-ttl">' + esc(st.title || "안전작업수칙") + "</div></div></div>" +
       (pics ? '<div class="rs-pics">' + pics + "</div>" : "") +
       '<div class="rs-body"><ol>' + rules.map(function (r) { return "<li><span>" + esc(r) + "</span></li>"; }).join("") + "</ol></div>" +
       '<div class="rs-ft">' + (st.logo ? '<img src="' + st.logo + '" alt="">' : "") + '<span class="co">' + esc(st.co || "") + '</span><span class="meta">' + meta + "</span></div>" +
@@ -231,7 +229,6 @@
     pg.style.width = d[0] + "mm"; pg.style.height = d[1] + "mm";
     var landscape = st.ori === "l";
     pg.style.setProperty("--ft", (landscape ? 36 : 40) * base + "pt");
-    pg.style.setProperty("--fb", 13 * base + "pt");
     pg.style.setProperty("--pw", (st.signs.length > 3 ? 28 : 32) * base * (landscape ? 0.85 : 1) + "mm");
     pg.style.setProperty("--fp", 10 * base + "pt");
     pg.style.setProperty("--ff", 11 * base + "pt");
