@@ -274,7 +274,7 @@ CAT_RANK = {"무료 작성 도구": 0, "웹 작성 서식": 1, "법정 서식": 
 
 
 SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours"], "점검·작업허가": ["improve", "docmap", "inspect", "loto", "rule-sign"],
-             "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["council", "safety-cost", "cost-use", "hpp"], "기계·설비 인증·검사": ["machines", "inspect"],
+             "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["council", "safety-cost", "cost-use", "hpp"], "기계·설비 인증·검사": ["machines", "gear-cert", "inspect"],
              "화학물질·석면": ["msds"], "작업환경·건강": ["heat", "confined", "cvd"]}
 
 
@@ -591,17 +591,17 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
 
 TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "cost-use": "🧾", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
-              "duties": "🧑‍💼", "law-ai": "⚖️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
+              "duties": "🧑‍💼", "law-ai": "⚖️", "gear-cert": "⛑️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
 TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "heat": "heat", "improve": "fix", "confined": "confined",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "cost-use": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
-              "schedule": "calendar", "duties": "briefcase", "law-ai": "book", "retention": "folder", "inspect": "search", "docmap": "audit"}
+              "schedule": "calendar", "duties": "briefcase", "law-ai": "book", "gear-cert": "helmet", "retention": "folder", "inspect": "search", "docmap": "audit"}
 # 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
 WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "improve"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
 HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"), ("accident", "alarm"), ("ppe-ledger", "goggles")]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
-LOOKUP_TOOLS = ["law-ai", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
+LOOKUP_TOOLS = ["law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
 NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "board/?b=job"), ("board", "게시판", "board/")]

@@ -138,7 +138,8 @@
     "committee",
     "risk",
     "law-ai",
-    "rule-sign"
+    "rule-sign",
+    "gear-cert"
    ],
    "note": ""
   },
@@ -237,7 +238,8 @@
     "inspect",
     "forms",
     "improve",
-    "law-ai"
+    "law-ai",
+    "gear-cert"
    ],
    "note": ""
   },
@@ -385,7 +387,8 @@
     "cvd",
     "hpp",
     "confined",
-    "law-ai"
+    "law-ai",
+    "gear-cert"
    ],
    "note": ""
   },

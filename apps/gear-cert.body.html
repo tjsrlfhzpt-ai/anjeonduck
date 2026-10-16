@@ -1,0 +1,213 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>보호구·방호장치 인증 확인</p>
+  <h1>보호구·방호장치 인증 확인 · 확인 기록</h1>
+  <p>안전모·안전화·보안경, 자동전격방지기·연삭기 덮개 같은 <strong>보호구·방호장치</strong>를 사거나 지급하기 전에 <strong>안전인증 대상인지 자율안전확인 대상인지</strong> 보고, 안전보건공단 현황에서 번호를 조회한 뒤 <strong>확인 기록</strong>을 남겨 A4로 인쇄합니다. 인증·신고가 없는 대상품은 누구도 사용할 수 없습니다(산안법 제87조·제92조).</p>
+</div></section>
+<div class="wrap layout-detail gc-layout no-print">
+  <section class="col-main stack">
+    <div class="calc">
+      <h2 class="h-sm">① 품목 고르기</h2>
+      <div class="seg" id="gcKind" role="group" aria-label="종류"><button type="button" data-k="ppe" aria-pressed="true">보호구</button><button type="button" data-k="devices" aria-pressed="false">방호장치</button></div>
+      <div class="gc-grp" id="gcList"></div>
+      <div id="gcCard" aria-live="polite"></div>
+    </div>
+    <div class="calc">
+      <div class="gc-head"><h2 class="h-sm">② 확인 기록 <span class="muted" id="gcN"></span></h2>
+        <div class="btns"><button type="button" class="btn btn-sm btn-ghost" id="gcAdd">＋ 빈 줄</button><button type="button" class="btn btn-sm btn-ghost" id="gcCsv">엑셀(CSV) 저장</button><button type="button" class="btn btn-sm" id="gcPrint">인쇄 · PDF</button></div></div>
+      <div class="grid3">
+        <label class="field"><span class="label">사업장</span><input type="text" id="gcCo" maxlength="40" placeholder="예: ○○공장"></label>
+        <label class="field"><span class="label">확인 책임자</span><input type="text" id="gcMgr" maxlength="20" placeholder="예: 안전관리자 홍길동"></label>
+        <label class="field"><span class="label">문서 제목</span><input type="text" id="gcTtl" maxlength="40"></label>
+      </div>
+      <div class="table-wrap"><table class="dtable gc-tbl">
+        <thead><tr><th>품목</th><th>구분</th><th>제조사</th><th>형식·모델명</th><th>인증·신고번호</th><th>수량</th><th>확인일</th><th>확인 방법</th><th>결과</th><th>비고</th><th><span class="sr">삭제</span></th></tr></thead>
+        <tbody id="gcRows"></tbody>
+      </table></div>
+      <p class="hint">위 ①에서 품목을 고르고 「기록에 추가」를 누르거나, 빈 줄을 넣어 직접 적으세요. 이 브라우저에만 저장됩니다(서버로 보내지 않음).</p>
+    </div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">현장에서 이렇게 확인하세요</h2><ol class="bul hint gc-ol">
+      <li>제품이나 포장에 <b>안전인증 표시</b> 또는 <b>자율안전확인 표시</b>와 번호가 있는지 봅니다(법 제85조·제90조).</li>
+      <li>번호·모델명을 안전보건공단 <b>현황</b>에서 조회합니다(아래 바로가기).</li>
+      <li>업체가 준 인증서·신고증명서는 공단 <b>발급문서 진위확인</b>으로 확인합니다.</li>
+      <li>확인 결과를 ② 기록에 남기고, 납품서·인증서 사본과 함께 보관합니다.</li>
+    </ol></div>
+    <div class="side-box"><h2 class="h-sm">안전보건공단 바로가기</h2><ul class="bul" id="gcLinks"></ul><p class="hint">공단 사이트의 조회 화면으로 연결합니다. SafePlum은 공단 자료를 복사해 두지 않습니다.</p></div>
+    <div class="side-box"><h2 class="h-sm">작업별 지급해야 할 보호구</h2><div class="hint" id="gcWork"></div></div>
+    <div class="side-box"><h2 class="h-sm">위반하면</h2><ul class="bul hint">
+      <li>안전인증 없는 대상품 사용: <b>3년 이하 징역 또는 3천만원 이하 벌금</b> (법 제87조제1항 → 제169조)</li>
+      <li>자율안전확인 신고 없는 대상품 사용: <b>1년 이하 징역 또는 1천만원 이하 벌금</b> (법 제92조제1항 → 제170조)</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">함께 쓰는 도구</h2><ul class="bul">
+      <li><a href="../machines/">기계·기구 법정 의무 조회</a></li>
+      <li><a href="../inspect/">안전검사 대상·다음 검사일</a></li>
+      <li><a href="../law-ai/">법령 AI 질문</a></li>
+    </ul></div>
+    <p class="src-line" id="gcSrc"></p>
+  </aside>
+</div>
+<div class="gc-print" id="gcSheet" aria-hidden="true"></div>
+<style>
+.gc-grp{margin-top:10px}
+.gc-grp h3{font-size:13px;color:var(--text-2);margin:12px 0 6px}
+.gc-items{display:flex;flex-wrap:wrap;gap:6px}
+.gc-items button{min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13.5px;color:var(--text);cursor:pointer;text-align:left}
+.gc-items button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.gc-card{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface-2)}
+.gc-card h3{font-size:17px;margin:0 0 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gc-b{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:800}
+.gc-b.cert{background:var(--red-50);color:var(--red)}
+.gc-b.self{background:var(--orange-50);color:var(--orange)}
+.gc-card dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:6px 12px;margin:0;font-size:14px}
+.gc-card dt{font-weight:700;color:var(--navy)}
+.gc-card dd{margin:0;color:var(--text-2)}
+.gc-card .btns{margin-top:12px}
+.gc-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.gc-tbl{min-width:1020px;font-size:13px}
+.gc-tbl td{padding:4px!important;vertical-align:middle}
+.gc-tbl input,.gc-tbl select{width:100%;min-width:0;height:34px;border:1px solid var(--line);border-radius:7px;padding:0 6px;font:inherit;font-size:13px;background:var(--surface);color:var(--text)}
+.gc-tbl td:nth-child(1){min-width:150px}.gc-tbl td:nth-child(5){min-width:120px}.gc-tbl td:nth-child(6){width:56px}.gc-tbl td:nth-child(7){width:126px}
+.gc-tbl .del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;width:32px;height:32px}
+.gc-tbl .empty td{text-align:center;color:var(--muted);padding:18px!important}
+.gc-ol{padding-left:18px}
+.gc-work{width:100%;border-collapse:collapse;font-size:12.5px}
+.gc-work td{border-top:1px solid var(--line-2);padding:5px 4px;vertical-align:top}
+.gc-work td:last-child{white-space:nowrap;font-weight:700;color:var(--text)}
+.gc-print{display:none}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(main){display:none!important}
+  main>*:not(.gc-print){display:none!important}
+  .gc-print{display:block!important;color:#000;font-size:9.5pt}
+  .gc-print h1{font-size:16pt;text-align:center;margin:0 0 3mm;color:#000}
+  .gc-print .meta{display:flex;justify-content:space-between;margin-bottom:2mm}
+  .gc-print table{width:100%;border-collapse:collapse}
+  .gc-print th,.gc-print td{border:0.3mm solid #333;padding:1.6mm 1.2mm;text-align:center;word-break:keep-all}
+  .gc-print th{background:#E9EEF4!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .gc-print .note{margin-top:3mm;font-size:8pt;color:#333;line-height:1.5}
+}
+@media (max-width:720px){.gc-card dl{grid-template-columns:1fr}}
+@media (max-width:1023px){.layout-detail.gc-layout .col-side{order:0}}
+@media print{@page{size:A4 landscape;margin:10mm}}
+</style>
+<script>
+(function () {
+  "use strict";
+  var M = /*@DATA@*/null;
+  if (!M) return;
+  var KEY = "safetake.gearcert", MAXR = 300;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  // 안전보건공단 산업안전포털 조회 화면(2026-10-16 메뉴 기준 확인). 주소가 바뀌면 여기만 고친다
+  var P = "https://portal.kosha.or.kr/business-apply-search/";
+  var LINKS = {
+    certGear: P + "biz-support/safe-cert/gear/cont",
+    selfGear: P + "biz-support/self-report/gear/cont",
+    certMach: P + "biz-support/safe-cert/hazard/status",
+    selfMach: P + "biz-support/self-report/hazard/cont2",
+    auth: P + "authenticity"
+  };
+  var LAWREF = {
+    ppe: { cert: "산안법 시행령 제74조제1항제3호", self: "산안법 시행령 제77조제1항제3호" },
+    devices: { cert: "산안법 시행령 제74조제1항제2호", self: "산안법 시행령 제77조제1항제2호" }
+  };
+  // 안전보건규칙 제32조제1항 제1~9호(작업 → 보호구). 그 밖의 호는 원문 참고
+  var WORK = [["물체가 떨어지거나 날아올 위험, 추락할 위험이 있는 작업", "안전모"], ["높이·깊이 2m 이상 추락 위험 장소의 작업", "안전대"], ["낙하·충격, 끼임, 감전·정전기 대전 위험 작업", "안전화"], ["물체가 흩날릴 위험이 있는 작업", "보안경"], ["용접 시 불꽃·물체가 흩날릴 위험이 있는 작업", "보안면"], ["감전 위험이 있는 작업", "절연용 보호구"], ["고열에 의한 화상 등의 위험 작업", "방열복"], ["선창 등 분진이 심한 하역작업", "방진마스크"], ["영하 18℃ 이하 급냉동어창 하역작업", "방한모·방한복·방한화·방한장갑"]];
+  var METHODS = ["제품 표시 확인", "공단 현황 조회", "진위확인", "인증서·신고증명서 사본"];
+  var RESULTS = ["적합", "부적합", "확인 중"];
+
+  var st = load(), kind = "ppe", sel = null;
+  function load() {
+    var d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+    d = d && typeof d === "object" ? d : {};
+    return { co: String(d.co || ""), mgr: String(d.mgr || ""), ttl: String(d.ttl || "보호구·방호장치 인증 확인 기록"), rows: Array.isArray(d.rows) ? d.rows.slice(0, MAXR).map(clean) : [] };
+  }
+  function clean(r) {
+    r = r && typeof r === "object" ? r : {};
+    var o = {}; ["item", "type", "maker", "model", "no", "qty", "date", "how", "res", "note"].forEach(function (k) { o[k] = String(r[k] == null ? "" : r[k]).slice(0, 120); });
+    return o;
+  }
+  var saveT = null;
+  function save() { clearTimeout(saveT); saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }, 300); }
+  function today() { var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function typeLabel(t) { return t === "cert" ? "안전인증" : t === "self" ? "자율안전확인" : ""; }
+
+  // ---------- ① 품목
+  function renderList() {
+    var g = M[kind] || { cert: [], self: [] };
+    $("gcList").innerHTML = ["cert", "self"].map(function (t) {
+      return "<h3>" + typeLabel(t) + " 대상 <span class=\"muted\">(" + LAWREF[kind][t] + ")</span></h3><div class=\"gc-items\">" +
+        (g[t] || []).map(function (n, i) { var on = sel && sel.k === kind && sel.t === t && sel.i === i; return '<button type="button" data-t="' + t + '" data-i="' + i + '" aria-pressed="' + on + '">' + esc(n) + "</button>"; }).join("") + "</div>";
+    }).join("");
+    [].forEach.call(document.querySelectorAll("#gcKind button"), function (b) { b.setAttribute("aria-pressed", b.dataset.k === kind); });
+  }
+  function renderCard() {
+    if (!sel) { $("gcCard").innerHTML = ""; return; }
+    var name = M[sel.k][sel.t][sel.i], cert = sel.t === "cert";
+    var cur = cert ? LINKS.certGear : LINKS.selfGear;
+    $("gcCard").innerHTML = '<div class="gc-card"><h3>' + esc(name) + ' <span class="gc-b ' + sel.t + '">' + typeLabel(sel.t) + " 대상</span></h3><dl>" +
+      "<dt>근거</dt><dd>" + LAWREF[sel.k][sel.t] + (cert ? " · 산안법 제84조(안전인증)" : " · 산안법 제89조(자율안전확인의 신고)") + " · 세부 종류·규격은 고용노동부 고시</dd>" +
+      "<dt>제품 확인</dt><dd>제품이나 포장에 " + (cert ? "안전인증 표시(법 제85조)" : "자율안전확인 표시(법 제90조)") + "와 번호가 있는지 봅니다.</dd>" +
+      '<dt>번호 조회</dt><dd><a href="' + cur + '" target="_blank" rel="noopener">공단 ' + (cert ? "안전인증 현황" : "자율안전확인 현황") + " (방호장치·보호구) ↗</a> 에서 형식·모델명이나 번호로 찾습니다.</dd>" +
+      '<dt>서류 확인</dt><dd><a href="' + LINKS.auth + '" target="_blank" rel="noopener">발급문서 진위확인 ↗</a> — 업체가 준 ' + (cert ? "안전인증서" : "자율안전확인 신고증명서") + "가 진짜인지 확인합니다.</dd>" +
+      "<dt>사용 금지</dt><dd>" + (cert ? "안전인증을 받지 않았거나 취소·사용금지된 것은 사용할 수 없습니다(법 제87조제1항, 위반 시 제169조)." : "신고하지 않았거나 사용금지된 것은 사용할 수 없습니다(법 제92조제1항, 위반 시 제170조).") + "</dd>" +
+      (sel.k === "ppe" && !cert ? "<dt>주의</dt><dd>추락·감전 위험방지용 안전모, 차광·비산물 위험방지용 보안경, 용접용 보안면은 <b>안전인증</b> 대상입니다. 용도에 맞는지 먼저 보세요.</dd>" : "") +
+      '</dl><div class="btns"><button type="button" class="btn btn-sm" id="gcPick">기록에 추가</button></div></div>';
+  }
+
+  // ---------- ② 기록
+  function opt(list, v) { return '<option value=""></option>' + list.map(function (x) { return '<option' + (x === v ? " selected" : "") + ">" + esc(x) + "</option>"; }).join(""); }
+  function renderRows() {
+    $("gcN").textContent = st.rows.length ? st.rows.length + "건" : "";
+    if (!st.rows.length) { $("gcRows").innerHTML = '<tr class="empty"><td colspan="11">아직 기록이 없습니다.</td></tr>'; return; }
+    $("gcRows").innerHTML = st.rows.map(function (r, i) {
+      function inp(k, ph, t) { return '<input type="' + (t || "text") + '" data-r="' + i + '" data-k="' + k + '" value="' + esc(r[k]) + '" placeholder="' + ph + '" maxlength="120" aria-label="' + ph + '">'; }
+      return "<tr><td>" + inp("item", "품목") + '</td><td><select data-r="' + i + '" data-k="type" aria-label="구분">' + opt(["안전인증", "자율안전확인", "대상 아님"], r.type) + "</select></td><td>" + inp("maker", "제조사") + "</td><td>" + inp("model", "형식·모델명") + "</td><td>" + inp("no", "번호") + "</td><td>" + inp("qty", "수량") + "</td><td>" + inp("date", "확인일", "date") +
+        '</td><td><select data-r="' + i + '" data-k="how" aria-label="확인 방법">' + opt(METHODS, r.how) + '</select></td><td><select data-r="' + i + '" data-k="res" aria-label="결과">' + opt(RESULTS, r.res) + "</select></td><td>" + inp("note", "비고") + '</td><td><button type="button" class="del" data-del="' + i + '" aria-label="' + (i + 1) + '번째 줄 삭제">✕</button></td></tr>';
+    }).join("");
+  }
+  function addRow(r) {
+    if (st.rows.length >= MAXR) { alert("기록은 " + MAXR + "줄까지 저장됩니다. 인쇄·CSV로 보관한 뒤 지워 주세요."); return; }
+    st.rows.push(clean(r)); save(); renderRows();
+    var last = $("gcRows").lastElementChild; var f = last && last.querySelector('[data-k="maker"]'); if (f) f.focus();
+  }
+  function csv() {
+    var head = ["품목", "구분", "제조사", "형식·모델명", "인증·신고번호", "수량", "확인일", "확인 방법", "결과", "비고"];
+    var keys = ["item", "type", "maker", "model", "no", "qty", "date", "how", "res", "note"];
+    var q = function (v) { v = String(v == null ? "" : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+    var lines = [head.map(q).join(",")].concat(st.rows.map(function (r) { return keys.map(function (k) { return q(r[k]); }).join(","); }));
+    var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = (st.ttl || "인증확인기록") + "_" + today() + ".csv";
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function sheet() {
+    var rows = st.rows.length ? st.rows : [clean({})];
+    $("gcSheet").innerHTML = "<h1>" + esc(st.ttl || "보호구·방호장치 인증 확인 기록") + '</h1><div class="meta"><span>사업장: ' + esc(st.co) + "</span><span>확인 책임자: " + esc(st.mgr) + "</span><span>출력일: " + today() + "</span></div>" +
+      "<table><thead><tr><th>연번</th><th>품목</th><th>구분</th><th>제조사</th><th>형식·모델명</th><th>인증·신고번호</th><th>수량</th><th>확인일</th><th>확인 방법</th><th>결과</th><th>비고</th></tr></thead><tbody>" +
+      rows.map(function (r, i) { return "<tr><td>" + (i + 1) + "</td><td>" + esc(r.item) + "</td><td>" + esc(r.type) + "</td><td>" + esc(r.maker) + "</td><td>" + esc(r.model) + "</td><td>" + esc(r.no) + "</td><td>" + esc(r.qty) + "</td><td>" + esc(r.date) + "</td><td>" + esc(r.how) + "</td><td>" + esc(r.res) + "</td><td>" + esc(r.note) + "</td></tr>"; }).join("") +
+      '</tbody></table><p class="note">근거: 산업안전보건법 제84조·제87조(안전인증), 제89조·제92조(자율안전확인), 시행령 제74조·제77조, 산업안전보건기준에 관한 규칙 제32조(보호구의 지급 등). 번호는 안전보건공단 산업안전포털 현황·진위확인으로 확인.</p>';
+  }
+
+  // ---------- 이벤트
+  $("gcKind").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; kind = b.dataset.k; sel = null; renderList(); renderCard(); });
+  $("gcList").addEventListener("click", function (e) { var b = e.target.closest("button[data-t]"); if (!b) return; sel = { k: kind, t: b.dataset.t, i: +b.dataset.i }; renderList(); renderCard(); });
+  $("gcCard").addEventListener("click", function (e) {
+    if (e.target.id !== "gcPick" || !sel) return;
+    addRow({ item: M[sel.k][sel.t][sel.i].replace(/\((안전인증 대상[^)]*|고시)\)$/, ""), type: typeLabel(sel.t), date: today(), how: "공단 현황 조회" });
+  });
+  $("gcRows").addEventListener("input", function (e) { var el = e.target, i = +el.dataset.r; if (!el.dataset.k || !st.rows[i]) return; st.rows[i][el.dataset.k] = String(el.value).slice(0, 120); save(); });
+  $("gcRows").addEventListener("change", function (e) { var el = e.target, i = +el.dataset.r; if (!el.dataset.k || !st.rows[i]) return; st.rows[i][el.dataset.k] = String(el.value).slice(0, 120); save(); });
+  $("gcRows").addEventListener("click", function (e) { var b = e.target.closest("[data-del]"); if (!b) return; var i = +b.dataset.del; var r = st.rows[i]; if ((r.maker || r.model || r.no) && !confirm((i + 1) + "번째 줄을 지울까요?")) return; st.rows.splice(i, 1); save(); renderRows(); });
+  $("gcAdd").addEventListener("click", function () { addRow({ date: today() }); });
+  $("gcCsv").addEventListener("click", csv);
+  $("gcPrint").addEventListener("click", function () { sheet(); window.print(); });
+  window.addEventListener("beforeprint", sheet);
+  [["gcCo", "co"], ["gcMgr", "mgr"], ["gcTtl", "ttl"]].forEach(function (p) { var el = $(p[0]); el.value = st[p[1]]; el.addEventListener("input", function () { st[p[1]] = el.value.slice(0, 40); save(); }); });
+
+  $("gcLinks").innerHTML = [["방호장치·보호구 안전인증 현황", LINKS.certGear], ["방호장치·보호구 자율안전확인 현황", LINKS.selfGear], ["기계·기구 안전인증 현황", LINKS.certMach], ["기계·기구 자율안전확인 현황", LINKS.selfMach], ["발급문서 진위확인", LINKS.auth]].map(function (l) { return '<li><a href="' + l[1] + '" target="_blank" rel="noopener">' + l[0] + " ↗</a></li>"; }).join("");
+  $("gcWork").innerHTML = '<table class="gc-work">' + WORK.map(function (w) { return "<tr><td>" + esc(w[0]) + "</td><td>" + esc(w[1]) + "</td></tr>"; }).join("") + '</table><p style="margin-top:6px">안전보건규칙 제32조제1항 제1~9호 요약. 작업하는 근로자 수 이상 지급·착용. <a href="../../laws/krule/#j32">원문 ↗</a></p>';
+  $("gcSrc").textContent = "대상 목록: " + (M.source || "") + " · 확인 " + (M.checked || "");
+  renderList(); renderCard(); renderRows();
+})();
+</script>
