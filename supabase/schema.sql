@@ -250,7 +250,8 @@ begin
   p := btrim(p);
   if not public.nickname_ok(p) then raise exception 'NICKNAME_INVALID'; end if;
   select * into cur from public.profiles where id = auth.uid();
-  if cur.nickname_changed_at is not null and cur.nickname_changed_at > now() - interval '7 days' then raise exception 'NICKNAME_COOLDOWN'; end if;
+  -- 2026-10-19 운영 결정: 7일 변경 제한을 잠시 해제(다시 걸려면 아래 줄 주석을 푼다)
+  -- if cur.nickname_changed_at is not null and cur.nickname_changed_at > now() - interval '7 days' then raise exception 'NICKNAME_COOLDOWN'; end if;
   if exists (select 1 from public.profiles where lower(nickname) = lower(p) and id <> auth.uid()) then raise exception 'NICKNAME_TAKEN'; end if;
   update public.profiles set nickname = p, nickname_changed_at = now() where id = auth.uid();
 end $$;

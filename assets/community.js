@@ -546,7 +546,7 @@
         h("form", { class: "cm-form", onsubmit: function (ev) {
           ev.preventDefault(); busy(b1, true);
           sb.rpc("set_nickname", { p: nn.value.trim() }).then(function (r) { busy(b1, false); result(o1, r.error ? msg(r.error) : "닉네임을 바꿨습니다.", !r.error); });
-        } }, field("닉네임", nn, "한글·영문·숫자·밑줄 2~12자 · 7일에 한 번 변경"), o1, h("p", { class: "btns" }, b1)),
+        } }, field("닉네임", nn, "한글·영문·숫자·밑줄 2~12자"), o1, h("p", { class: "btns" }, b1)),
         h("form", { class: "cm-form", onsubmit: function (ev) {
           ev.preventDefault(); if (!c2.same()) { c2.input.focus(); return result(o2, "비밀번호가 서로 다릅니다. 다시 확인해 주세요."); } busy(b2, true);
           sb.auth.updateUser({ password: pw.value }).then(function (r) { busy(b2, false); if (!r.error) { pw.value = ""; c2.input.value = ""; c2.same(); } result(o2, r.error ? msg(r.error) : "비밀번호를 바꿨습니다.", !r.error); });
