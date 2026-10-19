@@ -65,7 +65,13 @@
     if (full) return ymd + " " + hm;
     return d.toDateString() === now.toDateString() ? hm : (d.getFullYear() === now.getFullYear() ? ymd.slice(5) : ymd);
   }
-  function nick(row) { return (row && row.author && row.author.nickname) || "탈퇴한 회원"; }
+  // 쓸 당시 닉네임 컬럼(supabase/nick_snapshot.sql). 아직 DB에 없으면 한 번 실패 후 빼고 다시 불러온다.
+  var NICKCOL = "author_nick,";
+  function nick(row) {
+    // 글·댓글은 쓸 당시 닉네임(author_nick)을 보여 준다. 탈퇴해 작성자 정보가 없으면 '탈퇴한 회원'.
+    if (!row || !row.author) return "탈퇴한 회원";
+    return row.author_nick || row.author.nickname || "탈퇴한 회원";
+  }
   // 본문: 줄바꿈은 CSS(pre-wrap), https 주소만 링크로 만든다
   function rich(text) {
     var out = [], re = /https?:\/\/[^\s<>"']+/g, last = 0, m;
@@ -241,11 +247,12 @@
     navJob(b === "job");
     loading();
     var job = b === "job";
-    var q = sb.from("posts").select("id,board,category,title,created_at,comment_count,accepted_comment_id,notice," + (job ? "meta," : "") + "author:profiles(nickname)", { count: "exact" }).is("deleted_at", null)
+    var q = sb.from("posts").select("id,board,category,title,created_at,comment_count,accepted_comment_id,notice," + NICKCOL + (job ? "meta," : "") + "author:profiles(nickname)", { count: "exact" }).is("deleted_at", null)
       .eq("board", b).order("notice", { ascending: false }).order("created_at", { ascending: false }).range((p - 1) * PER, p * PER - 1);
     if (cat) q = q.eq("category", cat);
     if (kw) q = q.ilike("title", "%" + kw.replace(/[\\%_]/g, "\\$&") + "%");
     q.then(function (r) {
+      if (r.error && NICKCOL && /author_nick/.test(String(r.error.message || ""))) { NICKCOL = ""; return pageList(); }
       if (r.error && job && /meta/.test(String(r.error.message || ""))) return show(tabs(b), chatBox(), h("div", { class: "empty" }, h("p", { class: "cm-empty-t" }, "채용공고 게시판을 준비하고 있습니다"), h("p", null, "곧 회원이 직접 채용공고를 올릴 수 있게 됩니다.")));
       if (r.error) return show(tabs(b), note(msg(r.error), "err"), h("p", { class: "btns" }, h("button", { type: "button", class: "btn btn-ghost", onclick: pageList }, "다시 시도")));
       var rows = r.data || [], total = r.count || 0, pages = Math.max(1, Math.ceil(total / PER));
@@ -288,9 +295,10 @@
     loading();
     Promise.all([
       sb.from("posts").select("*,author:profiles(nickname)").eq("id", id).is("deleted_at", null).maybeSingle(),
-      sb.from("comments").select("id,body,created_at,author_id,author:profiles(nickname)").eq("post_id", id).is("deleted_at", null).order("created_at", { ascending: true }).limit(500)
+      sb.from("comments").select("id,body,created_at,author_id," + NICKCOL + "author:profiles(nickname)").eq("post_id", id).is("deleted_at", null).order("created_at", { ascending: true }).limit(500)
     ]).then(function (rs) {
       var post = rs[0].data, err = rs[0].error || rs[1].error;
+      if (err && NICKCOL && /author_nick/.test(String(err.message || ""))) { NICKCOL = ""; return pageView(); }
       if (err) return show(note(msg(err), "err"));
       if (!post) return show(h("div", { class: "empty" }, h("p", null, "삭제되었거나 없는 글입니다."), h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("") }, "목록으로"))));
       var job = post.board === "job", jm = (job && post.meta) || {}, jst = job ? jobState(jm) : null; navJob(job);
