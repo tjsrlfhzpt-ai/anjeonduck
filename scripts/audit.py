@@ -147,8 +147,8 @@ def check_phrases(site_dir):
                 ctx = txt[max(0, m.start() - 60):m.end() + 90].replace("\n", " ")
                 if ok and re.search(ok, ctx):
                     continue
-                if p.parent.name == "lawtext":
-                    continue
+                if p.parent.name == "lawtext" or p.name == "gov_qa.json":
+                    continue  # 법령 원문·정부 질의회시 원문은 옮긴 그대로 둔다
                 ERR.append(f"금지 표현 '{word}': {p.relative_to(ROOT)} …{ctx[40:130]}…")
     if site_dir:
         n = 0

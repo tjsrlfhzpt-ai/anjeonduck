@@ -617,7 +617,7 @@ def nav_cols(site, rel):
                  + [(f"{rel}tools/forms/", f"작성기 전체 {WRITER_N}종 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
                 ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
-                ("소식·안내", [(f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
+                ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
         "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")][:2 if (site.get("features") or {}).get("job_posting", True) else 1] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
@@ -1927,6 +1927,102 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
         write(f"brief/{b['date']}/index.html", page(site, "../../", f"brief/{b['date']}/", f'{fmt_date(b["date"])} 안전 브리핑 — {b["title"]}', body,
               desc=(b.get("lead") or b["title"])[:150], active="brief/"))
 
+
+    # ---- 고용노동부 질의회시(중앙부처 1차 해석) 모음: data/gov_qa.json (scripts/import_gov_qa.py 로 만든다)
+    GQ = load("data/gov_qa.json") if (ROOT / "data/gov_qa.json").exists() else None
+    if GQ:
+        gm, gitems = GQ["meta"], GQ["items"]
+        OLD = "2020-01-16"  # 산업안전보건법 전부개정 시행일. 그 전 해석은 조문 번호가 현행과 다를 수 있다
+
+        def gq_paras(t):
+            return "".join(f"<p>{e(ln)}</p>" for ln in t.split("\n") if ln.strip())
+
+        def gq_badges(x, long=False):
+            dd = (fmt_date(x["d"]) if long else x["d"].replace("-", ".")) if x["d"] else "회신일 미상"
+            old = '<span class="gq-old">구법 기준</span>' if (x["d"] and x["d"] < OLD) else ""
+            return f'<span class="nb-cat gq-cat">{e(x["c"])}</span><time datetime="{e(x["d"])}">{e(dd)}</time>{old}'
+
+        gq_note = ('이 자료는 법제처가 공공데이터로 개방한 「중앙부처 1차 해석」 중 고용노동부의 질의회시입니다(출처: 국가법령정보센터, 공공누리 제1유형). '
+                   '부처가 해석 당시의 법령을 기준으로 답한 것이며 법제처의 해석이 아닙니다. 지금은 폐지·변경된 해석도 있고, 2020년 1월 16일 산업안전보건법 전부개정 전 해석은 조문 번호가 현행과 다릅니다. '
+                   '실제 적용 여부는 현행 법령과 고용노동부(관할 지방고용노동관서)에서 확인하세요. 주제 분류는 SafePlum이 안건명 낱말로 자동으로 나눈 것입니다.')
+        topics = [t for t in gm["topics"] if any(x["c"] == t for x in gitems)]
+        tcount = {t: sum(1 for x in gitems if x["c"] == t) for t in topics}
+        years = sorted({x["d"][:4] for x in gitems if x["d"]}, reverse=True)
+
+        def gq_side(rel):
+            tl = "".join(f'<li><a href="{rel}laws/qa/?c={quote(t)}">{e(t)} <span class="muted">{tcount[t]}</span></a></li>' for t in topics)
+            return f"""<aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">주제별 보기</h2><ul class="bul gq-tl">{tl}</ul></div>
+    <div class="side-box"><h2 class="h-sm">현행 법령으로 확인하기</h2><ul class="bul">
+      <li><a href="{rel}tools/law-ai/">법령 AI 질문 — 현행 조문 근거로 답변</a></li>
+      <li><a href="{rel}laws/act/">산업안전보건법 전문</a></li><li><a href="{rel}laws/yeong/">시행령 전문</a></li><li><a href="{rel}laws/rule/">시행규칙 전문</a></li>
+      <li><a href="{rel}board/?b=qna">Q&amp;A 게시판에 질문하기</a></li></ul></div>
+    <div class="side-box"><h2 class="h-sm">원문 보러 가기</h2><ul class="bul"><li><a href="{e(gm["src_url"])}" target="_blank" rel="noopener">국가법령정보센터 중앙부처 1차 해석 ↗</a></li></ul></div>
+    {blog_banner("cm-chat-side")}</aside>"""
+
+        def gq_row(x):
+            q = (x["t"] + " " + x["q"][:160] + " " + x["c"]).lower()
+            return (f'<li class="gq-row" data-c="{e(x["c"])}" data-y="{e(x["d"][:4])}" data-q="{e(q)}"><a href="{e(x["id"])}/">'
+                    f'<span class="gq-m">{gq_badges(x)}</span><span class="gq-t">{e(x["t"])}</span></a></li>')
+
+        seg = '<button type="button" data-c="" aria-pressed="true">전체 ' + str(len(gitems)) + '</button>' + "".join(f'<button type="button" data-c="{e(t)}" aria-pressed="false">{e(t)} {tcount[t]}</button>' for t in topics)
+        yopt = '<option value="">전체 연도</option>' + "".join(f'<option value="{y}">{y}년</option>' for y in years)
+        qa_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">법령</a><span>/</span>질의회시</p>
+  <h1>고용노동부 질의회시 모음 <span class="muted" style="font-size:.6em">산업안전보건법</span></h1>
+  <p>현장에서 실제로 물어본 질문과 고용노동부의 회신 {len(gitems):,}건을 주제별로 모았습니다. 안건명·질의 내용으로 찾고, 제목을 누르면 질의요지와 회답 전문을 볼 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail gq-layout"><section class="col-main">
+  <p class="lst-note gq-warn">{CHK_SVG} <span>{e(gq_note)}</span></p>
+  <div class="nb-tools"><div class="search-inline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="gqQ" placeholder="예: 관리감독자 교육, 협의체, 안전관리자 겸직" aria-label="질의회시 검색"></div>
+    <select id="gqY" aria-label="회신 연도">{yopt}</select><p class="nb-count" aria-live="polite"><strong id="gqN">{len(gitems):,}</strong>건</p></div>
+  <div class="seg nb-filter" id="gqF" role="group" aria-label="주제">{seg}</div>
+  <ul class="gq-list" id="gqL">{"".join(gq_row(x) for x in gitems)}</ul>
+  <p class="empty" id="gqE" hidden>조건에 맞는 질의회시가 없습니다. 낱말을 줄이거나 <a href="../../tools/law-ai/">법령 AI 질문</a>을 써 보세요.</p>
+  <p class="btns" style="justify-content:center"><button type="button" class="btn btn-ghost" id="gqM">더 보기</button></p>
+  <p class="src-note">출처: 법제처 국가법령정보센터 「중앙부처 1차 해석」(고용노동부) · 공공누리 제1유형 · 수집 {e(gm.get("collected", ""))} · 질의·회답 본문은 원문 그대로 옮기고 줄바꿈만 넣었습니다.</p>
+</section>{gq_side("../../")}</div>
+<script>(function(){{var L=document.getElementById("gqL"),q=document.getElementById("gqQ"),y=document.getElementById("gqY"),f=document.getElementById("gqF"),n=document.getElementById("gqN"),em=document.getElementById("gqE"),mb=document.getElementById("gqM"),c="",lim=50,rows=[].slice.call(L.children);
+function run(){{var t=(q.value||"").toLowerCase().split(/\\s+/).filter(Boolean),yy=y.value,k=0;rows.forEach(function(r){{var ok=(!c||r.dataset.c===c)&&(!yy||r.dataset.y===yy)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});if(ok)k++;r.hidden=!ok||k>lim;}});n.textContent=k.toLocaleString();em.hidden=k>0;mb.hidden=k<=lim;}}
+function reset(){{lim=50;run();}}
+f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;c=b.dataset.c;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});reset();}});
+q.addEventListener("input",reset);y.addEventListener("change",reset);mb.addEventListener("click",function(){{lim+=100;run();}});
+try{{var p=new URLSearchParams(location.search);if(p.get("q"))q.value=p.get("q");var pc=p.get("c");if(pc){{var bb=[].filter.call(f.children,function(x){{return x.dataset.c===pc;}})[0];if(bb){{bb.click();return;}}}}}}catch(e){{}}run();}})();</script>"""
+        write("laws/qa/index.html", page(site, "../../", "laws/qa/", "고용노동부 질의회시 모음 — 산업안전보건법", qa_body,
+              desc=f"산업안전보건법 관련 고용노동부 질의회시(행정해석) {len(gitems):,}건을 주제별로 정리. 선임·교육·도급·건설·위험성평가 등 질의요지와 회답 전문.", active="laws/"))
+        side3 = gq_side("../../../")
+        for i, x in enumerate(gitems):
+            same = [y for y in gitems if y is not x and y["c"] == x["c"]][:6]
+            rl = "".join(f'<li><a href="../{y["id"]}/"><time>{e(y["d"][:7].replace("-", ".") or "-")}</time><span>{e(y["t"])}</span></a></li>' for y in same)
+            newer, older = (gitems[i - 1] if i > 0 else None), (gitems[i + 1] if i + 1 < len(gitems) else None)
+            nav = "".join(f'<a class="bdn-{k}" href="../{y["id"]}/"><span>{lab}</span>{e(y["t"])}</a>' for k, lab, y in (("prev", "← 최근 회신", newer), ("next", "이전 회신 →", older)) if y)
+            tools = "".join(f'<a class="btn btn-sm btn-ghost" href="../../../{h}">{e(nm)}</a>' for h, nm in gm["tools"].get(x["c"], gm["tools"]["기타"]))
+            rows = [("질의요지", gq_paras(x["q"])), ("회답", gq_paras(x["a"]))]
+            if x.get("l"):
+                rows.append(("관련법령", f'<p>{e(x["l"])}</p>'))
+            tbl = "".join(f'<tr><th scope="row">{k}</th><td>{v}</td></tr>' for k, v in rows)
+            old = (f'<p class="lst-note">{CHK_SVG} <b>구법 기준 해석</b> {fmt_date(x["d"])} 회신으로, 2020년 1월 16일 산업안전보건법 전부개정 전 법령을 기준으로 답했습니다. 조문 번호와 내용이 현행과 다를 수 있으니 현행 법령으로 다시 확인하세요.</p>'
+                   if x["d"] and x["d"] < OLD else "")
+            body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">법령</a><span>/</span><a href="../">질의회시</a><span>/</span><a href="../?c={quote(x["c"])}">{e(x["c"])}</a></p>
+  <p class="bdm">{gq_badges(x, True)}<span>고용노동부</span></p>
+  <h1>{e(x["t"])}</h1>
+</div></section>
+<div class="wrap layout-detail gq-layout"><section class="col-main"><article class="bdv gq-v">
+  {old}
+  <table class="bdv-t"><tbody>{tbl}</tbody></table>
+  <p class="btns bdv-btns"><a class="btn" href="{e(gm["item_url"].format(id=x["id"]))}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a><a class="btn btn-ghost" href="../?c={quote(x["c"])}">같은 주제 목록</a><a class="btn btn-ghost" href="../../../tools/law-ai/">현행 법령으로 물어보기</a></p>
+  <p class="src-note">{e(gq_note)}</p>
+  <section class="gq-tools"><h2 class="h-sm">이 주제에 쓰는 무료 도구</h2><p class="btns">{tools}</p></section>
+  {f'<nav class="bdn" aria-label="이전·다음 질의회시">{nav}</nav>' if nav else ''}
+  {f'<section class="bdr"><h2 class="h-sm">같은 주제 질의회시 · {e(x["c"])}</h2><ul>{rl}</ul></section>' if rl else ''}
+</article></section>{side3}</div>"""
+            write(f"laws/qa/{x['id']}/index.html", page(site, "../../../", f"laws/qa/{x['id']}/", f'{x["t"]} — 고용노동부 질의회시', body,
+                  desc=(f'[{x["c"]}] ' + re.sub(r"\s+", " ", x["q"]))[:150], active="laws/"))
+    else:
+        warn("data/gov_qa.json 이 없음 → 질의회시 모음(laws/qa/)을 만들지 않음")
 
     # ---- 게시판(커뮤니티 · Q&A): 글·회원은 Supabase 에 있고, 여기서는 빈 화면 틀만 만든다(assets/community.js 가 채운다)
     cmc = site.get("community") or {}

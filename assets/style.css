@@ -1929,3 +1929,25 @@ details[open]>.brow-r{background:var(--surface-2)}
 .pv{outline:none;border-radius:2px;min-width:2em;display:inline-block}
 @media (hover:hover){.pv:hover{box-shadow:inset 0 0 0 1px #9db7d6;cursor:text}}
 .pv:focus{background:#fffde7;box-shadow:inset 0 0 0 1px #3182ce}
+
+/* 고용노동부 질의회시 모음 */
+.gq-warn{display:flex;gap:8px;align-items:flex-start;margin:0 0 14px;font-size:13.5px;line-height:1.6}
+.gq-warn .chk-svg{flex:none;margin-top:2px}
+.nb-tools select{height:40px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font:inherit;font-size:14px;padding:0 10px}
+.gq-list{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.gq-row{border-top:1px solid var(--line-2)}
+.gq-row:first-child{border-top:0}
+.gq-row[hidden]{display:none}
+.gq-row a{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:center;padding:12px 16px;color:var(--text);font-size:14.5px}
+.gq-row a:hover{background:var(--surface-2);text-decoration:none}
+.gq-m{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.gq-t{font-weight:700;min-width:0;line-height:1.45}
+.gq-cat{padding:2px 8px}
+.gq-old{font-size:11px;font-weight:800;color:#92400E;background:#FEF3C7;border-radius:5px;padding:1px 6px}
+.gq-v .bdv-t td p{margin:0 0 8px}
+.gq-v .bdv-t td p:last-child{margin-bottom:0}
+.gq-tools{margin-top:22px}
+.gq-tools .btns{flex-wrap:wrap}
+.gq-tl a{display:flex;justify-content:space-between;gap:8px}
+@media (max-width:720px){.gq-row a{grid-template-columns:1fr}}
+@media (max-width:1023px){.layout-detail.gq-layout .col-side{order:0}}
