@@ -2017,3 +2017,15 @@ details[open]>.brow-r{background:var(--surface-2)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gq-alert{background:#33280F;border-color:#55431A;color:#F2C55C}:root:not([data-theme="light"]) .gq-row mark{background:#5A4A0F}:root:not([data-theme="light"]) .gq-row a:visited .gq-t{color:#C4B5FD}}
 :root[data-theme="dark"] .gq-alert{background:#33280F;border-color:#55431A;color:#F2C55C}:root[data-theme="dark"] .gq-row mark{background:#5A4A0F}:root[data-theme="dark"] .gq-row a:visited .gq-t{color:#C4B5FD}
 .nb-tools select{height:40px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font:inherit;font-size:14px;padding:0 10px}
+
+/* 2026-10-24 작성기 공통: 휴대폰에서 서식 도구 막대가 4줄로 쌓여 화면 1/4을 가리던 문제 → 한 줄 가로 스크롤 */
+@media (max-width:720px){
+  .form-bar{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 -16px 6px;padding:8px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .form-bar::-webkit-scrollbar{display:none}
+  .form-bar .btn{flex:0 0 auto;height:38px;padding:0 13px;font-size:13.5px;white-space:nowrap}
+  .form-bar .form-save{flex:0 0 auto;width:auto;white-space:nowrap;font-size:12.5px}
+}
+/* 작성기 허브 검색(질의회시 검색창과 같은 모양) */
+.phead .wsearch{position:relative;display:flex;align-items:center;gap:10px;max-width:620px;height:50px;margin:16px 0 4px;padding:0 14px;background:var(--surface);border:2px solid var(--navy);border-radius:13px;color:var(--muted)}
+.phead .wsearch:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-100)}
+.ftool[hidden],.ftools-page[hidden]{display:none!important}

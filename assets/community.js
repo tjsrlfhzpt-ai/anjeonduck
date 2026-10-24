@@ -18,7 +18,7 @@
     POST_NOT_FOUND: "삭제되었거나 없는 글입니다.", NICKNAME_INVALID: "닉네임은 한글·영문·숫자·밑줄 2~12자이며 운영자를 연상시키는 이름은 쓸 수 없습니다.",
     NICKNAME_TAKEN: "이미 쓰고 있는 닉네임입니다.", NICKNAME_COOLDOWN: "닉네임은 7일에 한 번만 바꿀 수 있습니다.",
     JOB_PAUSED: JOB_PAUSED,
-    JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", IMAGES_INVALID: "사진은 3장까지, 이 화면에서 올린 사진만 붙일 수 있습니다.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.",
+    JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", IMAGES_INVALID: "사진은 3장까지, 이 화면에서 올린 사진만 붙일 수 있습니다.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.", JOB_BIZNO_INVALID: "사업자등록번호 10자리를 정확히 적어 주세요(직업안정법 시행령 제28조 — 구인자 확인).", JOB_CONTACT_INVALID: "채용 담당 연락처를 회사 전화번호나 이메일로 적어 주세요. 사서함 주소는 쓸 수 없습니다.", JOB_PAY_REQUIRED: "급여를 적어 주세요. 최저임금에 못 미치는 구인정보는 올릴 수 없습니다.",
     "Invalid login credentials": "이메일 또는 비밀번호가 맞지 않습니다.", "Email not confirmed": "이메일 인증이 끝나지 않았습니다. 받은 메일의 인증 링크를 눌러 주세요.",
     "rate limit": "요청이 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도하세요.", "posts_title_check": "제목은 2~80자로 적어 주세요.",
     "posts_body_check": "본문은 5~5,000자로 적어 주세요.", "comments_body_check": "댓글은 1~2,000자로 적어 주세요.",
@@ -127,6 +127,11 @@
       Object.keys(BOARDS).map(function (b) { return h("a", { class: "cm-tab", href: url("", { b: b }), "aria-current": b === cur ? "page" : null }, BOARDS[b]); })), userBar());
   }
   // 채용공고 마감 상태: 마감일이 없으면 상시, 지났으면 마감
+  // 사업자등록번호: 숫자 10자리 + 국세청 검증번호 계산식
+  function bizFmt(v) { var d = String(v || "").replace(/\D/g, ""); return d.length === 10 ? d.slice(0, 3) + "-" + d.slice(3, 5) + "-" + d.slice(5) : String(v || "").trim(); }
+  function bizOk(v) { var d = String(v || "").replace(/\D/g, ""); if (!/^\d{10}$/.test(d)) return false; var w = [1, 3, 7, 1, 3, 7, 1, 3, 5], sum = 0; for (var i = 0; i < 9; i++) sum += +d[i] * w[i]; sum += Math.floor(+d[8] * 5 / 10); return (10 - sum % 10) % 10 === +d[9]; }
+  // 최저임금(고용노동부 고시): 2026년 시간급 10,320원, 2027년 10,700원
+  function minWageLabel() { return new Date() >= new Date("2027-01-01T00:00:00+09:00") ? "2027년 시간급 10,700원" : "2026년 시간급 10,320원"; }
   function jobState(m) {
     var d = m && /^\d{4}-\d{2}-\d{2}$/.test(m.deadline || "") ? m.deadline : "";
     if (!d) return { cls: "cm-st-ans", text: "상시", closed: false };
@@ -329,7 +334,7 @@
         h("p", { class: "cm-post-cat" }, h("a", { href: url("", { b: post.board }) }, BOARDS[post.board]), post.category ? " · " + post.category : "", post.notice ? " · 공지" : ""),
         h("h2", { class: "cm-post-t" }, post.title),
         h("p", { class: "cm-post-meta" }, nick(post), " · ", h("time", { datetime: post.created_at }, when(post.created_at, true)), post.updated_at ? " · 수정됨" : ""),
-        job ? h("dl", { class: "cm-job" }, [["회사", jm.company], ["근무지", jm.region], ["직무", post.category], ["경력", jm.career], ["고용형태", jm.employment], ["마감", (jm.deadline || "상시 채용") + (jst.closed ? " (마감됨)" : "")]].filter(function (x) { return x[1]; }).map(function (x) { return [h("dt", null, x[0]), h("dd", null, x[1])]; })) : null,
+        job ? h("dl", { class: "cm-job" }, [["회사", jm.company], ["사업자등록번호", jm.bizno], ["근무지", jm.region], ["직무", post.category], ["경력", jm.career], ["고용형태", jm.employment], ["급여", jm.pay], ["채용 담당 연락처", jm.contact], ["마감", (jm.deadline || "상시 채용") + (jst.closed ? " (마감됨)" : "")]].filter(function (x) { return x[1]; }).map(function (x) { return [h("dt", null, x[0]), h("dd", null, x[1])]; })) : null,
         h("div", { class: "cm-body" }, rich(post.body)),
         gallery(post.meta),
         job ? h("p", { class: "cm-share" },
@@ -414,12 +419,19 @@
         career: h("input", { type: "text", maxlength: "40", placeholder: "경력 (예: 신입·경력 3년 이상)", "aria-label": "경력", value: jv("career") }),
         employment: h("select", { "aria-label": "고용형태" }, ["", "정규직", "계약직", "파견·도급", "인턴", "기타"].map(function (v) { return h("option", { value: v }, v || "고용형태 선택"); })),
         deadline: h("input", { type: "date", "aria-label": "마감일" }),
-        apply: h("input", { type: "text", maxlength: "300", placeholder: "지원 방법 (필수) — 채용 페이지 주소(https://…) 또는 접수 방법", "aria-label": "지원 방법", value: jv("apply") })
+        apply: h("input", { type: "text", maxlength: "300", placeholder: "지원 방법 (필수) — 채용 페이지 주소(https://…) 또는 접수 방법", "aria-label": "지원 방법", value: jv("apply") }),
+        // 직업안정법 시행령 제28조: 구인자 신원(업체명·사업자등록번호·연락처) 확인, 최저임금 미달 구인정보 게재 금지
+        bizno: h("input", { type: "text", inputmode: "numeric", maxlength: "12", placeholder: "사업자등록번호 (필수, 10자리)", "aria-label": "사업자등록번호", value: jv("bizno") }),
+        contact: h("input", { type: "text", maxlength: "60", placeholder: "채용 담당 연락처 (필수) — 회사 전화 또는 이메일", "aria-label": "채용 담당 연락처", value: jv("contact") }),
+        pay: h("input", { type: "text", maxlength: "60", placeholder: "급여 (필수) — 예: 연봉 4,000만원 / 월 300만원 / 회사 내규", "aria-label": "급여", value: jv("pay") })
       };
+      var payOk = h("input", { type: "checkbox", "aria-label": "최저임금 이상 확인" }); payOk.checked = !!(pm.pay || sm.pay);
       J.employment.value = jv("employment"); J.deadline.value = jv("deadline");
-      function jmeta() { var o = {}; Object.keys(J).forEach(function (k) { o[k] = J[k].value.trim(); }); return o; }
+      function jmeta() { var o = {}; Object.keys(J).forEach(function (k) { o[k] = J[k].value.trim(); }); o.bizno = bizFmt(o.bizno); return o; }
       var jbox = h("div", { class: "cm-jobf" }, h("div", { class: "cm-row2 cm-row2e" }, J.company, J.region), h("div", { class: "cm-row3" }, J.career, J.employment, h("label", { class: "cm-dl" }, h("span", null, "마감일"), J.deadline)),
-        J.apply, h("p", { class: "hint" }, "마감일을 비워 두면 '상시 채용'으로 표시됩니다. 회사명과 지원 방법은 공고를 보는 사람이 확인할 수 있게 정확히 적어 주세요."));
+        J.apply, h("div", { class: "cm-row2 cm-row2e" }, J.bizno, J.contact), J.pay,
+        h("label", { class: "cm-chk" }, payOk, " 이 공고의 임금은 최저임금(" + minWageLabel() + ") 이상입니다"),
+        h("p", { class: "hint" }, "마감일을 비워 두면 '상시 채용'으로 표시됩니다. 직업안정법 시행령 제28조에 따라 업체명·사업자등록번호·연락처로 구인자를 확인할 수 없거나 연락처가 사서함 등인 공고, 최저임금에 못 미치는 공고는 올릴 수 없습니다."));
       // 사진 첨부(모든 게시판)
       var imgs = imgList(saved.meta && saved.meta.images ? saved.meta : pm), imgs0 = imgList(pm);
       var pick = h("input", { type: "file", accept: "image/*", multiple: true, class: "cm-file", "aria-label": "사진 선택" });
@@ -462,6 +474,9 @@
         var isJob = selB.value === "job", mt = isJob ? jmeta() : null;
         if (isJob && !post && !JOB_POST) { out.textContent = JOB_PAUSED; out.hidden = false; return; }
         if (isJob && (mt.company.length < 2 || mt.apply.length < 5)) { out.textContent = ERR.JOB_META_INVALID; out.hidden = false; (mt.company.length < 2 ? J.company : J.apply).focus(); return; }
+        if (isJob && !post && !bizOk(mt.bizno)) { out.textContent = "사업자등록번호 10자리를 정확히 적어 주세요(직업안정법 시행령 제28조 — 구인자 확인)."; out.hidden = false; J.bizno.focus(); return; }
+        if (isJob && !post && (mt.contact.length < 7 || /사서함|P\.?\s*O\.?\s*Box/i.test(mt.contact) || !(/@/.test(mt.contact) || /\d{2,4}-?\d{3,4}-?\d{4}/.test(mt.contact)))) { out.textContent = "채용 담당 연락처를 회사 전화번호나 이메일로 적어 주세요. 사서함 주소는 쓸 수 없습니다."; out.hidden = false; J.contact.focus(); return; }
+        if (isJob && !post && (mt.pay.length < 2 || !payOk.checked)) { out.textContent = "급여를 적고, 최저임금 이상인지 확인란에 체크해 주세요. 최저임금에 못 미치는 구인정보는 올릴 수 없습니다."; out.hidden = false; (mt.pay.length < 2 ? J.pay : payOk).focus(); return; }
         if (isJob && /^http:\/\//i.test(mt.apply)) { out.textContent = "지원 페이지 주소는 https:// 로 시작해야 합니다."; out.hidden = false; J.apply.focus(); return; }
         busy(btn, true, "저장 중…"); out.hidden = true;
         var rowU = { title: t, body: bd, category: selC.value }, rowI = { board: selB.value, category: selC.value, title: t, body: bd, author_id: ME.id };

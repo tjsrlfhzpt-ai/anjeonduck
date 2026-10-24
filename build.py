@@ -2195,6 +2195,7 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
   <p>근거: 「개인정보 보호법」 제28조의8제1항제3호(계약 이행을 위한 처리위탁·보관으로서 처리방침에 공개하는 경우).</p>
   <p>법령에 따른 요청이 있는 경우를 빼고 제3자에게 제공하지 않습니다.</p>
   <p>'안전보건 영상'은 유튜브(YouTube, 개인정보 보호 강화 모드)·틱톡(TikTok)이 제공하는 플레이어로 보여 줍니다. 방문자가 재생 버튼을 누르기 전에는 유튜브·틱톡에 접속하지 않으며, 재생하면 해당 서비스가 쿠키 등으로 정보를 수집할 수 있고 이에는 각 서비스의 개인정보 처리방침이 적용됩니다. SafePlum은 이 과정에서 회원 정보를 보내지 않습니다.</p>
+  <p>법령 AI 질문, TBM·위험성평가 AI 초안 같은 <b>AI 기능</b>은 이용자가 직접 입력한 본인의 Google Gemini API 키로 브라우저에서 Google에 바로 요청합니다. 키는 그 브라우저에만 저장되고 SafePlum 서버로 보내지 않습니다. AI 기능을 쓰면 입력한 질문·작업 내용이 Google(미국 Google LLC)로 전송되어 처리되며, 이에는 Google의 Gemini API 약관과 개인정보 처리방침이 적용됩니다. SafePlum은 이 내용을 받거나 보관하지 않습니다. 회사명·실명·사고 피해자 정보 같은 개인정보나 기밀은 AI 입력란에 넣지 마세요. AI 기능을 쓰지 않으면 이 전송은 일어나지 않습니다.</p>
   <h2>4. 회원의 권리</h2>
   <p>'마이페이지'에서 닉네임·비밀번호를 바꾸고 탈퇴(삭제)할 수 있습니다. 열람·정정·삭제·처리정지를 직접 하기 어려우면 아래 문의 창구로 요청하세요. 만 14세 미만은 가입할 수 없습니다.</p>
   <h2>5. 안전 조치</h2>
@@ -2552,9 +2553,15 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>작성기</p>
   <h1>작성기 {WRITER_N}종</h1>
   <p>TBM 일지·위험성평가서부터 교육일지·점검표·작업계획서·중대재해처벌법 이행 서식까지, 화면에서 채우고 A4로 인쇄하거나 PDF로 저장합니다. 회원가입 없이 쓰고, 입력 내용은 이 브라우저에만 저장됩니다.</p>
+  <form class="gq-search wsearch" role="search" onsubmit="return false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="wQ" placeholder="작성기 찾기 (예: 지게차, 교육, 협의체, 밀폐공간)" aria-label="작성기 검색" autocomplete="off" enterkeyhint="search"><button type="button" class="gq-x" id="wX" aria-label="검색어 지우기" hidden>×</button></form>
   <nav class="wjump" aria-label="작성기 묶음">{wjump}</nav>
 </div></section>
-{"".join(fsecs)}"""
+<p class="wrap empty" id="wE" hidden style="margin-top:24px">맞는 작성기가 없습니다. 다른 낱말로 찾아 보거나 <a href="../../board/?b=free">게시판</a>에 필요한 서식을 요청해 주세요.</p>
+{"".join(fsecs)}
+<script>(function(){{var q=document.getElementById("wQ"),x=document.getElementById("wX"),E=document.getElementById("wE"),cards=[].slice.call(document.querySelectorAll(".ftools-page .ftool")),secs=[].slice.call(document.querySelectorAll(".ftools-page"));
+cards.forEach(function(c){{c._t=c.textContent.toLowerCase().replace(/\s+/g," ");}});
+function run(){{var t=q.value.toLowerCase().split(/\s+/).filter(Boolean),n=0;x.hidden=!q.value;cards.forEach(function(c){{var ok=t.every(function(w){{return c._t.indexOf(w)>=0;}});c.hidden=!ok;if(ok)n++;}});secs.forEach(function(s){{s.hidden=!s.querySelector(".ftool:not([hidden])");}});E.hidden=n>0;}}
+q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="";q.focus();run();}});try{{var v=new URLSearchParams(location.search).get("q");if(v){{q.value=v;run();}}}}catch(e){{}}}})();</script>"""
     write("tools/forms/index.html", page(site, "../../", "tools/forms/", "작성기", forms_body,
                                          desc=f"교육일지, 협의체 회의록, 순회점검표, 작업계획서, 작업시작 전 점검표 등 안전보건 서식 {len(forms)}종을 무료로 작성·인쇄.", active="tools/"))
 

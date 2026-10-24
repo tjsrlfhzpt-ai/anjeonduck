@@ -72,6 +72,26 @@
 /* 좁은 화면: 칸이 많은 표는 가로로 밀어서 본다(칸이 20px로 찌그러져 입력할 수 없던 문제) */
 .tsc{max-width:100%;position:relative}
 @media (max-width:760px){.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch}.tsc>table{min-width:var(--mw,0)}}
+/* 휴대폰 현장 입력: 점검표(양호·불량 등)는 가로로 밀지 않고 한 항목씩 카드로 — 판정은 큰 버튼으로 누른다. 인쇄는 원래 표 그대로 */
+@media screen and (max-width:720px){
+  .tsc>table.ctab{min-width:0!important}
+  .ctab thead{display:none}
+  .ctab,.ctab tbody{display:block}
+  .ctab tr.grp{display:block}.ctab tr.grp th{display:block;text-align:left}
+  .ctab tr:not(.grp){display:flex;flex-wrap:wrap;align-items:stretch;border-bottom:1px solid #9AA6B8}
+  .ctab tr:not(.grp)>td{border:0!important}
+  .ctab td.num{flex:0 0 34px;display:flex;align-items:flex-start;justify-content:center;padding-top:9px!important;font-weight:700}
+  .ctab td.item{flex:1 1 calc(100% - 34px);min-width:0;font-size:14.5px;padding:8px 6px 4px!important}
+  .ctab td.opt{flex:1 1 0;padding:2px 3px 6px!important}
+  .ctab td.opt label{min-height:42px;border:1.5px solid #CBD3DF;border-radius:9px;background:#fff;font-size:13.5px;font-weight:700;color:#334155}
+  .ctab td.opt label .sr{position:static!important;width:auto!important;height:auto!important;clip:auto!important;margin:0!important;overflow:visible!important;white-space:nowrap}
+  .ctab td.opt input{position:absolute;opacity:0;pointer-events:none}
+  .ctab td.opt label:has(input:checked){background:#0F172A;border-color:#0F172A;color:#fff}
+  .ctab td.opt label:has(input:focus-visible){outline:3px solid #93C5FD;outline-offset:1px}
+  .ctab td.opt label:has(input[value="불량"]:checked),.ctab td.opt label:has(input[value="부적합"]:checked),.ctab td.opt label:has(input[value="미흡"]:checked),.ctab td.opt label:has(input[value="미실시"]:checked){background:#B91C1C;border-color:#B91C1C}
+  .ctab tr:not(.grp)>td:last-child{flex:1 1 100%;padding:0 6px 8px 40px!important}
+  .ctab tr:not(.grp)>td:last-child .ed:empty::before{content:"비고·조치 (선택)";color:#94A3B8}
+}
 @media print{
   .tsc{overflow:visible!important}.tsc>table{min-width:0!important}
   .paper .lbl,.paper .lbl:hover,.paper .lbl:focus{background:none!important;box-shadow:none!important}
@@ -433,6 +453,7 @@
       if (!d || !add) { el.textContent = ""; return; }
       var due = add.months ? addM(d, add.months) : new Date(d.getFullYear(), d.getMonth(), d.getDate() + (add.days || 0));
       el.textContent = nx.label + ": " + ymd(due) + "까지  (" + nx.basis + ")";
+      if (nx.fill) putAuto(nx.fill, ymd(due));  // 서식 안의 '다음 예정일' 칸도 같이 채운다(직접 고치면 그 값을 둔다)
     });
     if (A.judge === "accident") judgeAccident();
     var ab = document.getElementById("fAutoBack");
