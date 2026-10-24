@@ -10,6 +10,7 @@ import argparse
 import datetime as dt
 import html
 import json
+import os
 import re
 import shutil
 import sys
@@ -49,6 +50,37 @@ def form_url(law, byl_no, byl_br="00", cls="BF"):
     # 법령명+서식번호로 연결하는 고정 주소. 서식이 개정돼도 항상 현행본을 연다. BF=서식(별지), BE=별표
     return (f"https://www.law.go.kr/LSW/lsBylInfoPLinkR.do?bylCls={cls}"
             f"&lsNm={quote(law)}&bylNo={quote(byl_no)}&bylBrNo={quote(byl_br or '00')}")
+
+
+BOARD_BUILT = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+
+
+def fetch_board_posts(url, key):
+    """게시판(커뮤니티·Q&A)의 공개 글과 댓글을 빌드 때 읽어 온다 — 검색엔진이 읽을 수 있는 글별 정적 페이지를 만들기 위해서다.
+    - 브라우저 게시판과 같은 공개(anon) 키·같은 읽기 정책(삭제되지 않은 글)만 쓴다. 채용공고(job)는 연락처 등이 있어 만들지 않는다.
+    - 접속에 실패하면 None(이번 빌드는 정적 글 페이지 없이 진행). 시험용으로 BOARD_FIXTURE=파일 경로를 주면 그 파일을 쓴다."""
+    import os, urllib.request
+    fx = os.environ.get("BOARD_FIXTURE")
+    if fx:
+        return json.loads(Path(fx).read_text(encoding="utf-8"))
+    if os.environ.get("SKIP_BOARD_FETCH") or not url or not key:
+        return None
+    def get(path):
+        req = urllib.request.Request(url.rstrip("/") + "/rest/v1/" + path, headers={"apikey": key, "Authorization": "Bearer " + key, "Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.loads(r.read().decode("utf-8"))
+    try:
+        posts = get("posts?select=id,board,category,title,body,created_at,updated_at,comment_count,accepted_comment_id,notice,author_nick,author:profiles(nickname)"
+                    "&deleted_at=is.null&board=in.(free,qna)&order=id.desc&limit=1000")
+        ids = [p["id"] for p in posts]
+        cms = []
+        for i in range(0, len(ids), 150):
+            chunk = ",".join(str(x) for x in ids[i:i + 150])
+            cms += get(f"comments?select=id,post_id,body,created_at,author_nick,author:profiles(nickname)&deleted_at=is.null&post_id=in.({chunk})&order=id.asc&limit=5000")
+        return {"posts": posts, "comments": cms}
+    except Exception as ex:   # 네트워크 차단·정책 변경 등 — 사이트 빌드는 멈추지 않는다
+        warn(f"게시판 글을 읽지 못해 글별 정적 페이지를 만들지 않음({type(ex).__name__}: {str(ex)[:120]})")
+        return None
 
 
 def fmt_date(d):
@@ -2092,8 +2124,10 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
         sys.exit("config/site.json community.supabase_anon_key 에 비밀 키(service_role/secret)가 들어 있습니다. 브라우저에 공개되는 값이므로 anon(publishable) 키만 넣으세요.")
     cm_cats = cmc.get("categories") or {}
 
+    BP = fetch_board_posts(cm_url, cm_key) if cm_on else None   # 글별 정적 페이지용(아래)
+
     def cm_page(sub, kind, title, lead, rel, desc, wide=False):
-        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST}, ensure_ascii=False).replace("</", "<\\/")
+        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST, "built": BOARD_BUILT if (BP and BP.get("posts")) else ""}, ensure_ascii=False).replace("</", "<\\/")
         crumb = f'<a href="{rel}board/">게시판</a><span>/</span>{e(title)}' if sub else "게시판"
         side = f"""<aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint">
@@ -2122,6 +2156,78 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     cm_page("write/", "write", "글쓰기", "제목과 내용을 적어 등록합니다. 개인·사업장을 알아볼 수 있는 정보는 적지 마세요.", "../../", "SafePlum 게시판 글쓰기.", wide=True)
     cm_page("admin/", "admin", "운영 관리", "신고 처리, 회원 글쓰기 정지, 삭제한 글 복구, 처리 기록. 운영자 계정으로 로그인해야 보입니다.", "../../", "SafePlum 게시판 운영 관리(운영자 전용).", wide=True)
     cm_page("account/", "account", "로그인 · 마이페이지", "누구나 무료로 가입합니다. 이메일 인증만 하면 되고 이름·전화번호는 받지 않습니다.", "../../", "SafePlum 로그인·회원가입·마이페이지.", wide=True)
+
+    # ---- 게시판 글별 정적 페이지(board/post/{id}/): 검색엔진·자바스크립트를 끈 사용자도 실제 글 내용을 읽을 수 있게.
+    #      화면의 게시판(board/view/?id=)과 같은 공개 글만 담고, 댓글 쓰기·추천 같은 기능은 게시판 화면으로 연결한다.
+    BOARD_NAMES = {"free": "커뮤니티", "qna": "Q&A"}
+    POST_LM = {}
+    if BP and BP.get("posts"):
+        cm_by = {}
+        for c in BP.get("comments") or []:
+            cm_by.setdefault(c["post_id"], []).append(c)
+        def bp_nick(r):   # 화면 게시판(community.js nick)과 같은 규칙: 작성자 정보가 없으면 '탈퇴한 회원', 있으면 쓸 당시 닉네임
+            if not r.get("author"):
+                return "탈퇴한 회원"
+            return r.get("author_nick") or r["author"].get("nickname") or "탈퇴한 회원"
+        def bp_date(v):
+            return str(v or "")[:10]
+        def bp_text(t):
+            # 글 본문: 그대로 옮기고 주소만 링크(화면 게시판과 같은 rel="nofollow ugc")
+            out = []
+            for para in re.split(r"\n{2,}", str(t or "").strip()):
+                lines = []
+                for ln in para.split("\n"):
+                    parts, last = [], 0
+                    for m in re.finditer(r"https?://[^\s<>\"']+", ln):
+                        u = re.sub(r"[.,)\]]+$", "", m.group(0))
+                        parts.append(e(ln[last:m.start()])); parts.append(f'<a href="{e(u)}" target="_blank" rel="nofollow ugc noopener">{e(u)}</a>'); last = m.start() + len(u)
+                    parts.append(e(ln[last:])); lines.append("".join(parts))
+                out.append("<p>" + "<br>".join(lines) + "</p>")
+            return "".join(out)
+        posts = [p for p in BP["posts"] if p.get("board") in BOARD_NAMES]
+        base = (site.get("base_url") or "").rstrip("/")
+        for bk in BOARD_NAMES:
+            plist = [p for p in posts if p["board"] == bk]
+            for i, p in enumerate(plist):
+                pid = int(p["id"]); cms = cm_by.get(pid, [])
+                word = "답변" if bk == "qna" else "댓글"
+                desc_txt = re.sub(r"\s+", " ", str(p.get("body") or "")).strip()[:150]
+                newer, older = (plist[i - 1] if i > 0 else None), (plist[i + 1] if i + 1 < len(plist) else None)
+                nav = "".join(f'<a class="bdn-{k}" href="../{x["id"]}/"><span>{lab}</span>{e(x["title"])}</a>' for k, lab, x in (("prev", "← 최근 글", newer), ("next", "이전 글 →", older)) if x)
+                rel_list = "".join(f'<li><a href="../{x["id"]}/"><time>{e(bp_date(x.get("created_at")))}</time><span>{e(x["title"])}</span></a></li>' for x in [y for y in plist if y is not p][:8])
+                cm_html = "".join(f'<li class="bpc{" bpc-acc" if p.get("accepted_comment_id") == c["id"] else ""}"><p class="bpc-m"><b>{e(bp_nick(c))}</b> · <time datetime="{e(str(c.get("created_at") or ""))}">{e(bp_date(c.get("created_at")))}</time>{" · <span class=bpc-badge>채택된 답변</span>" if p.get("accepted_comment_id") == c["id"] else ""}</p><div class="bpc-b">{bp_text(c.get("body"))}</div></li>' for c in cms)
+                url_c = f"{base}/board/post/{pid}/" if base else ""
+                ld = {"@context": "https://schema.org", "@type": "DiscussionForumPosting", "headline": p["title"], "text": str(p.get("body") or "")[:5000],
+                      "datePublished": p.get("created_at"), "author": {"@type": "Person", "name": bp_nick(p)}, "commentCount": len(cms),
+                      "comment": [{"@type": "Comment", "text": str(c.get("body") or "")[:2000], "datePublished": c.get("created_at"), "author": {"@type": "Person", "name": bp_nick(c)}} for c in cms[:30]]}
+                if p.get("updated_at"): ld["dateModified"] = p["updated_at"]
+                if url_c: ld["url"] = url_c; ld["mainEntityOfPage"] = url_c
+                body = f"""
+<section class="phead bp-head"><div class="wrap">
+  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">게시판</a><span>/</span><a href="../../?b={bk}">{e(BOARD_NAMES[bk])}</a></p>
+  <p class="bp-cat"><a href="../../?b={bk}">{e(BOARD_NAMES[bk])}</a>{(" · " + e(p.get("category") or "")) if p.get("category") else ""}{" · 공지" if p.get("notice") else ""}</p>
+  <h1>{e(p["title"])}</h1>
+  <p class="bp-m"><b>{e(bp_nick(p))}</b> · <time datetime="{e(str(p.get("created_at") or ""))}">{e(bp_date(p.get("created_at")))}</time>{" · 수정됨" if p.get("updated_at") else ""} · {word} {len(cms)}</p>
+</div></section>
+<div class="wrap layout-detail bp-layout"><section class="col-main"><article class="bp">
+  <div class="bp-body">{bp_text(p.get("body"))}</div>
+  <p class="btns bp-act"><a class="btn" href="../../view/?id={pid}">게시판에서 {word} 쓰기·보기</a><a class="btn btn-ghost" href="../../?b={bk}">{e(BOARD_NAMES[bk])} 목록</a></p>
+  <section class="bp-cms"><h2 class="h-sm">{word} {len(cms)}</h2>{f'<ol class="bp-cl">{cm_html}</ol>' if cm_html else f'<p class="hint">아직 {word}이 없습니다. <a href="../../view/?id={pid}">게시판에서 {word}을 남겨 주세요.</a></p>'}</section>
+  <p class="hint bp-note">게시판의 글과 {word}은 회원 개인의 의견입니다. 법 적용 여부는 법령 원문과 소관 기관에서 확인하세요. 이 페이지는 하루 한 번 이상 게시판 내용으로 갱신되며, 최신 {word}은 게시판 화면에서 볼 수 있습니다.</p>
+  {f'<nav class="bdn" aria-label="이전·다음 글">{nav}</nav>' if nav else ''}
+  {f'<section class="bdr"><h2 class="h-sm">{e(BOARD_NAMES[bk])}의 다른 글</h2><ul>{rel_list}</ul></section>' if rel_list else ''}
+</article></section><aside class="col-side stack"><div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint"><li>읽기는 누구나, 쓰기는 이메일 인증을 마친 회원만 할 수 있습니다.</li><li>개인·사업장을 알아볼 수 있는 정보는 적지 마세요.</li></ul><p class="btns" style="margin-top:12px"><a class="btn btn-sm btn-ghost" href="../../rules/">이용수칙</a><a class="btn btn-sm btn-ghost" href="../../write/">글쓰기</a></p></div></aside></div>
+<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False).replace("</", "<\\/")}</script>"""
+                write(f"board/post/{pid}/index.html", page(site, "../../../", f"board/post/{pid}/", f'{p["title"]} — {BOARD_NAMES[bk]}', body, desc=desc_txt or p["title"], active="board/"))
+                POST_LM[f"board/post/{pid}/"] = bp_date(p.get("updated_at") or p.get("created_at"))
+        # 게시판 첫 화면(자바스크립트가 목록을 그리기 전·검색엔진용): 최근 글 링크. 화면 목록이 그려지면 이 부분은 대신 바뀐다
+        recent = sorted(posts, key=lambda x: str(x.get("created_at") or ""), reverse=True)[:40]
+        BOARD_STATIC = '<div class="cm-static"><h2 class="h-sm">최근 글</h2><ul class="bd-list">' + "".join(
+            f'<li><a href="post/{p["id"]}/"><span class="nb-cat">{e(BOARD_NAMES[p["board"]])}</span> {e(p["title"])} <time>{e(bp_date(p.get("created_at")))}</time></a></li>' for p in recent) + "</ul></div>"
+        b_src = (out / "board/index.html").read_text(encoding="utf-8")
+        b_src = b_src.replace('<div id="cm" class="cm" data-page="list"><noscript>', '<div id="cm" class="cm" data-page="list">' + BOARD_STATIC + "<noscript>", 1)
+        (out / "board/index.html").write_text(b_src, encoding="utf-8")
+        print(f"  게시판 글 정적 페이지 {len(POST_LM)}개")
 
     op_line = operator_html(site, "../../")
     _po = (site.get("operator") or {}).get("privacy_officer") or {}
@@ -2637,6 +2743,7 @@ q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="
         # lastmod 는 날짜를 아는 글(브리핑·소식)에만 넣는다. 빌드할 때마다 모든 주소를 오늘로 바꾸면 검색엔진이 lastmod 를 믿지 않게 된다
         _lm = {f"brief/n/{x['id']}/": x["date"] for x in BOARD if re.match(r"^\d{4}-\d{2}-\d{2}$", x.get("date", ""))}
         _lm.update({f"brief/{b['date']}/": b["date"] for b in briefs})
+        _lm.update(POST_LM)
         sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc>" + (f"<lastmod>{_lm[u]}</lastmod>" if u in _lm else "") + "</url>" for u in urls)
         (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>', encoding="utf-8")
     # ---- RSS (브리핑·소식). 네이버 서치어드바이저 등에 제출할 수 있다

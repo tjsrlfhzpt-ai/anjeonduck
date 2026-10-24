@@ -309,6 +309,14 @@
       var job = post.board === "job", jm = (job && post.meta) || {}, jst = job ? jobState(jm) : null; navJob(job);
       var qna = post.board === "qna", cms = rs[1].data || [], mine = ME && ME.id === post.author_id, admin = ME && ME.role === "admin", word = qna ? "답변" : "댓글";
       document.title = post.title + " | " + document.title.split(" | ").pop();
+      // 검색엔진용 글별 정적 페이지(board/post/ID/)가 만들어진 글이면 그 주소를 대표 주소(canonical)로 알린다 — 마지막 사이트 빌드 전에 쓴 커뮤니티·Q&A 글만
+      try {
+        if (!job && CFG.built && post.created_at && new Date(post.created_at) <= new Date(CFG.built)) {
+          var cu = new URL(REL + "board/post/" + post.id + "/", location.href).href, cl = document.querySelector('link[rel="canonical"]'), og = document.querySelector('meta[property="og:url"]');
+          if (!cl) { cl = document.createElement("link"); cl.rel = "canonical"; document.head.appendChild(cl); }
+          cl.href = cu; if (og) og.content = cu;
+        }
+      } catch (e) {}
       function rpc(name, args, confirmText, after) {
         return function () {
           if (confirmText && !window.confirm(confirmText)) return;
