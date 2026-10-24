@@ -37,6 +37,7 @@
   "ppe-ledger": {"profile": {"f.site": "company", "f.mgr": "manager"}},
   "msd-survey": {"today": ["f.date"], "profile": {"f.who": "health"}, "calc": [{"type": "product", "table": "load", "a": 2, "b": 3, "target": 4}, {"type": "track", "table": "plan", "due": 4, "done": 5, "label": "개선 계획"}], "next": [{"from": "f.date", "months": 36, "label": "다음 정기 유해요인조사 기한", "basis": "안전보건규칙 제657조제1항: 3년마다"}]},
   "confined-program": {"today": ["f.date"], "profile": {"f.site": "company", "f.owner": "manager", "t.emg.2.1": "manager"}},
-  "customer-care": {"today": ["f.date"], "profile": {"f.site": "company"}}
+  "customer-care": {"today": ["f.date"], "profile": {"f.site": "company"}},
+  "safety-rules": {"today": ["f.date"], "profile": {"f.co": "company"}}
  }
 }
