@@ -864,7 +864,7 @@ def operator_html(site, rel_root):
     ok = url.startswith("mailto:") or safe_url(url)
     link = f'<a href="{e(url)}"{"" if url.startswith("mailto:") else " target=_blank rel=noopener"}>{e(op.get("contact_label") or "문의하기")}</a>' if ok else "문의 채널 준비 중"
     blog = f' · <a href="{e(BLOG["url"])}" target=_blank rel=noopener>네이버 블로그</a>' if BLOG else ""
-    return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}{blog}'
+    return f'운영: {e(op.get("name") or site["name"])} · 문의·오류 신고·삭제 요청: {link}{blog} · <a href="{rel_root}about/">서비스 소개·문의 창구</a>'
 
 
 def og_image_tags(site):
@@ -969,7 +969,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
       <li>서식·법령은 국가법령정보센터 등 기관 원본으로 연결됩니다.</li>
       <li>채용 조건과 마감일은 공고 원문이 우선합니다.</li>
       <li>게시판의 글과 답변은 회원 개인의 의견입니다. 법령 해석은 원문과 관할 기관 안내를 기준으로 하세요. <a href="{rel_root}board/rules/">이용수칙</a> · <a href="{rel_root}privacy/">개인정보 처리방침</a></li>
-      <li>작성 도구는 입력한 문서 내용을 SafePlum 서버로 보내지 않고 브라우저 안에 저장합니다. 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
+      <li>작성 도구는 입력한 문서 내용을 SafePlum 서버로 보내지 않고 브라우저 안에 저장합니다(AI 기능을 쓸 때만 입력 내용이 Google로 전송). 호스팅(GitHub Pages)·글꼴 CDN 등 인프라의 접속 기록에는 각 제공자의 정책이 적용됩니다.</li>
       <li>판정·계산 결과는 자가진단용 참고 자료이며, 최종 판단은 관할 행정기관의 해석을 따릅니다.</li>
     </ul>
     <p class="ft-op">{operator_html(site, rel_root)}</p>
@@ -2333,6 +2333,55 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
   <p class="src-note">시행일 {pv_val("effective")}. 내용이 바뀌면 이 페이지에 알립니다.</p>
 </div>"""
     write("privacy/index.html", page(site, "../", "privacy/", "개인정보 처리방침", privacy_body, desc="SafePlum 개인정보 처리방침."))
+
+    # ---- 서비스 소개·문의(about/): 확인된 운영 정보와 실제로 연결되는 문의 채널만 싣는다(사업자 정보·답변 기한 등은 확인되지 않아 싣지 않음)
+    _op = site.get("operator") or {}
+    _cu = _op.get("contact_url") or ""
+    _cu_ok = _cu.startswith("mailto:") or bool(safe_url(_cu))
+    _pm = ((_op.get("privacy_officer") or {}).get("email") or "").strip()
+    _err_post = next((p for p in ((BP or {}).get("posts") or []) if p.get("board") == "free" and "오류 신고" in p.get("title", "") and str(p.get("title", "")).startswith("[운영팀]")), None)
+    _err_href = f"../board/post/{_err_post['id']}/" if _err_post else "../board/?b=free"
+    _gq_n = len(load("data/gov_qa.json")["items"]) if (ROOT / "data/gov_qa.json").exists() else 0
+    def _ch(title, desc_, links):
+        return f'<li class="ab-ch"><div><b>{e(title)}</b><span>{e(desc_)}</span></div><p class="btns">{"".join(links)}</p></li>'
+    _kakao = (f'<a class="btn btn-sm" href="{e(_cu)}"{"" if _cu.startswith("mailto:") else " target=_blank rel=noopener"}>{e(_op.get("contact_label") or "문의하기")}</a>') if _cu_ok else ""
+    _chs = []
+    if _kakao:
+        _chs.append(_ch("서비스 이용 문의", "도구·서식 사용법, 게시판 이용 등 궁금한 점", [_kakao]))
+    _chs.append(_ch("기능 오류 신고", "화면이 깨지거나 계산·판정·법령 근거가 틀린 것 같을 때 — 페이지 주소와 함께 알려 주세요", ([_kakao] if _kakao else []) + [f'<a class="btn btn-sm btn-ghost" href="{_err_href}">게시판 오류 신고 글</a>']))
+    _chs.append(_ch("개선 의견 제안", "필요한 서식·기능, 불편한 점", [f'<a class="btn btn-sm btn-ghost" href="{_err_href}">게시판에 남기기</a>'] + ([_kakao] if _kakao else [])))
+    if _pm:
+        _chs.append(_ch("개인정보 관련 문의", "회원 정보 열람·정정·삭제·처리정지 요청, 개인정보 처리에 관한 문의", [f'<a class="btn btn-sm" href="mailto:{e(_pm)}">이메일 {e(_pm)}</a>', '<a class="btn btn-sm btn-ghost" href="../privacy/">개인정보 처리방침</a>']))
+    about_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../">홈</a><span>/</span>서비스 소개·문의</p>
+  <h1>서비스 소개 · 문의</h1>
+  <p>{e(site['name'])}(세이프플럼)은 안전관리자·보건관리자 등 산업안전보건 실무자가 법정 서류를 쉽고 빠르게 작성하고, 법령과 실무 정보를 한곳에서 찾을 수 있도록 만든 무료 서비스입니다.</p>
+</div></section>
+<div class="wrap layout-detail ab-layout"><section class="col-main stack">
+  <section><h2 class="h-sm">주요 기능</h2><ul class="ab-feat">
+    <li><a href="../tools/forms/"><b>작성기 {WRITER_N}종</b><span>TBM 일지·위험성평가서·교육일지·점검표·작업계획서·중대재해처벌법 이행 서식 등. 회원가입 없이 쓰고 A4로 인쇄·PDF 저장</span></a></li>
+    <li><a href="../tools/"><b>계산·조회 도구</b><span>적용범위 판정, 법정교육 시간, 산업안전보건관리비, 과태료 기준, 안전검사 주기 등</span></a></li>
+    <li><a href="../laws/"><b>법령</b><span>산업안전보건법령·중대재해처벌법령 현행 조문{f", 고용노동부 질의회시 {_gq_n:,}건" if _gq_n else ""}</span></a></li>
+    <li><a href="../tools/ai/"><b>AI 도구</b><span>법령 AI 질문, 서식 AI 작성 도우미 등 — Google Gemini API 키(무료 발급)가 필요한 기능</span></a></li>
+    <li><a href="../board/"><b>게시판</b><span>커뮤니티·Q&amp;A·채용공고. 읽기는 누구나, 쓰기는 이메일 인증 회원</span></a></li>
+    <li><a href="../brief/"><b>브리핑·소식</b><span>법령 개정·입법예고 등 안전보건 소식</span></a></li>
+  </ul></section>
+  <section><h2 class="h-sm">문의 · 오류 신고 · 제안</h2><p class="hint">목적에 맞는 창구를 골라 주세요. 회사명·실명·연락처 같은 개인정보는 꼭 필요한 경우가 아니면 적지 마세요.</p><ul class="ab-chs">{"".join(_chs)}</ul></section>
+  <section><h2 class="h-sm">운영 정보</h2><table class="ab-t"><tbody>
+    <tr><th scope="row">서비스명</th><td>{e(site['name'])} (세이프플럼) · <a href="{e((site.get('base_url') or '').rstrip('/') + '/')}">{e((site.get('base_url') or '').replace('https://', ''))}</a></td></tr>
+    <tr><th scope="row">운영</th><td>{e(_op.get("name") or site["name"])}</td></tr>
+    <tr><th scope="row">개인정보 보호책임자</th><td>{e((_op.get("privacy_officer") or {}).get("title") or "운영자")}{f' · <a href="mailto:{e(_pm)}">{e(_pm)}</a>' if _pm else ""}</td></tr>
+    <tr><th scope="row">요금</th><td>무료(회원가입 없이 작성기·도구 이용 가능). AI 기능은 이용자 본인의 Google API 키로 동작하며 사용 한도는 Google 정책을 따릅니다.</td></tr>
+    <tr><th scope="row">입력 내용 저장</th><td>작성기·도구에 입력한 내용은 이용자의 브라우저에만 저장되고 SafePlum 서버로 보내지 않습니다(AI 기능을 쓸 때만 입력 내용이 Google로 전송). 게시판 글과 회원 정보는 게시판 서비스(Supabase)에 저장됩니다.</td></tr>
+  </tbody></table></section>
+  <section><h2 class="h-sm">정책</h2><ul class="bul">
+    <li><a href="../privacy/">개인정보 처리방침</a></li>
+    <li><a href="../board/rules/">게시판 이용수칙</a></li>
+    <li><a href="../legal/">법령정보·면책 안내</a></li>
+  </ul></section>
+</section><aside class="col-side stack"><div class="side-box"><h2 class="h-sm">알아 두세요</h2><p class="hint">SafePlum의 정보와 서식은 현장 참고용입니다. 법 적용 여부는 법령 원문과 관할 지방고용노동관서(국번 없이 1350) 안내를 따르세요.</p></div></aside></div>"""
+    write("about/index.html", page(site, "../", "about/", "서비스 소개·문의", about_body, desc=f"{site['name']}(세이프플럼) 서비스 소개, 주요 기능, 문의·오류 신고·개선 제안·개인정보 문의 창구와 운영 정보."))
 
     # ---- 법령정보·면책 안내
     man = manifest()

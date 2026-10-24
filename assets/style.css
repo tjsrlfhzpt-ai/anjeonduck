@@ -2063,3 +2063,16 @@ details[open]>.brow-r{background:var(--surface-2)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bpc-acc{background:#0E2A1E;border-color:#1F6B47}}
 :root[data-theme="dark"] .bpc-acc{background:#0E2A1E;border-color:#1F6B47}
 @media (max-width:1023px){.layout-detail.bp-layout .col-side{order:0}}
+/* 서비스 소개·문의(about/) */
+.ab-feat{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ab-feat a{display:flex;flex-direction:column;gap:4px;height:100%;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);text-decoration:none}
+.ab-feat a:hover{border-color:var(--blue);text-decoration:none}.ab-feat span{font-size:13.5px;color:var(--text-2);line-height:1.6}
+.ab-chs{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ab-ch{display:flex;gap:10px 16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.ab-ch div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 260px}.ab-ch span{font-size:13.5px;color:var(--text-2)}
+.ab-ch .btns{flex-wrap:wrap;margin:0}
+.ab-t{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface)}
+.ab-t th,.ab-t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;line-height:1.6}
+.ab-t th{width:28%;background:var(--surface-2);font-weight:700}
+@media (max-width:720px){.ab-feat{grid-template-columns:1fr}.ab-t th{width:36%}}
+@media (max-width:1023px){.layout-detail.ab-layout .col-side{order:0}}
