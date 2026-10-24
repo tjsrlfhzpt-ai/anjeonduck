@@ -865,6 +865,7 @@ def hd_auth(site, rel_root):
 
 
 def page(site, rel_root, path, title, body, desc=None, active=""):
+    body = body.replace('assets/ai.js"', f'assets/ai.js?v={ASSET_VER}"')  # AI 모듈도 바뀌면 새 주소로(예전 파일 캐시 방지)
     base = (site.get("base_url") or "").rstrip("/")
     canonical = f"{base}/{path}" if base else ""
     canon_tags = f'<link rel="canonical" href="{e(canonical)}">\n<meta property="og:url" content="{e(canonical)}">' if canonical else ""
@@ -1310,7 +1311,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))}</p>')
         assert "</body>" in src
         src = src.replace("</body>", note + "</body>", 1)
-    return src
+    return src.replace('assets/ai.js"', f'assets/ai.js?v={ASSET_VER}"')
 
 
 def precheck_forms(lawref):

@@ -12,6 +12,7 @@
     <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
     <!-- 결재란(칸 이름·개수·성명·서명)은 사이트 공통 모듈을 쓴다 — 저장 키 safetake.appr.tool.edu-log -->
     <script src="../../assets/docs.js"></script>
+    <script src="../../assets/ai.js"></script>
     <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
     <style>
@@ -189,6 +190,7 @@
         .el-h4 { margin: 4px 0 6px; font-size: 13px; font-weight: 700; }
         .el-fn { margin: -8px 0 14px; font-size: 10px; line-height: 1.55; color: #475569; }
         /* ---- 입력 칸: 접이식 단계 */
+        .el-ai { border: 1px solid #C7D2FE; background: #F5F7FF; border-radius: 10px; padding: 10px 12px; }
         .el-pane { display: grid; gap: 10px; align-content: start; }
         .el-st { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0; }
         .el-st.el-top { padding: 10px 12px; display: grid; gap: 8px; }
@@ -622,6 +624,15 @@
                                 </span>
                             </div>
                             <button type="button" id="addCustom" @click="custom.push({ text: '' })" class="el-link"><i class="ph-bold ph-plus-circle"></i> 주제 추가</button>
+                        </div>
+                        <div class="el-ai">
+                            <div class="el-row" style="justify-content:space-between;gap:8px;flex-wrap:wrap">
+                                <b style="color:#3730A3">✦ AI로 교육 내용 만들기</b>
+                                <button type="button" class="el-link" @click="aiKey">AI 키 설정</button>
+                            </div>
+                            <input v-model="aiTopic" type="text" maxlength="200" class="el-in" placeholder="이번 교육에서 강조할 것(선택) — 예: 지난달 지게차 아차사고, 겨울철 미끄럼, 신규 설비 도입" aria-label="강조할 주제">
+                            <button type="button" class="el-btn el-btn-pri" style="margin-top:6px" :disabled="aiBusy" @click="aiEdu">{{ aiBusy ? 'AI가 쓰는 중…' : '교육명·내용 요약·자료·평가 초안 만들기' }}</button>
+                            <p class="el-hint" style="margin-top:4px">{{ aiMsg || '고른 교육 과정과 시행규칙 별표 5 교육내용에 맞춰 초안을 씁니다(내 Gemini 키). 실제로 진행한 내용으로 고쳐 쓰세요.' }}</p>
                         </div>
                         <div>
                             <label class="el-lb" style="font-weight:700;color:#334155" for="eDetail">교육 내용 요약 (진행한 내용)</label>
@@ -1986,8 +1997,33 @@
                     });
                 };
 
+                // ---- AI 초안(내 Gemini 키, assets/ai.js) — 교육명·내용 요약·자료·평가만 채우고 시간·인원·서명은 건드리지 않는다
+                const aiTopic = ref(''), aiBusy = ref(false), aiMsg = ref('');
+                const aiKey = () => { if (window.SPAI) { SPAI.css(); SPAI.openSettings(); } };
+                const aiEdu = () => {
+                    if (!window.SPAI) { aiMsg.value = 'AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.'; return; }
+                    SPAI.css();
+                    if (!SPAI.hasKey()) { SPAI.ensureKey().then(ok => { if (ok) aiEdu(); }); return; }
+                    const x = f.value, has = x.detail.trim() || x.materials.trim() || x.evalText.trim();
+                    if (has && !window.confirm('이미 적은 교육 내용 요약·교육 자료·평가 내용을 AI 초안으로 바꿀까요?')) return;
+                    const topics = (picked.value.length ? picked.value : lawTopics.value.map(t => t.text)).slice(0, 14);
+                    aiBusy.value = true; aiMsg.value = 'AI가 초안을 쓰는 중…';
+                    SPAI.json({
+                        system: '너는 한국 사업장의 안전보건교육 강사다. 산업안전보건법 시행규칙 별표 5의 교육내용에 맞춰, 실제 교육 현장에서 바로 쓸 수 있는 교육 일지 문안을 쓴다. 과장 없이 구체적으로, 번호 목록으로. 사람 이름·인원수·시간·측정값은 지어내지 않는다.',
+                        prompt: '교육 과정: ' + courseLabel.value + (special.value ? ' (특별교육 대상 작업: ' + special.value.name + ')' : '') + '\n교육 대상: ' + (x.dept || '') + '\n교육 방법: ' + x.method + '\n강조할 주제: ' + (aiTopic.value.trim() || '(없음)') +
+                            '\n\n이 교육에서 다룰 법정 교육내용(시행규칙 별표 5):\n- ' + topics.join('\n- ') +
+                            '\n\ntitle: 교육명 한 줄(30자 이내). detail: 진행한 교육 내용 요약 4~7줄(번호 목록, 법정 교육내용을 현장 사례와 연결). materials: 교육 자료 한두 줄. evalText: 평가·질의응답·건의 처리 방법 한두 줄.',
+                        schema: { type: 'OBJECT', properties: { title: { type: 'STRING' }, detail: { type: 'STRING' }, materials: { type: 'STRING' }, evalText: { type: 'STRING' } }, required: ['title', 'detail'] },
+                        temperature: 0.4, timeout: 60000
+                    }).then(r => {
+                        if (!x.title.trim() && r.title) x.title = String(r.title).slice(0, 60);
+                        x.detail = String(r.detail || '').trim(); x.materials = String(r.materials || '').trim(); x.evalText = String(r.evalText || '').trim();
+                        aiMsg.value = 'AI 초안을 넣었습니다. ' + SPAI.NOTICE; showToast('AI 초안을 넣었습니다. 실제 진행한 내용으로 고쳐 쓰세요.');
+                    }).catch(e => { aiMsg.value = (e && e.message) || 'AI 요청이 실패했습니다.'; }).finally(() => { aiBusy.value = false; });
+                };
                 return {
-                    EDU, HIST_MAX, docTypes, groups: GROUPS, courses: COURSES, methods, quals, specials: EDU.special,
+                    EDU, HIST_MAX,
+                    aiTopic, aiBusy, aiMsg, aiKey, aiEdu, docTypes, groups: GROUPS, courses: COURSES, methods, quals, specials: EDU.special,
                     f, attendees, picked, custom, bulk, history: historyView,
                     photoDataUrl, isGeneratingPDF, toast, saveMsg,
                     targetRows, targetRow, courseLabel, reqText, targetShort, setGroup, setCourse, setTarget, setHalf, setShort,
