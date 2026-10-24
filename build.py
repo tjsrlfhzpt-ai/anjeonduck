@@ -1935,7 +1935,11 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
         OLD = "2020-01-16"  # 산업안전보건법 전부개정 시행일. 그 전 해석은 조문 번호가 현행과 다를 수 있다
 
         def gq_paras(t):
-            return "".join(f"<p>{e(ln)}</p>" for ln in t.split("\n") if ln.strip())
+            # '□ 질의', '<질의 1>' 처럼 짧은 소제목 줄은 굵게 보여 준다(본문 낱말은 고치지 않는다)
+            def one(ln):
+                k = "gq-h" if (len(ln) <= 30 and re.match(r"^\s*(?:[□■▶]|<[^>]{1,20}>$|\[[^\]]{1,20}\]$|[가-하]\.\s*\(?질의)", ln)) else ""
+                return f'<p class="{k}">{e(ln)}</p>' if k else f"<p>{e(ln)}</p>"
+            return "".join(one(ln) for ln in t.split("\n") if ln.strip())
 
         def gq_badges(x, long=False):
             dd = (fmt_date(x["d"]) if long else x["d"].replace("-", ".")) if x["d"] else "회신일 미상"
@@ -1949,10 +1953,11 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
         tcount = {t: sum(1 for x in gitems if x["c"] == t) for t in topics}
         years = sorted({x["d"][:4] for x in gitems if x["d"]}, reverse=True)
 
-        def gq_side(rel):
+        def gq_side(rel, topics_box=True):
             tl = "".join(f'<li><a href="{rel}laws/qa/?c={quote(t)}">{e(t)} <span class="muted">{tcount[t]}</span></a></li>' for t in topics)
+            tbox = f'<div class="side-box"><h2 class="h-sm">주제별 보기</h2><ul class="bul gq-tl">{tl}</ul></div>' if topics_box else ""
             return f"""<aside class="col-side stack">
-    <div class="side-box"><h2 class="h-sm">주제별 보기</h2><ul class="bul gq-tl">{tl}</ul></div>
+    {tbox}
     <div class="side-box"><h2 class="h-sm">현행 법령으로 확인하기</h2><ul class="bul">
       <li><a href="{rel}tools/law-ai/">법령 AI 질문 — 현행 조문 근거로 답변</a></li>
       <li><a href="{rel}laws/act/">산업안전보건법 전문</a></li><li><a href="{rel}laws/yeong/">시행령 전문</a></li><li><a href="{rel}laws/rule/">시행규칙 전문</a></li>
@@ -1960,35 +1965,66 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     <div class="side-box"><h2 class="h-sm">원문 보러 가기</h2><ul class="bul"><li><a href="{e(gm["src_url"])}" target="_blank" rel="noopener">국가법령정보센터 중앙부처 1차 해석 ↗</a></li></ul></div>
     {blog_banner("cm-chat-side")}</aside>"""
 
-        def gq_row(x):
-            q = (x["t"] + " " + x["q"][:160] + " " + x["c"]).lower()
-            return (f'<li class="gq-row" data-c="{e(x["c"])}" data-y="{e(x["d"][:4])}" data-q="{e(q)}"><a href="{e(x["id"])}/">'
-                    f'<span class="gq-m">{gq_badges(x)}</span><span class="gq-t">{e(x["t"])}</span></a></li>')
+        def gq_snip(x):
+            # 목록에서 제목 아래 한 줄로 보여 줄 질의 요지. 제목과 같으면 비운다
+            q = re.sub(r"^\s*(?:[□■○◦\-]?\s*(?:사건\s*경위|질의\s*요지|질의\s*내용|질의|사실관계)\s*[:：]?\s*)+", "", x["q"].replace("\n", " "))
+            q = re.sub(r"\s+", " ", q).strip()
+            if not q or re.sub(r"\W", "", q)[:30] == re.sub(r"\W", "", x["t"])[:30]:
+                return ""
+            return q[:120]
 
-        seg = '<button type="button" data-c="" aria-pressed="true">전체 ' + str(len(gitems)) + '</button>' + "".join(f'<button type="button" data-c="{e(t)}" aria-pressed="false">{e(t)} {tcount[t]}</button>' for t in topics)
+        GQ_FIRST = 30  # 처음 그리는 줄 수. 나머지는 list.json 으로 받는다(목록 페이지가 1MB를 넘지 않게)
+        def gq_row(x):
+            old = x["d"] and x["d"] < OLD
+            sn = gq_snip(x)
+            dd = x["d"].replace("-", ".") if x["d"] else "회신일 미상"
+            return (f'<li class="gq-row"><a href="{e(x["id"])}/"><strong class="gq-t">{e(x["t"])}</strong>'
+                    + (f'<span class="gq-s">{e(sn)}</span>' if sn else "")
+                    + f'<span class="gq-m"><span class="gq-cat">{e(x["c"])}</span><time datetime="{e(x["d"])}">{e(dd)}</time>'
+                    + ('<span class="gq-old">구법 기준</span>' if old else "") + '</span></a></li>')
+
+        write("laws/qa/list.json", json.dumps([[x["id"], x["t"], x["d"], x["c"], gq_snip(x)] for x in gitems], ensure_ascii=False, separators=(",", ":")))
+        seg = '<button type="button" data-c="" aria-pressed="true">전체 <em>' + f"{len(gitems):,}" + '</em></button>' + "".join(f'<button type="button" data-c="{e(t)}" aria-pressed="false">{e(t)} <em>{tcount[t]}</em></button>' for t in topics)
         yopt = '<option value="">전체 연도</option>' + "".join(f'<option value="{y}">{y}년</option>' for y in years)
+        n_old = sum(1 for x in gitems if x["d"] and x["d"] < OLD)
         qa_body = f"""
-<section class="phead"><div class="wrap">
+<section class="phead gq-head"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">법령</a><span>/</span>질의회시</p>
-  <h1>고용노동부 질의회시 모음 <span class="muted" style="font-size:.6em">산업안전보건법</span></h1>
-  <p>현장에서 실제로 물어본 질문과 고용노동부의 회신 {len(gitems):,}건을 주제별로 모았습니다. 안건명·질의 내용으로 찾고, 제목을 누르면 질의요지와 회답 전문을 볼 수 있습니다.</p>
+  <h1>고용노동부 질의회시 모음</h1>
+  <p>산업안전보건법에 대해 현장에서 실제로 물어본 질문과 고용노동부의 회신 <b>{len(gitems):,}건</b>을 주제별로 모았습니다.</p>
+  <form class="gq-search" role="search" onsubmit="return false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input type="search" id="gqQ" placeholder="예: 관리감독자 교육, 안전관리자 겸직" aria-label="질의회시 검색" autocomplete="off" enterkeyhint="search">
+    <button type="button" class="gq-x" id="gqX" aria-label="검색어 지우기" hidden>×</button></form>
 </div></section>
 <div class="wrap layout-detail gq-layout"><section class="col-main">
-  <p class="lst-note gq-warn">{CHK_SVG} <span>{e(gq_note)}</span></p>
-  <div class="nb-tools"><div class="search-inline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="gqQ" placeholder="예: 관리감독자 교육, 협의체, 안전관리자 겸직" aria-label="질의회시 검색"></div>
-    <select id="gqY" aria-label="회신 연도">{yopt}</select><p class="nb-count" aria-live="polite"><strong id="gqN">{len(gitems):,}</strong>건</p></div>
-  <div class="seg nb-filter" id="gqF" role="group" aria-label="주제">{seg}</div>
-  <ul class="gq-list" id="gqL">{"".join(gq_row(x) for x in gitems)}</ul>
+  <div class="gq-chips" id="gqF" role="group" aria-label="주제">{seg}</div>
+  <div class="gq-bar"><p class="gq-n" aria-live="polite">총 <strong id="gqN">{len(gitems):,}</strong>건</p>
+    <div class="gq-sel"><select id="gqY" aria-label="회신 연도">{yopt}</select>
+    <select id="gqS" aria-label="정렬"><option value="new">최신 회신순</option><option value="old">오래된 회신순</option></select>
+    <label class="gq-chk"><input type="checkbox" id="gqC"> 현행법 기준만</label></div></div>
+  <ul class="gq-list" id="gqL">{"".join(gq_row(x) for x in gitems[:GQ_FIRST])}</ul>
   <p class="empty" id="gqE" hidden>조건에 맞는 질의회시가 없습니다. 낱말을 줄이거나 <a href="../../tools/law-ai/">법령 AI 질문</a>을 써 보세요.</p>
-  <p class="btns" style="justify-content:center"><button type="button" class="btn btn-ghost" id="gqM">더 보기</button></p>
-  <p class="src-note">출처: 법제처 국가법령정보센터 「중앙부처 1차 해석」(고용노동부) · 공공누리 제1유형 · 수집 {e(gm.get("collected", ""))} · 질의·회답 본문은 원문 그대로 옮기고 줄바꿈만 넣었습니다.</p>
-</section>{gq_side("../../")}</div>
-<script>(function(){{var L=document.getElementById("gqL"),q=document.getElementById("gqQ"),y=document.getElementById("gqY"),f=document.getElementById("gqF"),n=document.getElementById("gqN"),em=document.getElementById("gqE"),mb=document.getElementById("gqM"),c="",lim=50,rows=[].slice.call(L.children);
-function run(){{var t=(q.value||"").toLowerCase().split(/\\s+/).filter(Boolean),yy=y.value,k=0;rows.forEach(function(r){{var ok=(!c||r.dataset.c===c)&&(!yy||r.dataset.y===yy)&&t.every(function(w){{return r.dataset.q.indexOf(w)>=0;}});if(ok)k++;r.hidden=!ok||k>lim;}});n.textContent=k.toLocaleString();em.hidden=k>0;mb.hidden=k<=lim;}}
-function reset(){{lim=50;run();}}
-f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;c=b.dataset.c;[].forEach.call(f.children,function(x){{x.setAttribute("aria-pressed",String(x===b));}});reset();}});
-q.addEventListener("input",reset);y.addEventListener("change",reset);mb.addEventListener("click",function(){{lim+=100;run();}});
-try{{var p=new URLSearchParams(location.search);if(p.get("q"))q.value=p.get("q");var pc=p.get("c");if(pc){{var bb=[].filter.call(f.children,function(x){{return x.dataset.c===pc;}})[0];if(bb){{bb.click();return;}}}}}}catch(e){{}}run();}})();</script>"""
+  <p class="gq-more"><button type="button" class="btn btn-ghost" id="gqM">더 보기 <span id="gqMn"></span></button></p>
+  <details class="gq-note"><summary>{CHK_SVG} 이 자료를 볼 때 꼭 알아 둘 점 <span class="muted">— 부처 해석이며, {n_old:,}건은 2020년 전부개정 전 법령 기준</span></summary><p>{e(gq_note)}</p>
+  <p class="src-note">출처: 법제처 국가법령정보센터 「중앙부처 1차 해석」(고용노동부) · 공공누리 제1유형 · 수집 {e(gm.get("collected", ""))} · 질의·회답 본문은 원문 그대로 옮기고 줄바꿈만 넣었습니다.</p></details>
+</section>{gq_side("../../", False)}</div>
+<script>(function(){{var L=document.getElementById("gqL"),q=document.getElementById("gqQ"),x=document.getElementById("gqX"),y=document.getElementById("gqY"),so=document.getElementById("gqS"),cb=document.getElementById("gqC"),f=document.getElementById("gqF"),n=document.getElementById("gqN"),em=document.getElementById("gqE"),mb=document.getElementById("gqM"),mn=document.getElementById("gqMn"),c="",lim=30,D=null,OLD="{OLD}";
+function h(s){{return String(s).replace(/[&<>"]/g,function(m){{return {{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}}[m];}});}}
+function mark(s,t){{s=h(s);if(!t.length)return s;var re=new RegExp("("+t.map(function(w){{return h(w).replace(/[.*+?^${{}}()|[\\]\\\\]/g,"\\\\$&");}}).join("|")+")","gi");return s.replace(re,"<mark>$1</mark>");}}
+function row(r,t){{var old=r[2]&&r[2]<OLD;return '<li class="gq-row"><a href="'+r[0]+'/"><strong class="gq-t">'+mark(r[1],t)+'</strong>'+(r[4]?'<span class="gq-s">'+mark(r[4],t)+'</span>':'')+'<span class="gq-m"><span class="gq-cat">'+h(r[3])+'</span><time datetime="'+r[2]+'">'+(r[2]?r[2].replace(/-/g,"."):"회신일 미상")+'</time>'+(old?'<span class="gq-old">구법 기준</span>':'')+'</span></a></li>';}}
+function sync(){{try{{var p=new URLSearchParams();if(q.value.trim())p.set("q",q.value.trim());if(c)p.set("c",c);if(y.value)p.set("y",y.value);if(so.value==="old")p.set("s","old");if(cb.checked)p.set("cur","1");var s=p.toString();history.replaceState(null,"",s?"?"+s:location.pathname);}}catch(e){{}}}}
+function run(){{x.hidden=!q.value;if(!D)return;var t=(q.value||"").toLowerCase().split(/\\s+/).filter(Boolean),yy=y.value,out=[];
+for(var i=0;i<D.length;i++){{var r=D[i];if(c&&r[3]!==c)continue;if(yy&&r[2].slice(0,4)!==yy)continue;if(cb.checked&&(!r[2]||r[2]<OLD))continue;var hay=(r[1]+" "+r[4]+" "+r[3]).toLowerCase();if(!t.every(function(w){{return hay.indexOf(w)>=0;}}))continue;out.push(r);}}
+if(so.value==="old")out.reverse();n.textContent=out.length.toLocaleString();em.hidden=out.length>0;L.innerHTML=out.slice(0,lim).map(function(r){{return row(r,t);}}).join("");
+mb.hidden=out.length<=lim;mn.textContent="("+Math.min(lim,out.length).toLocaleString()+" / "+out.length.toLocaleString()+")";sync();}}
+function reset(){{lim=30;run();}}
+function setC(v){{c=v;[].forEach.call(f.children,function(b){{b.setAttribute("aria-pressed",String(b.dataset.c===v));}});}}
+f.addEventListener("click",function(ev){{var b=ev.target.closest("button");if(!b)return;setC(b.dataset.c);b.scrollIntoView({{block:"nearest",inline:"center"}});reset();}});
+var tm;q.addEventListener("input",function(){{clearTimeout(tm);tm=setTimeout(reset,120);}});x.addEventListener("click",function(){{q.value="";q.focus();reset();}});
+y.addEventListener("change",reset);so.addEventListener("change",reset);cb.addEventListener("change",reset);mb.addEventListener("click",function(){{lim+=50;run();}});
+try{{var p=new URLSearchParams(location.search);if(p.get("q"))q.value=p.get("q");if(p.get("y"))y.value=p.get("y");if(p.get("s")==="old")so.value="old";if(p.get("cur"))cb.checked=true;if(p.get("c"))setC(p.get("c"));}}catch(e){{}}
+mn.textContent="({GQ_FIRST} / {len(gitems):,})";
+fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;run();}}).catch(function(){{mb.hidden=true;}});}})();</script>"""
         write("laws/qa/index.html", page(site, "../../", "laws/qa/", "고용노동부 질의회시 모음 — 산업안전보건법", qa_body,
               desc=f"산업안전보건법 관련 고용노동부 질의회시(행정해석) {len(gitems):,}건을 주제별로 정리. 선임·교육·도급·건설·위험성평가 등 질의요지와 회답 전문.", active="laws/"))
         side3 = gq_side("../../../")
@@ -1998,27 +2034,28 @@ try{{var p=new URLSearchParams(location.search);if(p.get("q"))q.value=p.get("q")
             newer, older = (gitems[i - 1] if i > 0 else None), (gitems[i + 1] if i + 1 < len(gitems) else None)
             nav = "".join(f'<a class="bdn-{k}" href="../{y["id"]}/"><span>{lab}</span>{e(y["t"])}</a>' for k, lab, y in (("prev", "← 최근 회신", newer), ("next", "이전 회신 →", older)) if y)
             tools = "".join(f'<a class="btn btn-sm btn-ghost" href="../../../{h}">{e(nm)}</a>' for h, nm in gm["tools"].get(x["c"], gm["tools"]["기타"]))
-            rows = [("질의요지", gq_paras(x["q"])), ("회답", gq_paras(x["a"]))]
-            if x.get("l"):
-                rows.append(("관련법령", f'<p>{e(x["l"])}</p>'))
-            tbl = "".join(f'<tr><th scope="row">{k}</th><td>{v}</td></tr>' for k, v in rows)
-            old = (f'<p class="lst-note">{CHK_SVG} <b>구법 기준 해석</b> {fmt_date(x["d"])} 회신으로, 2020년 1월 16일 산업안전보건법 전부개정 전 법령을 기준으로 답했습니다. 조문 번호와 내용이 현행과 다를 수 있으니 현행 법령으로 다시 확인하세요.</p>'
+            law = f'<div class="gq-law"><b>관련 법령</b> {e(x["l"])}</div>' if x.get("l") else ""
+            old = (f'<div class="gq-alert" role="note"><b>구법 기준 해석</b><p>{fmt_date(x["d"])} 회신으로, 2020년 1월 16일 산업안전보건법 전부개정 <u>전</u> 법령을 기준으로 답했습니다. 조문 번호와 내용이 현행과 다를 수 있으니 현행 법령으로 다시 확인하세요.</p></div>'
                    if x["d"] and x["d"] < OLD else "")
+            dd = fmt_date(x["d"]) if x["d"] else "회신일 미상"
             body = f"""
-<section class="phead"><div class="wrap">
+<section class="phead gq-vhead"><div class="wrap">
   <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">법령</a><span>/</span><a href="../">질의회시</a><span>/</span><a href="../?c={quote(x["c"])}">{e(x["c"])}</a></p>
-  <p class="bdm">{gq_badges(x, True)}<span>고용노동부</span></p>
+  <p class="gq-vcat"><a href="../?c={quote(x["c"])}">{e(x["c"])}</a></p>
   <h1>{e(x["t"])}</h1>
+  <p class="gq-vm"><span>고용노동부 회신</span><time datetime="{e(x["d"])}">{e(dd)}</time>{'<span class="gq-old">구법 기준</span>' if old else ''}<button type="button" class="gq-copy" data-copy>링크 복사</button></p>
 </div></section>
-<div class="wrap layout-detail gq-layout"><section class="col-main"><article class="bdv gq-v">
+<div class="wrap layout-detail gq-layout"><section class="col-main"><article class="gq-v">
   {old}
-  <table class="bdv-t"><tbody>{tbl}</tbody></table>
-  <p class="btns bdv-btns"><a class="btn" href="{e(gm["item_url"].format(id=x["id"]))}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a><a class="btn btn-ghost" href="../?c={quote(x["c"])}">같은 주제 목록</a><a class="btn btn-ghost" href="../../../tools/law-ai/">현행 법령으로 물어보기</a></p>
-  <p class="src-note">{e(gq_note)}</p>
+  <section class="gq-blk gq-q" aria-labelledby="gqQh"><h2 id="gqQh"><span class="gq-qa">Q</span>질의 요지</h2><div class="gq-tx">{gq_paras(x["q"])}</div></section>
+  <section class="gq-blk gq-a" aria-labelledby="gqAh"><h2 id="gqAh"><span class="gq-qa">A</span>고용노동부 회답</h2><div class="gq-tx">{gq_paras(x["a"])}</div>{law}</section>
+  <p class="btns gq-btns"><a class="btn" href="{e(gm["item_url"].format(id=x["id"]))}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a><a class="btn btn-ghost" href="../../../tools/law-ai/">현행 법령으로 물어보기</a><a class="btn btn-ghost" href="../?c={quote(x["c"])}">같은 주제 목록</a></p>
+  <details class="gq-note"><summary>{CHK_SVG} 이 해석을 볼 때 꼭 알아 둘 점</summary><p>{e(gq_note)}</p></details>
   <section class="gq-tools"><h2 class="h-sm">이 주제에 쓰는 무료 도구</h2><p class="btns">{tools}</p></section>
   {f'<nav class="bdn" aria-label="이전·다음 질의회시">{nav}</nav>' if nav else ''}
   {f'<section class="bdr"><h2 class="h-sm">같은 주제 질의회시 · {e(x["c"])}</h2><ul>{rl}</ul></section>' if rl else ''}
-</article></section>{side3}</div>"""
+</article></section>{side3}</div>
+<script>(function(){{var b=document.querySelector("[data-copy]");if(!b)return;b.addEventListener("click",function(){{var u=location.href.split("#")[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){{b.textContent="복사했습니다";setTimeout(function(){{b.textContent="링크 복사";}},1600);}},function(){{prompt("아래 주소를 복사하세요",u);}});}});}})();</script>"""
             write(f"laws/qa/{x['id']}/index.html", page(site, "../../../", f"laws/qa/{x['id']}/", f'{x["t"]} — 고용노동부 질의회시', body,
                   desc=(f'[{x["c"]}] ' + re.sub(r"\s+", " ", x["q"]))[:150], active="laws/"))
     else:
