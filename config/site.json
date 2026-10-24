@@ -219,6 +219,19 @@
       "menu": "법정 주기업무 달력"
     },
     {
+      "id": "ai",
+      "name": "AI 도구 모음",
+      "short": "AI 도구",
+      "desc": "법령 AI 질문, 서식 AI 작성 도우미·AI 검토, TBM·위험성평가·교육일지 AI 초안, 질의회시 AI 풀이를 한곳에. 현행 조문을 근거로 붙이고 AI가 쓴 칸은 검토 표시를 남깁니다.",
+      "src": "apps/ai-hub.body.html",
+      "tag": "AI",
+      "group": "계산·조회",
+      "law": "",
+      "cat": "조회·일정",
+      "kind": "page",
+      "menu": "AI 도구 모음"
+    },
+    {
       "id": "law-ai",
       "name": "법령 AI 질문",
       "short": "법령 AI",

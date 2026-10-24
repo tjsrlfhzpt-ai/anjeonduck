@@ -591,17 +591,17 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
 
 TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "cost-use": "🧾", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
-              "duties": "🧑‍💼", "law-ai": "⚖️", "gear-cert": "⛑️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
+              "duties": "🧑‍💼", "ai": "✨", "law-ai": "⚖️", "gear-cert": "⛑️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
 TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "heat": "heat", "improve": "fix", "confined": "confined",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "cost-use": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
-              "schedule": "calendar", "duties": "briefcase", "law-ai": "book", "gear-cert": "helmet", "retention": "folder", "inspect": "search", "docmap": "audit"}
+              "schedule": "calendar", "duties": "briefcase", "ai": "book", "law-ai": "book", "gear-cert": "helmet", "retention": "folder", "inspect": "search", "docmap": "audit"}
 # 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
 WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "improve"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
 HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"), ("accident", "alarm"), ("ppe-ledger", "goggles")]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
-LOOKUP_TOOLS = ["law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
+LOOKUP_TOOLS = ["ai", "law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
 NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "board/?b=job"), ("board", "게시판", "board/")]
@@ -2050,12 +2050,30 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
   {old}
   <section class="gq-blk gq-q" aria-labelledby="gqQh"><h2 id="gqQh"><span class="gq-qa">Q</span>질의 요지</h2><div class="gq-tx">{gq_paras(x["q"])}</div></section>
   <section class="gq-blk gq-a" aria-labelledby="gqAh"><h2 id="gqAh"><span class="gq-qa">A</span>고용노동부 회답</h2><div class="gq-tx">{gq_paras(x["a"])}</div>{law}</section>
+  <section class="gq-ai" id="gqAI"><div class="gq-ai-h"><b>✦ AI로 쉽게 풀이 · 현행 법령과 대조</b><button type="button" class="btn btn-sm gq-ai-go" id="gqAIGo">풀이 보기</button></div>
+    <p class="gq-ai-st" id="gqAISt">회답을 쉬운 말로 요약하고, 지금 시행 중인 조문과 비교해 달라진 점이 있는지 알려 줍니다(내 Gemini 키 · 참고용).</p><div id="gqAIOut"></div></section>
   <p class="btns gq-btns"><a class="btn" href="{e(gm["item_url"].format(id=x["id"]))}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a><a class="btn btn-ghost" href="../../../tools/law-ai/">현행 법령으로 물어보기</a><a class="btn btn-ghost" href="../?c={quote(x["c"])}">같은 주제 목록</a></p>
   <details class="gq-note"><summary>{CHK_SVG} 이 해석을 볼 때 꼭 알아 둘 점</summary><p>{e(gq_note)}</p></details>
   <section class="gq-tools"><h2 class="h-sm">이 주제에 쓰는 무료 도구</h2><p class="btns">{tools}</p></section>
   {f'<nav class="bdn" aria-label="이전·다음 질의회시">{nav}</nav>' if nav else ''}
   {f'<section class="bdr"><h2 class="h-sm">같은 주제 질의회시 · {e(x["c"])}</h2><ul>{rl}</ul></section>' if rl else ''}
 </article></section>{side3}</div>
+<script src="../../../assets/ai.js"></script>
+<script>(function(){{var go=document.getElementById("gqAIGo"),st=document.getElementById("gqAISt"),out=document.getElementById("gqAIOut"),busy=false;if(!go)return;
+function E(t){{return window.SPAI?SPAI.esc(t):String(t);}}
+function tx(sel){{var el=document.querySelector(sel);return el?[].map.call(el.querySelectorAll("p"),function(p){{return p.textContent.trim();}}).join("\\n"):"";}}
+go.addEventListener("click",function(){{if(busy)return;if(!window.SPAI){{st.textContent="AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.";return;}}SPAI.css();
+if(!SPAI.hasKey()){{SPAI.ensureKey().then(function(ok){{if(ok)go.click();}});return;}}
+busy=true;go.disabled=true;st.innerHTML='<span class="spai-busy">관련 현행 조문을 찾고 풀이하는 중…</span>';
+var title=document.querySelector(".gq-vhead h1").textContent.trim(),date=(document.querySelector(".gq-vm time")||{{}}).textContent||"",old=!!document.querySelector(".gq-alert"),q=tx(".gq-q .gq-tx"),a=tx(".gq-a .gq-tx"),law=[];
+SPAI.law.search(title+" "+q.slice(0,400),{{k:6}}).then(function(L){{law=L;
+return SPAI.json({{system:"너는 고용노동부 행정해석(질의회시)을 현장 실무자에게 설명하는 한국 산업안전보건 전문가다. 회답 내용을 왜곡하지 말고 쉬운 말로 요약한다. 현행 조문은 아래 [번호] 조문만 근거로 비교하며, 제공된 조문만으로 판단할 수 없으면 그렇다고 쓴다. 질의회시는 법적 구속력이 없는 부처 해석임을 전제로 한다.",
+prompt:"질의회시: 「"+title+"」 회신일 "+date+(old?" (2020.1.16 산업안전보건법 전부개정 전 법령 기준)":"")+"\\n\\n질의요지:\\n"+q.slice(0,2500)+"\\n\\n회답:\\n"+a.slice(0,3500)+"\\n\\n현행 조문:\\n"+SPAI.law.ctx(law,1000)+"\\n\\nsummary: 회답 결론을 쉬운 말 2~3문장. points: 실무 포인트 2~4개. now: 지금 시행 중인 조문과 비교한 내용 2~4문장(조문 번호가 바뀌었거나 내용이 달라졌으면 구체적으로, 근거 문장 끝에 [번호]). cites: now에 쓴 조문 번호.",
+schema:{{type:"OBJECT",properties:{{summary:{{type:"STRING"}},points:{{type:"ARRAY",items:{{type:"STRING"}}}},now:{{type:"STRING"}},cites:{{type:"ARRAY",items:{{type:"INTEGER"}}}}}},required:["summary","now"]}},temperature:0.2,maxTokens:4000,timeout:60000}});
+}}).then(function(r){{var used={{}};(r.cites||[]).forEach(function(n){{if(n>=1&&n<=law.length)used[n]=law[n-1];}});
+var now=E(r.now||"").replace(/\\[(\\d{{1,2}})\\]/g,function(m,n){{var c=law[n-1];if(!c)return"";used[n]=c;return'<sup><a href="'+E(c.url)+'" target="_blank" rel="noopener">['+n+']</a></sup>';}});
+out.innerHTML='<div class="gq-ai-box"><p><b>한눈에</b> '+E(r.summary||"")+'</p>'+((r.points||[]).length?'<ul>'+r.points.map(function(x){{return"<li>"+E(x)+"</li>";}}).join("")+"</ul>":"")+'<p><b>현행 법령과 비교</b> '+now+'</p><p class="gq-ai-src">'+Object.keys(used).map(function(n){{var c=used[n];return'<a href="'+E(c.url)+'" target="_blank" rel="noopener">['+n+'] '+E(c.label)+"</a>";}}).join(" ")+'</p><p class="gq-ai-src">'+E(SPAI.NOTICE)+" 원문과 현행 조문을 꼭 확인하세요.</p></div>";
+st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textContent=(e&&e.message)||"AI 요청이 실패했습니다.";}}).then(function(){{busy=false;go.disabled=false;}});}});}})();</script>
 <script>(function(){{var b=document.querySelector("[data-copy]");if(!b)return;b.addEventListener("click",function(){{var u=location.href.split("#")[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){{b.textContent="복사했습니다";setTimeout(function(){{b.textContent="링크 복사";}},1600);}},function(){{prompt("아래 주소를 복사하세요",u);}});}});}})();</script>"""
             write(f"laws/qa/{x['id']}/index.html", page(site, "../../../", f"laws/qa/{x['id']}/", f'{x["t"]} — 고용노동부 질의회시', body,
                   desc=(f'[{x["c"]}] ' + re.sub(r"\s+", " ", x["q"]))[:150], active="laws/"))
@@ -2560,8 +2578,8 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
 <p class="wrap empty" id="wE" hidden style="margin-top:24px">맞는 작성기가 없습니다. 다른 낱말로 찾아 보거나 <a href="../../board/?b=free">게시판</a>에 필요한 서식을 요청해 주세요.</p>
 {"".join(fsecs)}
 <script>(function(){{var q=document.getElementById("wQ"),x=document.getElementById("wX"),E=document.getElementById("wE"),cards=[].slice.call(document.querySelectorAll(".ftools-page .ftool")),secs=[].slice.call(document.querySelectorAll(".ftools-page"));
-cards.forEach(function(c){{c._t=c.textContent.toLowerCase().replace(/\s+/g," ");}});
-function run(){{var t=q.value.toLowerCase().split(/\s+/).filter(Boolean),n=0;x.hidden=!q.value;cards.forEach(function(c){{var ok=t.every(function(w){{return c._t.indexOf(w)>=0;}});c.hidden=!ok;if(ok)n++;}});secs.forEach(function(s){{s.hidden=!s.querySelector(".ftool:not([hidden])");}});E.hidden=n>0;}}
+cards.forEach(function(c){{c._t=c.textContent.toLowerCase().replace(/\\s+/g," ");}});
+function run(){{var t=q.value.toLowerCase().split(/\\s+/).filter(Boolean),n=0;x.hidden=!q.value;cards.forEach(function(c){{var ok=t.every(function(w){{return c._t.indexOf(w)>=0;}});c.hidden=!ok;if(ok)n++;}});secs.forEach(function(s){{s.hidden=!s.querySelector(".ftool:not([hidden])");}});E.hidden=n>0;}}
 q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="";q.focus();run();}});try{{var v=new URLSearchParams(location.search).get("q");if(v){{q.value=v;run();}}}}catch(e){{}}}})();</script>"""
     write("tools/forms/index.html", page(site, "../../", "tools/forms/", "작성기", forms_body,
                                          desc=f"교육일지, 협의체 회의록, 순회점검표, 작업계획서, 작업시작 전 점검표 등 안전보건 서식 {len(forms)}종을 무료로 작성·인쇄.", active="tools/"))

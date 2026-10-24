@@ -880,11 +880,11 @@
     if (work.length < 4) { toast("1단계 '금일 작업구간 및 주요내용'을 먼저 적어 주세요."); open[1] = true; renderAll(); var w = document.querySelector('[data-b="s.workArea"]'); if (w) w.focus(); return; }
     if (rowsEdited(p) && !confirm("위험요인 표를 AI 초안으로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) return;
     SPAI.css(); if (el()) el().innerHTML = '<span class="spai-busy">AI가 위험요인·대책을 만드는 중…</span>';
-    SPAI.json({
+    SPAI.law.search(p.group + " " + work, { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
       system: "너는 한국 산업현장의 안전관리자다. 산업안전보건법·산업안전보건기준에 관한 규칙과 안전보건공단(KOSHA) 자료의 표현을 따른다. 작업 전 안전점검회의(TBM)에서 근로자에게 바로 읽어 줄 수 있게 짧고 구체적으로 쓴다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다.",
-      prompt: "공종(부서): " + p.group + "\n금일 작업내용: " + work + "\n\n이 작업의 유해·위험요인과 감소대책을 6~8개 만들어라. 각 항목: group(작업 단계나 구분, 6자 이내), risk(유해·위험요인 및 위험성, 한 문장 40자 이내 '~로 인한 ~위험' 형태), type(재해형태 한 단어: 끼임·떨어짐·넘어짐·부딪힘·맞음·베임·감전·화재·폭발·질식·화상·근골격계 등), level(상·중·하), measure(감소대책, 실제 행동 위주 한두 문장 60자 이내).",
+      prompt: "공종(부서): " + p.group + "\n금일 작업내용: " + work + "\n\n이 작업의 유해·위험요인과 감소대책을 6~8개 만들어라. 각 항목: group(작업 단계나 구분, 6자 이내), risk(유해·위험요인 및 위험성, 한 문장 40자 이내 '~로 인한 ~위험' 형태), type(재해형태 한 단어: 끼임·떨어짐·넘어짐·부딪힘·맞음·베임·감전·화재·폭발·질식·화상·근골격계 등), level(상·중·하), measure(감소대책, 실제 행동 위주 한두 문장 60자 이내)." + (law.length ? "\n\n관련 현행 조문(감소대책은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
       schema: { type: "OBJECT", properties: { rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING" }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["rows"] },
-      temperature: 0.4
+      temperature: 0.4 });
     }).then(function (r) {
       var rows = (r.rows || []).map(normRow).filter(function (x) { return x.risk; }).slice(0, MAX_ROWS);
       if (!rows.length) throw new Error("AI가 위험요인을 만들지 못했습니다. 작업내용을 조금 더 구체적으로 적어 다시 시도해 주세요.");

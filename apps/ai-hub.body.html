@@ -1,0 +1,72 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>AI 도구</p>
+  <h1>AI 도구 모음</h1>
+  <p>SafePlum의 AI 기능을 한곳에 모았습니다. 모든 AI 기능은 <b>현행 법령 조문을 먼저 찾아 근거로 붙이고</b>, AI가 쓴 내용은 <b>초안으로 표시</b>해 사람이 검토한 뒤 확정하도록 만들었습니다.</p>
+</div></section>
+<div class="wrap layout-detail aih-layout">
+  <section class="col-main stack">
+    <div class="aih-key" id="aihKey">
+      <div><b>내 AI 키</b> <span id="aihKeySt" class="muted">확인 중…</span></div>
+      <div class="btns"><button type="button" class="btn" id="aihSet">AI 키 설정</button><button type="button" class="btn btn-ghost" id="aihTest" hidden>연결 다시 확인</button></div>
+      <p class="hint">AI 기능은 본인의 Google Gemini API 키로 동작합니다. 키는 이 브라우저에만 저장되고 SafePlum 서버로 보내지 않습니다. 키는 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio ↗</a>에서 무료로 만들 수 있습니다(사용 한도는 Google 정책을 따릅니다).</p>
+    </div>
+
+    <h2 class="h-sm">AI 기능</h2>
+    <div class="aih-grid">
+      <a class="aih-card" href="../law-ai/"><span class="aih-tag">질문·답변</span><strong>법령 AI 질문</strong><span>산안법·시행령·시행규칙·안전보건규칙·중처법 현행 조문과 고용노동부 질의회시 1,416건에서 근거를 찾아 답합니다. 답마다 조문·회시 원문 링크와 현장 확인 목록이 붙습니다.</span></a>
+      <a class="aih-card" href="../forms/"><span class="aih-tag">서식 작성</span><strong>서식 작성기 — AI 작성 도우미</strong><span>업무일지·재해 조사·작업계획서·중처법 이행 서식 등 작성기 대부분에서 상황을 한두 문장 적으면 빈 칸을 초안으로 채웁니다. 다 쓴 문서는 "AI 검토"로 관련 조문과 대조해 빠진 것을 찾습니다.</span></a>
+      <a class="aih-card" href="../tbm/"><span class="aih-tag">서식 작성</span><strong>TBM 일지 — AI 위험요인·대책</strong><span>오늘 작업을 적으면 관련 조문을 근거로 위험요인과 감소대책 초안을 표에 넣습니다.</span></a>
+      <a class="aih-card" href="../risk/"><span class="aih-tag">서식 작성</span><strong>위험성평가서 — AI 초안</strong><span>공정·작업을 적으면 관련 조문을 근거로 유해·위험요인·재해 형태·감소대책과 현재 위험성(상·중·하) 초안을 넣습니다. 위험성 크기는 현장에서 다시 판단하세요.</span></a>
+      <a class="aih-card" href="../edu-log/"><span class="aih-tag">서식 작성</span><strong>안전보건교육 일지 — AI 교육 내용</strong><span>고른 교육 과정과 시행규칙 별표 5 교육내용에 맞춰 교육명·내용 요약·자료·평가 초안을 씁니다.</span></a>
+      <a class="aih-card" href="../rule-sign/"><span class="aih-tag">게시물</span><strong>안전작업수칙 게시물 — AI 문안</strong><span>설비·작업을 적으면 현장에 붙일 안전수칙 문안 초안을 만듭니다.</span></a>
+      <a class="aih-card" href="../../laws/qa/"><span class="aih-tag">해석 풀이</span><strong>고용노동부 질의회시 — AI 풀이</strong><span>회시마다 "풀이 보기"를 누르면 회답을 쉬운 말로 요약하고 현행 조문과 비교해 달라진 점을 알려 줍니다.</span></a>
+    </div>
+
+    <h2 class="h-sm">AI를 안전하게 쓰는 방법</h2>
+    <ol class="aih-steps">
+      <li><b>근거부터</b> — AI에게 묻기 전에 이 사이트에 저장된 현행 조문(국가법령정보센터 원문)에서 관련 조문을 먼저 찾아 함께 보냅니다. 답에 없는 조문 번호를 AI가 지어내면 표시하지 않습니다.</li>
+      <li><b>초안 표시</b> — 서식에 AI가 채운 칸은 파란 점선으로 표시되고, 고쳐 쓰면 표시가 사라집니다. 표시가 남아 있으면 인쇄 전에 한 번 더 묻습니다.</li>
+      <li><b>사실은 사람이</b> — 성명·날짜·인원·측정값·점검 결과(양호/불량)·위험성 크기처럼 사실을 확인해야 하는 칸은 AI가 채우지 않습니다.</li>
+      <li><b>개인정보 가림</b> — 보내기 전에 전화번호·주민등록번호·이메일·차량번호 꼴의 글자를 자동으로 가립니다. 그래도 회사명·실명·피해자 정보는 적지 마세요.</li>
+      <li><b>참고용</b> — AI 결과는 법적 판단이 아닙니다. 실제 판단은 근거 조문 원문과 고용노동부(국번 없이 1350)·안전보건공단 상담으로 확인하세요.</li>
+    </ol>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">무엇이 전송되나요</h2><p class="hint">AI 기능을 쓸 때만, 입력한 내용과 찾은 조문이 Google(Gemini API)로 바로 전송됩니다. SafePlum은 그 내용을 받거나 보관하지 않습니다. 무료 키로 보낸 내용은 Google이 서비스 개선에 쓸 수 있습니다(Google 약관). <a href="../../privacy/">개인정보 처리방침</a></p></div>
+    <div class="side-box"><h2 class="h-sm">자주 묻는 것</h2><ul class="bul hint">
+      <li><b>키 없이 쓸 수 있나요?</b> 작성기·계산기는 키 없이 모두 쓸 수 있고, AI 버튼만 키가 필요합니다.</li>
+      <li><b>"사용 한도" 오류</b> — 잠시 뒤 다시 시도하거나 Google AI Studio에서 한도를 확인하세요. 한 번은 자동으로 다시 시도합니다.</li>
+      <li><b>공용 PC</b> — 키 설정에서 "이 기기에 기억하기"를 끄면 창을 닫을 때 키가 지워집니다.</li>
+    </ul></div>
+  </aside>
+</div>
+<style>
+.aih-key{border:1px solid #C7D2FE;background:#F5F7FF;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.aih-key>div:first-child{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:15px}
+.aih-key .ok{color:#05603A;font-weight:700}
+.aih-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.aih-card{display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);text-decoration:none}
+.aih-card:hover{border-color:#4F46E5;box-shadow:var(--shadow-2);text-decoration:none}
+.aih-card strong{font-size:16px}
+.aih-card span:last-child{font-size:14px;line-height:1.6;color:var(--text-2)}
+.aih-tag{align-self:flex-start;font-size:11.5px;font-weight:800;color:#3730A3;background:#E0E7FF;border-radius:6px;padding:1px 8px}
+.aih-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;line-height:1.7}
+@media (max-width:720px){.aih-grid{grid-template-columns:1fr}}
+@media (max-width:1023px){.layout-detail.aih-layout .col-side{order:0}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .aih-key{background:#161E3A;border-color:#2E3A70}:root:not([data-theme="light"]) .aih-tag{background:#2E3A70;color:#C7D2FE}}
+:root[data-theme="dark"] .aih-key{background:#161E3A;border-color:#2E3A70}:root[data-theme="dark"] .aih-tag{background:#2E3A70;color:#C7D2FE}
+</style>
+<script src="../../assets/ai.js"></script>
+<script>
+(function () {
+  var st = document.getElementById("aihKeySt"), set = document.getElementById("aihSet"), test = document.getElementById("aihTest");
+  function draw() {
+    if (!window.SPAI) { st.textContent = "AI 모듈을 불러오지 못했습니다. 새로고침해 주세요."; return; }
+    if (SPAI.hasKey()) { st.innerHTML = '<span class="ok">설정됨</span>' + (SPAI.model() ? " · 사용 모델 " + SPAI.esc(SPAI.model()) : ""); set.textContent = "키 바꾸기·지우기"; test.hidden = false; }
+    else { st.textContent = "아직 설정하지 않았습니다 — 키를 넣으면 아래 모든 AI 기능을 바로 쓸 수 있습니다."; set.textContent = "AI 키 설정"; test.hidden = true; }
+  }
+  set.addEventListener("click", function () { if (!window.SPAI) return; SPAI.css(); SPAI.openSettings().then(draw); });
+  test.addEventListener("click", function () { if (!window.SPAI) return; SPAI.css(); SPAI.openSettings().then(draw); });
+  draw();
+})();
+</script>

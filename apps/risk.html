@@ -755,11 +755,11 @@
     var keys = Object.keys(TYPE_MAP).join("·"), btn = $("aiRiskBtn");
     aiBusy = true; if (btn) btn.disabled = true;
     setStatus("AI가 유해·위험요인과 감소대책을 만드는 중…");
-    SPAI.json({
+    SPAI.law.search(dept + " " + work, { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
       system: "너는 한국 사업장의 안전관리자다. 고용노동부 「사업장 위험성평가에 관한 지침」과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 자료의 표현을 따른다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다.",
-      prompt: "공종(부서): " + dept + "\n평가 대상 작업: " + work + "\n\n이 작업의 유해·위험요인과 감소대책을 6~10개 만들어라. 각 항목: group(세부 작업 단계, 10자 이내), risk(유해·위험요인 및 위험성, '~로 인한 ~위험' 형태 한 문장 50자 이내), type(재해형태 — 반드시 다음 중 하나: " + keys + "·소음·기타), level(현재 위험성 상·중·하), measure(감소대책 — 공학적 대책·관리적 대책·보호구 순으로 실제 행동 위주 80자 이내).",
+      prompt: "공종(부서): " + dept + "\n평가 대상 작업: " + work + "\n\n이 작업의 유해·위험요인과 감소대책을 6~10개 만들어라. 각 항목: group(세부 작업 단계, 10자 이내), risk(유해·위험요인 및 위험성, '~로 인한 ~위험' 형태 한 문장 50자 이내), type(재해형태 — 반드시 다음 중 하나: " + keys + "·소음·기타), level(현재 위험성 상·중·하), measure(감소대책 — 공학적 대책·관리적 대책·보호구 순으로 실제 행동 위주 80자 이내)." + (law.length ? "\n\n관련 현행 조문(감소대책·법적 기준은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
       schema: { type: "OBJECT", properties: { rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING", enum: ["상", "중", "하"] }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["rows"] },
-      temperature: 0.4
+      temperature: 0.4 });
     }).then(function (r) {
       var rows = (r && r.rows || []).filter(function (x) { return x && str(x.risk).trim(); }).slice(0, 20).map(function (x) {
         var row = hazRow({ group: str(x.group), risk: str(x.risk).trim(), type: str(x.type).trim(), level: str(x.level).trim(), measure: str(x.measure).trim() });
