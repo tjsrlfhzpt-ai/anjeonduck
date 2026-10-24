@@ -2202,6 +2202,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
                       "comment": [{"@type": "Comment", "text": str(c.get("body") or "")[:2000], "datePublished": c.get("created_at"), "author": {"@type": "Person", "name": bp_nick(c)}} for c in cms[:30]]}
                 if p.get("updated_at"): ld["dateModified"] = p["updated_at"]
                 if url_c: ld["url"] = url_c; ld["mainEntityOfPage"] = url_c
+                ld_json = json.dumps(ld, ensure_ascii=False).replace("</", "<\\/")
                 body = f"""
 <section class="phead bp-head"><div class="wrap">
   <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">게시판</a><span>/</span><a href="../../?b={bk}">{e(BOARD_NAMES[bk])}</a></p>
@@ -2217,7 +2218,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
   {f'<nav class="bdn" aria-label="이전·다음 글">{nav}</nav>' if nav else ''}
   {f'<section class="bdr"><h2 class="h-sm">{e(BOARD_NAMES[bk])}의 다른 글</h2><ul>{rel_list}</ul></section>' if rel_list else ''}
 </article></section><aside class="col-side stack"><div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint"><li>읽기는 누구나, 쓰기는 이메일 인증을 마친 회원만 할 수 있습니다.</li><li>개인·사업장을 알아볼 수 있는 정보는 적지 마세요.</li></ul><p class="btns" style="margin-top:12px"><a class="btn btn-sm btn-ghost" href="../../rules/">이용수칙</a><a class="btn btn-sm btn-ghost" href="../../write/">글쓰기</a></p></div></aside></div>
-<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False).replace("</", "<\\/")}</script>"""
+<script type="application/ld+json">{ld_json}</script>"""
                 write(f"board/post/{pid}/index.html", page(site, "../../../", f"board/post/{pid}/", f'{p["title"]} — {BOARD_NAMES[bk]}', body, desc=desc_txt or p["title"], active="board/"))
                 POST_LM[f"board/post/{pid}/"] = bp_date(p.get("updated_at") or p.get("created_at"))
         # 게시판 첫 화면(자바스크립트가 목록을 그리기 전·검색엔진용): 최근 글 링크. 화면 목록이 그려지면 이 부분은 대신 바뀐다
