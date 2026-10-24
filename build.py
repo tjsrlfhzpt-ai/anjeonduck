@@ -614,7 +614,7 @@ def nav_cols(site, rel):
         return [(f'{rel}tools/{i}/', by[i].get("menu") or by[i].get("short") or by[i]["name"]) for i in ids if i in by]
     return {
         "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}", n) for g, n in (("업무일지", "안전·보건 업무일지"), ("작업계획서", "작업계획서"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표"), ("중대재해처벌법 이행", "중대재해법 이행 서식"))]
-                 + [(f"{rel}tools/forms/", f"작성기 전체 {WRITER_N}종 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
+                 + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
                 ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
