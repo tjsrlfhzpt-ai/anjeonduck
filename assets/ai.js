@@ -8,7 +8,7 @@
 (function () {
   "use strict";
   if (window.SPAI) return;
-  var K_KEY = "safeplum.ai.key", K_MODEL = "safeplum.ai.model", K_AGREE = "safeplum.ai.agree";
+  var K_KEY = "safeplum.ai.key", K_MODEL = "safeplum.ai.model", K_AGREE = "safeplum.ai.agree", K_STATE = "safeplum.ai.state";
   var API = "https://generativelanguage.googleapis.com/v1beta/";
   var FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
   var KEY_GUIDE = "https://aistudio.google.com/app/apikey";
@@ -24,8 +24,33 @@
     k = String(k || "").trim();
     sset(sessionStorage, K_KEY, k); sset(localStorage, K_KEY, remember ? k : "");
     if (!k) sset(localStorage, K_MODEL, "");
+    sset(localStorage, K_STATE, "");   // 키가 바뀌면 연결 상태도 처음부터
+    fire();
   }
   function maskKey(k) { return k ? k.slice(0, 4) + "…" + k.slice(-4) : ""; }
+  // ---------- 연결 상태: 키 설정(있음/없음)과 연결 결과(성공/오류)를 따로 기록한다 — 키 값은 기록하지 않는다
+  //   none: 키 없음 · set: 키는 있지만 아직 연결 확인 전 · ok: 마지막 요청 성공 · key/network/quota/server/model/other: 마지막 요청 실패
+  function readState() { try { return JSON.parse(sget(localStorage, K_STATE) || "null"); } catch (e) { return null; } }
+  function writeState(code, msg) { try { localStorage.setItem(K_STATE, JSON.stringify({ s: code, m: String(msg || "").slice(0, 300), at: new Date().toISOString() })); } catch (e) {} fire(); }
+  function status() {
+    if (!getKey()) return { code: "none" };
+    var st = readState();
+    return st && st.s ? { code: st.s, msg: st.m, at: st.at } : { code: "set" };
+  }
+  function fire() { try { window.dispatchEvent(new CustomEvent("spai:status", { detail: status() })); } catch (e) {} }
+  var STATUS_TEXT = {
+    none: ["미설정", "AI 키가 아직 없습니다."],
+    set: ["설정됨 · 연결 확인 전", "키는 저장되어 있지만 아직 연결을 확인하지 않았습니다."],
+    ok: ["연결 확인됨", "마지막 AI 요청이 정상 처리되었습니다."],
+    key: ["API 키 오류", "키가 올바르지 않거나 사용할 수 없는 키입니다. Google AI Studio에서 키를 다시 복사해 넣거나 새 키를 만드세요."],
+    network: ["연결 실패", "Google AI 서버에 연결하지 못했습니다. 인터넷 연결을 확인하세요. 회사 네트워크(방화벽)에서 generativelanguage.googleapis.com 접속을 막는 경우도 있어 확인이 필요합니다."],
+    quota: ["사용량 제한", "Google 사용 한도(분당·일일 요청 수)에 걸렸습니다. 잠시 뒤 다시 시도하거나 Google AI Studio에서 한도·결제 설정을 확인하세요."],
+    server: ["외부 API 오류", "Google AI 서버가 잠시 응답하지 않았습니다. 잠시 뒤 다시 시도하세요."],
+    model: ["모델 오류", "선택된 AI 모델을 쓸 수 없습니다. 연결을 다시 확인하면 쓸 수 있는 모델을 다시 고릅니다."],
+    timeout: ["응답 지연", "AI 응답이 너무 오래 걸렸습니다. 다시 시도하세요."],
+    other: ["기타 오류", "원인을 정확히 알 수 없는 오류입니다. 아래 상세 내용을 확인하고, 계속되면 오류 신고 창구로 알려 주세요."]
+  };
+  function statusLabel(st) { st = st || status(); var t = STATUS_TEXT[st.code] || STATUS_TEXT.other; return { code: st.code, label: t[0], help: t[1], detail: st.msg || "", at: st.at || "" }; }
 
   // ---------- 개인정보 가리기: AI로 보내기 전에 자동으로 바꾼다(화면·저장 내용은 그대로)
   var PII = [
@@ -120,8 +145,10 @@
       };
       if (o.system) body.systemInstruction = { parts: [{ text: o.system }] };
       if (wantJSON) { body.generationConfig.responseMimeType = "application/json"; if (o.schema) body.generationConfig.responseSchema = o.schema; }
-      return call("models/" + encodeURIComponent(model) + ":generateContent", { body: body, timeout: o.timeout }).catch(function (e) {
+      return call("models/" + encodeURIComponent(model) + ":generateContent", { body: body, timeout: o.timeout }).then(function (b) { writeState("ok"); return b; }, function (e) {
         if (e.code === "model") { sset(localStorage, K_MODEL, ""); }
+        if (["key", "network", "quota", "server", "model", "timeout"].indexOf(e.code) >= 0) writeState(e.code, e.detail);
+        else if (e.code !== "nokey") writeState("other", e.message + (e.detail ? " — " + e.detail : ""));
         throw e;
       });
     }).then(function (b) {
@@ -155,50 +182,115 @@
     "@keyframes spai-r{to{transform:rotate(360deg)}}";
   function injectCSS() { if (document.getElementById("spai-css")) return; var s = document.createElement("style"); s.id = "spai-css"; s.textContent = CSS; document.head.appendChild(s); }
 
-  function openSettings() {
+  // ---------- 화면: AI 키 설정 안내(처음 쓰는 사람은 단계별로, 이미 설정한 사람은 관리 화면으로)
+  var CSS2 = ".spai-steps{display:flex;gap:4px;margin:2px 0 12px;padding:0;list-style:none;counter-reset:s}" +
+    ".spai-steps li{flex:1;text-align:center;font-size:11.5px;color:#94A3B8;border-top:3px solid #E2E8F0;padding-top:6px}" +
+    ".spai-steps li.on{color:#17365D;font-weight:800;border-color:#17365D}.spai-steps li.done{color:#05603a;border-color:#12B76A}" +
+    ".spai-pw{display:flex;gap:6px;align-items:center}.spai-pw input{flex:1}" +
+    ".spai-eye{flex:none;height:44px;margin-top:4px;padding:0 12px;border:1px solid #c8d1dd;border-radius:9px;background:#fff;font-weight:700;font-size:13px;cursor:pointer}" +
+    ".spai-badge{display:inline-block;font-size:12px;font-weight:800;border-radius:6px;padding:1px 8px;background:#EEF2F6;color:#334155}" +
+    ".spai-badge.ok{background:#DCFCE7;color:#05603A}.spai-badge.err{background:#FEE4E2;color:#B42318}.spai-badge.set{background:#FEF3C7;color:#92400E}" +
+    ".spai-box{border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px;margin:8px 0;background:#F8FAFC}" +
+    ".spai-det{font-size:12px;color:#667085;word-break:break-all;margin-top:4px}" +
+    ".spai-ul{margin:6px 0 6px 18px;padding:0}.spai-ul li{margin:3px 0}";
+  function badgeCls(c) { return c === "ok" ? "ok" : c === "set" ? "set" : c === "none" ? "" : "err"; }
+  function openSettings(opt) {
     injectCSS();
+    if (!document.getElementById("spai-css2")) { var st2 = document.createElement("style"); st2.id = "spai-css2"; st2.textContent = CSS2; document.head.appendChild(st2); }
+    opt = opt || {};
     return new Promise(function (resolve) {
-      var ov = document.createElement("div"); ov.className = "spai-ov"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
-      var k = getKey();
-      ov.innerHTML = '<div class="spai-m"><h3>AI 키 설정 (내 Gemini API 키)</h3>' +
-        '<p>SafePlum의 AI 기능은 <b>본인의 Google Gemini API 키</b>로 동작합니다. 키는 <b>이 브라우저에만</b> 저장되고, SafePlum은 키나 입력 내용을 받지 않습니다(AI 요청은 Google로 바로 갑니다).</p>' +
-        '<ol><li><a class="spai-a" href="' + KEY_GUIDE + '" target="_blank" rel="noopener">Google AI Studio API 키 페이지 ↗</a>에 구글 계정으로 로그인</li><li>「API 키 만들기」를 눌러 키 복사</li><li>아래 칸에 붙여 넣고 「연결 확인」</li></ol>' +
-        '<label>API 키<input type="password" id="spaiKey" autocomplete="off" spellcheck="false" placeholder="Google AI Studio에서 복사한 키" value="' + esc(k) + '"></label>' +
-        '<label class="spai-chk"><input type="checkbox" id="spaiRem"' + (remembered() ? " checked" : "") + '><span>이 기기에 기억하기 <small style="color:#667">(끄면 창을 닫을 때 지워짐 · 공용 PC에서는 끄세요)</small></span></label>' +
-        '<div class="spai-note"><b>입력 주의</b> — 무료 키로 보낸 내용은 Google이 서비스 개선에 쓸 수 있고 사람이 검토할 수 있습니다(Google 약관). <b>실명·연락처·주민번호 등 개인정보와 회사 기밀은 넣지 마세요.</b> AI 결과는 초안이므로 반드시 검토 후 사용하세요.</div>' +
-        '<div class="spai-st" id="spaiSt" aria-live="polite">' + (k ? "저장된 키: " + esc(maskKey(k)) : "") + '</div>' +
-        '<div class="spai-row">' + (k ? '<button type="button" class="spai-b red" id="spaiDel">키 지우기</button>' : "") +
-        '<button type="button" class="spai-b" id="spaiCancel">닫기</button><button type="button" class="spai-b pri" id="spaiOk">연결 확인 후 저장</button></div></div>';
-      document.body.appendChild(ov);
-      var inp = ov.querySelector("#spaiKey"), st = ov.querySelector("#spaiSt"), ok = ov.querySelector("#spaiOk");
-      setTimeout(function () { inp.focus(); }, 30);
-      function close(v) { ov.remove(); document.removeEventListener("keydown", onKey); resolve(v); }
+      var ov = document.createElement("div"); ov.className = "spai-ov"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "AI 키 설정");
+      var box = document.createElement("div"); box.className = "spai-m"; ov.appendChild(box); document.body.appendChild(ov);
+      var STEPS = ["기능 소개", "키 준비", "키 입력", "연결 확인", "질문 시작"];
+      var prevFocus = document.activeElement;
+      function close(v) { ov.remove(); document.removeEventListener("keydown", onKey); fire(); try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {} resolve(v); }
       function onKey(e) { if (e.key === "Escape") close(!!getKey()); }
       document.addEventListener("keydown", onKey);
       ov.addEventListener("click", function (e) { if (e.target === ov) close(!!getKey()); });
-      ov.querySelector("#spaiCancel").onclick = function () { close(!!getKey()); };
-      var del = ov.querySelector("#spaiDel"); if (del) del.onclick = function () { setKey(""); st.className = "spai-st"; st.textContent = "키를 지웠습니다."; inp.value = ""; del.remove(); };
-      ok.onclick = function () {
-        // 공백·줄바꿈·따옴표·보이지 않는 문자는 지우고, 실제 유효성은 아래 연결 확인(Google 응답)으로 판단한다.
-        // 키 형식은 Google이 바꿀 수 있으므로(예: AIza…, 점이 들어간 새 형식) 글자 종류를 좁게 막지 않는다.
-        var v = inp.value.replace(/[\s\u200B-\u200D\uFEFF"'`]/g, ""); inp.value = v;
-        if (!/^[\x21-\x7E]{20,300}$/.test(v)) { st.className = "spai-st err"; st.textContent = "키 형식이 맞지 않습니다. Google AI Studio에서 복사한 키를 그대로 붙여 넣어 주세요."; return; }
-        var prevS = sget(sessionStorage, K_KEY), prevL = sget(localStorage, K_KEY);
-        setKey(v, ov.querySelector("#spaiRem").checked);
-        ok.disabled = true; st.className = "spai-st"; st.innerHTML = '<span class="spai-busy">연결 확인 중…</span>';
+      function steps(i) { return '<ol class="spai-steps" aria-label="설정 단계">' + STEPS.map(function (t, j) { return '<li class="' + (j < i ? "done" : j === i ? "on" : "") + '"' + (j === i ? ' aria-current="step"' : "") + ">" + (j + 1) + ". " + t + "</li>"; }).join("") + "</ol>"; }
+      function btns(h) { return '<div class="spai-row">' + h + "</div>"; }
+      function focus(sel) { setTimeout(function () { var el = box.querySelector(sel); if (el) el.focus(); }, 30); }
+      // 1. 기능 소개
+      function s1() {
+        box.innerHTML = '<h3>AI 기능 처음 설정하기</h3>' + steps(0) +
+          "<p><b>" + esc(opt.feature || "SafePlum AI 기능") + "</b>은 현행 산업안전보건 법령 조문(필요하면 고용노동부 질의회시)을 먼저 찾아, 그 자료를 근거로 AI가 답하거나 서식 초안을 만드는 기능입니다.</p>" +
+          '<div class="spai-box"><b>이 기능은 Google Gemini API 키가 필요합니다.</b><ul class="spai-ul"><li>키는 구글 계정으로 <b>무료로 발급</b>받을 수 있습니다(사용 한도는 Google 정책을 따릅니다).</li><li>키는 <b>이 브라우저에만</b> 저장되고 SafePlum 서버로 보내지 않습니다.</li><li>AI를 쓸 때만 질문과 찾은 조문이 Google로 바로 전송됩니다.</li></ul></div>' +
+          '<p style="font-size:13px;color:#667085">서식 작성·계산 도구는 키 없이도 모두 쓸 수 있습니다. AI 버튼만 키가 필요합니다.</p>' +
+          btns('<button type="button" class="spai-b" data-x>나중에</button><button type="button" class="spai-b pri" data-n>다음 — 키 준비</button>');
+        box.querySelector("[data-x]").onclick = function () { close(false); }; box.querySelector("[data-n]").onclick = s2; focus("[data-n]");
+      }
+      // 2. 키 준비
+      function s2() {
+        box.innerHTML = '<h3>API 키 준비</h3>' + steps(1) +
+          '<ol class="spai-ul"><li><a class="spai-a" href="' + KEY_GUIDE + '" target="_blank" rel="noopener">Google AI Studio API 키 페이지 ↗</a>를 새 창에서 엽니다(Google 공식 페이지).</li><li>구글 계정으로 로그인한 뒤 <b>「API 키 만들기(Create API key)」</b>를 누릅니다.</li><li>만들어진 키 옆의 <b>복사</b> 버튼을 누릅니다.</li><li>이 창으로 돌아와 「다음」을 누르고 붙여 넣습니다.</li></ol>' +
+          '<div class="spai-note"><b>입력 주의</b> — 무료 키로 보낸 내용은 Google이 서비스 개선에 쓸 수 있고 사람이 검토할 수 있습니다(Google 약관). 실명·연락처·주민번호 등 개인정보와 회사 기밀은 넣지 마세요.</div>' +
+          btns('<button type="button" class="spai-b" data-b>이전</button><button type="button" class="spai-b pri" data-n>다음 — 키 입력</button>');
+        box.querySelector("[data-b]").onclick = s1; box.querySelector("[data-n]").onclick = function () { s3(""); }; focus("[data-n]");
+      }
+      // 3. 키 입력(+보기/숨기기) → 4. 연결 확인
+      function s3(err, typed) {
+        var k = typed != null ? typed : getKey();
+        box.innerHTML = '<h3>API 키 입력</h3>' + steps(2) +
+          '<label for="spaiKey">API 키</label><div class="spai-pw"><input type="password" id="spaiKey" autocomplete="off" spellcheck="false" placeholder="Google AI Studio에서 복사한 키 붙여 넣기" value="' + esc(k) + '"><button type="button" class="spai-eye" id="spaiEye" aria-pressed="false" aria-controls="spaiKey">보기</button></div>' +
+          '<label class="spai-chk"><input type="checkbox" id="spaiRem"' + (remembered() ? " checked" : "") + '><span>이 기기에 기억하기 <small style="color:#667">(끄면 브라우저 창을 닫을 때 지워짐 · 공용 PC에서는 끄세요)</small></span></label>' +
+          '<div class="spai-st' + (err ? " err" : "") + '" id="spaiSt" aria-live="polite">' + (err || "") + "</div>" +
+          btns('<button type="button" class="spai-b" data-b>이전</button><button type="button" class="spai-b" data-x>취소(저장 안 함)</button><button type="button" class="spai-b pri" id="spaiOk">저장하고 연결 확인</button>');
+        var inp = box.querySelector("#spaiKey"), eye = box.querySelector("#spaiEye"), stl = box.querySelector("#spaiSt"), ok = box.querySelector("#spaiOk");
+        eye.onclick = function () { var show = inp.type === "password"; inp.type = show ? "text" : "password"; eye.textContent = show ? "숨기기" : "보기"; eye.setAttribute("aria-pressed", String(show)); inp.focus(); };
+        box.querySelector("[data-b]").onclick = getKey() ? manage : s2;
+        box.querySelector("[data-x]").onclick = function () { close(!!getKey()); };
+        ok.onclick = function () {
+          // 공백·줄바꿈·따옴표·보이지 않는 문자는 지우고, 실제 유효성은 연결 확인(Google 응답)으로 판단한다(키 형식은 Google이 바꿀 수 있어 좁게 막지 않는다)
+          var v = inp.value.replace(/[\s​-‍﻿"'`]/g, ""); inp.value = v;
+          if (!/^[\x21-\x7E]{20,300}$/.test(v)) { stl.className = "spai-st err"; stl.textContent = "키 형식이 맞지 않습니다. Google AI Studio에서 복사한 키를 그대로 붙여 넣어 주세요(앞뒤 공백·줄바꿈 없이)."; inp.focus(); return; }
+          var prevS = sget(sessionStorage, K_KEY), prevL = sget(localStorage, K_KEY), prevState = sget(localStorage, K_STATE);
+          setKey(v, box.querySelector("#spaiRem").checked);
+          s4(prevS, prevL, prevState, v);
+        };
+        inp.addEventListener("keydown", function (e) { if (e.key === "Enter") ok.click(); });
+        focus("#spaiKey");
+      }
+      function s4(prevS, prevL, prevState, typed) {
+        box.innerHTML = '<h3>연결 확인</h3>' + steps(3) + '<p class="spai-st" aria-live="polite"><span class="spai-busy">Google AI 서버에 연결해 키를 확인하는 중…</span></p>';
         pickModel(true).then(function (m) {
-          sset(localStorage, K_AGREE, "1");
-          st.className = "spai-st ok"; st.textContent = "연결되었습니다. 사용 모델: " + m;
-          setTimeout(function () { close(true); }, 700);
+          sset(localStorage, K_AGREE, "1"); writeState("ok");
+          box.innerHTML = '<h3>연결되었습니다</h3>' + steps(4) +
+            '<p><span class="spai-badge ok">연결 확인됨</span> 사용 모델: <b>' + esc(m) + "</b></p>" +
+            '<p>이제 AI 기능을 쓸 수 있습니다. 키를 바꾸거나 지우려면 언제든 「AI 키 설정」을 누르세요.</p>' +
+            btns('<button type="button" class="spai-b pri" data-go>' + esc(opt.startLabel || "시작하기") + "</button>");
+          box.querySelector("[data-go]").onclick = function () { close(true); }; focus("[data-go]");
         }, function (e) {
-          sset(sessionStorage, K_KEY, prevS); sset(localStorage, K_KEY, prevL);
-          ok.disabled = false; st.className = "spai-st err"; st.textContent = e.message;
+          // 실패한 키는 저장하지 않고 이전 상태로 되돌린다
+          sset(sessionStorage, K_KEY, prevS); sset(localStorage, K_KEY, prevL); sset(localStorage, K_STATE, prevState); fire();
+          var t = STATUS_TEXT[e.code] || STATUS_TEXT.other;
+          s3("<b>" + esc(t[0]) + "</b> — " + esc(t[1]) + (e.detail ? '<div class="spai-det">Google 응답: ' + esc(String(e.detail).slice(0, 200)) + "</div>" : "") + '<div class="spai-det">입력한 키는 저장하지 않았습니다.</div>', typed);
         });
-      };
-      inp.addEventListener("keydown", function (e) { if (e.key === "Enter") ok.click(); });
+      }
+      // 이미 설정한 사람: 상태·관리
+      function manage() {
+        var st = statusLabel();
+        box.innerHTML = '<h3>AI 키 설정</h3>' +
+          '<div class="spai-box"><p style="margin:0">상태 <span class="spai-badge ' + badgeCls(st.code) + '">' + esc(st.label) + "</span></p>" +
+          '<p style="margin:6px 0 0;font-size:13.5px">' + esc(st.help) + "</p>" + (st.detail && st.code !== "ok" ? '<div class="spai-det">상세: ' + esc(st.detail) + "</div>" : "") +
+          (st.at ? '<div class="spai-det">마지막 확인 ' + esc(new Date(st.at).toLocaleString("ko-KR")) + "</div>" : "") + "</div>" +
+          "<p>저장된 키: <code>" + esc(maskKey(getKey())) + "</code> · 저장 위치: " + (remembered() ? "이 기기(브라우저)에 기억" : "이 창을 닫을 때까지만") + (sget(localStorage, K_MODEL) ? " · 모델 " + esc(sget(localStorage, K_MODEL)) : "") + "</p>" +
+          '<p style="font-size:13px;color:#667085">키는 이 브라우저에만 있고 SafePlum 서버로 보내지 않습니다. AI 요청은 Google(generativelanguage.googleapis.com)로 바로 갑니다.</p>' +
+          '<div class="spai-st" id="spaiSt" aria-live="polite"></div>' +
+          btns('<button type="button" class="spai-b red" data-del>키 지우기</button><button type="button" class="spai-b" data-chg>키 바꾸기</button><button type="button" class="spai-b" data-test>연결 다시 확인</button><button type="button" class="spai-b pri" data-x>닫기</button>');
+        var stl = box.querySelector("#spaiSt");
+        box.querySelector("[data-x]").onclick = function () { close(true); };
+        box.querySelector("[data-chg]").onclick = function () { s3(""); };
+        box.querySelector("[data-del]").onclick = function () { if (!window.confirm("이 브라우저에 저장된 AI 키를 지울까요? AI 기능을 쓰려면 다시 넣어야 합니다.")) return; setKey(""); close(false); };
+        box.querySelector("[data-test]").onclick = function () {
+          var b = this; b.disabled = true; stl.className = "spai-st"; stl.innerHTML = '<span class="spai-busy">연결 확인 중…</span>';
+          pickModel(true).then(function () { writeState("ok"); manage(); }, function (e) { writeState(["key", "network", "quota", "server", "model", "timeout"].indexOf(e.code) >= 0 ? e.code : "other", e.detail || e.message); manage(); });
+        };
+        focus("[data-x]");
+      }
+      if (getKey()) manage(); else if (opt.skipIntro) s2(); else s1();
     });
   }
-  function ensureKey() { return getKey() ? Promise.resolve(true) : openSettings(); }
+  function ensureKey(opt) { return getKey() ? Promise.resolve(true) : openSettings(opt); }
 
   // ---------- 근거 찾기 1: 현행 조문(assets/lawai.json, 사이트 빌드 때 국가법령정보센터 원문으로 만든 묶음)
   var JOSA = /(으로써|으로서|에서는|에게는|으로는|이라도|까지는|에서|에게|으로|부터|까지|이나|이란|이라|하고|해야|하나요|인가요|있나요|되나요|합니까|입니까|해요|은|는|이|가|을|를|의|에|와|과|도|만|로|요)$/;
@@ -320,6 +412,7 @@
     json: function (o) { return ensureKey().then(function (ok) { if (!ok) throw AIError("nokey", "AI 키가 설정되지 않았습니다."); return gen(o, true); }); },
     text: function (o) { return ensureKey().then(function (ok) { if (!ok) throw AIError("nokey", "AI 키가 설정되지 않았습니다."); return gen(o, false); }); },
     model: function () { return sget(localStorage, K_MODEL); },
+    status: function () { return statusLabel(); },
     esc: esc,
     css: injectCSS,
     root: ROOT,

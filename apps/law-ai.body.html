@@ -6,12 +6,25 @@
 <div class="wrap layout-detail la-layout">
   <section class="col-main stack">
     <div class="la-warn" role="note"><b>참고용입니다.</b> AI 답변은 법적 효력이 없고 틀릴 수 있습니다. 실제 판단은 근거 조문 원문과 고용노동부(국번 없이 1350)·안전보건공단 상담으로 확인하세요.</div>
+    <div class="la-setup" id="laSetup" hidden>
+      <h2 class="h-sm">처음 쓰시나요? <span class="muted">— 이 기능은 Google Gemini API 키(무료 발급)가 필요합니다</span></h2>
+      <ol class="la-flow">
+        <li><b>기능 소개</b><span>현행 조문·질의회시를 찾아 근거와 함께 답합니다</span></li>
+        <li><b>키 준비</b><span>Google AI Studio에서 무료로 발급</span></li>
+        <li><b>키 입력</b><span>이 브라우저에만 저장</span></li>
+        <li><b>연결 확인</b><span>Google 서버에 실제로 연결해 확인</span></li>
+        <li><b>질문 시작</b><span>아래 입력창에서 바로 질문</span></li>
+      </ol>
+      <div class="btns"><button type="button" class="btn" id="laStart">AI 키 설정 시작</button><a class="btn btn-ghost" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">키 발급 페이지 ↗</a></div>
+    </div>
     <div class="la-log" id="laLog" aria-live="polite"></div>
     <div class="calc la-ask">
       <label class="field"><span class="label">질문</span><textarea id="laQ" rows="3" maxlength="600" placeholder="예: 지게차에 후방 카메라를 꼭 달아야 하나요?"></textarea></label>
       <div class="la-ex" id="laEx" role="group" aria-label="예시 질문"></div>
+      <p class="la-priv" role="note">개인정보, 회사 기밀 및 사고 관계자의 식별정보는 입력하지 마세요. 질문과 찾은 조문은 Google Gemini로 전송됩니다 — 처리 방식은 <a href="../../privacy/">개인정보 처리방침</a>을 확인해 주세요.</p>
       <div class="btns"><button type="button" class="btn" id="laGo">질문하기</button><button type="button" class="btn btn-ghost" id="laKey">AI 키 설정</button><button type="button" class="linkbtn" id="laClear" hidden>대화 지우기</button></div>
-      <p class="hint" id="laSt">회사명·실명·사고 피해자 정보 같은 개인정보나 기밀은 넣지 마세요. 질문과 찾은 조문이 Google Gemini로 전송됩니다.</p>
+      <p class="la-kst" id="laKst" aria-live="polite"></p>
+      <p class="hint" id="laSt"></p>
     </div>
   </section>
   <aside class="col-side stack">
@@ -52,6 +65,16 @@
 .la-ex button,.la-fu button{min-height:34px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px;color:var(--text-2);cursor:pointer;text-align:left}
 .la-ex button:hover,.la-fu button:hover{border-color:var(--navy);color:var(--navy)}
 .la-err{color:#B3261E}
+.la-setup{border:1px solid #C7D2FE;background:#F5F7FF;border-radius:14px;padding:14px 16px}
+.la-flow{list-style:none;margin:8px 0 12px;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;counter-reset:f}
+.la-flow li{counter-increment:f;background:#fff;border:1px solid #E0E7FF;border-radius:10px;padding:8px 8px 9px;font-size:12.5px;line-height:1.45;display:flex;flex-direction:column;gap:2px}
+.la-flow li b{font-size:13.5px;color:#1E3A8A}.la-flow li b::before{content:counter(f) ". "}
+.la-flow li span{color:var(--text-2)}
+.la-priv{margin:4px 0 10px;font-size:13px;line-height:1.6;color:#7A4A00;background:#FFF8E1;border:1px solid #F5D9A8;border-radius:9px;padding:8px 10px}
+.la-kst{margin:8px 0 0;font-size:13px;color:var(--text-2);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.la-b{display:inline-block;font-size:12px;font-weight:800;border-radius:6px;padding:1px 8px;background:#EEF2F6;color:#334155}
+.la-b.ok{background:#DCFCE7;color:#05603A}.la-b.set{background:#FEF3C7;color:#92400E}.la-b.err{background:#FEE4E2;color:#B42318}
+@media (max-width:720px){.la-flow{grid-template-columns:1fr 1fr}.la-flow li:last-child{grid-column:1/-1}}
 .la-ck{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface-2);font-size:14px}
 .la-ck ul{margin:4px 0 0 18px;padding:0}
 .la-old{font-style:normal;font-size:11px;font-weight:800;color:#92400E;background:#FEF3C7;border-radius:5px;padding:0 5px}
@@ -134,7 +157,7 @@
     if (q.length < 4) { st("질문을 조금 더 구체적으로 적어 주세요.", true); $("laQ").focus(); return; }
     if (!window.SPAI) { st("AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.", true); return; }
     SPAI.css();
-    if (!SPAI.hasKey()) { SPAI.ensureKey().then(function (ok) { if (ok) ask(q); }); return; }
+    if (!SPAI.hasKey()) { SPAI.ensureKey({ feature: "법령 AI 질문", startLabel: "이 질문 보내기" }).then(function (ok) { drawKey(); if (ok) ask(q); }); return; }
     busy = true; $("laGo").disabled = true;
     var prev = hist.length ? hist[hist.length - 1] : null;
     st('<span class="spai-busy">관련 조문을 찾는 중…</span>');
@@ -172,14 +195,27 @@
   $("laEx").innerHTML = EX.map(function (q) { return '<button type="button" data-q="' + esc(q) + '">' + esc(q) + "</button>"; }).join("");
   document.addEventListener("click", function (ev) {
     var b = ev.target.closest && ev.target.closest("[data-q],[data-key]"); if (!b) return;
-    if (b.hasAttribute("data-key")) { SPAI.openSettings(); return; }
+    if (b.hasAttribute("data-key")) { startSetup(); return; }
     var q = b.getAttribute("data-q"); $("laQ").value = q; ask(q);
   });
   $("laGo").addEventListener("click", function () { ask($("laQ").value); });
   $("laQ").addEventListener("keydown", function (ev) { if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); ask($("laQ").value); } });
-  $("laKey").addEventListener("click", function () { if (window.SPAI) { SPAI.css(); SPAI.openSettings(); } });
+  $("laKey").addEventListener("click", startSetup);
   $("laClear").addEventListener("click", function () { if (!confirm("이 기기에 저장된 질문·답변을 모두 지울까요?")) return; hist = []; save(); renderLog(); st("대화를 지웠습니다."); });
+  // ---------- 키 설정 상태(키 있음/없음)와 연결 상태(성공/오류)를 따로 보여 준다
+  function drawKey() {
+    var box = $("laSetup"), k = $("laKst");
+    if (!window.SPAI) { k.textContent = "AI 모듈을 불러오지 못했습니다. 새로고침해 주세요."; return; }
+    var st = SPAI.status(), cls = st.code === "ok" ? "ok" : st.code === "set" ? "set" : st.code === "none" ? "" : "err";
+    box.hidden = st.code !== "none";
+    k.innerHTML = 'AI 키 <span class="la-b ' + cls + '">' + esc(st.label) + "</span>" + (st.code !== "ok" && st.code !== "none" ? '<span>' + esc(st.help) + "</span>" : "") +
+      (st.code === "none" ? '<button type="button" class="linkbtn" data-key>설정하기</button>' : '<button type="button" class="linkbtn" data-key>키 관리(변경·삭제)</button>');
+  }
+  function startSetup() { if (!window.SPAI) return; SPAI.css(); SPAI.openSettings({ feature: "법령 AI 질문", startLabel: "질문 시작하기" }).then(function (ok) { drawKey(); if (ok) { $("laQ").focus(); $("laQ").scrollIntoView({ behavior: "smooth", block: "center" }); } }); }
+  $("laStart").addEventListener("click", startSetup);
+  window.addEventListener("spai:status", drawKey);
   if (window.SPAI) SPAI.css();
+  drawKey();
   renderLog();
   getDB().catch(function (e) { $("laVer").textContent = e.message; });
 })();
