@@ -226,7 +226,7 @@
       "src": "apps/ai-hub.body.html",
       "tag": "AI",
       "group": "계산·조회",
-      "law": "",
+      "law": "현행 산업안전보건법령 · 중대재해처벌법령",
       "cat": "조회·일정",
       "kind": "page",
       "menu": "AI 도구 모음"
