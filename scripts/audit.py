@@ -156,6 +156,8 @@ def check_phrases(site_dir):
             rel = str(p.relative_to(site_dir))
             if rel.startswith("laws/") and rel.count("/") >= 2:
                 continue  # 법령 원문 페이지는 원문 그대로
+            if rel.startswith("board/post/"):
+                continue  # 회원이 쓴 게시판 글은 쓴 그대로 옮긴다(운영 문구 검사 대상 아님)
             txt = strip_html(p.read_text(encoding="utf-8"))
             n += 1
             for word in ("법적으로 문제없", "이것만 하면 됩니다", "법적 의무를 충족합니다", "미적용", "법정 5×4"):
