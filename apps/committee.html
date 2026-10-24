@@ -152,6 +152,7 @@
         .cm-card-h { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
         .cm-card-h:last-child { margin-bottom: 0; }
         .cm-no { flex: none; width: 20px; height: 20px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .cm-ai { border: 1px solid #C7D2FE; background: #F5F7FF; border-radius: 10px; padding: 10px 12px; margin: 6px 0; }
         .cm-check { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #334155; }
         .cm-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
         .cm-hist li { display: flex; align-items: center; gap: 6px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; }
@@ -397,6 +398,12 @@
                                 <button v-if="formData.docType !== 'notice'" type="button" id="openEx" class="cm-btn" @click="openExModal"><i class="ph-fill ph-lightbulb"></i> 작성 예시</button>
                             </div>
                             <p v-if="formData.docType !== 'notice'" class="cm-hint r">실제로 심의·의결한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
+                            <div v-if="formData.docType !== 'notice'" class="cm-ai">
+                                <div class="cm-row" style="justify-content:space-between"><b style="color:#3730A3">✦ 회의 메모 → 회의록 문장으로 정리 (AI)</b><button type="button" class="cm-link" @click="aiKey">AI 키 설정</button></div>
+                                <textarea v-model="aiNotes" rows="4" maxlength="4000" class="cm-in" placeholder="회의 때 적은 메모를 그대로 붙여 넣으세요. 예: 1번 재해예방계획 - 하반기 지게차 동선 분리 예산 500만원 원안 통과 / 위험성평가 - 냉동창고 수시평가 결과 보고, 질문 없음 / 기타 - 휴게실 에어컨 교체 건의 → 다음 회의 검토"></textarea>
+                                <button type="button" class="cm-btn" style="margin-top:6px" :disabled="aiBusy" @click="aiMinutes">{{ aiBusy ? 'AI가 정리하는 중…' : '메모를 안건별 심의·의결 내용으로 정리' }}</button>
+                                <p class="cm-hint">{{ aiMsg || 'AI는 메모에 있는 내용만 안건별 문장으로 다듬습니다. 메모에 없는 안건은 비워 둡니다(내 Gemini 키).' }}</p>
+                            </div>
                             <p v-else class="cm-hint">공고문에는 안건 제목만 들어갑니다.</p>
                             <div>
                                 <div v-for="(it, idx) in items" :key="'it' + idx" class="cm-card" data-item>
@@ -855,6 +862,7 @@
 
     <!-- 사이트 공통 모듈: 결재란 · 서명 · 사진대지 · 백업 (못 불러와도 작성기는 동작) -->
     <script src="../../assets/docs.js"></script>
+    <script src="../../assets/ai.js"></script>
     <script>
         // Vue 파일을 못 불러오면 빈 화면 대신 안내를 보여 준다
         if (!window.Vue) {
@@ -1514,7 +1522,36 @@
                     try { await html2pdf().set(opt).from(element).save(); done(true); } catch (e) { done(false); }
                 };
 
+                // ---- AI: 회의 메모 → 안건별 심의·의결 문장(메모에 없는 내용은 만들지 않는다)
+                const aiNotes = ref(''), aiBusy = ref(false), aiMsg = ref('');
+                const aiKey = () => { if (window.SPAI) { SPAI.css(); SPAI.openSettings(); } };
+                const aiMinutes = () => {
+                    if (!window.SPAI) { aiMsg.value = 'AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.'; return; }
+                    SPAI.css();
+                    if (!SPAI.hasKey()) { SPAI.ensureKey().then(ok => { if (ok) aiMinutes(); }); return; }
+                    const notes = aiNotes.value.trim();
+                    if (notes.length < 10) { aiMsg.value = '회의 메모를 붙여 넣어 주세요.'; return; }
+                    const list = items.value.map((it, i) => (i + 1) + '. ' + (it.title || '(제목 없음)')).join('\n');
+                    aiBusy.value = true; aiMsg.value = 'AI가 정리하는 중…';
+                    SPAI.json({
+                        system: '너는 산업안전보건위원회 회의록 작성 보조자다. 사용자가 준 회의 메모에 실제로 있는 내용만 안건별로 회의록 문장(~함, ~하기로 의결함)으로 정리한다. 메모에 없는 결정·숫자·이름·일정은 절대 만들지 않는다. 메모에 없는 안건은 비워 둔다.',
+                        prompt: '안건 목록:\n' + list + '\n\n회의 메모:\n' + notes + '\n\nitems: 메모에서 다룬 안건만 {no(안건 번호, 목록에 없으면 0), title(목록에 없을 때만 새 제목), content(심의 내용 및 의결·결정 사항 1~4문장), result(원안 의결·수정 의결·보고·보류·의결하지 못함 중 메모로 알 수 있으면, 아니면 빈 문자열)}.',
+                        schema: { type: 'OBJECT', properties: { items: { type: 'ARRAY', items: { type: 'OBJECT', properties: { no: { type: 'INTEGER' }, title: { type: 'STRING' }, content: { type: 'STRING' }, result: { type: 'STRING' } }, required: ['no', 'content'] } } }, required: ['items'] },
+                        temperature: 0.2, timeout: 60000
+                    }).then(r => {
+                        let n = 0, added = 0;
+                        (r.items || []).forEach(x => {
+                            const c = String(x.content || '').trim(); if (!c) return;
+                            const i = (x.no | 0) - 1;
+                            if (i >= 0 && i < items.value.length) { const it = items.value[i]; if (it.content.trim() && !window.confirm((i + 1) + '번 안건에 이미 쓴 내용이 있습니다. AI 정리로 바꿀까요?')) return; it.content = c.slice(0, 2000); if (x.result) it.result = String(x.result).slice(0, 60); n++; }
+                            else if (items.value.length < 60) { items.value.push({ title: String(x.title || '기타 안건').slice(0, 300), content: c.slice(0, 2000), result: String(x.result || '').slice(0, 60) }); added++; }
+                        });
+                        aiMsg.value = n || added ? '안건 ' + n + '개를 정리했습니다' + (added ? ', 새 안건 ' + added + '개를 추가했습니다' : '') + '. 실제 회의 내용과 맞는지 확인하세요.' : '메모에서 안건과 맞는 내용을 찾지 못했습니다.';
+                        if (n || added) showToast('AI가 메모를 정리했습니다 — 실제 회의 내용과 대조하세요.');
+                    }).catch(e => { aiMsg.value = (e && e.message) || 'AI 요청이 실패했습니다.'; }).finally(() => { aiBusy.value = false; });
+                };
                 return {
+                    aiNotes, aiBusy, aiMsg, aiKey, aiMinutes,
                     docTypes, formData, employerReps, employeeReps, items, prev, actions, history, historyView, HIST_MAX, APPR_KEY, PHOTO_DOC, hasADoc,
                     saveMsg, toast, steps, open, allOpen, toggleStep, toggleAll, goNext, tab, setTab, changeDocType, docLabel,
                     touch, unsetManual, manualList, bodyName, noticeDateEff, reportDateEff, noticeNoEff, setDate, setNoticeNo,
