@@ -280,7 +280,7 @@
       system: "너는 한국 제조·물류·건설 현장의 산업안전 전문가다. 산업안전보건법과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 표준작업 안전수칙의 표현 방식을 따른다. 현장 게시용 안전작업수칙을 쓴다. 각 수칙은 한 문장, 25~45자, '~할 것' 또는 '~한다'로 끝내고, 실제로 지킬 수 있는 구체적 행동만 쓴다. 법 조문 번호는 확실한 경우가 아니면 쓰지 않는다.",
       prompt: "작업·설비: " + job + "\n\n이 작업에 맞는 안전작업수칙을 8~10개 만들어라. 제목은 '○○ 안전수칙' 형태로 15자 이내. 함께 붙일 안전보건표지를 아래 목록에서 2~4개 골라 번호만 적어라.\n표지 목록: " + CODES,
       schema: { type: "OBJECT", properties: { title: { type: "STRING" }, rules: { type: "ARRAY", items: { type: "STRING" } }, signs: { type: "ARRAY", items: { type: "STRING" } } }, required: ["title", "rules", "signs"] },
-      temperature: 0.5
+      temperature: 0.5, label: "AI가 안전수칙 문안을 쓰는 중"
     }).then(function (r) {
       var rules = (r.rules || []).map(function (x) { return String(x).replace(/^\s*\d{1,2}[.)]\s*/, "").trim(); }).filter(Boolean).slice(0, MAXR);
       if (!rules.length) throw new Error("AI가 수칙을 만들지 못했습니다. 다시 시도해 주세요.");

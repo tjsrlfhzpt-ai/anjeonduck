@@ -581,6 +581,40 @@ def edu_auto():
     return [course_picker, special_picker], f"{ec['source']} · {eh['source']}"
 
 
+AI_EX_GROUP = {
+    "교육·회의": ["신규 입사자 3명 채용 시 교육, 물류센터 지게차·컨베이어 작업에 배치 예정",
+              "정기 안전보건교육 2시간, 생산직 20명, 이번 달 주제는 끼임 사고 예방과 전원 차단(LOTO)",
+              "산업안전보건위원회 정기회의 — 안건: 하반기 위험성평가 결과, 보호구 교체, 아차사고 3건",
+              "협력업체 5개사 협의체 회의, 다음 달 고소작업·화기작업 일정 조정"],
+    "점검·허가": ["2층 배관 수리 용접 작업, 주변에 단열재 있음, 화재감시자 1명 배치",
+              "정화조 청소 밀폐공간 작업 3명, 산소·황화수소 측정 후 진입",
+              "월간 순회점검 — 가공동·창고·전기실, 지게차 통로 적치물과 분전반 덮개 확인",
+              "고소작업대로 천장 배관 보수, 높이 6m, 아래로 사람이 지나다님"],
+    "재해·사고 조사": ["오전 10시 2라인 컨베이어 이물을 손으로 빼다 손가락 끼임, 설비 가동 중이었고 덮개가 열려 있었음",
+                  "창고에서 사다리(1.5m)에 올라 박스를 내리다 떨어짐, 사다리를 잡아 주는 사람 없었음",
+                  "지게차 후진 중 보행자와 부딪힐 뻔한 아차사고, 교차 지점에 반사경 없음"],
+    "보건·작업환경": ["포장 라인 반복 작업 8명, 하루 6시간 10kg 상자 들기, 허리·어깨 통증 호소",
+                 "콜센터 상담원 30명, 고객 폭언이 잦아 상담 중단 기준과 휴식 시간이 필요함",
+                 "도장 작업장 유기용제 사용, 국소배기장치 있음, 작업자 4명"],
+    "업무일지": ["오늘 프레스 2호기 금형 교체, 지게차 하역 작업 지휘, 신규자 1명 배치, 통로에 팔레트 적치 발견",
+             "순회점검 2회, 용접 작업장 불티 비산 지적, 협력업체 배관 작업 화기작업 허가",
+             "건설 현장 골조 공사 — 3층 슬래브 거푸집 설치, 타워크레인 양중 작업"],
+    "작업계획서": ["창고 A동 입고장에서 2.5톤 지게차로 팔레트 하역, 보행자 통로와 겹치는 구간 있음",
+              "배수관 매설을 위해 깊이 2.5m 굴착, 0.6㎥ 굴착기 1대, 옆 도로에 차량 통행",
+              "1.2톤 모터를 체인블록으로 들어 올려 교체, 좁은 기계실",
+              "수변전실 저압반 정기점검, 정전 작업, 전기기능사 2명"],
+    "조직·발령": ["생산팀장을 관리감독자로 지정, 담당 공정은 프레스·용접, 근로자 25명",
+              "상시근로자 120명 제조업, 안전관리자 1명 선임"],
+    "관리대장": ["신규 입사자와 교체 대상에게 안전화 10켤레·안전모 5개 지급",
+             "세척제·절삭유·도료 등 12종 MSDS 대장 정리"],
+    "중대재해처벌법 이행": ["상시근로자 60명 제조업, 경영책임자의 안전보건 목표와 경영방침 수립",
+                    "반기 이행점검 — 위험성평가·종사자 의견 청취·협력업체 평가를 했는지 확인",
+                    "협력업체 3곳 안전보건 수준 평가, 기준은 안전관리 체계·재해 이력·교육"],
+    "작업시작 전 점검(별표 3)": ["2.5톤 지게차 1호기 작업시작 전 점검, 후진 경보음이 작게 들림",
+                           "25톤 이동식 크레인 작업 전 점검, 연약지반 위에 설치"],
+}
+
+
 def form_auto_map():
     fa = load("data/form_auto.json")
     m = fa["forms"]
@@ -1388,6 +1422,10 @@ def all_forms(lawref):
         if f.get("src_law"):
             f["source_url"] = law_url(f["src_law"])
         f["auto"] = auto.get(f["id"], {"source": "", "checked": ""})
+        # AI 작성 도우미 입력 예시: 서식별 예시 + 묶음별 예시를 합쳐 5개까지(눌러서 넣는 칩으로 보인다)
+        _ai = f["auto"].setdefault("ai", {})
+        _ex = ([_ai["example"]] if _ai.get("example") else []) + list(_ai.get("examples") or []) + AI_EX_GROUP.get(f.get("group", ""), [])
+        _ai["examples"] = list(dict.fromkeys(x for x in _ex if x))[:5]
         fam = f.get("family")
         if fam:   # 같은 묶음(직무 × 주기)을 화면 안에서 오가는 선택 버튼
             sib = [x for x in forms if (x.get("family") or {}).get("name") == fam["name"]]
@@ -2101,7 +2139,7 @@ var title=document.querySelector(".gq-vhead h1").textContent.trim(),date=(docume
 SPAI.law.search(title+" "+q.slice(0,400),{{k:6}}).then(function(L){{law=L;
 return SPAI.json({{system:"너는 고용노동부 행정해석(질의회시)을 현장 실무자에게 설명하는 한국 산업안전보건 전문가다. 회답 내용을 왜곡하지 말고 쉬운 말로 요약한다. 현행 조문은 아래 [번호] 조문만 근거로 비교하며, 제공된 조문만으로 판단할 수 없으면 그렇다고 쓴다. 질의회시는 법적 구속력이 없는 부처 해석임을 전제로 한다.",
 prompt:"질의회시: 「"+title+"」 회신일 "+date+(old?" (2020.1.16 산업안전보건법 전부개정 전 법령 기준)":"")+"\\n\\n질의요지:\\n"+q.slice(0,2500)+"\\n\\n회답:\\n"+a.slice(0,3500)+"\\n\\n현행 조문:\\n"+SPAI.law.ctx(law,1000)+"\\n\\nsummary: 회답 결론을 쉬운 말 2~3문장. points: 실무 포인트 2~4개. now: 지금 시행 중인 조문과 비교한 내용 2~4문장(조문 번호가 바뀌었거나 내용이 달라졌으면 구체적으로, 근거 문장 끝에 [번호]). cites: now에 쓴 조문 번호.",
-schema:{{type:"OBJECT",properties:{{summary:{{type:"STRING"}},points:{{type:"ARRAY",items:{{type:"STRING"}}}},now:{{type:"STRING"}},cites:{{type:"ARRAY",items:{{type:"INTEGER"}}}}}},required:["summary","now"]}},temperature:0.2,maxTokens:4000,timeout:60000}});
+schema:{{type:"OBJECT",properties:{{summary:{{type:"STRING"}},points:{{type:"ARRAY",items:{{type:"STRING"}}}},now:{{type:"STRING"}},cites:{{type:"ARRAY",items:{{type:"INTEGER"}}}}}},required:["summary","now"]}},temperature:0.2,maxTokens:4000,timeout:90000,label:"AI가 회시를 쉬운 말로 풀이하는 중"}});
 }}).then(function(r){{var used={{}};(r.cites||[]).forEach(function(n){{if(n>=1&&n<=law.length)used[n]=law[n-1];}});
 var now=E(r.now||"").replace(/\\[(\\d{{1,2}})\\]/g,function(m,n){{var c=law[n-1];if(!c)return"";used[n]=c;return'<sup><a href="'+E(c.url)+'" target="_blank" rel="noopener">['+n+']</a></sup>';}});
 out.innerHTML='<div class="gq-ai-box"><p><b>한눈에</b> '+E(r.summary||"")+'</p>'+((r.points||[]).length?'<ul>'+r.points.map(function(x){{return"<li>"+E(x)+"</li>";}}).join("")+"</ul>":"")+'<p><b>현행 법령과 비교</b> '+now+'</p><p class="gq-ai-src">'+Object.keys(used).map(function(n){{var c=used[n];return'<a href="'+E(c.url)+'" target="_blank" rel="noopener">['+n+'] '+E(c.label)+"</a>";}}).join(" ")+'</p><p class="gq-ai-src">'+E(SPAI.NOTICE)+" 원문과 현행 조문을 꼭 확인하세요.</p></div>";

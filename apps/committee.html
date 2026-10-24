@@ -511,13 +511,17 @@
                             <p class="cm-hint" id="labelNote">미리보기에서 제목·표 머리글·항목 이름·문구에 마우스를 올리면 파랗게 표시됩니다. 눌러서 바로 고칠 수 있습니다.
                                 <template v-if="overCount"> 지금 바꾼 곳 {{ overCount }}군데 — <button type="button" id="resetLabels" class="cm-link" @click="resetAllLabels">모두 기본으로 되돌리기</button></template>
                             </p>
-                            <template v-if="hasADoc && formData.docType !== 'notice'">
-                                <hr class="cm-sep">
-                                <div class="cm-row">
-                                    <button type="button" id="addPhoto" class="cm-btn" @click="pickPhoto"><i class="ph-fill ph-camera"></i> 회의 사진 추가</button>
-                                    <span class="cm-hint">{{ photoCount ? '사진 ' + photoCount + '장 — 문서 맨 뒤에 붙습니다. 설명·순서는 미리보기에서 고칩니다.' : '첨부한 사진 없음' }}</span>
-                                </div>
-                            </template>
+                        </template>
+
+                        <!-- 회의 사진(사진대지) -->
+                        <template v-else-if="s.id === 'photos'">
+                            <p class="cm-hint" style="margin-top:0">회의 장면, 참석자 서명부, 게시·공지 사진을 붙이면 회의록 맨 뒤에 <b>사진대지</b>로 인쇄됩니다. 사진마다 설명을 적고 순서를 바꿀 수 있습니다(미리보기 맨 아래).</p>
+                            <div class="cm-row" style="margin-top:8px">
+                                <button type="button" id="addPhoto" class="cm-btn" style="background:#17365D;color:#fff;border-color:#17365D" @click="pickPhoto"><i class="ph-fill ph-camera"></i> 회의 사진 추가</button>
+                                <button v-if="photoCount" type="button" class="cm-btn" @click="goPhotos">사진대지로 이동</button>
+                                <span class="cm-hint">{{ photoCount ? '사진 ' + photoCount + '장 첨부됨' : '첨부한 사진 없음' }}</span>
+                            </div>
+                            <p class="cm-hint">사진은 이 브라우저에만 저장됩니다(서버로 보내지 않음). 휴대폰에서는 바로 촬영할 수도 있습니다.</p>
                         </template>
 
                         <!-- 6. 보관·다음 회의 -->
@@ -832,7 +836,7 @@
                     </div>
 
                     <!-- 사진대지(회의록·결과 보고서 맨 뒤) -->
-                    <div v-if="hasADoc" v-show="formData.docType !== 'notice'" v-photos="PHOTO_DOC"></div>
+                    <div data-photos-anchor></div><div v-if="hasADoc" v-show="formData.docType !== 'notice'" v-photos="PHOTO_DOC"></div>
                 </div>
             </div>
         </main>
@@ -1321,6 +1325,7 @@
                 const syncPhotos = () => { if (hasADoc) ADoc.countPhotos(PHOTO_DOC).then(c => { photoCount.value = c.total; }); };
                 if (hasADoc) { ADoc.onPhotos(PHOTO_DOC, syncPhotos); syncPhotos(); }
                 const pickPhoto = () => { if (hasADoc) ADoc.pickPhoto(PHOTO_DOC, ''); };
+                const goPhotos = () => { const el = document.querySelector('[data-photos-anchor]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
                 // ---------- 알림
                 const toast = ref({ visible: false, message: '', type: 'success' });
@@ -1347,7 +1352,8 @@
                     a.push({ id: 'items', title: notice ? '안건·협조사항' : '안건·의결사항', sum: notice ? `안건 ${n}건` : `안건 ${n}건 · 내용 입력 ${filled}건`,
                         done: n > 0 && !untitled && (notice || filled === n), warn: n === 0 ? '안건이 없습니다' : (untitled ? `제목이 빈 안건 ${untitled}건` : '') });
                     if (!notice) a.push({ id: 'follow', title: '이행 확인·후속 조치', sum: `이행 확인 ${prevFilled.value.length}건 · 후속 조치 ${actionsFilled.value.length}건${f.nextDatetime ? ' · 다음 회의 정함' : ''}`, done: prevFilled.value.length + actionsFilled.value.length > 0, warn: '' });
-                    a.push({ id: 'style', title: '결재란·제목·문구' + (notice ? '' : '·사진'), sum: `결재란 ${showAppr.value ? '넣음' : '뺌'}${overCount.value ? ' · 고친 글자 ' + overCount.value + '군데' : ''}${!notice && photoCount.value ? ' · 사진 ' + photoCount.value + '장' : ''}`, done: false, warn: '' });
+                    if (!notice && hasADoc) a.push({ id: 'photos', title: '회의 사진(사진대지)', sum: photoCount.value ? `사진 ${photoCount.value}장 — 문서 맨 뒤 사진대지에 붙음` : '첨부한 사진 없음 — 회의 장면·참석자 서명부 사진을 붙일 수 있습니다', done: photoCount.value > 0, warn: '' });
+                    a.push({ id: 'style', title: '결재란·제목·문구', sum: `결재란 ${showAppr.value ? '넣음' : '뺌'}${overCount.value ? ' · 고친 글자 ' + overCount.value + '군데' : ''}`, done: false, warn: '' });
                     a.push({ id: 'archive', title: '보관·다음 회의', sum: history.value.length ? `보관한 기록 ${history.value.length}건` : '보관한 기록 없음', done: false, warn: '' });
                     a.push({ id: 'law', title: '법령 메모', sum: '법 제24조 · 시행령 제34조~제39조', done: false, warn: '' });
                     return a;
@@ -1537,7 +1543,7 @@
                         system: '너는 산업안전보건위원회 회의록 작성 보조자다. 사용자가 준 회의 메모에 실제로 있는 내용만 안건별로 회의록 문장(~함, ~하기로 의결함)으로 정리한다. 메모에 없는 결정·숫자·이름·일정은 절대 만들지 않는다. 메모에 없는 안건은 비워 둔다.',
                         prompt: '안건 목록:\n' + list + '\n\n회의 메모:\n' + notes + '\n\nitems: 메모에서 다룬 안건만 {no(안건 번호, 목록에 없으면 0), title(목록에 없을 때만 새 제목), content(심의 내용 및 의결·결정 사항 1~4문장), result(원안 의결·수정 의결·보고·보류·의결하지 못함 중 메모로 알 수 있으면, 아니면 빈 문자열)}.',
                         schema: { type: 'OBJECT', properties: { items: { type: 'ARRAY', items: { type: 'OBJECT', properties: { no: { type: 'INTEGER' }, title: { type: 'STRING' }, content: { type: 'STRING' }, result: { type: 'STRING' } }, required: ['no', 'content'] } } }, required: ['items'] },
-                        temperature: 0.2, timeout: 60000
+                        temperature: 0.2, timeout: 90000, label: "AI가 회의 메모를 안건별로 정리하는 중"
                     }).then(r => {
                         let n = 0, added = 0;
                         (r.items || []).forEach(x => {
@@ -1560,7 +1566,7 @@
                     anyResult, itemsTitled, addItem, removeItem, resetItems, clearItemContents, resetNoticeInstructions,
                     prevFilled, actionsFilled, addPrev, addAction, suggestNext, formattedDatetime, fmtDate, shortDate, nextText,
                     T, setL, isOver, resetLabel, overCount, resetAllLabels, noteKeys, showAppr, apprOn, setShowAppr,
-                    photoCount, pickPhoto, archiveOnly, archiveAndNext, openHistory, deleteHistory, resetAll,
+                    photoCount, pickPhoto, goPhotos, archiveOnly, archiveAndNext, openHistory, deleteHistory, resetAll,
                     examples, isExOpen, openExModal, applyExample, printDoc, downloadPDF, isGeneratingPDF
                 };
             }

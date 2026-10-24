@@ -125,40 +125,220 @@
   }
 
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-  // 한도(429)·서버 오류(5xx)·연결 끊김은 잠깐 쉬었다 한 번 더, 모델 없음(404)은 모델을 다시 골라 한 번 더 시도한다
-  function gen(o, wantJSON, attempt) {
-    attempt = attempt || 0;
-    if (!attempt) { var sc = scrub(o.prompt), ss = scrub(o.system || ""); o = Object.assign({}, o, { prompt: sc.text, system: o.system ? ss.text : o.system }); lastScrub = sc.n + ss.n; }
-    return gen1(o, wantJSON).catch(function (e) {
-      if (attempt >= 1) throw e;
-      if (e.code === "quota" || e.code === "server" || e.code === "network") return wait(e.code === "quota" ? 4000 : 2000).then(function () { return gen(o, wantJSON, attempt + 1); });
-      if (e.code === "model") return pickModel(true).then(function () { return gen(o, wantJSON, attempt + 1); });
-      if (e.code === "parse" || e.code === "empty") return gen(o, wantJSON, attempt + 1);
+
+  // ---------- 진행 표시: AI가 일하는 동안 화면 아래에 크게 보여 준다(단계·경과 시간·받은 글자 수·취소)
+  var PCSS = ".spai-pg{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:4900;width:min(460px,calc(100vw - 24px));background:#17365D;color:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(10,20,40,.35);padding:14px 16px 12px;font:14px/1.5 'Pretendard','Noto Sans KR',system-ui,sans-serif}" +
+    ".spai-pg[hidden]{display:none}.spai-pg-h{display:flex;align-items:center;gap:12px}" +
+    ".spai-pg-sp{flex:none;width:26px;height:26px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spai-r .8s linear infinite}" +
+    ".spai-pg-t{flex:1;min-width:0}.spai-pg-t b{display:block;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spai-pg-t span{display:block;font-size:12.5px;color:#C7D7EE}" +
+    ".spai-pg-x{flex:none;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;font-weight:700;font-size:13px;cursor:pointer}" +
+    ".spai-pg-bar{height:6px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:10px;position:relative}" +
+    ".spai-pg-bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:#7DD3FC;border-radius:4px;transition:width .4s ease}" +
+    ".spai-pg-bar.ind i{width:35%;animation:spai-ind 1.3s ease-in-out infinite}" +
+    "@keyframes spai-ind{0%{left:-35%}100%{left:100%}}@keyframes spai-r{to{transform:rotate(360deg)}}" +
+    ".spai-pg.done{background:#05603A}.spai-pg.done .spai-pg-sp{animation:none;border-color:#fff}.spai-pg.err{background:#B42318}.spai-pg.err .spai-pg-sp,.spai-pg.done .spai-pg-sp{display:none}" +
+    "@media (max-width:1023px){.spai-pg{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}" +
+    "@media (prefers-reduced-motion:reduce){.spai-pg-sp,.spai-pg-bar.ind i{animation-duration:3s}}";
+  var prog = null;
+  // 예시 칩: 무엇을 적을지 모를 때 눌러서 입력칸에 넣는다(넣은 뒤 고쳐 쓰게 커서를 끝으로)
+  var XCSS = ".spai-ex{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 2px}.spai-ex-l{font-size:12.5px;font-weight:800;color:#475467;margin-right:2px}" +
+    ".spai-ex button{min-height:34px;max-width:100%;padding:5px 11px;border-radius:17px;border:1px solid #C7D2FE;background:#F5F7FF;color:#3730A3;font-size:13px;line-height:1.35;text-align:left;cursor:pointer}" +
+    ".spai-ex button:hover{background:#E0E7FF;border-color:#818CF8}.spai-cnt{font-size:12.5px;color:#667085;margin-top:4px}.spai-cnt.bad{color:#B42318;font-weight:700}.spai-cnt.ok{color:#05603A;font-weight:700}";
+  function examples(box, list, input, opt) {
+    opt = opt || {};
+    if (!document.getElementById("spai-xcss")) { var s = document.createElement("style"); s.id = "spai-xcss"; s.textContent = XCSS; document.head.appendChild(s); }
+    list = (list || []).filter(Boolean);
+    box.innerHTML = list.length ? '<div class="spai-ex" role="group" aria-label="입력 예시"><span class="spai-ex-l">예시 눌러 넣기</span>' + list.map(function (x, i) { return '<button type="button" data-ex="' + i + '" title="눌러서 입력칸에 넣기">' + esc(x) + "</button>"; }).join("") + "</div>" : "";
+    box.onclick = function (ev) { var b = ev.target.closest("[data-ex]"); if (!b) return; input.value = list[+b.dataset.ex]; input.dispatchEvent(new Event("input", { bubbles: true })); input.focus(); try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {} };
+    // 글자 수 안내: 최소 글자 수를 입력칸 바로 아래에 늘 보여 준다
+    var min = opt.min || 0, cnt = null;
+    if (min) {
+      cnt = input.parentNode.querySelector(".spai-cnt");
+      if (!cnt) { cnt = document.createElement("p"); cnt.className = "spai-cnt"; input.insertAdjacentElement("afterend", cnt); }
+      var upd = function () { var n = input.value.replace(/\s/g, "").length; cnt.className = "spai-cnt " + (n >= min ? "ok" : n ? "bad" : ""); cnt.textContent = n >= min ? "✓ " + n + "자 — AI가 쓸 수 있습니다" : "최소 " + min + "자 이상 적어 주세요 (지금 " + n + "자) · 무엇을·어디서·어떤 장비로 하는지 적으면 더 정확합니다"; };
+      input.addEventListener("input", upd); upd();
+    }
+  }
+  function progress(label, onCancel) {
+    if (!document.getElementById("spai-pcss")) { var s = document.createElement("style"); s.id = "spai-pcss"; s.textContent = PCSS; document.head.appendChild(s); }
+    var el = document.getElementById("spaiPg");
+    if (!el) {
+      el = document.createElement("div"); el.id = "spaiPg"; el.className = "spai-pg"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite");
+      el.innerHTML = '<div class="spai-pg-h"><span class="spai-pg-sp" aria-hidden="true"></span><div class="spai-pg-t"><b></b><span></span></div><button type="button" class="spai-pg-x">취소</button></div><div class="spai-pg-bar ind"><i></i></div>';
+      document.body.appendChild(el);
+    }
+    if (prog && prog.timer) clearInterval(prog.timer);
+    var st = { el: el, t0: Date.now(), chars: 0, stage: "보내는 중", label: label || "AI가 작성하는 중", cancel: onCancel };
+    el.className = "spai-pg"; el.hidden = false;
+    el.querySelector("b").textContent = st.label;
+    el.querySelector(".spai-pg-x").hidden = !onCancel;
+    el.querySelector(".spai-pg-x").onclick = function () { if (st.cancel) st.cancel(); };
+    function draw() {
+      var sec = Math.round((Date.now() - st.t0) / 1000), bar = el.querySelector(".spai-pg-bar"), fill = bar.querySelector("i");
+      var stage = st.chars ? "답을 받는 중 · " + st.chars.toLocaleString() + "자" : (sec >= 3 ? "AI가 생각하는 중" : "요청 보내는 중");
+      el.querySelector(".spai-pg-t span").textContent = stage + " · " + sec + "초" + (st.note ? " · " + st.note : "") + (sec >= 25 && !st.chars ? " — 내용이 많으면 30초 이상 걸릴 수 있습니다" : "");
+      if (st.chars) { bar.classList.remove("ind"); fill.style.width = Math.round(25 + 70 * (1 - Math.exp(-st.chars / 1800))) + "%"; }
+      else { bar.classList.add("ind"); fill.style.width = ""; }
+    }
+    st.timer = setInterval(draw, 500); draw();
+    st.set = function (n) { st.chars = n; draw(); };
+    st.notice = function (t) { st.note = t; draw(); };
+    st.end = function (ok, msg) {
+      clearInterval(st.timer);
+      el.className = "spai-pg " + (ok ? "done" : "err");
+      el.querySelector("b").textContent = msg || (ok ? "AI 초안이 준비되었습니다 — 검토 후 고쳐 쓰세요" : "AI 작업을 마치지 못했습니다");
+      el.querySelector(".spai-pg-t span").textContent = ok ? Math.round((Date.now() - st.t0) / 1000) + "초 걸렸습니다" : "";
+      el.querySelector(".spai-pg-x").hidden = true;
+      el.querySelector(".spai-pg-bar").classList.remove("ind"); el.querySelector(".spai-pg-bar i").style.width = ok ? "100%" : "0";
+      setTimeout(function () { if (prog === st) { el.hidden = true; prog = null; } }, ok ? 2200 : 4000);
+    };
+    prog = st;
+    return st;
+  }
+
+  // 입력 창: 브라우저 기본 prompt() 대신 — 예시 칩·글자 수 안내·여러 줄 입력
+  function ask(opt) {
+    opt = opt || {}; injectCSS();
+    return new Promise(function (done) {
+      var ov = document.createElement("div"); ov.className = "spai-ov";
+      ov.innerHTML = '<div class="spai-m" role="dialog" aria-modal="true" aria-labelledby="spaiAskT"><h3 id="spaiAskT">' + esc(opt.title || "AI 초안") + "</h3>" +
+        (opt.desc ? "<p>" + esc(opt.desc) + "</p>" : "") +
+        '<label style="display:block;font-weight:700;margin-top:8px">' + esc(opt.label || "내용") + '<textarea rows="3" maxlength="800" style="width:100%;box-sizing:border-box;border:1px solid #c8d1dd;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:15px;line-height:1.55;margin-top:4px" placeholder="' + esc(opt.placeholder || "") + '"></textarea></label>' +
+        '<div class="spai-askx"></div><p class="spai-note" style="margin-top:10px">회사명·실명·연락처 같은 개인정보는 적지 마세요.</p>' +
+        '<div class="spai-row"><button type="button" class="spai-b" data-x="0">취소</button><button type="button" class="spai-b pri" data-x="1">' + esc(opt.ok || "AI 초안 만들기") + "</button></div></div>";
+      document.body.appendChild(ov);
+      var ta = ov.querySelector("textarea"), min = opt.min || 4;
+      ta.value = opt.value || "";
+      examples(ov.querySelector(".spai-askx"), opt.examples || [], ta, { min: min });
+      function close(v) { ov.remove(); document.removeEventListener("keydown", key); done(v); }
+      function key(ev) { if (ev.key === "Escape") close(null); }
+      document.addEventListener("keydown", key);
+      ov.addEventListener("click", function (ev) {
+        if (ev.target === ov) return close(null);
+        var b = ev.target.closest("[data-x]"); if (!b) return;
+        if (b.dataset.x === "0") return close(null);
+        var v = ta.value.trim();
+        if (v.replace(/\s/g, "").length < min) { ta.focus(); var c = ov.querySelector(".spai-cnt"); if (c) { c.className = "spai-cnt bad"; } return; }
+        close(v);
+      });
+      setTimeout(function () { ta.focus(); }, 30);
+    });
+  }
+
+  // 한도(429)·서버 오류(5xx)·연결 끊김·응답 지연은 잠깐 쉬었다 한 번 더, 모델 없음(404)은 모델을 다시 골라 한 번 더 시도한다
+  function gen(o, wantJSON) {
+    var sc = scrub(o.prompt), ss = scrub(o.system || ""), pg = null;
+    o = Object.assign({}, o, { prompt: sc.text, system: o.system ? ss.text : o.system }); lastScrub = sc.n + ss.n;
+    if (!o.quiet) pg = progress(o.label, function () { if (pg.abort) pg.abort("cancel"); });
+    function run(attempt) {
+      return gen1(o, wantJSON, pg).catch(function (e) {
+        var retry = attempt < 1 && ["quota", "server", "network", "timeout", "model", "parse", "empty"].indexOf(e.code) >= 0;
+        if (!retry) throw e;
+        if (pg) { pg.notice(e.code === "timeout" ? "응답이 늦어 한 번 더 시도합니다" : "한 번 더 시도합니다"); pg.set(0); }
+        var next = e.code === "model" ? pickModel(true) : wait(e.code === "quota" ? 4000 : e.code === "parse" || e.code === "empty" ? 0 : 1500);
+        return next.then(function () { return run(attempt + 1); });
+      });
+    }
+    return run(0).then(function (r) { if (pg) pg.end(true); return r; }, function (e) {
+      if (pg) pg.end(false, e.code === "cancel" ? "AI 작업을 취소했습니다" : e.message);
       throw e;
     });
   }
-  function gen1(o, wantJSON) {
+
+  // 생각(thinking) 수준: 최신 flash 모델은 기본으로 깊게 생각해 서식 초안에 1분 넘게 걸리기도 한다 → '낮게'로 요청.
+  // 이 설정을 받지 않는 모델(오류 400)은 기억해 두고 설정 없이 보낸다.
+  var K_NOTHINK = "safeplum.ai.nothink";
+  function thinkOK(model) { return sget(localStorage, K_NOTHINK).split(",").indexOf(model) < 0; }
+  function noThink(model) { var l = sget(localStorage, K_NOTHINK).split(",").filter(Boolean); if (l.indexOf(model) < 0) l.push(model); sset(localStorage, K_NOTHINK, l.slice(-8).join(",")); }
+
+  // 답을 조각(SSE)으로 받는다: 글자가 들어오는 동안은 기다리고, 일정 시간 아무것도 오지 않을 때만 멈춘다.
+  function stream(model, body, o, pg) {
+    var key = getKey();
+    if (!key) return Promise.reject(AIError("nokey", "AI 키가 설정되지 않았습니다."));
+    var ctl = typeof AbortController === "function" ? new AbortController() : null, why = "", timer = null;
+    var FIRST = o.timeout || 90000, IDLE = 45000, total = Date.now();
+    function arm(ms) { if (!ctl) return; clearTimeout(timer); timer = setTimeout(function () { why = "timeout"; ctl.abort(); }, ms); }
+    if (pg) pg.abort = function (w) { why = w || "cancel"; if (ctl) ctl.abort(); };
+    arm(FIRST);
+    var text = "", finish = "", blocked = "";
+    function eat(line) {
+      if (line.indexOf("data:") !== 0) return;
+      var j; try { j = JSON.parse(line.slice(5).trim()); } catch (e) { return; }
+      if (j.error) throw explain(j.error.code || 500, j);
+      if (j.promptFeedback && j.promptFeedback.blockReason) blocked = j.promptFeedback.blockReason;
+      var c = (j.candidates || [])[0];
+      if (c) {
+        (c.content && c.content.parts || []).forEach(function (p) { if (p.text && !p.thought) text += p.text; });
+        if (c.finishReason) finish = c.finishReason;
+      }
+    }
+    return fetch(API + "models/" + encodeURIComponent(model) + ":streamGenerateContent?alt=sse", {
+      method: "POST", headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
+      body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined
+    }).then(function (res) {
+      if (!res.ok) return res.json().catch(function () { return {}; }).then(function (b) { throw explain(res.status, b); });
+      arm(IDLE);
+      if (!res.body || !res.body.getReader || typeof TextDecoder !== "function") return res.text().then(function (t) { t.split(/\r?\n/).forEach(eat); });
+      var rd = res.body.getReader(), dec = new TextDecoder("utf-8"), buf = "";
+      function pump() {
+        return rd.read().then(function (r) {
+          if (r.done) { buf += dec.decode(); buf.split(/\r?\n/).forEach(eat); return; }
+          arm(IDLE);
+          buf += dec.decode(r.value, { stream: true });
+          var lines = buf.split(/\r?\n/); buf = lines.pop();
+          lines.forEach(eat);
+          if (pg) pg.set(text.length);
+          return pump();
+        });
+      }
+      return pump();
+    }).then(function () {
+      clearTimeout(timer);
+      return { text: text, finish: finish, blocked: blocked, ms: Date.now() - total };
+    }, function (err) {
+      clearTimeout(timer);
+      if (err && err.code) throw err;
+      if (err && err.name === "AbortError") {
+        if (why === "cancel") throw AIError("cancel", "AI 작업을 취소했습니다.");
+        throw AIError("timeout", "AI 응답이 너무 오래 걸려 중단했습니다. 다시 시도해 주세요.", "모델 " + model + " · " + Math.round((Date.now() - total) / 1000) + "초 동안 " + (text ? "답이 중간에 멈춤" : "답이 시작되지 않음"));
+      }
+      throw AIError("network", "인터넷 연결을 확인해 주세요(Google AI 서버에 연결하지 못했습니다).");
+    });
+  }
+  function gen1(o, wantJSON, pg) {
     return pickModel().then(function (model) {
       var body = {
         contents: [{ role: "user", parts: [{ text: o.prompt }] }],
         generationConfig: { temperature: o.temperature == null ? 0.4 : o.temperature, maxOutputTokens: o.maxTokens || 4096 }
       };
+      if (thinkOK(model)) body.generationConfig.thinkingConfig = { thinkingLevel: "low" };
       if (o.system) body.systemInstruction = { parts: [{ text: o.system }] };
       if (wantJSON) { body.generationConfig.responseMimeType = "application/json"; if (o.schema) body.generationConfig.responseSchema = o.schema; }
-      return call("models/" + encodeURIComponent(model) + ":generateContent", { body: body, timeout: o.timeout }).then(function (b) { writeState("ok"); return b; }, function (e) {
+      function send() {
+        return stream(model, body, o, pg).catch(function (e) {
+          // 생각 수준 설정을 모르는 모델: 설정을 빼고 바로 다시 보낸다(재시도 횟수에 넣지 않음)
+          if (body.generationConfig.thinkingConfig && (e.code === "other" || e.code === "key") && /thinking/i.test(e.detail || "")) {
+            noThink(model); delete body.generationConfig.thinkingConfig; return stream(model, body, o, pg);
+          }
+          throw e;
+        });
+      }
+      return send().then(function (r) { writeState("ok"); return r; }, function (e) {
         if (e.code === "model") { sset(localStorage, K_MODEL, ""); }
         if (["key", "network", "quota", "server", "model", "timeout"].indexOf(e.code) >= 0) writeState(e.code, e.detail);
-        else if (e.code !== "nokey") writeState("other", e.message + (e.detail ? " — " + e.detail : ""));
+        else if (e.code !== "nokey" && e.code !== "cancel") writeState("other", e.message + (e.detail ? " — " + e.detail : ""));
         throw e;
       });
-    }).then(function (b) {
-      if (b.promptFeedback && b.promptFeedback.blockReason) throw AIError("blocked", "AI가 이 요청에 답하지 않았습니다(안전 정책). 표현을 바꿔 다시 시도해 주세요.");
-      var c = (b.candidates || [])[0];
-      var t = c && c.content && (c.content.parts || []).map(function (p) { return p.text || ""; }).join("");
-      if (!t) throw AIError("empty", "AI가 빈 답을 보냈습니다. 다시 시도해 주세요.");
+    }).then(function (r) {
+      if (r.blocked) throw AIError("blocked", "AI가 이 요청에 답하지 않았습니다(안전 정책). 표현을 바꿔 다시 시도해 주세요.");
+      var t = r.text;
+      if (!t) throw AIError("empty", "AI가 빈 답을 보냈습니다. 다시 시도해 주세요.", r.finish);
       if (!wantJSON) return t;
       try { return JSON.parse(t.replace(/^```(?:json)?\s*|\s*```$/g, "")); }
-      catch (e) { throw AIError("parse", "AI 답을 해석하지 못했습니다. 다시 시도해 주세요."); }
+      catch (e) {
+        if (r.finish === "MAX_TOKENS") throw AIError("parse", "AI 답이 너무 길어 중간에 끊겼습니다. 상황을 조금 짧게 적거나 '빈 칸만 채우기'로 다시 시도해 주세요.", r.finish);
+        throw AIError("parse", "AI 답을 해석하지 못했습니다. 다시 시도해 주세요.", r.finish);
+      }
     });
   }
 
@@ -418,6 +598,9 @@
     root: ROOT,
     scrub: function (t) { return scrub(t).text; },
     lastScrub: function () { return lastScrub; },
+    progress: progress,
+    examples: examples,
+    ask: ask,
     law: { db: lawDB, search: lawSearch, refs: parseRefs, ctx: lawCtx, terms: terms },
     govqa: { search: gqSearch },
     NOTICE: "AI가 만든 초안입니다. 현장 상황에 맞는지 반드시 검토·수정한 뒤 사용하세요."

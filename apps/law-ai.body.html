@@ -111,7 +111,7 @@
       system: "너는 한국 산업안전보건 법령 검색 도우미다. 사용자 질문을 법령 본문에 실제로 쓰이는 용어로 바꾼다.",
       prompt: (prev ? "이전 질문: " + prev + "\n" : "") + "질문: " + q + "\n\n이 질문의 답이 들어 있을 조문을 찾을 검색어를 법령 용어로 4~10개 만들어라(예: 지게차→지게차·차량계 하역운반기계, 사다리→이동식 사다리, 안전모→보호구, 교육시간→안전보건교육). laws에는 관련 가능성이 큰 법령을 고른다: act=산업안전보건법, yeong=시행령, rule=시행규칙, krule=산업안전보건기준에 관한 규칙, sapa=중대재해처벌법, sapa_dec=중대재해처벌법 시행령, pen=과태료 부과기준.",
       schema: { type: "OBJECT", properties: { keywords: { type: "ARRAY", items: { type: "STRING" } }, laws: { type: "ARRAY", items: { type: "STRING", enum: LAWKEYS } } }, required: ["keywords"] },
-      temperature: 0.1, timeout: 40000
+      temperature: 0.1, timeout: 60000, label: "질문을 법령 용어로 바꿔 관련 조문을 찾는 중"
     });
   }
   function answer(q, items, qas, prev) {
@@ -122,7 +122,7 @@
       prompt: (prev ? "이전 대화 — 질문: " + prev.q + " / 답 요약: " + String(prev.a || "").slice(0, 400) + "\n\n" : "") + "질문: " + q + "\n\n조문:\n" + ctx + (qctx ? "\n\n고용노동부 질의회시(참고):\n" + qctx : "") +
         "\n\n작성 규칙: answer는 먼저 결론 한두 문장, 이어서 근거와 실무 포인트를 5~12줄로. 조문 근거 문장 끝에 [번호], 질의회시를 참고한 문장 끝에 [Q번호]를 붙인다. cites에는 실제로 근거로 쓴 조문 번호(숫자)만, qcites에는 실제로 참고한 질의회시 번호(숫자)만. 관련 없는 질의회시는 쓰지 않는다. penalty에는 위반 시 벌칙·과태료가 조문에 나와 있으면 한두 문장, 없으면 빈 문자열. checklist에는 현장에서 바로 확인할 일 2~5개(짧게). followups에는 이어서 물어볼 만한 짧은 질문 2~3개.",
       schema: { type: "OBJECT", properties: { answer: { type: "STRING" }, cites: { type: "ARRAY", items: { type: "INTEGER" } }, qcites: { type: "ARRAY", items: { type: "INTEGER" } }, penalty: { type: "STRING" }, checklist: { type: "ARRAY", items: { type: "STRING" } }, followups: { type: "ARRAY", items: { type: "STRING" } } }, required: ["answer", "cites"] },
-      temperature: 0.2, maxTokens: 8192, timeout: 90000
+      temperature: 0.2, maxTokens: 8192, timeout: 90000, label: "AI가 조문·질의회시를 근거로 답을 쓰는 중"
     });
   }
 

@@ -2014,7 +2014,7 @@
                             '\n\n이 교육에서 다룰 법정 교육내용(시행규칙 별표 5):\n- ' + topics.join('\n- ') +
                             '\n\ntitle: 교육명 한 줄(30자 이내). detail: 진행한 교육 내용 요약 4~7줄(번호 목록, 법정 교육내용을 현장 사례와 연결). materials: 교육 자료 한두 줄. evalText: 평가·질의응답·건의 처리 방법 한두 줄.',
                         schema: { type: 'OBJECT', properties: { title: { type: 'STRING' }, detail: { type: 'STRING' }, materials: { type: 'STRING' }, evalText: { type: 'STRING' } }, required: ['title', 'detail'] },
-                        temperature: 0.4, timeout: 60000
+                        temperature: 0.4, timeout: 90000, label: "AI가 교육 내용 초안을 쓰는 중"
                     }).then(r => {
                         if (!x.title.trim() && r.title) x.title = String(r.title).slice(0, 60);
                         x.detail = String(r.detail || '').trim(); x.materials = String(r.materials || '').trim(); x.evalText = String(r.evalText || '').trim();
