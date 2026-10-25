@@ -960,7 +960,10 @@
           if (mode === "empty" && !s.fixed) {   // 빈 칸만: 이미 쓴 줄 다음부터 채운다
             for (var rr = 0; rr < have; rr++) { var any = s.cols.some(function (c, ci) { return !c.auto && !c.sign && String(state["t." + s.k + "." + rr + "." + ci] || "").trim() && !state["_ai.t." + s.k + "." + rr + "." + ci]; }); if (any) start = rr + 1; }
           }
-          rows.forEach(function (row, i) { var rIdx = s.fixed ? i : start + i; s.cols.forEach(function (c, ci) { if (row && row["c" + ci] != null) put("t." + s.k + "." + rIdx + "." + ci, row["c" + ci], c.options); }); });
+          rows.forEach(function (row, i) { var rIdx = s.fixed ? i : start + i; s.cols.forEach(function (c, ci) {
+            // 고정 표의 기본 문구 칸(법정 항목 이름 등)은 AI가 바꾸지 않는다
+            if (s.fixed && s.defaults && s.defaults[rIdx] && String(s.defaults[rIdx][ci] || "").trim()) return;
+            if (row && row["c" + ci] != null) put("t." + s.k + "." + rIdx + "." + ci, row["c" + ci], c.options); }); });
           if (!s.fixed) state["n." + s.k] = Math.max(have, start + rows.length);
         }
       });
@@ -1008,6 +1011,8 @@
     var ph = AIX.example || "예: 오늘 2라인 금형 교체와 자재 하역이 있음. 신규 입사자 2명 배치. 어제 지게차와 보행자 동선이 겹치는 아차사고가 있었음.";
     document.getElementById("fAIQ").placeholder = ph;
     if (AIX.ask) document.getElementById("fAIQl").textContent = AIX.ask;
+    if (AIX.go) document.getElementById("fAIGo").textContent = AIX.go;   // 예: 협의체 회의록 '메모로 회의록 정리'
+    if (AIX.rows) document.getElementById("fAIQ").rows = AIX.rows;
     if (window.SPAI && SPAI.examples) SPAI.examples(document.getElementById("fAIEx"), AIX.examples || (AIX.example ? [AIX.example] : []), document.getElementById("fAIQ"), { min: 4 });
     b.addEventListener("click", function () { pnl.hidden = !pnl.hidden; b.setAttribute("aria-expanded", String(!pnl.hidden)); if (!pnl.hidden) { if (window.SPAI) SPAI.css(); document.getElementById("fAIQ").focus(); } });
     document.getElementById("fAIGo").addEventListener("click", aiDraft);
