@@ -742,27 +742,35 @@
   }
   window.shuffleRows = shuffleRows;
   var aiBusy = false;
+  var RA_FIELDS = [
+    { k: "type", label: "작업 유형", type: "select", required: true, options: ["일반 작업", "고소작업", "중량물 취급·양중", "화기작업(용접·용단)", "밀폐공간 작업", "전기작업", "굴착·토목", "차량·건설기계", "하역·운반", "기계 정비·청소·수리", "화학물질 취급", "해체·철거", "사무·서비스", "기타"] },
+    { k: "proc", label: "평가할 공정·작업 내용", type: "area", required: true, min: 6, rows: 2, ph: "예: 냉동창고에서 지게차로 팔레트 입출고" },
+    { k: "equip", label: "설비·장비·물질", ph: "예: 2.5톤 지게차, 랙(5단)" },
+    { k: "place", label: "작업 장소", required: true, ph: "예: 물류동 냉동창고(-20℃)" },
+    { k: "crew", label: "작업 인원·근무 형태", ph: "예: 6명, 2교대" },
+    { k: "cond", label: "작업 조건", type: "chips", options: ["야간", "옥외", "고온", "저온", "협소 공간", "고소(2m 이상)", "소음·분진", "동시 작업", "협력업체 참여", "신규·미숙련자", "외국인 근로자"] },
+    { k: "hist", label: "과거 재해·아차사고", ph: "예: 지난달 바닥 결빙으로 미끄러짐 1건" }];
   function aiRiskDraft() {
     if (aiBusy) return;
     if (!window.SPAI) { setStatus("AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.", true); return; }
     if (!SPAI.hasKey()) { SPAI.ensureKey().then(function (ok) { if (ok) aiRiskDraft(); }); return; }
-    var dept = $("globalWorkType").value, def = txt($("dispDept"));
-    SPAI.ask({ title: "AI 위험성평가 초안", desc: "평가할 작업을 적으면 관련 조문을 찾아 유해·위험요인과 감소대책 초안을 3번 표에 넣습니다. 위험성 크기는 현장에서 다시 판단하세요.",
-      label: "평가할 작업내용 (무엇을·어디서·어떤 장비로)", placeholder: "예) 냉동창고에서 지게차로 팔레트 입출고", value: def && def !== dept ? def : "", min: 4,
-      examples: ["냉동창고에서 지게차로 팔레트 입출고, 바닥 결빙 구간 있음", "3m 사다리를 사용해 사무실 천장 조명 교체", "프레스 금형 교체 작업, 2인 1조, 크레인 사용", "건설 현장 3층 슬래브 거푸집 설치, 단부 작업", "음식점 주방 튀김기 사용과 마감 후 바닥 청소", "물류센터 컨베이어 분류 작업, 박스 걸림 제거"]
-    }).then(function (w) { if (w) aiRiskRun(dept, w); });
-  }
-  function aiRiskRun(dept, work) {
     if (rowsEdited() && !confirm("3번 표를 AI 초안으로 바꿉니다.\n직접 적은 유해·위험요인, 조치, 점수, 담당자는 지워집니다. 계속할까요?")) return;
-    var keys = Object.keys(TYPE_MAP).join("·"), btn = $("aiRiskBtn");
-    aiBusy = true; if (btn) btn.disabled = true;
-    setStatus("AI가 유해·위험요인과 감소대책을 만드는 중…");
-    SPAI.law.search(dept + " " + work, { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
-      system: "너는 한국 사업장의 안전관리자다. 고용노동부 「사업장 위험성평가에 관한 지침」과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 자료의 표현을 따른다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다.",
-      prompt: "공종(부서): " + dept + "\n평가 대상 작업: " + work + "\n\n이 작업의 유해·위험요인과 감소대책을 6~10개 만들어라. 각 항목: group(세부 작업 단계, 10자 이내), risk(유해·위험요인 및 위험성, '~로 인한 ~위험' 형태 한 문장 50자 이내), type(재해형태 — 반드시 다음 중 하나: " + keys + "·소음·기타), level(현재 위험성 상·중·하), measure(감소대책 — 공학적 대책·관리적 대책·보호구 순으로 실제 행동 위주 80자 이내)." + (law.length ? "\n\n관련 현행 조문(감소대책·법적 기준은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
-      schema: { type: "OBJECT", properties: { rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING", enum: ["상", "중", "하"] }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["rows"] },
-      temperature: 0.4, maxTokens: 6000, label: "AI가 유해·위험요인과 감소대책을 만드는 중" });
-    }).then(function (r) {
+    var dept = $("globalWorkType").value, def = txt($("dispDept")), keys = Object.keys(TYPE_MAP).join("·"), btn = $("aiRiskBtn");
+    SPAI.guided({ key: "risk", title: "AI 위험성평가 초안", fields: RA_FIELDS, values: def && def !== dept ? { proc: def } : {},
+      desc: "평가할 작업 정보를 칸별로 적어 주세요. *필수 칸이 비어 있으면 만들지 않고, 정보가 부족하면 AI가 먼저 질문합니다. 위험성 크기는 현장에서 다시 판단하세요.",
+      exampleFor: "proc", examples: ["냉동창고에서 지게차로 팔레트 입출고, 바닥 결빙 구간 있음", "3m 사다리를 사용해 사무실 천장 조명 교체", "프레스 금형 교체 작업, 2인 1조, 크레인 사용", "건설 현장 3층 슬래브 거푸집 설치, 단부 작업", "음식점 주방 튀김기 사용과 마감 후 바닥 청소", "물류센터 컨베이어 분류 작업, 박스 걸림 제거"],
+      run: function (v, ctx, force) {
+        aiBusy = true; if (btn) btn.disabled = true;
+        setStatus("AI가 유해·위험요인과 감소대책을 만드는 중…");
+        return SPAI.law.search([dept, v.type, v.proc, v.equip].join(" "), { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
+          system: "너는 한국 사업장의 안전관리자다. 고용노동부 「사업장 위험성평가에 관한 지침」과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 자료의 표현을 따른다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다. " + SPAI.check.quality,
+          prompt: "공종(부서): " + dept + "\n" + ctx + "\n\n이 작업의 유해·위험요인과 감소대책을 6~10개 만들어라. 과거 재해·아차사고가 있으면 그 원인을 반드시 포함한다. 각 항목: group(세부 작업 단계, 10자 이내), risk(유해·위험요인 및 위험성, '~하다가 ~로 인한 ~위험' 형태 한 문장 50자 이내), type(재해형태 — 반드시 다음 중 하나: " + keys + "·소음·기타), level(감소대책 적용 전 현재 위험성 상·중·하), measure(그 위험요인의 원인을 직접 줄이는 감소대책 — 공학적 대책·관리적 대책·보호구 순으로 실제 행동 위주 80자 이내).\n" + (force ? SPAI.check.force : SPAI.check.rule) + (law.length ? "\n\n관련 현행 조문(감소대책·법적 기준은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
+          schema: { type: "OBJECT", properties: { _check: SPAI.check.schema, rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING", enum: ["상", "중", "하"] }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["_check", "rows"], propertyOrdering: ["_check", "rows"] },
+          temperature: 0.4, maxTokens: 6000, label: "AI가 유해·위험요인과 감소대책을 만드는 중" }); }).then(function (r) { aiBusy = false; if (btn) btn.disabled = false; return r; }, function (e) { aiBusy = false; if (btn) btn.disabled = false; throw e; });
+      }
+    }).then(function (out) {
+      if (!out) { setStatus("AI 초안을 만들지 않았습니다. 작업 정보를 채운 뒤 다시 눌러 주세요."); return; }
+      var r = out.result, v = out.values, work = v.proc;
       var rows = (r && r.rows || []).filter(function (x) { return x && str(x.risk).trim(); }).slice(0, 20).map(function (x) {
         var row = hazRow({ group: str(x.group), risk: str(x.risk).trim(), type: str(x.type).trim(), level: str(x.level).trim(), measure: str(x.measure).trim() });
         row.work = str(x.group).trim() || work.slice(0, 40);
@@ -771,9 +779,9 @@
       if (!rows.length) throw new Error("AI가 항목을 만들지 못했습니다. 작업내용을 조금 더 구체적으로 적어 다시 시도해 주세요.");
       var dd = $("dispDept"); if (!txt(dd) || HAZARD_DB.groups.indexOf(txt(dd)) >= 0) dd.textContent = work.slice(0, 40);
       fillRows(rows); touched = true; saveNow();
-      setStatus("AI 초안 " + rows.length + "줄을 넣었습니다. " + SPAI.NOTICE);
-    }).catch(function (e) { setStatus((e && e.message) || "AI 초안을 만들지 못했습니다.", true); })
-      .then(function () { aiBusy = false; if (btn) btn.disabled = false; });
+      var gen = SPAI.check.generic(rows.map(function (x) { return x.measure; }));
+      setStatus("AI 초안 " + rows.length + "줄을 넣었습니다. " + SPAI.NOTICE + (gen.length ? " 일반 문구만 있는 대책 " + gen.length + "개는 이 작업에 맞게 고쳐 쓰세요." : ""));
+    }).catch(function (e) { setStatus((e && e.message) || "AI 초안을 만들지 못했습니다.", true); });
   }
   window.aiRiskDraft = aiRiskDraft;
   function fillRows(rows) {

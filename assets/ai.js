@@ -196,20 +196,83 @@
     return st;
   }
 
-  // 입력 창: 브라우저 기본 prompt() 대신 — 예시 칩·글자 수 안내·여러 줄 입력
+  // ---------- 구조화 입력: 작업 유형·공정·설비·위치·인원·작업 내용·당일 조건 등을 칸으로 받는다
+  //   field: {k, label, type: text|area|select|chips, options, required, ph}
+  var FCSS = ".spai-f{display:flex;flex-direction:column;gap:4px;margin-top:10px}.spai-f>span{font-weight:700;font-size:13.5px}.spai-f>span em{color:#B42318;font-style:normal;margin-left:3px}" +
+    ".spai-f input,.spai-f select,.spai-f textarea{width:100%;box-sizing:border-box;border:1px solid #c8d1dd;border-radius:9px;padding:9px 11px;font-family:inherit;font-size:15px;line-height:1.5;background:#fff;color:#1d2433}" +
+    ".spai-f.bad input,.spai-f.bad select,.spai-f.bad textarea{border-color:#B42318;background:#FFF5F4}.spai-f .spai-err{color:#B42318;font-size:12.5px;font-weight:700}" +
+    ".spai-chips{display:flex;flex-wrap:wrap;gap:6px}.spai-chips label{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:4px 11px;border:1px solid #C7D2FE;border-radius:17px;font-size:13.5px;cursor:pointer;background:#F5F7FF}" +
+    ".spai-chips input{width:auto;margin:0}.spai-chips label:has(input:checked){background:#3730A3;border-color:#3730A3;color:#fff}" +
+    ".spai-fg{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.spai-fg .wide{grid-column:1/-1}@media (max-width:560px){.spai-fg{grid-template-columns:1fr}}" +
+    ".spai-q{border:1px solid #F5D9A8;background:#FFFBF2;border-radius:12px;padding:12px 14px;margin-top:10px}.spai-q h4{margin:0 0 4px;font-size:15px;color:#7a4a00}";
+  function fieldCSS() { if (!document.getElementById("spai-fcss")) { var s = document.createElement("style"); s.id = "spai-fcss"; s.textContent = FCSS + XCSS; document.head.appendChild(s); } }
+  function fieldsHTML(fields, vals, idp) {
+    vals = vals || {}; idp = idp || "spaiF";
+    return '<div class="spai-fg">' + fields.map(function (f) {
+      var v = vals[f.k] == null ? "" : vals[f.k], id = idp + "_" + f.k, inp;
+      if (f.type === "select") inp = '<select id="' + id + '" data-f="' + esc(f.k) + '"><option value="">선택하세요</option>' + f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select>";
+      else if (f.type === "chips") { var on = String(v).split(/\s*,\s*/); inp = '<div class="spai-chips" data-f="' + esc(f.k) + '" role="group" aria-label="' + esc(f.label) + '">' + f.options.map(function (o) { return '<label><input type="checkbox" value="' + esc(o) + '"' + (on.indexOf(o) >= 0 ? " checked" : "") + ">" + esc(o) + "</label>"; }).join("") + "</div>"; }
+      else if (f.type === "area") inp = '<textarea id="' + id + '" data-f="' + esc(f.k) + '" rows="' + (f.rows || 3) + '" maxlength="1500" placeholder="' + esc(f.ph || "") + '">' + esc(v) + "</textarea>";
+      else inp = '<input id="' + id + '" type="text" data-f="' + esc(f.k) + '" maxlength="300" value="' + esc(v) + '" placeholder="' + esc(f.ph || "") + '">';
+      var wide = f.type === "area" || f.type === "chips" || f.wide;
+      return '<label class="spai-f' + (wide ? " wide" : "") + '" data-fw="' + esc(f.k) + '"' + (f.type === "chips" ? "" : ' for="' + id + '"') + "><span>" + esc(f.label) + (f.required ? "<em>*필수</em>" : "") + "</span>" + inp + '<b class="spai-err" hidden></b></label>';
+    }).join("") + "</div>";
+  }
+  function readFields(root, fields) {
+    var out = {};
+    fields.forEach(function (f) {
+      var el = root.querySelector('[data-f="' + f.k + '"]'); if (!el) return;
+      if (f.type === "chips") out[f.k] = [].map.call(el.querySelectorAll("input:checked"), function (x) { return x.value; }).join(", ");
+      else out[f.k] = String(el.value || "").trim();
+    });
+    return out;
+  }
+  // 필수 칸 검사: 빠진 칸을 빨갛게 표시하고 빠진 칸 이름 목록을 돌려준다
+  function checkFields(root, fields, vals) {
+    var miss = [];
+    fields.forEach(function (f) {
+      var w = root.querySelector('[data-fw="' + f.k + '"]'); if (!w) return;
+      var bad = !!(f.required && String(vals[f.k] || "").replace(/\s/g, "").length < (f.min || 2));
+      w.classList.toggle("bad", bad); var er = w.querySelector(".spai-err"); er.hidden = !bad; er.textContent = bad ? "이 칸을 채워야 상황에 맞는 초안을 만들 수 있습니다" : "";
+      if (bad) miss.push(f.label);
+    });
+    return miss;
+  }
+  // 고쳐 쓰기 시작하면 그 칸의 '필수' 경고를 바로 지운다
+  function clearOnInput(root) {
+    function f(ev) { var w = ev.target.closest && ev.target.closest(".spai-f.bad"); if (!w) return; w.classList.remove("bad"); var er = w.querySelector(".spai-err"); if (er) er.hidden = true; }
+    root.addEventListener("input", f); root.addEventListener("change", f);
+  }
+  function ctxText(fields, vals) {
+    return fields.map(function (f) { var v = String(vals[f.k] || "").trim(); return v ? "- " + f.label + ": " + v : ""; }).filter(Boolean).join("\n");
+  }
+  // AI 답의 '정보 충분' 판단: 부족하면 일반적인 문서를 만들지 않고 질문을 돌려준다
+  var CHECK_SCHEMA = { type: "OBJECT", properties: { enough: { type: "BOOLEAN" }, questions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["enough"] };
+  var CHECK_RULE = "먼저 작성자가 준 정보로 이 문서를 그 현장에 맞게 구체적으로 쓸 수 있는지 판단해 _check에 적는다. 작업 종류·장소·설비·작업 내용처럼 문서의 핵심이 빠지거나 모호해서 어느 현장에나 해당하는 일반적인 내용밖에 쓸 수 없으면 _check.enough=false로 하고, _check.questions에 꼭 필요한 질문만 1~4개(짧게, 답하기 쉬운 예시를 괄호로) 쓰고 나머지 칸은 모두 빈 값으로 둔다. 충분하면 _check.enough=true로 하고 questions는 빈 배열로 둔다.";
+  var FORCE_RULE = "작성자가 추가 질문 없이 지금 정보로 작성해 달라고 했다. _check.enough=true로 하고, 모르는 부분은 '○○'로 비워 두며 지어내지 않는다.";
+  // 문장 품질: 상황 → 위험요인 → 대책을 서로 연결하고, 어디에나 붙는 일반 문구만 쓰지 않는다
+  var QUALITY_RULE = "작성 품질 규칙: ⓐ작성자가 준 작업 내용·설비·장소·인원·당일 조건을 문장에 직접 반영한다(예: '야간·우천'이면 조명·미끄럼 대책). ⓑ위험요인은 '무엇을 하다가 → 어떤 원인으로 → 어떤 재해'처럼 구체적으로 쓰고, 예방대책은 그 위험요인의 원인을 직접 없애거나 줄이는 조치로 짝을 맞춘다. ⓒ'안전교육 실시', '보호구 착용', '안전수칙 준수', '주의 철저'처럼 어느 작업에나 붙는 문구만 단독으로 쓰지 않는다 — 보호구는 종류(예: 안전대 체결, 절연장갑)를, 교육은 내용(예: 금형 교체 시 안전블록 사용법)을 적는다. ⓓ대책은 제거·대체 → 공학적(방호장치·차단) → 관리적(절차·허가·감시인) → 보호구 순으로 우선 검토한다. ⓔ업종·작업이 다르면 표현도 달라야 하며 같은 문장을 여러 칸에 반복하지 않는다.";
+  var GENERIC = /^(?:안전\s*교육(?:\s*실시|\s*강화)?|보호구\s*(?:착용|지급)(?:\s*철저)?|안전\s*수칙\s*준수|주의\s*(?:철저|요망)?|안전\s*점검(?:\s*실시)?|정리\s*정돈|안전\s*관리\s*철저|관리\s*감독\s*철저)[\s.,·]*$/;
+  // 일반 문구만으로 된 칸 찾기: 값 목록에서 해당하는 것만 돌려준다
+  function lintGeneric(list) { return (list || []).filter(function (v) { return String(v || "").split(/\s*[,·\/]\s*|\n/).filter(Boolean).every(function (p) { return GENERIC.test(p.trim()); }) && String(v || "").trim(); }); }
+  function needMore(r) { var c = r && r._check; return c && c.enough === false ? (c.questions || []).filter(Boolean).slice(0, 4) : null; }
+
+  // 입력 창: 브라우저 기본 prompt() 대신 — 칸별 입력·예시 칩·필수 칸 안내
+  //   opt.fields가 있으면 {k: 값} 객체를, 없으면 글 한 줄(문자열)을 돌려준다. 취소하면 null
   function ask(opt) {
-    opt = opt || {}; injectCSS();
+    opt = opt || {}; injectCSS(); fieldCSS();
+    var fields = opt.fields || [{ k: "_t", label: opt.label || "내용", type: "area", required: true, min: opt.min || 4, ph: opt.placeholder || "" }];
+    var vals = opt.fields ? (opt.values || {}) : { _t: opt.value || "" };
     return new Promise(function (done) {
       var ov = document.createElement("div"); ov.className = "spai-ov";
       ov.innerHTML = '<div class="spai-m" role="dialog" aria-modal="true" aria-labelledby="spaiAskT"><h3 id="spaiAskT">' + esc(opt.title || "AI 초안") + "</h3>" +
-        (opt.desc ? "<p>" + esc(opt.desc) + "</p>" : "") +
-        '<label style="display:block;font-weight:700;margin-top:8px">' + esc(opt.label || "내용") + '<textarea rows="3" maxlength="800" style="width:100%;box-sizing:border-box;border:1px solid #c8d1dd;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:15px;line-height:1.55;margin-top:4px" placeholder="' + esc(opt.placeholder || "") + '"></textarea></label>' +
-        '<div class="spai-askx"></div><p class="spai-note" style="margin-top:10px">회사명·실명·연락처 같은 개인정보는 적지 마세요.</p>' +
-        '<div class="spai-row"><button type="button" class="spai-b" data-x="0">취소</button><button type="button" class="spai-b pri" data-x="1">' + esc(opt.ok || "AI 초안 만들기") + "</button></div></div>";
-      document.body.appendChild(ov);
-      var ta = ov.querySelector("textarea"), min = opt.min || 4;
-      ta.value = opt.value || "";
-      examples(ov.querySelector(".spai-askx"), opt.examples || [], ta, { min: min });
+        (opt.desc ? "<p>" + esc(opt.desc) + "</p>" : "") + (opt.questions && opt.questions.length ? '<div class="spai-q"><h4>AI가 더 알아야 할 것</h4><p style="margin:0;font-size:13.5px">아래 질문에 답하면 그 현장에 맞게 다시 작성합니다. 모르는 칸은 비워 두어도 됩니다.</p></div>' : "") +
+        fieldsHTML(fields, vals) + '<div class="spai-askx"></div><p class="spai-note" style="margin-top:10px">회사명·실명·연락처 같은 개인정보는 적지 마세요.</p>' +
+        '<div class="spai-row">' + (opt.force ? '<button type="button" class="spai-b" data-x="2" title="추가 질문 없이 지금 정보로 작성합니다(모르는 부분은 ○○로 비움)">' + esc(opt.force) + "</button>" : "") +
+        '<button type="button" class="spai-b" data-x="0">취소</button><button type="button" class="spai-b pri" data-x="1">' + esc(opt.ok || "AI 초안 만들기") + "</button></div></div>";
+      document.body.appendChild(ov); clearOnInput(ov);
+      var main = ov.querySelector('[data-f="' + (opt.exampleFor || fields.filter(function (f) { return f.type === "area" || !f.type || f.type === "text"; })[0].k) + '"]');
+      if (main && (opt.examples || []).length) examples(ov.querySelector(".spai-askx"), opt.examples, main, {});
       function close(v) { ov.remove(); document.removeEventListener("keydown", key); done(v); }
       function key(ev) { if (ev.key === "Escape") close(null); }
       document.addEventListener("keydown", key);
@@ -217,11 +280,46 @@
         if (ev.target === ov) return close(null);
         var b = ev.target.closest("[data-x]"); if (!b) return;
         if (b.dataset.x === "0") return close(null);
-        var v = ta.value.trim();
-        if (v.replace(/\s/g, "").length < min) { ta.focus(); var c = ov.querySelector(".spai-cnt"); if (c) { c.className = "spai-cnt bad"; } return; }
-        close(v);
+        var v = readFields(ov, fields);
+        if (b.dataset.x === "1" && checkFields(ov, fields, v).length) { var f1 = ov.querySelector(".spai-f.bad input,.spai-f.bad select,.spai-f.bad textarea"); if (f1) f1.focus(); return; }
+        if (b.dataset.x === "2") v._force = true;
+        close(opt.fields ? v : v._t);
       });
-      setTimeout(function () { ta.focus(); }, 30);
+      setTimeout(function () { var f0 = ov.querySelector("input[type=text],select,textarea"); if (f0) f0.focus(); }, 30);
+    });
+  }
+  // 질문 받기 → 답을 '추가 정보' 글로: 사용자가 취소하면 null, '이대로 작성'이면 {force:true}
+  function askMore(questions, title) {
+    var fields = questions.map(function (q, i) { return { k: "q" + i, label: q, type: "text" }; });
+    return ask({ title: title || "추가 정보가 필요합니다", questions: questions, fields: fields, ok: "답하고 다시 만들기", force: "이대로 작성" }).then(function (v) {
+      if (!v) return null;
+      var t = questions.map(function (q, i) { return v["q" + i] ? "- " + q + " → " + v["q" + i] : ""; }).filter(Boolean).join("\n");
+      return { text: t, force: !!v._force || !t };
+    });
+  }
+
+  // 안내형 작성 흐름: 칸별 입력 → AI → (정보 부족이면) 질문·답 → 다시 AI. 마지막 결과를 돌려주고, 취소하면 null
+  //   o: {key, title, desc, fields, values, examples, exampleFor, ok, run(vals, ctx, force) → Promise(AI 결과 객체)}
+  function guided(o) {
+    var saved = {}; try { saved = JSON.parse(localStorage.getItem("safeplum.aiin." + o.key) || "{}") || {}; } catch (e) { saved = {}; }
+    var vals0 = Object.assign({}, saved, o.values || {});
+    return ask({ title: o.title, desc: o.desc, fields: o.fields, values: vals0, examples: o.examples, exampleFor: o.exampleFor, ok: o.ok }).then(function (v) {
+      if (!v) return null;
+      try { localStorage.setItem("safeplum.aiin." + o.key, JSON.stringify(v)); } catch (e) {}
+      var extra = "";
+      function loop(force) {
+        var ctx = "[작업 정보]\n" + ctxText(o.fields, v) + (extra ? "\n[AI 질문에 대한 답]\n" + extra : "");
+        return o.run(v, ctx, force).then(function (r) {
+          var q = force ? null : needMore(r);
+          if (!q || !q.length) return { result: r, values: v };
+          return askMore(q, (o.title || "AI 초안") + " — 추가 정보가 필요합니다").then(function (ans) {
+            if (!ans) return null;
+            if (ans.text) extra += (extra ? "\n" : "") + ans.text;
+            return loop(ans.force);
+          });
+        });
+      }
+      return loop(false);
     });
   }
 
@@ -601,6 +699,10 @@
     progress: progress,
     examples: examples,
     ask: ask,
+    askMore: askMore,
+    guided: guided,
+    fields: { html: fieldsHTML, read: readFields, check: checkFields, text: ctxText, css: fieldCSS, live: clearOnInput },
+    check: { schema: CHECK_SCHEMA, rule: CHECK_RULE, force: FORCE_RULE, need: needMore, quality: QUALITY_RULE, generic: lintGeneric },
     law: { db: lawDB, search: lawSearch, refs: parseRefs, ctx: lawCtx, terms: terms },
     govqa: { search: gqSearch },
     NOTICE: "AI가 만든 초안입니다. 현장 상황에 맞는지 반드시 검토·수정한 뒤 사용하세요."

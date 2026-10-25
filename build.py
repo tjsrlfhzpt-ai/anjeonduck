@@ -689,6 +689,53 @@ AI_EX_GROUP = {
 }
 
 
+# AI 작성 도우미 입력 칸(구조화 입력): 묶음별 기본값, 서식별로 form_auto의 ai.fields 로 바꿀 수 있다(빈 목록이면 칸 없이 글만)
+_COND = {"k": "cond", "label": "당일 작업 조건", "type": "chips", "options": ["주간", "야간", "우천", "강풍", "폭염", "한파", "협소 공간", "고소(2m 이상)", "소음·분진", "동시 작업", "협력업체 참여", "신규·미숙련자"]}
+_WORK = [
+    {"k": "type", "label": "작업 유형", "type": "select", "required": True, "options": ["일반 작업", "고소작업", "중량물 취급·양중", "화기작업(용접·용단)", "밀폐공간 작업", "전기작업", "굴착·토목", "차량·건설기계", "하역·운반", "기계 정비·청소·수리", "화학물질 취급", "해체·철거", "기타"]},
+    {"k": "proc", "label": "공정·작업 내용", "required": True, "ph": "예: 2라인 프레스 금형 교체"},
+    {"k": "equip", "label": "설비·장비·공구", "ph": "예: 천장크레인 5톤, 체인블록"},
+    {"k": "place", "label": "작업 위치", "required": True, "ph": "예: 가공동 2층 기계실"},
+    {"k": "crew", "label": "작업 인원", "ph": "예: 4명(협력업체 2명 포함)"},
+    _COND]
+AI_FIELDS_GROUP = {
+    "작업계획서": _WORK, "점검·허가": _WORK, "작업시작 전 점검(별표 3)": [
+        {"k": "equip", "label": "점검 대상 기계·장비", "required": True, "ph": "예: 지게차 2.5톤 3호기"},
+        {"k": "proc", "label": "오늘 할 작업", "required": True, "ph": "예: 창고 입고 팔레트 하역"},
+        {"k": "place", "label": "작업 위치", "ph": "예: 물류동 1번 도크"}, {"k": "issue", "label": "이상 징후·특이사항", "ph": "예: 후진 경보음이 작게 들림"}, _COND],
+    "업무일지": [
+        {"k": "proc", "label": "오늘 한 주요 업무·작업", "type": "area", "required": True, "min": 6, "ph": "예: 프레스 금형 교체 작업 지휘, 지게차 하역 입회, 신규자 1명 배치"},
+        {"k": "place", "label": "점검·작업 장소", "ph": "예: 가공동, 자재창고"}, {"k": "crew", "label": "출력 인원", "ph": "예: 28명"},
+        {"k": "issue", "label": "지적·특이사항", "ph": "예: 통로에 팔레트 적치, 아차사고 1건"}, _COND],
+    "재해·사고 조사": [
+        {"k": "kind", "label": "발생 형태", "type": "select", "required": True, "options": ["떨어짐", "넘어짐", "끼임", "부딪힘", "물체에 맞음", "깔림·뒤집힘", "절단·베임·찔림", "감전", "화재·폭발", "화상", "질식·중독", "근골격계", "아차사고(부상 없음)", "기타"]},
+        {"k": "proc", "label": "당시 하던 작업", "required": True, "ph": "예: 컨베이어 벨트 이물 제거"},
+        {"k": "place", "label": "발생 장소", "required": True, "ph": "예: 2라인 컨베이어 끝단"},
+        {"k": "equip", "label": "관련 설비·기계·도구", "ph": "예: 벨트컨베이어(가동 중), 덮개 열림"},
+        {"k": "course", "label": "어떻게 일어났나(경위)", "type": "area", "required": True, "min": 10, "ph": "예: 설비를 멈추지 않고 손으로 이물을 빼다 롤러에 손가락이 끼임"},
+        {"k": "harm", "label": "피해 정도", "ph": "예: 손가락 골절, 병원 이송 (진단명·실명은 적지 마세요)"}],
+    "교육·회의": [
+        {"k": "proc", "label": "교육·회의 주제", "required": True, "ph": "예: 끼임 사고 예방과 전원 차단(LOTO)"},
+        {"k": "target", "label": "대상·인원", "ph": "예: 생산직 20명, 협력업체 5개사"},
+        {"k": "place", "label": "업종·사업장", "required": True, "ph": "예: 금속 가공 제조업 상시 120명"},
+        {"k": "issue", "label": "최근 이슈", "ph": "예: 이번 달 아차사고 3건, 감독 지적 사항"}],
+    "보건·작업환경": [
+        {"k": "proc", "label": "작업·업무 내용", "required": True, "ph": "예: 포장 라인 상자 들기(10kg) 하루 6시간"},
+        {"k": "place", "label": "작업 장소·부서", "required": True, "ph": "예: 물류동 포장 라인"},
+        {"k": "crew", "label": "대상 인원", "ph": "예: 8명"}, {"k": "issue", "label": "유해요인·호소 증상·민원", "ph": "예: 허리·어깨 통증 호소, 소음"}],
+    "조직·발령": [
+        {"k": "place", "label": "업종·사업장 규모", "required": True, "ph": "예: 제조업 상시근로자 120명"},
+        {"k": "target", "label": "지정·선임 대상(직위)", "ph": "예: 생산팀장"}, {"k": "proc", "label": "담당 공정·업무", "ph": "예: 프레스·용접 공정"}],
+    "관리대장": [
+        {"k": "proc", "label": "관리 대상", "required": True, "ph": "예: 안전화·안전모 지급, MSDS 12종"},
+        {"k": "place", "label": "업종·사업장", "ph": "예: 금속 가공 제조업"}, {"k": "issue", "label": "특이사항", "ph": "예: 신규 입사자 5명"}],
+    "중대재해처벌법 이행": [
+        {"k": "place", "label": "업종·규모", "required": True, "ph": "예: 제조업 상시근로자 60명, 협력업체 3곳"},
+        {"k": "proc", "label": "이번에 작성·점검할 범위", "required": True, "ph": "예: 하반기 이행점검, 경영방침 수립"},
+        {"k": "issue", "label": "현재 상황·미흡 사항", "ph": "예: 위험성평가는 했으나 종사자 의견 청취 기록 없음"}],
+}
+
+
 def form_auto_map():
     fa = load("data/form_auto.json")
     m = fa["forms"]
@@ -1500,6 +1547,8 @@ def all_forms(lawref):
         _ai = f["auto"].setdefault("ai", {})
         _ex = ([_ai["example"]] if _ai.get("example") else []) + list(_ai.get("examples") or []) + AI_EX_GROUP.get(f.get("group", ""), [])
         _ai["examples"] = list(dict.fromkeys(x for x in _ex if x))[:5]
+        if "fields" not in _ai:
+            _ai["fields"] = AI_FIELDS_GROUP.get(f.get("group", ""), [])
         fam = f.get("family")
         if fam:   # 같은 묶음(직무 × 주기)을 화면 안에서 오가는 선택 버튼
             sib = [x for x in forms if (x.get("family") or {}).get("name") == fam["name"]]

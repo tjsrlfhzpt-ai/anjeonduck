@@ -873,30 +873,43 @@
   }
   // 기본 목록과 다른 줄(직접 고친 줄)이 있는지
   // AI 초안(내 Gemini 키, assets/ai.js) — 표를 채우기만 하고 저장·인쇄는 사람이 검토한 뒤에 한다
+  // AI 초안 입력 칸: 작업 유형·작업 내용·설비·위치·인원·당일 조건·오늘 달라진 점 (필수 칸이 비면 AI를 부르지 않는다)
+  var TBM_TYPES = ["일반 작업", "고소작업", "중량물 취급·양중", "화기작업(용접·용단)", "밀폐공간 작업", "전기작업", "굴착·토목", "차량·건설기계", "하역·운반", "기계 정비·청소·수리", "화학물질 취급", "해체·철거", "기타"];
+  var TBM_FIELDS = [
+    { k: "type", label: "작업 유형", type: "select", required: true, options: TBM_TYPES },
+    { k: "proc", label: "금일 작업 내용", type: "area", required: true, min: 6, rows: 2, ph: "예: 2층 배관 용접 보수, 주변에 단열재 있음" },
+    { k: "equip", label: "설비·장비·공구", ph: "예: 용접기, 고소작업대" },
+    { k: "place", label: "작업 위치", required: true, ph: "예: 2층 기계실 배관 라인" },
+    { k: "crew", label: "작업 인원", ph: "예: 3명(협력업체 1명)" },
+    { k: "cond", label: "당일 작업 조건", type: "chips", options: ["주간", "야간", "우천", "강풍", "폭염", "한파", "협소 공간", "고소(2m 이상)", "소음·분진", "동시 작업", "협력업체 참여", "신규·미숙련자"] },
+    { k: "change", label: "어제와 달라진 점·새 위험", ph: "예: 장비 교체, 신규자 투입, 우천으로 바닥 미끄러움" }];
   function aiDraft(p) {
     var el = function () { return $("aiTbmSt"); };
     if (!window.SPAI) { toast("AI 모듈을 불러오지 못했습니다. 새로고침해 주세요."); return; }
-    var work = S(state.workArea).trim();
-    if (work.replace(/\s/g, "").length < 4) {
-      if (!SPAI.hasKey()) { SPAI.ensureKey().then(function (ok) { if (ok) aiDraft(p); }); return; }
-      SPAI.ask({ title: "AI 위험요인·대책 초안", desc: "오늘 작업을 적으면 1단계 '금일 작업구간 및 주요내용'에도 넣고, 관련 조문을 찾아 위험요인·감소대책 초안을 만듭니다.",
-        label: "금일 작업구간 및 주요내용", placeholder: "예) 2층 배관 용접 보수, 주변 단열재 있음", value: work, min: 4,
-        examples: ["2층 배관 용접 보수, 주변에 단열재 있음, 화재감시자 배치", "물류센터 입고장 지게차 하역과 팔레트 정리", "3층 슬래브 거푸집 설치, 단부 작업, 타워크레인 양중", "정화조 청소(밀폐공간) 3명, 산소·황화수소 측정 후 진입", "프레스 2호기 금형 교체, 크레인 사용", "고소작업대로 천장 조명 교체, 높이 6m"]
-      }).then(function (v) { if (!v) return; state.workArea = v; renderAll(); markTouched(); aiDraft(p); });
-      return;
-    }
+    if (!SPAI.hasKey()) { SPAI.ensureKey().then(function (ok) { if (ok) aiDraft(p); }); return; }
     if (rowsEdited(p) && !confirm("위험요인 표를 AI 초안으로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) return;
-    SPAI.css(); if (el()) el().innerHTML = '<span class="spai-busy">AI가 위험요인·대책을 만드는 중…</span>';
-    SPAI.law.search(p.group + " " + work, { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
-      system: "너는 한국 산업현장의 안전관리자다. 산업안전보건법·산업안전보건기준에 관한 규칙과 안전보건공단(KOSHA) 자료의 표현을 따른다. 작업 전 안전점검회의(TBM)에서 근로자에게 바로 읽어 줄 수 있게 짧고 구체적으로 쓴다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다.",
-      prompt: "공종(부서): " + p.group + "\n금일 작업내용: " + work + "\n\n이 작업의 유해·위험요인과 감소대책을 6~8개 만들어라. 각 항목: group(작업 단계나 구분, 6자 이내), risk(유해·위험요인 및 위험성, 한 문장 40자 이내 '~로 인한 ~위험' 형태), type(재해형태 한 단어: 끼임·떨어짐·넘어짐·부딪힘·맞음·베임·감전·화재·폭발·질식·화상·근골격계 등), level(상·중·하), measure(감소대책, 실제 행동 위주 한두 문장 60자 이내)." + (law.length ? "\n\n관련 현행 조문(감소대책은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
-      schema: { type: "OBJECT", properties: { rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING" }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["rows"] },
-      temperature: 0.4, maxTokens: 6000, label: "AI가 위험요인·감소대책을 만드는 중" });
-    }).then(function (r) {
+    SPAI.css();
+    var work0 = S(state.workArea).trim();
+    SPAI.guided({ key: "tbm", title: "AI 위험요인·감소대책 초안", fields: TBM_FIELDS, values: work0 ? { proc: work0 } : {},
+      desc: "오늘 작업 정보를 칸별로 적어 주세요. *필수 칸이 비어 있으면 만들지 않습니다. 정보가 부족하면 AI가 먼저 질문합니다.",
+      exampleFor: "proc", examples: ["2층 배관 용접 보수, 주변에 단열재 있음, 화재감시자 배치", "물류센터 입고장 지게차 하역과 팔레트 정리", "3층 슬래브 거푸집 설치, 단부 작업, 타워크레인 양중", "정화조 청소(밀폐공간) 3명, 산소·황화수소 측정 후 진입", "프레스 2호기 금형 교체, 크레인 사용", "고소작업대로 천장 조명 교체, 높이 6m"],
+      run: function (v, ctx, force) {
+        if (el()) el().innerHTML = '<span class="spai-busy">AI가 위험요인·대책을 만드는 중…</span>';
+        return SPAI.law.search([p.group, v.type, v.proc, v.equip].join(" "), { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
+          system: "너는 한국 산업현장의 안전관리자다. 산업안전보건법·산업안전보건기준에 관한 규칙과 안전보건공단(KOSHA) 자료의 표현을 따른다. 작업 전 안전점검회의(TBM)에서 근로자에게 바로 읽어 줄 수 있게 짧고 구체적으로 쓴다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다. " + SPAI.check.quality,
+          prompt: "공종(부서): " + p.group + "\n" + ctx + "\n\n이 작업의 유해·위험요인과 감소대책을 6~8개 만들어라. '어제와 달라진 점·새 위험'이 있으면 그 위험을 맨 앞에 넣는다. 각 항목: group(작업 단계나 구분, 6자 이내), risk(유해·위험요인 및 위험성, 한 문장 40자 이내 '~하다가 ~로 인한 ~위험' 형태), type(재해형태 한 단어: 끼임·떨어짐·넘어짐·부딪힘·맞음·베임·감전·화재·폭발·질식·화상·근골격계 등), level(상·중·하), measure(그 위험요인의 원인을 없애거나 줄이는 감소대책, 실제 행동 위주 한두 문장 60자 이내).\n" + (force ? SPAI.check.force : SPAI.check.rule) + (law.length ? "\n\n관련 현행 조문(감소대책은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
+          schema: { type: "OBJECT", properties: { _check: SPAI.check.schema, rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING" }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["_check", "rows"], propertyOrdering: ["_check", "rows"] },
+          temperature: 0.4, maxTokens: 6000, label: "AI가 위험요인·감소대책을 만드는 중" }); });
+      }
+    }).then(function (out) {
+      if (!out) { if (el()) el().textContent = "AI 초안을 만들지 않았습니다. 작업 정보를 채운 뒤 다시 눌러 주세요."; return; }
+      var v = out.values, r = out.result;
+      if (!S(state.workArea).trim() && v.proc) state.workArea = v.proc + (v.place ? " (" + v.place + ")" : "");
       var rows = (r.rows || []).map(normRow).filter(function (x) { return x.risk; }).slice(0, MAX_ROWS);
       if (!rows.length) throw new Error("AI가 위험요인을 만들지 못했습니다. 작업내용을 조금 더 구체적으로 적어 다시 시도해 주세요.");
       p.rows = rows; renderAll(); markTouched();
-      if (el()) el().innerHTML = "<b>AI 초안 " + rows.length + "줄을 넣었습니다.</b> " + SPAI.esc(SPAI.NOTICE);
+      var gen = SPAI.check.generic(rows.map(function (x) { return x.measure; }));
+      if (el()) el().innerHTML = "<b>AI 초안 " + rows.length + "줄을 넣었습니다.</b> " + SPAI.esc(SPAI.NOTICE) + (gen.length ? "<br><b>일반 문구만 있는 대책 " + gen.length + "개</b> — 이 작업에 맞게 고쳐 쓰세요." : "");
       toast("AI 초안을 넣었습니다 — 오늘 작업에 맞는지 검토하세요");
     }).catch(function (e) { if (el()) el().textContent = (e && e.message) || "AI 초안을 만들지 못했습니다."; });
   }

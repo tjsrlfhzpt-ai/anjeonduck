@@ -270,27 +270,40 @@
   // ---------- AI 초안
   var CODES = SIGNS.map(function (s) { return s.no + " " + s.ko; }).join(", ");
   $("rsAiKey").addEventListener("click", function () { window.SPAI && SPAI.openSettings(); });
+  var RS_FIELDS = [
+    { k: "job", label: "작업·설비", required: true, ph: "예: 탁상 그라인더 연마 작업" },
+    { k: "place", label: "게시 장소", required: true, ph: "예: 가공동 연마실 입구" },
+    { k: "hazard", label: "주요 위험·과거 사고", ph: "예: 숫돌 파편 비산, 작년 손가락 베임 1건" },
+    { k: "who", label: "읽는 사람", type: "chips", options: ["정규직", "협력업체", "신규·미숙련자", "외국인 근로자", "고령 근로자"] }];
   $("rsAiGo").addEventListener("click", function () {
-    var job = $("rsAiIn").value.trim(), stEl = $("rsAiSt"), btn = this;
+    var stEl = $("rsAiSt"), btn = this;
     if (!window.SPAI) { stEl.textContent = "AI 모듈을 불러오지 못했습니다. 새로고침해 주세요."; return; }
-    if (job.length < 3) { stEl.textContent = "작업이나 설비를 조금 더 구체적으로 적어 주세요."; $("rsAiIn").focus(); return; }
+    if (!SPAI.hasKey()) { SPAI.ensureKey(); return; }
     if ((st.edited || st.src === "ai") && !confirm("지금 제목·수칙·그림을 AI 초안으로 바꿉니다. 계속할까요?")) return;
-    btn.disabled = true; stEl.innerHTML = '<span class="spai-busy">AI가 초안을 만드는 중…</span>'; SPAI.css();
-    SPAI.json({
-      system: "너는 한국 제조·물류·건설 현장의 산업안전 전문가다. 산업안전보건법과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 표준작업 안전수칙의 표현 방식을 따른다. 현장 게시용 안전작업수칙을 쓴다. 각 수칙은 한 문장, 25~45자, '~할 것' 또는 '~한다'로 끝내고, 실제로 지킬 수 있는 구체적 행동만 쓴다. 법 조문 번호는 확실한 경우가 아니면 쓰지 않는다.",
-      prompt: "작업·설비: " + job + "\n\n이 작업에 맞는 안전작업수칙을 8~10개 만들어라. 제목은 '○○ 안전수칙' 형태로 15자 이내. 함께 붙일 안전보건표지를 아래 목록에서 2~4개 골라 번호만 적어라.\n표지 목록: " + CODES,
-      schema: { type: "OBJECT", properties: { title: { type: "STRING" }, rules: { type: "ARRAY", items: { type: "STRING" } }, signs: { type: "ARRAY", items: { type: "STRING" } } }, required: ["title", "rules", "signs"] },
+    SPAI.css();
+    var job0 = $("rsAiIn").value.trim();
+    SPAI.guided({ key: "rule-sign", title: "AI 안전작업수칙 초안", fields: RS_FIELDS, values: job0 ? { job: job0 } : {},
+      desc: "게시할 작업·설비와 장소를 적어 주세요. 정보가 부족하면 AI가 먼저 질문합니다.", exampleFor: "job",
+      examples: ["탁상 그라인더 연마 작업", "지게차 운행 구역", "프레스 금형 교체", "정화조·맨홀 밀폐공간 출입", "용접·용단 화기작업", "컨베이어 이물 제거"],
+      run: function (v, ctx, force) { btn.disabled = true; stEl.innerHTML = '<span class="spai-busy">AI가 초안을 만드는 중…</span>'; return SPAI.json({
+      system: "너는 한국 제조·물류·건설 현장의 산업안전 전문가다. 산업안전보건법과 산업안전보건기준에 관한 규칙, 안전보건공단(KOSHA) 표준작업 안전수칙의 표현 방식을 따른다. 현장 게시용 안전작업수칙을 쓴다. 각 수칙은 한 문장, 25~45자, '~할 것' 또는 '~한다'로 끝내고, 실제로 지킬 수 있는 구체적 행동만 쓴다. 법 조문 번호는 확실한 경우가 아니면 쓰지 않는다. " + SPAI.check.quality,
+      prompt: ctx + "\n\n이 작업에 맞는 안전작업수칙을 8~10개 만들어라. 주요 위험·과거 사고가 있으면 그 원인을 막는 수칙을 앞에 둔다. 읽는 사람에 외국인·신규자가 있으면 쉬운 낱말로 짧게 쓴다. 제목은 '○○ 안전수칙' 형태로 15자 이내. 함께 붙일 안전보건표지를 아래 목록에서 2~4개 골라 번호만 적어라.\n" + (force ? SPAI.check.force : SPAI.check.rule) + "\n표지 목록: " + CODES,
+      schema: { type: "OBJECT", properties: { _check: SPAI.check.schema, title: { type: "STRING" }, rules: { type: "ARRAY", items: { type: "STRING" } }, signs: { type: "ARRAY", items: { type: "STRING" } } }, required: ["_check", "title", "rules", "signs"], propertyOrdering: ["_check", "title", "rules", "signs"] },
       temperature: 0.5, label: "AI가 안전수칙 문안을 쓰는 중"
-    }).then(function (r) {
+    }).then(function (r) { btn.disabled = false; return r; }, function (e) { btn.disabled = false; throw e; }); }
+    }).then(function (out) {
+      if (!out) { stEl.textContent = "AI 초안을 만들지 않았습니다."; return; }
+      var r = out.result; $("rsAiIn").value = out.values.job || "";
       var rules = (r.rules || []).map(function (x) { return String(x).replace(/^\s*\d{1,2}[.)]\s*/, "").trim(); }).filter(Boolean).slice(0, MAXR);
       if (!rules.length) throw new Error("AI가 수칙을 만들지 못했습니다. 다시 시도해 주세요.");
       st.title = String(r.title || "안전수칙").slice(0, 40); st.rules = rules;
       st.signs = (r.signs || []).map(function (x) { return String(x).match(/\d{3}/) ? String(x).match(/\d{3}/)[0] : ""; }).filter(function (x, i, a) { return BYNO[x] && a.indexOf(x) === i; }).slice(0, MAXS);
       st.src = "ai"; st.edited = false; fill(); list(); save(); render();
-      stEl.innerHTML = "<b>AI 초안을 넣었습니다.</b> " + esc(SPAI.NOTICE);
+      var gen = SPAI.check.generic(rules);
+      stEl.innerHTML = "<b>AI 초안을 넣었습니다.</b> " + esc(SPAI.NOTICE) + (gen.length ? "<br><b>일반 문구만 있는 수칙 " + gen.length + "개</b> — 이 작업에 맞게 고쳐 쓰세요." : "");
     }).catch(function (e) {
       stEl.textContent = (e && e.message) || "AI 초안을 만들지 못했습니다.";
-    }).then(function () { btn.disabled = false; });
+    });
   });
 
   $("rsSrc").innerHTML = "수칙: " + esc(D.source.org) + " 「" + esc(D.source.title) + "」 (" + D.items.length + "개 항목, 원문 문구 그대로). 사업장에 맞게 고쳐 쓰는 예시입니다.<br>표지 그림: " + esc(SG.source.org) + " 「" + esc(SG.source.title) + "」 · " + esc(SG.source.kogl) + ".";

@@ -35,6 +35,7 @@
   <section class="fauto no-print" id="fAuto" hidden></section>
   <section class="fai no-print" id="fAI" hidden>
     <h2 class="h-sm">✦ AI 작성 도우미 <span class="muted">— 내 Gemini 키로 동작합니다. AI가 채운 칸은 파란 점선으로 표시되고, 고쳐 쓰면 표시가 사라집니다</span></h2>
+    <div id="fAIFields" class="fai-fields"></div>
     <label class="field"><span class="label" id="fAIQl">지금 상황을 적어 주세요</span><textarea id="fAIQ" rows="3" maxlength="1500"></textarea></label>
     <div id="fAIEx"></div>
     <div class="fai-row">
@@ -84,6 +85,7 @@
 .fai-mode{display:flex;gap:14px;font-size:14px;color:#334155}
 .fai-mode label{display:inline-flex;gap:5px;align-items:center;cursor:pointer}
 .fai-st{margin:8px 0 0;font-size:13px;color:#475569;line-height:1.6}
+.fai-fields{margin:4px 0 10px;padding:10px 12px 12px;border:1px solid #DDE3F7;border-radius:12px;background:#fff}.fai-fh{margin:0;font-weight:800;font-size:14px;color:#1d2433}.fai-fh .muted{font-weight:500;font-size:12.5px}
 .fai-st.err{color:#B42318}
 .fai-rev{margin-top:10px;background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:12px 14px}
 .fai-rev h3{margin:0 0 6px;font-size:15px}
@@ -922,13 +924,35 @@
   }
   var aiBusy = false, aiUndo = null;
   function aiErr(e) { aiSt(SPAI.esc((e && e.message) || "AI 요청이 실패했습니다.") + (e && e.code === "key" ? ' <button type="button" class="linkbtn" data-aikey>AI 키 다시 설정</button>' : ""), true); }
-  function aiDraft() {
+  // AI 입력 칸(작업 유형·공정·설비·위치·인원·작업 내용·당일 조건 등): 서식마다 build.py가 정한 목록. 이 브라우저에 서식별로 기억한다
+  var AIF = AIX.fields || [], AIFK = "safeplum.aiin." + F.id;
+  function aiFieldVals() { return window.SPAI && SPAI.fields ? SPAI.fields.read(document.getElementById("fAIFields"), AIF) : {}; }
+  function aiFieldsInit() {
+    var box = document.getElementById("fAIFields"); if (!AIF.length || !window.SPAI || !SPAI.fields) { box.hidden = true; return; }
+    SPAI.fields.css();
+    var saved = {}; try { saved = JSON.parse(localStorage.getItem(AIFK) || "{}") || {}; } catch (e) { saved = {}; }
+    // 서식에 이미 적은 값이 있으면 먼저 넣어 둔다(장소·작업명·장비·인원)
+    var from = { place: ["f.place", "f.loc", "f.site"], proc: ["f.name", "f.work", "f.title"], equip: ["f.equip", "f.model", "f.mach"], crew: ["f.crew", "f.people"] };
+    AIF.forEach(function (f) { if (saved[f.k]) return; (from[f.k] || []).some(function (k) { var v = String(val(k, "") || "").trim(); if (v) { saved[f.k] = v; return true; } return false; }); });
+    box.innerHTML = '<p class="fai-fh">작업 정보 <span class="muted">— <b>*필수</b> 칸을 채워야 AI가 이 현장에 맞게 씁니다</span></p>' + SPAI.fields.html(AIF, saved, "fAIF");
+    SPAI.fields.live(box);
+    box.addEventListener("input", function () { try { localStorage.setItem(AIFK, JSON.stringify(aiFieldVals())); } catch (e) {} });
+    box.addEventListener("change", function () { try { localStorage.setItem(AIFK, JSON.stringify(aiFieldVals())); } catch (e) {} });
+    document.getElementById("fAIQl").textContent = AIX.more_label || "추가로 알려 줄 내용 (선택) — 특이사항, 최근 사고·지적 사항 등";
+  }
+  function aiDraft(more) {
     if (aiBusy) return;
     if (!window.SPAI) { aiSt("AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.", true); return; }
     SPAI.css();
-    if (!SPAI.hasKey()) { SPAI.ensureKey().then(function (ok) { if (ok) aiDraft(); }); return; }
-    var sit = document.getElementById("fAIQ").value.trim();
-    if (sit.replace(/\s/g, "").length < 4) { aiSt("상황을 4자 이상 적어 주세요. 무엇을 적을지 모르겠으면 위의 예시를 눌러 넣고 고쳐 쓰세요.", true); document.getElementById("fAIQ").focus(); return; }
+    if (!SPAI.hasKey()) { SPAI.ensureKey().then(function (ok) { if (ok) aiDraft(more); }); return; }
+    more = more && more.text != null ? more : null;
+    var free = document.getElementById("fAIQ").value.trim(), fv = aiFieldVals();
+    if (AIF.length) {
+      var miss = SPAI.fields.check(document.getElementById("fAIFields"), AIF, fv);
+      if (miss.length) { aiSt("<b>필수 칸 " + miss.length + "개를 채워 주세요</b> — " + SPAI.esc(miss.join(", ")) + ". 정보가 없으면 어느 현장에나 맞는 일반 문서밖에 만들 수 없습니다.", true); var f1 = document.querySelector("#fAIFields .spai-f.bad input,#fAIFields .spai-f.bad select,#fAIFields .spai-f.bad textarea"); if (f1) f1.focus(); return; }
+    } else if (free.replace(/\s/g, "").length < 4) { aiSt("상황을 4자 이상 적어 주세요. 무엇을 적을지 모르겠으면 위의 예시를 눌러 넣고 고쳐 쓰세요.", true); document.getElementById("fAIQ").focus(); return; }
+    var sit = (AIF.length ? "[작업 정보]\n" + SPAI.fields.text(AIF, fv) + "\n" : "") + (free ? (AIF.length ? "[추가 설명]\n" : "") + free : "") + (more && more.text ? "\n[AI 질문에 대한 답]\n" + more.text : "");
+    var force = !!(more && more.force), needQ = null;
     var plan = aiPlan(); if (plan.desc.length === 0) { aiSt("이 서식에는 AI가 채울 칸이 없습니다.", true); return; }
     var mode = (document.querySelector('input[name="faiMode"]:checked') || {}).value || "empty";
     aiBusy = true; var gb = document.getElementById("fAIGo"); gb.disabled = true;
@@ -940,10 +964,13 @@
         (notesText() ? "\n서식 안내문:\n" + notesText() : "") +
         (law.length ? "\n\n관련 조문:\n" + SPAI.law.ctx(law, 900) : "") +
         "\n\n지금까지 쓴 내용(참고, 이와 어긋나지 않게):\n" + (docText(2500) || "(없음)") +
-        "\n\n채울 칸(키: 설명):\n" + plan.desc.join("\n") + "\n\n각 키에 알맞은 내용을 넣은 JSON으로 답한다. _notes에는 작성자가 사실 확인해야 할 점을 1~3줄로.";
+        "\n\n채울 칸(키: 설명):\n" + plan.desc.join("\n") + "\n\n각 키에 알맞은 내용을 넣은 JSON으로 답한다. _notes에는 작성자가 사실 확인해야 할 점을 1~3줄로.\n" + SPAI.check.quality + "\n" + (force ? SPAI.check.force : SPAI.check.rule);
+      plan.schema.properties._check = SPAI.check.schema;
+      plan.schema.propertyOrdering = ["_check"].concat(Object.keys(plan.schema.properties).filter(function (k) { return k !== "_check"; }));
       return SPAI.json({ system: sys, prompt: prompt, schema: plan.schema, temperature: 0.35, maxTokens: 8192, timeout: 90000, label: "AI가 「" + F.title + "」 초안을 쓰는 중" }).then(function (r) { return [r, plan]; });
     }).then(function (x) {
       var r = x[0] || {}, mp = x[1].map, before = JSON.stringify(state), n = 0, skipped = 0;
+      if (!force) { needQ = SPAI.check.need(r); if (needQ && needQ.length) { aiSt("<b>AI가 정보가 더 필요하다고 판단했습니다.</b> 일반적인 문서를 만드는 대신 질문 " + needQ.length + "개를 드립니다. 답하면 이 현장에 맞게 다시 작성합니다.", true); return; } needQ = null; }
       function put(k, v, opts) {
         v = String(v == null ? "" : v).trim(); if (!v) return;
         var cur = String(state[k] == null ? "" : state[k]).trim();
@@ -971,9 +998,14 @@
       aiUndo = before; document.getElementById("fAIUndo").hidden = false;
       save(); render();
       var notes = String(r._notes || "").trim();
-      aiSt("<b>AI 초안으로 " + n + "칸을 채웠습니다.</b>" + (skipped ? " (이미 쓴 칸 " + skipped + "개는 그대로 두었습니다)" : "") + " " + SPAI.esc(SPAI.NOTICE) + (notes ? '<br><b>확인할 점</b> ' + SPAI.esc(notes) : "") + (SPAI.lastScrub() ? '<br><span class="muted">개인정보로 보이는 ' + SPAI.lastScrub() + "곳은 가리고 보냈습니다.</span>" : ""));
+      var filledVals = Object.keys(state).filter(function (k) { return state["_ai." + k]; }).map(function (k) { return state[k]; });
+      var gen = SPAI.check.generic ? SPAI.check.generic(filledVals) : [];
+      aiSt("<b>AI 초안으로 " + n + "칸을 채웠습니다.</b>" + (skipped ? " (이미 쓴 칸 " + skipped + "개는 그대로 두었습니다)" : "") + " " + SPAI.esc(SPAI.NOTICE) + (notes ? '<br><b>확인할 점</b> ' + SPAI.esc(notes) : "") + (gen.length ? '<br><b class="err">일반 문구만 있는 칸 ' + gen.length + "개</b> — '" + SPAI.esc(gen.slice(0, 3).join("', '")) + "' 처럼 어느 현장에나 붙는 문구입니다. 이 작업에 맞게 구체적으로 고쳐 쓰세요." : "") + (SPAI.lastScrub() ? '<br><span class="muted">개인정보로 보이는 ' + SPAI.lastScrub() + "곳은 가리고 보냈습니다.</span>" : ""));
       var first = document.querySelector(".paper .is-ai"); if (first && first.scrollIntoView) first.scrollIntoView({ behavior: "smooth", block: "center" });
-    }).catch(aiErr).then(function () { aiBusy = false; gb.disabled = false; });
+    }).catch(aiErr).then(function () {
+      aiBusy = false; gb.disabled = false;
+      if (needQ) SPAI.askMore(needQ, "「" + F.title + "」 — 추가 정보가 필요합니다").then(function (ans) { if (ans) aiDraft(ans); else aiSt("작성을 멈췄습니다. 작업 정보를 더 채운 뒤 다시 눌러 주세요.", true); });
+    });
   }
   function aiReview() {
     if (aiBusy) return;
@@ -1011,11 +1043,12 @@
     var ph = AIX.example || "예: 오늘 2라인 금형 교체와 자재 하역이 있음. 신규 입사자 2명 배치. 어제 지게차와 보행자 동선이 겹치는 아차사고가 있었음.";
     document.getElementById("fAIQ").placeholder = ph;
     if (AIX.ask) document.getElementById("fAIQl").textContent = AIX.ask;
-    if (AIX.go) document.getElementById("fAIGo").textContent = AIX.go;   // 예: 협의체 회의록 '메모로 회의록 정리'
+    if (AIX.go) document.getElementById("fAIGo").textContent = AIX.go;
+    aiFieldsInit();   // 예: 협의체 회의록 '메모로 회의록 정리'
     if (AIX.rows) document.getElementById("fAIQ").rows = AIX.rows;
-    if (window.SPAI && SPAI.examples) SPAI.examples(document.getElementById("fAIEx"), AIX.examples || (AIX.example ? [AIX.example] : []), document.getElementById("fAIQ"), { min: 4 });
+    if (window.SPAI && SPAI.examples) SPAI.examples(document.getElementById("fAIEx"), AIX.examples || (AIX.example ? [AIX.example] : []), document.getElementById("fAIQ"), { min: (AIX.fields || []).length ? 0 : 4 });
     b.addEventListener("click", function () { pnl.hidden = !pnl.hidden; b.setAttribute("aria-expanded", String(!pnl.hidden)); if (!pnl.hidden) { if (window.SPAI) SPAI.css(); document.getElementById("fAIQ").focus(); } });
-    document.getElementById("fAIGo").addEventListener("click", aiDraft);
+    document.getElementById("fAIGo").addEventListener("click", function () { aiDraft(); });
     document.getElementById("fAIRev").addEventListener("click", aiReview);
     document.getElementById("fAIKey").addEventListener("click", function () { if (window.SPAI) { SPAI.css(); SPAI.openSettings(); } });
     document.getElementById("fAIUndo").addEventListener("click", function () {
