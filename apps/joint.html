@@ -7,7 +7,8 @@
     <meta name="description" content="도급인·관계수급인 합동 안전·보건점검 실시 통보서, 결과서(점검표), 조치 요구서, 조치 결과 확인서를 작성해 PDF로 저장하세요. 무료, 회원가입 없음.">
     <link rel="icon" href="../../assets/favicon.png" type="image/png">
     <!-- Tailwind: 빌드 때 미리 만든 CSS (런타임 CDN 사용 안 함) -->
-    <style>/*@TAILWIND@*/</style>
+    <style>/*@TAILWIND@*/        .jt-due{margin:6px 0 0;font-size:12.5px;font-weight:800;color:#b42318}
+</style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
     <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
     <!-- 결재란(칸 이름·개수·성명·서명)은 사이트 공통 모듈을 그대로 쓴다 -->
@@ -575,6 +576,7 @@
                             </select>
                             <input v-model="f.doneDate" @change="onDone(f)" type="date" aria-label="조치 완료일" title="조치 완료일" class="jt-in">
                         </div>
+                        <p v-if="dueState(f)" class="jt-due">{{ dueState(f) }} — 해당 업체에 조치를 다시 요구하세요.</p>
                         <div class="jt-row jt-mt">
                             <input type="file" accept="image/*" class="hidden" :id="'ph-' + f.id + '-b'" @change="onPhoto($event, f.id, 'before')">
                             <label :for="'ph-' + f.id + '-b'" :class="['jt-phbtn', photoOf(f.id).before ? 'has' : '']"><i class="ph-fill ph-camera"></i> 조치 전 사진{{ photoOf(f.id).before ? ' ✓' : '' }}</label>
@@ -1228,6 +1230,7 @@
                 };
                 const mkItem = (text) => ({ id: newId('i'), text: text || '', result: '', note: '', req: '', fid: '' });
                 const mkChecklist = (groups) => groups.map(g => ({ id: newId('g'), title: g[0], items: g[1].map(mkItem) }));
+                const dueState = (f) => { if (f.doneDate || /완료/.test(f.status || '') || !f.due) return ''; const t = new Date(); t.setHours(0, 0, 0, 0); const d = new Date(f.due + 'T00:00:00'); if (isNaN(d)) return ''; const left = Math.round((d - t) / 86400000); return left < 0 ? '조치 기한 ' + (-left) + '일 경과' : left <= 3 ? '조치 기한 ' + left + '일 남음' : ''; };
                 const mkFinding = (o) => Object.assign({ id: newId('f'), content: '', location: '', company: '', risk: '중', due: '', action: '', doneDate: '', status: '미조치' }, o || {});
 
                 // ---- 저장값 정리(모양이 어긋난 값이 들어와도 화면이 깨지지 않게)
@@ -1876,6 +1879,7 @@
                 };
 
                 return {
+                    dueState,
                     HIST_MAX, ROLES, RESULTS, SCALES, resKind, resOpts, badLabel, statText, checkCols, pasteOpen, pasteText, pastePreview, applyPaste, attendRowsList, STATUSES, exPool: EX_POOL, today, docTypes, formData, team, checklist, findings, prev, history: historyView,
                     isGeneratingPDF, toast, saveMsg, cycle, titlePrefix, inspName, inspShort, formattedDatetime, docDateText, fmtDate, NOTICE_DEFAULT,
                     T, txDef, para, hintP, hintN, txCount, labelCustom, resetAllText, roleLabel, apprOn, hasADoc, docLabel, confNote,

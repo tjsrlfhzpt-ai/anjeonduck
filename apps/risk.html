@@ -6,7 +6,13 @@
 <title>위험성평가서 작성기 | SafePlum</title>
 <meta name="description" content="빈도×강도(5×4) 방식 위험성평가서를 업종별 위험요인으로 빠르게 작성하고 A4로 인쇄하세요. 무료, 회원가입 없음.">
 <link rel="icon" href="../../assets/favicon.png" type="image/png">
-<style id="pgSize">@page { size: A4 portrait; margin: 10mm; }</style>
+<style id="pgSize">@page { size: A4 portrait; margin: 10mm; }  .ra-re{margin-top:14px}.ra-re-h{font-size:15px;margin:0 0 6px}.ra-re-h span{font-size:12px;font-weight:400;color:#5b6474}
+  .ra-re-t{width:100%;border-collapse:collapse;font-size:12px}.ra-re-t th,.ra-re-t td{border:1px solid #9aa6b5;padding:4px 5px;text-align:center;vertical-align:middle}.ra-re-t th{background:#e5e9ee}
+  .ra-re-t td:nth-child(2),.ra-re-t td:nth-child(4){text-align:left}.ra-re-t select,.ra-re-t input{font:inherit;font-size:12px;border:1px solid #c8d1dd;border-radius:6px;padding:2px 4px;max-width:100%}.ra-re-t input{width:96px}
+  .re-ok{color:#05603a;font-weight:800}.re-bad{color:#b42318;font-weight:800}.re-pre{color:#6b7280}.ra-re-empty{font-size:12.5px;color:#5b6474}
+  #ra-tbody tr.row-over td.c0{box-shadow:inset 4px 0 0 #f04438}#ra-tbody tr.row-late td:nth-child(12){background:#fff5f4;box-shadow:inset 0 0 0 2px #f04438}
+  @media print{.ra-re-t select,.ra-re-t input{border:0;appearance:none;-webkit-appearance:none;padding:0;background:none}#ra-tbody tr.row-over td.c0,#ra-tbody tr.row-late td:nth-child(12){box-shadow:none;background:none}}
+</style>
 <style>
   :root { --ink: #222; --line: #b9c2cc; --head: #263746; --blue: #3182ce; }
   body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; margin: 0; padding: 0; background-color: #555; }
@@ -368,6 +374,7 @@
     <div><p id="raSummary" class="ra-sum" aria-live="polite"></p><p id="raWarn" class="ra-warn no-print"></p></div>
     <div class="foot-acts no-print"><button class="btn btn-blue btn-sm" onclick="openPick()">+ 목록에서 불러오기</button><button class="btn btn-blue btn-sm" onclick="addEmptyRow()">+ 빈 줄 추가</button></div>
   </div>
+  <div id="raRe" class="ra-re"></div>
   </div></section>
 
   <section class="sec closed" data-sec="4">
@@ -675,7 +682,7 @@
     function cl(v, max) { v = parseInt(v, 10) || 0; return v > max ? max : v < 0 ? 0 : v; }
     function ed(f, ph, cls) { return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="' + CE + '" data-f="' + f + '" data-ph="' + ph + '">' + esc(str(r[f])) + "</div>"; }
     // 예전 형식(완료 체크·개선 후 위험성·확인자)으로 저장된 값은 화면에 없는 칸이라도 지우지 않고 그대로 들고 다닌다
-    tr._keep = { p2: r.p2 || 0, c2: r.c2 || 0, checker: str(r.checker) };
+    tr._keep = { p2: r.p2 || 0, c2: r.c2 || 0, checker: str(r.checker), rdate: str(r.rdate) };
     var doneDate = str(r.doneDate) || (r.done ? "완료" : "");
     tr.innerHTML =
       '<td class="c0" style="text-align:center;"><button type="button" class="row-sum no-print" aria-expanded="false"><b></b><span></span><em></em></button><span class="row-num">' + no + '</span>' +
@@ -703,7 +710,7 @@
     FIELDS.forEach(function (f) { o[f] = txt(tr.querySelector('[data-f="' + f + '"]')); });
     o.p = +s[0].value; o.c = +s[1].value;
     o.done = !!o.doneDate;
-    var k = tr._keep || {}; o.p2 = k.p2 || 0; o.c2 = k.c2 || 0; o.checker = k.checker || "";
+    var k = tr._keep || {}; o.p2 = k.p2 || 0; o.c2 = k.c2 || 0; o.checker = k.checker || ""; o.rdate = k.rdate || "";
     return o;
   }
   function rowBlank(r) { return !FIELDS.some(function (f) { return r[f]; }) && !r.p && !r.c; }
@@ -831,6 +838,31 @@
     b.children[1].textContent = hz || "(유해·위험요인을 적으세요)";
     b.children[2].textContent = bd.dataset.t || bd.textContent; b.children[2].className = bd.className.replace("score-badge", "").trim();
   }
+  // 감소대책 적용 후 재평가: 허용 기준을 넘었던 줄과 개선을 완료한 줄만 모아 '적용 전 → 적용 후'를 비교한다
+  function renderReeval() {
+    var box = $("raRe"); if (!box) return;
+    var rows = [];
+    document.querySelectorAll("#ra-tbody tr").forEach(function (tr, i) { var r = rowData(tr), s1 = scoreOf(r.p, r.c); if ((r.hazard || s1) && (s1 > +CFG.accept || r.doneDate)) rows.push({ tr: tr, i: i, r: r, s1: s1 }); });
+    if (!rows.length) { box.innerHTML = '<p class="ra-re-empty no-print">허용 기준(' + CFG.accept + '점)을 넘는 줄이나 개선을 완료한 줄이 생기면, 여기서 감소대책 적용 후 위험성을 다시 평가합니다.</p>'; return; }
+    function opt(v, max) { var h = '<option value="0">-</option>'; for (var k = 1; k <= max; k++) h += "<option" + (k === v ? " selected" : "") + ">" + k + "</option>"; return h; }
+    box.innerHTML = '<h3 class="ra-re-h">감소대책 적용 후 재평가 <span class="no-print">— 허용 기준 ' + CFG.accept + "점 이하가 되어야 개선이 끝난 것으로 봅니다</span></h3>" +
+      '<table class="ra-re-t"><thead><tr><th>연번</th><th>유해·위험요인</th><th>적용 전</th><th>감소대책</th><th>' + esc(CFG.pn) + "</th><th>" + esc(CFG.cn) + '</th><th>적용 후</th><th>판정</th><th>재평가일</th></tr></thead><tbody>' +
+      rows.map(function (x) {
+        var k = x.tr._keep, s2 = scoreOf(k.p2, k.c2), i1 = levelInfo(x.s1), i2 = levelInfo(s2);
+        var judge = !x.r.doneDate ? "개선 전" : !s2 ? "재평가 필요" : s2 > +CFG.accept ? "여전히 초과" : "허용";
+        return '<tr data-ri="' + x.i + '"><td>' + (x.i + 1) + "</td><td>" + esc(x.r.hazard.slice(0, 60)) + '</td><td class="' + i1.cls + '">' + (x.s1 || "-") + " " + esc(i1.text) + "</td><td>" + esc((x.r.measure || "").slice(0, 60)) +
+          '</td><td><select data-re="p2" aria-label="개선 후 ' + esc(CFG.pn) + '">' + opt(k.p2, CFG.p) + '</select></td><td><select data-re="c2" aria-label="개선 후 ' + esc(CFG.cn) + '">' + opt(k.c2, CFG.c) + "</select></td>" +
+          '<td class="' + (s2 ? i2.cls : "") + '">' + (s2 ? s2 + " " + esc(i2.text) : "-") + '</td><td class="re-' + (judge === "허용" ? "ok" : judge === "개선 전" ? "pre" : "bad") + '">' + judge + '</td><td><input type="text" data-re="rdate" value="' + esc(k.rdate || "") + '" placeholder="예: 2026-11-05" aria-label="재평가일"></td></tr>';
+      }).join("") + "</tbody></table>";
+  }
+  document.addEventListener("change", function (ev) {
+    var t = ev.target; if (!t.dataset || !t.dataset.re) return;
+    var row = t.closest("tr[data-ri]"); if (!row) return;
+    var tr = document.querySelectorAll("#ra-tbody tr")[+row.dataset.ri]; if (!tr) return;
+    tr._keep[t.dataset.re] = t.dataset.re === "rdate" ? t.value.trim() : +t.value || 0;
+    if (t.dataset.re !== "rdate" && !tr._keep.rdate) { var d = new Date(); tr._keep.rdate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+    updateSummary(); markTouched();
+  });
   function updateAll() {
     var trs = document.querySelectorAll("#ra-tbody tr");
     trs.forEach(function (tr, i) {
@@ -841,20 +873,31 @@
     updateSummary();
   }
   // 집계: 평가한 요인 수, 허용 기준을 넘는 요인 수, 개선 후에도 넘는 요인 수, 완료 수
+  // 날짜 읽기: 2026-03-05 · 2026.3.5 · 2026/3/5
+  function pday(v) { var m = String(v || "").match(/(\d{4})[-.\/년\s]+(\d{1,2})[-.\/월\s]+(\d{1,2})/); if (!m) return null; var d = new Date(+m[1], +m[2] - 1, +m[3]); return isNaN(d) ? null : d; }
   function updateSummary() {
     var el = $("raSummary"); if (!el) return;
-    var n = 0, bad = 0, still = 0, done = 0, noPlan = 0, noScore = 0;
+    var n = 0, bad = 0, still = 0, done = 0, noPlan = 0, noScore = 0, noOwner = 0, over = 0, noRe = 0, t0 = new Date(); t0.setHours(0, 0, 0, 0);
     document.querySelectorAll("#ra-tbody tr").forEach(function (tr) {
       var r = rowData(tr), s1 = scoreOf(r.p, r.c);
+      tr.classList.remove("row-over", "row-late");
       if (!r.hazard && !s1) return;
       n++;
       if (!s1) noScore++;
-      if (s1 > +CFG.accept) { bad++; if (!r.measure) noPlan++; if (r.doneDate) done++; }
+      if (s1 > +CFG.accept) {
+        bad++; tr.classList.add("row-over"); if (!r.measure) noPlan++; if (!r.owner || !r.due) noOwner++;
+        if (r.doneDate) { done++; var s2 = scoreOf(r.p2, r.c2); if (!s2) noRe++; else if (s2 > +CFG.accept) still++; }
+      }
+      var dd = pday(r.due); if (dd && dd < t0 && !r.doneDate) { over++; tr.classList.add("row-late"); }
     });
+    renderReeval();
     el.textContent = n ? "평가 " + n + "건 · 허용 기준(" + CFG.accept + "점) 초과 " + bad + "건" + (bad ? " (개선 완료 " + done + "건" + (still ? ", 개선 후에도 초과 " + still + "건" : "") + ")" : "") : "";
     var w = [];
     if (noScore) w.push("현재 위험성을 고르지 않은 줄 " + noScore + "건");
     if (noPlan) w.push("허용 기준을 넘는데 감소대책이 비어 있는 줄 " + noPlan + "건");
+    if (noOwner) w.push("허용 기준을 넘는데 담당자·개선일이 없는 줄 " + noOwner + "건");
+    if (over) w.push("개선일이 지났는데 완료일이 없는 줄 " + over + "건");
+    if (noRe) w.push("개선을 완료했는데 개선 후 재평가를 하지 않은 줄 " + noRe + "건(아래 재평가 표)");
     $("raWarn").textContent = w.join(" · ");
     secSums(n, bad, w.length);
   }

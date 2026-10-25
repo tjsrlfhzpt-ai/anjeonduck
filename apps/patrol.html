@@ -7,7 +7,8 @@
     <meta name="description" content="도급인의 작업장 순회점검 일지·주간/월간 집계표·시정 요구서를 작성해 PDF로 저장하세요. 업종별 순회 주기 자동 판정, 미조치 지적사항 자동 이월. 무료, 회원가입 없음.">
     <link rel="icon" href="../../assets/favicon.png" type="image/png">
     <!-- Tailwind: 빌드 때 미리 만든 CSS (런타임 CDN 사용 안 함) -->
-    <style>/*@TAILWIND@*/</style>
+    <style>/*@TAILWIND@*/        .pt-due{margin:4px 0 0;font-size:12.5px;font-weight:800;color:#b42318}
+</style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
     <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
     <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
@@ -587,6 +588,12 @@
                             </select>
                         </div>
                         <label class="pt-ck"><input type="checkbox" v-model="f.immediate" @change="onImmediate(f)"> 현장에서 즉시 조치함</label>
+                        <p v-if="dueState(f)" class="pt-due">{{ dueState(f) }} — 담당 업체에 조치를 다시 요구하세요.</p>
+                        <div v-if="f.status !== '시정 요구' || f.immediate" class="pt-g3" style="grid-template-columns:1fr auto auto">
+                            <input v-model="f.fixNote" type="text" placeholder="개선 내용 — 예: 덮개 고정 후 표지 부착" aria-label="개선 내용" class="pt-in">
+                            <input v-model="f.doneDate" type="date" aria-label="완료일" class="pt-in" title="완료일">
+                            <button type="button" class="pt-btn" @click="pickEvidence(idx)">📷 완료 증빙{{ evidenceCount(idx) ? ' ' + evidenceCount(idx) : '' }}</button>
+                        </div>
                     </div>
                     <div class="pt-row"><button type="button" id="addFinding" class="pt-add" @click="addFinding()"><i class="ph-bold ph-plus-circle"></i> 지적사항 추가</button>
                     <button type="button" id="addExFinding" class="pt-btn" style="margin-left:auto" @click="addExFinding" title="자주 나오는 지적사항 예시를 무작위로 하나 넣습니다">🔀 지적사항 예시 넣기</button></div>
@@ -618,6 +625,7 @@
                 <pt-step :s="S.photo" @toggle="toggle('photo')" @next="goNext('photo')">
                     <div class="pt-row">
                         <input type="file" accept="image/*" multiple @change="handleFileUpload" id="photo-input" class="hidden">
+                        <input type="file" accept="image/*" @change="handleEvidence" id="ev-input" class="hidden">
                         <label for="photo-input" class="pt-btn" style="display:inline-flex;align-items:center;gap:6px"><i class="ph-bold ph-upload-simple"></i> 사진 선택·촬영</label>
                         <span class="text-xs text-slate-500">{{ photos.length ? photos.length + '장 첨부됨 (최대 ' + PHOTO_MAX + '장)' : '최대 ' + PHOTO_MAX + '장' }}</span>
                     </div>
@@ -814,7 +822,7 @@
                             <tbody>
                                 <tr v-for="(f, i) in findingRows" :key="'df-' + i">
                                     <td class="c">{{ i + 1 }}</td><td class="s"><pv :o="f" k="zone"></pv></td><td class="pre"><pv :o="f" k="hazard" multi></pv></td><td class="s pre"><pv :o="f" k="demand" multi></pv></td><td class="c s"><pv :o="f" k="owner"></pv></td>
-                                    <td class="c s">{{ f.immediate ? '즉시' : f.due }}</td><td class="c s">{{ f.immediate ? '즉시 조치' : f.status }}</td>
+                                    <td class="c s">{{ f.immediate ? '즉시' : f.due }}</td><td class="c s">{{ f.immediate ? '즉시 조치' : f.status }}<div v-if="f.doneDate" style="font-size:10px">{{ f.doneDate }}</div><div v-if="f.fixNote" style="font-size:10px;text-align:left">개선: {{ f.fixNote }}</div></td>
                                 </tr>
                                 <tr v-if="!findingRows.length"><td colspan="7" class="c">지적사항 없음</td></tr>
                             </tbody>
@@ -1196,7 +1204,7 @@
                 };
                 const cleanZones = (a) => Array.isArray(a) ? a.slice(0, 200).map(r => { r = obj(r); return { zone: str(r.zone), company: str(r.company), work: str(r.work), workers: str(r.workers), companion: str(r.companion) }; }) : null;
                 const cleanItems = (a) => Array.isArray(a) ? a.slice(0, 300).map(r => { r = obj(r); return { group: str(r.group), text: str(r.text), result: RESULTS.includes(r.result) ? r.result : '' }; }) : null;
-                const cleanFindings = (a) => Array.isArray(a) ? a.slice(0, 300).map(r => { r = obj(r); return { fid: str(r.fid) || newId('f'), zone: str(r.zone), hazard: str(r.hazard), demand: str(r.demand), owner: str(r.owner), due: isDay(r.due) ? r.due : '', immediate: !!r.immediate, status: F_STATUS.includes(r.status) ? r.status : '시정 요구' }; }) : [];
+                const cleanFindings = (a) => Array.isArray(a) ? a.slice(0, 300).map(r => { r = obj(r); return { fid: str(r.fid) || newId('f'), zone: str(r.zone), hazard: str(r.hazard), demand: str(r.demand), owner: str(r.owner), due: isDay(r.due) ? r.due : '', immediate: !!r.immediate, status: F_STATUS.includes(r.status) ? r.status : '시정 요구', fixNote: str(r.fixNote), doneDate: isDay(r.doneDate) ? r.doneDate : '' }; }) : [];
                 const cleanPrev = (a) => Array.isArray(a) ? a.slice(0, 300).map(r => { r = obj(r); return { fid: str(r.fid) || newId('f'), found: isDay(r.found) ? r.found : '', zone: str(r.zone), hazard: str(r.hazard), demand: str(r.demand), owner: str(r.owner), due: isDay(r.due) ? r.due : '', result: P_RESULT.includes(r.result) ? r.result : '' }; }) : [];
                 const cleanSnap = (s) => {
                     s = obj(s);
@@ -1672,7 +1680,20 @@
                     items.value.forEach(it => { if (it.text.trim() && !it.result) { it.result = '양호'; n++; } });
                     showToast(`표시하지 않은 ${n}개 항목을 양호로 표시했습니다. 직접 확인한 항목인지 다시 보세요.`);
                 };
-                const blankFinding = () => ({ fid: newId('f'), zone: '', hazard: '', demand: '', owner: '', due: '', immediate: false, status: '시정 요구' });
+                const blankFinding = () => ({ fid: newId('f'), zone: '', hazard: '', demand: '', owner: '', due: '', immediate: false, status: '시정 요구', fixNote: '', doneDate: '' });
+                // 기한 경과·임박 표시(조치 완료는 제외) — 오늘 날짜 기준
+                const dueState = (f) => { if (f.immediate || f.status === '조치 완료' || !f.due) return ''; const t = new Date(); t.setHours(0, 0, 0, 0); const d = new Date(f.due + 'T00:00:00'); const left = Math.round((d - t) / 86400000); return left < 0 ? '기한 ' + (-left) + '일 경과' : left <= 3 ? '기한 ' + left + '일 남음' : ''; };
+                // 완료 증빙: 사진을 고르면 사진대지에 '[완료 증빙] 지적 n · 위치' 설명으로 붙는다
+                const evidenceFor = ref(-1);
+                const pickEvidence = (idx) => { evidenceFor.value = idx; const el = document.getElementById('ev-input'); if (el) el.click(); };
+                const handleEvidence = async (e) => {
+                    const file = (e.target.files || [])[0]; e.target.value = ''; const idx = evidenceFor.value; if (!file || idx < 0) return;
+                    if (photos.value.length >= PHOTO_MAX) { showToast(`사진은 ${PHOTO_MAX}장까지 첨부할 수 있습니다.`, 'error'); return; }
+                    if (!/^image\//.test(file.type)) { showToast('사진(이미지) 파일만 첨부할 수 있습니다.', 'error'); return; }
+                    try { const url = await shrink(file); const f = findings.value[idx]; photos.value.push({ url, cap: `[완료 증빙] 지적 ${idx + 1}${f && f.zone ? ' · ' + f.zone : ''}` }); showToast('완료 증빙 사진을 사진대지에 붙였습니다.'); }
+                    catch (err) { showToast('사진을 읽지 못했습니다(HEIC 사진은 JPG로 바꿔 주세요).', 'error'); }
+                };
+                const evidenceCount = (idx) => photos.value.filter(ph => ph.cap.indexOf(`[완료 증빙] 지적 ${idx + 1}`) === 0).length;
                 const addFinding = (init) => { findings.value.push(Object.assign(blankFinding(), init || {})); };
                 // 자주 나오는 지적사항 예시(위험요인 → 시정 요구). 누를 때마다 아직 없는 것을 무작위로 하나 넣는다
                 const EX_FIND = [
@@ -1716,7 +1737,7 @@
                 };
                 // "즉시 조치"를 켜면 조치 완료, 끄면(잘못 누른 경우) 시정 요구로 되돌린다
                 const onImmediate = (f) => { if (f.immediate) f.status = '조치 완료'; else if (f.status === '조치 완료') f.status = '시정 요구'; };
-                const onStatus = (f) => { if (f.status !== '조치 완료') f.immediate = false; };
+                const onStatus = (f) => { if (f.status !== '조치 완료') f.immediate = false; else if (!f.doneDate) { const d = new Date(); f.doneDate = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); } };
                 const addPrev = () => prev.value.push({ fid: newId('f'), found: '', zone: '', hazard: '', demand: '', owner: '', due: '', result: '' });
                 const suggestNext = () => {
                     if (!nextDue.value) { showToast('업종과 점검일을 먼저 입력하세요.', 'error'); return; }
@@ -2033,6 +2054,7 @@
                 };
 
                 return {
+                    dueState, pickEvidence, handleEvidence, evidenceCount,
                     HIST_MAX, PHOTO_MAX, INDUSTRIES, DEF, LABEL_DEFS, LDEF: Object.fromEntries(LABEL_DEFS.map(d => [d.k, d.def])), docTypes, today, formData, zones, items, findings, prev, custom, history: historyView, newGroup, editItems,
                     photos, isGeneratingPDF, toast, saveMsg, fmtDay,
                     cycle, nextDue, zoneRows, totalWorkers, findingRows, prevRows, ownerNames, zoneNames, groups, docGroups, tally,

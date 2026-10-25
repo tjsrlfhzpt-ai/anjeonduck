@@ -1161,7 +1161,30 @@ tr.q-hide{display:none}
     var fq = QA.fields || {};
     (fq.req || []).forEach(function (k) { var e = paper.querySelector('[data-k="' + k + '"]'); if (!e) return; var th = e.closest("td") && e.closest("td").previousElementSibling; if (th) th.classList.add("q-req"); if (!String(val(k, "") || "").trim()) { (e.closest("td") || e).classList.add("q-miss"); tot.miss++; } });
     (fq.num || []).forEach(function (k) { var v = String(val(k, "") || "").trim(); if (v && num(v) == null) { qaMark(k, "q-bad", "숫자만 적어 주세요"); tot.bad++; } });
-    qaGas(tot); qaGate(tot); qaProgress(tot);
+    qaHours(tot); qaGas(tot); qaGate(tot); qaProgress(tot);
+  }
+  // 교육시간 검사: '2시간'·'90분'·'09:00~11:00' 꼴을 분으로 바꿔 법정 시간(별표 4)과 비교, 참석 인원이 대상 인원보다 많으면 표시
+  function qaMin(v) {
+    v = String(v || ""); var m = v.match(/(\d{1,2})\s*[:시]\s*(\d{2})?\s*[~\-–]\s*(\d{1,2})\s*[:시]\s*(\d{2})?/);
+    if (m) { var a = +m[1] * 60 + (+m[2] || 0), b = +m[3] * 60 + (+m[4] || 0); return b > a ? b - a : null; }
+    var h = v.match(/(\d+(?:\.\d+)?)\s*시간/), mi = v.match(/(\d+)\s*분/);
+    if (h || mi) return Math.round((h ? +h[1] * 60 : 0) + (mi ? +mi[1] : 0));
+    return /^\s*\d+(\.\d+)?\s*$/.test(v) ? Math.round(+v * 60) : null;
+  }
+  function qaHours(tot) {
+    var q = QA.hours; if (!q) return;
+    var tv = String(val(q.time, "") || "").trim(), rv = String(val(q.req, "") || "").trim(), c = String(val(q.course, "") || "");
+    var el = document.getElementById("fQAh"); if (!el) { var anchor = paper.querySelector('[data-k="' + q.time + '"]'); var tb = anchor && anchor.closest("table"); if (tb) { el = document.createElement("p"); el.id = "fQAh"; el.className = "qa-sum no-print"; (tb.closest(".tsc") || tb).insertAdjacentElement("afterend", el); } }
+    if (!el) return;
+    var t = qaMin(tv), r = qaMin(rv), msg = [];
+    if (tv && t == null) { qaMark(q.time, "q-bad", "예: 2시간, 90분, 09:00~11:00"); tot.bad++; msg.push('<b class="qa-r">교육시간 형식을 확인하세요</b> (예: 2시간 · 90분 · 09:00~11:00)'); }
+    if (t != null && r != null) {
+      if (t < r) { var regular = /정기/.test(c) || /매반기|매분기|연간|반기/.test(rv); msg.push(regular ? '<b class="qa-o">이번 교육 ' + Math.round(t / 6) / 10 + "시간 — 법정 " + rv + "보다 적습니다.</b> 정기교육은 기간 합계로 채우면 됩니다(다른 회차 기록과 합산)." : '<b class="qa-r">교육시간이 법정 시간보다 적습니다</b> — 이번 ' + Math.round(t / 6) / 10 + "시간, 법정 " + rv + "(시행규칙 별표 4)"); if (!regular) { qaMark(q.time, "q-over", "법정 시간보다 적습니다"); tot.bad++; } }
+      else msg.push('<span class="qa-g">교육시간 ' + Math.round(t / 6) / 10 + "시간 — 법정 시간(" + esc(rv) + ") 이상</span>");
+    }
+    var nt = num(val(q.total, "")), nd = num(String(val(q.done, "") || "").replace(/명/, ""));
+    if (nt != null && nd != null && nd > nt) { msg.push('<b class="qa-r">참석 인원(' + nd + "명)이 대상 인원(" + nt + "명)보다 많습니다</b>"); qaMark(q.done, "q-bad", "대상 인원보다 많습니다"); tot.bad++; }
+    el.innerHTML = msg.join(" · ");
   }
   // 가스 농도: 적정공기(안전보건규칙 제618조) — 산소 18% 이상 23.5% 미만, 이산화탄소 1.5% 미만, 일산화탄소 30ppm 미만, 황화수소 10ppm 미만
   function qaGas(tot) {

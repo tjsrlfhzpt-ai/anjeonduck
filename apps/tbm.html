@@ -222,6 +222,9 @@
     .page-container select { appearance: none; -webkit-appearance: none; }
     .worker-table .op .e { border-bottom: 0; }
   }
+  .pre-fs{border:1px solid #d5dde7;border-radius:10px;padding:8px 10px;margin:8px 0 0}.pre-fs legend{font-weight:700;font-size:13px;padding:0 4px}.pre-fs small{font-weight:400;color:#64748b}
+  .pre-ck{display:flex;gap:6px;align-items:flex-start;font-size:13.5px;margin:4px 0}.pre-ck input{margin-top:3px}
+  .pre-out .pre-i{display:inline-block;margin:0 10px 2px 0;font-size:12px;white-space:nowrap}
 </style>
 <script src="../../assets/docs.js"></script>
 <script src="../../assets/ai.js"></script>
@@ -287,17 +290,19 @@
   var MAX_DAYS = 31, ROWS = 5, MAX_ROWS = 10, WORKERS = 30, MAX_PAGES = 10, NSTEP = 6;
   var LV = ["상", "중", "하"];
   var WEEK = ["일", "월", "화", "수", "목", "금", "토"];
-  var STATE_KEYS = ["headerCompany", "siteName", "group", "workArea", "majorPoints"];
+  var STATE_KEYS = ["headerCompany", "siteName", "group", "workArea", "majorPoints", "changes", "pre"];
+  // 당일 작업 전 확인 항목(작업자 의견과 따로 기록): 체크한 항목은 "|"로 이어 저장한다
+  var PRE_ITEMS = ["작업자 건강상태(음주·피로·질병) 확인", "작업에 맞는 보호구 착용 확인", "사용 장비·공구 작업 전 점검", "작업구역 정리·통로 확보", "위험요인·대책 복창(전원 숙지)", "비상연락·대피 경로 공유"];
   var NOTE_DEF = "* 당일 작업 시작 전 작성";
   var LDEF = {
     title: "TBM 일지", sec1: "작 업 및 현 장 개 요", site: "사업장/현장명", group: "공종(부서/팀)", date: "일 자",
-    work: "금일 작업구간 및 주요내용", points: "주요 전파사항",
+    work: "금일 작업구간 및 주요내용", points: "주요 전파사항", changes: "변경 사항·새 위험요인", pre: "작업 전 확인",
     sec2: "당일 작업 위험성 평가 (유해·위험요인 및 감소대책)", cGroup: "구분", cRisk: "유해·위험요인 및 위험성",
     cType: "재해형태", cLevel: "상/중/하", cMeasure: "위험성 감소대책",
     opinion: "* 근로자 의견청취 및 건의사항 :", wOrg: "소속", wName: "성명", wSign: "서명", wNote: "비고"
   };
   var LNAME = {
-    title: "문서 제목", sec1: "개요 표 제목", site: "현장명 칸", group: "공종 칸", date: "일자 칸", work: "작업내용 칸", points: "전파사항 칸",
+    title: "문서 제목", sec1: "개요 표 제목", site: "현장명 칸", group: "공종 칸", date: "일자 칸", work: "작업내용 칸", points: "전파사항 칸", changes: "변경 사항 칸", pre: "작업 전 확인 칸",
     sec2: "위험성평가 표 제목", cGroup: "구분 열", cRisk: "위험요인 열", cType: "재해형태 열", cLevel: "수준 열", cMeasure: "대책 열",
     opinion: "의견청취 문구", wOrg: "명단 소속 열", wName: "명단 성명 열", wSign: "명단 서명 열", wNote: "명단 비고 열"
   };
@@ -328,7 +333,7 @@
     var t = todayParts();
     return { headerCompany: profileCompany(), siteName: "", group: GROUPS[0],
              year: t.year, month: t.month, day: t.day, weekday: t.weekday,
-             workArea: "", majorPoints: "개인보호구 착용, 위험성평가 항목 숙지, 이상 발견 시 즉시 작업중지·보고" };
+             workArea: "", majorPoints: "개인보호구 착용, 위험성평가 항목 숙지, 이상 발견 시 즉시 작업중지·보고", changes: "", pre: "" };
   }
 
   var state = defaultState();
@@ -610,6 +615,8 @@
         '<table class="data-table work-table"><col style="width:35mm"><col>' +
           '<tr><th class="th-label th-blue">' + LB("work") + '</th><td class="align-left">' + E("s.workArea", { multi: true, cls: "b", ph: "예) 2라인 컨베이어 벨트 교체, 오전 9시~12시", label: "금일 작업구간 및 주요내용" }) + "</td></tr>" +
           '<tr><th class="th-label th-blue">' + LB("points") + '</th><td class="align-left">' + E("s.majorPoints", { multi: true, label: "주요 전파사항" }) + "</td></tr>" +
+          '<tr><th class="th-label th-blue">' + LB("changes") + '</th><td class="align-left">' + E("s.changes", { multi: true, ph: "변경 없음", label: "변경 사항·새 위험요인" }) + "</td></tr>" +
+          '<tr><th class="th-label th-blue">' + LB("pre") + '</th><td class="align-left pre-out">' + PRE_ITEMS.map(function (t) { return '<span class="pre-i">' + (S(state.pre).split("|").indexOf(t) >= 0 ? "☑" : "☐") + " " + esc(t) + "</span>"; }).join("") + "</td></tr>" +
         "</table>" +
         '<table class="data-table risk-table">' +
           '<col class="col-no"><col class="col-tool"><col class="col-risk"><col class="col-type"><col class="col-lvl"><col class="col-plan">' +
@@ -678,7 +685,9 @@
       '<label class="fld"><span>공종(부서/팀)' + (multi ? " — " + (cur + 1) + "쪽" : "") + '</span><select class="fin work-type-select" data-pi="' + cur + '">' + groupOptions(p.group) + "</select></label></div>" +
       (multi ? '<div class="acts"><button type="button" class="btn-sub" data-act="groupAll">이 공종을 모든 쪽에 적용</button></div>' : "") +
       FI("s.workArea", "금일 작업구간 및 주요내용", { multi: true, ph: "예) 2라인 컨베이어 벨트 교체, 오전 9시~12시" }) +
-      FI("s.majorPoints", "주요 전파사항", { multi: true });
+      FI("s.majorPoints", "주요 전파사항", { multi: true }) +
+      FI("s.changes", "어제와 달라진 점·새 위험요인 (같은 작업을 반복해도 적어 두세요)", { multi: true, ph: "예) 장비 교체(5톤 → 10톤 크레인), 신규자 2명 투입, 우천으로 바닥 미끄러움 — 없으면 '변경 없음'" }) +
+      '<fieldset class="fld pre-fs"><legend>당일 작업 전 확인 <small>(근로자 의견과 따로 기록)</small></legend>' + PRE_ITEMS.map(function (t, i) { var on = S(state.pre).split("|").indexOf(t) >= 0; return '<label class="pre-ck"><input type="checkbox" data-pre="' + i + '"' + (on ? " checked" : "") + "> " + esc(t) + "</label>"; }).join("") + "</fieldset>";
     h += stepHTML(1, "기본 정보", b);
 
     // 2 위험요인·대책
@@ -1107,6 +1116,10 @@
     if (t.id === "hideAppr") { opts.hideAppr = t.checked; saveOpts(); renderAll(); return; }
     if (t.id === "wnSel") { p.wn = Math.max(+t.value || WORKERS, minWn(p)); renderAll(); markTouched(); return; }
     if (t.id === "pickGroup") { drawPicker(); return; }
+    if (t.dataset && t.dataset.pre != null) {
+      var on = [].filter.call(document.querySelectorAll("[data-pre]"), function (x) { return x.checked; }).map(function (x) { return PRE_ITEMS[+x.dataset.pre]; });
+      state.pre = on.join("|"); renderAll(); markTouched(); return;
+    }
     if (t.tagName === "SELECT" && t.dataset.b) onEdit(ev);
   }
 

@@ -7,7 +7,11 @@
     <meta name="description" content="화기·밀폐공간·고소·정전·굴착·중량물 작업의 안전작업허가서를 작성하세요. 작업 종류별 확인 항목(산업안전보건기준에 관한 규칙 조문 표시), 가스 농도 측정 기록, 현장 게시용 요약, 허가 대장. 무료, 회원가입 없음.">
     <link rel="icon" href="../../assets/favicon.png" type="image/png">
     <!-- Tailwind: 빌드 때 미리 만든 CSS (런타임 CDN 사용 안 함) -->
-    <style>/*@TAILWIND@*/</style>
+    <style>/*@TAILWIND@*/        .pw-rtag{display:inline-block;font-size:11px;font-weight:800;color:#9a3412;background:#ffedd5;border-radius:5px;padding:0 6px;margin-left:4px;vertical-align:1px}
+        .pw-recheck{border:1px solid #fed7aa;background:#fff7ed;border-radius:10px;padding:10px 12px;margin-bottom:12px}
+        .pw-block{color:#b42318!important;font-weight:700}.pw-okline{color:#05603a!important;font-weight:700}
+        .pd-note{font-size:11px;color:#555}
+</style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
     <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
     <!-- html2pdf.js 0.10.1 은 'PDF 파일로 받기'를 누를 때만 불러온다(assets/vendor) -->
@@ -449,6 +453,7 @@
                             <select id="pStatus" v-model="form.status" class="pw-in">
                                 <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
                             </select>
+                            <p class="pw-hint" :class="approveBlock.length ? 'pw-block' : 'pw-okline'" style="margin:4px 0 0">{{ approveBlock.length ? '승인 불가 — ' + approveBlock.join(' · ') : '승인 가능 — 확인 항목이 모두 끝났습니다' }}</p>
                         </div>
                         <div>
                             <label class="pw-lb" for="pCompany">사업장(회사)명</label>
@@ -461,6 +466,8 @@
                         <div>
                             <label class="pw-lb" for="pPlace">작업 장소</label>
                             <input id="pPlace" v-model="form.place" type="text" placeholder="예: B동 옥외 탱크야드" class="pw-in">
+                            <label class="pw-lb" for="pScope" style="margin-top:8px">적용 범위 <span class="pw-rec">이 허가로 할 수 있는 작업·구역 — 범위 밖 작업은 별도 허가</span></label>
+                            <input id="pScope" v-model="form.scope" type="text" placeholder="예: 2호 탱크 내부 하부 용접 보수만(상부·배관 작업 제외)" class="pw-in">
                         </div>
                         <div>
                             <label class="pw-lb" for="pEquip">대상 설비·기기</label>
@@ -613,6 +620,7 @@
                                     <p class="pw-item-t">{{ it.t }}
                                         <a v-if="it.c" class="pw-cite" v-bind="{ href: it.href }" target="_blank" rel="noopener">{{ it.cite }}</a>
                                         <span v-else class="pw-rec">권장(사내 기준)</span>
+                                        <span v-if="RECHECK.includes(it.id)" class="pw-rtag" title="작업 중단 후 재개·조건 변경 때 다시 확인할 항목">재확인</span>
                                         <button v-if="!noteShown(it.id)" type="button" class="ck-noteb" @click="openNote(it.id)">＋비고</button>
                                     </p>
                                     <div class="ck-ans">
@@ -771,6 +779,12 @@
 
                 <!-- 작업 중·완료 -->
                 <acc-step v-bind="sp.done" @toggle="toggleStep" @next="nextStep">
+                    <div class="pw-recheck">
+                        <b>작업 중단·조건 변경·재개 시 재확인</b>
+                        <p class="pw-hint" style="margin:2px 0 6px">작업을 멈췄다가 다시 시작하거나 장소·인원·설비·기상 조건이 바뀌면, 아래 <span class="pw-rtag">재확인</span> 표시 항목을 다시 확인해야 합니다. 버튼을 누르면 해당 항목을 '미확인'으로 되돌리고 작업 중 점검 기록에 남깁니다.</p>
+                        <div class="pw-line"><select v-model="recheckWhy" aria-label="재확인 사유" class="pw-in pw-w30"><option>작업 재개</option><option>작업 조건 변경</option><option>작업자 교대</option><option>기상 변화</option></select>
+                        <button type="button" id="recheckBtn" class="pw-btn pw-btn-sm" @click="startRecheck">재확인 시작 ({{ recheckIds.length }}개 항목)</button></div>
+                    </div>
                     <div class="pw-row" style="justify-content:space-between">
                         <span class="pw-lb" style="margin:0;font-weight:700">작업 중 점검 기록</span>
                         <button type="button" id="addMid" class="pw-add" style="padding:2px 4px" @click="addMid"><i class="ph-bold ph-plus-circle"></i> 점검 기록 추가</button>
@@ -884,7 +898,8 @@
                         <table class="pd-t">
                             <tr><th class="w14">사업장</th><td><pv :o="form" k="company"></pv></td><th class="w14">작업명</th><td><pv :o="form" k="title"></pv></td></tr>
                             <tr><th>작업 장소</th><td><pv :o="form" k="place"></pv></td><th>대상 설비</th><td><pv :o="form" k="equip"></pv></td></tr>
-                            <tr><th>허가 유효 시간</th><td colspan="3"><b>{{ periodText }}</b></td></tr>
+                            <tr><th>허가 유효 시간</th><td colspan="3"><b>{{ periodText }}</b> <span class="pd-note">(유효 시간·적용 범위를 벗어나거나 작업 조건이 바뀌면 다시 허가)</span></td></tr>
+                            <tr v-if="form.scope"><th>적용 범위</th><td colspan="3"><pv :o="form" k="scope"></pv></td></tr>
                             <tr><th>작업 업체</th><td><pv :o="form" k="contractor"></pv><span v-if="form.isContract"> (도급)</span></td><th>작업 책임자</th><td><pv :o="form" k="lead"></pv><span v-if="form.leadTel"> · <pv :o="form" k="leadTel"></pv></span></td></tr>
                             <tr><th>작업 종류</th><td colspan="3"><span v-for="t in TYPES" :key="t.id" class="pd-ty"><span class="pd-box">{{ hasType(t.id) ? '✓' : '' }}</span>{{ t.id === 'etc' && form.etcName ? '기타(' + form.etcName + ')' : t.short }}</span></td></tr>
                             <tr><th>작업 내용</th><td colspan="3" class="pd-pre"><pv :o="form" k="desc" multi></pv></td></tr>
@@ -1234,6 +1249,8 @@
         const ANS = [{ v: 'Y', l: '예' }, { v: 'N', l: '아니오' }, { v: 'NA', l: '해당없음' }];
         const ANS_LABEL = { Y: '예', N: '아니오', NA: '해당없음' };
         const STATUSES = ['작성 중', '승인', '작업 중', '완료', '중지·취소'];
+        // 작업 중단 후 재개·조건 변경 때 다시 확인할 항목(측정·차단·출입통제·감시처럼 시간이 지나면 바뀌는 상태)
+        const RECHECK = ['cm1', 'cm6', 'cm8', 'hot3', 'hot4', 'hot5', 'conf4', 'conf8', 'conf9', 'conf11', 'conf12', 'hgt5', 'hgt10', 'elc5', 'elc7', 'elc9'];
         // 앞 6개는 기준규칙 제32조제1항 각 호의 보호구, 송기마스크·공기호흡기는 제619조의2·제620조 등의 보호구
         const PPE = ['안전모', '안전대', '안전화', '보안경', '보안면', '절연용 보호구', '방열복', '방진마스크', '송기마스크', '공기호흡기'];
         const PPE_BY_TYPE = { hot: ['보안면', '안전화'], conf: ['송기마스크', '안전대'], height: ['안전모', '안전대'], elec: ['절연용 보호구', '안전화'], exc: ['안전모', '안전화'], lift: ['안전모', '안전화'], heavy: ['안전모', '안전화'], etc: [] };
@@ -1319,7 +1336,7 @@
                     company: str(profile.company), title: '', place: '', equip: '', desc: '',
                     contractor: '', isContract: false, lead: '', leadTel: '',
                     start: todayAt(9), end: todayAt(18),
-                    types: [], etcName: '', hazards: '',
+                    types: [], etcName: '', hazards: '', scope: '',
                     fireWatch: '', extinguisher: '', attendant: '', gasTester: '', director: '', emergency: '', gasRisk: '',
                     ppe: [], ppeEtc: '', loto: '', refRisk: false, refTbm: false, conditions: '',
                     reviewer: str(profile.manager), approver: '',
@@ -1713,6 +1730,38 @@
                     return [c.stop && `조치 필요 ${c.stop}건`, c.warn && `확인 ${c.warn}건`, c.todo && `남은 입력 ${c.todo}건`].filter(Boolean).join(' · ');
                 });
                 const sumOpen = ref(false);
+                // ---- 승인 잠금: 미확인·미충족·부적정 측정값·필수 정보가 남아 있으면 '승인'·'작업 중'으로 바꾸지 못한다
+                const approveBlock = computed(() => {
+                    const f = form.value, t = tally.value, b = [];
+                    if (!f.types.length) b.push('작업 종류 미선택');
+                    if (!f.title.trim() || !f.place.trim() || !f.lead.trim()) b.push('작업명·장소·책임자 미입력');
+                    if (!f.start || !f.end) b.push('허가 유효 시간 미입력');
+                    if (t.blank) b.push('미확인 ' + t.blank);
+                    if (t.N) b.push('미충족 ' + t.N);
+                    if (gasState.value.bad) b.push('부적정 측정값');
+                    if (hasType('conf') && !gasState.value.has) b.push('가스 측정 기록 없음');
+                    return b;
+                });
+                let lastStatus = form.value.status;
+                watch(() => form.value.status, (nv, ov) => {
+                    if (['승인', '작업 중'].includes(nv) && !['승인', '작업 중'].includes(ov || '') && approveBlock.value.length) {
+                        form.value.status = ov || '작성 중';
+                        showToast('아직 승인할 수 없습니다 — ' + approveBlock.value.join(' · ') + '. 모두 해결한 뒤 바꾸세요.', 'error');
+                        return;
+                    }
+                    lastStatus = nv;
+                });
+                const recheckWhy = ref('작업 재개');
+                const recheckIds = computed(() => RECHECK.filter(id => sections.value.some(s => s.items.some(it => it.id === id))));
+                const startRecheck = () => {
+                    const ids = recheckIds.value; if (!ids.length) { showToast('재확인할 항목이 없습니다.', 'error'); return; }
+                    const prev = ids.filter(id => checks.value[id] && checks.value[id].v).length;
+                    ids.forEach(id => { if (checks.value[id]) checks.value[id].v = ''; });
+                    const d = new Date();
+                    mid.value.push({ time: `${pad(d.getHours())}:${pad(d.getMinutes())}`, note: `${recheckWhy.value} — 재확인 항목 ${ids.length}개를 다시 확인함` + (hasType('conf') ? ' (가스 농도 재측정 포함)' : ''), by: '' });
+                    if (form.value.status === '작업 중') form.value.status = '작성 중';
+                    showToast(`${recheckWhy.value}: 재확인 항목 ${ids.length}개를 '미확인'으로 되돌렸습니다(이전 표시 ${prev}개). 다시 확인한 뒤 상태를 바꾸세요.`);
+                };
 
                 // ---- 입력 단계(접이식). 펼침 상태는 저장하지 않는다
                 const openSteps = ref({ base: true });
@@ -2047,6 +2096,7 @@
                     toggleType, setAns, addCustom, togglePpe, suggestPpe, ppeText,
                     addWorker, workerCount, workerNames, workerRows,
                     showGas, addGas, gasView, gasState, gasBlankRows,
+                    RECHECK, approveBlock, recheckWhy, recheckIds, startRecheck,
                     addMid, midRows, doneNow, doneItems, periodText, doneTimeText, todayText, postState, postMeasures,
                     timeChecks, checksOut, onNoInput, autoNo, changeDocType,
                     handleFileUpload, removePhoto, resetToBlank,
