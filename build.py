@@ -173,6 +173,80 @@ def brief_article(b, rel):
             f'국회 통과안·입법예고 내용은 공포·시행 때 확정됩니다. 확인일 {fmt_date(b.get("checked") or b["date"])}</p>')
 
 
+BILL_STAGE_NOTE = {
+    "입법예고": "입법예고 단계입니다. 의견 수렴·심사 과정에서 내용이 바뀔 수 있고, 공포·시행 때 확정됩니다.",
+    "국회 통과": "국회를 통과했지만 아직 공포 전입니다. 조문 번호와 시행일은 공포문으로 확정되고, 대통령령에 맡긴 내용(금액·대상 등)은 하위법령이 나와야 알 수 있습니다.",
+    "시행 예정": "공포를 마치고 시행을 기다리는 내용입니다. 시행일 전까지 준비하세요.",
+    "시행 중": "이미 시행 중인 내용입니다.",
+}
+
+
+def write_bills(site, write, B):
+    """입법예고·개정 포인트: 개정 사항 하나를 한 글로 — 현행·개정 비교, 왜 바뀌나, 준비할 것, 묻고 답하기, 출처."""
+    posts = [x for x in B.get("posts", []) if x.get("slug") and x.get("title") and x.get("lead")]
+    if not posts:
+        return
+    order = {"입법예고": 0, "국회 통과": 1, "시행 예정": 2, "시행 중": 3}
+    chk = fmt_date(B.get("checked", ""))
+    css = """<style>
+.bl-list{list-style:none;margin:0;padding:0;border-top:2px solid var(--text)}.bl-list li{border-bottom:1px solid var(--line)}
+.bl-list a{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:14px 4px;color:var(--text);text-decoration:none}.bl-list a:hover .bl-t{text-decoration:underline}
+.bl-list .lst{grid-row:span 2;align-self:start;margin-top:2px}.bl-t{font-weight:800;font-size:16px;line-height:1.45}.bl-d{font-size:13.5px;color:var(--text-2);line-height:1.55}
+.bl-cmp{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:14.5px;line-height:1.6}.bl-cmp th,.bl-cmp td{border:1px solid var(--line);padding:10px 12px;vertical-align:top;text-align:left}
+.bl-cmp thead th{background:var(--surface-2,#F4F6F9);font-size:13.5px}.bl-cmp td:last-child{background:#F5F9FF}.bl-cmp ul{margin:0;padding-left:18px}
+.bl-sec{margin-top:26px}.bl-sec h2{font-size:18px;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.bl-facts{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;margin:10px 0 0;font-size:14.5px}.bl-facts dt{font-weight:800;color:var(--text-2)}.bl-facts dd{margin:0}
+.bl-note{background:#FFF7E6;border:1px solid #F5D9A8;border-radius:10px;padding:10px 12px;font-size:13.5px;color:#7a4a00;margin-top:12px}
+.bl-todo li{margin:4px 0}.bl-faq dt{font-weight:800;margin-top:10px}.bl-faq dd{margin:4px 0 0}
+@media (max-width:1023px){.layout-detail.bl-layout .col-side{order:2}}
+@media (max-width:600px){.bl-cmp,.bl-cmp tbody,.bl-cmp tr,.bl-cmp td{display:block;width:100%}.bl-cmp thead{display:none}.bl-cmp td{border-top:0}.bl-cmp td:first-child{border-top:1px solid var(--line)}
+.bl-cmp td:before{content:attr(data-h);display:block;font-weight:800;font-size:12.5px;color:var(--text-2);margin-bottom:2px}.bl-facts{grid-template-columns:1fr}.bl-facts dt{margin-top:6px}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bl-cmp td:last-child{background:#16213A}:root:not([data-theme="light"]) .bl-note{background:#2A2110;border-color:#5C4720;color:#F5D9A8}}
+:root[data-theme="dark"] .bl-cmp td:last-child{background:#16213A}:root[data-theme="dark"] .bl-note{background:#2A2110;border-color:#5C4720;color:#F5D9A8}
+</style>"""
+    posts = sorted(posts, key=lambda x: (order.get(x["stage"], 9), x["date"]), reverse=False)
+
+    def stage(x):
+        return f'<span class="lst {BRIEF_STAGE.get(x["stage"], "lst-rec")}">{e(x["stage"])}</span>'
+
+    rows = "".join(f'<li><a href="{e(x["slug"])}/">{stage(x)}<span class="bl-t">{e(x["title"])}</span><span class="bl-d">{e(x.get("effective", ""))}</span></a></li>' for x in posts)
+    blog = (f'<p class="hint">같은 내용을 <a href="{e(BLOG["url"])}" target="_blank" rel="noopener">SafePlum 네이버 블로그 ↗</a>에도 올립니다.</p>' if BLOG else "")
+    side = (f'<aside class="col-side stack"><div class="side-box"><h2 class="h-sm">단계 표시</h2><ul class="bul hint">'
+            + "".join(f"<li><b>{k}</b> — {v}</li>" for k, v in BILL_STAGE_NOTE.items()) +
+            '</ul></div><div class="side-box"><h2 class="h-sm">함께 보기</h2><ul class="bul"><li><a href="{up}laws/#upcoming">시행 예정 법령</a></li><li><a href="{up}brief/?c=%EC%9E%85%EB%B2%95%EC%98%88%EA%B3%A0">입법예고 소식(브리핑)</a></li><li><a href="{up}laws/qa/">고용노동부 질의회시</a></li></ul></div></aside>')
+    head = ('<section class="phead"><div class="wrap"><p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">법령</a><span>/</span>입법예고·개정 포인트</p>'
+            '<h1>입법예고·개정 포인트</h1><p>입법예고되거나 국회를 통과한 산업안전보건 법령 개정 사항을 한 가지씩 풀어 씁니다. 무엇이 바뀌는지(현행·개정 비교), 언제부터인지, 현장에서 무엇을 준비할지를 정리하고 공식 출처를 붙였습니다.</p></div></section>')
+    write("laws/bills/index.html", page(site, "../../", "laws/bills/", "입법예고·개정 포인트",
+          css + head + f'<div class="wrap layout-detail bl-layout"><section class="col-main"><ul class="bl-list">{rows}</ul>{blog}<p class="src-note">SafePlum이 공식 발표·법령 원문과 법무법인 분석 자료를 바탕으로 쓴 해설입니다. 원문을 옮겨 싣지 않으며, 법적 판단이 필요하면 원문과 고용노동부 상담(국번 없이 1350)으로 확인하세요. 확인일 {chk}</p></section>{side.format(up="../../")}</div>',
+          desc="산업안전보건법 입법예고·국회 통과 개정안을 포인트별로 정리 — 신고포상금, 작업중지권 확대, 사망사고 과징금, 위험성평가 과태료 등 시행일과 준비사항.", active="laws/"))
+    for i, x in enumerate(posts):
+        cmp_rows = max(len(x.get("before", [])), 1)
+        ul = lambda L: "<ul>" + "".join(f"<li>{e(t)}</li>" for t in L) + "</ul>" if L else "—"
+        tools = "".join(f'<li><a href="../../../{e(h)}">{e(n)}</a></li>' for n, h in x.get("tools", []))
+        srcs = "".join(f'<li><a class="link-ext" href="{e(safe_url(u))}" target="_blank" rel="noopener{"" if is_official(u) else " nofollow"}">{e(n)} ↗</a>{"" if is_official(u) else " <span class=muted>(참고 자료)</span>"}</li>' for n, u in x.get("sources", []) if safe_url(u))
+        faq = "".join(f"<dt>Q. {e(q)}</dt><dd>{e(a)}</dd>" for q, a in x.get("faq", []))
+        prev = posts[i - 1] if i > 0 else None
+        nxt = posts[i + 1] if i + 1 < len(posts) else None
+        nav = "".join(f'<a class="bdn-{k}" href="../{y["slug"]}/"><span>{lab}</span>{e(y["title"])}</a>' for k, lab, y in (("prev", "← 이전 글", prev), ("next", "다음 글 →", nxt)) if y)
+        body = (css + '<section class="phead"><div class="wrap"><p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">법령</a><span>/</span><a href="../">입법예고·개정 포인트</a></p>'
+                f'<p class="bdm">{stage(x)}<time datetime="{e(x["date"])}">{fmt_date(x["date"])}</time></p><h1>{e(x["title"])}</h1><p>{e(x["lead"])}</p></div></section>'
+                '<div class="wrap layout-detail bl-layout"><section class="col-main"><article class="bdv">'
+                f'<dl class="bl-facts"><dt>단계</dt><dd>{e(x["stage"])}</dd><dt>시행 시기</dt><dd>{e(x.get("effective", ""))}</dd><dt>관련 조문</dt><dd>{e(x.get("law", ""))}</dd></dl>'
+                f'<p class="bl-note">{e(BILL_STAGE_NOTE.get(x["stage"], ""))}</p>'
+                f'<section class="bl-sec"><h2>무엇이 바뀌나</h2><table class="bl-cmp"><thead><tr><th style="width:45%">지금(현행)</th><th>바뀌는 내용</th></tr></thead><tbody><tr><td data-h="지금(현행)">{ul(x.get("before", []))}</td><td data-h="바뀌는 내용">{ul(x.get("after", []))}</td></tr></tbody></table></section>'
+                f'<section class="bl-sec"><h2>왜 바뀌나</h2><p>{e(x.get("why", ""))}</p></section>'
+                f'<section class="bl-sec"><h2>핵심 포인트</h2>{ul(x.get("points", []))}</section>'
+                f'<section class="bl-sec"><h2>현장에서 준비할 것</h2><ol class="bl-todo">' + "".join(f"<li>{e(t)}</li>" for t in x.get("todo", [])) + '</ol></section>'
+                + (f'<section class="bl-sec"><h2>자주 묻는 질문</h2><dl class="bl-faq">{faq}</dl></section>' if faq else "")
+                + (f'<section class="bl-sec"><h2>SafePlum 무료 작성기로 준비하기</h2><ul class="bul">{tools}</ul></section>' if tools else "")
+                + f'<section class="bl-sec"><h2>출처</h2><ul class="bul">{srcs}</ul></section>'
+                f'<p class="src-note">SafePlum이 공식 발표·법령 원문과 법무법인 분석 자료를 바탕으로 쓴 해설입니다. 원문을 옮겨 싣지 않았고, 법적 판단이 필요하면 원문을 확인하세요. 확인일 {chk}</p>'
+                + (f'<nav class="bdn" aria-label="이전·다음 글">{nav}</nav>' if nav else "")
+                + f'</article></section>{side.format(up="../../../")}</div>')
+        write(f"laws/bills/{x['slug']}/index.html", page(site, "../../../", f"laws/bills/{x['slug']}/", x["title"], body,
+              desc=f'{x["stage"]} · {x.get("effective", "")} — {x["lead"]}'[:150], active="laws/"))
+
+
 # ---------------------------------------------------------------- 검증
 
 def validate_jobs(jobs, today):
@@ -683,7 +757,7 @@ def nav_cols(site, rel):
                  + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
                 ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
-                ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
+                ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}laws/bills/", "입법예고·개정 포인트")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
         "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")][:2 if (site.get("features") or {}).get("job_posting", True) else 1] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
@@ -1743,6 +1817,16 @@ def build(out, today):
             BOARD.append({"date": it.get("date") or b["date"], "cat": it.get("cat") or "정책", "agency": it.get("agency", ""), "title": it["title"], "official_title": it.get("official_title", ""),
                           "summary": it["summary"], "point": it.get("point", ""), "period": "", "url": it["sources"][0]["url"], "href": f"{b['date']}/",
                           "verify": "" if b.get("review") == "verified" else ""})
+    # 입법예고·개정 포인트(data/bills.json): 게시판에는 요약만, 전문은 laws/bills/<slug>/
+    BILLS = load("data/bills.json") if (ROOT / "data/bills.json").exists() else {"posts": []}
+    for x in BILLS.get("posts", []):
+        offi = [u for _n, u in x.get("sources", []) if is_official(u)]
+        if not (x.get("title") and x.get("lead") and offi):
+            warn(f"입법예고 포인트 {x.get('slug')}: 제목·요약·공식 출처가 없어 게시판에서 제외")
+            continue
+        BOARD.append({"date": x["date"], "cat": "입법예고" if x["stage"] in ("입법예고", "국회 통과") else "법령", "agency": "고용노동부", "title": x["title"],
+                      "official_title": "", "summary": x["lead"], "point": (x.get("todo") or [""])[0], "period": x.get("effective", ""),
+                      "url": offi[0], "href": f"../laws/bills/{x['slug']}/", "href_label": "해설 전문"})
     # 언론 보도 스크랩: 제목·요약·실무 포인트는 SafePlum이 쓴 문장, 원문은 링크만 (사진·기사 문장 미사용)
     for x in load("data/scrap.json").get("items", []):
         if x.get("title") and x.get("summary") and re.match(r"^https://", x.get("url", "")) and x.get("press"):
@@ -1901,7 +1985,7 @@ def build(out, today):
         per = f'<p><b>기간</b> {e(x["period"])}</p>' if x.get("period") else ""
         ot = f'<p class="muted">공식 제목: {e(x["official_title"])}</p>' if x.get("official_title") else ""
         vf = f'<p class="lst-note">{CHK_SVG} <b>확인 필요</b> {e(x["verify"])}</p>' if x.get("verify") else ""
-        more = f' · <a href="{e(x["href"])}">브리핑 전문</a>' if x.get("href") else ""
+        more = f' · <a href="{e(x["href"])}">{e(x.get("href_label") or "브리핑 전문")}</a>' if x.get("href") else ""
         more += f' · <a href="n/{x["id"]}/">자세히 보기</a>'
         q = " ".join([x["title"], x.get("official_title", ""), x.get("summary", ""), x.get("agency", ""), x["cat"]])
         return (f'<details class="nb-row" id="b-{x["id"]}" data-cat="{e(x["cat"])}" data-q="{e(q.lower())}"><summary><time datetime="{e(x["date"][:7] if x.get("date_prec") == "month" else x["date"])}">{e(bdate(x))}</time><span class="nb-cat nb-{e(x["cat"])}">{e(x["cat"])}</span>'
@@ -1920,7 +2004,7 @@ def build(out, today):
             rows.append(("실무 포인트", f'<p>{e(x["point"])}</p>'))
         tbl = "".join(f'<tr><th scope="row">{k}</th><td>{v}</td></tr>' for k, v in rows)
         vf = f'<p class="lst-note">{CHK_SVG} <b>확인 필요</b> {e(x["verify"])}</p>' if x.get("verify") else ""
-        full = f'<a class="btn btn-ghost" href="../../{e(x["href"])}">브리핑 전문</a>' if x.get("href") else ""
+        full = f'<a class="btn btn-ghost" href="../../{e(x["href"])}">{e(x.get("href_label") or "브리핑 전문")}</a>' if x.get("href") else ""
         return f"""
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">안전 브리핑</a><span>/</span><a href="../../?c={quote(x["cat"])}">{e(x["cat"])}</a></p>
@@ -1998,6 +2082,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
         write(f"brief/{b['date']}/index.html", page(site, "../../", f"brief/{b['date']}/", f'{fmt_date(b["date"])} 안전 브리핑 — {b["title"]}', body,
               desc=(b.get("lead") or b["title"])[:150], active="brief/"))
 
+    write_bills(site, write, BILLS)
 
     # ---- 고용노동부 질의회시(중앙부처 1차 해석) 모음: data/gov_qa.json (scripts/import_gov_qa.py 로 만든다)
     GQ = load("data/gov_qa.json") if (ROOT / "data/gov_qa.json").exists() else None
