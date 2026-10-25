@@ -1080,7 +1080,8 @@ tr.q-hide{display:none}
   }
   (function () {
     var b = document.getElementById("fAIBtn"), pnl = document.getElementById("fAI");
-    var ph = AIX.example || "예: 오늘 2라인 금형 교체와 자재 하역이 있음. 신규 입사자 2명 배치. 어제 지게차와 보행자 동선이 겹치는 아차사고가 있었음.";
+    // 입력칸 예시는 이 서식의 예시에서 가져온다(모든 서식에 같은 '금형 교체' 예시가 나오지 않게)
+    var ph = AIX.note ? "예: " + AIX.note : (AIF.length ? "예: 최근 사고·지적 사항, 이번에 꼭 넣고 싶은 내용 (비워 두어도 됩니다)" : "예: " + (AIX.example || (AIX.examples || [])[0] || "이번에 작성할 내용과 현장 상황"));
     document.getElementById("fAIQ").placeholder = ph;
     if (AIX.ask) document.getElementById("fAIQl").textContent = AIX.ask;
     if (AIX.go) document.getElementById("fAIGo").textContent = AIX.go;

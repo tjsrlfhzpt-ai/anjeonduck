@@ -200,7 +200,7 @@
   //   field: {k, label, type: text|area|select|chips, options, required, ph}
   var FCSS = ".spai-f{display:flex;flex-direction:column;gap:4px;margin-top:10px}.spai-f>span{font-weight:700;font-size:13.5px}.spai-f>span em{color:#B42318;font-style:normal;margin-left:3px}" +
     ".spai-f input,.spai-f select,.spai-f textarea{width:100%;box-sizing:border-box;border:1px solid #c8d1dd;border-radius:9px;padding:9px 11px;font-family:inherit;font-size:15px;line-height:1.5;background:#fff;color:#1d2433}" +
-    ".spai-f.bad input,.spai-f.bad select,.spai-f.bad textarea{border-color:#B42318;background:#FFF5F4}.spai-f .spai-err{color:#B42318;font-size:12.5px;font-weight:700}.spai-f .spai-hint{color:#5b6576;font-size:12.5px;font-weight:400;line-height:1.45}.spai-f.bad .spai-hint{color:#7a2a20}.spai-f input:placeholder-shown~.spai-hint.ph,.spai-f textarea:placeholder-shown~.spai-hint.ph{display:none}" +
+    ".spai-f.bad input,.spai-f.bad select,.spai-f.bad textarea{border-color:#B42318;background:#FFF5F4}.spai-f .spai-err{color:#B42318;font-size:12.5px;font-weight:700}.spai-f .spai-hint{color:#5b6576;font-size:12.5px;font-weight:400;line-height:1.45;white-space:pre-line}.spai-f.bad .spai-hint{color:#7a2a20}.spai-f input:placeholder-shown~.spai-hint.ph,.spai-f textarea:placeholder-shown~.spai-hint.ph{display:none}" +
     ".spai-chips{display:flex;flex-wrap:wrap;gap:6px}.spai-chips label{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:4px 11px;border:1px solid #C7D2FE;border-radius:17px;font-size:13.5px;cursor:pointer;background:#F5F7FF}" +
     ".spai-chips input{width:auto;margin:0}.spai-chips label:has(input:checked){background:#3730A3;border-color:#3730A3;color:#fff}" +
     ".spai-fg{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.spai-fg .wide{grid-column:1/-1}@media (max-width:560px){.spai-fg{grid-template-columns:1fr}}" +
@@ -272,7 +272,7 @@
         '<div class="spai-row">' + (opt.force ? '<button type="button" class="spai-b" data-x="2" title="추가 질문 없이 지금 정보로 작성합니다(모르는 부분은 ○○로 비움)">' + esc(opt.force) + "</button>" : "") +
         '<button type="button" class="spai-b" data-x="0">취소</button><button type="button" class="spai-b pri" data-x="1">' + esc(opt.ok || "AI 초안 만들기") + "</button></div></div>";
       document.body.appendChild(ov); clearOnInput(ov);
-      var main = ov.querySelector('[data-f="' + (opt.exampleFor || fields.filter(function (f) { return f.type === "area" || !f.type || f.type === "text"; })[0].k) + '"]');
+      var mf = opt.exampleFor || (fields.filter(function (f) { return f.type === "area" || !f.type || f.type === "text"; })[0] || fields[0] || {}).k, main = mf ? ov.querySelector('[data-f="' + mf + '"]') : null;
       if (main && (opt.examples || []).length) examples(ov.querySelector(".spai-askx"), opt.examples, main, {});
       function close(v) { ov.remove(); document.removeEventListener("keydown", key); done(v); }
       function key(ev) { if (ev.key === "Escape") close(null); }
@@ -298,6 +298,21 @@
       return { text: t, force: !!v._force || !t };
     });
   }
+
+  // 이미 쓴 칸에 AI 결과를 넣을 때 칸마다 처리 방법을 한 화면에서 고른다
+  //   list: [{key, label, old, neu}] → Promise({key: "append"|"replace"|"new"|"skip"}), 취소하면 null
+  var MERGE_OPT = ["기존 내용 뒤에 덧붙이기", "AI 정리로 바꾸기", "새 안건으로 따로 추가", "이 칸은 그대로 두기"], MERGE_KEY = ["append", "replace", "new", "skip"];
+  function merge(list, o) {
+    o = o || {};
+    if (!list || !list.length) return Promise.resolve({});
+    var fields = list.map(function (c, i) { return { k: "m" + i, label: c.label, type: "select", options: MERGE_OPT, help: "지금: " + clip(c.old, 60) + "\nAI: " + clip(c.neu, 90) }; });
+    var vals = {}; list.forEach(function (c, i) { vals["m" + i] = MERGE_OPT[0]; });
+    return ask({ title: o.title || "이미 쓴 내용이 있습니다", desc: o.desc || "아래 칸에는 이미 적은 내용이 있습니다. 칸마다 AI 정리를 어떻게 넣을지 고르세요. 기본은 '기존 내용 뒤에 덧붙이기'라 지금 쓴 내용은 지워지지 않습니다.", fields: fields, values: vals, ok: "이대로 넣기" }).then(function (v) {
+      if (!v) return null;
+      var out = {}; list.forEach(function (c, i) { var j = MERGE_OPT.indexOf(v["m" + i]); out[c.key] = j < 0 ? "skip" : MERGE_KEY[j]; }); return out;
+    });
+  }
+  function clip(t, n) { t = String(t || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n) + "…" : t; }
 
   // 안내형 작성 흐름: 칸별 입력 → AI → (정보 부족이면) 질문·답 → 다시 AI. 마지막 결과를 돌려주고, 취소하면 null
   //   o: {key, title, desc, fields, values, examples, exampleFor, ok, run(vals, ctx, force) → Promise(AI 결과 객체)}
@@ -700,7 +715,7 @@
     progress: progress,
     examples: examples,
     ask: ask,
-    askMore: askMore,
+    askMore: askMore, merge: merge,
     guided: guided,
     fields: { html: fieldsHTML, read: readFields, check: checkFields, text: ctxText, css: fieldCSS, live: clearOnInput },
     check: { schema: CHECK_SCHEMA, rule: CHECK_RULE, force: FORCE_RULE, need: needMore, quality: QUALITY_RULE, generic: lintGeneric },

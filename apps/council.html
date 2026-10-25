@@ -10,6 +10,7 @@
     <style>/*@TAILWIND@*/        .cc-ai{border:1px solid #C7D2FE;background:#F5F7FF;border-radius:12px;padding:10px 12px;margin:8px 0 12px}
         .cc-chip{min-height:32px;padding:4px 10px;border-radius:16px;border:1px solid #C7D2FE;background:#fff;color:#3730A3;font-size:12.5px;cursor:pointer;text-align:left;max-width:100%}
         .cc-chip:hover{background:#E0E7FF}
+        .cc-exd{margin-top:8px}.cc-exd>summary{cursor:pointer;font-size:13px;font-weight:700;color:#3730A3;padding:6px 0;list-style-position:inside}.cc-exl{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px}.cc-exl .cc-chip{border-radius:10px;line-height:1.45;padding:7px 11px}
         .cc-flash{background:#FFF8D6!important;border-color:#E0B000!important;transition:background .6s}
 </style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
@@ -501,9 +502,9 @@
                         <div class="cc-row" style="justify-content:space-between"><b style="color:#3730A3">✦ 회의 메모 → 회의록으로 정리 (AI)</b><button type="button" class="cc-lk" @click="aiKey">AI 키 설정</button></div>
                         <p class="cc-hint" style="margin:4px 0 6px">회의 때 메모한 내용을 짧게라도(글자 수 제한 없음) 적고 버튼을 누르면, AI가 아래 <b>협의 항목의 '협의 내용' 칸</b>과 <b>후속 조치</b>에 회의록 문장으로 채워 넣습니다. 메모가 부족하면 AI가 먼저 묻습니다. 채운 내용은 실제 회의와 맞는지 확인하고 고치세요.</p>
                         <textarea id="ccAiNotes" v-model="aiNotes" rows="5" maxlength="4000" class="cc-in cc-ta" placeholder="예: 작업시간 08~17시 / 크레인 양중은 오전만 / 비상 연락은 무전 3번 / A사 비계 난간 보수 — 다음 주 화요일까지"></textarea>
-                        <div class="cc-row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span class="cc-hint" style="margin:0;font-weight:700">예시 눌러 넣기</span><button v-for="(x, i) in AI_EX" :key="'aix' + i" type="button" class="cc-chip" @click="aiNotes = x">{{ x.slice(0, 28) }}…</button></div>
                         <button type="button" id="ccAiGo" class="cc-btn" style="margin-top:8px;background:#3730A3;color:#fff;border-color:#3730A3" :disabled="aiBusy" @click="aiMinutes">{{ aiBusy ? 'AI가 정리하는 중…' : '메모로 회의록 정리' }}</button>
                         <p class="cc-hint">{{ aiMsg || 'AI는 메모에 있는 내용만 협의 항목 5가지·추가 안건·후속 조치로 나눠 회의록 문장으로 다듬습니다. 메모에서 다루지 않은 항목은 비워 둡니다(내 Gemini 키).' }}</p>
+                        <details class="cc-exd"><summary>무엇을 적을지 모르겠으면 — AI에 적는 예시 {{ AI_EX.length }}개 보기</summary><div class="cc-exl"><span class="cc-hint" style="margin:0">예시를 누르면 메모 칸에 들어갑니다. 실제 회의 내용으로 고쳐 쓴 뒤 버튼을 누르세요.</span><button v-for="(x, i) in AI_EX" :key="'aix' + i" type="button" class="cc-chip" @click="aiNotes = x">{{ x }}</button></div></details>
                     </div>
 
                     <div v-for="(t, idx) in topics" :key="'tp-' + idx" class="cc-topic">
@@ -1509,7 +1510,9 @@
                 const AI_EX = [
                     '작업시간 08:00 시작, 17:00 종료 / 크레인 양중은 오전만(10시~12시) / 연락: 무전 3번 채널, 비상 시 원청 안전팀 / 대피: 화재·가스 경보 시 정문 주차장 집결 / 위험성평가: 협력사별 이번 주 금요일까지 제출, 원청 취합 / 2층 배관(A사)과 전기(B사) 작업 겹쳐 B사 오후로 조정',
                     '외벽 도장(C사)·비계 해체(D사) 일정 겹침 → D사 해체는 도장 끝난 뒤 수요일부터 / 무전 2번 채널 통일 / 강풍 예보 시 비계 작업 중지 / 위험성평가 결과 각 사 TBM에서 공유 / D사 해체 구간 출입 통제선 설치 — D사, 다음 주 화요일까지',
-                    '물류센터 협력사 3곳 / 작업 시작 07:30, 지게차는 08:00부터 / 하역장 보행 통로 재도색 원청이 다음 주 시행 / 비상 대피는 동쪽 출입문, 소화기 위치 재안내 / 협력사 신규자 채용 시 교육 기록 다음 회의 때 확인'];
+                    '물류센터 협력사 3곳 / 작업 시작 07:30, 지게차는 08:00부터 / 하역장 보행 통로 재도색 원청이 다음 주 시행 / 비상 대피는 동쪽 출입문, 소화기 위치 재안내 / 협력사 신규자 채용 시 교육 기록 다음 회의 때 확인',
+                    '이번 달 협력사 2곳(배관 A사, 전기 B사) / 2층 기계실 배관 용접은 화기작업 허가 후 진행, 화재감시인은 A사가 배치 / B사 분전반 작업 시 정전·잠금 확인 후 작업 / 비상 연락은 원청 안전팀',
+                    '신규 협력사 C사(청소 용역) 참여 — 채용 시 교육 기록은 다음 회의 때 확인 / 냉동창고 출입 시 2인 1조 / 지게차 통로 보행 금지 재안내 / 위험성평가 결과는 각 사 TBM에서 공유'];
                 const aiNotes = ref(''), aiBusy = ref(false), aiMsg = ref('');
                 const aiKey = () => { if (window.SPAI) { SPAI.css(); SPAI.openSettings(); } };
                 const aiMinutes = () => {
@@ -1539,17 +1542,24 @@
                             });
                         }
                         let n = 0, added = 0, acts = 0; const hit = [];
-                        (r.topics || []).forEach(x => {
-                            const c = String(x.content || '').trim(); if (!c) return;
-                            const i = (x.no | 0) - 1;
-                            if (i >= 0 && i < topics.value.length) { const t = topics.value[i]; if (String(t.content || '').trim() && !window.confirm((i + 1) + '번 항목에 이미 쓴 내용이 있습니다. AI 정리로 바꿀까요?')) return; t.content = c.slice(0, 2000); n++; hit.push(i); }
-                            else { topics.value.push({ label: String(x.title || '기타 안건').slice(0, 200), content: c.slice(0, 2000), fixed: false }); added++; hit.push(topics.value.length - 1); }
+                        const rows = []; (r.topics || []).forEach(x => { const c = String(x.content || '').trim(), i = (x.no | 0) - 1; if (!c) return; const same = i >= 0 && rows.find(o => o.i === i); if (same) same.c += '\n' + c; else rows.push({ x, c, i }); });  // 같은 번호로 여러 개가 오면 한 칸에 모은다
+                        const inList = o => o.i >= 0 && o.i < topics.value.length;
+                        const conf = rows.filter(o => inList(o) && String(topics.value[o.i].content || '').trim()).map(o => ({ key: o.i, label: (o.i + 1) + '번 ' + (topics.value[o.i].label || '항목'), old: topics.value[o.i].content, neu: o.c }));
+                        return SPAI.merge(conf, { desc: "아래 항목에는 이미 적은 내용이 있습니다. 항목마다 AI 정리를 어떻게 넣을지 고르세요. 기본은 '기존 내용 뒤에 덧붙이기'라 지금 쓴 내용은 지워지지 않습니다." }).then(mode => {
+                            if (!mode) { aiMsg.value = '넣기를 취소했습니다. 메모는 그대로 남아 있으니 고쳐서 다시 누를 수 있습니다.'; return; }
+                            rows.forEach(o => {
+                                const md = inList(o) ? (mode[o.i] || 'replace') : 'new';
+                                if (md === 'skip') return;
+                                if (md === 'new') { topics.value.push({ label: String(o.x.title || (inList(o) ? topics.value[o.i].label : '') || '기타 안건').slice(0, 200), content: o.c.slice(0, 2000), fixed: false }); added++; hit.push(topics.value.length - 1); return; }
+                                const t = topics.value[o.i];
+                                t.content = (md === 'append' ? String(t.content || '').trim() + '\n' + o.c : o.c).slice(0, 2000); n++; hit.push(o.i);
+                            });
+                            (r.actions || []).forEach(a => { const c = String(a.content || '').trim(); if (!c || actions.value.length >= 60) return; actions.value.push({ content: c.slice(0, 300), owner: String(a.owner || '').slice(0, 60), due: /^\d{4}-\d{2}-\d{2}$/.test(a.due || '') ? a.due : '', status: '진행 중' }); acts++; });
+                            if (String(r.others || '').trim() && !String(formData.value.others || '').trim()) formData.value.others = String(r.others).trim().slice(0, 2000);
+                            aiMsg.value = (n || added || acts) ? (hit.length ? hit.map(i => i + 1).join('·') + '번 항목의 협의 내용 칸' : '') + (hit.length && acts ? '과 ' : '') + (acts ? '후속 조치 ' + acts + '건' : '') + '에 넣었습니다(노란색 표시). 실제 회의 내용과 맞는지 확인하고 고쳐 쓰세요.' : '메모에서 정리할 내용을 찾지 못했습니다. 무엇을 협의·결정했는지 더 적어 주세요.';
+                            if (hit.length) nextTick(() => { const tas = document.querySelectorAll('.cc-topic textarea'); hit.forEach(i => { const el = tas[i]; if (el) { el.classList.add('cc-flash'); setTimeout(() => el.classList.remove('cc-flash'), 6000); } }); const f = tas[hit[0]]; if (f) f.scrollIntoView({ block: 'center', behavior: 'smooth' }); });
+                            if (n || added || acts) showToast('AI가 메모를 정리했습니다 — 실제 회의 내용과 대조하세요.');
                         });
-                        (r.actions || []).forEach(a => { const c = String(a.content || '').trim(); if (!c || actions.value.length >= 60) return; actions.value.push({ content: c.slice(0, 300), owner: String(a.owner || '').slice(0, 60), due: /^\d{4}-\d{2}-\d{2}$/.test(a.due || '') ? a.due : '', status: '진행 중' }); acts++; });
-                        if (String(r.others || '').trim() && !String(formData.value.others || '').trim()) formData.value.others = String(r.others).trim().slice(0, 2000);
-                        aiMsg.value = (n || added || acts) ? (hit.length ? hit.map(i => i + 1).join('·') + '번 항목의 협의 내용 칸' : '') + (hit.length && acts ? '과 ' : '') + (acts ? '후속 조치 ' + acts + '건' : '') + '에 넣었습니다(노란색 표시). 실제 회의 내용과 맞는지 확인하고 고쳐 쓰세요.' : '메모에서 정리할 내용을 찾지 못했습니다. 무엇을 협의·결정했는지 더 적어 주세요.';
-                        if (hit.length) nextTick(() => { const tas = document.querySelectorAll('.cc-topic textarea'); hit.forEach(i => { const el = tas[i]; if (el) { el.classList.add('cc-flash'); setTimeout(() => el.classList.remove('cc-flash'), 6000); } }); const f = tas[hit[0]]; if (f) f.scrollIntoView({ block: 'center', behavior: 'smooth' }); });
-                        if (n || added || acts) showToast('AI가 메모를 정리했습니다 — 실제 회의 내용과 대조하세요.');
                     }).catch(e => { aiMsg.value = (e && e.message) || 'AI 요청이 실패했습니다.'; }).finally(() => { aiBusy.value = false; });
                 };
                 const addPrev = () => prev.value.push({ content: '', owner: '', due: '', result: '' });
