@@ -268,7 +268,7 @@
       var ov = document.createElement("div"); ov.className = "spai-ov";
       ov.innerHTML = '<div class="spai-m" role="dialog" aria-modal="true" aria-labelledby="spaiAskT"><h3 id="spaiAskT">' + esc(opt.title || "AI 초안") + "</h3>" +
         (opt.desc ? "<p>" + esc(opt.desc) + "</p>" : "") + (opt.questions && opt.questions.length ? '<div class="spai-q"><h4>AI가 더 알아야 할 것</h4><p style="margin:0;font-size:13.5px">아래 질문에 답하면 그 현장에 맞게 다시 작성합니다. 모르는 칸은 비워 두어도 됩니다.</p></div>' : "") +
-        fieldsHTML(fields, vals) + '<div class="spai-askx"></div><p class="spai-note" style="margin-top:10px">회사명·실명·연락처 같은 개인정보는 적지 마세요.</p>' +
+        (fields.some(function (f) { return f.required; }) ? '<p class="spai-note" style="margin:0 0 8px">✱ <b>*필수</b> 칸만 채우면 됩니다. <b>글자 수 제한은 없습니다</b> — 한두 단어로 적어도 되고, 정보가 부족하면 AI가 되묻습니다.</p>' : "") + fieldsHTML(fields, vals) + '<div class="spai-askx"></div><p class="spai-note" style="margin-top:10px">회사명·실명·연락처 같은 개인정보는 적지 마세요.</p>' +
         '<div class="spai-row">' + (opt.force ? '<button type="button" class="spai-b" data-x="2" title="추가 질문 없이 지금 정보로 작성합니다(모르는 부분은 ○○로 비움)">' + esc(opt.force) + "</button>" : "") +
         '<button type="button" class="spai-b" data-x="0">취소</button><button type="button" class="spai-b pri" data-x="1">' + esc(opt.ok || "AI 초안 만들기") + "</button></div></div>";
       document.body.appendChild(ov); clearOnInput(ov);

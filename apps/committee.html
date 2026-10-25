@@ -141,7 +141,14 @@
         .cm-ib:hover { background: #f1f5f9; color: #0f172a; }
         .cm-ib.x:hover { color: #e11d48; }
         .cm-ib:disabled { opacity: .3; cursor: default; background: none; }
-        .cm-rep { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 64px auto; gap: 4px; align-items: center; }
+        .cm-rep { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 64px auto; gap: 4px; align-items: end; }
+        .cm-chip{min-height:32px;padding:4px 10px;border-radius:16px;border:1px solid #C7D2FE;background:#fff;color:#3730A3;font-size:12.5px;cursor:pointer;text-align:left;max-width:100%}
+        .cm-chip:hover{background:#E0E7FF}
+        .cm-flash{background:#FFF8D6!important;border-color:#E0B000!important;transition:background .6s}
+        .cm-ml { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .cm-ml > span { font-size: 11px; font-weight: 600; color: #64748b; }
+        .cm-how { margin: 8px 0; padding: 9px 12px 9px 28px; background: #f0f7ff; border: 1px solid #cfe0f5; border-radius: 10px; font-size: 12.5px; line-height: 1.55; color: #334155; }
+        .cm-how li + li { margin-top: 2px; }
         .cm-rep + .cm-rep { margin-top: 5px; }
         .cm-rep .cm-in { padding: 6px 7px; font-size: 12.5px; }
         .cm-rep select.cm-in { padding: 6px 2px; }
@@ -149,7 +156,7 @@
         .cm-ibs { display: inline-flex; }
         .cm-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px; background: #fff; }
         .cm-card + .cm-card { margin-top: 6px; }
-        .cm-card-h { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+        .cm-card-h { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px; }
         .cm-card-h:last-child { margin-bottom: 0; }
         .cm-no { flex: none; width: 20px; height: 20px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
         .cm-ai { border: 1px solid #C7D2FE; background: #F5F7FF; border-radius: 10px; padding: 10px 12px; margin: 6px 0; }
@@ -271,8 +278,13 @@
                         <i :class="item.icon"></i><span>{{ item.label }}</span>
                     </button>
                 </div>
+                <ol class="cm-how">
+                    <li><b>만들 문서</b>를 고릅니다 — 회의록 · 개최 공고 · 결과 보고서. 입력은 한 번만 하면 세 문서에 같이 들어갑니다.</li>
+                    <li>아래 <b>1번부터 차례로</b> 채우고 "다음 단계로"를 누릅니다. 제목 줄을 누르면 단계가 열리고 닫힙니다.</li>
+                    <li>다 채우면 <b>미리보기</b>(PC는 오른쪽 화면)에서 확인하고 "인쇄 / PDF 저장"을 누릅니다. 미리보기 글자도 눌러서 고칠 수 있습니다.</li>
+                </ol>
                 <div class="cm-bar">
-                    <span>세 문서는 같은 입력 내용을 함께 씁니다.</span>
+                    <span>단계 {{ steps.filter(x => x.done).length }}/{{ steps.length }} 작성</span>
                     <button type="button" id="toggleAll" class="cm-link" @click="toggleAll">{{ allOpen ? '모두 접기' : '모두 펼치기' }}</button>
                 </div>
 
@@ -369,11 +381,11 @@
                                 </p>
                                 <div style="margin-top:6px">
                                     <div v-for="(rep, idx) in g.list" :key="g.key + idx" class="cm-rep" :data-rep="g.key">
-                                        <input v-model="rep.title" type="text" :list="'dl-' + g.key" placeholder="직책" :aria-label="g.label + ' ' + (idx + 1) + ' 직책'" class="cm-in">
-                                        <input v-model="rep.name" type="text" placeholder="성명" :aria-label="g.label + ' ' + (idx + 1) + ' 성명'" class="cm-in">
-                                        <select :value="repStatus(rep)" @change="setRepStatus(rep, $event.target.value)" :aria-label="g.label + ' ' + (idx + 1) + ' 출석'" class="cm-in">
+                                        <label class="cm-ml"><span>직책</span><input v-model="rep.title" type="text" :list="'dl-' + g.key" placeholder="예: 안전관리자" :aria-label="g.label + ' ' + (idx + 1) + ' 직책'" class="cm-in"></label>
+                                        <label class="cm-ml"><span>성명</span><input v-model="rep.name" type="text" placeholder="성명" :aria-label="g.label + ' ' + (idx + 1) + ' 성명'" class="cm-in"></label>
+                                        <label class="cm-ml"><span>출석</span><select :value="repStatus(rep)" @change="setRepStatus(rep, $event.target.value)" :aria-label="g.label + ' ' + (idx + 1) + ' 출석'" class="cm-in">
                                             <option value="in">출석</option><option value="proxy">대리</option><option value="out">불참</option>
-                                        </select>
+                                        </select></label>
                                         <span class="cm-ibs">
                                             <button type="button" class="cm-ib" :disabled="idx === 0" @click="moveRow(g.list, idx, -1)" aria-label="위로">▲</button>
                                             <button type="button" class="cm-ib" :disabled="idx === g.list.length - 1" @click="moveRow(g.list, idx, 1)" aria-label="아래로">▼</button>
@@ -400,7 +412,9 @@
                             <p v-if="formData.docType !== 'notice'" class="cm-hint r">실제로 심의·의결한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
                             <div v-if="formData.docType !== 'notice'" class="cm-ai">
                                 <div class="cm-row" style="justify-content:space-between"><b style="color:#3730A3">✦ 회의 메모 → 회의록 문장으로 정리 (AI)</b><button type="button" class="cm-link" @click="aiKey">AI 키 설정</button></div>
-                                <textarea v-model="aiNotes" rows="4" maxlength="4000" class="cm-in" placeholder="회의 때 적은 메모를 그대로 붙여 넣으세요. 예: 1번 재해예방계획 - 하반기 지게차 동선 분리 예산 500만원 원안 통과 / 위험성평가 - 냉동창고 수시평가 결과 보고, 질문 없음 / 기타 - 휴게실 에어컨 교체 건의 → 다음 회의 검토"></textarea>
+                                <p class="cm-hint" style="margin:4px 0 6px">회의 때 메모한 내용을 짧게라도(글자 수 제한 없음) 적고 버튼을 누르면, AI가 아래 <b>안건별 '심의 내용 및 의결·결정 사항' 칸</b>에 회의록 문장으로 채워 넣습니다. 메모가 부족하면 AI가 먼저 묻습니다(예: "개정 내용이 무엇인가요?"). 채운 내용은 실제 회의와 맞는지 확인하고 고치세요.</p>
+                                <textarea v-model="aiNotes" rows="4" maxlength="4000" class="cm-in" placeholder="예: 3번 안전보건교육 — 신규자 교육 8시간으로 개정, 원안 의결 / 1번 재해예방계획 — 지게차 동선 분리 예산 500만원 통과"></textarea>
+                                <div class="cm-row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span class="cm-hint" style="margin:0;font-weight:700">예시 눌러 넣기</span><button v-for="(x, i) in AI_EX" :key="'aix' + i" type="button" class="cm-chip" @click="aiNotes = x">{{ x.slice(0, 26) }}…</button></div>
                                 <button type="button" class="cm-btn" style="margin-top:6px" :disabled="aiBusy" @click="aiMinutes">{{ aiBusy ? 'AI가 정리하는 중…' : '메모를 안건별 심의·의결 내용으로 정리' }}</button>
                                 <p class="cm-hint">{{ aiMsg || 'AI는 메모에 있는 내용만 안건별 문장으로 다듬습니다. 메모에 없는 안건은 비워 둡니다(내 Gemini 키).' }}</p>
                             </div>
@@ -446,17 +460,17 @@
                             <div v-else>
                                 <div v-for="(p, idx) in prev" :key="'pv' + idx" class="cm-card" data-prev>
                                     <div class="cm-card-h">
-                                        <input v-model="p.content" type="text" placeholder="지난 회의 의결·조치 사항" aria-label="지난 회의 의결·조치 사항" class="cm-in" style="flex:1">
+                                        <label class="cm-ml" style="flex:1"><span>지난 회의에서 정한 일</span><input v-model="p.content" type="text" placeholder="지난 회의 의결·조치 사항" aria-label="지난 회의 의결·조치 사항" class="cm-in"></label>
                                         <button type="button" class="cm-ib" :disabled="idx === 0" @click="moveRow(prev, idx, -1)" aria-label="위로">▲</button>
                                         <button type="button" class="cm-ib" :disabled="idx === prev.length - 1" @click="moveRow(prev, idx, 1)" aria-label="아래로">▼</button>
                                         <button type="button" class="cm-ib x" @click="prev.splice(idx, 1)" aria-label="이 항목 삭제"><i class="ph-bold ph-x"></i></button>
                                     </div>
                                     <div class="cm-g3">
-                                        <input v-model="p.owner" type="text" placeholder="담당" aria-label="담당" class="cm-in">
-                                        <input v-model="p.due" type="date" aria-label="기한" class="cm-in">
-                                        <select v-model="p.result" aria-label="이행 결과" class="cm-in">
+                                        <label class="cm-ml"><span>담당</span><input v-model="p.owner" type="text" placeholder="예: 생산팀" aria-label="담당" class="cm-in"></label>
+                                        <label class="cm-ml"><span>기한</span><input v-model="p.due" type="date" aria-label="기한" class="cm-in"></label>
+                                        <label class="cm-ml"><span>이행 결과</span><select v-model="p.result" aria-label="이행 결과" class="cm-in">
                                             <option value="">(비움)</option><option value="완료">완료</option><option value="진행 중">진행 중</option><option value="미이행">미이행</option>
-                                        </select>
+                                        </select></label>
                                     </div>
                                 </div>
                             </div>
@@ -466,22 +480,22 @@
                             <div v-else>
                                 <div v-for="(a, idx) in actions" :key="'ac' + idx" class="cm-card" data-action>
                                     <div class="cm-card-h">
-                                        <input v-model="a.content" type="text" placeholder="조치 사항 (예: 프레스 방호장치 교체)" aria-label="조치 사항" class="cm-in" style="flex:1">
+                                        <label class="cm-ml" style="flex:1"><span>조치 사항</span><input v-model="a.content" type="text" placeholder="예: 프레스 방호장치 교체" aria-label="조치 사항" class="cm-in"></label>
                                         <button type="button" class="cm-ib" :disabled="idx === 0" @click="moveRow(actions, idx, -1)" aria-label="위로">▲</button>
                                         <button type="button" class="cm-ib" :disabled="idx === actions.length - 1" @click="moveRow(actions, idx, 1)" aria-label="아래로">▼</button>
                                         <button type="button" class="cm-ib x" @click="actions.splice(idx, 1)" aria-label="이 조치 삭제"><i class="ph-bold ph-x"></i></button>
                                     </div>
                                     <div class="cm-g3">
-                                        <input v-model="a.owner" type="text" placeholder="담당" aria-label="담당" class="cm-in">
-                                        <input v-model="a.due" type="date" aria-label="기한" class="cm-in">
-                                        <select v-model="a.status" aria-label="상태" class="cm-in">
+                                        <label class="cm-ml"><span>담당</span><input v-model="a.owner" type="text" placeholder="예: 생산팀" aria-label="담당" class="cm-in"></label>
+                                        <label class="cm-ml"><span>기한</span><input v-model="a.due" type="date" aria-label="기한" class="cm-in"></label>
+                                        <label class="cm-ml"><span>상태</span><select v-model="a.status" aria-label="상태" class="cm-in">
                                             <option value="진행 중">진행 중</option><option value="완료">완료</option><option value="보류">보류</option>
-                                        </select>
+                                        </select></label>
                                     </div>
                                 </div>
                             </div>
                             <hr class="cm-sep">
-                            <p class="cm-sub"><span>다음 회의 일정 (선택)</span><button type="button" id="suggestNext" class="cm-link" @click="suggestNext">3개월 뒤 같은 시각</button></p>
+                            <p class="cm-sub"><span>차기 회의 일정 (선택)</span><button type="button" id="suggestNext" class="cm-link" @click="suggestNext">3개월 뒤 같은 시각</button></p>
                             <div class="cm-g2">
                                 <input v-model="formData.nextDatetime" id="fNext" type="datetime-local" aria-label="다음 회의 일시" class="cm-in">
                                 <input v-model="formData.nextLocation" id="fNextLoc" type="text" placeholder="장소 (비우면 이번과 같음)" aria-label="다음 회의 장소" class="cm-in">
@@ -524,7 +538,7 @@
                             <p class="cm-hint">사진은 이 브라우저에만 저장됩니다(서버로 보내지 않음). 휴대폰에서는 바로 촬영할 수도 있습니다.</p>
                         </template>
 
-                        <!-- 6. 보관·다음 회의 -->
+                        <!-- 6. 보관·차기 회의 작성 -->
                         <template v-else-if="s.id === 'archive'">
                             <div class="cm-row">
                                 <button type="button" id="archiveNext" class="cm-btn pri" @click="archiveAndNext">보관하고 다음 회의 작성</button>
@@ -564,7 +578,10 @@
                         </template>
 
                         <div v-if="i < steps.length - 1" class="cm-step-f">
-                            <button type="button" class="cm-btn dark" :data-next="s.id" @click="goNext(i)">다음: {{ steps[i + 1].title }} <i class="ph-bold ph-arrow-right"></i></button>
+                            <button type="button" class="cm-btn dark" :data-next="s.id" @click="goNext(i)">다음 단계로: {{ i + 2 }}. {{ steps[i + 1].title }} <i class="ph-bold ph-arrow-right"></i></button>
+                        </div>
+                        <div v-else class="cm-step-f">
+                            <button type="button" class="cm-btn dark" data-finish @click="finishInput">작성 끝 — 미리보기 확인 <i class="ph-bold ph-arrow-right"></i></button>
                         </div>
                     </div>
                 </section>
@@ -1351,10 +1368,10 @@
                     const n = items.value.length, filled = itemsFilledCount.value, untitled = items.value.filter(it => !it.title.trim()).length;
                     a.push({ id: 'items', title: notice ? '안건·협조사항' : '안건·의결사항', sum: notice ? `안건 ${n}건` : `안건 ${n}건 · 내용 입력 ${filled}건`,
                         done: n > 0 && !untitled && (notice || filled === n), warn: n === 0 ? '안건이 없습니다' : (untitled ? `제목이 빈 안건 ${untitled}건` : '') });
-                    if (!notice) a.push({ id: 'follow', title: '이행 확인·후속 조치', sum: `이행 확인 ${prevFilled.value.length}건 · 후속 조치 ${actionsFilled.value.length}건${f.nextDatetime ? ' · 다음 회의 정함' : ''}`, done: prevFilled.value.length + actionsFilled.value.length > 0, warn: '' });
+                    if (!notice) a.push({ id: 'follow', title: '이행 확인·후속 조치', sum: `이행 확인 ${prevFilled.value.length}건 · 후속 조치 ${actionsFilled.value.length}건${f.nextDatetime ? ' · 차기 회의 정함' : ''}`, done: prevFilled.value.length + actionsFilled.value.length > 0, warn: '' });
                     if (!notice && hasADoc) a.push({ id: 'photos', title: '회의 사진(사진대지)', sum: photoCount.value ? `사진 ${photoCount.value}장 — 문서 맨 뒤 사진대지에 붙음` : '첨부한 사진 없음 — 회의 장면·참석자 서명부 사진을 붙일 수 있습니다', done: photoCount.value > 0, warn: '' });
                     a.push({ id: 'style', title: '결재란·제목·문구', sum: `결재란 ${showAppr.value ? '넣음' : '뺌'}${overCount.value ? ' · 고친 글자 ' + overCount.value + '군데' : ''}`, done: false, warn: '' });
-                    a.push({ id: 'archive', title: '보관·다음 회의', sum: history.value.length ? `보관한 기록 ${history.value.length}건` : '보관한 기록 없음', done: false, warn: '' });
+                    a.push({ id: 'archive', title: '보관·차기 회의 작성', sum: history.value.length ? `보관한 기록 ${history.value.length}건` : '보관한 기록 없음', done: false, warn: '' });
                     a.push({ id: 'law', title: '법령 메모', sum: '법 제24조 · 시행령 제34조~제39조', done: false, warn: '' });
                     return a;
                 });
@@ -1369,6 +1386,8 @@
                 };
                 const tab = ref('in');
                 const setTab = (t) => { tab.value = t; nextTick(() => { fitPreview(); window.scrollTo(0, 0); }); };
+                // 마지막 단계의 '작성 끝': 모바일은 미리보기 탭으로, PC는 맨 위로 올려 오른쪽 미리보기와 인쇄 버튼을 보여 준다
+                const finishInput = () => { const t = document.getElementById('tabOut'); if (t && t.offsetParent) setTab('out'); else { window.scrollTo(0, 0); showToast('오른쪽 미리보기를 확인한 뒤 위의 "인쇄 / PDF 저장"을 누르세요.'); } };
                 const changeDocType = (type) => { if (DOC_IDS.includes(type)) formData.value.docType = type; };
 
                 // ---------- 보관·다음 회의
@@ -1530,36 +1549,53 @@
 
                 // ---- AI: 회의 메모 → 안건별 심의·의결 문장(메모에 없는 내용은 만들지 않는다)
                 const aiNotes = ref(''), aiBusy = ref(false), aiMsg = ref('');
+                const AI_EX = [
+                    '3번 안전보건교육 — 신규 채용자 교육 8시간, 외국인 근로자는 통역 동석으로 개정, 원안 의결 / 근로자위원 질문: 교육 시간은 근무시간에 포함 → 포함하기로 함',
+                    '1번 재해예방계획 — 하반기 지게차·보행자 동선 분리, 예산 500만원 원안 의결 / 4번 작업환경측정 — 상반기 소음 초과 2곳 보고, 귀마개 지급·방음 커버 검토 / 기타 — 휴게실 에어컨 교체 건의 → 다음 회의 검토',
+                    '2번 안전보건관리규정 — 위험성평가 수시평가 기준 신설 수정 의결 / 7번 중대재해 재발방지 — 해당 없음 보고 / 9번 유해·위험 기계 도입 — 신규 프레스 2대, 방호장치 확인 후 가동하기로 의결'];
                 const aiKey = () => { if (window.SPAI) { SPAI.css(); SPAI.openSettings(); } };
                 const aiMinutes = () => {
                     if (!window.SPAI) { aiMsg.value = 'AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.'; return; }
                     SPAI.css();
                     if (!SPAI.hasKey()) { SPAI.ensureKey().then(ok => { if (ok) aiMinutes(); }); return; }
+                    if (!aiNotes.value.trim()) { aiMsg.value = '회의 메모 칸이 비어 있습니다. 회의에서 이야기한 것을 짧게라도 적거나 위 예시를 눌러 보세요.'; return; }
+                    aiRun(false);
+                };
+                const aiRun = (force) => {
                     const notes = aiNotes.value.trim();
-                    if (notes.length < 10) { aiMsg.value = '회의 메모를 붙여 넣어 주세요.'; return; }
                     const list = items.value.map((it, i) => (i + 1) + '. ' + (it.title || '(제목 없음)')).join('\n');
                     aiBusy.value = true; aiMsg.value = 'AI가 정리하는 중…';
                     SPAI.json({
-                        system: '너는 산업안전보건위원회 회의록 작성 보조자다. 사용자가 준 회의 메모에 실제로 있는 내용만 안건별로 회의록 문장(~함, ~하기로 의결함)으로 정리한다. 메모에 없는 결정·숫자·이름·일정은 절대 만들지 않는다. 메모에 없는 안건은 비워 둔다.',
+                        system: '너는 산업안전보건위원회 회의록 작성 보조자다. 사용자가 준 회의 메모에 실제로 있는 내용만 안건별로 회의록 문장(~함, ~하기로 의결함)으로 정리한다. 메모에 없는 결정·숫자·이름·일정은 절대 만들지 않는다. 메모에 없는 안건은 비워 둔다. 메모가 짧아 무엇을 심의·의결했는지(무엇을 어떻게 바꾸거나 정했는지, 결과) 알 수 없으면 _check.enough=false로 하고 꼭 필요한 질문만 questions에 1~3개(답하기 쉬운 예시를 괄호로) 쓴다. 알 수 있으면 _check.enough=true.' + (force ? ' ' + SPAI.check.force : ''),
                         prompt: '안건 목록:\n' + list + '\n\n회의 메모:\n' + notes + '\n\nitems: 메모에서 다룬 안건만 {no(안건 번호, 목록에 없으면 0), title(목록에 없을 때만 새 제목), content(심의 내용 및 의결·결정 사항 1~4문장), result(원안 의결·수정 의결·보고·보류·의결하지 못함 중 메모로 알 수 있으면, 아니면 빈 문자열)}.',
-                        schema: { type: 'OBJECT', properties: { items: { type: 'ARRAY', items: { type: 'OBJECT', properties: { no: { type: 'INTEGER' }, title: { type: 'STRING' }, content: { type: 'STRING' }, result: { type: 'STRING' } }, required: ['no', 'content'] } } }, required: ['items'] },
+                        schema: { type: 'OBJECT', properties: { _check: SPAI.check.schema, items: { type: 'ARRAY', items: { type: 'OBJECT', properties: { no: { type: 'INTEGER' }, title: { type: 'STRING' }, content: { type: 'STRING' }, result: { type: 'STRING' } }, required: ['no', 'content'] } } }, required: ['_check', 'items'], propertyOrdering: ['_check', 'items'] },
                         temperature: 0.2, timeout: 90000, label: "AI가 회의 메모를 안건별로 정리하는 중"
                     }).then(r => {
-                        let n = 0, added = 0;
+                        const q = force ? null : SPAI.check.need(r);
+                        if (q && q.length) {
+                            aiMsg.value = 'AI가 메모에 대해 묻고 있습니다 — 답하면 메모에 덧붙여 다시 정리합니다.';
+                            return SPAI.askMore(q, 'AI가 회의 메모에 대해 묻습니다').then(ans => {
+                                if (!ans) { aiMsg.value = '정리를 멈췄습니다. 메모를 더 적은 뒤 다시 눌러 주세요.'; return; }
+                                if (ans.text) aiNotes.value = aiNotes.value.trim() + '\n' + ans.text;
+                                aiRun(ans.force);
+                            });
+                        }
+                        let n = 0, added = 0; const hit = [];
                         (r.items || []).forEach(x => {
                             const c = String(x.content || '').trim(); if (!c) return;
                             const i = (x.no | 0) - 1;
-                            if (i >= 0 && i < items.value.length) { const it = items.value[i]; if (it.content.trim() && !window.confirm((i + 1) + '번 안건에 이미 쓴 내용이 있습니다. AI 정리로 바꿀까요?')) return; it.content = c.slice(0, 2000); if (x.result) it.result = String(x.result).slice(0, 60); n++; }
-                            else if (items.value.length < 60) { items.value.push({ title: String(x.title || '기타 안건').slice(0, 300), content: c.slice(0, 2000), result: String(x.result || '').slice(0, 60) }); added++; }
+                            if (i >= 0 && i < items.value.length) { const it = items.value[i]; if (it.content.trim() && !window.confirm((i + 1) + '번 안건에 이미 쓴 내용이 있습니다. AI 정리로 바꿀까요?')) return; it.content = c.slice(0, 2000); if (x.result) it.result = String(x.result).slice(0, 60); n++; hit.push(i); }
+                            else if (items.value.length < 60) { items.value.push({ title: String(x.title || '기타 안건').slice(0, 300), content: c.slice(0, 2000), result: String(x.result || '').slice(0, 60) }); added++; hit.push(items.value.length - 1); }
                         });
-                        aiMsg.value = n || added ? '안건 ' + n + '개를 정리했습니다' + (added ? ', 새 안건 ' + added + '개를 추가했습니다' : '') + '. 실제 회의 내용과 맞는지 확인하세요.' : '메모에서 안건과 맞는 내용을 찾지 못했습니다.';
+                        aiMsg.value = hit.length ? hit.map(i => i + 1).join('·') + '번 안건의 심의 내용 칸에 넣었습니다' + (added ? '(새 안건 ' + added + '개 추가)' : '') + ' — 노란색으로 표시한 칸을 실제 회의 내용과 맞는지 확인하고 고치세요.' : '메모에서 안건과 맞는 내용을 찾지 못했습니다. 어느 안건에서 무엇을 정했는지 더 적어 주세요.';
+                        if (hit.length) nextTick(() => { hit.forEach(i => { const el = document.querySelector('[aria-label="안건 ' + (i + 1) + ' 심의·의결 내용"]'); if (el) { el.classList.add('cm-flash'); setTimeout(() => el.classList.remove('cm-flash'), 6000); } }); const f = document.querySelector('[aria-label="안건 ' + (hit[0] + 1) + ' 심의·의결 내용"]'); if (f) f.scrollIntoView({ block: 'center', behavior: 'smooth' }); });
                         if (n || added) showToast('AI가 메모를 정리했습니다 — 실제 회의 내용과 대조하세요.');
                     }).catch(e => { aiMsg.value = (e && e.message) || 'AI 요청이 실패했습니다.'; }).finally(() => { aiBusy.value = false; });
                 };
                 return {
-                    aiNotes, aiBusy, aiMsg, aiKey, aiMinutes,
+                    AI_EX, aiNotes, aiBusy, aiMsg, aiKey, aiMinutes,
                     docTypes, formData, employerReps, employeeReps, items, prev, actions, history, historyView, HIST_MAX, APPR_KEY, PHOTO_DOC, hasADoc,
-                    saveMsg, toast, steps, open, allOpen, toggleStep, toggleAll, goNext, tab, setTab, changeDocType, docLabel,
+                    saveMsg, toast, steps, open, allOpen, toggleStep, toggleAll, goNext, finishInput, tab, setTab, changeDocType, docLabel,
                     touch, unsetManual, manualList, bodyName, noticeDateEff, reportDateEff, noticeNoEff, setDate, setNoticeNo,
                     presentEmployer, presentEmployee, presentCount, totalRepsCount, balanced, quorumOk, repStatus, setRepStatus, repName, repRows, repGroups,
                     formattedEmployerReps, formattedEmployeeReps, absentNames, addRep, removeRep, moveRow,

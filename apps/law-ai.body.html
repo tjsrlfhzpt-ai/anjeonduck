@@ -154,7 +154,7 @@
   function ask(q) {
     if (busy) return;
     q = String(q || "").trim();
-    if (q.length < 4) { st("질문을 조금 더 구체적으로 적어 주세요.", true); $("laQ").focus(); return; }
+    if (q.length < 4) { st("질문을 4자 이상 적어 주세요. 예: 지게차 운전 자격", true); $("laQ").focus(); return; }
     if (!window.SPAI) { st("AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.", true); return; }
     SPAI.css();
     if (!SPAI.hasKey()) { SPAI.ensureKey({ feature: "법령 AI 질문", startLabel: "이 질문 보내기" }).then(function (ok) { drawKey(); if (ok) ask(q); }); return; }

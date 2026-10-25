@@ -10,6 +10,7 @@
     <style>/*@TAILWIND@*/        .cc-ai{border:1px solid #C7D2FE;background:#F5F7FF;border-radius:12px;padding:10px 12px;margin:8px 0 12px}
         .cc-chip{min-height:32px;padding:4px 10px;border-radius:16px;border:1px solid #C7D2FE;background:#fff;color:#3730A3;font-size:12.5px;cursor:pointer;text-align:left;max-width:100%}
         .cc-chip:hover{background:#E0E7FF}
+        .cc-flash{background:#FFF8D6!important;border-color:#E0B000!important;transition:background .6s}
 </style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
     <script src="../../assets/vendor/vue-3.5.43.global.prod.js"></script>
@@ -178,6 +179,11 @@
         .cc-sb { padding: 2px 10px 10px; }
         .cc-sb > * + * { margin-top: 8px; }
         .cc-next { display: flex; justify-content: flex-end; }
+        .cc-ml { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .cc-ml > span { font-size: 11px; font-weight: 600; color: #64748b; }
+        .cc-line, .cc-subhead { align-items: flex-end; }
+        .cc-how { margin: 0 0 8px; padding: 9px 12px 9px 28px; background: #f0f7ff; border: 1px solid #cfe0f5; border-radius: 10px; font-size: 12.5px; line-height: 1.55; color: #334155; }
+        .cc-how li + li { margin-top: 2px; }
         .cc-l { display: block; font-size: 11.5px; font-weight: 500; color: #475569; margin-bottom: 3px; }
         .cc-g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
         .cc-g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -325,13 +331,18 @@
 
                 <!-- 문서 종류 -->
                 <div class="cc-top">
+                    <ol class="cc-how">
+                        <li><b>만들 문서</b>를 고릅니다 — 회의록 · 개최 통보 · 결과 보고서. 입력은 한 번만 하면 세 문서에 같이 들어갑니다.</li>
+                        <li>아래 <b>1번부터 차례로</b> 채우고 "다음 단계로"를 누릅니다. 제목 줄을 누르면 단계가 열리고 닫힙니다.</li>
+                        <li>다 채우면 <b>미리보기</b>(PC는 오른쪽 화면)에서 확인하고 "인쇄 / PDF 저장"을 누릅니다. 미리보기 글자도 눌러서 고칠 수 있습니다.</li>
+                    </ol>
                     <div class="cc-dt" role="group" aria-label="문서 종류 선택">
                         <button v-for="item in docTypes" :key="item.value" type="button" @click="changeDocType(item.value)" :aria-pressed="formData.docType === item.value" :class="{ on: formData.docType === item.value }">
                             <i :class="item.icon"></i><span>{{ item.label }}</span>
                         </button>
                     </div>
                     <div class="cc-topr">
-                        <span>단계를 눌러 펼치세요 · 확인할 곳 {{ warnTotal }}건</span>
+                        <span>확인할 곳 {{ warnTotal }}건</span>
                         <span>
                             <button type="button" id="openAll" class="cc-lk" @click="setAll(true)">모두 펼치기</button>
                             <button type="button" id="closeAll" class="cc-lk" @click="setAll(false)">모두 접기</button>
@@ -420,8 +431,8 @@
                         <button type="button" id="addHost" @click="addHost" class="cc-add"><i class="ph-bold ph-plus-circle"></i> 추가</button>
                     </div>
                     <div v-for="(rep, idx) in hostReps" :key="'host-' + idx" class="cc-line">
-                        <input v-model="rep.title" type="text" placeholder="직책 (예: 안전보건총괄책임자)" aria-label="도급인 참석자 직책" class="cc-in">
-                        <input v-model="rep.name" type="text" placeholder="성명" aria-label="도급인 참석자 성명" class="cc-in">
+                        <label class="cc-ml" style="flex:1.3"><span>직책</span><input v-model="rep.title" type="text" placeholder="직책 (예: 안전보건총괄책임자)" aria-label="도급인 참석자 직책" class="cc-in"></label>
+                        <label class="cc-ml" style="flex:1"><span>성명</span><input v-model="rep.name" type="text" placeholder="성명" aria-label="도급인 참석자 성명" class="cc-in"></label>
                         <label class="cm-abs"><input type="checkbox" v-model="rep.absent"> 불참</label>
                         <cc-mv :list="hostReps" :i="idx"></cc-mv>
                         <button :disabled="hostReps.length < 2" type="button" @click="hostReps.splice(idx, 1)" aria-label="이 참석자 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
@@ -431,19 +442,20 @@
                         <span class="cc-bt" style="color:#047857">수급인 (업체별)</span>
                         <button type="button" id="addSub" @click="addSub" class="cc-add"><i class="ph-bold ph-plus-circle"></i> 업체 추가</button>
                     </div>
+                    <p class="cc-hint">수급인은 이 사업장에서 일을 도급받아 하는 협력업체입니다. 업체마다 <b>맡은 작업</b>(무슨 공사·작업을 하는지)과 회의에 나온 사람을 적습니다. 맡은 작업은 회의록 참석자 명단의 "담당 작업" 칸에 들어갑니다.</p>
                     <p v-if="!subs.length" class="cc-hint">수급인 업체가 없습니다. "업체 추가"를 눌러 도급인 사업장에서 작업하는 수급인을 모두 넣으세요.</p>
                     <div v-for="(s, idx) in subs" :key="'sub-' + idx" class="cc-sub">
                         <div class="cc-subhead">
                             <span class="cc-no">{{ idx + 1 }}</span>
-                            <input v-model="s.company" type="text" placeholder="수급인 업체명" aria-label="수급인 업체명" class="cc-in" style="flex:1;min-width:0;font-weight:700">
+                            <label class="cc-ml" style="flex:1"><span>업체명</span><input v-model="s.company" type="text" placeholder="수급인 업체명" aria-label="수급인 업체명" class="cc-in" style="font-weight:700"></label>
                             <label class="cm-abs"><input type="checkbox" v-model="s.absent"> 불참</label>
                             <cc-mv :list="subs" :i="idx"></cc-mv>
                             <button type="button" @click="removeSub(idx)" aria-label="이 업체 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="cc-grid3">
-                            <input v-model="s.work" type="text" placeholder="작업 내용 (예: 배관 보수)" aria-label="작업 내용" class="cc-in">
-                            <input v-model="s.title" type="text" placeholder="직위 (예: 현장소장)" aria-label="참석자 직위" class="cc-in">
-                            <input v-model="s.name" type="text" placeholder="참석자 성명" aria-label="참석자 성명" class="cc-in">
+                            <label class="cc-ml"><span>맡은 작업(공종)</span><input v-model="s.work" type="text" placeholder="예: 배관 보수, 전기 공사, 청소 용역" aria-label="이 업체가 맡은 작업(공종)" class="cc-in"></label>
+                            <label class="cc-ml"><span>참석자 직위</span><input v-model="s.title" type="text" placeholder="예: 현장소장" aria-label="참석자 직위" class="cc-in"></label>
+                            <label class="cc-ml"><span>참석자 성명</span><input v-model="s.name" type="text" placeholder="성명" aria-label="참석자 성명" class="cc-in"></label>
                         </div>
                         <input v-if="s.absent" v-model="s.reason" type="text" placeholder="불참 사유·결과 전달 방법 (예: 작업 종료, 회의록 사본 전달)" aria-label="불참 사유" class="cc-in" style="margin-top:6px">
                     </div>
@@ -458,16 +470,16 @@
                     <p v-if="!prev.length" class="cc-hint">아직 없습니다. "보관하고 다음 회의 작성"을 쓰면 끝나지 않은 조치가 자동으로 넘어옵니다.</p>
                     <div v-for="(p, idx) in prev" :key="'prev-' + idx" class="cc-sub">
                         <div class="cc-subhead">
-                            <input v-model="p.content" type="text" placeholder="지난 회의 조치 사항" aria-label="지난 회의 조치 사항" class="cc-in" style="flex:1;min-width:0">
+                            <label class="cc-ml" style="flex:1"><span>지난 회의에서 정한 조치</span><input v-model="p.content" type="text" placeholder="지난 회의 조치 사항" aria-label="지난 회의 조치 사항" class="cc-in"></label>
                             <cc-mv :list="prev" :i="idx"></cc-mv>
                             <button type="button" @click="prev.splice(idx, 1)" aria-label="이 항목 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="cc-grid3">
-                            <input v-model="p.owner" type="text" list="ccOwners" placeholder="담당 업체" aria-label="담당 업체" class="cc-in">
-                            <input v-model="p.due" type="date" aria-label="기한" class="cc-in">
-                            <select v-model="p.result" aria-label="이행 결과" class="cc-in">
+                            <label class="cc-ml"><span>담당 업체</span><input v-model="p.owner" type="text" list="ccOwners" placeholder="담당 업체" aria-label="담당 업체" class="cc-in"></label>
+                            <label class="cc-ml"><span>기한</span><input v-model="p.due" type="date" aria-label="기한" class="cc-in"></label>
+                            <label class="cc-ml"><span>이행 결과</span><select v-model="p.result" aria-label="이행 결과" class="cc-in">
                                 <option value="">확인 전</option><option value="완료">완료</option><option value="진행 중">진행 중</option><option value="미이행">미이행</option>
-                            </select>
+                            </select></label>
                         </div>
                     </div>
                 </cc-step>
@@ -487,7 +499,8 @@
                     <p v-else class="cc-hint">통보문에는 협의 항목(제목)만 들어갑니다. 추가 안건이 있으면 아래에서 항목을 더하세요.</p>
                     <div v-if="formData.docType !== 'notice'" class="cc-ai">
                         <div class="cc-row" style="justify-content:space-between"><b style="color:#3730A3">✦ 회의 메모 → 회의록으로 정리 (AI)</b><button type="button" class="cc-lk" @click="aiKey">AI 키 설정</button></div>
-                        <textarea id="ccAiNotes" v-model="aiNotes" rows="5" maxlength="4000" class="cc-in cc-ta" placeholder="회의 때 적은 메모를 그대로 붙여 넣으세요."></textarea>
+                        <p class="cc-hint" style="margin:4px 0 6px">회의 때 메모한 내용을 짧게라도(글자 수 제한 없음) 적고 버튼을 누르면, AI가 아래 <b>협의 항목의 '협의 내용' 칸</b>과 <b>후속 조치</b>에 회의록 문장으로 채워 넣습니다. 메모가 부족하면 AI가 먼저 묻습니다. 채운 내용은 실제 회의와 맞는지 확인하고 고치세요.</p>
+                        <textarea id="ccAiNotes" v-model="aiNotes" rows="5" maxlength="4000" class="cc-in cc-ta" placeholder="예: 작업시간 08~17시 / 크레인 양중은 오전만 / 비상 연락은 무전 3번 / A사 비계 난간 보수 — 다음 주 화요일까지"></textarea>
                         <div class="cc-row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span class="cc-hint" style="margin:0;font-weight:700">예시 눌러 넣기</span><button v-for="(x, i) in AI_EX" :key="'aix' + i" type="button" class="cc-chip" @click="aiNotes = x">{{ x.slice(0, 28) }}…</button></div>
                         <button type="button" id="ccAiGo" class="cc-btn" style="margin-top:8px;background:#3730A3;color:#fff;border-color:#3730A3" :disabled="aiBusy" @click="aiMinutes">{{ aiBusy ? 'AI가 정리하는 중…' : '메모로 회의록 정리' }}</button>
                         <p class="cc-hint">{{ aiMsg || 'AI는 메모에 있는 내용만 협의 항목 5가지·추가 안건·후속 조치로 나눠 회의록 문장으로 다듬습니다. 메모에서 다루지 않은 항목은 비워 둡니다(내 Gemini 키).' }}</p>
@@ -529,16 +542,16 @@
                     </div>
                     <div v-for="(a, idx) in actions" :key="'act-' + idx" class="cc-sub">
                         <div class="cc-subhead">
-                            <input v-model="a.content" type="text" placeholder="조치 사항 (예: 지게차 통로 구획선 재도색)" aria-label="조치 사항" class="cc-in" style="flex:1;min-width:0">
+                            <label class="cc-ml" style="flex:1"><span>조치 사항</span><input v-model="a.content" type="text" placeholder="조치 사항 (예: 지게차 통로 구획선 재도색)" aria-label="조치 사항" class="cc-in"></label>
                             <cc-mv :list="actions" :i="idx"></cc-mv>
                             <button type="button" @click="actions.splice(idx, 1)" aria-label="이 조치 삭제" class="cc-x"><i class="ph-bold ph-x"></i></button>
                         </div>
                         <div class="cc-grid3">
-                            <input v-model="a.owner" type="text" list="ccOwners" placeholder="담당 업체" aria-label="담당 업체" class="cc-in">
-                            <input v-model="a.due" type="date" aria-label="기한" class="cc-in">
-                            <select v-model="a.status" aria-label="상태" class="cc-in">
+                            <label class="cc-ml"><span>담당 업체</span><input v-model="a.owner" type="text" list="ccOwners" placeholder="담당 업체" aria-label="담당 업체" class="cc-in"></label>
+                            <label class="cc-ml"><span>기한</span><input v-model="a.due" type="date" aria-label="기한" class="cc-in"></label>
+                            <label class="cc-ml"><span>상태</span><select v-model="a.status" aria-label="상태" class="cc-in">
                                 <option value="진행 중">진행 중</option><option value="완료">완료</option><option value="보류">보류</option>
-                            </select>
+                            </select></label>
                         </div>
                     </div>
                 </cc-step>
@@ -548,7 +561,7 @@
                 <cc-step sid="next">
                     <div class="cc-g2">
                         <div>
-                            <label class="cc-l" for="cNext">다음 회의 일시</label>
+                            <label class="cc-l" for="cNext">차기 회의 일시</label>
                             <input id="cNext" v-model="formData.nextDatetime" type="datetime-local" class="cc-in">
                         </div>
                         <div>
@@ -1055,7 +1068,7 @@
             ['ro.title', '명단 표 제목', '참석자 명단 (도급인 및 수급인 전원)', 'm', ''],
             ['ro.kind', '명단: 구분', '구분', 'm', ''],
             ['ro.co', '명단: 업체명', '업체명', 'm', ''],
-            ['ro.work', '명단: 작업 내용', '작업 내용', 'm', ''],
+            ['ro.work', '명단: 담당 작업', '담당 작업', 'm', ''],
             ['ro.pos', '명단: 직위', '직위', 'm', ''],
             ['ro.nm', '명단: 성명', '성명', 'm', ''],
             ['ro.sign', '명단: 서명', '서명', 'm', ''],
@@ -1121,7 +1134,7 @@
                 const cc = inject('cc');
                 const m = computed(() => cc.meta.value[props.sid]);
                 const isOpen = computed(() => !!cc.open[props.sid]);
-                return { m, isOpen, toggle: () => { cc.open[props.sid] = !cc.open[props.sid]; }, goNext: () => cc.goNext(props.sid) };
+                return { m, isOpen, toggle: () => { cc.open[props.sid] = !cc.open[props.sid]; }, goNext: () => cc.goNext(props.sid), finish: () => cc.finish() };
             },
             template: `<section v-if="m" class="cc-step" :class="{ open: isOpen }" :id="'st-' + sid">
                 <button type="button" class="cc-sth" @click="toggle" :aria-expanded="isOpen ? 'true' : 'false'" :aria-controls="'sb-' + sid">
@@ -1134,7 +1147,8 @@
                 <div class="cc-sb" :id="'sb-' + sid" v-show="isOpen">
                     <slot></slot>
                     <p v-for="(c, i) in m.checks" :key="i" :class="c.ok ? 'cm-ok' : 'cm-warn'">{{ c.text }}</p>
-                    <div v-if="m.next" class="cc-next"><button type="button" class="cc-btn cc-btn-pri" data-next @click="goNext">다음: {{ m.nextTitle }} →</button></div>
+                    <div v-if="m.next" class="cc-next"><button type="button" class="cc-btn cc-btn-pri" data-next @click="goNext">다음 단계로: {{ m.no + 1 }}. {{ m.nextTitle }} →</button></div>
+                    <div v-else class="cc-next"><button type="button" class="cc-btn cc-btn-pri" data-finish @click="finish">작성 끝 — 미리보기 확인 →</button></div>
                 </div>
             </section>`
         };
@@ -1423,7 +1437,7 @@
                     if (!notice) {
                         const ar = actionRows.value;
                         list.push({ id: 'actions', title: '후속 조치 (업체별)', sum: ar.length ? `${ar.length}건 · 완료 ${ar.filter(a => a.status === '완료').length}건` : '없음', done: ar.length > 0 && ar.every(a => a.owner.trim() && a.due) });
-                        list.push({ id: 'next', title: '다음 회의 일정 · 사진', sum: (f.nextDatetime ? '다음 회의 ' + shortDt(f.nextDatetime) : '다음 회의 미정') + (photoDataUrl.value ? ' · 사진 1장' : ''), done: !!f.nextDatetime });
+                        list.push({ id: 'next', title: '차기 회의 일정 · 사진', sum: (f.nextDatetime ? '차기 회의 ' + shortDt(f.nextDatetime) : '차기 회의 미정') + (photoDataUrl.value ? ' · 사진 1장' : ''), done: !!f.nextDatetime });
                     }
                     list.push({ id: 'format', title: '결재란 · 문서 제목·문구', sum: `결재란 ${showAppr.value ? '표시' : '숨김'}` + (labelCount.value ? ` · 고친 문구 ${labelCount.value}곳` : ' · 문구 기본값'), done: false });
                     list.push({ id: 'archive', title: '매월 이어 쓰기 · 지난 회의 기록', sum: `보관 ${history.value.length}건`, done: false });
@@ -1443,10 +1457,12 @@
                 const goNext = (id) => { const nx = stepMeta.value[id] && stepMeta.value[id].next; if (!nx) return; open[id] = false; open[nx] = true; toStep(nx); };
                 const setAll = (v) => { Object.keys(stepMeta.value).forEach(k => { open[k] = v; }); };
                 const toTop = () => { Object.keys(open).forEach(k => { open[k] = k === 'basic'; }); window.scrollTo(0, 0); const c = document.getElementById('form-col'); if (c) c.scrollTop = 0; };
-                provide('cc', { meta: stepMeta, open, goNext });
+                provide('cc', { meta: stepMeta, open, goNext, finish: () => finishInput() });
                 // 모바일: 입력 | 미리보기 전환
                 const view = ref('form');
                 const setView = (v) => { view.value = v; window.scrollTo(0, 0); nextTick(fitPreview); };
+                // 마지막 단계의 '작성 끝': 모바일은 미리보기 탭으로, PC는 맨 위로 올려 오른쪽 미리보기와 인쇄 버튼을 보여 준다
+                const finishInput = () => { const t = document.getElementById('tabDoc'); if (t && t.offsetParent) setView('doc'); else { window.scrollTo(0, 0); showToast('오른쪽 미리보기를 확인한 뒤 위의 "인쇄 / PDF 저장"을 누르세요.'); } };
 
                 // ---- A4 미리보기를 오른쪽 칸 너비에 맞춘다
                 const fitPreview = () => {
@@ -1500,28 +1516,39 @@
                     if (!window.SPAI) { aiMsg.value = 'AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.'; return; }
                     SPAI.css();
                     if (!SPAI.hasKey()) { SPAI.ensureKey().then(ok => { if (ok) aiMinutes(); }); return; }
+                    if (!aiNotes.value.trim()) { aiMsg.value = '회의 메모 칸이 비어 있습니다. 회의에서 이야기한 것을 짧게라도 적거나 위 예시를 눌러 보세요.'; return; }
+                    aiRun(false);
+                };
+                const aiRun = (force) => {
                     const notes = aiNotes.value.trim();
-                    if (notes.replace(/\s/g, '').length < 10) { aiMsg.value = '회의 메모를 10자 이상 붙여 넣어 주세요. 무엇을 적을지 모르겠으면 예시를 눌러 보세요.'; return; }
                     const list = topics.value.map((t, i) => (i + 1) + '. ' + (t.label || '(제목 없음)')).join('\n');
                     aiBusy.value = true; aiMsg.value = 'AI가 정리하는 중…';
                     SPAI.json({
-                        system: '너는 「안전 및 보건에 관한 협의체」(산업안전보건법 제64조, 시행규칙 제79조) 회의록 작성 보조자다. 사용자가 준 회의 메모에 실제로 있는 내용만 회의록 문장(~함, ~하기로 협의함, ~하기로 결정함)으로 정리한다. 메모에 없는 결정·수치·일정·업체명·사람 이름은 만들지 않는다. 메모가 너무 짧거나 무엇을 협의했는지 알 수 없으면 _check.enough=false로 하고 무엇을 더 적어야 하는지 questions에 1~3개 쓴다.',
+                        system: '너는 「안전 및 보건에 관한 협의체」(산업안전보건법 제64조, 시행규칙 제79조) 회의록 작성 보조자다. 사용자가 준 회의 메모에 실제로 있는 내용만 회의록 문장(~함, ~하기로 협의함, ~하기로 결정함)으로 정리한다. 메모에 없는 결정·수치·일정·업체명·사람 이름은 만들지 않는다. 메모가 너무 짧거나 무엇을 협의했는지 알 수 없으면 _check.enough=false로 하고 무엇을 더 적어야 하는지 questions에 1~3개 쓴다.' + (force ? ' ' + SPAI.check.force : ''),
                         prompt: '협의 항목 목록(1~5번은 법정 항목):\n' + list + '\n\n회의 메모:\n' + notes + '\n\ntopics: 메모에서 다룬 항목만 {no(항목 번호, 목록에 없으면 0), title(목록에 없을 때만 새 안건 제목), content(협의 내용 및 결정 사항, 2~4문장)}. actions: 메모에 나온 후속 조치만 {content, owner(메모에 나온 업체·부서만, 없으면 빈 값), due(메모에 날짜가 있을 때만 YYYY-MM-DD, 없으면 빈 값)}. others: 항목에 들어가지 않는 건의·공지(없으면 빈 값).',
                         schema: { type: 'OBJECT', properties: { _check: SPAI.check.schema, topics: { type: 'ARRAY', items: { type: 'OBJECT', properties: { no: { type: 'INTEGER' }, title: { type: 'STRING' }, content: { type: 'STRING' } }, required: ['no', 'content'] } }, actions: { type: 'ARRAY', items: { type: 'OBJECT', properties: { content: { type: 'STRING' }, owner: { type: 'STRING' }, due: { type: 'STRING' } }, required: ['content'] } }, others: { type: 'STRING' } }, required: ['_check', 'topics'], propertyOrdering: ['_check', 'topics', 'actions', 'others'] },
                         temperature: 0.2, timeout: 90000, label: 'AI가 회의 메모를 회의록으로 정리하는 중'
                     }).then(r => {
-                        const q = SPAI.check.need(r);
-                        if (q && q.length) { aiMsg.value = '메모만으로는 정리하기 어렵습니다 — ' + q.join(' / '); return; }
-                        let n = 0, added = 0, acts = 0;
+                        const q = force ? null : SPAI.check.need(r);
+                        if (q && q.length) {
+                            aiMsg.value = 'AI가 메모에 대해 묻고 있습니다 — 답하면 메모에 덧붙여 다시 정리합니다.';
+                            return SPAI.askMore(q, 'AI가 회의 메모에 대해 묻습니다').then(ans => {
+                                if (!ans) { aiMsg.value = '정리를 멈췄습니다. 메모를 더 적은 뒤 다시 눌러 주세요.'; return; }
+                                if (ans.text) aiNotes.value = aiNotes.value.trim() + '\n' + ans.text;
+                                aiRun(ans.force);
+                            });
+                        }
+                        let n = 0, added = 0, acts = 0; const hit = [];
                         (r.topics || []).forEach(x => {
                             const c = String(x.content || '').trim(); if (!c) return;
                             const i = (x.no | 0) - 1;
-                            if (i >= 0 && i < topics.value.length) { const t = topics.value[i]; if (String(t.content || '').trim() && !window.confirm((i + 1) + '번 항목에 이미 쓴 내용이 있습니다. AI 정리로 바꿀까요?')) return; t.content = c.slice(0, 2000); n++; }
-                            else { topics.value.push({ label: String(x.title || '기타 안건').slice(0, 200), content: c.slice(0, 2000), fixed: false }); added++; }
+                            if (i >= 0 && i < topics.value.length) { const t = topics.value[i]; if (String(t.content || '').trim() && !window.confirm((i + 1) + '번 항목에 이미 쓴 내용이 있습니다. AI 정리로 바꿀까요?')) return; t.content = c.slice(0, 2000); n++; hit.push(i); }
+                            else { topics.value.push({ label: String(x.title || '기타 안건').slice(0, 200), content: c.slice(0, 2000), fixed: false }); added++; hit.push(topics.value.length - 1); }
                         });
                         (r.actions || []).forEach(a => { const c = String(a.content || '').trim(); if (!c || actions.value.length >= 60) return; actions.value.push({ content: c.slice(0, 300), owner: String(a.owner || '').slice(0, 60), due: /^\d{4}-\d{2}-\d{2}$/.test(a.due || '') ? a.due : '', status: '진행 중' }); acts++; });
                         if (String(r.others || '').trim() && !String(formData.value.others || '').trim()) formData.value.others = String(r.others).trim().slice(0, 2000);
-                        aiMsg.value = (n || added || acts) ? '협의 항목 ' + n + '개' + (added ? ', 추가 안건 ' + added + '개' : '') + (acts ? ', 후속 조치 ' + acts + '개' : '') + '를 정리했습니다. 실제 회의 내용과 맞는지 확인하고 고쳐 쓰세요.' : '메모에서 정리할 내용을 찾지 못했습니다.';
+                        aiMsg.value = (n || added || acts) ? (hit.length ? hit.map(i => i + 1).join('·') + '번 항목의 협의 내용 칸' : '') + (hit.length && acts ? '과 ' : '') + (acts ? '후속 조치 ' + acts + '건' : '') + '에 넣었습니다(노란색 표시). 실제 회의 내용과 맞는지 확인하고 고쳐 쓰세요.' : '메모에서 정리할 내용을 찾지 못했습니다. 무엇을 협의·결정했는지 더 적어 주세요.';
+                        if (hit.length) nextTick(() => { const tas = document.querySelectorAll('.cc-topic textarea'); hit.forEach(i => { const el = tas[i]; if (el) { el.classList.add('cc-flash'); setTimeout(() => el.classList.remove('cc-flash'), 6000); } }); const f = tas[hit[0]]; if (f) f.scrollIntoView({ block: 'center', behavior: 'smooth' }); });
                         if (n || added || acts) showToast('AI가 메모를 정리했습니다 — 실제 회의 내용과 대조하세요.');
                     }).catch(e => { aiMsg.value = (e && e.message) || 'AI 요청이 실패했습니다.'; }).finally(() => { aiBusy.value = false; });
                 };
