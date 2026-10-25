@@ -989,7 +989,7 @@ tr.q-hide{display:none}
     var free = document.getElementById("fAIQ").value.trim(), fv = aiFieldVals();
     if (AIF.length) {
       var miss = SPAI.fields.check(document.getElementById("fAIFields"), AIF, fv);
-      if (miss.length) { aiSt("<b>필수 칸 " + miss.length + "개를 채워 주세요</b> — " + SPAI.esc(miss.join(", ")) + ". 정보가 없으면 어느 현장에나 맞는 일반 문서밖에 만들 수 없습니다.", true); var f1 = document.querySelector("#fAIFields .spai-f.bad input,#fAIFields .spai-f.bad select,#fAIFields .spai-f.bad textarea"); if (f1) f1.focus(); return; }
+      if (miss.length) { aiSt("<b>칸 " + miss.length + "개를 확인해 주세요</b> — " + SPAI.esc(miss.join(", ")) + ". 비었거나 칸 아래에 적힌 최소 글자 수보다 짧습니다(빨간 글씨 참고).", true); var f1 = document.querySelector("#fAIFields .spai-f.bad input,#fAIFields .spai-f.bad select,#fAIFields .spai-f.bad textarea"); if (f1) f1.focus(); return; }
     } else if (free.replace(/\s/g, "").length < 4) { aiSt("상황을 4자 이상 적어 주세요. 무엇을 적을지 모르겠으면 위의 예시를 눌러 넣고 고쳐 쓰세요.", true); document.getElementById("fAIQ").focus(); return; }
     var sit = (AIF.length ? "[작업 정보]\n" + SPAI.fields.text(AIF, fv) + "\n" : "") + (free ? (AIF.length ? "[추가 설명]\n" : "") + free : "") + (more && more.text ? "\n[AI 질문에 대한 답]\n" + more.text : "");
     var force = !!(more && more.force), needQ = null;

@@ -206,6 +206,14 @@
     ".spai-fg{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.spai-fg .wide{grid-column:1/-1}@media (max-width:560px){.spai-fg{grid-template-columns:1fr}}" +
     ".spai-q{border:1px solid #F5D9A8;background:#FFFBF2;border-radius:12px;padding:12px 14px;margin-top:10px}.spai-q h4{margin:0 0 4px;font-size:15px;color:#7a4a00}";
   function fieldCSS() { if (!document.getElementById("spai-fcss")) { var s = document.createElement("style"); s.id = "spai-fcss"; s.textContent = FCSS + XCSS; document.head.appendChild(s); } }
+  // 칸별 최소 글자 수: 직접 정한 값(f.min)이 우선, 없으면 필수 긴 글 칸 6자 · 필수 한 줄 칸 2자. 칸 아래에 늘 보여 준다
+  function minOf(f) {
+    if (f.type === "select" || f.type === "chips") return 0;
+    if (f.min != null) return +f.min || 0;
+    return f.required ? (f.type === "area" ? 6 : 2) : 0;
+  }
+  function nChars(v) { return String(v || "").replace(/\s/g, "").length; }
+  function cntText(min, n) { return n >= min ? "✓ " + n + "자 — " + min + "자 이상 채움" : min + "자 이상 적어 주세요 (지금 " + n + "자)"; }
   function fieldsHTML(fields, vals, idp) {
     vals = vals || {}; idp = idp || "spaiF";
     return '<div class="spai-fg">' + fields.map(function (f) {
@@ -215,7 +223,7 @@
       else if (f.type === "area") inp = '<textarea id="' + id + '" data-f="' + esc(f.k) + '" rows="' + (f.rows || 3) + '" maxlength="1500" placeholder="' + esc(f.ph || "") + '">' + esc(v) + "</textarea>";
       else inp = '<input id="' + id + '" type="text" data-f="' + esc(f.k) + '" maxlength="300" value="' + esc(v) + '" placeholder="' + esc(f.ph || "") + '">';
       var wide = f.type === "area" || f.type === "chips" || f.wide;
-      return '<label class="spai-f' + (wide ? " wide" : "") + '" data-fw="' + esc(f.k) + '"' + (f.type === "chips" ? "" : ' for="' + id + '"') + "><span>" + esc(f.label) + (f.required ? "<em>*필수</em>" : "") + "</span>" + inp + (f.help ? '<small class="spai-hint">' + esc(f.help) + "</small>" : f.ph ? '<small class="spai-hint ph">' + esc(String(f.ph).replace(/^예:\s*/, "예) ")) + "</small>" : "") + '<b class="spai-err" hidden></b></label>';
+      return '<label class="spai-f' + (wide ? " wide" : "") + '" data-fw="' + esc(f.k) + '"' + (f.type === "chips" ? "" : ' for="' + id + '"') + "><span>" + esc(f.label) + (f.required ? "<em>*필수" + (minOf(f) > 1 ? " · " + minOf(f) + "자 이상" : "") + "</em>" : (minOf(f) > 1 ? "<em>" + minOf(f) + "자 이상</em>" : "")) + "</span>" + inp + (minOf(f) > 1 ? '<small class="spai-cnt ' + (nChars(v) >= minOf(f) ? "ok" : "") + '" data-min="' + minOf(f) + '">' + esc(cntText(minOf(f), nChars(v))) + "</small>" : "") + (f.help ? '<small class="spai-hint">' + esc(f.help) + "</small>" : f.ph ? '<small class="spai-hint ph">' + esc(String(f.ph).replace(/^예:\s*/, "예) ")) + "</small>" : "") + '<b class="spai-err" hidden></b></label>';
     }).join("") + "</div>";
   }
   function readFields(root, fields) {
@@ -232,16 +240,23 @@
     var miss = [];
     fields.forEach(function (f) {
       var w = root.querySelector('[data-fw="' + f.k + '"]'); if (!w) return;
-      // 필수 칸은 '비었는지'만 막는다. 짧거나 모호한 답은 막지 않고 AI가 추가 질문으로 보충받는다(글자 수로 막으면 '사다리작업'처럼 맞게 적어도 이유를 모른 채 멈춘다)
-      var bad = !!(f.required && !String(vals[f.k] || "").replace(/\s/g, ""));
-      w.classList.toggle("bad", bad); var er = w.querySelector(".spai-err"); er.hidden = !bad; er.textContent = bad ? (f.type === "select" ? "하나를 골라 주세요" : f.type === "chips" ? "해당하는 것을 하나 이상 골라 주세요" : "비어 있습니다 — 위 예시처럼 적어 주세요") : "";
+      // 최소 글자 수는 칸 이름 옆과 칸 아래에 늘 보이므로(spai-cnt), 막을 때도 같은 숫자로 알려 준다
+      var n = nChars(vals[f.k]), min = minOf(f), empty = !n;
+      var bad = !!((f.required && empty) || (n > 0 && n < min));
+      w.classList.toggle("bad", bad); var er = w.querySelector(".spai-err"); er.hidden = !bad;
+      er.textContent = !bad ? "" : f.type === "select" ? "하나를 골라 주세요" : f.type === "chips" ? "해당하는 것을 하나 이상 골라 주세요" : empty ? "비어 있습니다 — " + (min > 1 ? min + "자 이상 " : "") + "적어 주세요" : min + "자 이상 적어 주세요 — 지금 " + n + "자입니다. 무엇을·어디서·어떻게를 조금 더 적어 주세요";
       if (bad) miss.push(f.label);
     });
     return miss;
   }
   // 고쳐 쓰기 시작하면 그 칸의 '필수' 경고를 바로 지운다
   function clearOnInput(root) {
-    function f(ev) { var w = ev.target.closest && ev.target.closest(".spai-f.bad"); if (!w) return; w.classList.remove("bad"); var er = w.querySelector(".spai-err"); if (er) er.hidden = true; }
+    function f(ev) {
+      var fw = ev.target.closest && ev.target.closest(".spai-f"); if (!fw) return;
+      var c = fw.querySelector(".spai-cnt[data-min]");
+      if (c) { var min = +c.dataset.min, n = nChars(ev.target.value); c.textContent = cntText(min, n); c.className = "spai-cnt " + (n >= min ? "ok" : n ? "bad" : ""); }
+      if (!fw.classList.contains("bad")) return; fw.classList.remove("bad"); var er = fw.querySelector(".spai-err"); if (er) er.hidden = true;
+    }
     root.addEventListener("input", f); root.addEventListener("change", f);
   }
   function ctxText(fields, vals) {
@@ -268,7 +283,7 @@
       var ov = document.createElement("div"); ov.className = "spai-ov";
       ov.innerHTML = '<div class="spai-m" role="dialog" aria-modal="true" aria-labelledby="spaiAskT"><h3 id="spaiAskT">' + esc(opt.title || "AI 초안") + "</h3>" +
         (opt.desc ? "<p>" + esc(opt.desc) + "</p>" : "") + (opt.questions && opt.questions.length ? '<div class="spai-q"><h4>AI가 더 알아야 할 것</h4><p style="margin:0;font-size:13.5px">아래 질문에 답하면 그 현장에 맞게 다시 작성합니다. 모르는 칸은 비워 두어도 됩니다.</p></div>' : "") +
-        (fields.some(function (f) { return f.required; }) ? '<p class="spai-note" style="margin:0 0 8px">✱ <b>*필수</b> 칸만 채우면 됩니다. <b>글자 수 제한은 없습니다</b> — 한두 단어로 적어도 되고, 정보가 부족하면 AI가 되묻습니다.</p>' : "") + fieldsHTML(fields, vals) + '<div class="spai-askx"></div><p class="spai-note" style="margin-top:10px">회사명·실명·연락처 같은 개인정보는 적지 마세요.</p>' +
+        (fields.some(function (f) { return f.required; }) ? '<p class="spai-note" style="margin:0 0 8px">✱ <b>*필수</b> 칸만 채우면 됩니다. 칸마다 <b>적어야 할 최소 글자 수</b>가 칸 이름 옆과 칸 아래에 보입니다. 정보가 부족하면 AI가 되묻습니다.</p>' : "") + fieldsHTML(fields, vals) + '<div class="spai-askx"></div><p class="spai-note" style="margin-top:10px">회사명·실명·연락처 같은 개인정보는 적지 마세요.</p>' +
         '<div class="spai-row">' + (opt.force ? '<button type="button" class="spai-b" data-x="2" title="추가 질문 없이 지금 정보로 작성합니다(모르는 부분은 ○○로 비움)">' + esc(opt.force) + "</button>" : "") +
         '<button type="button" class="spai-b" data-x="0">취소</button><button type="button" class="spai-b pri" data-x="1">' + esc(opt.ok || "AI 초안 만들기") + "</button></div></div>";
       document.body.appendChild(ov); clearOnInput(ov);

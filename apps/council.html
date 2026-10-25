@@ -10,7 +10,7 @@
     <style>/*@TAILWIND@*/        .cc-ai{border:1px solid #C7D2FE;background:#F5F7FF;border-radius:12px;padding:10px 12px;margin:8px 0 12px}
         .cc-chip{min-height:32px;padding:4px 10px;border-radius:16px;border:1px solid #C7D2FE;background:#fff;color:#3730A3;font-size:12.5px;cursor:pointer;text-align:left;max-width:100%}
         .cc-chip:hover{background:#E0E7FF}
-        .cc-exd{margin-top:8px}.cc-exd>summary{cursor:pointer;font-size:13px;font-weight:700;color:#3730A3;padding:6px 0;list-style-position:inside}.cc-exl{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px}.cc-exl .cc-chip{border-radius:10px;line-height:1.45;padding:7px 11px}
+        .cc-cnt{font-size:12.5px;color:#667085;margin:4px 0 0}.cc-cnt.bad{color:#B42318;font-weight:700}.cc-cnt.ok{color:#05603A;font-weight:700}.cc-exd{margin-top:8px}.cc-exd>summary{cursor:pointer;font-size:13px;font-weight:700;color:#3730A3;padding:6px 0;list-style-position:inside}.cc-exl{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px}.cc-exl .cc-chip{border-radius:10px;line-height:1.45;padding:7px 11px}
         .cc-flash{background:#FFF8D6!important;border-color:#E0B000!important;transition:background .6s}
 </style>
     <!-- Vue 3.5.43 (버전 고정, 사이트에 함께 올린 파일 — 외부 CDN이 막혀도 화면이 뜨도록) -->
@@ -500,8 +500,9 @@
                     <p v-else class="cc-hint">통보문에는 협의 항목(제목)만 들어갑니다. 추가 안건이 있으면 아래에서 항목을 더하세요.</p>
                     <div v-if="formData.docType !== 'notice'" class="cc-ai">
                         <div class="cc-row" style="justify-content:space-between"><b style="color:#3730A3">✦ 회의 메모 → 회의록으로 정리 (AI)</b><button type="button" class="cc-lk" @click="aiKey">AI 키 설정</button></div>
-                        <p class="cc-hint" style="margin:4px 0 6px">회의 때 메모한 내용을 짧게라도(글자 수 제한 없음) 적고 버튼을 누르면, AI가 아래 <b>협의 항목의 '협의 내용' 칸</b>과 <b>후속 조치</b>에 회의록 문장으로 채워 넣습니다. 메모가 부족하면 AI가 먼저 묻습니다. 채운 내용은 실제 회의와 맞는지 확인하고 고치세요.</p>
+                        <p class="cc-hint" style="margin:4px 0 6px">회의 때 메모한 내용을 10자 이상 적고 버튼을 누르면, AI가 아래 <b>협의 항목의 '협의 내용' 칸</b>과 <b>후속 조치</b>에 회의록 문장으로 채워 넣습니다. 메모가 부족하면 AI가 먼저 묻습니다. 채운 내용은 실제 회의와 맞는지 확인하고 고치세요.</p>
                         <textarea id="ccAiNotes" v-model="aiNotes" rows="5" maxlength="4000" class="cc-in cc-ta" placeholder="예: 작업시간 08~17시 / 크레인 양중은 오전만 / 비상 연락은 무전 3번 / A사 비계 난간 보수 — 다음 주 화요일까지"></textarea>
+                        <p class="cc-cnt" :class="memoLen >= 10 ? 'ok' : (memoLen ? 'bad' : '')">{{ memoLen >= 10 ? '✓ ' + memoLen + '자 — 10자 이상 채움' : '10자 이상 적어 주세요 (지금 ' + memoLen + '자)' }}</p>
                         <button type="button" id="ccAiGo" class="cc-btn" style="margin-top:8px;background:#3730A3;color:#fff;border-color:#3730A3" :disabled="aiBusy" @click="aiMinutes">{{ aiBusy ? 'AI가 정리하는 중…' : '메모로 회의록 정리' }}</button>
                         <p class="cc-hint">{{ aiMsg || 'AI는 메모에 있는 내용만 협의 항목 5가지·추가 안건·후속 조치로 나눠 회의록 문장으로 다듬습니다. 메모에서 다루지 않은 항목은 비워 둡니다(내 Gemini 키).' }}</p>
                         <details class="cc-exd"><summary>무엇을 적을지 모르겠으면 — AI에 적는 예시 {{ AI_EX.length }}개 보기</summary><div class="cc-exl"><span class="cc-hint" style="margin:0">예시를 누르면 메모 칸에 들어갑니다. 실제 회의 내용으로 고쳐 쓴 뒤 버튼을 누르세요.</span><button v-for="(x, i) in AI_EX" :key="'aix' + i" type="button" class="cc-chip" @click="aiNotes = x">{{ x }}</button></div></details>
@@ -1514,12 +1515,13 @@
                     '이번 달 협력사 2곳(배관 A사, 전기 B사) / 2층 기계실 배관 용접은 화기작업 허가 후 진행, 화재감시인은 A사가 배치 / B사 분전반 작업 시 정전·잠금 확인 후 작업 / 비상 연락은 원청 안전팀',
                     '신규 협력사 C사(청소 용역) 참여 — 채용 시 교육 기록은 다음 회의 때 확인 / 냉동창고 출입 시 2인 1조 / 지게차 통로 보행 금지 재안내 / 위험성평가 결과는 각 사 TBM에서 공유'];
                 const aiNotes = ref(''), aiBusy = ref(false), aiMsg = ref('');
+                const memoLen = computed(() => aiNotes.value.replace(/\s/g, '').length);
                 const aiKey = () => { if (window.SPAI) { SPAI.css(); SPAI.openSettings(); } };
                 const aiMinutes = () => {
                     if (!window.SPAI) { aiMsg.value = 'AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.'; return; }
                     SPAI.css();
                     if (!SPAI.hasKey()) { SPAI.ensureKey().then(ok => { if (ok) aiMinutes(); }); return; }
-                    if (!aiNotes.value.trim()) { aiMsg.value = '회의 메모 칸이 비어 있습니다. 회의에서 이야기한 것을 짧게라도 적거나 위 예시를 눌러 보세요.'; return; }
+                    if (memoLen.value < 10) { aiMsg.value = '회의 메모를 10자 이상 적어 주세요 (지금 ' + memoLen.value + '자). 무엇을 적을지 모르겠으면 아래 예시를 눌러 보세요.'; return; }
                     aiRun(false);
                 };
                 const aiRun = (force) => {
@@ -1815,7 +1817,7 @@
                 };
 
                 return {
-                    AI_EX, aiNotes, aiBusy, aiMsg, aiKey, aiMinutes,
+                    AI_EX, aiNotes, memoLen, aiBusy, aiMsg, aiKey, aiMinutes,
                     HIST_MAX, docTypes, formData, hostReps, subs, topics, actions, prev, history: historyView,
                     photoDataUrl, isGeneratingPDF, toast, saveMsg,
                     view, setView, warnTotal, setAll, fixedCount: STATUTORY.length,

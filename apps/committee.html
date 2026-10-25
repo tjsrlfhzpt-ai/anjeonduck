@@ -144,7 +144,7 @@
         .cm-rep { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 64px auto; gap: 4px; align-items: end; }
         .cm-chip{min-height:32px;padding:4px 10px;border-radius:16px;border:1px solid #C7D2FE;background:#fff;color:#3730A3;font-size:12.5px;cursor:pointer;text-align:left;max-width:100%}
         .cm-chip:hover{background:#E0E7FF}
-        .cm-exd{margin-top:8px}.cm-exd>summary{cursor:pointer;font-size:13px;font-weight:700;color:#3730A3;padding:6px 0;list-style-position:inside}.cm-exl{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px}.cm-exl .cm-chip{border-radius:10px;line-height:1.45;padding:7px 11px}
+        .cm-cnt{font-size:12.5px;color:#667085;margin:4px 0 0}.cm-cnt.bad{color:#B42318;font-weight:700}.cm-cnt.ok{color:#05603A;font-weight:700}.cm-exd{margin-top:8px}.cm-exd>summary{cursor:pointer;font-size:13px;font-weight:700;color:#3730A3;padding:6px 0;list-style-position:inside}.cm-exl{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px}.cm-exl .cm-chip{border-radius:10px;line-height:1.45;padding:7px 11px}
         .cm-flash{background:#FFF8D6!important;border-color:#E0B000!important;transition:background .6s}
         .cm-ml { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
         .cm-ml > span { font-size: 11px; font-weight: 600; color: #64748b; }
@@ -413,8 +413,9 @@
                             <p v-if="formData.docType !== 'notice'" class="cm-hint r">실제로 심의·의결한 내용만 적으세요. 예시를 그대로 두면 사실과 다른 회의록이 됩니다.</p>
                             <div v-if="formData.docType !== 'notice'" class="cm-ai">
                                 <div class="cm-row" style="justify-content:space-between"><b style="color:#3730A3">✦ 회의 메모 → 회의록 문장으로 정리 (AI)</b><button type="button" class="cm-link" @click="aiKey">AI 키 설정</button></div>
-                                <p class="cm-hint" style="margin:4px 0 6px">회의 때 메모한 내용을 짧게라도(글자 수 제한 없음) 적고 버튼을 누르면, AI가 아래 <b>안건별 '심의 내용 및 의결·결정 사항' 칸</b>에 회의록 문장으로 채워 넣습니다. 메모가 부족하면 AI가 먼저 묻습니다(예: "개정 내용이 무엇인가요?"). 채운 내용은 실제 회의와 맞는지 확인하고 고치세요.</p>
+                                <p class="cm-hint" style="margin:4px 0 6px">회의 때 메모한 내용을 10자 이상 적고 버튼을 누르면, AI가 아래 <b>안건별 '심의 내용 및 의결·결정 사항' 칸</b>에 회의록 문장으로 채워 넣습니다. 메모가 부족하면 AI가 먼저 묻습니다(예: "개정 내용이 무엇인가요?"). 채운 내용은 실제 회의와 맞는지 확인하고 고치세요.</p>
                                 <textarea v-model="aiNotes" rows="4" maxlength="4000" class="cm-in" placeholder="예: 3번 안전보건교육 — 신규자 교육 8시간으로 개정, 원안 의결 / 1번 재해예방계획 — 지게차 동선 분리 예산 500만원 통과"></textarea>
+                        <p class="cm-cnt" :class="memoLen >= 10 ? 'ok' : (memoLen ? 'bad' : '')">{{ memoLen >= 10 ? '✓ ' + memoLen + '자 — 10자 이상 채움' : '10자 이상 적어 주세요 (지금 ' + memoLen + '자)' }}</p>
                                 <button type="button" class="cm-btn" style="margin-top:6px" :disabled="aiBusy" @click="aiMinutes">{{ aiBusy ? 'AI가 정리하는 중…' : '메모를 안건별 심의·의결 내용으로 정리' }}</button>
                                 <p class="cm-hint">{{ aiMsg || 'AI는 메모에 있는 내용만 안건별 문장으로 다듬습니다. 메모에 없는 안건은 비워 둡니다(내 Gemini 키).' }}</p>
                                 <details class="cm-exd"><summary>무엇을 적을지 모르겠으면 — AI에 적는 예시 {{ AI_EX.length }}개 보기</summary><div class="cm-exl"><span class="cm-hint" style="margin:0">예시를 누르면 메모 칸에 들어갑니다. 실제 회의 내용으로 고쳐 쓴 뒤 버튼을 누르세요.</span><button v-for="(x, i) in AI_EX" :key="'aix' + i" type="button" class="cm-chip" @click="aiNotes = x">{{ x }}</button></div></details>
@@ -1550,6 +1551,7 @@
 
                 // ---- AI: 회의 메모 → 안건별 심의·의결 문장(메모에 없는 내용은 만들지 않는다)
                 const aiNotes = ref(''), aiBusy = ref(false), aiMsg = ref('');
+                const memoLen = computed(() => aiNotes.value.replace(/\s/g, '').length);
                 const AI_EX = [
                     '3번 안전보건교육 — 신규 채용자 교육 8시간, 외국인 근로자는 통역 동석으로 개정, 원안 의결 / 근로자위원 질문: 교육 시간은 근무시간에 포함 → 포함하기로 함',
                     '1번 재해예방계획 — 하반기 지게차·보행자 동선 분리, 예산 500만원 원안 의결 / 4번 작업환경측정 — 상반기 소음 초과 2곳 보고, 귀마개 지급·방음 커버 검토 / 기타 — 휴게실 에어컨 교체 건의 → 다음 회의 검토',
@@ -1561,7 +1563,7 @@
                     if (!window.SPAI) { aiMsg.value = 'AI 모듈을 불러오지 못했습니다. 새로고침해 주세요.'; return; }
                     SPAI.css();
                     if (!SPAI.hasKey()) { SPAI.ensureKey().then(ok => { if (ok) aiMinutes(); }); return; }
-                    if (!aiNotes.value.trim()) { aiMsg.value = '회의 메모 칸이 비어 있습니다. 회의에서 이야기한 것을 짧게라도 적거나 위 예시를 눌러 보세요.'; return; }
+                    if (memoLen.value < 10) { aiMsg.value = '회의 메모를 10자 이상 적어 주세요 (지금 ' + memoLen.value + '자). 무엇을 적을지 모르겠으면 아래 예시를 눌러 보세요.'; return; }
                     aiRun(false);
                 };
                 const aiRun = (force) => {
@@ -1609,7 +1611,7 @@
                     }).catch(e => { aiMsg.value = (e && e.message) || 'AI 요청이 실패했습니다.'; }).finally(() => { aiBusy.value = false; });
                 };
                 return {
-                    AI_EX, aiNotes, aiBusy, aiMsg, aiKey, aiMinutes,
+                    AI_EX, aiNotes, memoLen, aiBusy, aiMsg, aiKey, aiMinutes,
                     docTypes, formData, employerReps, employeeReps, items, prev, actions, history, historyView, HIST_MAX, APPR_KEY, PHOTO_DOC, hasADoc,
                     saveMsg, toast, steps, open, allOpen, toggleStep, toggleAll, goNext, finishInput, tab, setTab, changeDocType, docLabel,
                     touch, unsetManual, manualList, bodyName, noticeDateEff, reportDateEff, noticeNoEff, setDate, setNoticeNo,
