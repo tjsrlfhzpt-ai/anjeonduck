@@ -704,7 +704,7 @@ AI_FIELDS_GROUP = {
         {"k": "proc", "label": "오늘 할 작업", "required": True, "ph": "예: 창고 입고 팔레트 하역"},
         {"k": "place", "label": "작업 위치", "ph": "예: 물류동 1번 도크"}, {"k": "issue", "label": "이상 징후·특이사항", "ph": "예: 후진 경보음이 작게 들림"}, _COND],
     "업무일지": [
-        {"k": "proc", "label": "오늘 한 주요 업무·작업", "type": "area", "required": True, "min": 6, "ph": "예: 프레스 금형 교체 작업 지휘, 지게차 하역 입회, 신규자 1명 배치"},
+        {"k": "proc", "label": "오늘 한 주요 업무·작업", "type": "area", "required": True, "ph": "예: 프레스 금형 교체 작업 지휘, 지게차 하역 입회, 신규자 1명 배치"},
         {"k": "place", "label": "점검·작업 장소", "ph": "예: 가공동, 자재창고"}, {"k": "crew", "label": "출력 인원", "ph": "예: 28명"},
         {"k": "issue", "label": "지적·특이사항", "ph": "예: 통로에 팔레트 적치, 아차사고 1건"}, _COND],
     "재해·사고 조사": [
@@ -712,7 +712,7 @@ AI_FIELDS_GROUP = {
         {"k": "proc", "label": "당시 하던 작업", "required": True, "ph": "예: 컨베이어 벨트 이물 제거"},
         {"k": "place", "label": "발생 장소", "required": True, "ph": "예: 2라인 컨베이어 끝단"},
         {"k": "equip", "label": "관련 설비·기계·도구", "ph": "예: 벨트컨베이어(가동 중), 덮개 열림"},
-        {"k": "course", "label": "어떻게 일어났나(경위)", "type": "area", "required": True, "min": 10, "ph": "예: 설비를 멈추지 않고 손으로 이물을 빼다 롤러에 손가락이 끼임"},
+        {"k": "course", "label": "어떻게 일어났나(경위)", "type": "area", "required": True, "ph": "예: 설비를 멈추지 않고 손으로 이물을 빼다 롤러에 손가락이 끼임"},
         {"k": "harm", "label": "피해 정도", "ph": "예: 손가락 골절, 병원 이송 (진단명·실명은 적지 마세요)"}],
     "교육·회의": [
         {"k": "proc", "label": "교육·회의 주제", "required": True, "ph": "예: 끼임 사고 예방과 전원 차단(LOTO)"},

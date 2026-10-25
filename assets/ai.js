@@ -200,7 +200,7 @@
   //   field: {k, label, type: text|area|select|chips, options, required, ph}
   var FCSS = ".spai-f{display:flex;flex-direction:column;gap:4px;margin-top:10px}.spai-f>span{font-weight:700;font-size:13.5px}.spai-f>span em{color:#B42318;font-style:normal;margin-left:3px}" +
     ".spai-f input,.spai-f select,.spai-f textarea{width:100%;box-sizing:border-box;border:1px solid #c8d1dd;border-radius:9px;padding:9px 11px;font-family:inherit;font-size:15px;line-height:1.5;background:#fff;color:#1d2433}" +
-    ".spai-f.bad input,.spai-f.bad select,.spai-f.bad textarea{border-color:#B42318;background:#FFF5F4}.spai-f .spai-err{color:#B42318;font-size:12.5px;font-weight:700}" +
+    ".spai-f.bad input,.spai-f.bad select,.spai-f.bad textarea{border-color:#B42318;background:#FFF5F4}.spai-f .spai-err{color:#B42318;font-size:12.5px;font-weight:700}.spai-f .spai-hint{color:#5b6576;font-size:12.5px;font-weight:400;line-height:1.45}.spai-f.bad .spai-hint{color:#7a2a20}.spai-f input:placeholder-shown~.spai-hint.ph,.spai-f textarea:placeholder-shown~.spai-hint.ph{display:none}" +
     ".spai-chips{display:flex;flex-wrap:wrap;gap:6px}.spai-chips label{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:4px 11px;border:1px solid #C7D2FE;border-radius:17px;font-size:13.5px;cursor:pointer;background:#F5F7FF}" +
     ".spai-chips input{width:auto;margin:0}.spai-chips label:has(input:checked){background:#3730A3;border-color:#3730A3;color:#fff}" +
     ".spai-fg{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.spai-fg .wide{grid-column:1/-1}@media (max-width:560px){.spai-fg{grid-template-columns:1fr}}" +
@@ -215,7 +215,7 @@
       else if (f.type === "area") inp = '<textarea id="' + id + '" data-f="' + esc(f.k) + '" rows="' + (f.rows || 3) + '" maxlength="1500" placeholder="' + esc(f.ph || "") + '">' + esc(v) + "</textarea>";
       else inp = '<input id="' + id + '" type="text" data-f="' + esc(f.k) + '" maxlength="300" value="' + esc(v) + '" placeholder="' + esc(f.ph || "") + '">';
       var wide = f.type === "area" || f.type === "chips" || f.wide;
-      return '<label class="spai-f' + (wide ? " wide" : "") + '" data-fw="' + esc(f.k) + '"' + (f.type === "chips" ? "" : ' for="' + id + '"') + "><span>" + esc(f.label) + (f.required ? "<em>*필수</em>" : "") + "</span>" + inp + '<b class="spai-err" hidden></b></label>';
+      return '<label class="spai-f' + (wide ? " wide" : "") + '" data-fw="' + esc(f.k) + '"' + (f.type === "chips" ? "" : ' for="' + id + '"') + "><span>" + esc(f.label) + (f.required ? "<em>*필수</em>" : "") + "</span>" + inp + (f.help ? '<small class="spai-hint">' + esc(f.help) + "</small>" : f.ph ? '<small class="spai-hint ph">' + esc(String(f.ph).replace(/^예:\s*/, "예) ")) + "</small>" : "") + '<b class="spai-err" hidden></b></label>';
     }).join("") + "</div>";
   }
   function readFields(root, fields) {
@@ -232,8 +232,9 @@
     var miss = [];
     fields.forEach(function (f) {
       var w = root.querySelector('[data-fw="' + f.k + '"]'); if (!w) return;
-      var bad = !!(f.required && String(vals[f.k] || "").replace(/\s/g, "").length < (f.min || 2));
-      w.classList.toggle("bad", bad); var er = w.querySelector(".spai-err"); er.hidden = !bad; er.textContent = bad ? "이 칸을 채워야 상황에 맞는 초안을 만들 수 있습니다" : "";
+      // 필수 칸은 '비었는지'만 막는다. 짧거나 모호한 답은 막지 않고 AI가 추가 질문으로 보충받는다(글자 수로 막으면 '사다리작업'처럼 맞게 적어도 이유를 모른 채 멈춘다)
+      var bad = !!(f.required && !String(vals[f.k] || "").replace(/\s/g, ""));
+      w.classList.toggle("bad", bad); var er = w.querySelector(".spai-err"); er.hidden = !bad; er.textContent = bad ? (f.type === "select" ? "하나를 골라 주세요" : f.type === "chips" ? "해당하는 것을 하나 이상 골라 주세요" : "비어 있습니다 — 위 예시처럼 적어 주세요") : "";
       if (bad) miss.push(f.label);
     });
     return miss;
