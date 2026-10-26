@@ -426,7 +426,7 @@
   {
    "key": "sapa_dec",
    "name": "중대재해 처벌 등에 관한 법률 시행령",
-   "lsId": "",
+   "lsId": "014159",
    "status": "current",
    "current": {
     "no": "대통령령 제35805호",
@@ -438,7 +438,7 @@
    },
    "upcoming": [],
    "recent": [],
-   "history_url": "",
+   "history_url": "https://www.law.go.kr/LSW/lsHstListR.do?lsId=014159&chrClsCd=010202",
    "checked_at": "2026-10-05",
    "used_by": [
     "selection",
@@ -448,7 +448,7 @@
     "ai",
     "law-ai"
    ],
-   "note": "연혁 목록 주소(lsId)를 확인하지 못해 '현행 머리말'만 확인함 — 시행 예정본 유무는 확인 필요."
+   "note": "lsId 014159 — 2026-10-26 연혁 목록 확인: 최신 공포번호가 대통령령 제35805호(현행)와 같고 시행 예정본 없음."
   }
  ],
  "bills": [
