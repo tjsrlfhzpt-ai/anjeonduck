@@ -1051,99 +1051,137 @@ def council():
 # =====================================================================
 # 11. 표준안전작업절차서(SOP) + 교육 확인 서명부 + 관리대장 — 예시 작업: 컨베이어 벨트 청소
 # =====================================================================
-SOP_STEPS = [
-    ("작업 전 회의·보호구 착용", "작업 순서를 모른 채 시작", "TBM에서 오늘 청소 구간·담당·잠금 순서 공유, 보호구 착용 서로 확인"),
-    ("운전 정지·전원 차단", "다른 사람이 운전 스위치를 켬", "정지 버튼으로 멈춘 뒤 해당 컨베이어 차단기(MCC ○번)를 내림"),
-    ("잠금·표지 부착", "청소 중 갑자기 가동되어 손이 끼임", "차단기에 본인 자물쇠 잠금 + 꼬리표(성명·시간), 열쇠는 본인이 보관"),
-    ("정지 상태 확인", "관성으로 벨트가 움직임·잔류 에너지", "기동 버튼을 눌러 움직이지 않는지 확인, 벨트·롤러 완전 정지 확인"),
-    ("덮개 열고 청소", "롤러 사이 끼임·모서리 베임·바닥 미끄러짐", "손 대신 스크레이퍼 사용, 물기·이물은 바로 치움, 덮개는 정해진 곳에 둠"),
-    ("덮개 복구·공구 회수", "덮개 없이 가동·공구가 벨트에 말려듦", "덮개·연동장치 체결 확인, 가져간 공구 수량 확인"),
-    ("잠금 해제·시운전", "주변 근로자 접근 중 가동", "주변 인원 철수 확인 후 자물쇠를 건 본인이 해제, '가동합니다' 알리고 시운전, 비상정지 작동 확인"),
+SOP_STEPS = [  # 작업 단계, 위험요인, 안전 포인트, 대책 구분, 담당
+    ("작업 전 회의·보호구 착용", "순서·위험을 모른 채 시작해 잠금을 빠뜨림", "TBM에서 청소 구간·담당·잠금 순서와 핵심 위험 공유, 보호구 착용 서로 확인", "관리적", "전원"),
+    ("운전 정지·차단기 내림", "다른 사람이 운전 스위치를 켜 벨트가 움직임", "조작반 정지 버튼 → 해당 컨베이어 차단기 OFF (차단기 번호는 현장 표지로 확인)", "공학적", "작업자"),
+    ("잠금·표지", "청소 중 누군가 차단기를 올려 손이 끼임", "차단기에 본인 자물쇠 + 꼬리표(성명·시간), 열쇠는 본인 보관 — 2명이면 각자 자물쇠", "공학적", "작업자 각자"),
+    ("정지 상태 확인(시험 기동)", "다른 차단기를 잠가 기계가 살아 있음, 관성 회전", "기동 버튼을 눌러 움직이지 않는지 확인 후 원위치, 벨트·롤러 완전 정지 확인", "관리적", "확인자"),
+    ("덮개 열고 청소", "롤러 맞물림 부위 끼임, 모서리 베임, 물기에 미끄러짐", "손 대신 스크레이퍼·밀대, 맞물림 부위에 손 넣지 않음, 물기는 바로 제거", "관리적", "작업자"),
+    ("복구·잠금 해제·시운전", "덮개 없이 가동, 사람이 남은 채 가동", "덮개·공구 확인 → 인원 철수 확인 → 건 사람이 해제 → '가동합니다' 알리고 시운전, 비상정지 시험", "공학적", "작업자·확인자"),
 ]
 
 
 def sop():
     wb = new_book()
-    W = [6, 12, 12, 13, 13, 16, 13, 13]
+    W = [6, 14, 11, 11, 18, 14, 14, 10, 10]
+    LC = "I"
     ws = sheet(wb, "표준안전작업절차서", W, tab=NAVY)
-    title(ws, "표준안전작업절차서", 4, sub="작업을 안전한 순서로 나누고 단계마다 위험요인과 안전 포인트를 정한 사업장 기준서")
-    approval(ws, 1, 5, labels=("작성", "검토", "승인"), sign_h=30)
+    title(ws, "표준안전작업절차서", 5, sub="작업을 안전한 순서로 나누고 단계마다 위험요인·안전 포인트·대책을 정한 사업장 기준서")
+    approval(ws, 1, 6, labels=("작성", "검토", "승인"), sign_h=30)
     hd = lambda ref, v: box(ws, ref, v, f(9.5, True, NAVY), CENTER, HEAD)
-    sec = lambda r, v, c=NAVY: box(ws, f"A{r}:H{r}", v, f(10.5, True, "FFFFFF"), LEFT, c)
+    sec = lambda r, v, c=NAVY: box(ws, f"A{r}:{LC}{r}", v, f(10.5, True, "FFFFFF"), LEFT, c)
+    def pair(r, a, b_, ea=None, eb=None, h=24):
+        hd(f"A{r}:B{r}", a); box(ws, f"C{r}:E{r}", None, f(10), LEFT); hd(f"F{r}", b_); box(ws, f"G{r}:{LC}{r}", None, f(10), LEFT)
+        example(ws, r, [None, None, ea, None, None, None, eb]); ws.row_dimensions[r].height = h
+    def wide(r, a, ex=None, h=24, top=False):
+        hd(f"A{r}:B{r}", a); box(ws, f"C{r}:{LC}{r}", None, f(10), LEFT_TOP if top else LEFT)
+        if ex:
+            example(ws, r, [None, None, ex])
+        ws.row_dimensions[r].height = h
+    def area(r, ex, h):
+        box(ws, f"A{r}:{LC}{r}", None, f(10), LEFT_TOP); ws.row_dimensions[r].height = h
+        example(ws, r, [ex])
     r = 4
-    for a, b_, ea, eb in (("문서번호", "제정일", "예: SOP-생산-012", "예: 2026-10-27"), ("개정 차수", "개정일", "예: 0 (제정)", None)):
-        hd(f"A{r}:B{r}", a); box(ws, f"C{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", b_); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
-        example(ws, r, [None, None, ea, None, None, eb]); ws.row_dimensions[r].height = 22; r += 1
-    r += 1
+    pair(r, "문서번호", "제정일", "예: SOP-생산-012", "예: 2026-10-27"); r += 1
+    pair(r, "개정 차수", "개정일", "예: 0 (제정)"); r += 1
+    wide(r, "작성에 참여한 근로자", "예: 포장 2라인 작업자 ○○○, ○○○ — 실제 작업자와 함께 작성"); r += 2
     sec(r, "1. 작업 개요"); r += 1
     for a, b_, ea, eb in (("작업명", "공정·설비", "예: 컨베이어 벨트 청소", "예: 포장 2라인 이송 컨베이어"), ("작업 장소", "작업 주기", "예: 2공장 포장실", "예: 매일 생산 종료 후"),
                           ("작업 인원", "필요 자격·교육", "예: 2명 (청소 1·확인 1)", "예: 잠금·표지 교육 이수자"), ("소요 시간", "관리감독자", "예: 약 30분", "예: 포장반장")):
-        hd(f"A{r}:B{r}", a); box(ws, f"C{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", b_); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
-        example(ws, r, [None, None, ea, None, None, eb]); ws.row_dimensions[r].height = 24; r += 1
-    r += 1
-    sec(r, "2. 필요 보호구·장비"); r += 1
+        pair(r, a, b_, ea, eb); r += 1
+    wide(r, "절차서로 만든 이유", "비정상 작업(청소·정비·교체·고장 조치)")
+    dv_list(ws, f"C{r}", ["위험성평가 결과 위험성이 높은 작업", "사고·아차사고가 있었던 작업", "새 작업·작업 방법 변경", "비정상 작업(청소·정비·교체·고장 조치)", "순서가 복잡해 글로 된 지시가 필요한 작업", "기타"]); r += 2
+    sec(r, "2. 핵심 위험 — 이 작업에서 중대재해로 이어질 수 있는 위험", RED); r += 1
+    area(r, "예: ① 청소 중 기계가 갑자기 움직여 손·팔이 롤러 사이로 말려 들어감(끼임)  ② 덮개를 연 채 가동되어 회전부에 노출  ③ 청소 물기로 바닥에서 미끄러져 넘어짐", 44); r += 2
+    sec(r, "3. 보호구·장비"); r += 1
     gear = ["안전모·위생모", "보안경", "안전화(미끄럼 방지)", "보호장갑", "귀마개", "방진·방독마스크", "안전대", "기타"]
     for i in range(0, 8, 4):
-        for j in range(4):
-            col = 1 + j * 2
-            box(ws, ws.cell(row=r, column=col).coordinate, None, f(11, True, GREEN), CENTER)
-            box(ws, ws.cell(row=r, column=col + 1).coordinate, gear[i + j], f(9, False, INK), LEFT)
-        ws.row_dimensions[r].height = 22; r += 1
-    for rr in (r - 2, r - 1):
-        dv_list(ws, f"A{rr}", ["✔"]); dv_list(ws, f"C{rr}", ["✔"]); dv_list(ws, f"E{rr}", ["✔"]); dv_list(ws, f"G{rr}", ["✔"])
-    for col, v in ((1, "✔"), (3, "✔"), (5, "✔"), (7, "✔")):
-        example(ws, r - 2, [None] * (col - 1) + [v])
-    hd(f"A{r}:B{r}", "장비·공구"); box(ws, f"C{r}:H{r}", None, f(10), LEFT); example(ws, r, [None, None, "예: 자물쇠·꼬리표 1세트, 스크레이퍼, 고무 밀대, 손전등"]); ws.row_dimensions[r].height = 24; r += 2
-    sec(r, "3. 작업 전 확인"); r += 1
-    pre = ["작업 구역 정리, 통로 확보", "보호구 상태 확인", "잠금장치·꼬리표 준비", "비상정지 스위치 위치 확인"]
-    for i in range(0, 4, 2):
-        for j in range(2):
-            c0 = 1 + j * 4
+        for j, (c0, last) in enumerate([(1, 2), (3, 4), (5, 6), (7, 9)]):
             box(ws, ws.cell(row=r, column=c0).coordinate, None, f(11, True, GREEN), CENTER)
-            box(ws, f"{ws.cell(row=r, column=c0 + 1).coordinate}:{ws.cell(row=r, column=c0 + 3).coordinate}", pre[i + j], f(9.5), LEFT)
-        dv_list(ws, f"A{r}", ["✔", "X"]); dv_list(ws, f"E{r}", ["✔", "X"])
+            box(ws, f"{ws.cell(row=r, column=c0 + 1).coordinate}:{ws.cell(row=r, column=last).coordinate}", gear[i + j], f(9, False, INK), LEFT)
+            dv_list(ws, ws.cell(row=r, column=c0).coordinate, ["✔"])
+        ws.row_dimensions[r].height = 22; r += 1
+    for c0 in (1, 3, 5, 7):
+        example(ws, r - 2, [None] * (c0 - 1) + ["✔"])
+    wide(r, "장비·공구", "예: 개인 자물쇠·꼬리표, 스크레이퍼, 고무 밀대, 손전등"); r += 2
+    sec(r, "4. 작업 전 확인"); r += 1
+    pre = ["작업 구역 정리, 통로 확보", "보호구 상태 확인·착용", "잠금장치·꼬리표 등 필요한 도구 준비", "비상정지 스위치·비상연락 방법 확인", "함께 일하는 사람에게 작업 순서·핵심 위험 공유(TBM)", "작업중지 기준 함께 확인"]
+    for i in range(0, 6, 2):
+        for c0, last, it in ((1, 4, pre[i]), (5, 9, pre[i + 1])):
+            box(ws, ws.cell(row=r, column=c0).coordinate, None, f(11, True, GREEN), CENTER)
+            box(ws, f"{ws.cell(row=r, column=c0 + 1).coordinate}:{ws.cell(row=r, column=last).coordinate}", it, f(9.5), LEFT)
+            dv_list(ws, ws.cell(row=r, column=c0).coordinate, ["✔", "X"])
         ws.row_dimensions[r].height = 22; r += 1
     r += 1
-    sec(r, "4. 작업 절차 (단계 → 위험요인 → 안전 포인트)"); r += 1
-    header_row(ws, r, ["순서", "작업 단계", "", "사진·그림", "", "위험요인", "안전 포인트 (이렇게 한다)", ""], height=24)
-    ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:E{r}"); ws.merge_cells(f"G{r}:H{r}"); r += 1
+    brk5 = r
+    sec(r, "5. 작업 절차 (단계 → 위험요인 → 안전 포인트)"); r += 1
+    header_row(ws, r, ["순서", "작업 단계", "사진·그림", "", "위험요인\n(무엇이 잘못될 수 있나)", "안전 포인트 (이렇게 한다)", "", "대책 구분", "담당"], height=30)
+    ws.merge_cells(f"C{r}:D{r}"); ws.merge_cells(f"F{r}:G{r}"); r += 1
     s0 = r
     for i in range(8):
-        grid(ws, r, r, 1, 8, height=66)
-        ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:E{r}"); ws.merge_cells(f"G{r}:H{r}")
+        grid(ws, r, r, 1, 9, height=64)
+        ws.merge_cells(f"C{r}:D{r}"); ws.merge_cells(f"F{r}:G{r}")
         ws.cell(row=r, column=1, value=i + 1).font = f(14, True, NAVY)
-        ws.cell(row=r, column=2).font = f(10, True, INK)
-        for cc in (2, 6, 7):
+        for cc in (2, 5, 6):
             ws.cell(row=r, column=cc).alignment = LEFT
-        ws.cell(row=r, column=4).fill = fill("F8F9FB")
+        ws.cell(row=r, column=3).fill = fill("F8F9FB")
         if i < len(SOP_STEPS):
-            a, b_, c_ = SOP_STEPS[i]
-            example(ws, r, [None, a, None, "(사진 붙이기)" if i == 2 else None, None, b_, c_])
+            a, b_, c_, k_, w_ = SOP_STEPS[i]
+            example(ws, r, [None, a, "(사진 붙이기)" if i == 2 else None, None, b_, c_, None, k_, w_])
             ws.cell(row=r, column=2).font = f(10, True, "8A94A3", True)
+            ws.cell(row=r, column=5).font = f(9.5, False, "D97066", True)
         r += 1
-    ws.cell(row=s0 + 2, column=4).alignment = CENTER
-    ws.conditional_formatting.add(f"F{s0}:F{r - 1}", FormulaRule(formula=[f'F{s0}<>""'], font=Font(name=FONT, color=RED)))
+    dv_list(ws, f"H{s0}:H{r - 1}", ["제거·대체", "공학적", "관리적", "보호구"])
+    box(ws, f"A{r}:{LC}{r}", "대책은 제거·대체 → 공학적(방호장치·연동장치·차단) → 관리적(절차·교육·표지) → 보호구 순으로 먼저 검토합니다. 위험요인은 '무엇이 잘못될 수 있나, 그러면 어떻게 되나'로 씁니다.", f(8.5, False, MUTED), LEFT)
+    ws.row_dimensions[r].height = 28; r += 2
+    sec(r, "6. 작업중지 기준 — 이럴 때는 작업을 멈추고 보고한다", RED); r += 1
+    area(r, "예: ① 개인 자물쇠·꼬리표가 없을 때  ② 잠근 차단기가 이 설비 것인지 확인되지 않을 때  ③ 시험 기동에서 기계가 움직일 때  ④ 비상정지·덮개·연동장치가 고장 났을 때  ⑤ 확인자 없이 혼자 하게 될 때", 52); r += 1
+    box(ws, f"A{r}:{LC}{r}", "근로자는 산업재해가 발생할 급박한 위험이 있으면 작업을 중지하고 대피할 수 있고, 지체 없이 관리감독자 등에게 보고합니다(산업안전보건법 제52조).", f(8.5, False, MUTED), LEFT)
+    ws.row_dimensions[r].height = 20; r += 2
+    brk7 = r
+    sec(r, "7. 하지 말 것"); r += 1
+    area(r, "예: ① 운전 중인 벨트·롤러에 손이나 도구를 넣지 않는다  ② 다른 사람의 자물쇠를 풀지 않는다  ③ 덮개나 연동장치를 뗀 채 운전하지 않는다  ④ 운전 중인 컨베이어 위로 넘어가지 않는다", 46); r += 2
+    sec(r, "8. 작업 후 확인"); r += 1
+    post = ["공구·자재 회수, 수량 확인", "덮개·방호장치 원상 복구", "작업 구역 정리정돈", "이상·불편 사항 관리감독자에게 보고"]
+    for i in range(0, 4, 2):
+        for c0, last, it in ((1, 4, post[i]), (5, 9, post[i + 1])):
+            box(ws, ws.cell(row=r, column=c0).coordinate, None, f(11, True, GREEN), CENTER)
+            box(ws, f"{ws.cell(row=r, column=c0 + 1).coordinate}:{ws.cell(row=r, column=last).coordinate}", it, f(9.5), LEFT)
+            dv_list(ws, ws.cell(row=r, column=c0).coordinate, ["✔", "X"])
+        ws.row_dimensions[r].height = 22; r += 1
     r += 1
-    sec(r, "5. 하지 말 것", RED); r += 1
-    box(ws, f"A{r}:H{r}", None, f(10), LEFT_TOP); ws.row_dimensions[r].height = 54
-    example(ws, r, ["예: ① 운전 중인 벨트·롤러에 손이나 도구를 넣지 않는다  ② 다른 사람의 자물쇠를 풀지 않는다  ③ 덮개나 연동장치를 뗀 채 운전하지 않는다  ④ 운전 중인 컨베이어 위로 넘어가지 않는다"]); r += 2
-    sec(r, "6. 이상·비상 시 조치"); r += 1
-    box(ws, f"A{r}:H{r}", None, f(10), LEFT_TOP); ws.row_dimensions[r].height = 46
-    example(ws, r, ["예: 끼임·이상 발생 → 가장 가까운 비상정지 스위치 → 큰 소리로 주변에 알림 → 관리감독자 보고 → 부상자는 무리하게 빼내지 말고 119 지시에 따름 (사내 비상연락: 내선 ○○○)"]); r += 2
-    sec(r, "7. 관련 근거·연계"); r += 1
-    for a, ea in (("관련 조문", "예: 안전보건규칙 제92조(정비 등의 작업 시의 운전정지 등), 제192조(비상정지장치)"), ("위험성평가", "예: 2026 정기 위험성평가 포장-07 (끼임 · 위험성 12 → 4)"), ("참고 자료", "예: 안전보건공단 표준작업 안전수칙(제조분야) — 콘베이어 안전수칙, 장비의 잠금")):
-        hd(f"A{r}:B{r}", a); box(ws, f"C{r}:H{r}", None, f(10), LEFT); example(ws, r, [None, None, ea]); ws.row_dimensions[r].height = 24; r += 1
+    sec(r, "9. 이상·비상 시 조치"); r += 1
+    area(r, "예: 끼임·이상 발생 → 가장 가까운 비상정지 스위치 → 큰 소리로 주변에 알림 → 관리감독자 보고 → 부상자는 무리하게 빼내지 말고 119 지시에 따름 (사내 비상연락: 내선 ○○○)", 40); r += 2
+    sec(r, "10. 관련 근거·연계"); r += 1
+    for a, ea in (("관련 조문", "예: 안전보건규칙 제92조(정비 등의 작업 시의 운전정지 등), 제192조(비상정지장치), 제195조(통행의 제한 등)"), ("위험성평가 연계", "예: 2026 정기 위험성평가 포장-07 (끼임 · 위험성 12 → 4)"), ("참고 자료", "예: 안전보건공단 표준작업 안전수칙(제조분야) — 콘베이어 안전수칙, 장비의 잠금")):
+        wide(r, a, ea); r += 1
     r += 1
-    sec(r, "8. 제·개정 이력"); r += 1
-    header_row(ws, r, ["차수", "일자", "", "개정 내용", "", "", "작성", "승인"], height=22)
-    ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:F{r}"); r += 1
+    sec(r, "11. 현장 관찰·검토 기록 (절차대로 하고 있는지, 고칠 점은 없는지)"); r += 1
+    header_row(ws, r, ["일자", "", "관찰·검토자", "", "절차 준수", "발견 사항·개선 의견", "", "", "반영"], height=22)
+    ws.merge_cells(f"A{r}:B{r}"); ws.merge_cells(f"C{r}:D{r}"); ws.merge_cells(f"F{r}:H{r}"); r += 1
+    o0 = r
+    for k_ in range(3):
+        grid(ws, r, r, 1, 9, height=24); ws.merge_cells(f"A{r}:B{r}"); ws.merge_cells(f"C{r}:D{r}"); ws.merge_cells(f"F{r}:H{r}")
+        ws.cell(row=r, column=1).number_format = "yyyy-mm-dd"; ws.cell(row=r, column=6).alignment = LEFT; r += 1
+    example(ws, o0, ["2026-11-10", None, "관리감독자 ○○○", None, "일부 미준수", "확인자 없이 혼자 청소 — 2인 1조 재교육", None, None, "교육 실시"])
+    dv_list(ws, f"E{o0}:E{r - 1}", ["준수", "일부 미준수", "미준수"]); dv_list(ws, f"I{o0}:I{r - 1}", ["개정 반영", "교육 실시", "해당 없음"])
+    color_text_rule(ws, f"E{o0}:E{r - 1}", "미준수", ORANGE, INK)
+    r += 1
+    sec(r, "12. 제·개정 이력"); r += 1
+    header_row(ws, r, ["차수", "일자", "개정 내용·사유", "", "", "", "", "작성", "승인"], height=22)
+    ws.merge_cells(f"C{r}:G{r}"); r += 1
     h0 = r
     for k_ in range(3):
-        grid(ws, r, r, 1, 8, height=22); ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:F{r}"); ws.cell(row=r, column=4).alignment = LEFT; r += 1
-    example(ws, h0, ["0", "2026-10-27", None, "제정", None, None, "○○○", "○○○"])
-    legend(ws, r + 1, 8, text="흰 칸에 입력 · 회색 기울임 글씨는 예시(지우고 쓰기) · 사진은 [삽입 → 그림] 후 '사진·그림' 칸 크기에 맞춰 놓기")
-    ws.print_area = f"A1:H{r + 1}"
-    ws.page_setup.fitToHeight = 2
+        grid(ws, r, r, 1, 9, height=22); ws.merge_cells(f"C{r}:G{r}"); ws.cell(row=r, column=3).alignment = LEFT; r += 1
+    example(ws, h0, ["0", "2026-10-27", "제정", None, None, None, None, "○○○", "○○○"])
+    legend(ws, r + 1, 9, text="흰 칸에 입력 · 회색 기울임 글씨는 예시(지우고 쓰기) · 사진은 [삽입 → 그림] 후 '사진·그림' 칸 크기에 맞춰 놓기")
+    ws.print_area = f"A1:{LC}{r + 1}"
+    # 쪽 나눔을 정해 두려고 '쪽 맞춤' 대신 배율(너비가 A4에 들어가는 값)을 쓴다 — 1쪽 개요·확인, 2쪽 절차·작업중지, 3쪽 나머지
+    from openpyxl.worksheet.pagebreak import Break
+    ws.sheet_properties.pageSetUpPr.fitToPage = False
+    ws.page_setup.scale = 86
+    for b_ in (brk5, brk7):
+        ws.row_breaks.append(Break(id=b_ - 1))
 
     # 교육 확인 서명부
     e = sheet(wb, "교육 확인 서명부", [6, 14, 12, 14, 8, 6, 14, 12, 14, 8], tab=GREEN, one_page=True)
@@ -1207,18 +1245,21 @@ def sop():
     m.print_title_rows = "4:4"; m.freeze_panes = "D5"; m.print_area = f"A1:K{f1}"
 
     guide_sheet(wb, "표준안전작업절차서", [
-        ("무엇인가", ["작업 하나를 안전한 순서로 나누고, 단계마다 무엇이 위험한지와 어떻게 하면 안전한지를 정해 둔 사업장 기준서입니다. 같은 작업을 누가 하든 같은 방법으로 하게 만드는 것이 목적입니다.",
+        ("무엇인가", ["작업 하나를 안전한 순서로 나누고, 단계마다 무엇이 잘못될 수 있는지(위험요인)와 어떻게 하면 안전한지(안전 포인트)를 정해 둔 사업장 기준서입니다. 작업안전분석(JSA)의 결과를 현장에서 쓰는 절차로 옮긴 것이라고 보면 됩니다.",
                     "법령에 정해진 별도 서식은 없습니다. 이 양식은 실무용 예시이며, 회사 문서 체계(문서번호·결재)에 맞게 고쳐 쓰세요."]),
-        ("이렇게 만드세요", ["① 대상 작업 고르기: 위험성평가에서 위험성이 높게 나온 작업, 사고·아차사고가 있었던 작업, 비정상 작업(청소·정비·교체)부터 만듭니다.",
-                          "② 실제 작업을 보면서 단계로 나누기: 한 단계는 '동사 하나'(정지한다, 잠근다, 확인한다) 수준으로, 보통 5~10단계가 됩니다. 그 작업을 하는 근로자와 함께 만드세요.",
-                          "③ 단계마다 위험요인과 안전 포인트 적기: 안전 포인트는 '주의한다'가 아니라 '무엇을, 어떻게' 하는지 보이게 씁니다(예: 손 대신 스크레이퍼 사용).",
-                          "④ 사진 넣기: 사진·그림 칸에 실제 설비 사진을 넣으면 교육 효과가 큽니다. [삽입 → 그림]으로 넣고 칸 크기에 맞춥니다.",
-                          "⑤ 위험성평가와 연결: 절차서의 위험요인·대책이 위험성평가 결과와 같은지 맞춰 보고 '7. 관련 근거·연계'에 평가 번호를 적습니다."]),
-        ("교육에 쓰기", ["새로 배치된 사람, 작업 방법이 바뀐 사람에게 절차서를 현장에서 보여 주며 교육하고, '교육 확인 서명부'에 이해도 확인 결과와 서명을 남깁니다.",
-                       "근로자 채용 시·작업내용 변경 시 교육 내용에는 '기계·기구의 위험성과 작업의 순서 및 동선', '작업 개시 전 점검', '사고 발생 시 긴급조치'가 들어 있고, 관리감독자 정기교육에는 '표준안전 작업방법 결정 및 지도·감독 요령'이 들어 있습니다(시행규칙 별표 5). 교육시간·대상은 교육일지로 따로 관리하세요.",
-                       "같은 내용을 PowerPoint 교육자료 양식(safeplum.com 무료 양식)으로 만들어 화면으로 교육할 수 있습니다."]),
-        ("관리", ["설비·작업 방법이 바뀌거나 사고·아차사고가 나면 바로 개정하고, 그렇지 않아도 정한 주기(관리대장 오른쪽 위 '검토 주기')마다 다시 검토합니다. 다음 검토일이 지나면 관리대장에 빨간색으로 표시됩니다."]),
-    ], source="예시 작업(컨베이어 벨트 청소)은 작성 방법을 보여 주기 위한 것입니다. 관련 근거 예: 안전보건규칙 제92조·제192조, 안전보건공단 표준작업 안전수칙(제조분야). 교육 내용: 산업안전보건법 시행규칙 별표 5.")
+        ("어떤 작업부터 만드나", ["위험성평가에서 위험성이 높게 나온 작업 / 사고·아차사고가 있었던 작업 / 한 번의 실수로 중대재해가 날 수 있는 작업 / 새 작업·작업 방법이 바뀐 작업 / 청소·정비·교체·고장 조치 같은 비정상 작업 / 순서가 복잡해 글로 된 지시가 필요한 작업부터 만듭니다. '절차서로 만든 이유' 칸에 골라 적습니다."]),
+        ("이렇게 만드세요", ["① 그 작업을 실제로 하는 근로자와 함께 만듭니다. 사고·아차사고 기록을 먼저 보고, 바로 고칠 수 있는 위험은 절차서를 기다리지 말고 바로 고칩니다.",
+                          "② 작업을 보면서 단계로 나눕니다. 한 단계는 '동사 하나'(멈춘다·잠근다·확인한다) 수준으로, 보통 5~10단계입니다. 너무 잘게 나누면 쓰기 어렵고, 너무 크게 나누면 중요한 단계가 빠집니다. 사람이 아니라 작업을 봅니다.",
+                          "③ 단계마다 묻습니다: 무엇이 잘못될 수 있나? 그러면 어떻게 되나? 왜 그렇게 되나? 얼마나 자주 그럴 수 있나? — 답을 '위험요인' 칸에 씁니다.",
+                          "④ 대책은 제거·대체 → 공학적(방호장치·연동장치·전원 차단) → 관리적(절차·교육·표지) → 보호구 순서로 먼저 검토하고, 어느 것인지 '대책 구분'에 표시합니다. 보호구만으로 끝나는 단계가 많다면 위쪽 대책이 가능한지 다시 봅니다.",
+                          "⑤ 핵심 위험(중대재해로 이어질 수 있는 것 2~3개)과 작업중지 기준('이럴 때는 멈춘다')을 구체적으로 적습니다. 근로자는 급박한 위험이 있으면 작업을 중지하고 대피할 수 있습니다(산업안전보건법 제52조).",
+                          "⑥ 사진 칸에 실제 설비 사진을 넣고, 위험성평가 결과와 내용이 같은지 맞춰 본 뒤 평가 번호를 '관련 근거·연계'에 적습니다."]),
+        ("교육·주지", ["새로 배치된 사람, 작업 방법이 바뀐 사람에게 절차서를 현장에서 보여 주며 교육하고 '교육 확인 서명부'에 이해도 확인 결과와 서명을 남깁니다.",
+                    "근로자 채용 시·작업내용 변경 시 교육 내용에는 '기계·기구의 위험성과 작업의 순서 및 동선', '작업 개시 전 점검', '사고 발생 시 긴급조치'가 들어 있고, 관리감독자 정기교육에는 '표준안전 작업방법 결정 및 지도·감독 요령'이 들어 있습니다(시행규칙 별표 5).",
+                    "사업주는 중대재해로 이어질 수 있는 유해·위험 요인을 작업 전 안전점검회의(TBM) 등으로 근로자에게 상시 알리도록 노력해야 합니다(산업안전보건법 제36조제4항). 절차서의 '핵심 위험'을 TBM에서 읽어 주면 됩니다."]),
+        ("검토·개정", ["작업하는 모습을 가끔 직접 보고 '현장 관찰·검토 기록'에 남깁니다. 절차와 실제가 다르면 사람을 탓하기 전에 절차가 현실적인지 먼저 봅니다.",
+                     "사고·아차사고가 났을 때, 설비·작업 방법이 바뀌었을 때 바로 개정하고, 그렇지 않아도 정한 주기(관리대장 오른쪽 위 '검토 주기')마다 다시 검토합니다. 바뀐 내용은 해당 근로자에게 다시 교육합니다."]),
+    ], source="참고: 산업안전보건법 제36조·제52조, 시행규칙 별표 5, 안전보건규칙 제92조·제192조(예시 작업 관련), 안전보건공단 표준작업 안전수칙(제조분야), 미국 OSHA 3071 Job Hazard Analysis. 예시 작업(컨베이어 벨트 청소)은 작성 방법을 보여 주기 위한 것입니다.")
     wb.move_sheet("작성 안내", offset=-3); wb.active = 1
     p = OUT / "SafePlum_sop.xlsx"; wb.save(p); return p
 
