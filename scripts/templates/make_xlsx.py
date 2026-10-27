@@ -696,6 +696,356 @@ def workplan():
     p = OUT / "SafePlum_work_plan.xlsx"; wb.save(p); return p
 
 
+# =====================================================================
+# 8. 밀폐공간 — 작업 전 확인서(제619조제2항)·측정 기록(제619조의2)·출입 인원(제621조)·관리대장(제619조제1항, 제640조)
+# =====================================================================
+GAS_OK = "적정공기: 산소 18% 이상 23.5% 미만 · 이산화탄소 1.5% 미만 · 일산화탄소 30ppm 미만 · 황화수소 10ppm 미만 (제618조제3호)"
+
+
+def _gas_judge(r, o2, co2, co, h2s):
+    return (f'=IF(COUNT({o2}{r},{co2}{r},{co}{r},{h2s}{r})=0,"",IF(COUNT({o2}{r},{co2}{r},{co}{r},{h2s}{r})<4,"미측정 항목",'
+            f'IF(AND({o2}{r}>=18,{o2}{r}<23.5,{co2}{r}<1.5,{co}{r}<30,{h2s}{r}<10),"적정","부적정 — 작업 금지")))')
+
+
+def confined():
+    wb = new_book()
+    W = [12, 12, 11, 11, 11, 11, 13, 13]
+    ws = sheet(wb, "작업 전 확인서", W, tab=NAVY, one_page=True)
+    title(ws, "밀폐공간 작업 전 확인서", 4, sub="안전보건규칙 제619조제2항 — 작업이 끝날 때까지 출입구에 게시(제3항)")
+    approval(ws, 1, 5, labels=("관리감독자", "안전관리자", "허가"), sign_h=30)
+    hd = lambda ref, v: box(ws, ref, v, f(9.5, True, NAVY), CENTER, HEAD)
+    sec = lambda r, v: box(ws, f"A{r}:H{r}", v, f(10.5, True, "FFFFFF"), LEFT, NAVY)
+    r = 4; sec(r, "1. 작업 정보 (일시·기간·장소·내용)"); r += 1
+    for a, b_, ea, eb in (("작업 일시", "작업 기간", "예: 2026-10-27 09:00~11:30", "예: 1일"), ("밀폐공간", "작업 인원", "예: 오폐수처리장 집수정 2호", "예: 3명(작업 2·감시 1)")):
+        hd(f"A{r}", a); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", b_); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+        example(ws, r, [None, ea, None, None, None, eb]); ws.row_dimensions[r].height = 24; r += 1
+    hd(f"A{r}", "작업 내용"); box(ws, f"B{r}:H{r}", None, f(10), LEFT_TOP); example(ws, r, [None, "예: 집수정 바닥 슬러지 제거 및 수중펌프 교체"]); ws.row_dimensions[r].height = 30; r += 2
+    sec(r, "2. 작업자 정보 (관리감독자·감시인·측정자·작업자)"); r += 1
+    header_row(ws, r, ["역할", "성명", "소속", "", "연락처", "", "교육·숙지 확인", ""], height=22)
+    for a, b_ in (("C", "D"), ("E", "F"), ("G", "H")):
+        ws.merge_cells(f"{a}{r}:{b_}{r}")
+    r += 1
+    for role in ("관리감독자", "감시인(외부 상주)", "측정자", "작업자", "작업자", "작업자"):
+        grid(ws, r, r, 1, 8, height=22)
+        for a, b_ in (("C", "D"), ("E", "F"), ("G", "H")):
+            ws.merge_cells(f"{a}{r}:{b_}{r}")
+        c = ws.cell(row=r, column=1, value=role); c.font = f(9.5, True, INK); c.fill = fill(SUB)
+        r += 1
+    dv_list(ws, f"G{r - 6}:G{r - 1}", ["확인", "미확인"])
+    r += 1
+    sec(r, "3. 산소·유해가스 측정 결과와 후속조치 (작업 시작·재개 전마다, 제619조의2)"); r += 1
+    header_row(ws, r, ["측정 시각", "위치", "산소 %", "이산화탄소 %", "일산화탄소 ppm", "황화수소 ppm", "판정(자동)", "후속 조치"], height=30); r += 1
+    g0 = r
+    for k in range(4):
+        grid(ws, r, r, 1, 8, height=22)
+        ws.cell(row=r, column=7, value=_gas_judge(r, "C", "D", "E", "F")).fill = fill(SUB)
+        ws.cell(row=r, column=1).number_format = "hh:mm"
+        r += 1
+    example(ws, g0, ["09:05", "상·중·하", 20.8, 0.1, 2, 0, None, "환기 유지"])
+    dv_list(ws, f"B{g0}:B{r - 1}", ["상", "중", "하", "상·중·하"])
+    color_text_rule(ws, f"G{g0}:G{r - 1}", "부적정", RED)
+    color_text_rule(ws, f"G{g0}:G{r - 1}", "미측정", ORANGE, INK)
+    ws.conditional_formatting.add(f"G{g0}:G{r - 1}", FormulaRule(formula=[f'G{g0}="적정"'], fill=fill("D1FADF"), font=Font(name=FONT, color="05603A", bold=True)))
+    box(ws, f"A{r}:H{r}", GAS_OK, f(8.5, False, MUTED), LEFT); ws.row_dimensions[r].height = 18; r += 2
+    sec(r, "4. 작업 중 불활성가스·유해가스 누출·유입·발생 가능성 검토와 후속조치"); r += 1
+    header_row(ws, r, ["검토 항목", "", "", "가능성", "후속 조치", "", "", ""], height=22)
+    ws.merge_cells(f"A{r}:C{r}"); ws.merge_cells(f"E{r}:H{r}"); r += 1
+    c0 = r
+    for lab, ex in (("연결 배관·밸브로 유입", "예: 유입 밸브 잠금·표지, 맹판 설치"), ("불활성가스(질소 등) 퍼지·누출", None),
+                    ("슬러지·부패물·화학반응으로 발생", "예: 교반 시 황화수소 발생 — 연속 측정, 송기마스크"), ("작업 자체에서 발생(용접·도장 등)", None)):
+        box(ws, f"A{r}:C{r}", lab, f(9.5, False, INK), LEFT, SUB); box(ws, f"D{r}", None, f(10), CENTER); box(ws, f"E{r}:H{r}", None, f(10), LEFT)
+        if ex:
+            example(ws, r, [None, None, None, "있음", ex])
+        ws.row_dimensions[r].height = 24; r += 1
+    dv_list(ws, f"D{c0}:D{r - 1}", ["있음", "없음", "검토 중"])
+    color_text_rule(ws, f"D{c0}:D{r - 1}", "있음", ORANGE, INK)
+    r += 1
+    sec(r, "5. 착용할 보호구 · 환기 (제620조)"); r += 1
+    gear = ["공기호흡기", "송기마스크", "안전대·구명밧줄", "안전모", "휴대용 가스측정기", "기타"]
+    for i in range(0, 6, 3):
+        for j in range(3):
+            col = 1 + j * 3 if j < 2 else 7
+            a = ws.cell(row=r, column=col)
+            box(ws, a.coordinate, None, f(11, True, GREEN), CENTER)
+            last = col + 2 if j < 2 else 8
+            box(ws, f"{ws.cell(row=r, column=col + 1).coordinate}:{ws.cell(row=r, column=last).coordinate}", gear[i + j], f(9.5), LEFT)
+        dv_list(ws, f"A{r}", ["✔"]); dv_list(ws, f"D{r}", ["✔"]); dv_list(ws, f"G{r}", ["✔"])
+        ws.row_dimensions[r].height = 22; r += 1
+    hd(f"A{r}", "환기 방법"); box(ws, f"B{r}:H{r}", None, f(10), LEFT); example(ws, r, [None, "예: 송풍기 1대 작업 30분 전부터 작업 끝까지 연속 가동"]); ws.row_dimensions[r].height = 24; r += 2
+    sec(r, "6. 비상연락체계"); r += 1
+    for a, b_, ea, eb in (("감시인 → 보고", "구조 장비 위치", "예: 감시인 → 관리감독자(010-…) → 119·사내 비상(내선 …)", "예: 공기호흡기 2조·삼각대 — 처리장 입구"),):
+        hd(f"A{r}", a); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", b_); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+        example(ws, r, [None, ea, None, None, None, eb]); ws.row_dimensions[r].height = 34; r += 1
+    box(ws, f"A{r}:H{r}", "사고가 나면 감시인은 들어가지 말고 구조 요청 — 구조하는 사람도 공기호흡기 또는 송기마스크를 착용해야 합니다.", f(9, True, RED), LEFT)
+    ws.row_dimensions[r].height = 20; r += 1
+    legend(ws, r + 1, 8)
+    ws.print_area = f"A1:H{r + 1}"
+
+    # 측정 기록 (3년 보존)
+    m = sheet(wb, "측정 기록(3년 보존)", [5, 15, 18, 11, 9, 9, 10, 10, 10, 15, 22, 11], landscape=True, tab=GREEN)
+    title(m, "밀폐공간 산소·유해가스 측정 기록", 9, sub="측정·평가한 사람의 성명, 일시·장소, 결과를 기록해 3년간 보존 (안전보건규칙 제619조의2제4항)")
+    lc = ["No", "측정 일시", "장소(밀폐공간)", "시점", "위치", "산소 %", "이산화탄소 %", "일산화탄소\nppm", "황화수소\nppm", "판정(자동)", "조치", "측정자 성명"]
+    legend(m, 3, len(lc), text=GAS_OK)
+    header_row(m, 4, lc, height=30)
+    f0, f1 = 5, 44
+    grid(m, f0, f1, 1, len(lc), height=22)
+    for x in range(f0, f1 + 1):
+        m.cell(row=x, column=1, value=x - f0 + 1)
+        m.cell(row=x, column=2).number_format = "yyyy-mm-dd hh:mm"
+        m.cell(row=x, column=10, value=_gas_judge(x, "F", "G", "H", "I")).fill = fill(SUB)
+        m.cell(row=x, column=11).alignment = LEFT
+    example(m, f0, [None, "2026-10-27 09:05", "집수정 2호", "작업 전", "상·중·하", 20.8, 0.1, 2, 0, None, "환기 유지", "○○○"])
+    dv_list(m, f"D{f0}:D{f1}", ["작업 전", "재개 전", "작업 중", "작업 후"])
+    dv_list(m, f"E{f0}:E{f1}", ["상", "중", "하", "상·중·하"])
+    color_text_rule(m, f"J{f0}:J{f1}", "부적정", RED)
+    color_text_rule(m, f"J{f0}:J{f1}", "미측정", ORANGE, INK)
+    m.print_title_rows = "4:4"; m.freeze_panes = "D5"; m.print_area = f"A1:L{f1}"
+
+    # 출입 인원 점검
+    io = sheet(wb, "출입 인원 점검", [5, 12, 14, 12, 12, 12, 14, 18], tab="2E90FA")
+    title(io, "밀폐공간 출입 인원 점검표", 8, sub="입장시킬 때와 퇴장시킬 때마다 인원을 점검 (안전보건규칙 제621조)")
+    hd2 = lambda ref, v: box(io, ref, v, f(9.5, True, NAVY), CENTER, HEAD)
+    hd2("A4:B4", "일자·장소"); box(io, "C4:F4", None, f(10), LEFT); hd2("G4", "감시인"); box(io, "H4", None, f(10), LEFT)
+    io.row_dimensions[4].height = 24
+    header_row(io, 6, ["No", "성명", "소속", "입장 시각", "퇴장 시각", "체류(자동)", "산소측정 확인", "감시인 확인"], height=26)
+    grid(io, 7, 31, 1, 8, height=22)
+    for x in range(7, 32):
+        io.cell(row=x, column=1, value=x - 6)
+        for cc in (4, 5):
+            io.cell(row=x, column=cc).number_format = "hh:mm"
+        io.cell(row=x, column=6, value=f'=IF(OR(D{x}="",E{x}=""),IF(D{x}<>"","작업 중",""),E{x}-D{x})').number_format = "[h]:mm"
+        io.cell(row=x, column=6).fill = fill(SUB)
+    example(io, 7, [None, "○○○", "환경팀", "09:12", "09:58", None, "적정", "○"])
+    dv_list(io, "G7:G31", ["적정", "미확인"])
+    box(io, "A33:C33", "입장 인원", f(9.5, True, NAVY), CENTER, HEAD); box(io, "D33", "=COUNTA(D7:D31)", f(11, True), CENTER)
+    box(io, "E33:F33", "아직 안에 있는 인원", f(9.5, True, NAVY), CENTER, HEAD); box(io, "G33", '=COUNTIF(F7:F31,"작업 중")', f(11, True, RED), CENTER)
+    io.conditional_formatting.add("F7:F31", FormulaRule(formula=['F7="작업 중"'], fill=fill(YELLOW), font=Font(name=FONT, bold=True)))
+    io.print_area = "A1:H33"
+
+    # 관리대장 + 긴급구조훈련
+    g = sheet(wb, "밀폐공간 관리대장", [5, 18, 18, 14, 22, 18, 12, 12, 16], landscape=True, tab=ORANGE)
+    title(g, "밀폐공간 관리대장 · 긴급구조훈련 기록", 9, sub="밀폐공간 작업 프로그램의 '위치 파악 및 관리 방안'·'유해·위험 요인 파악'(제619조제1항) · 긴급구조훈련 6개월에 1회 이상(제640조)")
+    header_row(g, 4, ["No", "밀폐공간명", "위치", "별표 18 해당", "예상 유해·위험 요인", "출입 통제 방법", "관리 부서", "최근 점검일", "비고"], height=28)
+    grid(g, 5, 19, 1, 9, height=22)
+    for x in range(5, 20):
+        g.cell(row=x, column=1, value=x - 4); g.cell(row=x, column=8).number_format = "yyyy-mm-dd"
+        for cc in (5, 6):
+            g.cell(row=x, column=cc).alignment = LEFT
+    example(g, 5, [None, "집수정 2호", "오폐수처리장 지하", "제○호(원문 확인)", "황화수소·산소결핍", "맨홀 잠금·출입금지 표지", "환경팀", "2026-10-20"])
+    dv_list(g, "E5:E19", ["산소결핍", "황화수소", "일산화탄소", "이산화탄소", "가연성가스", "황화수소·산소결핍"])
+    box(g, "A21:I21", "긴급구조훈련 기록 (비상연락체계 운영·구조용 장비 사용·공기호흡기 또는 송기마스크 착용·응급처치 — 6개월에 1회 이상, 결과 기록·보존)", f(10, True, "FFFFFF"), LEFT, NAVY)
+    g.row_dimensions[21].height = 22
+    header_row(g, 22, ["No", "훈련일", "대상 밀폐공간", "참석 인원", "훈련 내용", "보완 사항", "다음 훈련 기한(자동)", "", "확인"], height=26)
+    g.merge_cells("G22:H22")
+    grid(g, 23, 30, 1, 9, height=22)
+    for x in range(23, 31):
+        g.merge_cells(f"G{x}:H{x}")
+        g.cell(row=x, column=1, value=x - 22); g.cell(row=x, column=2).number_format = "yyyy-mm-dd"
+        g.cell(row=x, column=7, value=f'=IF(B{x}="","",EDATE(B{x},6))').number_format = "yyyy-mm-dd"
+        g.cell(row=x, column=7).fill = fill(SUB)
+        for cc in (5, 6):
+            g.cell(row=x, column=cc).alignment = LEFT
+    g.conditional_formatting.add("G23:G30", FormulaRule(formula=['AND(G23<>"",G23<TODAY(),COUNTIF($B$23:$B$30,">"&B23)=0)'], fill=fill("FEE4E2"), font=Font(name=FONT, color=RED, bold=True)))
+    example(g, 23, [None, "2026-10-15", "집수정 2호", "8명", "공기호흡기 착용, 삼각대로 구조, 심폐소생술", "구조 로프 길이 부족 — 교체"])
+    g.print_area = "A1:I30"; g.print_title_rows = "4:4"
+
+    guide_sheet(wb, "밀폐공간 작업 양식", [
+        ("이 파일의 구성", ["작업 전 확인서: 제619조제2항 6가지(작업 정보·작업자 정보·산소/유해가스 측정 결과와 후속조치·누출 등 가능성 검토·보호구·비상연락체계)를 한 장에 확인하고, 작업이 끝날 때까지 출입구에 붙입니다(제3항).",
+                       "측정 기록: 작업 시작 전(일시 중단 후 다시 시작할 때 포함) 지정된 측정자가 산소·유해가스를 측정·평가하고, 측정자 성명·일시·장소·결과를 기록해 3년간 보존합니다(제619조의2제1항·제4항). 숫자를 넣으면 적정공기 기준(제618조제3호)과 비교해 판정이 자동으로 나옵니다.",
+                       "출입 인원 점검: 들어갈 때와 나올 때마다 인원을 점검합니다(제621조). 퇴장 시각이 비어 있으면 '작업 중'으로 표시됩니다.",
+                       "관리대장: 사업장 밀폐공간의 위치·유해 요인·출입 통제를 정리하고(밀폐공간 작업 프로그램, 제619조제1항), 6개월에 1회 이상 긴급구조훈련 결과를 남깁니다(제640조)."]),
+        ("주의", ["판정은 넣은 숫자를 기준과 비교한 결과일 뿐이며, 측정 위치·장비 교정 상태가 적절한지는 판단하지 않습니다. 네 가지 중 하나라도 비어 있으면 '미측정 항목'으로 표시됩니다.",
+                "밀폐공간에 해당하는 장소는 안전보건규칙 별표 18 원문에서 확인해 '별표 18 해당' 칸에 적으세요.",
+                "적정공기가 유지되지 않으면 환기하거나 공기호흡기·송기마스크를 지급해 착용시키는 등 필요한 조치를 해야 합니다(제619조의2제3항, 제620조)."]),
+    ], source="근거: 산업안전보건기준에 관한 규칙 제618조·제619조·제619조의2·제620조·제621조·제640조. 화면으로 작성: safeplum.com/tools/confined/")
+    wb.move_sheet("작성 안내", offset=-4); wb.active = 1
+    p = OUT / "SafePlum_confined_space.xlsx"; wb.save(p); return p
+
+
+# =====================================================================
+# 9. 화기작업 허가서 — 제241조(화재위험작업 시의 준수사항)·제241조의2(화재감시자)
+# =====================================================================
+def hot_work():
+    k = json.load(open(ROOT / "data/lawtext/krule.json", encoding="utf-8"))
+    import re
+    a241 = next(a for a in k["articles"] if a.get("jo") == "제241조")["text"]
+    items = [re.sub(r"\. 이 경우.*$", "", ln.split(". ", 1)[1]) for ln in a241.split("\n") if re.match(r"^[1-6]\. ", ln)]
+    assert len(items) == 6, items
+    wb = new_book()
+    W = [12, 12, 12, 12, 12, 12, 13, 13]
+    ws = sheet(wb, "화기작업 허가서", W, tab=RED, one_page=True)
+    title(ws, "화기작업 허가서", 4, sub="안전보건규칙 제241조·제241조의2 — 작업 시작부터 끝날 때까지 작업장소에 게시(제241조제4항)")
+    approval(ws, 1, 5, labels=("신청", "안전관리자", "허가"), sign_h=30)
+    hd = lambda ref, v: box(ws, ref, v, f(9.5, True, NAVY), CENTER, HEAD)
+    sec = lambda r, v, c=NAVY: box(ws, f"A{r}:H{r}", v, f(10.5, True, "FFFFFF"), LEFT, c)
+    r = 4; sec(r, "1. 작업 개요"); r += 1
+    for a, b_, ea, eb in (("작업 일시", "작업 종류", "예: 2026-10-27 13:00~16:00", "용접"), ("작업 장소", "작업 업체", "예: 2층 기계실 배관 랙", "예: ○○설비(협력업체)"),
+                          ("작업자", "화재감시자", "예: ○○○ 외 1명", "예: ○○○")):
+        hd(f"A{r}", a); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", b_); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+        example(ws, r, [None, ea, None, None, None, eb]); ws.row_dimensions[r].height = 24; r += 1
+    dv_list(ws, f"F{r - 3}", ["용접", "용단", "금속 가열", "연삭숫돌 건식연마", "그라인딩", "기타 불꽃 발생 작업"])
+    hd(f"A{r}", "작업 내용"); box(ws, f"B{r}:H{r}", None, f(10), LEFT_TOP); example(ws, r, [None, "예: 냉각수 배관 플랜지 교체를 위한 용단·용접, 주변 보온재 있음"]); ws.row_dimensions[r].height = 30; r += 2
+    sec(r, "2. 작업 전 확인 — 가연성물질이 있는 장소 (제241조제2항 각 호, 원문)"); r += 1
+    header_row(ws, r, ["확인 사항(원문)", "", "", "", "확인", "확인 내용", "", ""], height=22)
+    ws.merge_cells(f"A{r}:D{r}"); ws.merge_cells(f"F{r}:H{r}"); r += 1
+    c0 = r
+    ex = ["예: 작업 순서·담당 정해 TBM 공유", "예: 도료 18L 2통 → 창고로 이동", "예: 보온재 방화포로 덮음, 소화기 2대", "예: 성능인증 용접방화포 사용", "예: 가스 측정 0%LEL 확인", "예: 소화기 위치·대피로 교육"]
+    for i, it in enumerate(items):
+        box(ws, f"A{r}:D{r}", f"{i + 1}. {it}", f(9.5, False, INK), LEFT, SUB); box(ws, f"E{r}", None, f(10, True), CENTER); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+        example(ws, r, [None, None, None, None, None, ex[i]])
+        ws.row_dimensions[r].height = 30 if len(it) < 34 else 40; r += 1
+    box(ws, f"A{r}:D{r}", "통풍·환기가 충분하지 않은 장소에서 통풍·환기용으로 산소를 쓰지 않음 (제1항)", f(9.5, False, INK), LEFT, SUB); box(ws, f"E{r}", None, f(10, True), CENTER); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+    ws.row_dimensions[r].height = 30; r += 1
+    dv_list(ws, f"E{c0}:E{r - 1}", ["확인", "해당 없음", "미확인"])
+    color_text_rule(ws, f"E{c0}:E{r - 1}", "미확인", RED)
+    r += 1
+    sec(r, "3. 화재감시자 배치 (제241조의2) — 용접·용단 작업"); r += 1
+    header_row(ws, r, ["배치 대상 장소(어느 하나에 해당하면 배치)", "", "", "", "", "", "해당 여부", ""], height=22)
+    ws.merge_cells(f"A{r}:F{r}"); ws.merge_cells(f"G{r}:H{r}"); r += 1
+    k0 = r
+    for t in ("작업반경 11미터 이내에 건물구조 자체나 내부(개구부 등으로 개방된 부분 포함)에 가연성물질이 있는 장소",
+              "작업반경 11미터 이내의 바닥 하부에 가연성물질이 11미터 이상 떨어져 있지만 불꽃에 의해 쉽게 발화될 우려가 있는 장소",
+              "가연성물질이 금속으로 된 칸막이·벽·천장 또는 지붕의 반대쪽 면에 인접해 있어 열전도나 열복사에 의해 발화될 우려가 있는 장소"):
+        box(ws, f"A{r}:F{r}", t, f(9, False, INK), LEFT, SUB); box(ws, f"G{r}:H{r}", None, f(10, True), CENTER); ws.row_dimensions[r].height = 30; r += 1
+    dv_list(ws, f"G{k0}:G{r - 1}", ["해당", "해당 없음"])
+    hd(f"A{r}", "감시자 지급 장비"); box(ws, f"B{r}:H{r}", "□ 확성기   □ 휴대용 조명기구   □ 화재 대피용 마스크   (제241조의2제3항)", f(10), LEFT); ws.row_dimensions[r].height = 24; r += 1
+    hd(f"A{r}", "감시자 업무"); box(ws, f"B{r}:H{r}", "가연성물질 유무 확인 · 가스 검지·경보 장치 작동 확인 · 화재 시 근로자 대피 유도 (제241조의2제2항)", f(9.5, False, MUTED), LEFT); ws.row_dimensions[r].height = 24; r += 2
+    sec(r, "4. 인화성 가스·증기 측정 (작업 전·작업 중)"); r += 1
+    header_row(ws, r, ["측정 시각", "위치", "", "가연성가스 %LEL", "", "측정자", "", "조치"], height=22)
+    ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:E{r}"); ws.merge_cells(f"F{r}:G{r}"); r += 1
+    for k_ in range(3):
+        grid(ws, r, r, 1, 8, height=22)
+        ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:E{r}"); ws.merge_cells(f"F{r}:G{r}"); r += 1
+    example(ws, r - 3, ["12:50", "배관 랙 하부", None, "0", None, "○○○", None, "작업 가능"])
+    r += 1
+    sec(r, "5. 작업 종료 확인 — 불씨·잔불", RED); r += 1
+    hd(f"A{r}", "종료 시각"); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", "잔불 확인 시각"); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+    example(ws, r, [None, "15:40", None, None, None, "예: 16:10 (종료 30분 뒤 순회)"]); ws.row_dimensions[r].height = 24; r += 1
+    hd(f"A{r}", "확인자"); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", "특이 사항"); box(ws, f"F{r}:H{r}", None, f(10), LEFT); ws.row_dimensions[r].height = 24; r += 1
+    legend(ws, r + 1, 8)
+    ws.print_area = f"A1:H{r + 1}"
+
+    lg = sheet(wb, "화기작업 대장", [5, 11, 9, 9, 18, 13, 22, 12, 12, 11, 11], landscape=True, tab=ORANGE)
+    title(lg, "화기작업 허가 대장", 8, sub="허가서를 한 줄로 모아 허가 번호·장소·감시자·잔불 확인을 관리합니다")
+    lc = ["No", "작업일", "시작", "종료", "장소", "작업 종류", "작업 내용", "작업 업체", "화재감시자", "잔불 확인", "허가자"]
+    header_row(lg, 4, lc, height=26)
+    grid(lg, 5, 44, 1, len(lc), height=22)
+    for x in range(5, 45):
+        lg.cell(row=x, column=1, value=x - 4); lg.cell(row=x, column=2).number_format = "yyyy-mm-dd"
+        for cc in (3, 4):
+            lg.cell(row=x, column=cc).number_format = "hh:mm"
+        for cc in (5, 7):
+            lg.cell(row=x, column=cc).alignment = LEFT
+    dv_list(lg, "F5:F44", ["용접", "용단", "금속 가열", "연삭숫돌 건식연마", "그라인딩", "기타 불꽃 발생 작업"])
+    dv_list(lg, "J5:J44", ["확인", "미확인"])
+    color_text_rule(lg, "J5:J44", "미확인", RED)
+    lg.conditional_formatting.add("J5:J44", FormulaRule(formula=['AND(B5<>"",J5="")'], fill=fill(YELLOW)))
+    example(lg, 5, [None, "2026-10-27", "13:00", "15:40", "2층 기계실 배관 랙", "용접", "냉각수 배관 플랜지 교체", "○○설비", "○○○", "확인", "○○○"])
+    lg.print_title_rows = "4:4"; lg.freeze_panes = "C5"; lg.print_area = "A1:K44"
+
+    guide_sheet(wb, "화기작업 허가서", [
+        ("언제 쓰나", ["용접·용단, 금속 가열, 연삭숫돌 건식연마 등 불꽃이 생길 수 있는 작업(화재위험작업, 제236조제2항)을 가연성물질이 있는 장소에서 할 때 씁니다.",
+                     "작업 전에 제241조제2항 각 호를 확인하고 비산 방지 등 안전조치를 한 뒤 작업하게 해야 하며(제3항), 작업 내용·일시·안전점검 및 조치 사항을 작업이 끝날 때까지 작업장소에 서면으로 게시해야 합니다(제4항). 같은 장소에서 상시·반복적으로 하는 작업은 게시를 생략할 수 있습니다."]),
+        ("화재감시자", ["용접·용단 작업 장소가 제241조의2제1항 각 호 중 하나에 해당하면 화재감시자를 지정해 배치합니다. 같은 장소에서 상시·반복적으로 하면서 경보용 설비·기구, 소화설비 또는 소화기를 갖춘 경우에는 배치하지 않을 수 있습니다(같은 항 단서).",
+                     "감시자에게 확성기·휴대용 조명기구·화재 대피용 마스크 등 대피용 방연장비를 지급해야 합니다(제3항)."]),
+        ("이렇게 쓰세요", ["'2. 작업 전 확인'의 회색 칸은 원문입니다. 확인 칸에서 확인·해당 없음·미확인을 고르면 미확인은 빨간색으로 표시됩니다.",
+                       "작업이 끝난 뒤 잔불 확인 시각과 확인자를 반드시 적고, 대장에 옮겨 관리하세요. 잔불 확인 칸이 비어 있으면 노란색으로 표시됩니다."]),
+    ], source="근거: 산업안전보건기준에 관한 규칙 제236조제2항·제241조·제241조의2. 사업장 안전작업허가 절차가 있으면 그 절차를 따르세요. 화면으로 작성: safeplum.com/tools/permit/")
+    wb.move_sheet("작성 안내", offset=-2); wb.active = 1
+    p = OUT / "SafePlum_hot_work_permit.xlsx"; wb.save(p); return p
+
+
+# =====================================================================
+# 10. 안전 및 보건에 관한 협의체 회의록 — 시행규칙 제79조
+# =====================================================================
+def council():
+    r79 = next(a for a in json.load(open(ROOT / "data/lawtext/rule.json", encoding="utf-8"))["articles"] if a.get("jo") == "제79조")["text"]
+    import re
+    items = [ln.split(". ", 1)[1].replace("법 제36조에 따른 ", "") for ln in r79.split("\n") if re.match(r"^[1-5]\. ", ln)]
+    assert len(items) == 5, items
+    wb = new_book()
+    W = [12, 12, 12, 12, 12, 12, 13, 13]
+    ws = sheet(wb, "협의체 회의록", W, tab=NAVY, one_page=True)
+    title(ws, "안전 및 보건에 관한 협의체 회의록", 4, sub="산업안전보건법 제64조제1항제1호 · 시행규칙 제79조 — 매월 1회 이상 정기 회의, 결과 기록·보존")
+    approval(ws, 1, 5, labels=("작성", "안전관리자", "승인(도급인)"), sign_h=30)
+    hd = lambda ref, v: box(ws, ref, v, f(9.5, True, NAVY), CENTER, HEAD)
+    sec = lambda r, v: box(ws, f"A{r}:H{r}", v, f(10.5, True, "FFFFFF"), LEFT, NAVY)
+    r = 4; sec(r, "1. 회의 개요"); r += 1
+    for a, b_, ea, eb in (("회의 일시", "회차", "예: 2026-10-27 14:00~15:00", "예: 2026년 10월 정기"), ("장소", "작성자", "예: 본관 2층 회의실", "예: 안전관리자 ○○○")):
+        hd(f"A{r}", a); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", b_); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+        example(ws, r, [None, ea, None, None, None, eb]); ws.row_dimensions[r].height = 24; r += 1
+    r += 1
+    sec(r, "2. 참석자 — 도급인 및 그의 수급인 전원으로 구성 (제79조제1항)"); r += 1
+    header_row(ws, r, ["구분", "업체명", "", "맡은 작업(공종)", "", "직위", "성명", "서명"], height=22)
+    ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:E{r}"); r += 1
+    a0 = r
+    for k_ in range(7):
+        grid(ws, r, r, 1, 8, height=22)
+        ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"D{r}:E{r}"); r += 1
+    dv_list(ws, f"A{a0}:A{r - 1}", ["도급인", "수급인"])
+    example(ws, a0, ["도급인", "(주)○○", None, "전체 관리", None, "공장장", "○○○"])
+    example(ws, a0 + 1, ["수급인", "○○설비", None, "배관 보수", None, "현장소장", "○○○"])
+    box(ws, f"A{r}:B{r}", "참석 업체 수(자동)", f(9.5, True, NAVY), CENTER, HEAD); box(ws, f"C{r}", f'=SUMPRODUCT((B{a0}:B{r - 1}<>"")/COUNTIF(B{a0}:B{r - 1},B{a0}:B{r - 1}&""))', f(11, True), CENTER)
+    box(ws, f"D{r}:H{r}", "수급인이 모두 참석했는지 확인하세요. 불참 업체는 회의 결과를 따로 전달하고 기록합니다.", f(8.5, False, MUTED), LEFT)
+    ws.row_dimensions[r].height = 20; r += 2
+    sec(r, "3. 협의 사항 (제79조제2항 각 호 — 원문)"); r += 1
+    header_row(ws, r, ["협의 사항", "", "", "협의 내용·결정", "", "", "", ""], height=22)
+    ws.merge_cells(f"A{r}:C{r}"); ws.merge_cells(f"D{r}:H{r}"); r += 1
+    ex = ["예: 11월 작업 시작 08:00, 동절기 도장 작업 10:00 이후", "예: 동시 작업 구역(기계실)은 무전기 채널 3번으로 연락",
+          "예: 가스 누출 시 바람 반대 방향 정문 집결, 대피 신호 사이렌 3회", "예: 배관 보수 수시 위험성평가 결과 공유 — 고소 작업 안전대 부착설비 추가",
+          "예: 11/3~11/5 기계실 용접과 도장 작업 시간 분리(오전 용접·오후 도장)"]
+    for i, it in enumerate(items):
+        box(ws, f"A{r}:C{r}", f"{i + 1}. {it}", f(9.5, True, INK), LEFT, SUB); box(ws, f"D{r}:H{r}", None, f(10), LEFT_TOP)
+        example(ws, r, [None, None, None, ex[i]]); ws.row_dimensions[r].height = 38; r += 1
+    box(ws, f"A{r}:C{r}", "기타 안건·건의", f(9.5, True, INK), LEFT, SUB); box(ws, f"D{r}:H{r}", None, f(10), LEFT_TOP); ws.row_dimensions[r].height = 38; r += 2
+    sec(r, "4. 지난 회의 결정 사항 이행 확인"); r += 1
+    header_row(ws, r, ["결정 사항", "", "", "", "담당", "이행 결과", "", "상태"], height=22)
+    ws.merge_cells(f"A{r}:D{r}"); ws.merge_cells(f"F{r}:G{r}"); r += 1
+    p0 = r
+    for k_ in range(3):
+        grid(ws, r, r, 1, 8, height=22); ws.merge_cells(f"A{r}:D{r}"); ws.merge_cells(f"F{r}:G{r}")
+        ws.cell(row=r, column=1).alignment = LEFT; ws.cell(row=r, column=6).alignment = LEFT; r += 1
+    dv_list(ws, f"H{p0}:H{r - 1}", ["완료", "진행 중", "미이행"])
+    color_text_rule(ws, f"H{p0}:H{r - 1}", "미이행", RED)
+    r += 1
+    sec(r, "5. 이번 회의 결정 사항과 후속 조치"); r += 1
+    header_row(ws, r, ["조치 내용", "", "", "", "담당 업체", "기한", "확인자", "비고"], height=22)
+    ws.merge_cells(f"A{r}:D{r}"); r += 1
+    q0 = r
+    for k_ in range(4):
+        grid(ws, r, r, 1, 8, height=22); ws.merge_cells(f"A{r}:D{r}"); ws.cell(row=r, column=1).alignment = LEFT
+        ws.cell(row=r, column=6).number_format = "yyyy-mm-dd"; r += 1
+    example(ws, q0, ["예: 기계실 고소 작업 구간 안전대 부착설비 2개소 설치", None, None, None, "○○설비", "2026-11-10", "○○○"])
+    legend(ws, r + 1, 8)
+    ws.print_area = f"A1:H{r + 1}"
+
+    y = sheet(wb, "연간 개최 현황", [8, 13, 12, 34, 12, 14], tab=GREEN)
+    title(y, "협의체 연간 개최 현황", 6, sub="매월 1회 이상 정기 회의 — 지난 달에 회의일이 비어 있으면 '미개최 확인'으로 표시됩니다")
+    box(y, "A4", "연도", f(9.5, True, NAVY), CENTER, HEAD); box(y, "B4", 2026, f(11, True), CENTER); y.row_dimensions[4].height = 22
+    header_row(y, 6, ["월", "회의일", "참석 업체 수", "주요 협의·결정", "회의록 보관", "상태(자동)"], height=24)
+    for i in range(12):
+        x = 7 + i
+        grid(y, x, x, 1, 6, height=24)
+        y.cell(row=x, column=1, value=i + 1).number_format = '0"월"'
+        y.cell(row=x, column=2).number_format = "yyyy-mm-dd"; y.cell(row=x, column=4).alignment = LEFT
+        y.cell(row=x, column=6, value=f'=IF(B{x}<>"","개최",IF(EOMONTH(DATE($B$4,A{x},1),0)<TODAY(),"미개최 확인","예정"))').fill = fill(SUB)
+    dv_list(y, "E7:E18", ["보관", "미보관"])
+    color_text_rule(y, "F7:F18", "미개최", RED)
+    box(y, "A20:C20", "개최 횟수", f(9.5, True, NAVY), CENTER, HEAD); box(y, "D20", '=COUNTIF(F7:F18,"개최")', f(11, True), CENTER)
+    box(y, "A21:C21", "미개최 확인 필요", f(9.5, True, NAVY), CENTER, HEAD); box(y, "D21", '=COUNTIF(F7:F18,"미개최 확인")', f(11, True, RED), CENTER)
+    y.print_area = "A1:F21"
+
+    guide_sheet(wb, "안전 및 보건에 관한 협의체 회의록", [
+        ("누가·언제", ["관계수급인 근로자가 도급인의 사업장에서 작업하는 경우 도급인은 도급인과 수급인을 구성원으로 하는 협의체를 구성·운영해야 합니다(법 제64조제1항제1호). 협의체는 도급인 및 그의 수급인 전원으로 구성합니다(시행규칙 제79조제1항).",
+                    "매월 1회 이상 정기적으로 회의를 열고 그 결과를 기록·보존해야 합니다(제79조제3항). '연간 개최 현황' 시트로 빠진 달이 없는지 확인하세요."]),
+        ("무엇을 협의하나", ["제79조제2항의 다섯 가지(작업 시작 시간, 작업·작업장 간 연락방법, 재해 위험 시 대피방법, 위험성평가 실시, 연락 방법 및 작업공정 조정)를 매 회의에서 다루고 결과를 적습니다. 회색 칸은 원문입니다.",
+                         "결정 사항은 담당 업체와 기한을 정해 다음 회의에서 이행 결과를 확인하세요."]),
+        ("함께 쓰면 좋은 것", ["도급인의 작업장 순회점검(시행규칙 제80조: 건설업·제조업 등 2일에 1회 이상, 그 밖의 사업 1주일에 1회 이상)과 합동 안전·보건점검(제82조) 결과를 협의 안건으로 올리면 연결이 됩니다."]),
+    ], source="근거: 산업안전보건법 제64조, 시행규칙 제79조·제80조·제82조. 화면으로 작성: safeplum.com/tools/council/")
+    wb.move_sheet("작성 안내", offset=-2); wb.active = 1
+    p = OUT / "SafePlum_council_minutes.xlsx"; wb.save(p); return p
+
+
 if __name__ == "__main__":
-    for fn in (risk, tbm, patrol, edu, near_miss, ppe, workplan):
+    for fn in (risk, tbm, patrol, edu, near_miss, ppe, workplan, confined, hot_work, council):
         print(fn())
