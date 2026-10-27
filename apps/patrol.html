@@ -70,7 +70,7 @@
             h4 { break-after: avoid; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
-        @page { size: A4; margin: 14mm 13mm; }
+        @page { size: A4; margin: 14mm 13mm; } @page:first{margin-top:0;margin-bottom:0;padding-top:14mm;padding-bottom:14mm}
 
         /* 순회점검 작성기 전용(미리 만든 Tailwind CSS에 없는 모양은 여기 일반 CSS로 둔다) */
         .pt-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }

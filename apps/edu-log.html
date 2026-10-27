@@ -94,7 +94,7 @@
             tr, img { break-inside: avoid; page-break-inside: avoid; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
-        @page { size: A4; margin: 14mm 13mm; }
+        @page { size: A4; margin: 14mm 13mm; } @page:first{margin-top:0;margin-bottom:0;padding-top:14mm;padding-bottom:14mm}
         /* 교육 일지 작성기 전용(미리 만든 Tailwind CSS에 없는 모양은 여기 일반 CSS로 둔다) */
         .el-in { width: 100%; min-width: 0; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 8px; font-size: 12px; line-height: 1.4; background: #f8fafc; color: #1e293b; outline: none; font-family: inherit; }
         .el-in:focus { background: #fff; border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,.25); }

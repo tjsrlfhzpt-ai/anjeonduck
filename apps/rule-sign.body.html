@@ -254,7 +254,7 @@
     var n = st.rules.length;
     $("rsCount").textContent = n + "줄" + (n > 10 ? " · 줄이 많아 글자가 작아집니다(" + Math.round(r.fr) + "pt). 현장에서 읽기 좋은 것은 10줄 이내입니다." : "");
     var d = dims();
-    $("rsPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0}}";
+    $("rsPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0}@page:first{padding:0}}";
     $("rsSheet").dataset.dirty = "1";
   }
   function fillSheet() { var sh = $("rsSheet"); sh.innerHTML = pageHTML(); fit(sh.firstChild); sh.dataset.dirty = ""; return sh; }

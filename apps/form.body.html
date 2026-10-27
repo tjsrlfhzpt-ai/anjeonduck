@@ -250,7 +250,10 @@ tr.q-hide{display:none}
   function rowRel(s, r) { return "[증빙] " + (s.title ? lb("s." + F.sections.indexOf(s), s.title) : "표") + " · " + (r + 1) + "번째 줄"; }
   function secTable(s) {
     var n = tableRows(s), real = s.cols.filter(function (c) { return !c.auto; }).length;
-    var head = "<thead><tr>" + s.cols.map(function (c, ci) { return '<th style="' + (c.w ? "width:" + c.w + "%" : "") + '">' + lab("h." + s.k + "." + ci, c.label) + "</th>"; }).join("") + (s.fixed ? "" : '<th class="rowx-c no-print"><span class="sr">줄 편집</span></th>') + "</tr></thead>";
+    // 열 너비 합이 100%를 넘으면(뒤에 덧붙인 열 포함) 너비를 비율대로 줄이고, 너비가 없는 열도 최소 9%를 받게 한다 — 인쇄에서 열이 0으로 찌그러지거나 오른쪽이 잘리지 않게
+    var cwGiven = 0, cwFree = 0; s.cols.forEach(function (c) { if (c.w) cwGiven += +c.w; else cwFree++; });
+    var cwK = cwGiven + cwFree * 9 > 100 && cwGiven ? (100 - cwFree * 9) / cwGiven : 1, cwRest = cwFree ? Math.max(9, (100 - cwGiven * cwK) / cwFree) : 0;
+    var head = "<thead><tr>" + s.cols.map(function (c, ci) { var cw = c.w ? Math.round(c.w * cwK * 10) / 10 : (cwK < 1 ? cwRest : 0); return '<th style="' + (cw ? "width:" + cw + "%" : "") + '">' + lab("h." + s.k + "." + ci, c.label) + "</th>"; }).join("") + (s.fixed ? "" : '<th class="rowx-c no-print"><span class="sr">줄 편집</span></th>') + "</tr></thead>";
     var body = "";
     for (var r = 0; r < n; r++) {
       body += '<tr data-tr="' + esc(s.k) + "." + r + '">' + s.cols.map(function (c, ci) {

@@ -898,6 +898,9 @@ details.lawbox summary{cursor:pointer}
 .ctab .item .ad-cam{float:right;margin:1px 0 0 6px}
 @media print{.paper-photos:not(.has-photos){display:none}.paper-photos.has-photos{break-before:page;margin-top:0}.ctally-miss{color:#111}}
 @page{size:A4;margin:12mm 12mm 14mm;@bottom-center{content:counter(page) " / " counter(pages);font-size:9pt;color:#666}}
+/* 인쇄: 첫 쪽 위·아래 margin을 0으로 → 브라우저 머리글·바닥글(날짜·시간·제목·주소)이 붙지 않음. 같은 간격은 padding으로 */
+@page:first{margin-top:0;margin-bottom:0;padding-top:12mm;padding-bottom:14mm}
+@media print{html,body{min-width:0!important;width:auto!important}.paper,.print-doc{width:auto!important;max-width:100%!important;box-sizing:border-box}.paper table{max-width:100%}.paper th,.paper td{overflow-wrap:anywhere}.paper .im-info,.paper .im-pt{table-layout:fixed;width:100%}.paper-h{grid-template-columns:minmax(0,1fr) auto}.paper-t{min-width:0;overflow-wrap:anywhere}.table-wrap{overflow:visible!important}.table-wrap table,.dtable{width:100%!important;min-width:0!important}.dtable th,.dtable td,.seltable th{white-space:normal!important;padding:6px 6px}}
 .appr-panel{background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--r);padding:12px 14px;margin:8px 0}
 .appr-panel-l{font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:6px}
 .appr-panel .ad-appr{margin-left:0}
@@ -1698,6 +1701,10 @@ body.is-arrived [data-landing]{display:none!important}
 @media print{body.pr-confined #cPaper{display:block}}
 
 /* 개선 전·후 사진대지 */
+.dl-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;align-items:center;padding:18px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);margin-top:8px}
+.dl-thumb{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line)}.dl-thumb img{display:block;width:100%;height:auto}
+.dl-body h3{margin:2px 0 8px;font-size:18px;color:var(--navy)}.dl-body p{margin:0 0 12px;color:var(--text-2);line-height:1.6;font-size:14.5px}.dl-k{font-size:12.5px!important;font-weight:700;color:var(--blue)!important;margin:0!important}
+@media (max-width:720px){.dl-card{grid-template-columns:1fr}}
 .im-list{display:flex;flex-direction:column;gap:14px}
 .im-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px}
 .im-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}

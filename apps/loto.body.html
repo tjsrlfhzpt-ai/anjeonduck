@@ -80,7 +80,7 @@
 .lt-rot{transform:rotate(180deg)}
 .lt-print{display:none}
 @media print{
-  @page{size:A4 landscape;margin:0}
+  @page{size:A4 landscape;margin:0}@page:first{padding:0}
   html,body{background:#fff!important}
   body>*:not(main){display:none!important}
   main>*:not(.lt-print){display:none!important}

@@ -19,6 +19,15 @@
   <div class="listbar"><strong id="iSum"></strong><span class="grow"></span><div class="btns"><button type="button" class="btn btn-ghost" id="iNew">새 보고서</button><button type="button" class="btn" id="iPrint">인쇄 · PDF 저장</button></div></div>
   <div id="iList" class="im-list"></div>
   <div class="btns"><button type="button" class="btn" id="iAdd">+ 지적사항 추가</button><button type="button" class="btn btn-ghost" id="iPrint2">인쇄 · PDF 저장</button></div>
+  <section class="dl-card" aria-labelledby="dlPptT">
+    <a class="dl-thumb" href="../../assets/files/SafePlum_improve_report_template.pptx" download="SafePlum_지적사항_개선전후_보고양식.pptx"><img src="../../assets/files/improve_report_template_preview.jpg" width="720" height="413" loading="lazy" alt="PPT 보고 양식 미리보기 — 표지, 개선 전·후 1건, 위험성평가 감소대책, 아차사고 재발방지"></a>
+    <div class="dl-body">
+      <p class="dl-k">무료 양식 · PowerPoint</p>
+      <h3 id="dlPptT">회의·보고용 PPT 양식도 받을 수 있습니다</h3>
+      <p>위험성평가 감소대책, 아차사고 재발방지, 순회·합동점검 지적사항을 개선 전·후 사진과 함께 정리하는 16:9 보고 양식입니다. 표지·현황 요약(결재란)·1건/장·위험성평가·아차사고·2건/장 슬라이드가 들어 있고, 사진은 우클릭 → [그림 바꾸기]로 바꾸면 됩니다.</p>
+      <a class="btn" href="../../assets/files/SafePlum_improve_report_template.pptx" download="SafePlum_지적사항_개선전후_보고양식.pptx">PPT 양식 내려받기 (.pptx · 280KB)</a>
+    </div>
+  </section>
   <section class="lawbox"><h3>이 문서의 지위</h3>
     <p>사진대지는 사내 증빙용 실무 보조양식입니다(법령 별지 서식과는 별개). 안전관리자·보건관리자의 업무인 '사업장 순회점검, 지도 및 조치 건의'(시행령 제18조제1항제5호, 제22조제1항제9호)와 '업무 수행 내용의 기록·유지'(제18조제1항제9호, 제22조제1항제13호)를 뒷받침하는 사내 증빙으로 씁니다. 지적 근거 조문은 직접 확인해 적으세요.</p>
     <p class="src-line">사진은 긴 변 1600px로 줄여 이 브라우저 저장소(IndexedDB)에 보관합니다. 다른 기기에서는 보이지 않으며, 브라우저 데이터를 지우면 함께 지워집니다. 인쇄 창에서 'PDF로 저장'을 골라 보관하세요. 사람 얼굴 등 개인을 알아볼 수 있는 사진은 필요한 범위에서만 쓰세요.</p></section>
@@ -173,7 +182,7 @@
           '<tr><th>지적 내용</th><td class="im-txt">' + nl(it.found) + '</td><th>조치 내용</th><td class="im-txt">' + nl(it.action) + "</td></tr>" +
           "<tr><th>근거</th><td>" + esc(it.basis) + "</td><th>조치일·조치자</th><td>" + esc([it.adate, it.aby].filter(Boolean).join(" · ")) + "</td></tr></tbody></table>";
       }).join("");
-      $("iPaper").innerHTML = head + body + '<p class="paper-foot">SafePlum 개선 전·후 사진대지 · 사내 증빙용 보조양식</p>';
+      $("iPaper").innerHTML = head + body;
       var imgs = [].slice.call($("iPaper").querySelectorAll("img"));
       return Promise.all(imgs.map(function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); }));
     });

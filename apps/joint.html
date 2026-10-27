@@ -75,7 +75,7 @@
             .jt-break { break-before: page; page-break-before: always; border-top: 0 !important; margin-top: 0 !important; padding-top: 0 !important; }
             .jt-sign { break-inside: avoid; }
         }
-        @page { size: A4; margin: 14mm 13mm; }
+        @page { size: A4; margin: 14mm 13mm; } @page:first{margin-top:0;margin-bottom:0;padding-top:14mm;padding-bottom:14mm}
 
         /* 합동점검 작성기 전용(미리 만든 Tailwind CSS에 없는 모양은 여기 일반 CSS로 둔다) */
         .jt-in { width: 100%; min-width: 0; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 8px; font-size: 12px; line-height: 1.4; background: #f8fafc; color: #1e293b; outline: none; font-family: inherit; }
