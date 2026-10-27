@@ -1575,6 +1575,10 @@ button.mc-d.today:not(.sel){outline:2px solid var(--navy);outline-offset:-2px}
 .cm-blog{background:#03C75A;color:#04210F;border-color:#02A94C}
 .cm-blog .cm-chat-d{color:#062E15}
 .cm-blog .cm-chat-go{background:#04210F;color:#fff}
+.cm-yt{background:#E62117;color:#fff;border-color:#C4170F}
+.cm-yt .cm-chat-d{color:#FFE7E5}
+.cm-yt .cm-chat-go{background:#0F0F0F;color:#fff;display:inline-flex;align-items:center;gap:7px}
+.cm-yt-play{width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff}
 .cm-chat-side{grid-template-columns:1fr;margin:0}
 .cm-chat-side .cm-chat-go{grid-column:1;grid-row:auto;justify-self:start;margin-top:8px}
 .job-member{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 16px;margin:0 0 14px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);font-size:14px;color:var(--text-2)}

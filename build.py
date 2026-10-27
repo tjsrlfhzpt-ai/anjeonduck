@@ -956,6 +956,15 @@ def blog_banner(cls=""):
             f'<span class="cm-chat-go">네이버 블로그 보기 ↗</span></a>')
 
 
+def yt_banner(cls=""):
+    u = VIDEO_CHANNELS.get("youtube")
+    if not u:
+        return ""
+    return (f'<a class="cm-chat cm-yt {cls}" href="{html.escape(u)}" target="_blank" rel="noopener">'
+            f'<span class="cm-chat-t">SafePlum 유튜브</span><span class="cm-chat-d">현장 안전수칙을 짧은 영상으로 정리해 올립니다.</span>'
+            f'<span class="cm-chat-go"><span class="cm-yt-play" aria-hidden="true"></span>유튜브 채널 보기 ↗</span></a>')
+
+
 def _videos():
     p = ROOT / "data/videos.json"
     if not p.exists():
@@ -2179,6 +2188,7 @@ def build(out, today):
     {month_box}
     {chat_banner("cm-chat-side")}
     {blog_banner("cm-chat-side")}
+    {yt_banner("cm-chat-side")}
     {(f'<section class="side-box vside"><div class="bd-h"><h2 class="h-sm">안전보건 영상</h2><a class="more" href="videos/">전체 {len(VIDEOS)}편 →</a></div>' + video_card(VIDEOS[0], "") + '</section>' + VIDEO_JS) if VIDEOS else ""}
     <section class="side-box go-box"><h2 class="h-sm go-h"><img src="assets/img/ico/write.webp" width="40" height="40" alt="" loading="lazy">바로 신청·신고</h2><ul class="go-list">{civil}</ul><p class="go-orgs">{orgs}</p></section>
   </aside>
@@ -2249,6 +2259,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
     brief_side = f"""<aside class="col-side stack">
     {acc_trend_html(auto_acc, today)}
     {blog_banner("cm-chat-side")}
+    {yt_banner("cm-chat-side")}
     <div class="side-box"><h2 class="h-sm">지난 브리핑</h2><ul class="br-arch">{arch or '<li>없음</li>'}</ul></div>
     <div class="side-box"><h2 class="h-sm">브리핑은 이렇게 만듭니다</h2><ul class="bul hint">
       <li>국가법령정보센터, 고용노동부, 안전보건공단, 정부 부처·국회·공공기관의 공식 발표만 근거로 씁니다.</li>
@@ -2326,7 +2337,8 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
       <li><a href="{rel}laws/act/">산업안전보건법 전문</a></li><li><a href="{rel}laws/yeong/">시행령 전문</a></li><li><a href="{rel}laws/rule/">시행규칙 전문</a></li>
       <li><a href="{rel}board/?b=qna">Q&amp;A 게시판에 질문하기</a></li></ul></div>
     <div class="side-box"><h2 class="h-sm">원문 보러 가기</h2><ul class="bul"><li><a href="{e(gm["src_url"])}" target="_blank" rel="noopener">국가법령정보센터 중앙부처 1차 해석 ↗</a></li></ul></div>
-    {blog_banner("cm-chat-side")}</aside>"""
+    {blog_banner("cm-chat-side")}
+    {yt_banner("cm-chat-side")}</aside>"""
 
         def gq_snip(x):
             # 목록에서 제목 아래 한 줄로 보여 줄 질의 요지. 제목과 같으면 비운다
