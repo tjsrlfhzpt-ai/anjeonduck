@@ -245,7 +245,14 @@ tr.q-hide{display:none}
     // 줄 지우기·순서 바꾸기를 한 표(nx)는 기본 문구가 있던 줄도 지울 수 있다
     return state["nx." + s.k] ? Math.max(n, 1) : Math.max(n, (s.defaults || []).length, 1);
   }
-  function mwOf(n) { return n >= 5 ? Math.min(980, n * 92) : 0; }
+  function mwOf(n, cols) {
+    // 휴대폰에서 표가 화면 폭에 눌려 글자가 한두 자씩 줄바꿈되지 않게: 긴 글 칸은 넓게, 선택 칸은 값이 보일 만큼 최소 폭을 준다(넘치면 표만 옆으로 밀어 봄)
+    if (!cols) return n >= 5 ? Math.min(980, n * 92) : 0;
+    var multi = cols.filter(function (c) { return c.multi; }).length;
+    if (n < 5 && !(n >= 4 && multi >= 2)) return 0;
+    var w = cols.reduce(function (a, c) { return a + (c.auto ? 44 : c.multi ? 150 : c.options ? 104 : c.sign ? 110 : 92); }, 0);
+    return Math.min(1100, Math.max(n * 92, w));
+  }
   function wrapT(html, mw) { return '<div class="tsc"' + (mw ? ' style="--mw:' + mw + 'px"' : "") + ">" + html + "</div>"; }
   function rowRel(s, r) { return "[증빙] " + (s.title ? lb("s." + F.sections.indexOf(s), s.title) : "표") + " · " + (r + 1) + "번째 줄"; }
   function secTable(s) {
@@ -264,7 +271,7 @@ tr.q-hide{display:none}
         return "<td>" + ed("t." + s.k + "." + r + "." + ci, d, c.multi ? "multi" : "") + "</td>";
       }).join("") + (s.fixed ? "" : '<td class="rowx-c no-print">' + ((A.qa && A.qa.tables && A.qa.tables[s.k] || {}).evidence ? '<button type="button" class="ad-cam rowcam" data-cam="' + esc(rowRel(s, r)) + '" aria-label="' + (r + 1) + '번째 줄 증빙 사진">📷' + (PHOTO_REL[rowRel(s, r)] ? " <b>" + PHOTO_REL[rowRel(s, r)] + "</b>" : "") + "</button>" : "") + '<button type="button" class="rowx" data-rup="' + esc(s.k) + '" data-r="' + r + '"' + (r === 0 ? " disabled" : "") + ' aria-label="' + (r + 1) + '번째 줄 위로">↑</button><button type="button" class="rowx del" data-rdel="' + esc(s.k) + '" data-r="' + r + '"' + (n <= 1 ? " disabled" : "") + ' aria-label="' + (r + 1) + '번째 줄 삭제">×</button></td>') + "</tr>";
     }
-    return wrapT('<table class="gtab">' + head + "<tbody>" + body + "</tbody></table>", mwOf(real)) +
+    return wrapT('<table class="gtab">' + head + "<tbody>" + body + "</tbody></table>", mwOf(real, s.cols)) +
       (s.fixed ? "" : '<p class="rowbtns no-print"><button type="button" class="btn btn-sm btn-ghost" data-add="' + esc(s.k) + '">행 추가</button> <button type="button" class="btn btn-sm btn-ghost" data-dup="' + esc(s.k) + '" title="맨 아래에 줄을 추가하고 바로 윗줄 내용을 복사합니다">윗 행 복사</button> <button type="button" class="btn btn-sm btn-ghost" data-del="' + esc(s.k) + '">마지막 행 삭제</button></p>');
   }
   // 줄 하나를 지우거나 위로 올린다. 기본 문구·자동 계산 표시(_a)까지 줄 단위로 함께 옮긴다.

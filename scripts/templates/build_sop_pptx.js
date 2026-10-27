@@ -20,14 +20,15 @@ async function icon(Comp, color) {
 }
 const img = (f) => "image/png;base64," + fs.readFileSync(D + f).toString("base64");
 
-const STEPS = [
-  ["작업 전 회의·보호구 착용", "작업 순서를 모른 채 시작", "TBM에서 청소 구간·담당·잠금 순서 공유, 보호구 착용 서로 확인"],
-  ["운전 정지·전원 차단", "다른 사람이 운전 스위치를 켬", "정지 버튼으로 멈춘 뒤 해당 컨베이어 차단기를 내림"],
-  ["잠금·표지 부착", "청소 중 갑자기 가동되어 손이 끼임", "차단기에 본인 자물쇠 + 꼬리표(성명·시간), 열쇠는 본인이 보관"],
-  ["정지 상태 확인", "관성·잔류 에너지로 벨트가 움직임", "기동 버튼을 눌러 움직이지 않는지, 벨트·롤러가 완전히 멈췄는지 확인"],
-  ["덮개 열고 청소", "롤러 사이 끼임, 모서리 베임, 미끄러짐", "손 대신 스크레이퍼, 물기·이물은 바로 치움, 덮개는 정해진 곳에"],
-  ["복구·잠금 해제·시운전", "덮개 없이 가동, 주변 사람 접근 중 가동", "덮개·공구 확인 → 인원 철수 확인 → 건 사람이 해제 → 알리고 시운전"],
+const STEPS = [ // 작업 단계, 위험요인, 안전 포인트, 대책 구분, 담당 — 작성기 예시(data/form_auto.json sop)와 같음
+  ["작업 전 회의·보호구 착용", "순서·위험을 모른 채 시작해 잠금을 빠뜨림", "TBM에서 청소 구간·담당·잠금 순서와 핵심 위험 공유, 보호구 착용 서로 확인", "관리적", "전원"],
+  ["운전 정지·차단기 내림", "다른 사람이 운전 스위치를 켜 벨트가 움직임", "조작반 정지 버튼 → 해당 컨베이어 차단기 OFF (차단기 번호는 현장 표지로 확인)", "공학적", "작업자"],
+  ["잠금·표지", "청소 중 누군가 차단기를 올려 손이 끼임", "차단기에 본인 자물쇠 + 꼬리표(성명·시간), 열쇠는 본인 보관 — 2명이면 각자 자물쇠", "공학적", "작업자 각자"],
+  ["정지 상태 확인(시험 기동)", "다른 차단기를 잠가 기계가 살아 있음, 관성 회전", "기동 버튼을 눌러 움직이지 않는지 확인 후 원위치, 벨트·롤러 완전 정지 확인", "관리적", "확인자"],
+  ["덮개 열고 청소", "롤러 맞물림 부위 끼임, 모서리 베임, 물기에 미끄러짐", "손 대신 스크레이퍼·밀대, 맞물림 부위에 손 넣지 않음, 물기는 바로 제거", "관리적", "작업자"],
+  ["복구·잠금 해제·시운전", "덮개 없이 가동, 사람이 남은 채 가동", "덮개·공구 확인 → 인원 철수 확인 → 건 사람이 해제 → 알리고 시운전, 비상정지 시험", "공학적", "작업자·확인자"],
 ];
+const KIND = { "제거·대체": "6941C6", "공학적": "2E5AAC", "관리적": "475467", "보호구": "B54708" };
 
 (async () => {
   const pres = new pptxgen();
@@ -76,7 +77,7 @@ const STEPS = [
     const s = pres.addSlide({ masterName: "COVER" });
     pill(s, "표준안전작업절차 교육", M, 1.3, 2.8, HEX.accent1, HEX.dk2, 0.42, 14, "표지_구분");
     s.addText("컨베이어 벨트 청소\n표준안전작업절차", { placeholder: "title" });
-    s.addText("잠금·표지로 끼임 사고를 막는 6단계", { placeholder: "body" });
+    s.addText("잠금·표지로 끼임 사고를 막는 6단계와 작업중지 기준", { placeholder: "body" });
     const x = 8.35, y = 1.3, w = 4.4;
     s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w, h: 4.95, rectRadius: 0.16, fill: { color: "FFFFFF", transparency: 92 }, line: { color: "FFFFFF", transparency: 80 }, objectName: "표지_정보카드" });
     [["문서번호", "예: SOP-생산-012 (개정 0)"], ["교육 일시", "2026. 10. 00 (요일) 16:00"], ["교육 대상", "예: 포장 2라인 신규 배치자 3명"], ["교육 구분", "예: 작업내용 변경 시 교육"], ["교육자", "관리감독자 · 성명"]].forEach(([k, v], i) => {
@@ -147,12 +148,12 @@ const STEPS = [
     const s = pres.addSlide({ masterName: "CONTENT" });
     s.addText("작업 전에 확인할 것", { placeholder: "title" });
     sec(s, "3. 작업 전 확인");
-    const items = ["작업 구역 정리, 통로 확보", "보호구 상태 확인·착용", "잠금장치·꼬리표 등 필요한 도구 준비", "비상정지 스위치 위치·비상연락 방법 확인", "함께 일하는 사람에게 오늘 작업 순서·위험 공유(TBM)"];
+    const items = ["작업 구역 정리, 통로 확보", "보호구 상태 확인·착용", "잠금장치·꼬리표 등 필요한 도구 준비", "비상정지 스위치 위치·비상연락 방법 확인", "함께 일하는 사람에게 작업 순서·핵심 위험 공유(TBM)", "작업중지 기준 함께 확인"];
     items.forEach((t, i) => {
-      const y = 1.5 + i * 0.92;
-      card(s, M, y, 7.6, 0.76, i % 2 ? "FFFFFF" : HEX.lt2, "확인_" + (i + 1), "E4E7EC");
-      dot(s, I.check, M + 0.2, y + 0.14, 0.48, HEX.accent3, "확인아이콘_" + (i + 1));
-      T(s, t, { x: M + 0.9, y, w: 6.5, h: 0.76, fontSize: 17, color: "1D2939", valign: "middle" });
+      const y = 1.4 + i * 0.8;
+      card(s, M, y, 7.6, 0.68, i % 2 ? "FFFFFF" : HEX.lt2, "확인_" + (i + 1), "E4E7EC");
+      dot(s, I.check, M + 0.2, y + 0.1, 0.48, HEX.accent3, "확인아이콘_" + (i + 1));
+      T(s, t, { x: M + 0.9, y, w: 6.5, h: 0.68, fontSize: 16, color: "1D2939", valign: "middle" });
     });
     const rx = M + 8.0, rw = W - M - rx;
     card(s, rx, 1.5, rw, 4.44, HEX.dk2, "잠금카드");
@@ -169,9 +170,9 @@ const STEPS = [
     s.addText(title, { placeholder: "title" });
     sec(s, "4. 작업 절차");
     const cw = (W - 2 * M - 2 * 0.3) / 3;
-    STEPS.slice(from, from + 3).forEach(([t, hz, pt], j) => {
+    STEPS.slice(from, from + 3).forEach(([t, hz, pt, kd, who], j) => {
       const i = from + j, x = M + j * (cw + 0.3), y = 1.35;
-      card(s, x, y, cw, 5.35, "FFFFFF", "단계카드_" + (i + 1), "E4E7EC");
+      card(s, x, y, cw, 5.25, "FFFFFF", "단계카드_" + (i + 1), "E4E7EC");
       s.addImage({ data: PH, x: x + 0.15, y: y + 0.15, w: cw - 0.3, h: (cw - 0.3) / 1.73, objectName: "단계사진_" + (i + 1) });
       const ty = y + 0.3 + (cw - 0.3) / 1.73;
       T(s, String(i + 1), { x: x + 0.2, y: ty, w: 0.5, h: 0.5, fontSize: 18, bold: true, color: HEX.dk2, align: "center", valign: "middle", shape: pres.shapes.OVAL, fill: { color: HEX.accent1 } });
@@ -180,7 +181,11 @@ const STEPS = [
       T(s, hz, { x: x + 1.05, y: ty + 0.62, w: cw - 1.25, h: 0.62, fontSize: 13, color: "B42318", valign: "top", objectName: "위험_" + (i + 1) });
       pill(s, "이렇게", x + 0.2, ty + 1.4, 0.75, HEX.accent3, "FFFFFF", 0.3, 11);
       T(s, pt, { x: x + 1.05, y: ty + 1.32, w: cw - 1.25, h: 1.0, fontSize: 13, bold: true, color: "05603A", valign: "top", objectName: "안전포인트_" + (i + 1) });
+      pill(s, kd, x + 0.2, y + 4.92, 0.95, KIND[kd], "FFFFFF", 0.3, 10.5, "대책구분_" + (i + 1));
+      T(s, "담당 " + who, { x: x + 1.25, y: y + 4.92, w: cw - 1.45, h: 0.3, fontSize: 11.5, color: "667085", valign: "middle", objectName: "담당_" + (i + 1) });
     });
+    T(s, [{ text: "대책 구분  ", options: { bold: true, color: "475467" } }, { text: "제거·대체 → 공학적(방호·연동·차단) → 관리적(절차·교육·표지) → 보호구 순으로 먼저 검토합니다", options: { color: "667085" } }],
+      { x: M, y: H - 0.78, w: W - 2 * M, h: 0.3, fontSize: 10.5 });
     s.addNotes("사진은 우클릭 → [그림 바꾸기]로 실제 설비 사진으로 바꾸세요(크기·위치 유지). 가능하면 현장에서 실제로 시연하면서 설명합니다.");
   };
   stepSlide(0, "작업 절차 ① — 멈추고 잠그기");
@@ -202,11 +207,55 @@ const STEPS = [
     s.addNotes("금지 사항은 짧고 분명하게. 각 항목이 왜 위험한지 한 문장씩 덧붙여 설명하세요(예: 덮개를 뗀 채 운전하면 회전부가 그대로 드러납니다).");
   }
 
+  // 작업중지 기준
+  {
+    const s = pres.addSlide({ masterName: "CONTENT" });
+    s.addText("이럴 때는 멈추고 보고합니다", { placeholder: "title" });
+    sec(s, "6. 작업중지 기준");
+    const st = ["개인 자물쇠·꼬리표가 없을 때", "잠근 차단기가 이 컨베이어 것인지 확인되지 않을 때", "시험 기동에서 기계가 움직일 때", "비상정지 스위치·덮개·연동장치가 고장 났을 때", "확인자 없이 혼자 하게 될 때"];
+    st.forEach((t, i) => {
+      const y = 1.4 + i * 0.86;
+      card(s, M, y, 7.7, 0.72, "FEF3F2", "중지_" + (i + 1), "FECDCA");
+      dot(s, I.stop, M + 0.18, y + 0.1, 0.52, HEX.accent1, "중지아이콘_" + (i + 1));
+      T(s, t, { x: M + 0.9, y, w: 6.6, h: 0.72, fontSize: 17, bold: true, color: "912018", valign: "middle", objectName: "중지문구_" + (i + 1) });
+    });
+    const rx = M + 8.1, rw = W - M - rx;
+    card(s, rx, 1.4, rw, 4.16, HEX.dk2, "중지권카드");
+    T(s, "멈춰도 됩니다", { x: rx + 0.35, y: 1.7, w: rw - 0.7, h: 0.5, fontSize: 22, bold: true, color: HEX.accent1 });
+    T(s, [{ text: "산업재해가 발생할 급박한 위험이 있으면 근로자는 작업을 중지하고 대피할 수 있습니다.", options: { breakLine: true } },
+      { text: " ", options: { breakLine: true, fontSize: 8 } },
+      { text: "멈춘 뒤에는 바로 관리감독자에게 알리고, 관리감독자는 필요한 조치를 합니다.", options: { breakLine: true } },
+      { text: " ", options: { breakLine: true, fontSize: 8 } },
+      { text: "산업안전보건법 제52조(근로자의 작업중지)", options: { color: "98A2B3", fontSize: 12 } }],
+      { x: rx + 0.35, y: 2.35, w: rw - 0.7, h: 3.0, fontSize: 15, color: "E4E7EC", valign: "top" });
+    s.addNotes("작업중지 기준은 '이 상황이면 누구라도 멈춘다'는 약속입니다. 근로자가 멈췄을 때 탓하지 않는다는 것을 관리감독자가 직접 말해 주세요. 사업주는 급박한 위험이 있다고 믿을 만한 합리적인 이유로 작업을 중지·대피한 근로자에게 해고나 그 밖의 불리한 처우를 해서는 안 됩니다(법 제52조제4항).");
+  }
+
+  // 작업 후 확인
+  {
+    const s = pres.addSlide({ masterName: "CONTENT" });
+    s.addText("작업이 끝나면 확인할 것", { placeholder: "title" });
+    sec(s, "7. 작업 후 확인");
+    const post = [[I.copy, "공구·자재 회수", "가져간 공구 수량을 세어 벨트 위에 남은 것이 없는지 확인"], [I.lock, "덮개·방호장치 복구", "덮개·연동장치를 원래대로 체결한 뒤에만 잠금 해제"], [I.check, "정리정돈", "물기·이물 제거, 통로 확보"], [I.bell, "이상 보고", "청소 중 발견한 설비 이상·불편 사항을 관리감독자에게 보고"]];
+    const cw = (W - 2 * M - 3 * 0.3) / 4;
+    post.forEach(([ic, t, d], i) => {
+      const x = M + i * (cw + 0.3), y = 1.5;
+      card(s, x, y, cw, 3.4, HEX.lt2, "작업후_" + (i + 1));
+      dot(s, ic, x + 0.3, y + 0.35, 0.72, i === 2 ? HEX.accent3 : HEX.accent1, "작업후아이콘_" + (i + 1));
+      T(s, t, { x: x + 0.3, y: y + 1.3, w: cw - 0.6, h: 0.45, fontSize: 18, bold: true, color: C.text2 });
+      T(s, d, { x: x + 0.3, y: y + 1.85, w: cw - 0.6, h: 1.4, fontSize: 14, color: "475467", valign: "top" });
+    });
+    card(s, M, 5.25, W - 2 * M, 1.15, "FFF6D6", "관찰안내");
+    T(s, [{ text: "관리감독자는  ", options: { bold: true, color: C.text2 } }, { text: "작업하는 모습을 가끔 직접 보고 절차서의 '현장 관찰·검토 기록'에 남깁니다. 절차와 실제가 다르면 절차가 현실적인지 먼저 보고, 고친 내용은 다시 교육합니다.", options: { color: "475467" } }],
+      { x: M + 0.3, y: 5.3, w: W - 2 * M - 0.6, h: 1.05, fontSize: 14, valign: "middle" });
+    s.addNotes("시운전 전에 이 네 가지를 함께 확인하면 '덮개 없이 가동'과 '공구가 벨트에 말려 드는' 사고를 막을 수 있습니다.");
+  }
+
   // 8. 비상 시
   {
     const s = pres.addSlide({ masterName: "CONTENT" });
     s.addText("이상·비상 시 이렇게", { placeholder: "title" });
-    sec(s, "6. 비상 조치");
+    sec(s, "8. 비상 조치");
     const fl = [[I.stop, "멈춘다", "가장 가까운 비상정지 스위치"], [I.bell, "알린다", "큰 소리로 주변에 알림"], [I.phone, "보고한다", "관리감독자 · 사내 비상연락\n내선 ○○○"], [I.amb, "119", "부상자는 무리하게 빼내지 말고\n119 지시에 따름"]];
     const cw = 2.6, gap = (W - 2 * M - 4 * cw) / 3;
     fl.forEach(([ic, t, d], i) => {
@@ -226,7 +275,7 @@ const STEPS = [
   {
     const s = pres.addSlide({ masterName: "CONTENT" });
     s.addText("이해도 확인", { placeholder: "title" });
-    sec(s, "7. 확인 질문");
+    sec(s, "9. 확인 질문");
     const qs = [["청소 전에 차단기에 무엇을 해야 하나요?", "본인 자물쇠 잠금 + 꼬리표 부착"], ["잠금은 누가 풀 수 있나요?", "자물쇠를 건 본인만"], ["작업 중 끼임이 생기면 가장 먼저 무엇을 하나요?", "비상정지 스위치 → 주변에 알림"]];
     qs.forEach(([q], i) => {
       const y = 1.5 + i * 1.45;
