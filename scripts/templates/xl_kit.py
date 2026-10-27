@@ -251,7 +251,7 @@ def guide_sheet(wb, name, lines, source=None):
             r += 1
             for b in body:
                 c = ws.cell(row=r, column=2, value=b); c.font = f(10); c.alignment = LEFT
-                ws.row_dimensions[r].height = 18 if len(b) < 64 else (32 if len(b) < 128 else 46)
+                ws.row_dimensions[r].height = 16 * max(1, -(-len(b) // 62)) + 4  # 한글은 칸 너비 100에 한 줄 약 62자
                 r += 1
             r += 1
     if source:
