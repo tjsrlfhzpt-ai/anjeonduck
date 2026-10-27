@@ -3027,7 +3027,8 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     def upd_brow(n, u):
         src = safe_url(u.get("source_url"))
         arts = " · ".join(e(x) for x in u.get("affected_articles", []) or [])
-        det = (f'<p>{e(u.get("summary"))}</p>' + (f'<p><b>대상 조문</b> {arts}</p>' if arts else "")
+        tbl = lawpages.change_table(LAWS, u.get("law"), u.get("date", ""), u.get("effective", ""), u.get("affected_articles") or [], today)
+        det = (f'<p>{e(u.get("summary"))}</p>' + (tbl or (f'<p><b>대상 조문</b> {arts}</p>' if arts else ""))
                + (f'<p><b>실무 영향</b> {e(u["practical_impact"])}</p>' if u.get("practical_impact") else "")
                + '<p class="brow-f">' + " · ".join(x for x in (
                    f'<a href="{e(src)}" target="_blank" rel="noopener">{e(u.get("source_name") or "원문")} ↗</a>' if src else "",

@@ -399,7 +399,79 @@ def status_panel(laws, manifest, today, rel=""):
     return blist(rows, "등록된 법령이 없습니다."), n_up, n_chk
 
 
-def upcoming_html(manifest, today, rel=""):
+def change_table(laws, law_name, prom, eff, arts, today, rel=""):
+    """개정 한 건의 대상 조문을 '조항 / 시행일 / 바뀐 내용' 표로. 바뀐 내용은 현행(시행 전이면 시행 예정) 조문에서
+    공포일 개정·신설 표시가 붙은 항을 그대로 발췌한다 — 찾지 못하면 지어내지 않고 '원문에서 확인'으로 둔다."""
+    if not arts or not prom:
+        return ""
+    key = next((k for k, d in laws.items() if d.get("law") == law_name), None)
+    idx = {a["jo"]: a for a in laws[key]["articles"]} if key else {}
+    kd = kdate(prom)
+    pend = bool(eff and today and eff > today)
+    def cut(t, n=78):
+        t = re.sub(r"\s*<(?:개정|신설|전문개정)[^>]*>", "", t)
+        t = re.sub(r"\s*\[(?:시행일|본조신설|전문개정)[^\]]*\]", "", t).strip()
+        return t if len(t) <= n else t[:n].rstrip() + "…"
+    rows = []
+    for spec in arts:
+        m = re.match(r"(제\d+조(?:의\d+)?)", spec)
+        a = idx.get(m.group(1)) if m else None
+        if a:
+            head = f'<a href="{rel}{key}/#{anchor(a["jo"])}">{e(spec)}</a><span class="chg-t">{e(a.get("title", ""))}</span>'
+        else:
+            head = f'{e(spec)}'
+        cell = '<span class="chg-na">바뀐 문구는 원문에서 확인</span>'
+        if a and pend and (a.get("pending") or {}).get("effective") not in (None, eff):
+            a = dict(a, pending=None)   # 다른 시행일의 시행 예정 본문은 이 개정의 내용이 아니다
+        if a and pend and not a.get("pending") and not a.get("not_in_force"):
+            a = None   # 시행 전인데 개정 본문이 아직 반영되지 않았으면 현행 문구를 '바뀐 내용'처럼 보이지 않게 한다
+        if a:
+            txt = (a.get("pending") or {}).get("text") if pend and a.get("pending") else a.get("text", "")
+            txt = txt or ""
+            lines = txt.split("\n")
+            mh = re.search(r"제(\d+)항", spec[m.end():])
+            mo = re.search(r"제(\d+)호(?:의(\d+))?", spec[m.end():])
+            ho = (mo.group(1) + ("의" + mo.group(2) if mo.group(2) else "")) if mo else ""
+            pin = None
+            if mh or mo:   # 항·호까지 적힌 대상은 그 줄을 직접 찾는다
+                lo, hi = 0, len(lines)
+                if mh:
+                    cn = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳"[int(mh.group(1)) - 1] if int(mh.group(1)) <= 20 else ""
+                    st = next((i for i, ln in enumerate(lines) if cn and ln.startswith(cn)), None)
+                    if st is not None:
+                        lo = st
+                        hi = next((i for i in range(st + 1, len(lines)) if lines[i][:1] in "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳"), len(lines))
+                        pin = lines[st]
+                if mo:
+                    hit = next((lines[i] for i in range(lo, hi) if lines[i].startswith(ho + ".")), None)
+                    pin = hit or (pin if not mo else None)
+            if (mh or mo) and not pin:
+                pass   # 지정한 항·호를 현행 본문에서 못 찾으면(시행 전 본문 미반영 등) 원문 확인으로 둔다
+            elif pin:
+                kind = "신설" if re.search(r"<신설[^>]*" + re.escape(kd), pin) else "개정"
+                cell = f'<span class="chg-l"><b class="chg-k">{kind}</b> {e(cut(pin, 110))}</span>'
+            elif re.search(r"\[전문개정 " + re.escape(kd), txt):
+                cell = f'<b class="chg-k">조문 전부 개정</b> {e(cut(txt.split(chr(10))[0]))}'
+            elif re.search(r"\[본조신설 " + re.escape(kd), txt):
+                cell = f'<b class="chg-k">조문 신설</b> {e(cut(txt.split(chr(10))[0]))}'
+            else:
+                hits = [ln for ln in txt.split("\n") if kd in ln and re.search(r"<(?:개정|신설|전문개정)[^>]*" + re.escape(kd), ln)]
+                if hits:
+                    parts = []
+                    for ln in hits[:3]:
+                        kind = "신설" if re.search(r"<신설[^>]*" + re.escape(kd), ln) else "개정"
+                        parts.append(f'<span class="chg-l"><b class="chg-k">{kind}</b> {e(cut(ln))}</span>')
+                    more = f'<span class="chg-more">외 {len(hits) - 3}개 항·호</span>' if len(hits) > 3 else ""
+                    cell = "".join(parts) + more
+        when = e(kdate(eff)) if eff else "—"
+        if pend:
+            when += '<span class="chg-pend">시행 전</span>'
+        rows.append(f"<tr><th scope=\"row\">{head}</th><td class=\"chg-d\">{when}</td><td>{cell}</td></tr>")
+    return ('<div class="chg-wrap"><table class="chg"><thead><tr><th scope="col">조항</th><th scope="col">시행일</th><th scope="col">바뀐 내용 (현행 조문 발췌)</th></tr></thead>'
+            f'<tbody>{"".join(rows)}</tbody></table></div>')
+
+
+def upcoming_html(manifest, today, rel="", laws=None):
     items = []
     for l in manifest["laws"]:
         for u in l.get("upcoming", []):
@@ -408,8 +480,9 @@ def upcoming_html(manifest, today, rel=""):
     out = ""
     for n, (eff, l, u) in enumerate(sorted(items, key=lambda x: x[0]), 1):
         arts = " · ".join(e(x) for x in u.get("articles", []))
+        tbl = change_table(laws, l["name"], u.get("promulgated", ""), eff, u.get("articles", []), today, rel) if laws else ""
         det = (f'<p>{e(u.get("summary", ""))}</p>'
-               + (f'<p><b>대상 조문</b> {arts}</p>' if arts else "")
+               + (tbl or (f'<p><b>대상 조문</b> {arts}</p>' if arts else ""))
                + (f'<p><b>실무 영향</b> {e(u["impact"])}</p>' if u.get("impact") else "")
                + f'<p class="brow-f"><a href="{e(u["source_url"])}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a> · <a href="{rel}{l["key"]}/#versions">{e(l["name"])} 전문</a> · 근거 {e(u.get("basis", ""))}</p>')
         out += brow(n, f'{e(l["name"])} {e(u["kind"])}', f'{e(u["no"])} · {e(kdate(u["promulgated"]))} 공포', f'시행 {e(kdate(eff))}', det)
@@ -452,7 +525,7 @@ def hub_page(laws, updates_html, n_updates, statutes_html, update_filter_html, m
     status_sec = ""
     if manifest:
         table, n_up, n_chk = status_panel(laws, manifest, today)
-        up, _ = upcoming_html(manifest, today)
+        up, _ = upcoming_html(manifest, today, laws=laws)
         bills = bills_html(manifest)
         status_sec = f"""<section class="wrap lstat" id="status">
   <div class="sec-head"><div><h2>현행 법령</h2><p>국가법령정보센터 연혁과 대조 · 기준일 {e(manifest["checked_at"])}</p></div></div>
