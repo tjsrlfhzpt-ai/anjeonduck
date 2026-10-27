@@ -867,7 +867,7 @@ tr.q-hide{display:none}
     });
   }
 
-  document.getElementById("fTitle").textContent = F.switch ? F.switch.title : F.title;
+  document.getElementById("fTitle").textContent = F.switch && !F.switch.keep ? F.switch.title : F.title;
   // 같은 묶음의 서식(예: 안전·보건 × 일일·주간·월간)을 오가는 선택 버튼. 서식마다 입력값은 따로 저장된다
   if (F.switch) {
     var sw = document.getElementById("fSwitch"); sw.hidden = false;
@@ -875,7 +875,9 @@ tr.q-hide{display:none}
       return '<div class="fswitch-g"><span class="fswitch-l">' + esc(g.label) + '</span><div class="seg" role="group" aria-label="' + esc(g.label) + '">' + g.options.map(function (o) {
         return o.on ? '<button type="button" aria-pressed="true">' + esc(o.label) + "</button>" : '<a class="fswitch-a" href="' + esc(o.href) + '">' + esc(o.label) + "</a>";
       }).join("") + "</div></div>";
-    }).join("") + '<p class="fswitch-now">지금 서식: <b>' + esc(F.doc_title || F.title) + "</b></p>";
+    }).join("") + (F.switch.keep
+      ? '<p class="fswitch-now">작업 종류를 누르면 그 작업계획서로 바뀝니다(입력값은 종류별로 따로 저장). ' + (/^\.\.\/[\w\-]+\/$/.test(F.switch.hub || "") ? '<a href="' + esc(F.switch.hub) + '">작업 종류별 안내 보기 →</a>' : "") + "</p>"
+      : '<p class="fswitch-now">지금 서식: <b>' + esc(F.doc_title || F.title) + "</b></p>");
   }
   document.getElementById("fCrumb").textContent = F.short || F.title;
   document.getElementById("fDesc").textContent = F.desc || "";

@@ -849,7 +849,9 @@ TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "
 # 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
 WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "improve"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
-HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"), ("accident", "alarm"), ("ppe-ledger", "goggles")]
+HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"),
+                    ("workplan", "folder", "작업계획서", "지게차·중량물·고소작업대 등 작업 종류를 골라 별표 4 사항대로 작성합니다", "안전보건규칙 제38조"),
+                    ("accident", "alarm"), ("ppe-ledger", "goggles")]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
 LOOKUP_TOOLS = ["ai", "law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
@@ -863,9 +865,9 @@ def nav_cols(site, rel):
     def tl(ids):
         return [(f'{rel}tools/{i}/', by[i].get("menu") or by[i].get("short") or by[i]["name"]) for i in ids if i in by]
     return {
-        "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}", n) for g, n in (("업무일지", "안전·보건 업무일지"), ("작업계획서", "작업계획서"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표"), ("중대재해처벌법 이행", "중대재해법 이행 서식"))]
+        "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}" if g else g_href, n) for g, n, g_href in (("업무일지", "안전·보건 업무일지", ""), ("", "작업계획서 (종류 선택)", f"{rel}tools/forms/workplan/"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표", ""), ("중대재해처벌법 이행", "중대재해법 이행 서식", ""))]
                  + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
-                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실")])],
+                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}resources/templates/", "무료 양식 내려받기 (엑셀·PPT)")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}laws/bills/", "입법예고·개정 포인트")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
@@ -1539,7 +1541,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         elif t.get("inject"):
             names = t["inject"] if isinstance(t["inject"], list) else [t["inject"]]
             src = inject_data(src, names, t["src"])
-        src += lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
+        src += dl_section("../../", tool=t["id"]) + lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
         return page(site, "../../", f"tools/{t['id']}/", t["name"] + (" · 무료 양식" if t.get("cat") == "작성기" else ""), src, desc=t.get("desc"), active="tools/")
     if t.get("inject") == "hazards":
         payload = json.dumps(hazards, ensure_ascii=False).replace("</", "<\\/")
@@ -1561,6 +1563,13 @@ def render_free_tool(t, hazards, site=None, penalties=None):
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))}</p>')
         assert "</body>" in src
         src = src.replace("</body>", note + "</body>", 1)
+    _dl = dl_section("../../", tool=t["id"])
+    if _dl:   # 화면 높이에 맞춘 작성기(본문 스크롤 없음)는 입력 칸 영역 맨 아래로 옮겨 작성 화면을 줄이지 않는다
+        _dl += ('<script>(function(){var s=document.querySelector(".spdl");if(!s||getComputedStyle(document.body).overflow!=="hidden")return;'
+                'var p=[].slice.call(document.querySelectorAll(".no-print")).filter(function(x){return /(auto|scroll)/.test(getComputedStyle(x).overflowY);})[0];'
+                'if(p){s.style.margin="20px 0 8px";s.style.padding="0 4px";p.appendChild(s);}})();</script>')
+        assert "</body>" in src
+        src = src.replace("</body>", _dl + "</body>", 1)
     return src.replace('assets/ai.js"', f'assets/ai.js?v={ASSET_VER}"')
 
 
@@ -1592,6 +1601,82 @@ def precheck_forms(lawref):
 
 
 FAMILY = {"worklog": {"title": "안전 · 보건관리자 업무일지", "roles": [("safety", "안전관리자"), ("health", "보건관리자")], "periods": [("day", "일일"), ("week", "주간"), ("month", "월간")]}}
+# 작업계획서(안전보건규칙 제38조제1항) — 화면 안에서 작업 종류를 바꿔 가며 쓰는 묶음. 선택 화면: tools/forms/workplan/
+WORKPLAN_GROUPS = [("장비 사용", ["wp-forklift", "wp-heavy", "wp-aerial", "wp-truck", "wp-excavator", "wp-tower"]),
+                   ("작업", ["wp-elec", "wp-chem", "wp-dig", "wp-demolish", "wp-bridge", "wp-tunnel", "wp-quarry", "wp-rail"])]
+WORKPLAN_IDS = [i for _, ids in WORKPLAN_GROUPS for i in ids]
+
+# ---- 무료 내려받기 양식(data/downloads.json): 관련 화면 아래 카드 + resources/templates/ 모음
+_DL = None
+
+
+def _jpeg_size(p):
+    b = p.read_bytes()
+    i = 2
+    while i < len(b):
+        if b[i] != 0xFF:
+            i += 1
+            continue
+        m = b[i + 1]
+        if m in (0xC0, 0xC1, 0xC2):
+            return int.from_bytes(b[i + 7:i + 9], "big"), int.from_bytes(b[i + 5:i + 7], "big")
+        i += 2 + int.from_bytes(b[i + 2:i + 4], "big")
+    return 720, 413
+
+
+def downloads():
+    global _DL
+    if _DL is None:
+        _DL = load("data/downloads.json")["items"]
+        for x in _DL:
+            fp, pv = ROOT / x["file"], ROOT / x["preview"]
+            assert fp.exists() and pv.exists(), x["id"]
+            x["size"], x["ext"] = fp.stat().st_size, fp.suffix[1:]
+            x["w"], x["h"] = _jpeg_size(pv)
+    return _DL
+
+
+DL_CSS = ('<style>.spdl{max-width:1000px;margin:28px auto 12px;padding:0 16px;color:var(--text,#0F172A)}'
+          '.spdl h2{font-size:18px;margin:0 0 4px;color:var(--text,#0F172A);font-weight:800}.spdl>p{margin:0 0 14px;font-size:13.5px;line-height:1.6;color:var(--muted,#64748B)}'
+          '.spdl-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}'
+          '.spdl-c{display:flex;flex-direction:column;border:1px solid var(--line,#E2E8F0);border-radius:12px;background:var(--surface,#fff);overflow:hidden}'
+          '.spdl-t{display:block;background:#E8EBF2;border-bottom:1px solid var(--line,#E2E8F0)}.spdl-t img{display:block;width:100%;height:auto}'
+          '.spdl-b{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}'
+          '.spdl-k{font-size:12px;font-weight:700;color:#0E7A44;margin:0}.spdl-k.pp{color:#C2410C}'
+          '.spdl-b strong{font-size:15.5px;line-height:1.4;color:var(--text,#0F172A)}'
+          '.spdl-d{font-size:13px;line-height:1.6;color:var(--text-2,#334155);margin:0}.spdl-p{font-size:12px;line-height:1.5;color:var(--muted,#64748B);margin:0}'
+          '.spdl-a{margin-top:6px;display:flex;justify-content:center;align-items:center;min-height:44px;border-radius:10px;background:var(--blue,#1D4ED8);color:#fff!important;font-weight:700;font-size:14.5px;text-decoration:none!important}'
+          '.spdl-a:hover{filter:brightness(1.08)}.spdl-more{display:inline-block;margin-top:12px;font-size:14px;font-weight:700;color:var(--blue,#1D4ED8)}'
+          '@media print{.spdl{display:none!important}}</style>')
+
+
+def one_sentence(d):
+    d = re.split(r"(?<=[.다요])\s", str(d or "").strip())[0]
+    return d.rstrip(".")
+
+
+def dl_size(n):
+    return f"{n / 1024:.0f}KB" if n < 1024 * 1024 else f"{n / 1024 / 1024:.1f}MB"
+
+
+def dl_card(x, rel):
+    pp = x["kind"] == "PowerPoint"
+    return (f'<article class="spdl-c"><a class="spdl-t" href="{rel}{e(x["file"])}" download="{e(x["dl"])}" tabindex="-1" aria-hidden="true">'
+            f'<img src="{rel}{e(x["preview"])}" width="{x["w"]}" height="{x["h"]}" loading="lazy" alt=""></a>'
+            f'<div class="spdl-b"><p class="spdl-k{" pp" if pp else ""}">{e(x["kind"])} 양식 · 무료</p><strong>{e(x["title"])}</strong>'
+            f'<p class="spdl-d">{e(x["desc"])}</p><p class="spdl-p">들어 있는 것: {e(" · ".join(x.get("parts") or []))}</p>'
+            f'<a class="spdl-a" href="{rel}{e(x["file"])}" download="{e(x["dl"])}">내려받기 (.{e(x["ext"])} · {dl_size(x["size"])})</a></div></article>')
+
+
+def dl_section(rel, tool=None, form=None):
+    """이 화면과 관련된 내려받기 양식 카드. 없으면 빈 문자열."""
+    items = [x for x in downloads() if (tool and tool in x.get("tools", [])) or (form and form in x.get("forms", []))]
+    if not items:
+        return ""
+    return (DL_CSS + f'<section class="spdl" aria-label="내려받기 양식"><h2>엑셀·PPT 양식으로도 받을 수 있습니다</h2>'
+            f'<p>화면 작성이 어려운 곳(사내 결재 양식, 출력해서 수기 작성)에서 쓰도록 만든 파일입니다. 회색 기울임 글씨는 예시이니 지우고 쓰세요.</p>'
+            f'<div class="spdl-g">{"".join(dl_card(x, rel) for x in items)}</div>'
+            f'<a class="spdl-more" href="{rel}resources/templates/">무료 양식 전체 {len(downloads())}종 보기 →</a></section>')
 
 
 def all_forms(lawref):
@@ -1624,6 +1709,11 @@ def all_forms(lawref):
             f["switch"] = {"title": FAMILY[fam["name"]]["title"], "groups": [
                 {"label": "직무", "options": [{"label": lb, "on": k == fam["role"], "href": f"../{pick(k, fam['period'])}/"} for k, lb in FAMILY[fam["name"]]["roles"] if pick(k, fam["period"])]},
                 {"label": "작성 주기", "options": [{"label": lb, "on": k == fam["period"], "href": f"../{pick(fam['role'], k)}/"} for k, lb in FAMILY[fam["name"]]["periods"] if pick(fam["role"], k)]}]}
+        if f["id"] in WORKPLAN_IDS:   # 작업계획서: 화면 안에서 작업 종류(지게차·중량물 등)를 바꾼다. 서식마다 입력값은 따로 저장
+            _fb = {x["id"]: x for x in forms}
+            f["switch"] = {"title": f["title"], "keep": True, "hub": "../workplan/", "groups": [
+                {"label": g, "options": [{"label": _fb[i].get("short") or _fb[i]["title"], "on": i == f["id"], "href": f"../{i}/"} for i in ids if i in _fb]}
+                for g, ids in WORKPLAN_GROUPS]}
         f.pop("approval", None)  # 결재란은 공통(담당·검토·승인, 사용자가 고침) — assets/docs.js
         if f["id"] == "patrol":
             f["flow"] = {"chk": {"bad": ["불량"], "to": "fix", "col": 1, "label": "지적 사항 표"}}
@@ -1921,7 +2011,7 @@ def build(out, today):
                 f'<span class="hc-d">{e(desc)}</span></span><span class="hc-g">{e(badge)}</span></a>')
     def tcards(ids):
         return "".join(mcard(f"tools/{i}/", (f'<img src="assets/img/ico/{TOOL_DUCKS[i]}.webp" width="44" height="44" alt="" loading="lazy">' if i in TOOL_DUCKS else TOOL_ICONS.get(i, "📄")), tby[i].get("menu") or tby[i].get("short") or tby[i]["name"], one_line(tby[i]["desc"]), (tby[i].get("law") or "무료").split(" · ")[0][:22]) for i in ids if i in tby)
-    tab1 = tcards(WRITE_TOOLS) + "".join(mcard(f"tools/forms/{i}/", f'<img src="assets/img/ico/{ic}.webp" width="44" height="44" alt="" loading="lazy">', (x[2] if len(x) > 2 else fby[i].get("short") or fby[i]["title"]), (x[3] if len(x) > 3 else one_line(fby[i].get("desc", ""))), ("시행령 제18조·제22조" if len(x) > 2 else (fby[i].get("law") or "무료").replace("산업안전보건기준에 관한 규칙", "기준규칙").replace("산업안전보건법", "산안법").split(" · ")[0][:22])) for x in HOME_WRITE_FORMS for i, ic in [x[:2]] if i in fby)
+    tab1 = tcards(WRITE_TOOLS) + "".join(mcard(f"tools/forms/{i}/", f'<img src="assets/img/ico/{ic}.webp" width="44" height="44" alt="" loading="lazy">', (x[2] if len(x) > 2 else fby[i].get("short") or fby[i]["title"]), (x[3] if len(x) > 3 else one_line(fby[i].get("desc", ""))), ((x[4] if len(x) > 4 else "시행령 제18조·제22조") if len(x) > 2 else (fby[i].get("law") or "무료").replace("산업안전보건기준에 관한 규칙", "기준규칙").replace("산업안전보건법", "산안법").split(" · ")[0][:22])) for x in HOME_WRITE_FORMS for i, ic in [x[:2]] if i in fby or len(x) > 4)
     tab2 = tcards(CALC_TOOLS)
     look = "".join(f'<a href="tools/{i}/"><img src="assets/img/ico/{TOOL_DUCKS[i]}.webp" width="20" height="20" alt="" loading="lazy"> {e(tby[i].get("menu") or tby[i]["name"])}</a>' for i in LOOKUP_TOOLS if i in tby)
     form_rows = "".join(f'<li data-s="{e((f["title"] + " " + f.get("group", "")).lower())}"><a href="tools/forms/{e(f["id"])}/"><span class="fl-g">{e(f.get("group", "")[:10])}</span>{e(f["title"])}</a><span class="fkind fkind-b">웹 작성</span></li>' for f in _forms)
@@ -2802,6 +2892,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 <section class="wrap ftools-page" style="padding-top:8px" data-landing>
   <div class="ftools">
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>작성기 {WRITER_N}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
+    <a class="ftool" href="templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서 4종·순회점검표·교육일지 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>안전보건 자료실</strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
@@ -2949,8 +3040,51 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     groups, forms = all_forms(lawref)
     form_src = (ROOT / "apps/form.body.html").read_text(encoding="utf-8")
     for f in forms:
-        body = form_src.replace("/*@DATA@*/null", json.dumps(f, ensure_ascii=False).replace("</", "<\\/")) + lawver_html("forms", "../../../")
+        body = form_src.replace("/*@DATA@*/null", json.dumps(f, ensure_ascii=False).replace("</", "<\\/")) + dl_section("../../../", form=f["id"]) + lawver_html("forms", "../../../")
         write(f"tools/forms/{f['id']}/index.html", page(site, "../../../", f"tools/forms/{f['id']}/", f["title"], body, desc=f.get("desc"), active="tools/"))
+    # ---- 작업계획서 선택 화면: 작업 종류를 고르면 해당 작업계획서 작성기로 간다
+    _fb = {f["id"]: f for f in forms}
+    _krule = {a["jo"]: a for a in load("data/lawtext/krule.json")["articles"]}
+    def wp_card(f):
+        lead = "제39조" in f.get("law", "")
+        no = re.search(r"제38조제1항(제\d+호(?:·제\d+호)?)", f.get("law", ""))
+        return (f'<a class="ftool" href="../{e(f["id"])}/">{"<span class=ftool-tag>작업지휘자 지정</span>" if lead else ""}<strong>{e(f["short"] if f.get("short") else f["title"])}</strong>'
+                f'<span class="ftool-desc">{e(f["title"])} — {e(one_sentence(f.get("desc", "")))}</span>'
+                f'<span class="ftool-law">제38조제1항{e(no.group(1)) if no else ""}</span><span class="ftool-go">바로 작성 →</span></a>')
+    wp_secs = "".join(f'<section class="wrap ftools-page">{sec_head(g)}<div class="ftools">{"".join(wp_card(_fb[i]) for i in ids if i in _fb)}</div></section>' for g, ids in WORKPLAN_GROUPS)
+    _a38 = _krule.get("제38조", {}).get("text", "")
+    assert "작업계획서를 작성하고 그 계획에 따라 작업을 하도록 해야 한다" in _a38 and "작업계획서의 내용을 해당 근로자에게 알려야 한다" in _a38, "제38조 원문 확인"
+    wp_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">무료 도구</a><span>/</span><a href="../">작성기</a><span>/</span>작업계획서</p>
+  <h1>작업계획서 — 작업 종류를 고르세요</h1>
+  <p>지게차·중량물·고소작업대처럼 안전보건규칙 제38조제1항에 해당하는 작업은 사전조사를 하고 그 결과를 기록·보존한 뒤, 별표 4의 사항을 포함한 작업계획서를 작성해 그 계획에 따라 작업하도록 해야 합니다. 작성한 내용은 해당 근로자에게 알려야 합니다(같은 조 제2항). 작업 종류를 고르면 별표 4 포함 사항이 들어간 작성기가 열리고, 작성기 안에서도 종류를 바꿀 수 있습니다.</p>
+</div></section>
+{wp_secs}
+<section class="wrap"><div class="lawbox"><h3>함께 알아 둘 것</h3>
+  <p><b>작업지휘자</b> — 제38조제1항제2호(차량계 하역운반기계등)·제6호·제8호·제10호·제11호(중량물 취급) 작업계획서를 작성한 경우 작업지휘자를 지정해 계획서에 따라 지휘하도록 해야 합니다(제39조제1항, 같은 항 단서의 예외 확인). 위 카드의 '작업지휘자 지정' 표시가 그 작업입니다.</p>
+  <p><b>항타기·항발기</b> — 조립·해체·변경·이동 작업은 작업방법과 절차를 정해 근로자에게 주지시켜야 합니다(제38조제3항). 별도 작성기는 없으니 사업장 양식으로 남기세요.</p>
+  <p><b>이 작성기의 지위</b> — 법령에 별지 서식이 정해져 있지 않아 별표 4 포함 사항을 담아 만든 실무용 보조양식입니다. 양식을 채운 것만으로 의무를 다했다고 볼 수는 없으며, 실제 사전조사와 계획에 따른 작업이 함께 이뤄져야 합니다.</p>
+  <p class="src-line">원문: 산업안전보건기준에 관한 규칙 제38조·제39조, 별표 4 — <a href="{e(law_url("산업안전보건기준에 관한 규칙"))}" target="_blank" rel="noopener">국가법령정보센터 ↗</a></p>
+</div></section>
+{dl_section("../../../", form="workplan")}"""
+    write("tools/forms/workplan/index.html", page(site, "../../../", "tools/forms/workplan/", "작업계획서 — 작업 종류 선택", wp_body,
+                                                  desc="지게차·중량물·고소작업대·굴착기 등 안전보건규칙 제38조 작업계획서 14종을 작업 종류별로 골라 무료로 작성·인쇄. 별표 4 포함 사항 반영.", active="tools/"))
+    # ---- 무료 양식 내려받기 모음
+    _dls = downloads()
+    tpl_body = f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">서식·자료</a><span>/</span>무료 양식 내려받기</p>
+  <h1>무료 양식 내려받기 (엑셀·PPT {len(_dls)}종)</h1>
+  <p>현장에서 바로 고쳐 쓰도록 만든 엑셀·PowerPoint 양식입니다. 회원가입 없이 내려받고, 회사 이름·결재란·항목은 사업장에 맞게 고쳐 쓰세요. 화면에서 작성하고 인쇄하려면 각 양식과 짝을 이루는 <a href="../../tools/forms/">작성기</a>를 쓰면 됩니다.</p>
+</div></section>
+<section class="wrap" style="margin-top:8px">{DL_CSS}<div class="spdl" style="max-width:none;padding:0;margin:8px 0 0"><div class="spdl-g">{"".join(dl_card(x, "../../") for x in _dls)}</div></div>
+<div class="lawbox" style="margin-top:24px"><h3>쓰기 전에</h3>
+  <p>법령에 별지 서식이 정해져 있지 않은 실무 기록(작업계획서·TBM·순회점검·아차사고 등)을 위한 보조양식입니다. 양식을 채운 것만으로 법령상 의무를 다했다고 볼 수는 없으니, 서식 안에 적힌 근거 조문과 사업장 사정을 함께 확인하세요.</p>
+  <p class="src-line">엑셀 파일은 Microsoft Excel·한컴오피스 한셀·Google 스프레드시트에서 열립니다. 자동 계산·목록 선택은 프로그램에 따라 다르게 보일 수 있습니다.</p>
+</div></section>"""
+    write("resources/templates/index.html", page(site, "../../", "resources/templates/", "무료 양식 내려받기 (엑셀·PPT)", tpl_body,
+                                                 desc="위험성평가표·TBM 일지·작업계획서(지게차·중량물)·순회점검표·교육일지·아차사고·보호구 대장 엑셀과 산업안전보건위원회·개선 전후 보고 PPT 무료 양식.", active="resources/"))
     def wcard(kind, x):
         if kind == "tool":
             return (f'<a class="ftool" href="../{e(x["id"])}/"><strong>{e(x["name"].replace(" 작성기", ""))}</strong><span class="ftool-desc">{e(x.get("desc", ""))}</span>'
@@ -2960,7 +3094,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
         return (f'<a class="ftool" href="{e(f["id"])}/">{tag}<strong>{e(f["title"].replace("작업시작 전 점검표 — ", ""))}</strong><span class="ftool-desc">{e(f.get("desc",""))}</span>'
                 f'<span class="ftool-law">{e(f.get("law",""))}</span><span class="ftool-go">바로 작성 →</span></a>')
     wg = writer_groups(site, groups, forms)
-    fsecs = [f'<section class="wrap ftools-page" id="{WRITER_GID.get(g, "w" + str(i))}">{sec_head(g + " (" + str(len(items)) + ")")}<div class="ftools">{"".join(wcard(k, x) for k, x in items)}</div></section>'
+    fsecs = [f'<section class="wrap ftools-page" id="{WRITER_GID.get(g, "w" + str(i))}">{sec_head(g + " (" + str(len(items)) + ")", **({"href": "workplan/", "more": "작업 종류로 고르기"} if g == "작업계획서" else {}))}<div class="ftools">{"".join(wcard(k, x) for k, x in items)}</div></section>'
              for i, (g, items) in enumerate(wg)]
     wjump = "".join(f'<a href="#{WRITER_GID.get(g, "w" + str(i))}">{e(g)} <span>{len(items)}</span></a>' for i, (g, items) in enumerate(wg))
     forms_body = f"""

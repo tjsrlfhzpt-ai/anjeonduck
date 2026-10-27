@@ -2083,3 +2083,4 @@ details[open]>.brow-r{background:var(--surface-2)}
 .ab-t th{width:28%;background:var(--surface-2);font-weight:700}
 @media (max-width:720px){.ab-feat{grid-template-columns:1fr}.ab-t th{width:36%}}
 @media (max-width:1023px){.layout-detail.ab-layout .col-side{order:0}}
+@media (max-width:640px){.fswitch-g{flex-direction:column;align-items:flex-start;gap:6px}}
