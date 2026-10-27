@@ -903,6 +903,28 @@ def gnb_html(site, rel, active):
     return out
 
 
+def mnav_html(site, rel, active):
+    """휴대폰·태블릿 전체 메뉴: 헤더 '메뉴' 버튼으로 여는 서랍. PC 메가메뉴(nav_cols)와 같은 항목을 묶음별로 펼쳐 보인다."""
+    grp = ACTIVE_GROUP.get(active, "")
+    cols = nav_cols(site, rel)
+    def ext(u):
+        return ' target="_blank" rel="noopener"' if u.startswith("http") else ""
+    groups = ""
+    for key, label, href in NAV4:
+        top = href if href.startswith("http") else rel + href
+        inner = "".join(f'<p class="mnav-h">{e(h)}</p><ul>{"".join(f"<li><a href={chr(34)}{e(u)}{chr(34)}{ext(u)}>{e(n)}</a></li>" for u, n in ls)}</ul>' for h, ls in cols.get(key, []))
+        groups += (f'<details class="mnav-g"{" open" if key == grp else ""}><summary>{e(label)}</summary>'
+                   f'<div class="mnav-b"><a class="mnav-top" href="{e(top)}"{ext(top)}>{e(label)} 첫 화면 →</a>{inner}</div></details>')
+    return ('<div class="mnav" id="mnav" hidden><div class="mnav-bg" data-mnav-x></div>'
+            '<nav class="mnav-p" aria-label="전체 메뉴"><div class="mnav-hd"><a class="mnav-home" href="' + e(rel or "./") + '">홈</a>'
+            '<button type="button" class="mnav-x" data-mnav-x aria-label="메뉴 닫기">닫기 ✕</button></div>' + groups + '</nav></div>'
+            '<script>(function(){var b=document.getElementById("hdMenu"),m=document.getElementById("mnav");if(!b||!m)return;'
+            'function set(o){m.hidden=!o;b.setAttribute("aria-expanded",o?"true":"false");document.documentElement.classList.toggle("mnav-on",o);if(o){var f=m.querySelector("summary");if(f)f.focus();}else b.focus();}'
+            'b.addEventListener("click",function(){set(m.hidden);});'
+            'm.addEventListener("click",function(ev){if(ev.target.closest("[data-mnav-x]"))set(false);});'
+            'document.addEventListener("keydown",function(ev){if(ev.key==="Escape"&&!m.hidden)set(false);});})();</script>')
+
+
 def dock_html(rel, active):
     grp = ACTIVE_GROUP.get(active, "")
     items = [("", "🏠", "홈", "home")] + [(href, ic, label.replace("안전 ", "").replace("브리핑·소식", "소식"), key) for (key, label, href), ic in zip(NAV4, ["🗂️", "⚖️", "📰", "💼", "💬"])]
@@ -1182,9 +1204,11 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
     <a class="logo" href="{rel_root}" aria-label="{e(site['name'])} 홈">{LOGO_SVG}<span>{e(site['name'])}</span></a>
     <nav class="gnb" aria-label="주 메뉴">{nav}</nav>
     {hd_auth(site, rel_root)}
+    <button type="button" class="hd-menu" id="hdMenu" aria-expanded="false" aria-controls="mnav"><span class="hd-menu-i" aria-hidden="true"></span>메뉴</button>
     {f'<a class="btn btn-sm hd-cta" href="{e(tl)}"{ext}>Mallo 열기</a>' if safe_url(((site.get("tools") or [{}])[0]).get("url")) else ""}
   </div>
 </header>
+{mnav_html(site, rel_root, active)}
 <main id="main">
 {body}
 </main>
