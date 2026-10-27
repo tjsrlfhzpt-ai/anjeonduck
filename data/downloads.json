@@ -146,6 +146,55 @@
    ]
   },
   {
+   "id": "sop",
+   "title": "표준안전작업절차서 + 교육 확인 서명부",
+   "kind": "엑셀",
+   "file": "assets/files/templates/SafePlum_sop.xlsx",
+   "dl": "SafePlum_표준안전작업절차서.xlsx",
+   "preview": "assets/files/templates/preview/SafePlum_sop.jpg",
+   "desc": "작업 개요·보호구·작업 전 확인·단계별(사진·위험요인·안전 포인트) 절차·금지 사항·비상 조치·개정 이력을 담은 절차서와, 이해도 질문·참석자 서명을 남기는 교육 확인서, 검토 기한이 자동 표시되는 관리대장입니다.",
+   "parts": [
+    "표준안전작업절차서(사진 칸 포함)",
+    "교육 확인 서명부 30명",
+    "절차서 관리대장(검토 기한 자동)",
+    "작성 안내"
+   ],
+   "tools": [
+    "edu-log",
+    "loto"
+   ],
+   "forms": [
+    "sop"
+   ]
+  },
+  {
+   "id": "sop_training",
+   "title": "표준안전작업절차 교육자료",
+   "kind": "PowerPoint",
+   "file": "assets/files/templates/SafePlum_sop_training.pptx",
+   "dl": "SafePlum_표준안전작업절차_교육자료.pptx",
+   "preview": "assets/files/templates/preview/SafePlum_sop_training.jpg",
+   "desc": "절차서 내용을 현장 교육용 화면으로 옮긴 16:9 자료입니다. 왜 지켜야 하는지 → 개요·보호구 → 작업 전 확인 → 단계별 사진 절차 → 금지 사항 → 비상 조치 → 이해도 질문(정답은 발표자 노트) 순서입니다.",
+   "parts": [
+    "표지",
+    "이 작업의 위험",
+    "개요·보호구",
+    "작업 전 확인·잠금 4원칙",
+    "단계별 절차 2장",
+    "금지 사항",
+    "비상 조치",
+    "이해도 확인",
+    "고쳐 쓰는 법"
+   ],
+   "tools": [
+    "edu-log",
+    "loto"
+   ],
+   "forms": [
+    "sop"
+   ]
+  },
+  {
    "id": "edu",
    "title": "안전보건교육 일지 + 참석자 서명부",
    "kind": "엑셀",

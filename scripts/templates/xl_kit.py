@@ -162,6 +162,26 @@ def grid(ws, r1, r2, c1, c2, height=22, align=None, wrap=True):
             x.alignment = align or Alignment(horizontal="center", vertical="center", wrap_text=wrap)
 
 
+def _as_value(v, c):
+    """예시 날짜·시각 글자를 진짜 날짜 값으로 — 그래야 기한 계산 수식이 예시 줄에서도 맞게 돈다"""
+    import datetime as _dt, re as _re
+    if not isinstance(v, str):
+        return v
+    if _re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
+        if c.number_format == "General":
+            c.number_format = "yyyy-mm-dd"
+        return _dt.date.fromisoformat(v)
+    if _re.fullmatch(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}", v):
+        if c.number_format == "General":
+            c.number_format = "yyyy-mm-dd hh:mm"
+        return _dt.datetime.strptime(v, "%Y-%m-%d %H:%M")
+    if _re.fullmatch(r"\d{2}:\d{2}", v):
+        if c.number_format == "General":
+            c.number_format = "hh:mm"
+        return _dt.datetime.strptime(v, "%H:%M").time()
+    return v
+
+
 def example(ws, row, values, start_col=1, height=None):
     """예시 줄: 회색 기울임(지우고 쓰기)"""
     for i, v in enumerate(values):
@@ -170,7 +190,7 @@ def example(ws, row, values, start_col=1, height=None):
         c = ws.cell(row=row, column=start_col + i)
         if not (isinstance(v, str) and v.startswith("=")):
             c.font = f(9.5, False, "8A94A3", True)
-        c.value = v
+        c.value = _as_value(v, c)
     if height:
         ws.row_dimensions[row].height = height
 
