@@ -1071,7 +1071,7 @@ details.lawbox summary{cursor:pointer}
 /* ---------- 펼침 메뉴 (v2.4) ---------- */
 .gnb-item{position:relative;display:flex;height:100%}
 .gnb .mega{position:absolute;top:100%;left:-8px;z-index:30;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .12s,transform .12s,visibility 0s .12s}
-.gnb-item:hover .mega,.gnb-item:focus-within .mega{opacity:1;visibility:visible;transform:none;transition:opacity .12s,transform .12s}
+.gnb:not(.js-mega) .gnb-item:hover .mega,.gnb .gnb-item.is-open .mega,.gnb-item:focus-within .mega{opacity:1;visibility:visible;transform:none;transition:opacity .12s,transform .12s}
 .mega-in{display:grid;grid-auto-flow:column;grid-auto-columns:max-content;gap:8px 36px;margin-top:1px;padding:20px 24px 22px;background:var(--surface);border:1px solid var(--line);border-radius:0 0 var(--r-lg) var(--r-lg);box-shadow:var(--shadow-2)}
 .mega-h{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.02em;margin-bottom:6px}
 .mega-col:first-child .mega-h{color:var(--orange)}
@@ -2135,3 +2135,7 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
 }
 @media (max-width:720px){.hd-menu{order:2;margin-left:0}.hd-in>.logo+.hd-menu{margin-left:auto}}
 @media print{.hd-menu,.mnav{display:none!important}}
+/* 로그인 상태 휴대폰 헤더: '운영 관리·로그아웃'은 서랍으로 옮겨 메뉴 버튼이 둘째 줄로 밀리지 않게 */
+.mnav-acc{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg,#F6F8FB)}
+.mnav-acc-a{padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:14px;font-weight:700;color:var(--navy)}
+@media (max-width:720px){.hd-auth .hd-auth-adm,.hd-auth .hd-auth-out{display:none}}

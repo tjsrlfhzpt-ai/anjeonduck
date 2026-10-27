@@ -33,6 +33,38 @@
     var isAdm = false; try { isAdm = localStorage.getItem("safetake.adm") === ses.user.id; } catch (e) {}
     if (isAdm) { var ad = document.createElement("a"); ad.href = acct.replace(/account\/$/, "admin/"); ad.textContent = "운영 관리"; ad.className = "hd-auth-adm"; box.appendChild(ad); }
     box.appendChild(my); box.appendChild(out);
+    // 휴대폰에선 헤더 폭이 좁아 '운영 관리·로그아웃'을 헤더에서 숨기고(CSS), 전체 메뉴 서랍 맨 위에 같은 링크를 둔다.
+    var mp = document.querySelector("#mnav .mnav-hd");
+    if (mp) {
+      var acc = document.createElement("div"); acc.className = "mnav-acc";
+      [my, ad, out].forEach(function (a) { if (!a) return; var c = a.cloneNode(true); c.className = "mnav-acc-a"; acc.appendChild(c); });
+      mp.parentNode.insertBefore(acc, mp.nextSibling);
+    }
+  })();
+
+  // 0-1) PC 펼침 메뉴: 마우스를 아래 메뉴로 비스듬히 옮길 때 옆 항목(채용·게시판 등)을 스치면
+  //      펼친 메뉴가 바로 바뀌어 사라지던 문제를 막는다. 다른 항목으로 바꿀 때만 잠깐(0.2초) 기다린다.
+  (function () {
+    var gnb = document.querySelector(".hd .gnb"); if (!gnb) return;
+    var items = [].slice.call(gnb.querySelectorAll(".gnb-item")).filter(function (it) { return it.querySelector(".mega"); });
+    if (!items.length) return;
+    gnb.classList.add("js-mega");
+    var cur = null, swT = 0, clT = 0;
+    function open(it) { clearTimeout(swT); clearTimeout(clT); if (cur && cur !== it) cur.classList.remove("is-open"); cur = it; if (it) it.classList.add("is-open"); }
+    function closeAll() { clearTimeout(swT); if (cur) cur.classList.remove("is-open"); cur = null; }
+    items.forEach(function (it) {
+      it.addEventListener("pointerenter", function (ev) {
+        if (ev.pointerType && ev.pointerType !== "mouse") return;
+        clearTimeout(clT);
+        if (!cur || cur === it) { clearTimeout(swT); open(it); return; }
+        clearTimeout(swT); swT = setTimeout(function () { open(it); }, 200);
+      });
+      it.addEventListener("pointerleave", function (ev) {
+        if (ev.pointerType && ev.pointerType !== "mouse") return;
+        if (cur === it) { clearTimeout(clT); clT = setTimeout(closeAll, 250); }
+      });
+    });
+    document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") closeAll(); });
   })();
 
   // 1) 마감 상태를 방문 시점 기준으로 다시 계산 (사이트는 하루 1회만 빌드되므로)
