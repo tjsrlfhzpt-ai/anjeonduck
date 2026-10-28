@@ -689,6 +689,7 @@ details.lawbox summary{cursor:pointer}
 .dl-size{font-weight:400;opacity:.75;margin-left:6px;font-size:12px}
 .dl-chip{min-width:48px;font-weight:700;letter-spacing:.02em}
 /* 안전보건 자료실(공단 공공누리) */
+.km-indbar{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:14px 16px;display:grid;gap:8px;scroll-margin-top:80px}.km-indbar .hint{margin:0}.km-indbar[hidden]{display:none}
 .km-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .km-q{flex:1;min-width:240px;max-width:none}
 .km-filters{display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px}

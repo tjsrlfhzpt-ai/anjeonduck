@@ -5,6 +5,12 @@
 </div></section>
 <div class="wrap stack" style="padding-top:8px;padding-bottom:48px">
 
+  <section class="km-indbar" id="kmIndBar" hidden>
+    <h2 class="h-sm">업종별로 찾기</h2>
+    <div class="chips" id="kmIndQuick" role="group" aria-label="업종별로 찾기"></div>
+    <p class="hint">제목에 업종이 드러난 자료만 모읍니다. 여러 업종에 공통인 자료는 아래 '전체 자료'에서 찾아보세요. 현장에서 만든 자료는 <a href="../../board/?b=free&amp;c=%EC%9E%90%EB%A3%8C%20%EA%B3%B5%EC%9C%A0">게시판 '자료 공유'</a>에서 업종별로 나눕니다.</p>
+  </section>
+
   <section class="stack" id="kmSeason" hidden>
     <div class="sec-head"><div><h2 id="kmSeasonT">이달의 안전 자료</h2><p id="kmSeasonS">계절·시기에 맞는 자료를 최신순으로 골랐습니다.</p></div></div>
     <div id="kmSeasonRows" class="stack"></div>
@@ -206,6 +212,15 @@
       // 제조업 전체를 맨 앞, 그다음 제조 세부, 나머지 순
       var mf = inds.length - 1, iorder = [mf].concat(inds.map(function (_, i) { return i; }).filter(function (i) { return i !== mf && /^제조/.test(inds[i]); }), inds.map(function (_, i) { return i; }).filter(function (i) { return i !== mf && !/^제조/.test(inds[i]); }));
       chips($("kmInds"), iorder.map(function (i) { return inds[i].replace(/^제조·/, "제조 · "); }), "ind", iorder.map(function (i) { return ic[i]; }), iorder);
+      // 위쪽 '업종별로 찾기' 줄: 누르면 아래 업종 필터를 고르고 목록으로 이동
+      $("kmIndQuick").innerHTML = iorder.map(function (ix, k) { return ic[ix] ? '<button type="button" class="chip" data-k="' + k + '">' + esc(inds[ix].replace(/^제조·/, "제조 · ")) + ' <span class="n">' + ic[ix].toLocaleString("ko-KR") + "</span></button>" : ""; }).join("");
+      $("kmIndBar").hidden = false;
+      $("kmIndQuick").addEventListener("click", function (ev) {
+        var b = ev.target.closest("[data-k]"); if (!b) return;
+        var c = $("kmInds").querySelector('.chip[data-v="' + b.dataset.k + '"]'); if (c) c.click();
+        $("kmAll").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      if (location.hash === "#kmIndBar") setTimeout(function () { $("kmIndBar").scrollIntoView({ block: "start" }); }, 50);
       var want = inds.indexOf(IND0);
       if (want >= 0) { st.ind = want; $("kmInds").querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", String(+x.dataset.v === iorder.indexOf(want))); }); }
     } else $("kmInds").closest(".fgroup").hidden = true;

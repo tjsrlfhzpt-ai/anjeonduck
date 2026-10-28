@@ -893,7 +893,7 @@ def nav_cols(site, rel):
     return {
         "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}" if g else g_href, n) for g, n, g_href in (("업무일지", "안전·보건 업무일지", ""), ("", "작업계획서 (종류 선택)", f"{rel}tools/forms/workplan/"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표", ""), ("중대재해처벌법 이행", "중대재해법 이행 서식", ""))]
                  + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
-                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}resources/templates/", "무료 양식 내려받기 (엑셀·PPT)")])],
+                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}resources/library/#kmIndBar", "업종별 자료 (건설·제조·서비스 등)"), (f"{rel}resources/templates/", "무료 양식 내려받기 (엑셀·PPT)")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}laws/bills/", "입법예고·개정 포인트")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
@@ -901,7 +901,7 @@ def nav_cols(site, rel):
                  ("다른 채용 사이트", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
-        "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A")]),
+        "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=free&c=%EC%9E%90%EB%A3%8C%20%EA%B3%B5%EC%9C%A0", "자료 공유 (업종별 현장 자료)"), (f"{rel}board/?b=qna", "Q&A")]),
                   ("회원·안내", [(f"{rel}board/account/", "로그인 · 마이페이지"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
     }
 
@@ -3162,7 +3162,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>작성기 {WRITER_N}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
     <a class="ftool" href="templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서 4종·순회점검표·교육일지 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
-    <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>안전보건 자료실</strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
+    <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>안전보건 자료실</strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
 </section>
 <section class="wrap" style="padding-top:28px" data-landing>
