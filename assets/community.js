@@ -283,11 +283,12 @@
           h("span", { class: "cm-t" }, x.title, b !== "qna" && x.comment_count ? h("em", { "aria-label": "댓글 " + x.comment_count + "개" }, " [" + x.comment_count + "]") : null),
           state, h("span", { class: "cm-meta" }, nick(x), " · ", h("time", { datetime: x.created_at }, when(x.created_at)))));
       }));
-      var empty = !rows.length ? h("div", { class: "empty" }, kw || cat ? null : h("img", { class: "cm-empty-i", src: REL + "assets/img/ico/" + (b === "qna" ? "ask" : job ? "helmet" : "chat") + ".webp", width: "96", height: "96", alt: "" }), h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : job ? (JOB_POST ? "아직 등록된 채용공고가 없습니다. 회원이면 누구나 공고를 올릴 수 있습니다." : "아직 등록된 채용공고가 없습니다. " + JOB_PAUSED) : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
+      var empty = !rows.length ? h("div", { class: "empty" }, kw || cat ? null : h("img", { class: "cm-empty-i", src: REL + "assets/img/ico/" + (b === "qna" ? "ask" : job ? "helmet" : "chat") + ".webp", width: "96", height: "96", alt: "" }), h("p", null, kw || cat ? "조건에 맞는 글이 없습니다." : (b === "qna" ? "아직 질문이 없습니다. 첫 질문을 남겨 보세요." : job ? (JOB_POST ? "회원이 직접 올린 채용공고는 아직 없습니다. 회원이면 누구나 공고를 올릴 수 있습니다." : "아직 등록된 채용공고가 없습니다. " + JOB_PAUSED) : "아직 글이 없습니다. 첫 글을 남겨 보세요."))) : null;
       var pager = pages > 1 ? h("nav", { class: "cm-pager", "aria-label": "페이지" },
         p > 1 ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p - 1 }) }, "← 이전") : null,
         h("span", null, p + " / " + pages), p < pages ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p + 1 }) }, "다음 →") : null) : null;
-      show(tabs(b), job ? chatBox() : null, filter, empty || list, pager,
+      var jobLink = job && CFG.jobsOpen ? h("a", { class: "job-today", href: REL + "jobs/" }, h("b", null, "SafePlum이 고른 채용공고 " + CFG.jobsOpen + "건"), " 대기업·공공기관·중견기업 안전·보건 공고 보기 →") : null;
+      show(tabs(b), jobLink, job ? chatBox() : null, filter, empty || list, pager,
         job ? h("p", { class: "cm-more" }, h("a", { href: REL + "jobs/" }, "고용24·사람인 등 다른 채용 사이트에서 더 찾기 →")) : null,
         job && CFG.jobNo ? h("p", { class: "job-no" }, "직업정보제공사업 신고번호 ", h("b", null, CFG.jobNo), CFG.jobOrg ? " (" + CFG.jobOrg + ")" : "") : null,
         job ? h("p", { class: "src-note" }, "채용공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않으며, 조건·마감일은 공고를 올린 회사에 확인하세요. 금전·개인 금융정보를 요구하는 공고는 신고해 주세요.") : null);

@@ -857,7 +857,7 @@ CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hou
 LOOKUP_TOOLS = ["ai", "law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
-NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "board/?b=job"), ("board", "게시판", "board/")]
+NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "jobs/"), ("board", "게시판", "board/")]
 ACTIVE_GROUP = {"videos/": "brief", "tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
 
 
@@ -872,8 +872,8 @@ def nav_cols(site, rel):
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}laws/bills/", "입법예고·개정 포인트")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
-        "jobs": [("SafePlum 채용", [(f"{rel}board/?b=job", "채용공고 보기"), (f"{rel}board/write/?b=job", "공고 등록")][:2 if (site.get("features") or {}).get("job_posting", True) else 1] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
-                 ("다른 채용 사이트", [(f"{rel}jobs/", "채용 사이트 모음"), (JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
+        "jobs": [("SafePlum 채용", [(f"{rel}jobs/", "채용공고 전체"), (f"{rel}jobs/today/", "오늘의 채용 모음"), (f"{rel}board/?b=job", "회원 직접 등록 공고"), (f"{rel}board/write/?b=job", "공고 등록")][:4 if (site.get("features") or {}).get("job_posting", True) else 3] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
+                 ("다른 채용 사이트", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
                                     ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
         "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=qna", "Q&A")]),
@@ -1478,6 +1478,7 @@ ACC_PAGE = "accidents/"  # 사고사망 속보 목록(상세) 페이지 주소
 
 
 JOB_POST = True  # main() 에서 config/site.json features.job_posting 으로 정한다
+JOBS_OPEN = 0     # main() 에서: 채용정보(/jobs/)의 마감 전 공고 수 — 회원 채용공고 게시판에서 안내
 
 
 def bdate(x, long=False):
@@ -2001,6 +2002,8 @@ def build(out, today):
         j["origin"] = "user"
         j.setdefault("source_name", "기업 직접 등록")
     jobs = validate_jobs(load("data/jobs.json") + user_jobs + pubjobs["items"], today)
+    global JOBS_OPEN
+    JOBS_OPEN = sum(1 for x in jobs if not x["closed"])
     briefs = load_briefs(today)
     auto_news, auto_acc = load_auto("news.json"), load_auto("accidents.json")
     hazards = load("data/hazards.json")
@@ -2617,7 +2620,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     BP = fetch_board_posts(cm_url, cm_key) if cm_on else None   # 글별 정적 페이지용(아래)
 
     def cm_page(sub, kind, title, lead, rel, desc, wide=False):
-        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST, "jobNo": ((site.get("operator") or {}).get("job_info_no") or ""), "jobOrg": ((site.get("operator") or {}).get("job_info_org") or ""), "built": BOARD_BUILT if (BP and BP.get("posts")) else ""}, ensure_ascii=False).replace("</", "<\\/")
+        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST, "jobsOpen": JOBS_OPEN, "jobNo": ((site.get("operator") or {}).get("job_info_no") or ""), "jobOrg": ((site.get("operator") or {}).get("job_info_org") or ""), "built": BOARD_BUILT if (BP and BP.get("posts")) else ""}, ensure_ascii=False).replace("</", "<\\/")
         crumb = f'<a href="{rel}board/">게시판</a><span>/</span>{e(title)}' if sub else "게시판"
         side = f"""<aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint">
