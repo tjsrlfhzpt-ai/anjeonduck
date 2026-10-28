@@ -142,7 +142,8 @@
     "rule-sign",
     "top-rules",
     "gear-cert",
-    "edu-monthly"
+    "edu-monthly",
+    "law-register"
    ],
    "note": ""
   },
@@ -243,7 +244,8 @@
     "improve",
     "ai",
     "law-ai",
-    "gear-cert"
+    "gear-cert",
+    "law-register"
    ],
    "note": ""
   },
@@ -333,7 +335,8 @@
     "law-ai",
     "rule-sign",
     "top-rules",
-    "edu-monthly"
+    "edu-monthly",
+    "law-register"
    ],
    "note": ""
   },
@@ -397,7 +400,8 @@
     "ai",
     "law-ai",
     "gear-cert",
-    "edu-monthly"
+    "edu-monthly",
+    "law-register"
    ],
    "note": ""
   },
@@ -424,7 +428,8 @@
     "schedule",
     "docmap",
     "ai",
-    "law-ai"
+    "law-ai",
+    "law-register"
    ],
    "note": "제정 이후 개정 없음(연혁 1건). 상시근로자 50명 미만 사업장 적용 시기는 부칙에 따름."
   },
@@ -451,7 +456,8 @@
     "schedule",
     "docmap",
     "ai",
-    "law-ai"
+    "law-ai",
+    "law-register"
    ],
    "note": "lsId 014159 — 2026-10-26 연혁 목록 확인: 최신 공포번호가 대통령령 제35805호(현행)와 같고 시행 예정본 없음."
   }

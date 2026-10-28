@@ -865,15 +865,15 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
             ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
 
 
-TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "edu-monthly": "📅", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "top-rules": "📌", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
+TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "edu-monthly": "📅", "law-register": "📚", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "top-rules": "📌", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "cost-use": "🧾", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "ai": "✨", "law-ai": "⚖️", "gear-cert": "⛑️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
-TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "edu-monthly": "book", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "top-rules": "salute", "heat": "heat", "improve": "fix", "confined": "confined",
+TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "edu-monthly": "book", "law-register": "folder", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "top-rules": "salute", "heat": "heat", "improve": "fix", "confined": "confined",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "cost-use": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
               "schedule": "calendar", "duties": "briefcase", "ai": "book", "law-ai": "book", "gear-cert": "helmet", "retention": "folder", "inspect": "search", "docmap": "audit"}
 # 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
-WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "edu-monthly", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "top-rules", "improve"]
+WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "edu-monthly", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "top-rules", "improve", "law-register"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
 HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"),
                     ("workplan", "folder", "작업계획서", "지게차·중량물·고소작업대 등 작업 종류를 골라 별표 4 사항대로 작성합니다", "안전보건규칙 제38조"),
@@ -893,7 +893,7 @@ def nav_cols(site, rel):
     return {
         "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}" if g else g_href, n) for g, n, g_href in (("업무일지", "안전·보건 업무일지", ""), ("", "작업계획서 (종류 선택)", f"{rel}tools/forms/workplan/"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표", ""), ("중대재해처벌법 이행", "중대재해법 이행 서식", ""))]
                  + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
-                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "안전보건 자료실"), (f"{rel}resources/library/#kmIndBar", "업종별 자료 (건설·제조·서비스 등)"), (f"{rel}resources/templates/", "무료 양식 내려받기 (엑셀·PPT)")])],
+                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "공단 안전보건자료 (OPS·포스터·교안)"), (f"{rel}resources/library/#kmIndBar", "업종별 자료 (건설·제조·서비스 등)"), (f"{rel}resources/templates/", "무료 양식 내려받기 (엑셀·PPT)")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}laws/bills/", "입법예고·개정 포인트")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
@@ -1695,7 +1695,7 @@ ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="
 WRITER_LEAD = ("위험성평가·TBM", ["tbm", "risk"])          # 맨 앞 묶음(서식에는 없는 묶음)
 WRITER_TOOLS_IN = {"교육·회의": ["edu-log", "edu-monthly", "committee", "council"],
                    "점검·허가": ["patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "top-rules", "improve"],
-                   "관리대장": ["msds"]}
+                   "관리대장": ["msds", "law-register"]}
 WRITER_GID = {"위험성평가·TBM": "w-risk", "교육·회의": "w-edu", "점검·허가": "w-check", "재해·사고 조사": "w-acc", "업무일지": "w-log",
               "작업계획서": "w-plan", "작업시작 전 점검(별표 3)": "pre", "조직·발령": "w-org", "관리대장": "w-ledger", "중대재해처벌법 이행": "w-sapa"}
 WRITER_N = 0  # main() 에서 계산: 전용 작성기 + 서식 - 겹치는 것
@@ -1759,6 +1759,33 @@ def tool_ld(t, site):
     return '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + "</script>"
 
 
+LAWREG_KEYS = ["act", "yeong", "rule", "krule", "sapa", "sapa_dec"]
+
+
+def lawreg_index():
+    """법규 등록대장 작성기 데이터: 법령별 현행 판(공포번호·시행일·확인일)과 조문 목록(조문·제목·장·최근 개정일), 업종·작업별 묶음."""
+    laws, have = [], {}
+    for k in LAWREG_KEYS:
+        d = load(f"data/lawtext/{k}.json")
+        arts = []
+        for a in d["articles"]:
+            t = (a.get("title") or "").strip()
+            if not t or "삭제" == t:
+                continue
+            am = sorted(x for x in (a.get("amended") or []) if re.match(r"^\d{4}-\d\d-\d\d$", x))
+            arts.append([a["jo"], t, (a.get("path") or [""])[-1], am[-1] if am else ""])
+            have[(k, a["jo"])] = True
+        laws.append({"k": k, "law": d["law"], "short": d.get("short", d["law"]), "ver": d.get("version", ""), "eff": d.get("effective_iso", ""),
+                     "chk": d.get("checked", ""), "url": d.get("url", ""), "arts": arts})
+    packs = load("data/law_register.json")["packs"]
+    for pk in packs:
+        miss = [f"{k} {j}" for k, j in pk["items"] if (k, j) not in have]
+        if miss:
+            warn(f"법규 등록대장 묶음 '{pk['name']}': 조문 데이터에 없음 → 뺌: {', '.join(miss)}")
+        pk["items"] = [[k, j] for k, j in pk["items"] if (k, j) in have]
+    return {"laws": laws, "packs": packs}
+
+
 EDU_CASES = {"acc": [], "media": {}, "acc_src": "", "acc_fetched": ""}  # main()에서 채움: 월별 정기교육 자료의 '사고사례·영상'
 
 
@@ -1790,6 +1817,8 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         elif t.get("inject"):
             names = t["inject"] if isinstance(t["inject"], list) else [t["inject"]]
             src = inject_data(src, names, t["src"])
+        if "/*@LAWREG@*/null" in src:
+            src = src.replace("/*@LAWREG@*/null", json.dumps(lawreg_index(), ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
         if "/*@EDU_CASES@*/null" in src:
             src = src.replace("/*@EDU_CASES@*/null", json.dumps(EDU_CASES, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
         src += dl_section("../../", tool=t["id"]) + lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
@@ -2252,7 +2281,7 @@ def build(out, today):
     bd_forms = board(f"작성기 {WRITER_N}종", "tools/forms/", "".join(bd_row(f"tools/forms/{i}/", fby[i]["title"], "", fby[i]["group"][:5]) for i in FORM_PICKS if i in fby))
     bd_res = board("자주 찾는 법정 서식", "resources/", "".join(bd_row(f"resources/{r['detail']}" if r.get("detail") else "resources/", r["title"], "", "서식" if r.get("category") == "법정 서식" else "고시") for r in popular[:6]))
     lib = load("data/library.json")
-    bd_lib = board("안전보건 자료실", "resources/library/", "".join(bd_row(safe_url(x["url"]), x["name"], "", "공식", ext=True) for x in lib.get("official", [])[:3] if safe_url(x.get("url")))
+    bd_lib = board("공단 안전보건자료", "resources/library/", "".join(bd_row(safe_url(x["url"]), x["name"], "", "공식", ext=True) for x in lib.get("official", [])[:3] if safe_url(x.get("url")))
                    + bd_row("resources/signs/", "안전보건표지 40종 · SafePlum 현장 안내 게시물", "", "표지") + bd_row("tools/docmap/", "감독 대비 서류 자가점검", "", "점검"))
     quick_strip = ('<section class="qs" aria-label="기관 바로가기"><div class="wrap qs-in"><span class="qs-l">바로 신청·신고</span>' + "".join(
         f'<a class="qs-go" href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}">{e(x["name"])} ↗</a>' for x in sites.get("civil", []) if safe_url(x.get("url"))) + '<span class="qs-l qs-l2">기관</span>' + "".join(
@@ -3162,7 +3191,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>작성기 {WRITER_N}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
     <a class="ftool" href="templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서 4종·순회점검표·교육일지 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
-    <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>안전보건 자료실</strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
+    <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
 </section>
 <section class="wrap" style="padding-top:28px" data-landing>
@@ -3191,7 +3220,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 </div>"""
     for pid, src, name, title, desc in [
         ("signs", "apps/signs.body.html", "signs", "안전보건표지 40종", "산업안전보건법 시행규칙 별표 6 안전보건표지 40종을 찾아 A4로 인쇄. 한국어·영어 등 20개 언어 원본 파일."),
-        ("library", "apps/library.body.html", "library", "안전보건 자료실", "안전보건공단 공공누리 자료(OPS·포스터·책자·교안·동영상) 9천여 건을 검색하고 원본으로 연결."),
+        ("library", "apps/library.body.html", "library", "공단 안전보건자료 (OPS·포스터·교안·영상)", "안전보건공단 공공누리 자료(OPS·포스터·책자·교안·동영상) 9천여 건을 검색하고 원본으로 연결."),
     ]:
         body = inject_data((ROOT / src).read_text(encoding="utf-8"), [name], src)
         if pid == "signs":
