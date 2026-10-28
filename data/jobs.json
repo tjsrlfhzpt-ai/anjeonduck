@@ -16,7 +16,9 @@
   "source_name": "잡코리아",
   "origin": "curated",
   "group": "한국전력공사 계열",
-  "term": "육아휴직 대체"
+  "term": "육아휴직 대체",
+  "career_detail": "신입·경력",
+  "education": "학력무관"
  },
  {
   "id": "jk-50257800",
@@ -33,7 +35,9 @@
   "posted": "2026-10-28",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50257800",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50253809",
@@ -50,7 +54,9 @@
   "posted": "2026-10-28",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50253809",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 5년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50230228",
@@ -67,7 +73,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50230228",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50247850",
@@ -84,7 +92,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50247850",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 5년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50247540",
@@ -101,7 +111,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50247540",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50249519",
@@ -118,7 +130,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50249519",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 1년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50251348",
@@ -135,7 +149,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50251348",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력",
+  "education": "고졸↑"
  },
  {
   "id": "jk-50250656",
@@ -152,7 +168,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50250656",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입·경력",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50251952",
@@ -169,7 +187,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50251952",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50251981",
@@ -187,7 +207,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50251981",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 10년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50247109",
@@ -205,7 +227,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50247109",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 1년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50249808",
@@ -222,7 +246,9 @@
   "posted": "2026-10-27",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50249808",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50236336",
@@ -239,7 +265,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50236336",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "고졸↑"
  },
  {
   "id": "jk-50236366",
@@ -256,7 +284,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50236366",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50237833",
@@ -273,7 +303,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50237833",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50240115",
@@ -291,7 +323,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50240115",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "4개월(정규직 전환 가능성)"
+  "term": "4개월(정규직 전환 가능성)",
+  "career_detail": "경력 1년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50237392",
@@ -308,7 +342,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50237392",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50241760",
@@ -325,7 +361,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50241760",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입·경력",
+  "education": "학력무관"
  },
  {
   "id": "jk-50242977",
@@ -342,7 +380,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50242977",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 5년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50243026",
@@ -359,7 +399,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50243026",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50243849",
@@ -376,7 +418,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50243849",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50245053",
@@ -393,7 +437,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50245053",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50250391",
@@ -411,7 +457,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50250391",
   "source_name": "잡코리아",
   "origin": "curated",
-  "group": "두산그룹"
+  "group": "두산그룹",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50250318",
@@ -429,7 +477,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50250318",
   "source_name": "잡코리아",
   "origin": "curated",
-  "group": "두산그룹"
+  "group": "두산그룹",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50250248",
@@ -447,7 +497,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50250248",
   "source_name": "잡코리아",
   "origin": "curated",
-  "group": "두산그룹"
+  "group": "두산그룹",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50239921",
@@ -464,7 +516,9 @@
   "posted": "2026-10-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50239921",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50246236",
@@ -482,7 +536,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50246236",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "단기"
+  "term": "단기",
+  "career_detail": "신입",
+  "education": "학력무관"
  },
  {
   "id": "jk-50228342",
@@ -499,7 +555,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50228342",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 5년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50226672",
@@ -516,7 +574,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50226672",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50227757",
@@ -533,7 +593,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50227757",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50231220",
@@ -550,7 +612,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50231220",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50231249",
@@ -567,7 +631,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50231249",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50230669",
@@ -584,7 +650,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50230669",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 5년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50230873",
@@ -601,7 +669,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50230873",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50231425",
@@ -618,7 +688,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50231425",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50233199",
@@ -635,7 +707,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50233199",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입·경력 1년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50232599",
@@ -654,7 +728,9 @@
   "source_name": "잡코리아",
   "origin": "curated",
   "group": "롯데그룹",
-  "term": "12개월"
+  "term": "12개월",
+  "career_detail": "경력 2년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50231537",
@@ -672,7 +748,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50231537",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "6개월 이상"
+  "term": "6개월 이상",
+  "career_detail": "경력 1년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50231174",
@@ -691,7 +769,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50231174",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "프로젝트 기간"
+  "term": "프로젝트 기간",
+  "career_detail": "경력 10년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50230863",
@@ -710,7 +790,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50230863",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "12개월"
+  "term": "12개월",
+  "career_detail": "경력 2년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50237574",
@@ -727,7 +809,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50237574",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입",
+  "education": "학력무관"
  },
  {
   "id": "jk-50238072",
@@ -744,7 +828,9 @@
   "posted": "2026-10-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50238072",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입",
+  "education": "학력무관"
  },
  {
   "id": "jk-50219071",
@@ -761,7 +847,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50219071",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력",
+  "education": "학력무관"
  },
  {
   "id": "jk-50219452",
@@ -778,7 +866,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50219452",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 2년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50222367",
@@ -796,7 +886,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50222367",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "프로젝트 기간"
+  "term": "프로젝트 기간",
+  "career_detail": "경력 1년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50222090",
@@ -813,7 +905,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50222090",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 1년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50219583",
@@ -830,7 +924,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50219583",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 1년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50222482",
@@ -847,7 +943,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50222482",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50224173",
@@ -864,7 +962,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50224173",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 2년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50224370",
@@ -881,7 +981,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50224370",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입·경력",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50223767",
@@ -898,7 +1000,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50223767",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입·경력",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50222988",
@@ -916,7 +1020,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50222988",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50223829",
@@ -933,7 +1039,9 @@
   "posted": "2026-10-22",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50223829",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 2년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50215602",
@@ -951,7 +1059,9 @@
   "posted": "2026-10-21",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50215602",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50215700",
@@ -969,7 +1079,9 @@
   "posted": "2026-10-21",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50215700",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력",
+  "education": "학력무관"
  },
  {
   "id": "jk-50222813",
@@ -987,7 +1099,9 @@
   "posted": "2026-10-21",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50222813",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 2년↑",
+  "education": "석사↑"
  },
  {
   "id": "jk-50215349",
@@ -1005,7 +1119,9 @@
   "posted": "2026-10-21",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50215349",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50212247",
@@ -1023,7 +1139,9 @@
   "posted": "2026-10-21",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50212247",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50215691",
@@ -1040,7 +1158,9 @@
   "posted": "2026-10-21",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50215691",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50212501",
@@ -1058,7 +1178,9 @@
   "posted": "2026-10-21",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50212501",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50214241",
@@ -1076,7 +1198,9 @@
   "posted": "2026-10-20",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50214241",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 4년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50219089",
@@ -1094,7 +1218,9 @@
   "posted": "2026-10-20",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50219089",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 10년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50204914",
@@ -1112,7 +1238,9 @@
   "posted": "2026-10-20",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50204914",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "신입·경력",
+  "education": "학력무관"
  },
  {
   "id": "jk-50193861",
@@ -1131,7 +1259,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50193861",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "1년(재계약 가능)"
+  "term": "1년(재계약 가능)",
+  "career_detail": "경력 4~10년",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50193845",
@@ -1150,7 +1280,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50193845",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "1년(재계약 가능)"
+  "term": "1년(재계약 가능)",
+  "career_detail": "경력 4~10년",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50193875",
@@ -1169,7 +1301,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50193875",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "1년(재계약 가능)"
+  "term": "1년(재계약 가능)",
+  "career_detail": "경력 4~10년",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50193905",
@@ -1188,7 +1322,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50193905",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "1년(재계약 가능)"
+  "term": "1년(재계약 가능)",
+  "career_detail": "경력 4~10년",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50195015",
@@ -1205,7 +1341,9 @@
   "posted": "2026-10-19",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50195015",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50196640",
@@ -1224,7 +1362,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50196640",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "육아휴직 대체"
+  "term": "육아휴직 대체",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50180106",
@@ -1242,7 +1382,9 @@
   "posted": "2026-10-16",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50180106",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50186787",
@@ -1260,7 +1402,9 @@
   "posted": "2026-10-16",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50186787",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력무관",
+  "education": "학력무관"
  },
  {
   "id": "jk-50215932",
@@ -1279,7 +1423,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50215932",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "6개월"
+  "term": "6개월",
+  "career_detail": "신입",
+  "education": "고졸↑"
  },
  {
   "id": "jk-50165408",
@@ -1297,7 +1443,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50165408",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "1년"
+  "term": "1년",
+  "career_detail": "경력 1년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50164763",
@@ -1314,7 +1462,9 @@
   "posted": "2026-10-14",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50164763",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50151432",
@@ -1332,7 +1482,9 @@
   "posted": "2026-10-12",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50151432",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50152781",
@@ -1349,7 +1501,9 @@
   "posted": "2026-10-12",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50152781",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 7년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50143877",
@@ -1367,7 +1521,9 @@
   "posted": "2026-10-12",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50143877",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50130700",
@@ -1385,7 +1541,9 @@
   "posted": "2026-10-08",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50130700",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50131003",
@@ -1404,7 +1562,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50131003",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "24개월"
+  "term": "24개월",
+  "career_detail": "경력 3년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50120801",
@@ -1422,7 +1582,9 @@
   "posted": "2026-10-07",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50120801",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 10년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50124307",
@@ -1440,7 +1602,9 @@
   "posted": "2026-10-07",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50124307",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 4년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-50078011",
@@ -1459,7 +1623,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50078011",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "6개월"
+  "term": "6개월",
+  "career_detail": "신입·경력 1년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50084157",
@@ -1478,7 +1644,9 @@
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50084157",
   "source_name": "잡코리아",
   "origin": "curated",
-  "term": "프로젝트 기간"
+  "term": "프로젝트 기간",
+  "career_detail": "경력 2년↑",
+  "education": "초대졸↑"
  },
  {
   "id": "jk-50081360",
@@ -1495,7 +1663,9 @@
   "posted": "2026-09-30",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50081360",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 1년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50242478",
@@ -1513,7 +1683,9 @@
   "posted": "2026-09-26",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50242478",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 3년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-50047790",
@@ -1530,7 +1702,9 @@
   "posted": "2026-09-23",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/50047790",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 5년↑",
+  "education": "학력무관"
  },
  {
   "id": "jk-49993294",
@@ -1547,7 +1721,9 @@
   "posted": "2026-09-15",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/49993294",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 2년↑",
+  "education": "대졸↑"
  },
  {
   "id": "jk-49924197",
@@ -1565,6 +1741,8 @@
   "posted": "2026-09-04",
   "source_url": "https://www.jobkorea.co.kr/Recruit/GI_Read/49924197",
   "source_name": "잡코리아",
-  "origin": "curated"
+  "origin": "curated",
+  "career_detail": "경력 2년↑",
+  "education": "초대졸↑"
  }
 ]

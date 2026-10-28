@@ -1286,14 +1286,24 @@ def company_box(j):
             '<p class="hint">기업 구분·계열은 공고와 공개 정보를 바탕으로 SafePlum이 붙인 참고 표시입니다.</p></div>')
 
 
+def career_txt(j):
+    """경력 표시: 공고 요약의 년수(career_detail)가 있으면 우선, 없으면 신입/경력 구분."""
+    return j.get("career_detail") or j.get("career") or ""
+
+
+def term_txt(j):
+    t = j.get("term") or ""
+    return re.sub(r"\((.+)\)$", r", \1", t) if t.count("(") == 1 and t.endswith(")") and not t.startswith("(") else t
+
+
 def job_row(j, rel_root, compact=False):
     tags = "".join(f'<span class="tag tag-job">{e(x)}</span>' for x in j["jobs_list"])
-    tags += "".join(f'<span class="tag">{e(v)}</span>' for v in (j.get("career"), (j.get("employment") or "") + (f" · {j['term']}" if j.get("term") else "")) if v)
+    tags += "".join(f'<span class="tag">{e(v)}</span>' for v in (career_txt(j), j.get("education"), (j.get("employment") or "") + (f" · {j['term']}" if j.get("term") else "")) if v)
     loc = " · ".join(x for x in [j.get("company"), j.get("region")] if x)
     attrs = (f'data-item data-job="{e("|".join(j["jobs_list"]))}" '
              f'data-ctype="{e(j.get("company_type",""))}" data-industry="{e(j.get("industry",""))}" '
              f'data-deadline="{e(j.get("deadline",""))}" data-posted="{e(j.get("posted",""))}" '
-             f'data-text="{e(" ".join(str(j.get(k,"")) for k in ("title","company","region","job","industry","company_type","career","employment")))}"')
+             f'data-text="{e(" ".join(str(j.get(k,"")) for k in ("title","company","region","job","industry","company_type","career","career_detail","education","employment")))}"')
     meta = " · ".join(x for x in [j.get("company_type"), j.get("group"), j.get("industry")] if x)
     return f"""<li class="jrow{' closed' if j['closed'] else ''}{' compact' if compact else ''}" {attrs}>
   {avatar(j.get('company'))}
@@ -1353,8 +1363,9 @@ def jobs_today_text(site, jobs, today):
             dl_s = f"~{int(dl[5:7])}/{int(dl[8:10])}" if DATE_RE.match(dl) else (dl or "")
             emp = j.get("employment") or ""
             if emp == "계약직":
-                emp += f"({j['term']})" if j.get("term") else "(기간은 원문 확인)"
-            out.append(f"- {co}({cities}) [{tag}] / {'·'.join(j['jobs_list'])} · {j.get('career','')} · {emp} {dl_s}".replace("  ", " ").replace(" ·  · ", " · ").rstrip())
+                emp += f"({term_txt(j)})" if j.get("term") else "(기간은 원문 확인)"
+            cond = " · ".join(x for x in ['·'.join(j['jobs_list']), career_txt(j), j.get("education"), emp] if x)
+            out.append(f"- {co}({cities}) [{tag}] / {cond} {dl_s}".rstrip())
             out.append(f"  {base}/jobs/{j['id']}/")
         out.append("")
     no = ((site.get("operator") or {}).get("job_info_no") or "")
@@ -1388,6 +1399,7 @@ def jobs_today_body(site, jobs, today):
     </div>
     <div class="side-box"><h2 class="h-sm">표시 기준</h2><ul class="bul hint">
       <li>기업 구분·계열은 공고와 공개 정보를 바탕으로 SafePlum이 붙인 참고 표시입니다.</li>
+      <li>경력·학력은 공고 원문의 요약 조건(필수 자격)을 옮긴 것입니다. 직무별 세부 요건은 원문을 확인하세요.</li>
       <li>공고 원문에서 조건·마감이 바뀔 수 있습니다. 지원 전에 원문을 확인하세요.</li>
     </ul></div>
   </aside>
@@ -2998,7 +3010,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
             return "".join(f"<li>{e(x.strip())}</li>" for x in str(v or "").split("|") if x.strip())
         dl = str(j.get("deadline", "") or "")
         rows = [("기업 구분", j.get("company_type")), ("계열", j.get("group")), ("업종", j.get("industry")), ("직무", " · ".join(j["jobs_list"])),
-                ("근무지", j.get("region")), ("근무지 주소", j.get("address")), ("경력", j.get("career")), ("고용형태", j.get("employment")), ("근무기간", j.get("term") or ("원문 확인" if j.get("employment") == "계약직" else "")),
+                ("근무지", j.get("region")), ("근무지 주소", j.get("address")), ("경력", career_txt(j)), ("학력", j.get("education")), ("고용형태", j.get("employment")), ("근무기간", j.get("term") or ("원문 확인" if j.get("employment") == "계약직" else "")),
                 ("채용인원", f'{j["headcount"]:g}명' if isinstance(j.get("headcount"), (int, float)) and j["headcount"] else ""),
                 ("NCS 직무", j.get("ncs")),
                 ("등록일", fmt_date(j.get("posted")) if j.get("posted") else "")]
@@ -3039,7 +3051,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
   </aside>
 </div>"""
         write(f"jobs/{j['id']}/index.html", page(site, "../../", f"jobs/{j['id']}/", f"{j['company']} {j['title']}", body,
-                                                  desc=f"{j['company']} · {j.get('region','')} · {j.get('career','')} · 마감 {dl}", active="jobs/"))
+                                                  desc=f"{j['company']} · {j.get('region','')} · {career_txt(j)} · 마감 {dl}", active="jobs/"))
 
     # ---- 오늘의 채용 모음(카카오톡 오픈채팅 공유용): 대기업·공공·외국계·중견 공고 중 마감 전, 업종별
     write("jobs/today/index.html", page(site, "../../", "jobs/today/", "오늘의 안전·보건 채용 모음", jobs_today_body(site, jobs, today),
