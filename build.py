@@ -1414,7 +1414,7 @@ def jobs_today_body(site, jobs, today):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">채용정보</a><span>/</span>오늘의 채용 모음</p>
   <h1>오늘의 안전·보건 채용 <span class="muted">{d.month}월 {d.day}일</span></h1>
-  <p>대기업·공공기관·외국계·중견기업 등의 안전관리자·보건관리자·EHS 공고 중 <b>마감 전 {len(pick)}건</b>을 업종별로 모았습니다(협회·공제회 등 공공 성격 기관 포함). 마감일이 지난 공고는 매일 아침 목록에서 자동으로 빠지고, 새 공고는 SafePlum이 확인한 뒤 추가합니다.</p>
+  <p>대기업·공공기관·외국계·중견기업 등의 안전관리자·보건관리자·EHS 공고 중 <b>마감 전 {len(pick)}건</b>을 업종별로 모았습니다(협회·공제회 등 공공 성격 기관 포함). 마감일이 지난 공고는 목록에서 자동으로 빠지고, 새 공고는 SafePlum이 확인한 뒤 추가합니다.</p>
 </div></section>
 <div class="wrap layout-detail">
   <article class="col-main">{job_info_html(site, "job-no")}{secs or empty_box("오늘 모을 공고가 없습니다.")}</article>
