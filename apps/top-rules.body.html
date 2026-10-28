@@ -1,0 +1,513 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>N대 안전수칙 포스터</p>
+  <h1>우리 사업장 10대 안전수칙 포스터 만들기</h1>
+  <p>회사 전체가 지킬 <strong>N대 안전수칙</strong>(5~12개)을 그림과 함께 한 장짜리 포스터로 만듭니다. 업종 예시로 시작해 수칙 모음에서 고르거나 직접 쓰고, 회사명·로고·대표 선포 서명을 넣어 A4·A3·A2로 인쇄합니다. 오른쪽 포스터 글자도 눌러서 바로 고칠 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail tr-layout no-print">
+  <section class="col-main stack">
+    <div class="calc">
+      <h2 class="h-sm">① 업종 예시로 시작</h2>
+      <div class="tr-row"><select class="sort" id="trPreset" aria-label="업종 예시"></select><button type="button" class="btn" id="trLoad">이 예시 불러오기</button></div>
+      <div class="tr-ai">
+        <p class="tr-ai-h"><b>AI로 우리 사업장에 맞게 만들기</b> <span class="muted">내 Gemini 키 사용 · 초안</span></p>
+        <div class="tr-row"><input type="text" id="trAiIn" placeholder="예: 오리 도축·가공 공장, 냉동창고와 오폐수처리장 있음" aria-label="업종·공정 설명" autocomplete="off"><button type="button" class="btn" id="trAiGo">AI 초안</button></div>
+        <p class="hint" id="trAiSt" aria-live="polite">회사명·실명 같은 개인정보나 기밀은 넣지 마세요. <button type="button" class="linkbtn" id="trAiKey">AI 키 설정</button></p>
+      </div>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">② 수칙 <span class="muted" id="trN"></span></h2>
+      <p class="hint">위는 포스터에 크게 들어갈 짧은 수칙, 아래는 한 줄 설명입니다. 그림을 누르면 바꿀 수 있습니다.</p>
+      <ol class="tr-rules" id="trRules"></ol>
+      <div class="tr-pick" id="trPick" hidden>
+        <div class="tr-pick-hd"><b id="trPickT">그림 고르기</b><button type="button" class="linkbtn" id="trPickX">닫기</button></div>
+        <div class="tr-seg" role="group" aria-label="표시 방식"><button type="button" data-kind="do" aria-pressed="true">지시 · 색 원</button><button type="button" data-kind="dont" aria-pressed="false">금지 · 빨간 사선</button></div>
+        <div class="tr-icons" id="trIcons"></div>
+        <details class="tr-signs-d"><summary>안전보건표지 40종에서 고르기</summary><div class="tr-icons tr-signs" id="trSigns"></div><p class="hint">표지 그림을 쓰면 포스터 아래에 출처(안전보건공단, 공공누리 제4유형)가 작게 들어갑니다.</p></details>
+      </div>
+      <div class="btns"><button type="button" class="btn btn-ghost" id="trAdd">+ 직접 쓰기</button><button type="button" class="btn btn-ghost" id="trLibBtn" aria-expanded="false" aria-controls="trLib">+ 수칙 모음에서 고르기</button></div>
+      <div class="tr-lib" id="trLib" hidden>
+        <div class="tr-cats" id="trCats" role="group" aria-label="분야"></div>
+        <ul class="tr-lib-l" id="trLibL"></ul>
+      </div>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">③ 제목·회사</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">제목</span><input type="text" id="trTitle" maxlength="30"></label>
+        <label class="field tr-chk"><input type="checkbox" id="trAuto"> <span>개수가 바뀌면 'N대' 숫자도 바꾸기</span></label>
+        <label class="field"><span class="label">구호 (선택)</span><input type="text" id="trSlogan" maxlength="40"></label>
+        <label class="field"><span class="label">회사·현장명</span><input type="text" id="trCo" maxlength="30"></label>
+        <label class="field"><span class="label">선포자 직함 (선택)</span><input type="text" id="trCeoT" maxlength="20" placeholder="예: 대표이사, 공장장"></label>
+        <label class="field"><span class="label">선포자 이름 (선택)</span><input type="text" id="trCeo" maxlength="20"></label>
+        <label class="field"><span class="label">선포일 (선택)</span><input type="date" id="trDate"></label>
+      </div>
+      <label class="field"><span class="label">다짐 문구 (선택 · 포스터 아래)</span><input type="text" id="trPledge" maxlength="60" placeholder="예: 우리는 위 안전수칙을 반드시 지키겠습니다."></label>
+      <div class="tr-logo"><span class="label">로고 (선택)</span><label class="btn btn-ghost tr-up">로고 올리기<input type="file" id="trLogo" accept="image/*" hidden></label><button type="button" class="linkbtn" id="trLogoDel" hidden>로고 빼기</button><img id="trLogoPrev" alt="" hidden></div>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">④ 모양</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">배치</span><select class="sort" id="trLay" style="width:100%"><option value="g2">카드 2열</option><option value="g3">카드 3열 (가로 용지)</option><option value="l1">목록 1열</option></select></label>
+        <label class="field"><span class="label">색상</span><select class="sort" id="trTheme" style="width:100%"><option value="green">녹색 — 안전·일반</option><option value="navy">남색 — 지시·표준</option><option value="red">빨강 — 금지·경고 강조</option><option value="yellow">검정·노랑 — 주의</option></select></label>
+        <label class="field"><span class="label">설명 줄</span><select class="sort" id="trDesc" style="width:100%"><option value="1">넣기</option><option value="0">빼기 (수칙만 크게)</option></select></label>
+        <label class="field"><span class="label">용지</span><select class="sort" id="trPaper" style="width:100%"><option value="A4">A4</option><option value="A3">A3</option><option value="A2">A2 (출력소)</option></select></label>
+        <label class="field"><span class="label">방향</span><select class="sort" id="trOri" style="width:100%"><option value="p">세로</option><option value="l">가로</option></select></label>
+      </div>
+      <div class="btns"><button type="button" class="btn" id="trPrint">인쇄 · PDF 저장</button><button type="button" class="btn btn-ghost" id="trReset">처음부터</button></div>
+      <p class="hint">입력값과 로고는 이 브라우저에만 기억됩니다. 인쇄 창에서 용지·방향을 위와 같게, <b>배율 100%(실제 크기)</b>로 맞추세요. A2는 PDF로 저장해 출력소에 맡기면 됩니다.</p>
+    </div>
+    <h2 class="h-sm">미리보기 <span class="muted">· 글자를 눌러 바로 고칠 수 있습니다</span></h2>
+    <div class="tr-prev" id="trPrevWrap"><div class="tr-scale" id="trScale"></div></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">잘 만드는 요령</h2><ul class="bul hint">
+      <li>우리 사업장에서 실제로 사고가 났거나 날 뻔한 작업부터 넣으세요. 남의 회사 수칙을 그대로 붙이면 아무도 읽지 않습니다.</li>
+      <li>수칙은 지킬 행동이 보이게 짧게 씁니다. "안전에 유의" 같은 말보다 "정비 시 LOTO"가 지키기 쉽습니다.</li>
+      <li>10개가 많으면 5~7개로 줄이세요. 개수를 바꾸면 제목의 숫자도 같이 바뀝니다.</li>
+      <li>외국인 근로자가 많으면 그림 위주로, 설명 줄을 빼고 크게 만드는 편이 읽기 쉽습니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">게시·활용</h2><ul class="bul hint">
+      <li>출입구·휴게실·TBM 장소처럼 모두가 지나가는 곳에 붙이세요.</li>
+      <li>신규 채용자 교육과 TBM 때 함께 읽고, 위험성평가 결과가 바뀌면 수칙도 고쳐 다시 붙이세요.</li>
+      <li>위반을 징계로 연결하려면 취업규칙·안전보건관리규정에 근거를 두고 근로자에게 알린 뒤 운영해야 합니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">이어서 쓰는 도구</h2><ul class="bul">
+      <li><a href="../rule-sign/">작업별 안전작업수칙 게시물</a></li>
+      <li><a href="../../resources/signs/">안전보건표지 40종</a></li>
+      <li><a href="../tbm/">TBM 일지 작성기</a></li>
+      <li><a href="../loto/">LOTO 작업금지 태그</a></li>
+      <li><a href="../permit/">안전작업허가서</a></li>
+    </ul></div>
+  </aside>
+</div>
+<div class="tr-print" id="trSheet" aria-hidden="true"></div>
+<style id="trPageCss"></style>
+<style>
+@media (max-width:1023px){.layout-detail.tr-layout .col-side{order:0}}   /* 휴대폰: 작성 칸이 요령보다 먼저 */
+.tr-row{display:flex;gap:8px;align-items:center}
+.tr-row select,.tr-row input{flex:1;min-width:0;height:44px}
+.tr-row input{border:1px solid var(--line);border-radius:10px;padding:0 12px;font-size:15px}
+.tr-ai{margin-top:12px;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+.tr-ai-h{margin:0 0 6px;font-size:14px}
+.tr-rules{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:8px;counter-reset:tr}
+.tr-rules li{counter-increment:tr;display:grid;grid-template-columns:26px 52px 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--surface)}
+.tr-rules li::before{content:counter(tr);font-weight:900;color:var(--text-2);text-align:center}
+.tr-rules .ib{width:52px;height:52px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tr-rules .ib[aria-expanded=true]{border-color:#1F6FD1;box-shadow:0 0 0 2px #CFE0FA}
+.tr-rules .ib svg,.tr-rules .ib img{width:44px;height:44px}
+.tr-rules .tx{display:grid;gap:4px;min-width:0}
+.tr-rules .tx input{width:100%;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font:inherit;font-size:14.5px}
+.tr-rules .tx input.t{font-weight:700}
+.tr-rules .tx input.d{font-size:13px;color:var(--text-2)}
+.tr-rules .mv{display:flex;flex-direction:column;gap:2px}
+.tr-rules .mv button{width:32px;height:24px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;font-size:12px;line-height:1;color:var(--text-2)}
+.tr-rules .mv button:hover{border-color:var(--blue);color:var(--blue)}
+.tr-pick{border:1px solid #1F6FD1;border-radius:12px;padding:10px;margin:-2px 0 10px;background:var(--surface)}
+.tr-pick-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tr-seg{display:flex;gap:6px;margin-bottom:8px}
+.tr-seg button,.tr-cats button{min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;color:var(--text-2);cursor:pointer}
+.tr-seg button[aria-pressed=true],.tr-cats button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.tr-icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+.tr-icons button{border:2px solid var(--line);border-radius:10px;background:#fff;padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;aspect-ratio:1}
+.tr-icons button[aria-pressed=true]{border-color:#1F6FD1;background:#EAF2FD}
+.tr-icons svg,.tr-icons img{width:100%;height:auto;max-width:46px}
+.tr-signs-d{margin-top:10px}.tr-signs-d summary{cursor:pointer;font-weight:700;font-size:14px;margin-bottom:8px}
+.tr-lib{margin-top:10px}
+.tr-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.tr-lib-l{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.tr-lib-l li+li{border-top:1px solid var(--line-2)}
+.tr-lib-l button{width:100%;text-align:left;background:none;border:0;padding:8px 10px;cursor:pointer;display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;color:inherit;font:inherit}
+.tr-lib-l button:hover{background:var(--surface-2)}
+.tr-lib-l button[disabled]{opacity:.45;cursor:default}
+.tr-lib-l svg{width:34px;height:34px}
+.tr-lib-l b{display:block;font-size:14px}.tr-lib-l small{display:block;color:var(--text-2);font-size:12.5px;line-height:1.35}
+.tr-lib-l .ad{font-size:12px;font-weight:700;color:var(--blue)}
+.tr-chk{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;align-self:end;min-height:44px;font-size:14px}
+.tr-logo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.tr-logo img{max-height:40px;max-width:120px}
+.tr-up{cursor:pointer}
+.tr-prev{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;overflow:hidden}
+.tr-scale{transform-origin:top left}
+/* ---------- 그림(원형 픽토그램) */
+.tr-ic{display:block}
+.tr-ic .bg{fill:var(--c,#00764E)}
+.tr-ic{color:var(--ink,#fff)}
+.tr-ic.k-dont{color:#111}.tr-ic.k-dont .bg{fill:#fff;stroke:#D7191F;stroke-width:4}
+.tr-ic .sl{stroke:#D7191F;stroke-width:4.4;stroke-linecap:butt}
+.t-yellow .tr-ic.k-do .bg{fill:#111}.t-yellow .tr-ic.k-do{color:#FFD400}
+.tr-rules .tr-ic .bg,.tr-icons .tr-ic .bg,.tr-lib-l .tr-ic .bg{fill:#1E5BA8}
+.tr-rules .tr-ic.k-dont .bg,.tr-icons .tr-ic.k-dont .bg,.tr-lib-l .tr-ic.k-dont .bg{fill:#fff}
+/* ---------- 포스터(실제 mm 크기) */
+.tr-page{--c:#00764E;--c2:#E6F4EE;--ink:#fff;--hd:#00764E;--hdt:#fff;background:#fff;color:#111;display:flex;flex-direction:column;box-sizing:border-box;padding:var(--pad,10mm);font-family:'Pretendard','Noto Sans KR',sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.12);overflow:hidden;gap:var(--g,4mm)}
+.tr-page.t-navy{--c:#17365D;--c2:#E7EDF6;--hd:#17365D}.tr-page.t-red{--c:#C8102E;--c2:#FCE8EA;--hd:#C8102E}.tr-page.t-yellow{--c:#111;--c2:#FFF6CC;--ink:#FFD400;--hd:#111;--hdt:#FFD400}
+.tr-hd{background:var(--hd);color:var(--hdt);border-radius:3mm;padding:var(--hp,6mm) 8mm;text-align:center;flex:none}
+.t-yellow .tr-hd{box-shadow:inset 0 0 0 var(--stripe,2.2mm) #FFD400}
+.tr-co{font-size:var(--fco,12pt);font-weight:800;opacity:.9;letter-spacing:.02em}
+.tr-ttl{font-size:var(--ft,46pt);font-weight:900;line-height:1.12;word-break:keep-all;letter-spacing:-.01em}
+.tr-slg{font-size:var(--fs,15pt);font-weight:700;margin-top:1.5mm;word-break:keep-all;opacity:.95}
+.tr-body{flex:1;min-height:0;display:grid;gap:var(--cg,3.2mm);grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--rows,5),minmax(0,1fr))}
+.tr-card{display:flex;align-items:center;gap:var(--ig,4mm);border:0.6mm solid var(--c);border-radius:3mm;background:var(--c2);padding:var(--cp,3mm) var(--cp2,4mm);min-height:0;overflow:hidden;position:relative}
+.t-yellow .tr-card{border-color:#111}
+.tr-num{position:absolute;left:var(--np,2mm);top:var(--np,2mm);min-width:var(--nw,8mm);height:var(--nw,8mm);border-radius:999px;background:var(--c);color:var(--ink);font-weight:900;font-size:var(--fn,13pt);display:flex;align-items:center;justify-content:center;padding:0 1mm;z-index:1}
+.t-yellow .tr-num{background:#111;color:#FFD400}
+.tr-icw{flex:none;width:var(--ic,22mm);height:var(--ic,22mm);margin-left:var(--il,4mm)}
+.tr-icw svg,.tr-icw img{width:100%;height:100%;display:block}
+.tr-tx{min-width:0;flex:1}
+.tr-t{font-size:var(--fh,18pt);font-weight:900;line-height:1.22;word-break:keep-all;overflow-wrap:normal;color:#111}
+.tr-d{font-size:var(--fd,11pt);font-weight:500;line-height:1.38;margin-top:1.2mm;color:#333;word-break:keep-all;overflow-wrap:normal}
+.lay-l1 .tr-num{position:static;flex:none}.lay-l1 .tr-icw{margin-left:0}
+.tr-ft .sg .bl{display:inline-block;width:28mm;border-bottom:0.3mm solid #333;margin:0 1mm}
+.tr-ft{flex:none;display:flex;align-items:center;gap:5mm;font-size:var(--ff,11pt)}
+.tr-ft .lg{max-height:var(--lh,13mm);max-width:45mm}
+.tr-ft .pl{font-weight:800;flex:1;word-break:keep-all}
+.tr-ft .sg{margin-left:auto;text-align:right;line-height:1.5;white-space:nowrap}
+.tr-ft .sg b{font-size:1.2em;letter-spacing:.15em}
+.tr-src{font-size:6.5pt;color:#777;text-align:right;flex:none;margin-top:-2mm}
+[contenteditable]{outline:none;border-radius:1mm}
+.tr-scale [contenteditable]:hover{box-shadow:0 0 0 0.4mm rgba(31,111,209,.45)}
+.tr-scale [contenteditable]:focus{box-shadow:0 0 0 0.6mm #1F6FD1;background:rgba(255,255,255,.35)}
+.tr-print{position:fixed;left:-20000px;top:0;visibility:hidden;pointer-events:none}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(main){display:none!important}
+  main>*:not(.tr-print){display:none!important}
+  .tr-print{display:block!important;position:static!important;visibility:visible!important}
+  .tr-print .tr-page{box-shadow:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (max-width:640px){.tr-row{flex-direction:column;align-items:stretch}.tr-row select,.tr-row input{flex:none;width:100%}.tr-row .btn{width:100%}.tr-rules li{grid-template-columns:44px 1fr auto}.tr-rules li::before{display:none}.tr-rules .ib{width:44px;height:44px}.tr-rules .ib svg,.tr-rules .ib img{width:36px;height:36px}}
+</style>
+<script src="../../assets/ai.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null, SG = /*@SIGNS@*/null;
+  if (!D || !SG) return;
+  var ROOT = "../../", KEY = "safeplum.toprules", MAXR = 12, MINR = 1;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var PAPER = { A4: [210, 297], A3: [297, 420], A2: [420, 594] };
+  var LIB = {}; D.library.forEach(function (r) { LIB[r.id] = r; });
+  var SIGN = {}; SG.items.forEach(function (s) { SIGN[s.no] = s; });
+
+  // ---------- 내장 그림(48×48, currentColor). 원 안에 0.6배로 넣는다
+  var F = ' fill="currentColor" stroke="none"';
+  var ICONS = {
+    helmet: ["안전모", '<path d="M8 33a16 16 0 0 1 32 0z"' + F + '/><path d="M4 34h40"/><rect x="21" y="13" width="6" height="5" rx="1.5"' + F + '/>'],
+    phone: ["휴대폰", '<rect x="15" y="6" width="18" height="36" rx="3.5"/><path d="M21 36h6"/>'],
+    walk: ["보행", '<circle cx="26" cy="8" r="3.8"' + F + '/><path d="M24 15l-4 12 6 6 2 10M20 27l-4 14M24 15l7 7 6 2M24 15l-8 5-3 7"/>'],
+    chat: ["TBM·대화", '<path d="M8 10h32v20H24l-9 8v-8H8z"/><path d="M15 18h18M15 24h11"/>'],
+    megaphone: ["알림·공유", '<path d="M7 19v10h8l18 9V10l-18 9z"' + F + '/><path d="M15 29l3 10h5l-2-9"/><path d="M39 18c2.5 3 2.5 9 0 12"/>'],
+    stop: ["작업중지", '<path d="M17 5h14l12 12v14L31 43H17L5 31V17z"/><path d="M16 24h16"/>'],
+    cig: ["담배", '<rect x="5" y="27" width="30" height="7" rx="1"/><path d="M28 27v7M41 27v7M36 22c0-4 4-4 4-8s-3-4-3-7"/>'],
+    cup: ["술잔", '<path d="M14 7h20l-3 21a7 7 0 0 1-14 0z"/><path d="M24 35v7M17 42h14M15 15h18"/>'],
+    exit: ["비상구·통로", '<path d="M9 42V6h18v36"/><path d="M21 24h19M34 18l6 6-6 6"/>'],
+    gauge: ["속도", '<path d="M8 34a16 16 0 1 1 32 0"/><path d="M24 34l9-11"/><circle cx="24" cy="34" r="3.2"' + F + '/><path d="M12 23l3 2M24 15v4M36 23l-3 2"/>'],
+    forklift: ["지게차", '<path d="M7 34V20h12l5 8v6z"/><path d="M11 20v-7h6"/><path d="M31 7v27h12"/><circle cx="12" cy="37" r="3.8"' + F + '/><circle cx="22" cy="37" r="3.8"' + F + '/>'],
+    hook: ["인양물", '<path d="M24 3v8"/><path d="M24 11a4.5 4.5 0 1 1-4.5 4.5"/><path d="M18 27l6-8 6 8"/><rect x="11" y="27" width="26" height="16" rx="1.5"' + F + '/>'],
+    box: ["중량물", '<path d="M7 17l17-8 17 8v18l-17 8-17-8z"/><path d="M7 17l17 8 17-8M24 25v18"/>'],
+    clipboard: ["작업허가", '<rect x="11" y="8" width="26" height="35" rx="3"/><rect x="18" y="4" width="12" height="8" rx="2"' + F + '/><path d="M17 26l5 5 9-10"/>'],
+    cycle: ["변경관리", '<path d="M37 19A14 14 0 0 0 12 14"/><path d="M11 29a14 14 0 0 0 25 5"/><path d="M12 6v8h8M36 42v-8h-8"/>'],
+    lock: ["잠금(LOTO)", '<rect x="10" y="21" width="28" height="22" rx="3"' + F + '/><path d="M16 21v-6a8 8 0 0 1 16 0v6"/>'],
+    gear: ["회전체·방호", '<circle cx="24" cy="24" r="14" stroke-width="7" stroke-dasharray="5.5 5.5"/><circle cx="24" cy="24" r="10"/><circle cx="24" cy="24" r="3.5"' + F + '/>'],
+    hand: ["손", '<path d="M15 44V27l-4-8a2.6 2.6 0 0 1 4.5-2.5L19 22V10a2.6 2.6 0 0 1 5.2 0v10V7a2.6 2.6 0 0 1 5.2 0v13V9a2.6 2.6 0 0 1 5.2 0v13v-7a2.6 2.6 0 0 1 5.2 0v15c0 8-4 14-11 14z"' + F + '/>'],
+    glove: ["장갑", '<path d="M15 44V27l-4-8a2.6 2.6 0 0 1 4.5-2.5L19 22V10a2.6 2.6 0 0 1 5.2 0v10V7a2.6 2.6 0 0 1 5.2 0v13V9a2.6 2.6 0 0 1 5.2 0v13v-7a2.6 2.6 0 0 1 5.2 0v15c0 8-4 14-11 14z"/><path d="M15 36h21"/>'],
+    flame: ["화기", '<path d="M24 4c2 8 12 12 12 24a12 12 0 0 1-24 0c0-6 3-9 6-12 0 5 2 7 4 8-1-7 0-13 2-20z"' + F + '/>'],
+    meter: ["가스측정", '<rect x="13" y="12" width="22" height="31" rx="4"/><rect x="18" y="17" width="12" height="8" rx="1.5"' + F + '/><path d="M30 12V4"/><circle cx="20" cy="34" r="2.2"' + F + '/><circle cx="28" cy="34" r="2.2"' + F + '/>'],
+    flask: ["화학물질", '<path d="M19 5h10M20 5v13L9 38a3 3 0 0 0 3 4h24a3 3 0 0 0 3-4L28 18V5"/><path d="M14 31h20"/>'],
+    bolt: ["전기", '<path d="M27 3L10 27h11l-3 18 19-25H26z"' + F + '/>'],
+    carabiner: ["안전대", '<path d="M17 9a7 7 0 0 1 14 0v20a7 7 0 0 1-14 0z"/><path d="M31 13l-7 11"/><path d="M24 36v9"/>'],
+    rail: ["안전난간", '<path d="M5 42h38M10 42V13M24 42V13M38 42V13M5 15h38M5 28h38"/>'],
+    ladder: ["사다리", '<path d="M16 4l-4 40M32 4l4 40M15 12h18M14 22h20M13 32h22"/>'],
+    flag: ["신호수", '<path d="M12 45V5"/><path d="M12 7h25l-7 8 7 8H12z"' + F + '/>'],
+    drop: ["물기·미끄럼", '<path d="M24 4c7 10 12 16 12 23a12 12 0 0 1-24 0c0-7 5-13 12-23z"' + F + '/><path d="M5 44h38"/>'],
+    snow: ["냉동", '<path d="M24 4v40M6.7 14l34.6 20M6.7 34l34.6-20M19 8l5 5 5-5M19 40l5-5 5 5"/>'],
+    sun: ["폭염", '<circle cx="24" cy="24" r="8.5"' + F + '/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M10 38l4-4M34 14l4-4"/>']
+  };
+  var ICON_KEYS = Object.keys(ICONS);
+  function icon(name, kind) {
+    if (/^sign:\d{3}$/.test(name)) { var no = name.slice(5); return SIGN[no] ? '<img src="' + ROOT + "assets/signs/" + no + '.webp" alt="' + esc(SIGN[no].ko) + '">' : ""; }
+    var ic = ICONS[name] || ICONS.helmet, dont = kind === "dont";
+    return '<svg class="tr-ic k-' + (dont ? "dont" : "do") + '" viewBox="0 0 48 48" aria-hidden="true"><circle class="bg" cx="24" cy="24" r="' + (dont ? 21.5 : 23.5) + '"/>' +
+      '<g transform="translate(24 24) scale(' + (dont ? 0.52 : 0.6) + ') translate(-24 -24)" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">' + ic[1] + "</g>" +
+      (dont ? '<path class="sl" d="M9.3 9.3L38.7 38.7"/>' : "") + "</svg>";
+  }
+
+  // ---------- 상태
+  function profileCo() { try { var p = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}; return p.company || localStorage.getItem("safetake.company") || ""; } catch (e) { return ""; } }
+  function fromLib(id) { var r = LIB[id]; return r ? { t: r.t, d: r.d, icon: r.icon, kind: r.kind, lib: r.id } : null; }
+  function presetState(p) { return { preset: p.id, title: p.title, slogan: p.slogan, rules: p.rules.map(fromLib).filter(Boolean) }; }
+  var st;
+  try { st = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { st = null; }
+  if (!st || typeof st !== "object" || !Array.isArray(st.rules)) {
+    st = Object.assign(presetState(D.presets[0]), { auto: true, co: profileCo(), ceoT: "대표이사", ceo: "", date: "", pledge: "", logo: "", lay: "g2", theme: "green", desc: "1", paper: "A4", ori: "p" });
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, st, { logo: "" }))); } catch (e2) {} } }
+  var dirty = false;   // 예시를 불러온 뒤 직접 고쳤는지 — 다른 예시로 덮어쓸 때만 묻는다
+
+  // ---------- ① 예시
+  $("trPreset").innerHTML = D.presets.map(function (p) { return '<option value="' + p.id + '">' + esc(p.name) + " — " + esc(p.title) + "</option>"; }).join("") + '<option value="blank">빈 양식(직접 쓰기)</option>';
+  $("trPreset").value = st.preset && (st.preset === "blank" || D.presets.some(function (p) { return p.id === st.preset; })) ? st.preset : D.presets[0].id;
+  $("trLoad").addEventListener("click", function () {
+    var id = $("trPreset").value;
+    if (dirty && !confirm("지금 고친 수칙·제목을 선택한 예시로 바꿉니다. 계속할까요?")) return;
+    if (id === "blank") Object.assign(st, { preset: "blank", title: "5대 안전수칙", slogan: "", rules: [0, 1, 2, 3, 4].map(function () { return { t: "", d: "", icon: "helmet", kind: "do" }; }) });
+    else { var p = D.presets.filter(function (x) { return x.id === id; })[0]; Object.assign(st, presetState(p)); }
+    st.auto = true; dirty = false; closePick(); fill(); save(); render();
+  });
+
+  // ---------- ② 수칙 목록
+  var pickAt = -1;
+  function liAt(i) { return $("trRules").querySelector('li[data-i="' + i + '"]'); }
+  function rulesUI() {
+    var pk = $("trPick"); $("trRules").parentNode.insertBefore(pk, $("trRules").nextSibling);
+    $("trRules").innerHTML = st.rules.map(function (r, i) {
+      return '<li data-i="' + i + '"><button type="button" class="ib" data-act="pick" aria-label="' + (i + 1) + '번 그림 바꾸기" aria-expanded="' + (pickAt === i) + '" aria-controls="trPick">' + icon(r.icon, r.kind) + "</button>" +
+        '<div class="tx"><input class="t" data-f="t" value="' + esc(r.t) + '" maxlength="24" placeholder="짧은 수칙 (예: 정비·보수 시 LOTO)" aria-label="' + (i + 1) + '번 수칙">' +
+        '<input class="d" data-f="d" value="' + esc(r.d) + '" maxlength="60" placeholder="한 줄 설명 (선택)" aria-label="' + (i + 1) + '번 설명"></div>' +
+        '<div class="mv"><button type="button" data-act="up" aria-label="위로" title="위로">▲</button><button type="button" data-act="down" aria-label="아래로" title="아래로">▼</button><button type="button" data-act="del" aria-label="빼기" title="빼기">✕</button></div></li>';
+    }).join("");
+    if (pickAt >= 0 && liAt(pickAt)) liAt(pickAt).parentNode.insertBefore(pk, liAt(pickAt).nextSibling);
+    $("trN").textContent = "(" + st.rules.length + "개 / 최대 " + MAXR + ")";
+    $("trAdd").disabled = st.rules.length >= MAXR;
+    if (!$("trLib").hidden) libUI();
+  }
+  function autoTitle() { if (st.auto && /\d+\s*대/.test(st.title)) { st.title = st.title.replace(/\d+\s*대/, st.rules.length + "대"); $("trTitle").value = st.title; } }
+  $("trRules").addEventListener("input", function (e) {
+    var inp = e.target.closest("input[data-f]"); if (!inp) return;
+    var i = +inp.closest("li").dataset.i; st.rules[i][inp.dataset.f] = inp.value; delete st.rules[i].lib; dirty = true; save(); render();
+  });
+  $("trRules").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-act]"); if (!b) return;
+    var i = +b.closest("li").dataset.i, a = b.dataset.act, R = st.rules;
+    if (a === "pick") { if (pickAt === i) closePick(); else openPick(i); return; }
+    if (a === "up" && i > 0) { R.splice(i - 1, 0, R.splice(i, 1)[0]); }
+    else if (a === "down" && i < R.length - 1) { R.splice(i + 1, 0, R.splice(i, 1)[0]); }
+    else if (a === "del") { if (R.length <= MINR) return; R.splice(i, 1); autoTitle(); }
+    else return;
+    dirty = true; closePick(); rulesUI(); save(); render();
+  });
+  $("trAdd").addEventListener("click", function () {
+    if (st.rules.length >= MAXR) return;
+    st.rules.push({ t: "", d: "", icon: "helmet", kind: "do" }); autoTitle(); dirty = true; closePick(); rulesUI(); save(); render();
+    var ins = $("trRules").querySelectorAll("input.t"); if (ins.length) ins[ins.length - 1].focus();
+  });
+
+  // 그림 고르기
+  function openPick(i) {
+    pickAt = i; $("trPick").hidden = false;
+    $("trPickT").textContent = (i + 1) + "번 그림 고르기"; rulesUI(); pickUI();
+  }
+  function closePick() { pickAt = -1; var pk = $("trPick"); pk.hidden = true; $("trRules").parentNode.insertBefore(pk, $("trRules").nextSibling); [].forEach.call($("trRules").querySelectorAll(".ib"), function (b) { b.setAttribute("aria-expanded", "false"); }); }
+  function pickUI() {
+    var r = st.rules[pickAt]; if (!r) return;
+    [].forEach.call(document.querySelectorAll(".tr-seg button"), function (b) { b.setAttribute("aria-pressed", b.dataset.kind === r.kind); });
+    $("trIcons").innerHTML = ICON_KEYS.map(function (k) { return '<button type="button" data-ic="' + k + '" title="' + esc(ICONS[k][0]) + '" aria-label="' + esc(ICONS[k][0]) + '" aria-pressed="' + (r.icon === k) + '">' + icon(k, r.kind) + "</button>"; }).join("");
+    $("trSigns").innerHTML = SG.items.map(function (s) { return '<button type="button" data-ic="sign:' + s.no + '" title="' + esc(s.ko) + '" aria-label="' + esc(s.ko) + '" aria-pressed="' + (r.icon === "sign:" + s.no) + '"><img src="' + ROOT + "assets/signs/" + s.no + '.webp" alt="" loading="lazy"></button>'; }).join("");
+  }
+  $("trPickX").addEventListener("click", function () { var i = pickAt; closePick(); var b = liAt(i); if (b) b.querySelector(".ib").focus(); });
+  $("trPick").addEventListener("click", function (e) {
+    var r = st.rules[pickAt]; if (!r) return;
+    var k = e.target.closest("button[data-kind]"), ic = e.target.closest("button[data-ic]");
+    if (k) r.kind = k.dataset.kind; else if (ic) r.icon = ic.dataset.ic; else return;
+    dirty = true; pickUI();
+    var ib = liAt(pickAt).querySelector(".ib"); ib.innerHTML = icon(r.icon, r.kind);
+    save(); render();
+  });
+
+  // 수칙 모음
+  var cat = "전체";
+  $("trCats").innerHTML = ["전체"].concat(D.cats).map(function (c) { return '<button type="button" data-c="' + esc(c) + '" aria-pressed="' + (c === cat) + '">' + esc(c) + "</button>"; }).join("");
+  $("trCats").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; cat = b.dataset.c; [].forEach.call(this.children, function (x) { x.setAttribute("aria-pressed", x === b); }); libUI(); });
+  function libUI() {
+    var used = {}; st.rules.forEach(function (r) { if (r.lib) used[r.lib] = 1; });
+    var full = st.rules.length >= MAXR;
+    $("trLibL").innerHTML = D.library.filter(function (r) { return cat === "전체" || r.cat === cat; }).map(function (r) {
+      var u = used[r.id];
+      return '<li><button type="button" data-id="' + r.id + '"' + (u || full ? " disabled" : "") + ">" + icon(r.icon, r.kind) + "<span><b>" + esc(r.t) + "</b><small>" + esc(r.d) + '</small></span><span class="ad">' + (u ? "넣음" : full ? "가득 참" : "+ 넣기") + "</span></button></li>";
+    }).join("");
+  }
+  $("trLibBtn").addEventListener("click", function () { var h = !$("trLib").hidden; $("trLib").hidden = h; this.setAttribute("aria-expanded", String(!h)); if (!h) libUI(); });
+  $("trLibL").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-id]"); if (!b || b.disabled || st.rules.length >= MAXR) return;
+    var blank = -1; st.rules.forEach(function (r, i) { if (blank < 0 && !r.t.trim() && !r.d.trim()) blank = i; });
+    var nr = fromLib(b.dataset.id); if (blank >= 0) st.rules[blank] = nr; else st.rules.push(nr);
+    autoTitle(); dirty = true; closePick(); rulesUI(); save(); render();
+  });
+
+  // ---------- ③ ④ 입력
+  var FIELDS = { trTitle: "title", trSlogan: "slogan", trCo: "co", trCeoT: "ceoT", trCeo: "ceo", trDate: "date", trPledge: "pledge" };
+  var SELS = { trLay: "lay", trTheme: "theme", trDesc: "desc", trPaper: "paper", trOri: "ori" };
+  function fill() {
+    Object.keys(FIELDS).forEach(function (id) { $(id).value = st[FIELDS[id]] || ""; });
+    Object.keys(SELS).forEach(function (id) { $(id).value = st[SELS[id]]; });
+    $("trAuto").checked = !!st.auto; if ($("trPreset").querySelector('option[value="' + st.preset + '"]')) $("trPreset").value = st.preset;
+    rulesUI(); logoUI();
+  }
+  Object.keys(FIELDS).forEach(function (id) { $(id).addEventListener("input", function () { st[FIELDS[id]] = $(id).value; if (id === "trTitle") dirty = true; save(); render(); }); });
+  Object.keys(SELS).forEach(function (id) {
+    $(id).addEventListener("change", function () {
+      st[SELS[id]] = $(id).value;
+      if (id === "trLay" && st.lay === "g3" && st.ori === "p") { st.ori = "l"; $("trOri").value = "l"; }
+      save(); render();
+    });
+  });
+  $("trAuto").addEventListener("change", function () { st.auto = this.checked; autoTitle(); save(); render(); });
+  function logoUI() { var has = !!st.logo; $("trLogoPrev").hidden = !has; $("trLogoDel").hidden = !has; if (has) $("trLogoPrev").src = st.logo; }
+  $("trLogo").addEventListener("change", function () {
+    var f = this.files && this.files[0]; this.value = ""; if (!f) return;
+    if (!/^image\//.test(f.type)) { alert("그림 파일만 올릴 수 있습니다."); return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        var k = Math.min(1, 800 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        st.logo = c.toDataURL("image/png"); logoUI(); save(); render();
+      };
+      im.onerror = function () { alert("이 그림을 읽지 못했습니다."); };
+      im.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  });
+  $("trLogoDel").addEventListener("click", function () { st.logo = ""; logoUI(); save(); render(); });
+  $("trReset").addEventListener("click", function () { if (!confirm("입력한 내용을 모두 지우고 처음 상태로 돌릴까요?")) return; try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+
+  // ---------- 포스터 그리기 (실제 mm 크기, 넘치지 않을 때까지 글자를 줄인다)
+  function dims() { var p = PAPER[st.paper] || PAPER.A4; return st.ori === "l" ? [p[1], p[0]] : p; }
+  function layout() {
+    var n = Math.max(1, st.rules.length), lay = st.lay;
+    if (lay === "l1") return { cols: 1, rows: n };
+    var cols = lay === "g3" ? 3 : 2; if (n <= 3) cols = 1;
+    return { cols: cols, rows: Math.ceil(n / cols) };
+  }
+  function pageHTML(edit) {
+    var ce = edit ? ' contenteditable="true" spellcheck="false"' : "";
+    var showD = st.desc !== "0";
+    var L = layout(), n = st.rules.length, rem = n % L.cols, span = rem ? L.cols - rem + 1 : 1;   // 마지막 줄이 비면 마지막 카드를 넓혀 채운다
+    var cards = st.rules.map(function (r, i) {
+      return '<div class="tr-card"' + (i === n - 1 && span > 1 ? ' style="grid-column:span ' + span + '"' : "") + '><span class="tr-num">' + (i + 1) + '</span><div class="tr-icw">' + icon(r.icon, r.kind) + '</div><div class="tr-tx"><div class="tr-t" data-i="' + i + '" data-f="t"' + ce + ">" + esc(r.t || "수칙을 입력하세요") + "</div>" +
+        (showD && (r.d || edit) ? '<div class="tr-d" data-i="' + i + '" data-f="d"' + ce + ">" + esc(r.d) + "</div>" : "") + "</div></div>";
+    }).join("");
+    var sign = [st.date ? st.date.replace(/-/g, ". ") + "." : "", (st.ceoT || st.ceo) ? esc(st.ceoT || "") + (st.ceo ? " <b>" + esc(st.ceo) + "</b>" : ' <span class="bl"></span>') + " (인)" : ""].filter(Boolean).join("<br>");
+    var usesSign = st.rules.some(function (r) { return /^sign:/.test(r.icon); });
+    var foot = st.logo || st.pledge || sign;
+    return '<div class="tr-page t-' + st.theme + " lay-" + st.lay + '"><div class="tr-hd">' + (st.co ? '<div class="tr-co">' + esc(st.co) + "</div>" : "") +
+      '<div class="tr-ttl" data-f="title"' + ce + ">" + esc(st.title || "안전수칙") + "</div>" +
+      (st.slogan || edit ? '<div class="tr-slg" data-f="slogan"' + ce + ">" + esc(st.slogan || "") + "</div>" : "") + "</div>" +
+      '<div class="tr-body">' + cards + "</div>" +
+      (foot ? '<div class="tr-ft">' + (st.logo ? '<img class="lg" src="' + st.logo + '" alt="">' : "") + '<span class="pl" data-f="pledge"' + ce + ">" + esc(st.pledge || "") + "</span>" + (sign ? '<span class="sg">' + sign + "</span>" : "") + "</div>" : "") +
+      (usesSign ? '<div class="tr-src">표지 그림: 안전보건공단 「안전보건표지」(공공누리 제4유형)</div>' : "") + "</div>";
+  }
+  function overflow(pg) {
+    var cs = pg.querySelectorAll(".tr-card");
+    for (var i = 0; i < cs.length; i++) { var tx = cs[i].querySelector(".tr-tx"); if (tx.scrollHeight > cs[i].clientHeight - 1 || tx.scrollWidth > tx.clientWidth + 1 || cs[i].scrollWidth > cs[i].clientWidth + 1) return true; }
+    var t = pg.querySelector(".tr-ttl"); if (t.scrollWidth > t.clientWidth + 1) return true;
+    return pg.scrollHeight > pg.clientHeight + 1;
+  }
+  function fit(pg) {
+    var d = dims(), L = layout(), base = Math.sqrt(d[0] * d[1] / (210 * 297));   // A4 대비 배율
+    pg.style.width = d[0] + "mm"; pg.style.height = d[1] + "mm";
+    pg.style.setProperty("--cols", L.cols); pg.style.setProperty("--rows", L.rows);
+    var land = st.ori === "l";
+    var set = function (k, v, u) { pg.style.setProperty(k, v + u); };
+    set("--pad", 10 * base, "mm"); set("--g", 4 * base, "mm"); set("--cg", 3.2 * base, "mm");
+    set("--ft", (land ? 40 : 46) * base, "pt"); set("--fs", 15 * base, "pt"); set("--fco", 12 * base, "pt"); set("--hp", 5.5 * base, "mm");
+    set("--ff", 11 * base, "pt"); set("--lh", 13 * base, "mm"); set("--stripe", 2.2 * base, "mm");
+    // 카드 높이(대략)에 맞춘 시작 크기
+    var bodyH = d[1] - 20 * base - 42 * base - 18 * base, cardH = (bodyH - (L.rows - 1) * 3.2 * base) / L.rows, cardW = (d[0] - 20 * base - (L.cols - 1) * 3.2 * base) / L.cols;
+    var ic = Math.max(9 * base, Math.min(cardH * 0.74, cardW * 0.3, 36 * base));
+    var fh = Math.min(30 * base, cardH * 0.34 / 0.3528, cardW * 0.11 / 0.3528);
+    var showD = st.desc !== "0";
+    if (!showD) fh *= 1.15;
+    var fd = fh * 0.62;
+    for (var k = 0; k < 45; k++) {
+      set("--ic", ic, "mm"); set("--fh", fh, "pt"); set("--fd", fd, "pt");
+      set("--fn", Math.max(7, fh * 0.62), "pt"); set("--nw", Math.max(5, ic * 0.34), "mm"); set("--np", 1.6 * base, "mm");
+      set("--ig", Math.max(2, ic * 0.16), "mm"); set("--il", Math.max(2.5, ic * 0.14), "mm");
+      set("--cp", Math.max(1.5, Math.min(3 * base, cardH * 0.08)), "mm"); set("--cp2", 4 * base, "mm");
+      if (!overflow(pg)) break;
+      fh *= 0.95; fd *= 0.95; if (k > 6) ic *= 0.96;
+    }
+    var t = pg.querySelector(".tr-ttl"), ft = (land ? 40 : 46) * base;
+    for (var j = 0; j < 25 && t.scrollWidth > t.clientWidth + 1; j++) { ft *= 0.93; set("--ft", ft, "pt"); }
+    return { fh: fh };
+  }
+  var renderTimer = null, editing = false;
+  function render() { if (editing) return; clearTimeout(renderTimer); renderTimer = setTimeout(doRender, 60); }
+  function doRender() {
+    var wrap = $("trPrevWrap"), sc = $("trScale");
+    sc.innerHTML = pageHTML(true);
+    var pg = sc.firstChild; fit(pg);
+    var w = pg.offsetWidth, h = pg.offsetHeight, k = Math.min(1, (wrap.clientWidth - 28) / w);
+    sc.style.transform = "scale(" + k + ")"; sc.style.width = w + "px"; sc.style.height = h * k + "px";
+    $("trPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0;@bottom-center{content:none}}@page:first{margin:0;padding:0}}";
+    $("trSheet").dataset.dirty = "1";
+  }
+  // 미리보기에서 바로 고치기: 쓰는 동안은 다시 그리지 않고, 칸을 벗어나면 맞춤 크기로 다시 그린다
+  $("trScale").addEventListener("input", function (e) {
+    var el = e.target.closest("[data-f]"); if (!el) return;
+    var v = el.innerText.replace(/\s*\n+\s*/g, " ").trim(), f = el.dataset.f;
+    if (el.dataset.i != null) { var r = st.rules[+el.dataset.i]; if (!r) return; r[f] = v; delete r.lib; var li = liAt(+el.dataset.i); if (li) li.querySelector("input[data-f=" + f + "]").value = v; }
+    else { st[f] = v; var id = { title: "trTitle", slogan: "trSlogan", pledge: "trPledge" }[f]; if (id) $(id).value = v; }
+    dirty = true; save();
+  });
+  $("trScale").addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.closest("[contenteditable]")) { e.preventDefault(); e.target.blur(); } });
+  $("trScale").addEventListener("paste", function (e) { if (!e.target.closest("[contenteditable]")) return; e.preventDefault(); var t = (e.clipboardData || window.clipboardData).getData("text").replace(/\s+/g, " "); document.execCommand("insertText", false, t); });
+  $("trScale").addEventListener("focusin", function () { editing = true; });
+  $("trScale").addEventListener("focusout", function () { editing = false; setTimeout(function () { if (!$("trScale").contains(document.activeElement)) render(); }, 0); });
+
+  function fillSheet() { var sh = $("trSheet"); sh.innerHTML = pageHTML(false); fit(sh.firstChild); sh.dataset.dirty = ""; return sh; }
+  window.addEventListener("beforeprint", function () { if ($("trSheet").dataset.dirty !== "") fillSheet(); });
+  $("trPrint").addEventListener("click", function () {
+    var empty = st.rules.filter(function (r) { return !r.t.trim(); }).length;
+    if (empty && !confirm("수칙이 비어 있는 칸이 " + empty + "개 있습니다. 그대로 인쇄할까요?")) return;
+    var sh = fillSheet(), imgs = [].slice.call(sh.querySelectorAll("img"));
+    Promise.all(imgs.map(function (i) { return i.complete ? 1 : new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); });
+  });
+  window.addEventListener("resize", render);
+
+  // ---------- AI 초안
+  $("trAiKey").addEventListener("click", function () { window.SPAI && SPAI.openSettings(); });
+  var AI_FIELDS = [
+    { k: "biz", label: "업종·공정", required: true, ph: "예: 오리 도축·가공, 냉동창고, 오폐수처리장" },
+    { k: "equip", label: "주요 설비·작업", ph: "예: 컨베이어, 탈수기, 지게차 6대, 암모니아 냉동설비" },
+    { k: "acc", label: "최근 사고·아차사고", ph: "예: 컨베이어 청소 중 손 끼임, 지게차와 보행자 접촉 직전" },
+    { k: "n", label: "수칙 개수", type: "select", options: ["10", "5", "7", "8", "12"] },
+    { k: "who", label: "읽는 사람", type: "chips", options: ["정규직", "협력업체", "신규·미숙련자", "외국인 근로자", "고령 근로자"] }];
+  var ICON_LIST = ICON_KEYS.map(function (k) { return k + "(" + ICONS[k][0] + ")"; }).join(", ");
+  $("trAiGo").addEventListener("click", function () {
+    var stEl = $("trAiSt"), btn = this;
+    if (!window.SPAI) { stEl.textContent = "AI 모듈을 불러오지 못했습니다. 새로고침해 주세요."; return; }
+    if (!SPAI.hasKey()) { SPAI.ensureKey(); return; }
+    if (dirty && !confirm("지금 고친 수칙·제목을 AI 초안으로 바꿉니다. 계속할까요?")) return;
+    SPAI.css();
+    var b0 = $("trAiIn").value.trim();
+    SPAI.guided({ key: "top-rules", title: "AI N대 안전수칙 초안", fields: AI_FIELDS, values: b0 ? { biz: b0 } : {},
+      desc: "업종과 주요 작업을 적어 주세요. 최근 사고가 있으면 그 사고를 막는 수칙이 앞에 옵니다.", exampleFor: "biz",
+      examples: ["오리 도축·가공 공장(냉동창고·오폐수처리장)", "금속 프레스·용접 부품 공장", "물류센터(지게차·랙·컨베이어)", "아파트 신축 골조 공사 현장", "화학제품 배합·충전 공장"],
+      run: function (v, ctx, force) { btn.disabled = true; stEl.innerHTML = '<span class="spai-busy">AI가 초안을 만드는 중…</span>'; return SPAI.json({
+        system: "너는 한국 제조·물류·건설 현장의 산업안전 전문가다. 사업장 전체가 지킬 'N대 안전수칙' 포스터 문안을 쓴다. 수칙(t)은 지킬 행동이 드러나는 명사형 짧은 구절 8~16자(예: '정비·보수 시 LOTO', '입수보행·휴대폰 보행 금지'), 설명(d)은 그 행동을 구체적으로 적은 한 문장 20~38자, '~합니다'로 끝낸다. '안전에 유의' 같은 일반 문구는 쓰지 않는다. 법 조문 번호는 쓰지 않는다. " + SPAI.check.quality,
+        prompt: ctx + "\n\n이 사업장의 핵심 안전수칙을 정확히 " + (v.n || "10") + "개 만들어라. 최근 사고·아차사고가 있으면 그것을 막는 수칙을 앞에 둔다. 공통 기본수칙(보호구 등)은 1~2개만 넣고 나머지는 이 업종·설비의 중대 위험에 맞춘다. 읽는 사람에 외국인·신규자가 있으면 쉬운 낱말로 짧게. 각 수칙에 그림(icon)을 아래 목록의 영문 이름 하나로, 금지 행동이면 kind를 dont, 해야 할 행동이면 do로 적어라. 제목은 '" + (v.n || "10") + "대 안전수칙', 구호는 15자 안팎 한 줄.\n" + (force ? SPAI.check.force : SPAI.check.rule) + "\n그림 목록: " + ICON_LIST,
+        schema: { type: "OBJECT", properties: { _check: SPAI.check.schema, title: { type: "STRING" }, slogan: { type: "STRING" }, rules: { type: "ARRAY", items: { type: "OBJECT", properties: { t: { type: "STRING" }, d: { type: "STRING" }, icon: { type: "STRING" }, kind: { type: "STRING" } }, required: ["t", "d", "icon", "kind"] } } }, required: ["_check", "title", "slogan", "rules"], propertyOrdering: ["_check", "title", "slogan", "rules"] },
+        temperature: 0.5, label: "AI가 안전수칙 문안을 쓰는 중"
+      }).then(function (r) { btn.disabled = false; return r; }, function (e) { btn.disabled = false; throw e; }); }
+    }).then(function (out) {
+      if (!out) { stEl.textContent = "AI 초안을 만들지 않았습니다."; return; }
+      var r = out.result; $("trAiIn").value = out.values.biz || "";
+      var rules = (r.rules || []).map(function (x) {
+        var ic = String(x.icon || "").toLowerCase().replace(/\(.*$/, "").trim();
+        return { t: String(x.t || "").replace(/^\s*\d{1,2}[.)]\s*/, "").trim().slice(0, 24), d: String(x.d || "").trim().slice(0, 60), icon: ICONS[ic] ? ic : "helmet", kind: x.kind === "dont" ? "dont" : "do" };
+      }).filter(function (x) { return x.t; }).slice(0, MAXR);
+      if (!rules.length) throw new Error("AI가 수칙을 만들지 못했습니다. 다시 시도해 주세요.");
+      st.rules = rules; st.title = String(r.title || rules.length + "대 안전수칙").slice(0, 30); st.slogan = String(r.slogan || "").slice(0, 40);
+      st.auto = true; autoTitle(); st.preset = "ai"; dirty = false; closePick(); fill(); save(); render();
+      var gen = SPAI.check.generic(rules.map(function (x) { return x.t + " " + x.d; }));
+      stEl.innerHTML = "<b>AI 초안을 넣었습니다.</b> " + esc(SPAI.NOTICE) + (gen.length ? "<br><b>일반 문구만 있는 수칙 " + gen.length + "개</b> — 이 사업장에 맞게 고쳐 쓰세요." : "");
+    }).catch(function (e) { stEl.textContent = (e && e.message) || "AI 초안을 만들지 못했습니다."; });
+  });
+
+  fill(); render();
+})();
+</script>

@@ -140,6 +140,7 @@
     "ai",
     "law-ai",
     "rule-sign",
+    "top-rules",
     "gear-cert"
    ],
    "note": ""
@@ -329,7 +330,8 @@
     "schedule",
     "ai",
     "law-ai",
-    "rule-sign"
+    "rule-sign",
+    "top-rules"
    ],
    "note": ""
   },

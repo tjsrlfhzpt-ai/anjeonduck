@@ -1,0 +1,56 @@
+{
+  "checked": "2026-10-28",
+  "_comment": "N대 안전수칙 포스터 작성기(/tools/top-rules/)의 수칙 모음과 업종 예시. 법정 서식이 아니라 사업장이 스스로 정해 게시하는 수칙의 예시 문구다. t=짧은 수칙(포스터 큰 글씨), d=한 줄 설명, icon=작성기 내장 그림 이름, kind=do(지시: 색 원) | dont(금지: 빨간 테두리·사선).",
+  "cats": ["공통", "장비·운반", "작업 관리", "화재·화학·밀폐", "고소·건설", "식품·서비스"],
+  "library": [
+    {"id": "ppe", "cat": "공통", "t": "안전보호구 착용", "d": "작업장에서는 지급된 안전모·안전화·보안경 등 보호구를 항상 착용합니다", "icon": "helmet", "kind": "do"},
+    {"id": "walk-phone", "cat": "공통", "t": "입수보행·휴대폰 보행 금지", "d": "주머니에 손을 넣거나 휴대폰을 보면서 걷지 않습니다", "icon": "phone", "kind": "dont"},
+    {"id": "walkway", "cat": "공통", "t": "지정 보행통로 이용", "d": "지게차·차량 통로가 아닌 표시된 보행통로로 다닙니다", "icon": "walk", "kind": "do"},
+    {"id": "tbm", "cat": "공통", "t": "작업 전 TBM 참여", "d": "작업 전에 위험요인과 대책을 함께 확인하고 시작합니다", "icon": "chat", "kind": "do"},
+    {"id": "nearmiss", "cat": "공통", "t": "아차사고 즉시 공유", "d": "다칠 뻔한 일도 바로 알리고 함께 개선합니다", "icon": "megaphone", "kind": "do"},
+    {"id": "stopwork", "cat": "공통", "t": "위험하면 작업 중지", "d": "급박한 위험이 있으면 작업을 멈추고 대피한 뒤 바로 보고합니다", "icon": "stop", "kind": "do"},
+    {"id": "smoke", "cat": "공통", "t": "지정 장소 외 흡연 금지", "d": "흡연은 지정된 흡연 장소에서만 합니다", "icon": "cig", "kind": "dont"},
+    {"id": "alcohol", "cat": "공통", "t": "음주 후 작업·운전 금지", "d": "술을 마신 상태로 작업하거나 장비를 운전하지 않습니다", "icon": "cup", "kind": "dont"},
+    {"id": "tidy", "cat": "공통", "t": "통로·비상구 확보", "d": "통로와 비상구 앞에 물건을 쌓아 두지 않습니다", "icon": "exit", "kind": "do"},
+
+    {"id": "fl-speed", "cat": "장비·운반", "t": "지게차·사내 운행 속도 준수", "d": "사내 제한속도를 지키고 교차로·출입구에서는 서행·일시정지합니다", "icon": "gauge", "kind": "do"},
+    {"id": "fl-belt", "cat": "장비·운반", "t": "지게차 좌석 안전띠 착용", "d": "짧은 거리라도 운전할 때는 좌석 안전띠를 맵니다", "icon": "forklift", "kind": "do"},
+    {"id": "fl-license", "cat": "장비·운반", "t": "지정된 운전자만 장비 운전", "d": "지게차·크레인 등은 자격을 갖춘 지정 운전자만 운전합니다", "icon": "forklift", "kind": "do"},
+    {"id": "fl-nopeople", "cat": "장비·운반", "t": "장비 작업반경 출입 금지", "d": "지게차·중장비 작업반경과 들어 올린 포크 아래에 들어가지 않습니다", "icon": "forklift", "kind": "dont"},
+    {"id": "crane-under", "cat": "장비·운반", "t": "인양물 아래 출입 금지", "d": "크레인으로 매단 물건 아래를 지나가거나 머물지 않습니다", "icon": "hook", "kind": "dont"},
+    {"id": "heavy", "cat": "장비·운반", "t": "중량물은 2인 1조·보조도구", "d": "무거운 물건은 무릎을 굽혀 몸에 붙여 들고, 2인 1조나 대차를 씁니다", "icon": "box", "kind": "do"},
+
+    {"id": "permit", "cat": "작업 관리", "t": "비정형작업 시 작업허가서", "d": "화기·밀폐·고소·정비 등 비정형작업은 허가를 받은 뒤 시작합니다", "icon": "clipboard", "kind": "do"},
+    {"id": "moc", "cat": "작업 관리", "t": "공정 변경 시 변경관리위원회", "d": "설비·공정·원료를 바꾸기 전에 변경관리 검토를 거칩니다", "icon": "cycle", "kind": "do"},
+    {"id": "loto", "cat": "작업 관리", "t": "정비·보수 시 LOTO", "d": "전원을 끄고 잠금장치와 표지를 단 뒤 잔류 에너지까지 확인합니다", "icon": "lock", "kind": "do"},
+    {"id": "guard", "cat": "작업 관리", "t": "방호장치 임의 해제 금지", "d": "덮개·인터록·광전자식 방호장치를 끄거나 떼어 내지 않습니다", "icon": "gear", "kind": "dont"},
+    {"id": "running", "cat": "작업 관리", "t": "가동 중 설비에 손 넣기 금지", "d": "회전체·컨베이어가 움직일 때 손이나 도구를 넣지 않습니다", "icon": "hand", "kind": "dont"},
+    {"id": "elec", "cat": "작업 관리", "t": "전기작업은 정전·검전 후", "d": "전기설비는 지정된 사람만 다루고 작업 전에 전원 차단과 검전을 합니다", "icon": "bolt", "kind": "do"},
+
+    {"id": "hotwork", "cat": "화재·화학·밀폐", "t": "화기작업 시 주변 가연물 제거", "d": "용접·용단 전에 주변 가연물을 치우고 소화기를 가까이 둡니다", "icon": "flame", "kind": "do"},
+    {"id": "confined2", "cat": "화재·화학·밀폐", "t": "밀폐공간 가스농도 측정·송기마스크", "d": "들어가기 전 산소·유해가스 농도를 재고, 환기가 어려우면 송기마스크를 씁니다", "icon": "meter", "kind": "do"},
+    {"id": "chem", "cat": "화재·화학·밀폐", "t": "화학물질은 MSDS 확인", "d": "쓰기 전에 경고표지와 MSDS를 확인하고 서로 섞어 쓰지 않습니다", "icon": "flask", "kind": "do"},
+
+    {"id": "harness", "cat": "고소·건설", "t": "고소작업 시 안전대 체결", "d": "2m 이상 높은 곳에서 작업발판·난간이 없으면 안전대를 걸고 작업합니다", "icon": "carabiner", "kind": "do"},
+    {"id": "opening", "cat": "고소·건설", "t": "개구부·단부 안전난간 유지", "d": "개구부와 단부의 안전난간·덮개를 임의로 치우지 않습니다", "icon": "rail", "kind": "do"},
+    {"id": "ladder", "cat": "고소·건설", "t": "이동식 사다리 안전 사용", "d": "사다리는 2인 1조나 아웃트리거를 갖춰 쓰고 맨 위 발판에 올라서지 않습니다", "icon": "ladder", "kind": "do"},
+    {"id": "signal", "cat": "고소·건설", "t": "중장비 작업 시 신호수 배치", "d": "굴착기·크레인 작업에는 신호수를 두고 작업반경 출입을 통제합니다", "icon": "flag", "kind": "do"},
+
+    {"id": "slip", "cat": "식품·서비스", "t": "바닥 물기 즉시 제거", "d": "젖은 바닥은 바로 닦고 미끄럼 방지 안전화를 신습니다", "icon": "drop", "kind": "do"},
+    {"id": "cold", "cat": "식품·서비스", "t": "냉동창고 출입 전 비상장치 확인", "d": "들어가기 전 안쪽 문 열림장치와 비상벨이 작동하는지 확인합니다", "icon": "snow", "kind": "do"},
+    {"id": "knife", "cat": "식품·서비스", "t": "칼·절단 작업 시 방검장갑", "d": "칼·슬라이서를 쓸 때는 방검장갑을 끼고 몸 바깥쪽으로 자릅니다", "icon": "glove", "kind": "do"},
+    {"id": "heat", "cat": "식품·서비스", "t": "더운 날 물·그늘·휴식", "d": "폭염에는 물을 자주 마시고 그늘에서 쉬는 시간을 지킵니다", "icon": "sun", "kind": "do"}
+  ],
+  "presets": [
+    {"id": "mfg", "name": "제조업", "title": "10대 안전수칙", "slogan": "기본을 지키면 모두가 무사히 퇴근합니다",
+     "rules": ["ppe", "fl-speed", "walk-phone", "permit", "moc", "loto", "hotwork", "confined2", "harness", "guard"]},
+    {"id": "food", "name": "식품 제조", "title": "10대 안전수칙", "slogan": "깨끗하게, 안전하게, 무사히 퇴근",
+     "rules": ["ppe", "running", "loto", "slip", "chem", "knife", "cold", "fl-speed", "confined2", "nearmiss"]},
+    {"id": "cons", "name": "건설업", "title": "10대 안전수칙", "slogan": "오늘도 무사고, 내일도 무사고",
+     "rules": ["ppe", "harness", "opening", "ladder", "crane-under", "signal", "hotwork", "elec", "tbm", "stopwork"]},
+    {"id": "logi", "name": "물류·창고", "title": "10대 안전수칙", "slogan": "사람이 먼저, 안전이 먼저",
+     "rules": ["ppe", "fl-speed", "fl-belt", "fl-license", "walkway", "walk-phone", "heavy", "fl-nopeople", "tidy", "heat"]},
+    {"id": "basic", "name": "소규모 사업장 기본", "title": "5대 안전수칙", "slogan": "작은 습관이 큰 사고를 막습니다",
+     "rules": ["ppe", "walk-phone", "tbm", "nearmiss", "stopwork"]}
+  ]
+}

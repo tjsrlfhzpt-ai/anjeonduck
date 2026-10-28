@@ -109,12 +109,12 @@
 .rs-ft .co{font-weight:900;font-size:1.25em}
 .rs-ft .meta{margin-left:auto;text-align:right;line-height:1.4;color:#333}
 .rs-src{font-size:6.5pt;color:#777;margin-top:2mm;text-align:right}
-.rs-print{display:none}
+.rs-print{position:fixed;left:-20000px;top:0;visibility:hidden;pointer-events:none}  /* display:none이면 맞춤 계산이 0으로 재져 글자가 1~2pt로 줄던 문제(2026-10-28) */
 @media print{
   html,body{background:#fff!important}
   body>*:not(main){display:none!important}
   main>*:not(.rs-print){display:none!important}
-  .rs-print{display:block!important}
+  .rs-print{display:block!important;position:static!important;visibility:visible!important}
   .rs-print .rs-page{box-shadow:none}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
@@ -254,7 +254,7 @@
     var n = st.rules.length;
     $("rsCount").textContent = n + "줄" + (n > 10 ? " · 줄이 많아 글자가 작아집니다(" + Math.round(r.fr) + "pt). 현장에서 읽기 좋은 것은 10줄 이내입니다." : "");
     var d = dims();
-    $("rsPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0}@page:first{padding:0}}";
+    $("rsPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0;@bottom-center{content:none}}@page:first{margin:0;padding:0}}";
     $("rsSheet").dataset.dirty = "1";
   }
   function fillSheet() { var sh = $("rsSheet"); sh.innerHTML = pageHTML(); fit(sh.firstChild); sh.dataset.dirty = ""; return sh; }
