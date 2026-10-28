@@ -380,7 +380,7 @@ SITUATIONS = [
 CAT_RANK = {"무료 작성 도구": 0, "웹 작성 서식": 1, "법정 서식": 2, "고시·지침": 3, "법정 기준표(별표)": 4}
 
 
-SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours"], "점검·작업허가": ["improve", "docmap", "inspect", "loto", "rule-sign", "top-rules"],
+SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours", "edu-monthly"], "점검·작업허가": ["improve", "docmap", "inspect", "loto", "rule-sign", "top-rules"],
              "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["council", "safety-cost", "cost-use", "hpp"], "기계·설비 인증·검사": ["machines", "gear-cert", "inspect"],
              "화학물질·석면": ["msds"], "작업환경·건강": ["heat", "confined", "cvd"]}
 
@@ -840,15 +840,15 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
             ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
 
 
-TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "top-rules": "📌", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
+TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "edu-monthly": "📅", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "top-rules": "📌", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "cost-use": "🧾", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "ai": "✨", "law-ai": "⚖️", "gear-cert": "⛑️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
-TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "top-rules": "salute", "heat": "heat", "improve": "fix", "confined": "confined",
+TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "edu-monthly": "book", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "top-rules": "salute", "heat": "heat", "improve": "fix", "confined": "confined",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "cost-use": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
               "schedule": "calendar", "duties": "briefcase", "ai": "book", "law-ai": "book", "gear-cert": "helmet", "retention": "folder", "inspect": "search", "docmap": "audit"}
 # 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
-WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "top-rules", "improve"]
+WRITE_TOOLS = ["tbm", "risk", "msds", "edu-log", "edu-monthly", "committee", "council", "patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "top-rules", "improve"]
 # 홈 '자주 쓰는 작성기' 탭에 함께 올리는 서식 작성기(data/forms.json 의 id → 아이콘)
 HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일지", "안전·보건을 고르고 일일·주간·월간 일지를 업종별 예시로 채워 작성합니다"),
                     ("workplan", "folder", "작업계획서", "지게차·중량물·고소작업대 등 작업 종류를 골라 별표 4 사항대로 작성합니다", "안전보건규칙 제38조"),
@@ -1668,7 +1668,7 @@ ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="
 
 # 작성기 하나로 통합(2026-10-12): 전용 작성기(config free_tools, cat=작성기)를 서식 작성기 묶음 속에 넣어 /tools/forms/ 한 곳에서 찾는다.
 WRITER_LEAD = ("위험성평가·TBM", ["tbm", "risk"])          # 맨 앞 묶음(서식에는 없는 묶음)
-WRITER_TOOLS_IN = {"교육·회의": ["edu-log", "committee", "council"],
+WRITER_TOOLS_IN = {"교육·회의": ["edu-log", "edu-monthly", "committee", "council"],
                    "점검·허가": ["patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "top-rules", "improve"],
                    "관리대장": ["msds"]}
 WRITER_GID = {"위험성평가·TBM": "w-risk", "교육·회의": "w-edu", "점검·허가": "w-check", "재해·사고 조사": "w-acc", "업무일지": "w-log",
