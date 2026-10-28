@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>위험성평가서 작성기 | SafePlum</title>
-<meta name="description" content="빈도×강도(5×4) 방식 위험성평가서를 업종별 위험요인으로 빠르게 작성하고 A4로 인쇄하세요. 무료, 회원가입 없음.">
+<meta name="description" content="빈도·강도법(3×3·4×4·5×4·5×5)과 위험성 수준 3단계 판단법 중 골라 위험성평가서를 업종별 위험요인으로 빠르게 작성하고 A4로 인쇄하세요. 무료, 회원가입 없음.">
 <link rel="icon" href="../../assets/favicon.png" type="image/png">
 <style id="pgSize">@page { size: A4 landscape; margin: 10mm; } @page:first{margin-top:0;margin-bottom:0;padding-top:10mm;padding-bottom:10mm}</style>
 <style>
@@ -70,6 +70,12 @@
   .method .ed { flex:1; min-width:200px; border-bottom:1px solid #999; }
   .linkbtn { background:none; border:0; padding:0; font:inherit; font-size:11px; color:#1F6FD1; cursor:pointer; text-decoration:underline; }
   .own-mark { font-size:10.5px; color:#8a5a00; }
+  .cfg-kind { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:0 0 8px; font-size:13px; }
+  .cfg-kind select { font:inherit; font-size:13.5px; padding:5px 8px; border:1px solid #9aa6b5; border-radius:6px; background:#fff; max-width:100%; }
+  .cfg-kind-n { font-size:11.5px; color:#555; flex-basis:100%; }
+  #ra.lv3 th[data-lb="k8"], #ra.lv3 #ra-tbody td.sp + td.sp { display:none; }
+  .ra-re-t.lv3 th:nth-child(6), .ra-re-t.lv3 td:nth-child(6) { display:none; }
+  .matrix-table td.desc { text-align:left; font-weight:normal; background:#fff; color:#222; }
   .sec-note { font-size:11px; color:#555; margin:0 0 6px; }
   .criteria-box { border:2px solid var(--line); padding:8px; border-radius:4px; background:#fafbfc; margin-bottom:10px; display:flex; gap:10px; align-items:flex-start; }
   .matrix-table { width:40%; margin:0; } .level-table { width:60%; margin:0; }
@@ -256,6 +262,17 @@
     <label for="globalWorkType">공종(부서)</label>
     <select id="globalWorkType" onchange="applyAutoData(false)"></select>
   </div>
+  <div class="dept-select-wrap">
+    <label for="topKind">평가 기법</label>
+    <select id="topKind" title="위험성 결정 방법을 고릅니다. 이미 고른 위험성 값은 새 기법 단계로 옮겨집니다.">
+      <option value="m33">3×3 기법 (상·중·하)</option>
+      <option value="m44">4×4 기법</option>
+      <option value="m54">5×4 기법 (기본)</option>
+      <option value="m55">5×5 기법</option>
+      <option value="lv3">3단계 판단법 (점수 없음)</option>
+      <option value="own" hidden>직접 고친 기준</option>
+    </select>
+  </div>
   <button class="btn btn-blue" onclick="shuffleRows()" title="같은 공종의 다른 유해·위험요인 예시로 3번 표를 바꿉니다">🔀 다른 예시로</button>
   <button class="btn btn-blue" id="aiRiskBtn" onclick="aiRiskDraft()" title="내 Gemini API 키로 작업내용에 맞는 유해·위험요인 초안을 만듭니다">✨ AI 초안</button>
   <button class="btn btn-blue" id="pickBtn" onclick="openPick()">＋ 유해·위험요인 불러오기</button>
@@ -330,6 +347,14 @@
   <div class="sec-body">
   <p class="method"><b data-lb="mLabel" contenteditable>평가 방법</b><span class="ed left" id="fMethod" contenteditable></span><span class="own-mark no-print" id="mOwn" hidden>직접 고침 · <button type="button" class="linkbtn" onclick="methodAuto()">자동으로 되돌리기</button></span></p>
   <p class="sec-note no-print" id="defNote">SafePlum 기본 위험성평가 예시 기준입니다. 사업장 위험성평가 규정에서 정한 기준이 있으면 아래 '평가기준 바꾸기'에서 맞추세요.</p>
+  <div class="cfg-kind no-print"><label for="cfgKind"><b>평가 기법</b></label><select id="cfgKind">
+    <option value="m33">3×3 기법 — 빈도·강도법 (가능성 3 × 중대성 3, 9점)</option>
+    <option value="m44">4×4 기법 — 빈도·강도법 (16점)</option>
+    <option value="m54">5×4 기법 — 빈도·강도법 (20점 · SafePlum 기본)</option>
+    <option value="m55">5×5 기법 — 빈도·강도법 (25점)</option>
+    <option value="lv3">위험성 수준 3단계 판단법 (상·중·하, 점수 없음)</option>
+    <option value="own" hidden>직접 고친 기준</option></select>
+    <span class="cfg-kind-n" id="cfgKindN"></span></div>
   <div class="cfg no-print" id="cfgBox">
     <details><summary>평가기준 바꾸기 (단계 수 · 계산 방식 · 등급 구간 · 허용 기준 · 단계별 기준)</summary>
       <div class="cfg-grid">
@@ -455,7 +480,7 @@
   }
 
   // ---------- 평가기준 ----------
-  var DEF_CFG = { p: 5, c: 4, mode: "mul", accept: 6, pn: "가능성(빈도)", cn: "중대성(강도)", pd: [], cd: [],
+  var DEF_CFG = { kind: "mx", p: 5, c: 4, mode: "mul", accept: 6, pn: "가능성(빈도)", cn: "중대성(강도)", pd: [], cd: [],
     cuts: [["매우높음", 16, "즉시개선", ""], ["높음", 15, "즉시개선", ""], ["보통", 8, "개선", ""], ["낮음", 4, "현상유지", ""], ["매우낮음", 1, "현상유지", ""]] };
   var PAL = { 2: ["risk20", "risk1"], 3: ["risk20", "risk9", "risk1"], 4: ["risk20", "risk15", "risk9", "risk1"], 5: ["risk20", "risk15", "risk9", "risk4", "risk1"], 6: ["risk20", "risk15", "risk9", "risk8", "risk4", "risk1"] };
   var CFG_KEY = "safetake.risk.cfg", TPL_KEY = "safetake.risk.tpl", CFG;
@@ -463,15 +488,87 @@
   function cleanCfg(x) {
     var d = clone(DEF_CFG);
     if (!x || typeof x !== "object") return d;
-    var o = { p: num(x.p, 3, 5, d.p), c: num(x.c, 3, 5, d.c), mode: x.mode === "add" ? "add" : "mul", accept: num(x.accept, 1, 99, d.accept),
+    var o = { kind: "mx", p: num(x.p, 3, 5, d.p), c: num(x.c, 3, 5, d.c), mode: x.mode === "add" ? "add" : "mul", accept: num(x.accept, 1, 99, d.accept),
       pn: str(x.pn, 20).trim() || d.pn, cn: str(x.cn, 20).trim() || d.cn };
     function steps(a) { var r = []; for (var i = 0; i < 5; i++) r.push(Array.isArray(a) ? str(a[i], 200) : ""); return r; }
     o.pd = steps(x.pd); o.cd = steps(x.cd);
     var cuts = Array.isArray(x.cuts) ? x.cuts.filter(Array.isArray).slice(0, 6).map(function (c) { return [str(c[0], 20), num(c[1], 1, 99, 1), str(c[2], 30), str(c[3], 80)]; }) : [];
     o.cuts = cuts.length >= 2 ? cuts : d.cuts;
     o.cuts.sort(function (a, b) { return b[1] - a[1]; });
+    o.kind = x.kind === "lv3" ? "lv3" : "mx";
+    if (o.kind === "lv3") { o.p = 3; o.c = 1; o.mode = "mul"; o.cn = "-"; o.cd = steps([]); }
     return o;
   }
+  // 평가 기법 예시(「사업장 위험성평가에 관한 지침」이 정한 빈도·강도법 / 위험성 수준 3단계 판단법). 단계별 판단 기준은 SafePlum 예시 — 사업장 규정에 맞게 고쳐 쓴다
+  var LV3M = ["하", "중", "상"];
+  var PRESET = {
+    m33: { kind: "mx", p: 3, c: 3, mode: "mul", accept: 2, pn: "가능성(빈도)", cn: "중대성(강도)",
+      pd: ["하 — 발생 가능성이 거의 없음(안전조치가 잘 되어 있음)", "중 — 발생할 수 있음(안전조치 일부 미흡)", "상 — 발생 가능성이 높음(안전조치 없음·자주 노출)"],
+      cd: ["소 — 경미한 부상·질병(응급처치, 휴업 없음)", "중 — 휴업이 필요한 부상·질병", "대 — 사망 또는 장애가 남을 수 있는 부상·질병"],
+      cuts: [["높음", 6, "즉시 개선", ""], ["보통", 3, "개선", ""], ["낮음", 1, "현상유지", ""]] },
+    m44: { kind: "mx", p: 4, c: 4, mode: "mul", accept: 3, pn: "가능성(빈도)", cn: "중대성(강도)",
+      pd: ["거의 없음", "드물게 발생할 수 있음", "가끔 발생할 수 있음", "자주 발생할 수 있음"],
+      cd: ["경미한 부상·질병(응급처치, 휴업 없음)", "휴업이 필요한 부상·질병", "장기 휴업·입원이 필요한 부상·질병", "사망 또는 장애가 남는 부상·질병"],
+      cuts: [["매우높음", 12, "즉시 개선", ""], ["높음", 8, "우선 개선", ""], ["보통", 4, "개선", ""], ["낮음", 1, "현상유지", ""]] },
+    m54: DEF_CFG,
+    m55: { kind: "mx", p: 5, c: 5, mode: "mul", accept: 4, pn: "가능성(빈도)", cn: "중대성(강도)",
+      pd: ["거의 없음", "드물게 발생할 수 있음", "가끔 발생할 수 있음", "자주 발생할 수 있음", "매우 자주 발생(상시 노출)"],
+      cd: ["무시할 수준(응급처치 불필요)", "경미한 부상·질병(응급처치, 휴업 없음)", "휴업이 필요한 부상·질병", "장기 휴업·입원이 필요한 부상·질병", "사망 또는 장애가 남는 부상·질병"],
+      cuts: [["매우높음", 16, "즉시 개선", ""], ["높음", 10, "우선 개선", ""], ["보통", 5, "개선", ""], ["낮음", 1, "현상유지", ""]] },
+    lv3: { kind: "lv3", p: 3, c: 1, mode: "mul", accept: 1, pn: "위험성 수준", cn: "-",
+      pd: ["작업 수행에 영향을 미치지 않는 경미한 부상 또는 질병", "사고 발생 시 요양이 필요한 위험(아차사고 포함)", "사고 발생 시 사망 또는 장애가 남을 수 있는 위험"], cd: [],
+      cuts: [["상", 3, "즉시 개선", "허용 불가 — 공법·작업 변경 → 안전시설 → 보호구 순으로 감소대책"], ["중", 2, "개선", "허용 불가 — 관리자·신호수 배치, 교육 등 감소대책"], ["하", 1, "현상유지", "허용 가능 — 현재 조치 유지·일상관리"]] }
+  };
+  var KIND_NOTE = {
+    m33: "가능성 3단계 × 중대성 3단계 = 1~9점. 6점 이상 즉시 개선, 3~4점 개선, 2점 이하 허용(예시).",
+    m44: "가능성 4단계 × 중대성 4단계 = 1~16점. 3점 이하 허용(예시).",
+    m54: "가능성 5단계 × 중대성 4단계 = 1~20점. 6점 이하 허용(SafePlum 기본 예시).",
+    m55: "가능성 5단계 × 중대성 5단계 = 1~25점. 4점 이하 허용(예시).",
+    lv3: "점수를 매기지 않고 위험성 수준을 상·중·하로 바로 판단합니다. '하'만 허용 가능(예시). 판단 기준 문구는 고용노동부 위험성평가 표준 실시규정(3단계 판단법 활용) 예시를 따랐습니다.",
+    own: "아래 '평가기준 바꾸기'에서 직접 고친 기준입니다."
+  };
+  function cfgSig(x) { return JSON.stringify(cleanCfg(x)); }
+  function presetKey() { var c = cfgSig(CFG); for (var k in PRESET) if (cfgSig(PRESET[k]) === c) return k; return "own"; }
+  function isLv3() { return !!CFG && CFG.kind === "lv3"; }
+  function accLabel() { return isLv3() ? "'하'" : CFG.accept + "점"; }
+  var K7A = null, K7B = "위험성\n수준";
+  function syncKind() {
+    var lv = isLv3(), ra = $("ra"); if (!ra) return;
+    ra.classList.toggle("lv3", lv);
+    var g = ra.querySelector('[data-lb="kg2"]'); if (g) g.colSpan = lv ? 2 : 3;
+    var cg = ra.querySelector("colgroup"); if (!syncKind.col) syncKind.col = cg.children[8];
+    if (lv && syncKind.col.parentNode) cg.removeChild(syncKind.col); else if (!lv && !syncKind.col.parentNode) cg.insertBefore(syncKind.col, cg.children[8]);
+    var el = ra.querySelector('[data-lb="k7"]');
+    if (el) { if (K7A == null) K7A = DEF_LB.k7 || el.textContent; var want = lv ? K7B : K7A, other = lv ? K7A : K7B; if (el.textContent === other) { el.textContent = want; syncLabels(); } DEF_LB.k7 = want; }
+    var ks = $("cfgKind"), k = presetKey(); ks.querySelector('[value="own"]').hidden = k !== "own"; ks.value = k; $("cfgKindN").textContent = KIND_NOTE[k] || "";
+    var tk = $("topKind"); if (tk) { tk.querySelector('[value="own"]').hidden = k !== "own"; tk.value = k; }
+  }
+  var KIND_QUIET = false;
+  // 위 조작줄의 '평가 기법'은 2번 구역 선택과 같은 동작(취소하면 원래 값으로)
+  $("topKind").addEventListener("change", function () { var ks = $("cfgKind"); ks.value = this.value; ks.dispatchEvent(new Event("change")); this.value = ks.value; });
+  $("cfgKind").addEventListener("change", function () {
+    var k = this.value; if (!PRESET[k]) return;
+    // 이미 고른 값은 새 기법의 단계에 비율로 옮긴다(3단계 판단법과 오갈 때는 등급으로 옮김)
+    var trs = [].slice.call(document.querySelectorAll("#ra-tbody tr")), oldLv = isLv3(), oP = CFG.p, oC = CFG.c, top = sortedCuts()[0].min, acc = +CFG.accept;
+    var olds = trs.map(function (w) { var ss = w.querySelectorAll("td.sp select"); return ss.length > 1 ? { p: +ss[0].value, c: +ss[1].value } : null; });
+    var scored = olds.filter(function (o) { return o && o.p && o.c; }).length;
+    if (scored && !KIND_QUIET && !confirm("평가 기법을 바꿉니다. 이미 고른 위험성 값 " + scored + "건은 새 기법의 단계에 맞춰 옮겨 드립니다. 옮긴 값은 현장 기준으로 다시 확인해 주세요. 계속할까요?")) { this.value = presetKey(); return; }
+    CFG = cleanCfg(clone(PRESET[k])); cfgChanged(true);
+    function sc(v, from, to) { return v ? Math.max(1, Math.min(to, Math.round(v / from * to))) : 0; }
+    trs.forEach(function (w, i) {
+      var o = olds[i], ss = w.querySelectorAll("td.sp select"); if (!o || ss.length < 2) return;
+      var np = 0, nc = 0, scr = oldLv ? o.p : (o.p && o.c ? scoreOf.call(null, 0, 0) : 0);
+      if (!o.p || !o.c) { np = 0; nc = isLv3() ? 1 : 0; }
+      else if (oldLv && !isLv3()) { var g = suggest(LV3M[o.p - 1]); np = g.p; nc = g.c; }
+      else if (!oldLv && isLv3()) { var s0 = o.p * o.c; np = s0 >= top ? 3 : s0 > acc ? 2 : 1; nc = 1; }
+      else if (isLv3()) { np = o.p; nc = 1; }
+      else { np = sc(o.p, oP, CFG.p); nc = sc(o.c, oC, CFG.c); }
+      ss[0].value = String(np); ss[1].value = String(nc);
+      if (w._keep && oldLv !== isLv3()) { w._keep.p2 = 0; w._keep.c2 = 0; }
+      else if (w._keep && !isLv3()) { w._keep.p2 = sc(w._keep.p2, oP, CFG.p); w._keep.c2 = sc(w._keep.c2, oC, CFG.c); }
+    });
+    updateAll(); markTouched();
+  });
   function isDefCfg() { var a = cleanCfg(CFG), b = cleanCfg(DEF_CFG); return JSON.stringify(a) === JSON.stringify(b); }
   function opChar() { return CFG.mode === "add" ? "+" : "×"; }
   function scoreOf(p, c) { return p && c ? (CFG.mode === "add" ? p + c : p * c) : 0; }
@@ -493,10 +590,11 @@
   }
   // 기본 목록의 상/중/하 → 현재 위험성 추천값. 기본 5×4에서 상=4×4, 중=3×3, 하=2×2가 되도록 비율로 맞춘다
   function suggest(level) {
+    if (isLv3()) return { p: level === "상" ? 3 : level === "중" ? 2 : level === "하" ? 1 : 0, c: level ? 1 : 0 };
     var r = level === "상" ? [0.8, 1] : level === "중" ? [0.6, 0.75] : level === "하" ? [0.4, 0.5] : null;
     return r ? { p: Math.max(1, Math.round(CFG.p * r[0])), c: Math.max(1, Math.round(CFG.c * r[1])) } : { p: 0, c: 0 };
   }
-  function autoMethod() { return CFG.pn + " " + CFG.p + "단계 " + opChar() + " " + CFG.cn + " " + CFG.c + "단계 · 허용 가능 " + CFG.accept + "점 이하"; }
+  function autoMethod() { if (isLv3()) return "위험성 수준 3단계 판단법(상·중·하) · '하'만 허용 가능"; return "빈도·강도법 · " + CFG.pn + " " + CFG.p + "단계 " + opChar() + " " + CFG.cn + " " + CFG.c + "단계 · 허용 가능 " + CFG.accept + "점 이하"; }
   var methodOwn = false;
   function syncMethod() {
     var el = $("fMethod");
@@ -505,20 +603,27 @@
   }
   function methodAuto() { methodOwn = false; syncMethod(); markTouched(); }
   function renderCrit() {
+    if (isLv3()) {
+      var hv = "<thead><tr><th>" + esc(CFG.pn) + "</th><th>판단 기준</th></tr></thead><tbody>";
+      for (var q = 3; q >= 1; q--) hv += '<tr><td class="' + levelInfo(q).cls + '">' + LV3M[q - 1] + '</td><td class="desc">' + esc(CFG.pd[q - 1] || "") + "</td></tr>";
+      $("matrixTable").innerHTML = hv + "</tbody>";
+    } else {
     var h = "<thead><tr><th>" + esc(CFG.pn) + " \\ " + esc(CFG.cn) + "</th>", c, p;
     for (c = CFG.c; c >= 1; c--) h += "<th>" + MARKS[c - 1] + "</th>";
     h += "</tr></thead><tbody>";
     for (p = CFG.p; p >= 1; p--) { h += "<tr><th>" + MARKS[p - 1] + "</th>"; for (c = CFG.c; c >= 1; c--) { var sc = scoreOf(p, c); h += '<td class="' + levelInfo(sc).cls + '">' + sc + "</td>"; } h += "</tr>"; }
     $("matrixTable").innerHTML = h + "</tbody>";
+    }
     var a = sortedCuts(), max = maxScore(), lowest = minScore(), acc = +CFG.accept, warn = [];
     $("levelBody").innerHTML = a.map(function (x, i) {
       var hi = i === 0 ? max : a[i - 1].min - 1, lo = i === a.length - 1 ? Math.min(lowest, x.min) : x.min;
       var range = lo > hi ? "—" : lo === hi ? String(lo) : lo + "~" + hi;
+      if (isLv3()) return '<tr><td class="' + x.cls + '">' + esc(x.name) + '</td><td class="' + x.cls + '">' + esc(x.mng) + '</td><td class="desc">' + esc(x.desc.trim() || (lo > acc ? "허용 불가 — 감소대책 수립·이행" : "허용 가능 — 현재 조치 유지")) + "</td></tr>";
       if (lo > hi) warn.push("'" + (x.name || "이름 없음") + "' 등급에 해당하는 점수가 없습니다(구간이 겹치거나 최고 점수 " + max + "점보다 큼).");
       var auto = lo > acc ? "허용 불가 — 감소대책 수립·이행" : hi <= acc ? "허용 가능 — 현재 조치 유지" : "일부 허용(" + acc + "점 이하)";
       return '<tr><td class="' + x.cls + '">' + range + " (" + esc(x.name) + ')</td><td class="' + x.cls + '">' + esc(x.mng) + '</td><td class="desc">' + esc(x.desc.trim() || auto) + "</td></tr>";
     }).join("");
-    if (acc >= max) warn.push("허용 가능한 최대 점수(" + acc + "점)가 최고 점수(" + max + "점) 이상이라 모든 요인이 허용 가능으로 나옵니다.");
+    if (acc >= max && !isLv3()) warn.push("허용 가능한 최대 점수(" + acc + "점)가 최고 점수(" + max + "점) 이상이라 모든 요인이 허용 가능으로 나옵니다.");
     $("cfgWarn").textContent = warn.join(" ");
     // 단계별 판단 기준(적은 것이 있을 때만 문서에 넣는다)
     var st = $("stepTable"), n = Math.max(CFG.p, CFG.c), any = false, rows = "";
@@ -527,20 +632,22 @@
       if (a1.trim() || a2.trim()) any = true;
       rows += "<tr><td>" + MARKS[k - 1] + "</td><td>" + esc(a1) + "</td><td>" + esc(a2) + "</td></tr>";
     }
+    if (isLv3()) any = false;
     st.hidden = !any;
     st.innerHTML = any ? '<colgroup><col style="width:8%"><col style="width:46%"><col style="width:46%"></colgroup><thead><tr><th>단계</th><th>' + esc(CFG.pn) + "</th><th>" + esc(CFG.cn) + "</th></tr></thead><tbody>" + rows + "</tbody>" : "";
     $("defNote").hidden = !isDefCfg();
-    syncMethod();
+    syncMethod(); syncKind();
   }
   function renderCfgForm() {
-    $("cfgP").value = CFG.p; $("cfgC").value = CFG.c; $("cfgM").value = CFG.mode; $("cfgA").value = CFG.accept; $("cfgPn").value = CFG.pn; $("cfgCn").value = CFG.cn;
+    ["cfgP", "cfgC", "cfgM", "cfgA", "cfgCn"].forEach(function (id) { $(id).disabled = isLv3(); $(id).closest("label").hidden = isLv3(); });
+    $("cfgP").value = CFG.p; $("cfgC").value = isLv3() ? 3 : CFG.c; $("cfgM").value = CFG.mode; $("cfgA").value = CFG.accept; $("cfgPn").value = CFG.pn; $("cfgCn").value = CFG.cn;
     $("cfgCuts").innerHTML = CFG.cuts.map(function (x, i) {
       return '<tr><td><input data-cut="' + i + '" data-f="0" maxlength="20" aria-label="등급 이름" value="' + esc(x[0]) + '"></td><td><input type="number" min="1" max="99" data-cut="' + i + '" data-f="1" aria-label="이 점수 이상" value="' + esc(x[1]) + '"></td><td><input data-cut="' + i + '" data-f="2" maxlength="30" aria-label="관리기준" value="' + esc(x[2]) + '"></td><td><input data-cut="' + i + '" data-f="3" maxlength="80" aria-label="허용 여부 문구" placeholder="자동" value="' + esc(x[3] || "") + '"></td><td><button type="button" class="linkbtn" data-cutdel="' + i + '" aria-label="이 등급 삭제"' + (CFG.cuts.length <= 2 ? " disabled" : "") + ">삭제</button></td></tr>";
     }).join("");
     $("cfgAdd").disabled = CFG.cuts.length >= 6;
     $("cfgPdH").textContent = CFG.pn; $("cfgCdH").textContent = CFG.cn;
     var h = "";
-    for (var k = Math.max(CFG.p, CFG.c); k >= 1; k--) h += "<tr><td style=\"text-align:center\">" + MARKS[k - 1] + "</td><td>" + (k <= CFG.p ? '<input data-step="pd" data-k="' + (k - 1) + '" maxlength="200" placeholder="예: 기준을 적으세요" value="' + esc(CFG.pd[k - 1] || "") + '">' : "") + "</td><td>" + (k <= CFG.c ? '<input data-step="cd" data-k="' + (k - 1) + '" maxlength="200" placeholder="예: 기준을 적으세요" value="' + esc(CFG.cd[k - 1] || "") + '">' : "") + "</td></tr>";
+    for (var k = Math.max(CFG.p, CFG.c); k >= 1; k--) h += "<tr><td style=\"text-align:center\">" + (isLv3() ? LV3M : MARKS)[k - 1] + "</td><td>" + (k <= CFG.p ? '<input data-step="pd" data-k="' + (k - 1) + '" maxlength="200" placeholder="예: 기준을 적으세요" value="' + esc(CFG.pd[k - 1] || "") + '">' : "") + "</td><td>" + (k <= CFG.c && !isLv3() ? '<input data-step="cd" data-k="' + (k - 1) + '" maxlength="200" placeholder="예: 기준을 적으세요" value="' + esc(CFG.cd[k - 1] || "") + '">' : "") + "</td></tr>";
     $("cfgSteps").innerHTML = h;
   }
   function cfgChanged(structural) {
@@ -560,7 +667,7 @@
   function rebuildSelects() {
     document.querySelectorAll("#ra-tbody tr").forEach(function (w) {
       var ss = w.querySelectorAll("td.sp select"); if (ss.length < 2) return;
-      var p = Math.min(+ss[0].value, CFG.p), c = Math.min(+ss[1].value, CFG.c);
+      var p = Math.min(+ss[0].value, CFG.p), c = isLv3() ? 1 : Math.min(+ss[1].value, CFG.c);
       ss[0].parentNode.innerHTML = sel(p, CFG.p, CFG.pn); ss[1].parentNode.innerHTML = sel(c, CFG.c, CFG.cn);
     });
     updateAll();
@@ -569,6 +676,7 @@
     var t = ev.target;
     if (t.dataset.cut != null) { CFG.cuts[+t.dataset.cut][+t.dataset.f] = t.dataset.f === "1" ? num(t.value, 1, 99, 1) : t.value; if (t.dataset.f === "1") t.value = CFG.cuts[+t.dataset.cut][1]; cfgChanged(false); return; }
     if (t.dataset.step) { CFG[t.dataset.step][+t.dataset.k] = t.value; cfgChanged(false); return; }
+    if (isLv3()) { CFG.pn = $("cfgPn").value.trim() || PRESET.lv3.pn; cfgChanged(false); return; }
     var np = +$("cfgP").value, nc = +$("cfgC").value, over = overCount(np, nc);
     if (over && !confirm("단계 수를 줄이면 이미 고른 점수 " + over + "건이 새 최고 단계로 바뀝니다. 계속할까요?")) { $("cfgP").value = CFG.p; $("cfgC").value = CFG.c; return; }
     var st = np !== CFG.p || nc !== CFG.c;
@@ -651,8 +759,9 @@
     return list;
   }
   function sel(val, max, label) {
+    var mk = isLv3() && max === 3 ? LV3M : MARKS;
     var h = '<select onchange="updateScore(this)" aria-label="' + esc(label) + '"><option value="0"' + (val ? "" : " selected") + '>-</option>';
-    for (var i = 1; i <= max; i++) h += '<option value="' + i + '"' + (i === val ? " selected" : "") + '>' + MARKS[i - 1] + '</option>';
+    for (var i = 1; i <= max; i++) h += '<option value="' + i + '"' + (i === val ? " selected" : "") + '>' + mk[i - 1] + '</option>';
     return h + '</select>';
   }
   // 재해형태 → 정석 양식의 분류·원인·관련근거 예시(안전보건규칙 조문 제목은 국가법령정보센터 원문 기준). 현장에 맞게 고쳐 쓴다
@@ -696,7 +805,7 @@
       "<td>" + ed("law", "법적기준", "left") + "</td>" +
       "<td>" + ed("cur", "현재상태·조치", "left") + "</td>" +
       '<td class="sp">' + sel(cl(r.p, CFG.p), CFG.p, CFG.pn) + "</td>" +
-      '<td class="sp">' + sel(cl(r.c, CFG.c), CFG.c, CFG.cn) + "</td>" +
+      '<td class="sp">' + sel(isLv3() ? 1 : cl(r.c, CFG.c), CFG.c, CFG.cn) + "</td>" +
       '<td class="sb"><div class="score-badge"></div></td>' +
       "<td>" + ed("measure", "감소대책", "left") + "</td>" +
       "<td>" + ed("due", "개선일") + "</td>" +
@@ -827,8 +936,9 @@
     var score = scoreOf(parseInt(s[0].value, 10), parseInt(s[1].value, 10));
     var info = levelInfo(score);
     var badge = wrap.querySelector(".score-badge");
-    badge.dataset.t = score ? score + " (" + info.text + ")" + (score > +CFG.accept ? " · 개선" : "") : info.text;
-    badge.innerHTML = score ? score + " (" + esc(info.text) + ")" + (score > +CFG.accept ? "<small>개선</small>" : "") : esc(info.text);
+    var lab = isLv3() ? info.text : score + " (" + info.text + ")";
+    badge.dataset.t = score ? lab + (score > +CFG.accept ? " · 개선" : "") : info.text;
+    badge.innerHTML = score ? esc(lab) + (score > +CFG.accept ? "<small>개선</small>" : "") : esc(info.text);
     badge.className = "score-badge " + info.cls;
     wrap.classList.toggle("none", !score);
     rowSum(wrap); updateSummary();
@@ -845,16 +955,17 @@
     var box = $("raRe"); if (!box) return;
     var rows = [];
     document.querySelectorAll("#ra-tbody tr").forEach(function (tr, i) { var r = rowData(tr), s1 = scoreOf(r.p, r.c); if ((r.hazard || s1) && (s1 > +CFG.accept || r.doneDate)) rows.push({ tr: tr, i: i, r: r, s1: s1 }); });
-    if (!rows.length) { box.innerHTML = '<p class="ra-re-empty no-print">허용 기준(' + CFG.accept + '점)을 넘는 줄이나 개선을 완료한 줄이 생기면, 여기서 감소대책 적용 후 위험성을 다시 평가합니다.</p>'; return; }
-    function opt(v, max) { var h = '<option value="0">-</option>'; for (var k = 1; k <= max; k++) h += "<option" + (k === v ? " selected" : "") + ">" + k + "</option>"; return h; }
-    box.innerHTML = '<h3 class="ra-re-h">감소대책 적용 후 재평가 <span class="no-print">— 허용 기준 ' + CFG.accept + "점 이하가 되어야 개선이 끝난 것으로 봅니다</span></h3>" +
-      '<table class="ra-re-t"><thead><tr><th>연번</th><th>유해·위험요인</th><th>적용 전</th><th>감소대책</th><th>' + esc(CFG.pn) + "</th><th>" + esc(CFG.cn) + '</th><th>적용 후</th><th>판정</th><th>재평가일</th></tr></thead><tbody>' +
+    if (!rows.length) { box.innerHTML = '<p class="ra-re-empty no-print">허용 기준(' + accLabel() + ')을 넘는 줄이나 개선을 완료한 줄이 생기면, 여기서 감소대책 적용 후 위험성을 다시 평가합니다.</p>'; return; }
+    function opt(v, max) { var mk = isLv3() && max === 3 ? LV3M : MARKS, h = '<option value="0">-</option>'; for (var k = 1; k <= max; k++) h += '<option value="' + k + '"' + (k === v ? " selected" : "") + ">" + mk[k - 1] + "</option>"; return h; }
+    function lt(sc, inf) { return isLv3() ? esc(inf.text) : sc + " " + esc(inf.text); }
+    box.innerHTML = '<h3 class="ra-re-h">감소대책 적용 후 재평가 <span class="no-print">— 허용 기준(' + accLabel() + ") 이하가 되어야 개선이 끝난 것으로 봅니다</span></h3>" +
+      '<table class="ra-re-t' + (isLv3() ? " lv3" : "") + '"><thead><tr><th>연번</th><th>유해·위험요인</th><th>적용 전</th><th>감소대책</th><th>' + esc(CFG.pn) + "</th><th>" + esc(CFG.cn) + '</th><th>적용 후</th><th>판정</th><th>재평가일</th></tr></thead><tbody>' +
       rows.map(function (x) {
         var k = x.tr._keep, s2 = scoreOf(k.p2, k.c2), i1 = levelInfo(x.s1), i2 = levelInfo(s2);
         var judge = !x.r.doneDate ? "개선 전" : !s2 ? "재평가 필요" : s2 > +CFG.accept ? "여전히 초과" : "허용";
-        return '<tr data-ri="' + x.i + '"><td>' + (x.i + 1) + "</td><td>" + esc(x.r.hazard.slice(0, 60)) + '</td><td class="' + i1.cls + '">' + (x.s1 || "-") + " " + esc(i1.text) + "</td><td>" + esc((x.r.measure || "").slice(0, 60)) +
+        return '<tr data-ri="' + x.i + '"><td>' + (x.i + 1) + "</td><td>" + esc(x.r.hazard.slice(0, 60)) + '</td><td class="' + i1.cls + '">' + (x.s1 ? lt(x.s1, i1) : "- " + esc(i1.text)) + "</td><td>" + esc((x.r.measure || "").slice(0, 60)) +
           '</td><td><select data-re="p2" aria-label="개선 후 ' + esc(CFG.pn) + '">' + opt(k.p2, CFG.p) + '</select></td><td><select data-re="c2" aria-label="개선 후 ' + esc(CFG.cn) + '">' + opt(k.c2, CFG.c) + "</select></td>" +
-          '<td class="' + (s2 ? i2.cls : "") + '">' + (s2 ? s2 + " " + esc(i2.text) : "-") + '</td><td class="re-' + (judge === "허용" ? "ok" : judge === "개선 전" ? "pre" : "bad") + '">' + judge + '</td><td><input type="text" data-re="rdate" value="' + esc(k.rdate || "") + '" placeholder="예: 2026-11-05" aria-label="재평가일"></td></tr>';
+          '<td class="' + (s2 ? i2.cls : "") + '">' + (s2 ? lt(s2, i2) : "-") + '</td><td class="re-' + (judge === "허용" ? "ok" : judge === "개선 전" ? "pre" : "bad") + '">' + judge + '</td><td><input type="text" data-re="rdate" value="' + esc(k.rdate || "") + '" placeholder="예: 2026-11-05" aria-label="재평가일"></td></tr>';
       }).join("") + "</tbody></table>";
   }
   document.addEventListener("change", function (ev) {
@@ -862,6 +973,7 @@
     var row = t.closest("tr[data-ri]"); if (!row) return;
     var tr = document.querySelectorAll("#ra-tbody tr")[+row.dataset.ri]; if (!tr) return;
     tr._keep[t.dataset.re] = t.dataset.re === "rdate" ? t.value.trim() : +t.value || 0;
+    if (isLv3() && t.dataset.re === "p2") tr._keep.c2 = +t.value ? 1 : 0;
     if (t.dataset.re !== "rdate" && !tr._keep.rdate) { var d = new Date(); tr._keep.rdate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
     updateSummary(); markTouched();
   });
@@ -893,7 +1005,7 @@
       var dd = pday(r.due); if (dd && dd < t0 && !r.doneDate) { over++; tr.classList.add("row-late"); }
     });
     renderReeval();
-    el.textContent = n ? "평가 " + n + "건 · 허용 기준(" + CFG.accept + "점) 초과 " + bad + "건" + (bad ? " (개선 완료 " + done + "건" + (still ? ", 개선 후에도 초과 " + still + "건" : "") + ")" : "") : "";
+    el.textContent = n ? "평가 " + n + "건 · 허용 기준(" + accLabel() + ") 초과 " + bad + "건" + (bad ? " (개선 완료 " + done + "건" + (still ? ", 개선 후에도 초과 " + still + "건" : "") + ")" : "") : "";
     var w = [];
     if (noScore) w.push("현재 위험성을 고르지 않은 줄 " + noScore + "건");
     if (noPlan) w.push("허용 기준을 넘는데 감소대책이 비어 있는 줄 " + noPlan + "건");
@@ -906,7 +1018,7 @@
   function secSums(n, bad, warn) {
     function set(k, t, w) { var s = document.querySelector('.sec[data-sec="' + k + '"] .sec-sum'); if (s) { s.textContent = t; s.style.color = w ? "#b45309" : ""; } }
     set(1, [txt($("dispDept")), txt($("evalDate"))].filter(Boolean).join(" · "));
-    set(2, CFG.p + opChar() + CFG.c + " · 허용 " + CFG.accept + "점 이하");
+    set(2, isLv3() ? "3단계 판단법 · 하만 허용" : CFG.p + opChar() + CFG.c + " · 허용 " + CFG.accept + "점 이하");
     if (n != null) set(3, n ? "평가 " + n + "건 · 초과 " + bad + "건" + (warn ? " · 확인할 줄 있음" : "") : "아직 없음", warn);
     var pn = [].filter.call(document.querySelectorAll('#people-tbody [data-pf="name"]'), function (e) { return txt(e); }).length;
     set(4, "참여자 " + pn + "명");
@@ -1137,6 +1249,15 @@
       else { docId = newId(); apply(blankDoc()); }
     } catch (e) { docId = newId(); touched = false; apply(blankDoc()); setStatus("저장된 평가서를 읽지 못해 새 평가서로 시작합니다.", true); }
     updateDocsBtn(); fitScreen();
+    try {
+      var qm = (new URLSearchParams(location.search).get("m") || "").toLowerCase().replace(/[x×*\s]/g, "");
+      var MAPK = { m33: "m33", "33": "m33", m44: "m44", "44": "m44", m54: "m54", "54": "m54", m55: "m55", "55": "m55", lv3: "lv3", "3단계": "lv3" };
+      if (MAPK[qm] && MAPK[qm] !== presetKey()) {
+        // 새 평가서(추천값만 채운 상태)는 바로 바꾸고, 이어서 연 평가서는 바꿀지 먼저 묻는다
+        KIND_QUIET = !touched; var ks0 = $("cfgKind"); ks0.value = MAPK[qm]; ks0.dispatchEvent(new Event("change")); KIND_QUIET = false;
+        if (presetKey() === MAPK[qm]) setStatus("주소에서 고른 평가 기법(" + ks0.options[ks0.selectedIndex].text.split(" —")[0] + ")으로 바꿨습니다. 위 '평가 기법'에서 언제든 바꿀 수 있습니다.");
+      }
+    } catch (e) { KIND_QUIET = false; }
     if (window.MutationObserver) new MutationObserver(function () { if (!apprMute) markTouched(); }).observe($("apprBox"), { childList: true, subtree: true, characterData: true });
     page.addEventListener("input", function (ev) {
       var t = ev.target; if (!t.closest || t.closest("#cfgBox") || t.closest("#apprBox")) return;
