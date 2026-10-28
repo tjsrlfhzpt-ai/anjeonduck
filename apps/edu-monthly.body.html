@@ -1,7 +1,7 @@
 <section class="phead no-print"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>월별 정기교육 자료</p>
   <h1>월별 정기 안전보건교육 자료</h1>
-  <p>달마다 계절과 사고 유형에 맞춘 <strong>근로자 정기교육 자료 12편</strong>입니다. 달을 고르고 회사·교육일시를 넣으면 교육 개요, 핵심 내용, 관련 법 기준, 현장 점검표, OX 퀴즈, 참석자 서명부까지 A4로 인쇄됩니다. 교육 때는 <strong>발표 화면</strong>으로 띄워 바로 진행할 수 있습니다.</p>
+  <p>달마다 계절과 사고 유형에 맞춘 <strong>근로자 정기교육 자료 12편</strong>입니다. 달을 고르고 회사·교육일시를 넣으면 교육 개요, 핵심 내용, 관련 법 기준, 현장 점검표, 참석자 서명부까지 A4로 인쇄됩니다(필요하면 이해도 확인 퀴즈도 넣을 수 있습니다). 교육 때는 <strong>발표 화면</strong>으로 띄워 바로 진행할 수 있습니다.</p>
 </div></section>
 <div class="wrap layout-detail em-layout no-print">
   <section class="col-main stack">
@@ -31,12 +31,12 @@
         <label><input type="checkbox" data-o="sec" checked> 핵심 내용</label>
         <label><input type="checkbox" data-o="law" checked> 관련 법 기준</label>
         <label><input type="checkbox" data-o="check" checked> 현장 점검표</label>
-        <label><input type="checkbox" data-o="quiz" checked> OX 퀴즈</label>
+        <label><input type="checkbox" data-o="quiz"> 이해도 확인 퀴즈 <span class="muted">(선택)</span></label>
         <label><input type="checkbox" data-o="talk" checked> 함께 이야기하기</label>
         <label><input type="checkbox" data-o="sign" checked> 참석자 서명부</label>
       </div>
       <div class="grid3">
-        <label class="field"><span class="label">퀴즈 정답</span><select class="sort" id="emAns" style="width:100%"><option value="end">맨 뒤에 따로 (문제지로 쓰기)</option><option value="in">문제 바로 아래</option><option value="none">넣지 않기</option></select></label>
+        <label class="field" id="emAnsF"><span class="label">퀴즈 정답</span><select class="sort" id="emAns" style="width:100%"><option value="end">맨 뒤에 따로 (문제지로 쓰기)</option><option value="in">문제 바로 아래</option><option value="none">넣지 않기</option></select></label>
         <label class="field"><span class="label">서명부 칸 수</span><select class="sort" id="emRows" style="width:100%"><option>10</option><option selected>20</option><option>30</option><option>40</option><option>60</option></select></label>
       </div>
       <label class="field"><span class="label">우리 사업장 이야기 (선택 · 지난달 사고·아차사고, 개선 결과, 공지)</span><textarea id="emOwn" rows="3" maxlength="800" placeholder="예: 지난달 포장라인 컨베이어 청소 중 손이 말려 들어갈 뻔한 아차사고가 있었습니다. 청소 전 정지·잠금 절차를 다시 정했습니다."></textarea></label>
@@ -196,8 +196,9 @@
   try { st = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { st = null; }
   if (!st || typeof st !== "object") st = {};
   var defs = { m: new Date().getMonth() + 1, co: profileCo(), date: today(), start: "14:00", hrs: "2", place: "", target: "", lectT: "안전관리자", lect: "", how: "집체교육",
-    o: { goal: 1, sec: 1, law: 1, check: 1, quiz: 1, talk: 1, sign: 1 }, ans: "end", rows: "20", own: {}, ed: {}, view: "m" };
+    o: { goal: 1, sec: 1, law: 1, check: 1, quiz: 0, talk: 1, sign: 1 }, ans: "end", rows: "20", own: {}, ed: {}, view: "m" };
   Object.keys(defs).forEach(function (k) { if (st[k] == null) st[k] = defs[k]; });
+  if (!st.v) { st.o.quiz = 0; st.v = 2; } // 2026-10-28: 퀴즈는 기본 빼기(선택)
   var saveT = null;
   function save() { clearTimeout(saveT); saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }, 250); }
   function M() { return D.months[(st.m - 1 + 12) % 12]; }
@@ -314,6 +315,7 @@
     $("emPlace").value = st.place; $("emTarget").value = st.target; $("emLectT").value = st.lectT; $("emLect").value = st.lect; $("emHow").value = st.how;
     $("emAns").value = st.ans; $("emRows").value = st.rows; $("emOwn").value = st.own[st.m] || "";
     [].forEach.call(document.querySelectorAll("#emOpts input"), function (c) { c.checked = !!st.o[c.dataset.o]; });
+    $("emAnsF").hidden = !st.o.quiz;
     [].forEach.call(document.querySelectorAll(".em-tabs button"), function (b) { b.setAttribute("aria-selected", String(b.dataset.v === st.view)); });
   }
   function fillHours() {
@@ -357,7 +359,7 @@
     });
   });
   $("emOwn").addEventListener("input", function () { st.own[st.m] = this.value; save(); render(); });
-  $("emOpts").addEventListener("change", function (e) { var c = e.target.closest("input[data-o]"); if (!c) return; st.o[c.dataset.o] = c.checked ? 1 : 0; save(); render(); });
+  $("emOpts").addEventListener("change", function (e) { var c = e.target.closest("input[data-o]"); if (!c) return; st.o[c.dataset.o] = c.checked ? 1 : 0; $("emAnsF").hidden = !st.o.quiz; save(); render(); });
   document.querySelector(".em-tabs").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-v]"); if (!b) return; st.view = b.dataset.v; fillForm(); save(); render();
   });
@@ -397,7 +399,7 @@
     var own = (st.own[st.m] || "").trim();
     if (own) S.push('<div class="em-sl"><div class="k">우리 사업장 이야기</div><h2>우리 현장에서는</h2><p style="white-space:pre-wrap">' + esc(own) + "</p></div>");
     S.push('<div class="em-sl"><div class="k">관련 법 기준</div><h2>법은 이렇게 정합니다</h2><table>' + m.law.map(function (l, i) { return "<tr><th>" + esc(T("law." + i + ".ref", l.ref)) + "</th><td>" + esc(T("law." + i + ".t", l.t)) + "</td></tr>"; }).join("") + "</table></div>");
-    m.quiz.forEach(function (q, i) {
+    if (st.o.quiz) m.quiz.forEach(function (q, i) {
       S.push({ q: true, html: function (r) {
         return '<div class="em-sl"><div class="k">확인 퀴즈 ' + (i + 1) + " / " + m.quiz.length + '</div><div class="qq">' + esc(T("quiz." + i + ".q", q.q)) + '</div><div class="ox"><span class="' + (r && q.a === "O" ? "hit" : "") + '">O</span><span class="' + (r && q.a === "X" ? "hit" : "") + '">X</span></div>' +
           (r ? '<p class="ans">정답 ' + q.a + " · " + esc(T("quiz." + i + ".ex", q.ex)) + "</p>" : '<p class="ans" style="color:#889">한 번 더 누르면 정답이 나옵니다</p>') + "</div>";
