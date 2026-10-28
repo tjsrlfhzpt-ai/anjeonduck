@@ -141,7 +141,8 @@
     "law-ai",
     "rule-sign",
     "top-rules",
-    "gear-cert"
+    "gear-cert",
+    "edu-monthly"
    ],
    "note": ""
   },
@@ -331,7 +332,8 @@
     "ai",
     "law-ai",
     "rule-sign",
-    "top-rules"
+    "top-rules",
+    "edu-monthly"
    ],
    "note": ""
   },
@@ -394,7 +396,8 @@
     "confined",
     "ai",
     "law-ai",
-    "gear-cert"
+    "gear-cert",
+    "edu-monthly"
    ],
    "note": ""
   },

@@ -1,0 +1,438 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>월별 정기교육 자료</p>
+  <h1>월별 정기 안전보건교육 자료</h1>
+  <p>달마다 계절과 사고 유형에 맞춘 <strong>근로자 정기교육 자료 12편</strong>입니다. 달을 고르고 회사·교육일시를 넣으면 교육 개요, 핵심 내용, 관련 법 기준, 현장 점검표, OX 퀴즈, 참석자 서명부까지 A4로 인쇄됩니다. 교육 때는 <strong>발표 화면</strong>으로 띄워 바로 진행할 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail em-layout no-print">
+  <section class="col-main stack">
+    <div class="calc">
+      <h2 class="h-sm">① 달 고르기</h2>
+      <div class="em-months" id="emMonths" role="group" aria-label="교육 월"></div>
+      <p class="em-why" id="emWhy"></p>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">② 교육 정보</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">회사·현장명</span><input type="text" id="emCo" maxlength="40"></label>
+        <label class="field"><span class="label">교육일</span><input type="date" id="emDate"></label>
+        <label class="field"><span class="label">시작 시각</span><input type="time" id="emStart" step="600"></label>
+        <label class="field"><span class="label">교육시간</span><select class="sort" id="emHrs" style="width:100%"><option value="1">1시간</option><option value="2">2시간</option><option value="3">3시간</option><option value="4">4시간</option><option value="0.5">30분</option></select></label>
+        <label class="field"><span class="label">장소</span><input type="text" id="emPlace" maxlength="30" placeholder="예: 2층 교육장"></label>
+        <label class="field"><span class="label">교육 대상</span><input type="text" id="emTarget" maxlength="40" list="emTargetL" placeholder="예: 생산직 전원"><datalist id="emTargetL"><option value="전 직원"><option value="생산·현장직 전원"><option value="사무직 전원"><option value="판매직 전원"><option value="협력업체 포함 전원"></datalist></label>
+        <label class="field"><span class="label">강사 직책</span><input type="text" id="emLectT" maxlength="20" placeholder="예: 안전관리자"></label>
+        <label class="field"><span class="label">강사 이름</span><input type="text" id="emLect" maxlength="20"></label>
+        <label class="field"><span class="label">교육 방법</span><select class="sort" id="emHow" style="width:100%"><option>집체교육</option><option>현장교육</option><option>집체·현장교육</option><option>인터넷 원격교육</option></select></label>
+      </div>
+    </div>
+    <div class="calc">
+      <h2 class="h-sm">③ 넣을 내용</h2>
+      <div class="em-opts" id="emOpts">
+        <label><input type="checkbox" data-o="goal" checked> 교육 목표</label>
+        <label><input type="checkbox" data-o="sec" checked> 핵심 내용</label>
+        <label><input type="checkbox" data-o="law" checked> 관련 법 기준</label>
+        <label><input type="checkbox" data-o="check" checked> 현장 점검표</label>
+        <label><input type="checkbox" data-o="quiz" checked> OX 퀴즈</label>
+        <label><input type="checkbox" data-o="talk" checked> 함께 이야기하기</label>
+        <label><input type="checkbox" data-o="sign" checked> 참석자 서명부</label>
+      </div>
+      <div class="grid3">
+        <label class="field"><span class="label">퀴즈 정답</span><select class="sort" id="emAns" style="width:100%"><option value="end">맨 뒤에 따로 (문제지로 쓰기)</option><option value="in">문제 바로 아래</option><option value="none">넣지 않기</option></select></label>
+        <label class="field"><span class="label">서명부 칸 수</span><select class="sort" id="emRows" style="width:100%"><option>10</option><option selected>20</option><option>30</option><option>40</option><option>60</option></select></label>
+      </div>
+      <label class="field"><span class="label">우리 사업장 이야기 (선택 · 지난달 사고·아차사고, 개선 결과, 공지)</span><textarea id="emOwn" rows="3" maxlength="800" placeholder="예: 지난달 포장라인 컨베이어 청소 중 손이 말려 들어갈 뻔한 아차사고가 있었습니다. 청소 전 정지·잠금 절차를 다시 정했습니다."></textarea></label>
+      <div class="btns"><button type="button" class="btn" id="emPrint">인쇄 · PDF 저장</button><button type="button" class="btn btn-ghost" id="emShow">▶ 발표 화면</button><button type="button" class="btn btn-ghost" id="emReset">처음부터</button></div>
+      <p class="hint">입력값과 미리보기에서 고친 글자는 이 브라우저에만 달별로 기억됩니다(서버에 보내지 않음). 인쇄 창에서 용지 A4, 배율 100%로 맞추세요.</p>
+    </div>
+    <div class="em-tabs" role="tablist" aria-label="미리보기 종류"><button type="button" role="tab" data-v="m" aria-selected="true">이달 교육자료</button><button type="button" role="tab" data-v="y" aria-selected="false">연간 교육계획표</button></div>
+    <p class="hint em-edhint">미리보기 글자를 눌러 바로 고칠 수 있습니다. <button type="button" class="linkbtn" id="emUndo" hidden>이 달에서 고친 글자 되돌리기</button></p>
+    <div class="em-prev" id="emPrevWrap"><div class="em-scale" id="emScale"></div></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">정기교육 시간 기준</h2>
+      <table class="em-hrs" id="emHrsT"></table>
+      <p class="hint" id="emHrsN"></p>
+    </div>
+    <div class="side-box"><h2 class="h-sm">이 자료로 법정 교육내용을 채우려면</h2><ul class="bul hint">
+      <li>근로자 정기교육 내용은 시행규칙 별표 5에 8가지로 정해져 있습니다. 12편은 상반기(1~6월)와 하반기(7~12월) 각각 8가지를 모두 다루도록 짰습니다. 연간 교육계획표에서 확인하세요.</li>
+      <li>남의 사업장 이야기보다 우리 사업장 사고·아차사고 한 건이 더 잘 기억됩니다. '우리 사업장 이야기' 칸을 꼭 채워 보세요.</li>
+      <li>교육 일지(실시 결과)와 서명부는 보관해 두세요. 교육 일지는 아래 작성기에서 만들 수 있습니다.</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">이어서 쓰는 도구</h2><ul class="bul">
+      <li><a href="../edu-log/">안전보건교육 일지·서명부 작성기</a></li>
+      <li><a href="../edu-hours/">법정교육 시간 조회</a></li>
+      <li><a href="../tbm/">TBM 일지 작성기</a></li>
+      <li><a href="../risk/">위험성평가 작성기</a></li>
+      <li><a href="../top-rules/">10대 안전수칙 포스터</a></li>
+    </ul></div>
+  </aside>
+</div>
+<div class="em-print" id="emSheet" aria-hidden="true"></div>
+<div class="em-show" id="emShowBox" hidden role="dialog" aria-modal="true" aria-label="발표 화면">
+  <div class="em-stage" id="emStage"></div>
+  <div class="em-ctl"><button type="button" id="emPrev" aria-label="이전">◀</button><span id="emCount"></span><button type="button" id="emNext" aria-label="다음">▶</button><button type="button" id="emFull" aria-label="전체 화면">⛶</button><button type="button" id="emClose" aria-label="닫기">✕ 닫기</button></div>
+</div>
+<style>
+@media (max-width:1023px){.layout-detail.em-layout .col-side{order:0}}
+.em-months{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.em-months button{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 8px;text-align:left;cursor:pointer;color:inherit;font:inherit;min-height:58px}
+.em-months button b{display:block;font-size:15px}
+.em-months button small{display:block;font-size:12px;color:var(--text-2);line-height:1.3;margin-top:2px;word-break:keep-all}
+.em-months button[aria-pressed=true]{border-color:var(--blue);background:var(--blue-50);box-shadow:0 0 0 1px var(--blue)}
+.em-why{margin:10px 0 0;font-size:14px;color:var(--text-2);line-height:1.55}
+.em-opts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:10px}
+.em-opts label{display:flex;align-items:center;gap:6px;font-size:14.5px;min-height:36px;cursor:pointer}
+.em-opts input{width:18px;height:18px}
+.calc textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14.5px;resize:vertical;background:var(--surface);color:inherit}
+.em-tabs{display:flex;gap:6px}
+.em-tabs button{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:14px;color:var(--text-2);cursor:pointer}
+.em-tabs button[aria-selected=true]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.em-edhint{margin:0}
+.em-prev{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;overflow:hidden}
+.em-scale{transform-origin:top left}
+.em-hrs{width:100%;border-collapse:collapse;font-size:13.5px}
+.em-hrs th,.em-hrs td{border-top:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.em-hrs th{font-weight:600;color:var(--text-2);width:48%}
+.em-hrs td b{display:block}
+/* ---------- 교육자료(종이) */
+.em-doc{width:210mm;box-sizing:border-box;padding:14mm 14mm 16mm;background:#fff;color:#111;font-family:'Pretendard','Noto Sans KR',sans-serif;font-size:10.5pt;line-height:1.55;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.em-doc *{box-sizing:border-box}
+.em-doc h1,.em-doc h2,.em-doc h3{color:#111;letter-spacing:-.01em}
+.em-hd{border-bottom:0.8mm solid #17365D;padding-bottom:3mm;margin-bottom:4mm}
+.em-kick{font-size:10pt;font-weight:800;color:#17365D}
+.em-ttl{font-size:19pt;font-weight:900;line-height:1.25;margin:1mm 0 0;word-break:keep-all}
+.em-co{font-size:10pt;color:#444;margin-top:1mm}
+.em-t{width:100%;border-collapse:collapse;margin:0 0 4mm;font-size:9.8pt}
+.em-t th,.em-t td{border:0.25mm solid #555;padding:1.6mm 2.2mm;vertical-align:top;text-align:left}
+.em-t th{background:#EEF2F7;font-weight:700;white-space:nowrap}
+.em-t .c{text-align:center}
+.em-items{margin:0;padding:0;list-style:none;columns:2;column-gap:5mm}
+.em-items li{break-inside:avoid;font-size:9.4pt;padding-left:5mm;text-indent:-5mm}
+.em-items li::before{content:"☐ ";font-weight:700}
+.em-items li.on::before{content:"☑ "}
+.em-items li:not(.on){color:#777}
+.em-sec{margin:0 0 4mm;break-inside:avoid-page}
+.em-sec h2{font-size:12.5pt;font-weight:900;margin:0 0 1.5mm;padding:1mm 0 1mm 2.5mm;border-left:1.4mm solid #17365D;background:#F3F6FA}
+.em-sec h3{font-size:11pt;font-weight:800;margin:2.5mm 0 1mm}
+.em-sec ul,.em-sec ol{margin:0;padding-left:5.5mm}
+.em-sec ul{list-style:disc}.em-sec ol{list-style:decimal}
+.em-sl ul{list-style:disc}
+.em-sec li{margin:0.6mm 0;word-break:keep-all}
+.em-why2{margin:0 0 1.5mm;color:#333}
+.em-own{border:0.3mm solid #17365D;border-radius:1.5mm;padding:2.5mm 3mm;white-space:pre-wrap;background:#FBFCFE}
+.em-src{font-size:8pt;color:#666;margin:1mm 0 0}
+.em-sec .em-q{list-style:none;padding:0!important;counter-reset:q}
+.em-q li{counter-increment:q;display:grid;grid-template-columns:1fr auto;gap:3mm;align-items:start;border-bottom:0.2mm dashed #bbb;padding:1.2mm 0}
+.em-q li::before{content:counter(q) ".";position:absolute;margin-left:-5mm;font-weight:700}
+.em-q li{position:relative;margin-left:5mm!important}
+.em-ox{white-space:nowrap;font-weight:800;letter-spacing:.3em}
+.em-ox span{display:inline-block;width:6mm;height:6mm;border:0.3mm solid #333;border-radius:50%;text-align:center;line-height:5.6mm;font-size:9pt;letter-spacing:0;margin-left:1mm}
+.em-ex{grid-column:1/-1;font-size:9pt;color:#174A8B;margin:0}
+.em-talk li{margin-bottom:9mm!important}
+.em-sign{break-before:page;page-break-before:always}
+.em-sign-in{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+.em-sign-in .em-t{margin:0}
+.em-sign-in .em-t td{height:9mm;vertical-align:middle}
+.em-sign-ft{display:flex;justify-content:flex-end;gap:10mm;margin-top:5mm;font-size:10pt}
+.em-sign-ft span{display:inline-block;min-width:32mm;border-bottom:0.3mm solid #333;margin-left:2mm}
+.em-key{break-before:page;page-break-before:always}
+.em-key table td:first-child{width:12mm;text-align:center}
+.em-plan .em-t td,.em-plan .em-t th{font-size:9pt}
+.em-mx td.c,.em-mx th.c{text-align:center;padding:1.2mm 0.6mm;font-size:8.6pt}
+.em-mx .y{font-weight:900;color:#17365D}
+[contenteditable]{outline:none;border-radius:1mm}
+.em-scale [contenteditable]:hover{box-shadow:0 0 0 0.4mm rgba(31,111,209,.45)}
+.em-scale [contenteditable]:focus{box-shadow:0 0 0 0.6mm #1F6FD1;background:rgba(31,111,209,.05)}
+.em-print{position:fixed;left:-20000px;top:0;visibility:hidden;pointer-events:none}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(main){display:none!important}
+  main>*:not(.em-print){display:none!important}
+  .em-print{display:block!important;position:static!important;visibility:visible!important}
+  .em-print .em-doc{box-shadow:none;width:auto;padding:0}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+/* ---------- 발표 화면 */
+.em-show{position:fixed;inset:0;z-index:1000;background:#0B1220;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.em-show[hidden]{display:none}
+.em-stage{position:relative;width:min(100vw,calc((100vh - 56px) * 16 / 9));aspect-ratio:16/9;background:#fff;color:#111;overflow:hidden;font-family:'Pretendard','Noto Sans KR',sans-serif;cursor:pointer;container-type:inline-size}
+.em-sl{position:absolute;inset:0;padding:5cqw 6cqw;display:flex;flex-direction:column;gap:2.2cqw}
+.em-sl .k{font-size:1.9cqw;font-weight:800;color:#2C5E9E;letter-spacing:.02em}
+.em-sl h2{font-size:4.2cqw;font-weight:900;line-height:1.2;margin:0;color:#111;word-break:keep-all}
+.em-sl ul{margin:0;padding-left:3cqw;font-size:2.5cqw;line-height:1.5;display:grid;gap:1.3cqw}
+.em-sl li{word-break:keep-all}
+.em-sl p{font-size:2.4cqw;line-height:1.55;margin:0;word-break:keep-all}
+.em-sl.cover{background:#17365D;color:#fff;justify-content:center}
+.em-sl.cover h2{color:#fff;font-size:5.4cqw}
+.em-sl.cover .k{color:#BFD5F3;font-size:2.4cqw}
+.em-sl.cover p{color:#DCE7F6}
+.em-sl table{border-collapse:collapse;font-size:2cqw;width:100%}
+.em-sl td,.em-sl th{border-bottom:0.15cqw solid #ccd;padding:1cqw 1.2cqw;text-align:left;vertical-align:top}
+.em-sl th{white-space:nowrap;color:#17365D;width:36%}
+.em-sl .qq{font-size:3.4cqw;font-weight:800;line-height:1.4;word-break:keep-all}
+.em-sl .ox{display:flex;gap:4cqw;margin-top:2cqw}
+.em-sl .ox span{width:12cqw;height:12cqw;border-radius:50%;border:0.5cqw solid #17365D;display:flex;align-items:center;justify-content:center;font-size:7cqw;font-weight:900;color:#17365D}
+.em-sl .ox span.hit{background:#17365D;color:#fff}
+.em-sl .ans{font-size:2.4cqw;color:#174A8B;font-weight:600}
+.em-sl .pg{position:absolute;right:2.5cqw;bottom:1.8cqw;font-size:1.4cqw;color:#889}
+.em-ctl{height:56px;display:flex;align-items:center;gap:10px;color:#fff;font-size:15px}
+.em-ctl button{min-width:44px;height:40px;border-radius:8px;border:1px solid #445;background:#1B2638;color:#fff;font-size:15px;cursor:pointer;padding:0 12px}
+@media (max-width:640px){.em-months{grid-template-columns:repeat(3,minmax(0,1fr))}.em-months button small{display:none}.em-months button{min-height:44px;text-align:center}}
+</style>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null, H = /*@EDU_HOURS@*/null;
+  if (!D) return;
+  var KEY = "safeplum.edumonthly";
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var WD = ["일", "월", "화", "수", "목", "금", "토"];
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function today() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function profileCo() { try { var p = JSON.parse(localStorage.getItem("safetake.profile") || "{}") || {}; return p.company || localStorage.getItem("safetake.company") || ""; } catch (e) { return ""; } }
+
+  // ---------- 상태
+  var st;
+  try { st = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { st = null; }
+  if (!st || typeof st !== "object") st = {};
+  var defs = { m: new Date().getMonth() + 1, co: profileCo(), date: today(), start: "14:00", hrs: "2", place: "", target: "", lectT: "안전관리자", lect: "", how: "집체교육",
+    o: { goal: 1, sec: 1, law: 1, check: 1, quiz: 1, talk: 1, sign: 1 }, ans: "end", rows: "20", own: {}, ed: {}, view: "m" };
+  Object.keys(defs).forEach(function (k) { if (st[k] == null) st[k] = defs[k]; });
+  var saveT = null;
+  function save() { clearTimeout(saveT); saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }, 250); }
+  function M() { return D.months[(st.m - 1 + 12) % 12]; }
+  function ED() { return st.ed[st.m] || (st.ed[st.m] = {}); }
+  // 고친 글자가 있으면 그것을, 없으면 기본 문안을
+  function T(k, def) { var e = (st.ed[st.m] || {})[k]; return e != null ? e : def; }
+  function E(tag, k, def, cls) { return "<" + tag + (cls ? ' class="' + cls + '"' : "") + ' data-k="' + k + '" contenteditable="true" spellcheck="false">' + esc(T(k, def)) + "</" + tag + ">"; }
+  function P(tag, k, def, cls) { return "<" + tag + (cls ? ' class="' + cls + '"' : "") + ">" + esc(T(k, def)) + "</" + tag + ">"; }
+
+  // ---------- 날짜·시간
+  function when() {
+    var d = st.date ? new Date(st.date + "T00:00:00") : null, s = "";
+    if (d && !isNaN(d)) s = d.getFullYear() + ". " + (d.getMonth() + 1) + ". " + d.getDate() + ".(" + WD[d.getDay()] + ")";
+    var h = parseFloat(st.hrs) || 0;
+    if (st.start && /^\d\d:\d\d$/.test(st.start)) {
+      var a = st.start.split(":"), t = (+a[0]) * 60 + (+a[1]) + Math.round(h * 60);
+      s += " " + st.start + "~" + pad(Math.floor(t / 60) % 24) + ":" + pad(t % 60);
+    }
+    return s + (h ? " (" + (h < 1 ? Math.round(h * 60) + "분" : h + "시간") + ")" : "");
+  }
+  function yearOf() { var y = (st.date || "").slice(0, 4); return /^\d{4}$/.test(y) ? y : String(new Date().getFullYear()); }
+
+  // ---------- 이달 교육자료
+  function docHTML(ed) {
+    var m = M(), o = st.o, X = ed ? E : P, h = "";
+    h += '<div class="em-hd"><div class="em-kick">' + m.m + "월 근로자 정기 안전보건교육</div>" + X("div", "title", m.title, "em-ttl") +
+      (st.co ? '<div class="em-co">' + esc(st.co) + "</div>" : "") + "</div>";
+    var lect = [st.lectT, st.lect].filter(Boolean).join(" ");
+    h += '<table class="em-t"><tr><th>교육과정</th><td>근로자 정기교육</td><th>교육방법</th><td>' + esc(st.how) + "</td></tr>" +
+      "<tr><th>교육일시</th><td colspan=\"3\">" + esc(when()) + "</td></tr>" +
+      "<tr><th>장소</th><td>" + esc(st.place) + "</td><th>강사</th><td>" + esc(lect) + "</td></tr>" +
+      "<tr><th>교육대상</th><td colspan=\"3\">" + esc(st.target) + "</td></tr>" +
+      '<tr><th>교육내용<br><small style="font-weight:500">(시행규칙 별표 5)</small></th><td colspan="3"><ul class="em-items">' +
+      D.items.map(function (it, i) { return '<li class="' + (m.items.indexOf(i) >= 0 ? "on" : "") + '">' + esc(it) + "</li>"; }).join("") + "</ul></td></tr></table>";
+    var n = 0;
+    if (o.goal) {
+      h += '<div class="em-sec"><h2>' + (++n) + ". 이달의 교육 목표</h2>" + X("p", "why", m.why, "em-why2") + "<ul>" +
+        m.goal.map(function (g, i) { return X("li", "goal." + i, g); }).join("") + "</ul></div>";
+    }
+    if (o.sec) m.sec.forEach(function (s, i) {
+      h += '<div class="em-sec"><h2>' + (++n) + ". " + X("span", "sec." + i + ".h", s.h) + "</h2><ul>" +
+        s.b.map(function (b, j) { return X("li", "sec." + i + ".b." + j, b); }).join("") + "</ul></div>";
+    });
+    var own = (st.own[st.m] || "").trim();
+    if (own) h += '<div class="em-sec"><h2>' + (++n) + ". 우리 사업장 이야기</h2><div class=\"em-own\">" + esc(own) + "</div></div>";
+    if (o.law) {
+      h += '<div class="em-sec"><h2>' + (++n) + '. 관련 법 기준</h2><table class="em-t"><tr><th style="width:38%">조문</th><th>요약</th></tr>' +
+        m.law.map(function (l, i) { return "<tr>" + X("td", "law." + i + ".ref", l.ref) + X("td", "law." + i + ".t", l.t) + "</tr>"; }).join("") +
+        '</table><p class="em-src">조문 내용을 쉽게 줄인 것입니다. 정확한 문구는 국가법령정보센터(law.go.kr) 현행 원문을 확인하세요.</p></div>';
+    }
+    if (o.check) {
+      h += '<div class="em-sec"><h2>' + (++n) + '. 우리 작업장 점검</h2><table class="em-t"><tr><th>점검 항목</th><th class="c" style="width:12mm">양호</th><th class="c" style="width:12mm">미흡</th><th style="width:42mm">조치 내용</th></tr>' +
+        m.check.map(function (c, i) { return "<tr>" + X("td", "check." + i, c) + '<td class="c">☐</td><td class="c">☐</td><td></td></tr>'; }).join("") + "</table></div>";
+    }
+    if (o.quiz) {
+      h += '<div class="em-sec"><h2>' + (++n) + '. 확인 퀴즈 <small style="font-weight:600;font-size:9pt">(맞으면 O, 틀리면 X)</small></h2><ol class="em-q">' +
+        m.quiz.map(function (q, i) {
+          return "<li>" + X("span", "quiz." + i + ".q", q.q) + '<span class="em-ox"><span>O</span><span>X</span></span>' +
+            (st.ans === "in" ? '<p class="em-ex"><b>정답 ' + q.a + "</b> · " + X("span", "quiz." + i + ".ex", q.ex) + "</p>" : "") + "</li>";
+        }).join("") + "</ol></div>";
+    }
+    if (o.talk) {
+      h += '<div class="em-sec"><h2>' + (++n) + ". 함께 이야기해 봅시다</h2><ol class=\"em-talk\">" +
+        m.talk.map(function (t, i) { return X("li", "talk." + i, t); }).join("") + "</ol></div>";
+    }
+    if (o.quiz && st.ans === "end") {
+      h += '<div class="em-key"><div class="em-sec"><h2>퀴즈 정답과 해설</h2><table class="em-t"><tr><th class="c">번호</th><th class="c" style="width:12mm">정답</th><th>해설</th></tr>' +
+        m.quiz.map(function (q, i) { return '<tr><td class="c">' + (i + 1) + '</td><td class="c"><b>' + q.a + "</b></td>" + X("td", "quiz." + i + ".ex", q.ex) + "</tr>"; }).join("") + "</table></div></div>";
+    }
+    if (o.sign) {
+      var rows = +st.rows || 20, half = Math.ceil(rows / 2), col = function (from) {
+        var r = '<table class="em-t"><tr><th class="c" style="width:9mm">번호</th><th>소속</th><th>성명</th><th style="width:24mm">서명</th></tr>';
+        for (var i = from; i < from + half && i < rows; i++) r += '<tr><td class="c">' + (i + 1) + "</td><td></td><td></td><td></td></tr>";
+        return r + "</table>";
+      };
+      h += '<div class="em-sign"><div class="em-hd"><div class="em-kick">' + m.m + "월 근로자 정기 안전보건교육</div><div class=\"em-ttl\" style=\"font-size:16pt\">교육 참석자 서명부</div></div>" +
+        '<table class="em-t"><tr><th>교육주제</th><td colspan="3">' + esc(T("title", m.title)) + "</td></tr><tr><th>교육일시</th><td>" + esc(when()) + "</td><th>장소</th><td>" + esc(st.place) + "</td></tr></table>" +
+        '<div class="em-sign-in">' + col(0) + col(half) + "</div>" +
+        '<div class="em-sign-ft"><div>참석 인원 <span></span> 명</div><div>강사 ' + esc(lect) + " <span></span> (서명)</div></div></div>";
+    }
+    return '<div class="em-doc">' + h + "</div>";
+  }
+
+  // ---------- 연간 교육계획표
+  function planHTML() {
+    var y = yearOf(), h = '<div class="em-doc em-plan"><div class="em-hd"><div class="em-kick">' + esc(st.co || "") + "</div><div class=\"em-ttl\">" + y + "년 근로자 정기 안전보건교육 연간 계획</div></div>";
+    h += '<table class="em-t"><tr><th class="c" style="width:13mm;white-space:nowrap">월</th><th>교육 주제</th><th style="width:30mm">교육내용(별표 5)</th><th style="width:20mm">교육일</th><th class="c" style="width:13mm">시간</th><th class="c" style="width:16mm">실시 확인</th></tr>';
+    D.months.forEach(function (m) {
+      var t = (st.ed[m.m] || {}).title || m.title;
+      h += '<tr><td class="c" style="white-space:nowrap">' + m.m + "월</td><td>" + esc(t) + "</td><td>" + m.items.slice().sort(function (a, b) { return a - b; }).map(function (i) { return i + 1; }).join(", ") + "</td><td></td><td class=\"c\"></td><td class=\"c\">☐</td></tr>";
+    });
+    h += "</table>";
+    h += '<div class="em-sec"><h2>교육내용 배분 (상·하반기 각각 8개 항목 모두 포함)</h2><table class="em-t em-mx"><tr><th>교육내용(시행규칙 별표 5 근로자 정기교육)</th>';
+    for (var i = 1; i <= 12; i++) h += '<th class="c">' + i + "</th>";
+    h += "</tr>";
+    D.items.forEach(function (it, k) {
+      h += "<tr><td>" + (k + 1) + ". " + esc(it) + "</td>";
+      D.months.forEach(function (m) { h += '<td class="c' + (m.items.indexOf(k) >= 0 ? " y" : "") + '">' + (m.items.indexOf(k) >= 0 ? "●" : "") + "</td>"; });
+      h += "</tr>";
+    });
+    h += '</table><p class="em-src">교육시간은 근로자 구분에 따라 다릅니다(사무직·판매직 매반기 6시간 이상, 그 밖의 근로자 매반기 12시간 이상 — 시행규칙 별표 4). 상시근로자 50명 미만 도매업·숙박 및 음식점업 등은 2분의 1 이상. 실시 결과는 교육 일지와 서명부로 남겨 두세요.</p></div></div>';
+    return h;
+  }
+
+  // ---------- 화면 채우기
+  function fillMonths() {
+    $("emMonths").innerHTML = D.months.map(function (m) {
+      return '<button type="button" data-m="' + m.m + '" aria-pressed="' + (m.m === st.m) + '"><b>' + m.m + "월</b><small>" + esc(m.short || m.title) + "</small></button>";
+    }).join("");
+    $("emWhy").innerHTML = "<b>" + M().m + "월 · " + esc(M().title) + "</b><br>" + esc(M().why);
+  }
+  function fillForm() {
+    $("emCo").value = st.co; $("emDate").value = st.date; $("emStart").value = st.start; $("emHrs").value = st.hrs;
+    $("emPlace").value = st.place; $("emTarget").value = st.target; $("emLectT").value = st.lectT; $("emLect").value = st.lect; $("emHow").value = st.how;
+    $("emAns").value = st.ans; $("emRows").value = st.rows; $("emOwn").value = st.own[st.m] || "";
+    [].forEach.call(document.querySelectorAll("#emOpts input"), function (c) { c.checked = !!st.o[c.dataset.o]; });
+    [].forEach.call(document.querySelectorAll(".em-tabs button"), function (b) { b.setAttribute("aria-selected", String(b.dataset.v === st.view)); });
+  }
+  function fillHours() {
+    var rows = [];
+    if (H && H.sections) {
+      var w = H.sections.filter(function (s) { return s.id === "worker"; })[0], sv = H.sections.filter(function (s) { return s.id === "supervisor"; })[0];
+      (w ? w.rows : []).filter(function (r) { return r.course.indexOf("정기") >= 0; }).forEach(function (r) {
+        var hh = parseFloat((r.hours.match(/(\d+)시간/) || [])[1]) || 0;
+        var lb = r.target.replace(/^\d\)\s*/, "").replace(/^그 밖의 근로자 — (가|나)\)\s*/, "");
+        if (/외의 근로자$/.test(lb)) lb = "그 밖의 근로자 (생산·현장직 등)"; else if (/^판매/.test(lb)) lb = "판매업무 직접 종사자";
+        rows.push([lb, r.hours, hh ? "매월 하면 " + (hh / 6) + "시간" : ""]);
+      });
+      (sv ? sv.rows : []).filter(function (r) { return r.course.indexOf("정기") >= 0; }).forEach(function (r) { rows.push(["관리감독자", r.hours, "분기마다 하면 4시간"]); });
+      $("emHrsN").textContent = (w && w.notes && w.notes[2] ? "상시근로자 50명 미만 도매업, 숙박 및 음식점업 등은 위 시간의 2분의 1 이상입니다. " : "") + "출처: " + (H.source || "시행규칙 별표 4") + " · 확인 " + (H.checked || "");
+    }
+    $("emHrsT").innerHTML = rows.map(function (r) { return "<tr><th>" + esc(r[0]) + "</th><td><b>" + esc(r[1]) + "</b>" + esc(r[2]) + "</td></tr>"; }).join("");
+  }
+
+  var editing = false, renderT = null;
+  function render() { if (editing) return; clearTimeout(renderT); renderT = setTimeout(doRender, 40); }
+  function doRender() {
+    var wrap = $("emPrevWrap"), sc = $("emScale");
+    sc.innerHTML = st.view === "y" ? planHTML() : docHTML(true);
+    var pg = sc.firstChild, w = pg.offsetWidth, hh = pg.offsetHeight, k = Math.min(1, (wrap.clientWidth - 28) / w);
+    sc.style.transform = "scale(" + k + ")"; sc.style.width = w + "px"; sc.style.height = hh * k + "px";
+    $("emUndo").hidden = st.view === "y" || !Object.keys(st.ed[st.m] || {}).length;
+    document.querySelector(".em-edhint").hidden = st.view === "y";
+  }
+
+  // ---------- 입력
+  $("emMonths").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-m]"); if (!b) return;
+    st.m = +b.dataset.m; st.view = "m"; fillMonths(); fillForm(); save(); render();
+  });
+  var F = { emCo: "co", emDate: "date", emStart: "start", emHrs: "hrs", emPlace: "place", emTarget: "target", emLectT: "lectT", emLect: "lect", emHow: "how", emAns: "ans", emRows: "rows" };
+  Object.keys(F).forEach(function (id) {
+    $(id).addEventListener("input", function () {
+      st[F[id]] = this.value;
+      if (id === "emDate" && /^\d{4}-\d\d-\d\d$/.test(this.value)) { var mm = +this.value.slice(5, 7); if (mm !== st.m) { st.m = mm; fillMonths(); $("emOwn").value = st.own[st.m] || ""; } }
+      save(); render();
+    });
+  });
+  $("emOwn").addEventListener("input", function () { st.own[st.m] = this.value; save(); render(); });
+  $("emOpts").addEventListener("change", function (e) { var c = e.target.closest("input[data-o]"); if (!c) return; st.o[c.dataset.o] = c.checked ? 1 : 0; save(); render(); });
+  document.querySelector(".em-tabs").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-v]"); if (!b) return; st.view = b.dataset.v; fillForm(); save(); render();
+  });
+  $("emUndo").addEventListener("click", function () { if (!confirm(st.m + "월 자료에서 미리보기로 고친 글자를 모두 처음 문안으로 되돌릴까요?")) return; delete st.ed[st.m]; save(); render(); });
+  $("emReset").addEventListener("click", function () { if (!confirm("입력한 내용과 고친 글자를 모두 지우고 처음 상태로 돌릴까요?")) return; try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+
+  // 미리보기에서 바로 고치기 — 줄바꿈 없이 한 줄 글로 저장
+  var sc = $("emScale");
+  sc.addEventListener("input", function (e) {
+    var el = e.target.closest("[data-k]"); if (!el) return;
+    var v = el.innerText.replace(/\s*\n+\s*/g, " ").trim(), k = el.dataset.k;
+    ED()[k] = v;
+    // 같은 글이 두 군데(퀴즈 해설 등)에 있으면 함께 맞춘다
+    [].forEach.call(sc.querySelectorAll('[data-k="' + k + '"]'), function (x) { if (x !== el) x.textContent = v; });
+    $("emUndo").hidden = false; save();
+  });
+  sc.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.closest("[contenteditable]")) { e.preventDefault(); e.target.blur(); } });
+  sc.addEventListener("paste", function (e) { if (!e.target.closest("[contenteditable]")) return; e.preventDefault(); var t = (e.clipboardData || window.clipboardData).getData("text").replace(/\s+/g, " "); document.execCommand("insertText", false, t); });
+  sc.addEventListener("focusin", function () { editing = true; });
+  sc.addEventListener("focusout", function () { editing = false; setTimeout(function () { if (!sc.contains(document.activeElement)) render(); }, 0); });
+
+  // ---------- 인쇄
+  function fillSheet() { $("emSheet").innerHTML = st.view === "y" ? planHTML() : docHTML(false); }
+  window.addEventListener("beforeprint", fillSheet);
+  $("emPrint").addEventListener("click", function () { fillSheet(); window.print(); });
+  window.addEventListener("resize", render);
+
+  // ---------- 발표 화면
+  var slides = [], cur = 0, reveal = false;
+  function buildSlides() {
+    var m = M(), S = [], lect = [st.lectT, st.lect].filter(Boolean).join(" ");
+    S.push('<div class="em-sl cover"><div class="k">' + m.m + "월 근로자 정기 안전보건교육" + (st.co ? " · " + esc(st.co) : "") + "</div><h2>" + esc(T("title", m.title)) + "</h2><p>" + esc(when()) + (lect ? " · 강사 " + esc(lect) : "") + "</p></div>");
+    S.push('<div class="em-sl"><div class="k">이달의 교육 목표</div><h2>오늘 꼭 가져갈 두 가지</h2><p>' + esc(T("why", m.why)) + "</p><ul>" + m.goal.map(function (g, i) { return "<li>" + esc(T("goal." + i, g)) + "</li>"; }).join("") + "</ul></div>");
+    m.sec.forEach(function (s, i) {
+      S.push('<div class="em-sl"><div class="k">' + (i + 1) + " / " + m.sec.length + "</div><h2>" + esc(T("sec." + i + ".h", s.h)) + "</h2><ul>" + s.b.map(function (b, j) { return "<li>" + esc(T("sec." + i + ".b." + j, b)) + "</li>"; }).join("") + "</ul></div>");
+    });
+    var own = (st.own[st.m] || "").trim();
+    if (own) S.push('<div class="em-sl"><div class="k">우리 사업장 이야기</div><h2>우리 현장에서는</h2><p style="white-space:pre-wrap">' + esc(own) + "</p></div>");
+    S.push('<div class="em-sl"><div class="k">관련 법 기준</div><h2>법은 이렇게 정합니다</h2><table>' + m.law.map(function (l, i) { return "<tr><th>" + esc(T("law." + i + ".ref", l.ref)) + "</th><td>" + esc(T("law." + i + ".t", l.t)) + "</td></tr>"; }).join("") + "</table></div>");
+    m.quiz.forEach(function (q, i) {
+      S.push({ q: true, html: function (r) {
+        return '<div class="em-sl"><div class="k">확인 퀴즈 ' + (i + 1) + " / " + m.quiz.length + '</div><div class="qq">' + esc(T("quiz." + i + ".q", q.q)) + '</div><div class="ox"><span class="' + (r && q.a === "O" ? "hit" : "") + '">O</span><span class="' + (r && q.a === "X" ? "hit" : "") + '">X</span></div>' +
+          (r ? '<p class="ans">정답 ' + q.a + " · " + esc(T("quiz." + i + ".ex", q.ex)) + "</p>" : '<p class="ans" style="color:#889">한 번 더 누르면 정답이 나옵니다</p>') + "</div>";
+      } });
+    });
+    S.push('<div class="em-sl"><div class="k">함께 이야기해 봅시다</div><h2>우리 작업장은 어떤가요?</h2><ul>' + m.talk.map(function (t, i) { return "<li>" + esc(T("talk." + i, t)) + "</li>"; }).join("") + "</ul></div>");
+    S.push('<div class="em-sl cover"><div class="k">' + m.m + "월 정기교육</div><h2>오늘 배운 것, 오늘 현장에서 지킵시다</h2><p>참석자 서명부에 서명해 주세요.</p></div>");
+    return S;
+  }
+  function paint() {
+    var s = slides[cur], html = typeof s === "string" ? s : s.html(reveal);
+    $("emStage").innerHTML = html.replace(/<\/div>$/, '<span class="pg">' + (cur + 1) + " / " + slides.length + "</span></div>");
+    $("emCount").textContent = (cur + 1) + " / " + slides.length;
+  }
+  function go(d) {
+    var s = slides[cur];
+    if (d > 0 && typeof s !== "string" && s.q && !reveal) { reveal = true; return paint(); }
+    var n = Math.max(0, Math.min(slides.length - 1, cur + d)); if (n === cur && d > 0) return;
+    cur = n; reveal = false; paint();
+  }
+  function openShow() { slides = buildSlides(); cur = 0; reveal = false; $("emShowBox").hidden = false; document.body.style.overflow = "hidden"; paint(); $("emNext").focus(); }
+  function closeShow() { $("emShowBox").hidden = true; document.body.style.overflow = ""; if (document.fullscreenElement) document.exitFullscreen().catch(function () {}); $("emShow").focus(); }
+  $("emShow").addEventListener("click", openShow);
+  $("emClose").addEventListener("click", closeShow);
+  $("emPrev").addEventListener("click", function () { go(-1); });
+  $("emNext").addEventListener("click", function () { go(1); });
+  $("emFull").addEventListener("click", function () { var b = $("emShowBox"); if (!document.fullscreenElement && b.requestFullscreen) b.requestFullscreen().catch(function () {}); else if (document.exitFullscreen) document.exitFullscreen().catch(function () {}); });
+  $("emStage").addEventListener("click", function (e) { var r = this.getBoundingClientRect(); go(e.clientX - r.left < r.width * 0.3 ? -1 : 1); });
+  document.addEventListener("keydown", function (e) {
+    if ($("emShowBox").hidden) return;
+    if (e.key === "Escape") closeShow();
+    else if (e.key === "ArrowRight" || e.key === "PageDown" || (e.key === " " && !e.target.closest("button"))) { e.preventDefault(); go(1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(-1); }
+  });
+
+  fillMonths(); fillForm(); fillHours(); render();
+})();
+</script>
