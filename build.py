@@ -1510,7 +1510,7 @@ def writer_groups(site, groups, forms):
     """[(묶음 이름, [('tool', t) | ('form', f)])]. 같은 id 의 전용 작성기가 있으면 서식 카드는 빼고 전용 작성기만 보인다."""
     tools = {t["id"]: t for t in site.get("free_tools", []) if t.get("cat") == "작성기"}
     dup = set(tools) & {f["id"] for f in forms}
-    out = [(WRITER_LEAD[0], [("tool", tools[i]) for i in WRITER_LEAD[1] if i in tools])]
+    out = [(WRITER_LEAD[0], [("tool", tools[i]) for i in WRITER_LEAD[1] if i in tools] + [("form", f) for f in forms if f["group"] == WRITER_LEAD[0]])]
     used = set(WRITER_LEAD[1])
     for g in groups:
         items = [("tool", tools[i]) for i in WRITER_TOOLS_IN.get(g, []) if i in tools]
