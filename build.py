@@ -1296,12 +1296,39 @@ def term_txt(j):
     return re.sub(r"\((.+)\)$", r", \1", t) if t.count("(") == 1 and t.endswith(")") and not t.startswith("(") else t
 
 
+CAREER_CHIPS = ["신입 가능", "경력직", "경력무관"]
+EDU_ORDER = ["학력무관", "고졸↑", "초대졸↑", "대졸↑", "석사↑"]
+
+
+def career_tags(j):
+    """경력 필터용 값(여러 개). 신입 가능 = 신입·신입·경력·경력무관, 년수는 요구 최소 년수(예: 경력 3년↑, 4~10년은 4년↑)."""
+    c, d = j.get("career") or "", career_txt(j)
+    t = []
+    if "신입" in c or c == "경력무관":
+        t.append("신입 가능")
+    if "경력" in c and c != "경력무관":
+        t.append("경력직")
+    if c == "경력무관":
+        t.append("경력무관")
+    m = re.search(r"(\d+)\s*(?:년|~)", d)
+    if m:
+        t.append(f"경력 {int(m.group(1))}년↑")
+    return t
+
+
+def career_chip_vals(jobs):
+    allt = {t for j in jobs for t in career_tags(j)}
+    yrs = sorted((t for t in allt if t not in CAREER_CHIPS), key=lambda t: int(re.search(r"\d+", t).group()))
+    return [t for t in CAREER_CHIPS if t in allt] + yrs
+
+
 def job_row(j, rel_root, compact=False):
     tags = "".join(f'<span class="tag tag-job">{e(x)}</span>' for x in j["jobs_list"])
     tags += "".join(f'<span class="tag">{e(v)}</span>' for v in (career_txt(j), j.get("education"), (j.get("employment") or "") + (f" · {j['term']}" if j.get("term") else "")) if v)
     loc = " · ".join(x for x in [j.get("company"), j.get("region")] if x)
     attrs = (f'data-item data-job="{e("|".join(j["jobs_list"]))}" '
              f'data-ctype="{e(j.get("company_type",""))}" data-industry="{e(j.get("industry",""))}" '
+             f'data-emp="{e(j.get("employment",""))}" data-career="{e("|".join(career_tags(j)))}" data-edu="{e(j.get("education",""))}" '
              f'data-deadline="{e(j.get("deadline",""))}" data-posted="{e(j.get("posted",""))}" '
              f'data-text="{e(" ".join(str(j.get(k,"")) for k in ("title","company","region","job","industry","company_type","career","career_detail","education","employment")))}"')
     meta = " · ".join(x for x in [j.get("company_type"), j.get("group"), j.get("industry")] if x)
@@ -1330,7 +1357,7 @@ def jobs_today_text(site, jobs, today):
     d = dt.date.fromisoformat(today)
     pick = jobs_today_pick(jobs, today)
     out = [f"🔥 오늘의 안전·보건 채용 ({d.month}월 {d.day}일 · 마감 전 {len(pick)}건)",
-           "대기업·공공기관·외국계·중견기업 공고만 골라 매일 아침 올립니다.",
+           "대기업·공공기관·외국계·중견기업 등 주요 기관의 안전·보건 공고 중 마감 전 공고를 모았습니다.",
            f"👉 전체 보기: {base}/jobs/today/", ""]
     for sec in TODAY_SECTORS + ["기타"]:
         items = [j for j in pick if (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]
@@ -1387,7 +1414,7 @@ def jobs_today_body(site, jobs, today):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">채용정보</a><span>/</span>오늘의 채용 모음</p>
   <h1>오늘의 안전·보건 채용 <span class="muted">{d.month}월 {d.day}일</span></h1>
-  <p>대기업·공공기관·외국계·중견기업의 안전관리자·보건관리자·EHS 공고 중 <b>마감 전 {len(pick)}건</b>을 업종별로 모았습니다. 매일 아침 갱신되고, 마감된 공고는 자동으로 빠집니다.</p>
+  <p>대기업·공공기관·외국계·중견기업 등의 안전관리자·보건관리자·EHS 공고 중 <b>마감 전 {len(pick)}건</b>을 업종별로 모았습니다(협회·공제회 등 공공 성격 기관 포함). 마감일이 지난 공고는 매일 아침 목록에서 자동으로 빠지고, 새 공고는 SafePlum이 확인한 뒤 추가합니다.</p>
 </div></section>
 <div class="wrap layout-detail">
   <article class="col-main">{job_info_html(site, "job-no")}{secs or empty_box("오늘 모을 공고가 없습니다.")}</article>
@@ -2954,7 +2981,10 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 
     if jobs:
         filters = (filter_group("job", vals("job", True), "직무") + filter_group("ctype", vals("company_type"), "기업분류")
-                   + filter_group("industry", vals("industry"), "업종"))
+                   + filter_group("industry", vals("industry"), "업종")
+                   + filter_group("emp", [v for v in ("정규직", "계약직") if v in vals("employment")] + [v for v in vals("employment") if v not in ("정규직", "계약직")], "고용형태")
+                   + filter_group("career", career_chip_vals(jobs), "경력")
+                   + filter_group("edu", [v for v in EDU_ORDER if v in vals("education")], "학력"))
         main = f"""
     <div class="listbar">
       <div class="search-inline">
@@ -2986,7 +3016,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 </div></section>
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
-  <section class="col-list">{job_info_html(site, "job-no")}<a class="job-today" href="today/"><b>오늘의 채용 모음</b> 대기업·공공기관·외국계·중견기업 마감 전 공고만 업종별로 보기 →</a>{chat_banner()}
+  <section class="col-list">{job_info_html(site, "job-no")}<a class="job-today" href="today/"><b>오늘의 채용 모음</b> 대기업·공공기관·외국계·중견기업 등 마감 전 주요 공고를 업종별로 보기 →</a>{chat_banner()}
     {'<p class="job-member"><b>우리 회사 공고를 직접 올릴 수 있습니다.</b> 회원이면 누구나 무료로 등록합니다. <a class="btn btn-sm" href="../board/?b=job">회원 채용공고 보기 · 등록</a></p>' if JOB_POST else '<p class="job-member"><b>회원 채용공고 등록은 현재 준비 중입니다.</b> 준비가 끝나면 다시 열겠습니다. <a class="btn btn-sm btn-ghost" href="../board/?b=job">회원 채용공고 보기</a></p>'}
     {main}
     {f'<div class="more-box"><p>다른 채용 사이트에서 더 찾기</p><div class="jchips">{job_chips}</div></div>' if jobs else ''}
@@ -3055,7 +3085,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 
     # ---- 오늘의 채용 모음(카카오톡 오픈채팅 공유용): 대기업·공공·외국계·중견 공고 중 마감 전, 업종별
     write("jobs/today/index.html", page(site, "../../", "jobs/today/", "오늘의 안전·보건 채용 모음", jobs_today_body(site, jobs, today),
-                                        desc="대기업·공공기관·외국계·중견기업의 안전관리자·보건관리자·EHS 채용 중 마감 전 공고를 업종별로 모았습니다. 매일 아침 갱신.", active="jobs/"))
+                                        desc="대기업·공공기관·외국계·중견기업 등의 안전관리자·보건관리자·EHS 채용 중 마감 전 공고를 업종별로 모았습니다.", active="jobs/"))
 
     # ---- 서식·자료
     CAT_ORDER = ["법정 서식", "웹 작성 서식", "무료 작성 도구", "법정 기준표(별표)", "고시·지침", "공단 자료", "Mallo 서식", "기관·행정용"]

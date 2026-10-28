@@ -128,7 +128,8 @@
   var countEl = document.querySelector("[data-count]");
   var emptyEl = document.querySelector("[data-empty]");
   var sortEl = document.querySelector(".sort");
-  var ATTR = { job: "data-job", ctype: "data-ctype", industry: "data-industry", cat: "data-cat", topic: "data-topic" };
+  var ATTR = { job: "data-job", ctype: "data-ctype", industry: "data-industry", emp: "data-emp", career: "data-career", edu: "data-edu", cat: "data-cat", topic: "data-topic" };
+  var MULTI = { job: 1, career: 1 }; // 한 항목에 값이 여러 개(| 구분)
   var pageSize = list ? +(list.getAttribute("data-page-size") || 0) : 0, limit = pageSize;
   var moreWrap = document.querySelector("[data-more-wrap]"), moreBtn = document.querySelector("[data-more]");
 
@@ -151,7 +152,7 @@
       Object.keys(sel).forEach(function (k) {
         if (!ok || !sel[k]) return;
         var v = it.getAttribute(ATTR[k]) || "";
-        ok = k === "job" ? v.split("|").indexOf(sel[k]) >= 0 : v === sel[k];
+        ok = MULTI[k] ? v.split("|").indexOf(sel[k]) >= 0 : v === sel[k];
       });
       if (ok && hideClosed && hideClosed.checked && it.classList.contains("closed")) ok = false;
       if (ok && onlyFav && onlyFav.checked && favs.indexOf(it.getAttribute("data-id")) < 0) ok = false;
@@ -204,7 +205,7 @@
       var t = qh.querySelector(".qhead-t"); t.textContent = "";
       var b = document.createElement("span"); b.className = "qhead-k"; b.textContent = parts.join(" · ");
       var n = document.createElement("strong"); n.textContent = shown;
-      t.appendChild(b); t.appendChild(document.createTextNode(raw ? " 검색 결과 " : " 자료 "));
+      t.appendChild(b); t.appendChild(document.createTextNode(raw ? " 검색 결과 " : (list && list.classList.contains("jlist") ? " 공고 " : " 자료 ")));
       t.appendChild(n); t.appendChild(document.createTextNode("건"));
     }
     document.title = on && arrived ? parts.join(" · ") + " 검색 결과 — " + baseTitle : baseTitle;
@@ -219,7 +220,7 @@
       if (base && onlyFav && onlyFav.checked && favs.indexOf(it.getAttribute("data-id")) < 0) base = false;
       return base ? it : null;
     }).filter(Boolean);
-    function has(it, k, v) { var x = it.getAttribute(ATTR[k]) || ""; return k === "job" ? x.split("|").indexOf(v) >= 0 : x === v; }
+    function has(it, k, v) { var x = it.getAttribute(ATTR[k]) || ""; return MULTI[k] ? x.split("|").indexOf(v) >= 0 : x === v; }
     document.querySelectorAll("[data-filter]").forEach(function (g) {
       var k = g.getAttribute("data-filter"); if (!ATTR[k]) return;
       var rest = items.filter(function (it) { return Object.keys(sel).every(function (o) { return o === k || !sel[o] || has(it, o, sel[o]); }); });
@@ -321,7 +322,7 @@
     var pq = new URLSearchParams(location.search).get("q");
     if (pq && q) { q.value = pq; arrived = true; }
     var sp = new URLSearchParams(location.search);
-    ["topic", "cat"].forEach(function (k) {
+    ["topic", "cat", "emp", "career", "edu"].forEach(function (k) {
       var v = sp.get(k), g = document.querySelector('[data-filter="' + k + '"]');
       if (!v || !g) return;
       if (!g.querySelector('.chip[data-value="' + v.replace(/["\\]/g, "") + '"]')) return; // 없는 값이면 전체로 둔다
