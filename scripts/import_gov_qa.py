@@ -59,7 +59,12 @@ def tidy(s):
 
 def topic(t, q):
     txt = t + " " + q[:300]
+    head = t + " " + q[:150]  # PSM·유해위험방지계획서는 앞부분에 나올 때만(본문 뒤쪽에 지나가듯 나온 글은 다른 주제로)
     for name, kws in TOPICS:
+        if name in ("공정안전보고서(PSM)", "유해위험방지계획서"):
+            if any(k in head for k in kws):
+                return name
+            continue
         if any(k in txt for k in kws):
             return name
     return "기타"

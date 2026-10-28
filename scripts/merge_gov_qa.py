@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def src_name(s):
     s = re.sub(r"\.(pdf|hwp|hwpx)$", "", (s or "").strip(), flags=re.I)
-    s = re.sub(r"^\(\d{6}\)\s*", "", s)
+    s = re.sub(r"^\(\d{6,8}\)\s*", "", s)
     s = re.sub(r"^\((고용노동부)\)\s*", "", s)
     s = s.replace("산압언전보건법", "산업안전보건법")   # 원 파일명의 오타
     s = re.sub(r"\s*\d{4}년\s*개정판\(최종\)", "", s)
