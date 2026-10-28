@@ -2876,7 +2876,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
             return "".join(f"<li>{e(x.strip())}</li>" for x in str(v or "").split("|") if x.strip())
         dl = str(j.get("deadline", "") or "")
         rows = [("기업분류", j.get("company_type")), ("업종", j.get("industry")), ("직무", " · ".join(j["jobs_list"])),
-                ("근무지", j.get("region")), ("경력", j.get("career")), ("고용형태", j.get("employment")),
+                ("근무지", j.get("region")), ("근무지 주소", j.get("address")), ("경력", j.get("career")), ("고용형태", j.get("employment")),
                 ("채용인원", f'{j["headcount"]:g}명' if isinstance(j.get("headcount"), (int, float)) and j["headcount"] else ""),
                 ("NCS 직무", j.get("ncs")),
                 ("등록일", fmt_date(j.get("posted")) if j.get("posted") else "")]
@@ -2903,6 +2903,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     {f'<section class="block"><h2>주요 업무</h2><ul class="bul">{duties}</ul></section>' if duties else ''}
     {f'<section class="block"><h2>자격 요건</h2><ul class="bul">{reqs}</ul></section>' if reqs else ''}
     {'<p class="src-note">이 공고는 채용 기업이 SafePlum에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
+    {'<p class="src-note">' + e(j.get('source_name') or '채용 사이트') + '에 게시된 공고 중 안전·보건 직무를 SafePlum 운영자가 골라 기본 정보(회사·근무지·경력·마감일)만 옮기고 원문으로 연결했습니다. 담당 업무·자격요건·급여·지원 방법은 원문에서 확인하세요. SafePlum은 채용을 알선하지 않습니다.</p>' if j.get('origin') == 'curated' else ''}
     <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''} · 조건과 일정은 원문이 우선합니다.</p>
   </article>
   <aside class="col-side">
