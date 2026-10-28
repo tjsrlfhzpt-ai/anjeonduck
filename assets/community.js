@@ -8,6 +8,10 @@
   var PAGE = root.dataset.page, REL = CFG.root || "../", PER = 20;
   var BOARDS = { free: "커뮤니티", qna: "Q&A", job: "채용공고" };
   // 회원 채용공고 등록을 열어 둘지(config/site.json features.job_posting). 닫혀 있어도 이미 올라온 공고의 열람·수정·삭제는 된다.
+  // 자료 공유(커뮤니티 분류): 업종을 제목 앞 [업종]으로 붙여 제목 검색으로 모아 본다(DB 변경 없이). '제조-'로 시작하면 제조업 전체에 묶인다.
+  var SHARE_CAT = "자료 공유";
+  var SHARE_INDS = ["건설", "제조-기계·금속", "제조-전기·전자·반도체", "제조-화학·고무·플라스틱", "제조-식품", "제조-기타", "조선·해양", "농림·축산·어업", "물류·운수·배달", "서비스·유통·돌봄", "폐기물·수처리", "업종 공통"];
+  var SHARE_RE = /^\[([^\]]{1,20})\]\s*/;
   var JOB_POST = CFG.jobPost !== false, JOB_PAUSED = "채용공고 등록은 현재 준비 중입니다. 준비가 끝나면 다시 열겠습니다.";
   var ERR = {
     LOGIN_REQUIRED: "로그인이 필요합니다.", RATE_LIMIT: "너무 빠르게 연속으로 등록했습니다. 잠시 뒤 다시 시도하세요.",
@@ -288,7 +292,12 @@
         p > 1 ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p - 1 }) }, "← 이전") : null,
         h("span", null, p + " / " + pages), p < pages ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p + 1 }) }, "다음 →") : null) : null;
       var jobLink = job && CFG.jobsOpen ? h("a", { class: "job-today", href: REL + "jobs/" }, h("b", null, "SafePlum이 고른 채용공고 " + CFG.jobsOpen + "건"), " 대기업·공공기관·중견기업 안전·보건 공고 보기 →") : null;
-      show(tabs(b), jobLink, job ? chatBox() : null, filter, empty || list, pager,
+      var shareBar = b === "free" && cat === SHARE_CAT ? h("div", { class: "cm-filter cm-share" },
+        h("p", { class: "cm-share-t" }, h("b", null, "현장에서 직접 만든 자료를 나눠요."), " 양식·체크리스트·교육자료·개선 사례를 업종별로 모아 봅니다."),
+        h("div", { class: "chips" }, [h("a", { class: "chip", href: url("", { b: b, c: cat }), "aria-current": !kw ? "true" : null }, "모든 업종"),
+          h("a", { class: "chip", href: url("", { b: b, c: cat, q: "[제조-" }), "aria-current": kw === "[제조-" ? "true" : null }, "제조업 전체")].concat(
+          SHARE_INDS.map(function (v) { var k = "[" + v + "]"; return h("a", { class: "chip", href: url("", { b: b, c: cat, q: k }), "aria-current": kw === k ? "true" : null }, v.replace(/^제조-/, "제조 · ")); })))) : null;
+      show(tabs(b), jobLink, job ? chatBox() : null, filter, shareBar, empty || list, pager,
         job ? h("p", { class: "cm-more" }, h("a", { href: REL + "jobs/" }, "고용24·사람인 등 다른 채용 사이트에서 더 찾기 →")) : null,
         job && CFG.jobNo ? h("p", { class: "job-no" }, "직업정보제공사업 신고번호 ", h("b", null, CFG.jobNo), CFG.jobOrg ? " (" + CFG.jobOrg + ")" : "") : null,
         job ? h("p", { class: "src-note" }, "채용공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않으며, 조건·마감일은 공고를 올린 회사에 확인하세요. 금전·개인 금융정보를 요구하는 공고는 신고해 주세요.") : null);
@@ -417,6 +426,13 @@
       }
       fillCats(); selB.addEventListener("change", fillCats);
       selC.value = (post && post.category) || saved.category || "";
+      var indSel = h("select", { "aria-label": "업종" }, [h("option", { value: "" }, "업종 선택")].concat(SHARE_INDS.map(function (v) { return h("option", { value: v }, v.replace(/^제조-/, "제조 · ")); })));
+      var shareNote = h("div", { class: "cm-share-note" }, h("p", null, h("b", null, "자료 공유 안내")),
+        h("ul", null,
+          h("li", null, "현장에서 직접 만들었거나 써 본 양식·체크리스트·교육자료·개선 사례를 올려 주세요. 예전 자료도 좋습니다."),
+          h("li", null, "파일은 네이버 MYBOX·구글 드라이브 등의 '링크 공유' 주소를 본문에 붙여 주세요. 화면·문서 사진은 3장까지 바로 붙일 수 있습니다."),
+          h("li", null, "회사명·사람 이름·서명·연락처·주민등록번호는 지우고 올려 주세요."),
+          h("li", null, "책·교재·유료 강의자료를 찍거나 스캔한 것, 다른 사이트 자료를 통째로 옮긴 것은 저작권 때문에 올릴 수 없습니다. 공단 공개자료는 원문 링크로 알려 주세요.")));
       var title = h("input", { type: "text", name: "title", maxlength: "80", required: true, placeholder: "제목 (2~80자)", "aria-label": "제목", value: (saved.title != null ? saved.title : (post && post.title)) || "" });
       var body = h("textarea", { name: "body", rows: "14", maxlength: "5000", required: true, "aria-label": "본문", placeholder: "내용 (5~5,000자)\n\n· 사람 이름·연락처·사업장명 등 개인이나 회사를 알아볼 수 있는 정보는 적지 마세요.\n· 사고 사례는 누구인지 알 수 없게 적어 주세요." });
       body.value = (saved.body != null ? saved.body : (post && post.body)) || "";
@@ -469,17 +485,26 @@
       });
       var imgBox = h("div", { class: "cm-imgf" }, h("p", { class: "cm-imgf-h" }, pickBtn, pst, pick), thumbs,
         h("p", { class: "hint" }, "최대 3장. 올릴 때 자동으로 줄여 저장합니다. 얼굴·명찰·차량번호·사업장명이 보이는 사진은 가리고 올려 주세요."));
+      // 수정할 때 제목 앞 [업종]은 떼어 업종 칸으로
+      (function () { var m0 = SHARE_RE.exec(title.value); if (m0 && SHARE_INDS.indexOf(m0[1]) >= 0) { indSel.value = m0[1]; title.value = title.value.slice(m0[0].length); } })();
+      function syncShare() { var on = selB.value === "free" && selC.value === SHARE_CAT; indSel.hidden = !on; shareNote.hidden = !on; }
+      selB.addEventListener("change", syncShare); selC.addEventListener("change", syncShare);
       function syncJob() {
         var on = selB.value === "job"; jbox.hidden = !on;
         title.placeholder = on ? "공고 제목 (예: 안전관리자 경력직 채용)" : "제목 (2~80자)";
         body.placeholder = on ? "상세 내용 (5~5,000자)\n\n· 담당 업무, 자격 요건, 근무 조건, 전형 절차를 적어 주세요.\n· 주민등록번호·통장 사본 등 채용과 무관한 개인정보를 요구하는 내용은 올릴 수 없습니다." : "내용 (5~5,000자)\n\n· 사람 이름·연락처·사업장명 등 개인이나 회사를 알아볼 수 있는 정보는 적지 마세요.\n· 사고 사례는 누구인지 알 수 없게 적어 주세요.";
       }
-      selB.addEventListener("change", syncJob); syncJob(); navJob(selB.value === "job"); selB.addEventListener("change", function () { navJob(selB.value === "job"); });
+      selB.addEventListener("change", syncJob); syncJob(); syncShare(); navJob(selB.value === "job"); selB.addEventListener("change", function () { navJob(selB.value === "job"); });
       function tick() { cnt.textContent = body.value.length.toLocaleString() + " / 5,000자"; var dm = jmeta(); dm.images = imgs.slice(); draft(key, { title: title.value, body: body.value, category: selC.value, meta: dm }); }
       [title, body, selC].concat(Object.keys(J).map(function (k) { return J[k]; })).forEach(function (el) { el.addEventListener("input", tick); el.addEventListener("change", tick); }); drawImgs(); tick();
       show(h("form", { class: "cm-form cm-write", onsubmit: function (ev) {
         ev.preventDefault();
         var t = title.value.trim(), bd = body.value.trim();
+        if (selB.value === "free" && selC.value === SHARE_CAT) {
+          if (!indSel.value) { out.textContent = "자료 공유 글은 업종을 골라 주세요(여러 업종에 맞으면 '업종 공통')."; out.hidden = false; indSel.focus(); return; }
+          t = "[" + indSel.value + "] " + t.replace(SHARE_RE, "");
+          if (t.length > 80) { out.textContent = "업종 표시를 포함해 제목이 80자를 넘습니다. 제목을 조금 줄여 주세요."; out.hidden = false; title.focus(); return; }
+        }
         if (t.length < 2) { out.textContent = ERR.posts_title_check; out.hidden = false; title.focus(); return; }
         if (bd.length < 5) { out.textContent = ERR.posts_body_check; out.hidden = false; body.focus(); return; }
         var isJob = selB.value === "job", mt = isJob ? jmeta() : null;
@@ -506,7 +531,7 @@
           if (gone.length) sb.storage.from(IMG_BUCKET).remove(gone).then(done, done); else done();
         }, function (e) { out.textContent = msg(e) + " 작성하던 내용은 이 브라우저에 임시 저장되어 있습니다."; out.hidden = false; busy(btn, false, post ? "수정 저장" : "등록"); });
       } },
-        h("div", { class: "cm-row2" }, selB, selC), jbox, title, body, imgBox, h("p", { class: "cm-cnt" }, cnt, h("span", { class: "hint" }, "작성 중인 내용은 이 브라우저에 임시 저장됩니다.")), out,
+        h("div", { class: "cm-row2" }, selB, selC), indSel, shareNote, jbox, title, body, imgBox, h("p", { class: "cm-cnt" }, cnt, h("span", { class: "hint" }, "작성 중인 내용은 이 브라우저에 임시 저장됩니다.")), out,
         h("p", { class: "hint" }, "등록하면 ", h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "에 동의한 것으로 봅니다. 닉네임 ", h("b", null, ME.nickname), "(으)로 공개됩니다."),
         h("p", { class: "btns" }, btn, h("a", { class: "btn btn-ghost", href: post ? url("view", { id: post.id }) : url("", { b: b }) }, "취소"))));
     }

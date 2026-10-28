@@ -579,10 +579,35 @@ KM_TOPICS = [
 ]
 
 
+# 업종(제목 기준). 제조업은 세부 업종 + '제조·공장' 낱말로 묶는다. 공단 자료 대부분은 업종 공통이라 업종 표시가 없는 자료가 더 많다.
+KM_INDUSTRIES = [
+    ("건설업", ["건설", "굴착", "비계", "거푸집", "동바리", "타워크레인", "흙막이", "철골", "해체공사", "공사현장", "공사 현장", "건축", "토목", "터널", "교량", "도로공사", "리모델링", "인테리어", "지붕공사", "천막", "골조", "콘크리트 타설", "항타", "지반"]),
+    ("제조·기계·금속", ["프레스", "금속", "주조", "단조", "사출", "절삭", "공작기계", "선반", "연삭", "금형", "기계가공", "철강", "도금", "압연", "용해로", "주물", "자동차부품", "기계·기구", "산업용 로봇", "산업용로봇", "롤러기", "전단기", "절곡"]),
+    ("제조·전기·전자·반도체", ["반도체", "전자제품", "전자부품", "디스플레이", "이차전지", "2차전지", "리튬", "배터리", "클린룸", "PCB", "전기전자"]),
+    ("제조·화학·고무·플라스틱", ["화학공장", "화학설비", "화학제품", "플라스틱", "고무", "도료", "페인트 제조", "석유화학", "정유", "공정안전", "PSM", "반응기", "화학물질 취급"]),
+    ("제조·식품", ["식품", "제과", "제빵", "육가공", "도축", "도계장", "도계업", "음료", "수산물 가공", "수산가공", "김치", "떡", "식육", "식료품", "제분", "유가공"]),
+    ("제조·목재·섬유·인쇄·제지", ["목재", "제재소", "가구", "섬유", "봉제", "인쇄", "제지", "펄프", "염색"]),
+    ("조선·해양", ["조선", "선박", "도크", "해양플랜트"]),
+    ("농림·축산·어업", ["농업", "농작업", "농기계", "농약", "축산", "양돈", "양계", "축사", "벌목", "임업", "산림", "예초", "어선", "어업", "어촌", "버섯", "비닐하우스", "트랙터", "경운기", "과수", "농촌", "양식장"]),
+    ("물류·운수·배달", ["물류", "택배", "배달", "운송", "화물", "물류창고", "냉동창고", "창고업", "하역", "상하차", "이륜차", "운수", "버스운전", "버스 운전", "버스문", "택시", "집배", "퀵서비스"]),
+    ("서비스·유통·돌봄", ["서비스업", "음식점", "조리", "급식", "숙박", "청소", "환경미화", "경비", "콜센터", "감정노동", "고객응대", "유통", "대형마트", "판매", "미용", "세탁업", "세탁소", "요양", "병원", "의료", "사회복지", "돌봄", "골프장", "호텔", "외식", "카페", "학교"]),
+    ("폐기물·재활용·수처리", ["폐기물", "재활용", "하수", "정화조", "오폐수", "폐수", "소각", "수처리", "분뇨", "맨홀"]),
+]
+KM_MFG_WORDS = ["제조", "공장", "생산라인"]
+
+
+def km_industries(title):
+    """자료 제목 → 업종 번호 목록. 마지막 번호(len(KM_INDUSTRIES))는 '제조업 전체'."""
+    t = [i for i, (_, kws) in enumerate(KM_INDUSTRIES) if any(k in title for k in kws)]
+    if any(KM_INDUSTRIES[i][0].startswith("제조") for i in t) or any(k in title for k in KM_MFG_WORDS):
+        t.append(len(KM_INDUSTRIES))
+    return t
+
+
 def build_kosha_client(out_dir):
     """data/kosha_media.json → assets/data/kosha.json (열 단위 압축, 주제 태그 포함)."""
     d = load("data/kosha_media.json")
-    shapes, langs, cols = [], [], {k: [] for k in ("s", "n", "k", "g", "f", "dt", "h", "no", "la", "th", "t")}
+    shapes, langs, cols = [], [], {k: [] for k in ("s", "n", "k", "g", "f", "dt", "h", "no", "la", "th", "t", "u")}
     for x in d["items"]:
         if x["f"] not in shapes:
             shapes.append(x["f"])
@@ -592,10 +617,10 @@ def build_kosha_client(out_dir):
         probe = x["n"] + " " + x["k"] + " " + la
         tags = [i for i, (_, kws) in enumerate(KM_TOPICS) if any(k in probe for k in kws)]
         for k, v in (("s", x["s"]), ("n", x["n"]), ("k", x["k"]), ("g", x["g"]), ("f", shapes.index(x["f"])),
-                     ("dt", x["dt"]), ("h", x["h"]), ("no", x["no"]), ("la", langs.index(la) if la else -1), ("th", x["th"]), ("t", tags)):
+                     ("dt", x["dt"]), ("h", x["h"]), ("no", x["no"]), ("la", langs.index(la) if la else -1), ("th", x["th"]), ("t", tags), ("u", km_industries(x["n"]))):
             cols[k].append(v)
     client = {"checked": d["checked"], "total_all": d["total_all"], "shapes": shapes, "langs": langs,
-              "topics": [t for t, _ in KM_TOPICS], "cols": cols}
+              "topics": [t for t, _ in KM_TOPICS], "industries": [t for t, _ in KM_INDUSTRIES] + ["제조업 전체"], "cols": cols}
     (out_dir / "assets/data").mkdir(parents=True, exist_ok=True)
     (out_dir / "assets/data/kosha.js").write_text("window.ANJEONDUCK_KOSHA=" + json.dumps(client, ensure_ascii=False, separators=(",", ":")) + ";", encoding="utf-8")
     return len(d["items"])
@@ -1734,6 +1759,27 @@ def tool_ld(t, site):
     return '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + "</script>"
 
 
+EDU_CASES = {"acc": [], "media": {}, "acc_src": "", "acc_fetched": ""}  # main()에서 채움: 월별 정기교육 자료의 '사고사례·영상'
+
+
+def edu_cases(auto_acc):
+    """월별 정기교육 자료에 붙일 사고사례(공단 사고사망 속보, 이용허락 제한 없음)와 공단 자료실 영상·재해사례(공공누리) 목록."""
+    em = load("data/edu_monthly.json")
+    acc = [{"k": acc_key(a, i), "d": a.get("date", ""), "t": a.get("type", ""), "x": a.get("text", "")[:240]}
+           for i, a in enumerate(auto_acc.get("items", [])) if a.get("text")]
+    km = load("data/kosha_media.json")["items"]
+    VID = ("동영상", "애니메이션", "VR")
+    media = {}
+    for m in em["months"]:
+        kws = m.get("kw") or []
+        hit = [x for x in km if any(k in x["n"] for k in kws) and x.get("lang", "") == "" and "(HMD" not in x["n"] and "(HP" not in x["n"] and "(PC" not in x["n"]]
+        hit.sort(key=lambda x: (x.get("dt", ""), x.get("h", 0)), reverse=True)
+        vids = [x for x in hit if x["f"] in VID][:4]
+        cases = [x for x in hit if x["f"] not in VID and re.search(r"재해사례|사고사례|중대재해|사망사고|사례", x["n"])][:4]
+        media[m["m"]] = [{"s": x["s"], "n": x["n"], "f": x["f"], "dt": x.get("dt", "")} for x in vids + cases]
+    return {"acc": acc, "media": media, "acc_src": auto_acc.get("source", ""), "acc_fetched": auto_acc.get("fetched", "")}
+
+
 def render_free_tool(t, hazards, site=None, penalties=None):
     src = (ROOT / t["src"]).read_text(encoding="utf-8")
     if t.get("kind") == "page":
@@ -1744,6 +1790,8 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         elif t.get("inject"):
             names = t["inject"] if isinstance(t["inject"], list) else [t["inject"]]
             src = inject_data(src, names, t["src"])
+        if "/*@EDU_CASES@*/null" in src:
+            src = src.replace("/*@EDU_CASES@*/null", json.dumps(EDU_CASES, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
         src += dl_section("../../", tool=t["id"]) + lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
         return page(site, "../../", f"tools/{t['id']}/", t["name"] + (" · 무료 양식" if t.get("cat") == "작성기" else ""), src, desc=t.get("desc"), active="tools/")
     if t.get("inject") == "hazards":
@@ -2051,6 +2099,8 @@ def build(out, today):
     JOBS_OPEN = sum(1 for x in jobs if not x["closed"])
     briefs = load_briefs(today)
     auto_news, auto_acc = load_auto("news.json"), load_auto("accidents.json")
+    global EDU_CASES
+    EDU_CASES = edu_cases(auto_acc)
     hazards = load("data/hazards.json")
     hazards = {"groups": hazards["groups"], "items": hazards["items"]}
     penalties = load("data/penalties.json")
@@ -2795,6 +2845,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     <li>다른 사람의 저작물(유료 교재·기사 전문·타 사이트 자료 등)을 허락 없이 옮긴 글. 필요한 만큼만 인용하고 출처를 적어 주세요.</li>
     <li>욕설·혐오·차별 표현, 음란물, 불법 행위를 권하거나 법 위반을 숨기는 방법을 알려 주는 글</li>
   </ul>
+  <p><b>자료 공유</b>(커뮤니티 '자료 공유' 분류)에는 회원이 현장에서 직접 만들었거나 써 본 양식·체크리스트·교육자료·개선 사례를 올립니다. 파일은 네이버 MYBOX·구글 드라이브 등의 공유 링크로, 문서 화면은 사진(3장까지)으로 붙입니다. 회사명·이름·서명·연락처는 지우고, 책·교재·유료 강의자료의 촬영·스캔본이나 다른 사이트 자료를 통째로 옮긴 것은 올리지 않습니다. 링크로 연결된 파일은 SafePlum이 보관하지 않으며, 내려받은 파일은 열기 전에 백신으로 검사하세요.</p>
   <h2>3. 질문과 답변</h2>
   <p>Q&amp;A의 답변은 회원 개인의 경험과 의견입니다. 법령 해석은 원문과 관할 기관 안내를 기준으로 하세요. 답변할 때는 근거(법 조문·고시·공식 자료)를 함께 적어 주세요. 법 적용 여부와 행정 처분에 관한 판단은 법령 원문과 고용노동부 등 소관 기관에서 확인해야 합니다.</p>
   <h2>4. 채용공고</h2>

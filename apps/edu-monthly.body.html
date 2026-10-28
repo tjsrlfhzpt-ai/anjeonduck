@@ -29,12 +29,14 @@
       <div class="em-opts" id="emOpts">
         <label><input type="checkbox" data-o="goal" checked> 교육 목표</label>
         <label><input type="checkbox" data-o="sec" checked> 핵심 내용</label>
+        <label><input type="checkbox" data-o="case" checked> 사고사례·영상</label>
         <label><input type="checkbox" data-o="law" checked> 관련 법 기준</label>
         <label><input type="checkbox" data-o="check" checked> 현장 점검표</label>
         <label><input type="checkbox" data-o="quiz"> 이해도 확인 퀴즈 <span class="muted">(선택)</span></label>
         <label><input type="checkbox" data-o="talk" checked> 함께 이야기하기</label>
         <label><input type="checkbox" data-o="sign" checked> 참석자 서명부</label>
       </div>
+      <p class="hint em-news">교육 때 경각심을 높이려면 실제 사고 뉴스 영상을 함께 보여 주세요. <a id="emNews" target="_blank" rel="noopener">이달 주제 뉴스 영상 찾기 ↗</a> · <a id="emKm" target="_blank" rel="noopener">공단 영상 자료 더 보기 ↗</a><br>뉴스 영상은 방송사에 저작권이 있어 자료에 싣지 않고, 링크로 열어 보여 주는 방식입니다.</p>
       <div class="grid3">
         <label class="field" id="emAnsF"><span class="label">퀴즈 정답</span><select class="sort" id="emAns" style="width:100%"><option value="end">맨 뒤에 따로 (문제지로 쓰기)</option><option value="in">문제 바로 아래</option><option value="none">넣지 않기</option></select></label>
         <label class="field"><span class="label">서명부 칸 수</span><select class="sort" id="emRows" style="width:100%"><option>10</option><option selected>20</option><option>30</option><option>40</option><option>60</option></select></label>
@@ -181,7 +183,8 @@
 <script>
 (function () {
   "use strict";
-  var D = /*@DATA@*/null, H = /*@EDU_HOURS@*/null;
+  var D = /*@DATA@*/null, H = /*@EDU_HOURS@*/null, CS = /*@EDU_CASES@*/null;
+  var PORTAL = "https://portal.kosha.or.kr", KM_URL = PORTAL + "/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=";
   if (!D) return;
   var KEY = "safeplum.edumonthly";
   var $ = function (id) { return document.getElementById(id); };
@@ -199,6 +202,7 @@
     o: { goal: 1, sec: 1, law: 1, check: 1, quiz: 0, talk: 1, sign: 1 }, ans: "end", rows: "20", own: {}, ed: {}, view: "m" };
   Object.keys(defs).forEach(function (k) { if (st[k] == null) st[k] = defs[k]; });
   if (!st.v) { st.o.quiz = 0; st.v = 2; } // 2026-10-28: 퀴즈는 기본 빼기(선택)
+  if (st.v < 3) { st.o["case"] = 1; st.v = 3; } // 2026-10-28: 사고사례·영상 추가(기본 넣기)
   var saveT = null;
   function save() { clearTimeout(saveT); saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }, 250); }
   function M() { return D.months[(st.m - 1 + 12) % 12]; }
@@ -218,6 +222,17 @@
       s += " " + st.start + "~" + pad(Math.floor(t / 60) % 24) + ":" + pad(t % 60);
     }
     return s + (h ? " (" + (h < 1 ? Math.round(h * 60) + "분" : h + "시간") + ")" : "");
+  }
+  function fmtD(d) { return /^\d{4}-\d\d-\d\d/.test(d || "") ? d.slice(0, 4) + ". " + (+d.slice(5, 7)) + ". " + (+d.slice(8, 10)) + "." : (d || ""); }
+  function newsUrl() { return "https://www.youtube.com/results?search_query=" + encodeURIComponent(M().news + " 뉴스"); }
+  // 이달 주제 낱말이 들어간 최근 사고사망 속보 3건 + 공단 자료실 영상·사례
+  function cases() {
+    var m = M(), kw = m.kw || [], acc = [], media = [];
+    if (CS) {
+      acc = (CS.acc || []).filter(function (a) { var t = a.x + " " + a.t; return kw.some(function (k) { return t.indexOf(k) >= 0; }); }).slice(0, 3);
+      media = (CS.media && CS.media[m.m]) || [];
+    }
+    return { acc: acc, media: media };
   }
   function yearOf() { var y = (st.date || "").slice(0, 4); return /^\d{4}$/.test(y) ? y : String(new Date().getFullYear()); }
 
@@ -244,6 +259,13 @@
     });
     var own = (st.own[st.m] || "").trim();
     if (own) h += '<div class="em-sec"><h2>' + (++n) + ". 우리 사업장 이야기</h2><div class=\"em-own\">" + esc(own) + "</div></div>";
+    var cs = cases();
+    if (o["case"] && (cs.acc.length || cs.media.length)) {
+      h += '<div class="em-sec"><h2>' + (++n) + ". 실제 사고에서 배우기</h2>";
+      if (cs.acc.length) h += "<h3>최근 사고사망 속보 (안전보건공단 발표)</h3><ul>" + cs.acc.map(function (a) { return "<li><b>" + esc(fmtD(a.d)) + (a.t ? " · " + esc(a.t) : "") + "</b> — " + esc(a.x) + "</li>"; }).join("") + "</ul>";
+      if (cs.media.length) h += "<h3>교육 때 함께 볼 영상·사례 (안전보건공단 자료실)</h3><ul>" + cs.media.map(function (x) { return "<li>[" + esc(x.f) + "] " + (ed ? '<a href="' + KM_URL + x.s + '" target="_blank" rel="noopener">' + esc(x.n) + "</a>" : esc(x.n)) + "</li>"; }).join("") + "</ul>";
+      h += '<p class="em-src">' + (cs.acc.length ? "사고사망 속보는 안전보건공단 발표(공공데이터포털, 이용 제한 없음)를 그대로 옮긴 것입니다. " : "") + (cs.media.length ? "영상·사례는 공단 산업안전포털 자료실(공공누리)에서 제목으로 찾을 수 있습니다." : "") + "</p></div>";
+    }
     if (o.law) {
       h += '<div class="em-sec"><h2>' + (++n) + '. 관련 법 기준</h2><table class="em-t"><tr><th style="width:38%">조문</th><th>요약</th></tr>' +
         m.law.map(function (l, i) { return "<tr>" + X("td", "law." + i + ".ref", l.ref) + X("td", "law." + i + ".t", l.t) + "</tr>"; }).join("") +
@@ -308,6 +330,7 @@
     $("emMonths").innerHTML = D.months.map(function (m) {
       return '<button type="button" data-m="' + m.m + '" aria-pressed="' + (m.m === st.m) + '"><b>' + m.m + "월</b><small>" + esc(m.short || m.title) + "</small></button>";
     }).join("");
+    $("emNews").href = newsUrl(); $("emKm").href = "../../resources/library/?q=" + encodeURIComponent((M().kw || []).join("|"));
     $("emWhy").innerHTML = "<b>" + M().m + "월 · " + esc(M().title) + "</b><br>" + esc(M().why);
   }
   function fillForm() {
@@ -396,6 +419,10 @@
     m.sec.forEach(function (s, i) {
       S.push('<div class="em-sl"><div class="k">' + (i + 1) + " / " + m.sec.length + "</div><h2>" + esc(T("sec." + i + ".h", s.h)) + "</h2><ul>" + s.b.map(function (b, j) { return "<li>" + esc(T("sec." + i + ".b." + j, b)) + "</li>"; }).join("") + "</ul></div>");
     });
+    var cs = cases();
+    if (st.o["case"] && cs.acc.length) S.push('<div class="em-sl"><div class="k">실제 사고에서 배우기</div><h2>최근 실제로 일어난 사고</h2><ul>' + cs.acc.map(function (a) { return "<li><b>" + esc(fmtD(a.d)) + (a.t ? " · " + esc(a.t) : "") + "</b> — " + esc(a.x) + "</li>"; }).join("") + '</ul><p style="font-size:1.5cqw;color:#667">안전보건공단 사고사망 속보</p></div>');
+    if (st.o["case"]) S.push('<div class="em-sl"><div class="k">영상으로 보기</div><h2>함께 볼 영상·사례</h2><ul style="font-size:2.1cqw;gap:0.9cqw">' + cs.media.slice(0, 4).map(function (x) { return '<li><a href="' + KM_URL + x.s + '" target="_blank" rel="noopener">[' + esc(x.f) + "] " + esc(x.n) + "</a></li>"; }).join("") +
+      '<li><a href="' + newsUrl() + '" target="_blank" rel="noopener">뉴스 영상 찾기: ' + esc(M().news) + " ↗</a></li></ul><p style=\"font-size:1.5cqw;color:#667\">누르면 새 창으로 열립니다.</p></div>");
     var own = (st.own[st.m] || "").trim();
     if (own) S.push('<div class="em-sl"><div class="k">우리 사업장 이야기</div><h2>우리 현장에서는</h2><p style="white-space:pre-wrap">' + esc(own) + "</p></div>");
     S.push('<div class="em-sl"><div class="k">관련 법 기준</div><h2>법은 이렇게 정합니다</h2><table>' + m.law.map(function (l, i) { return "<tr><th>" + esc(T("law." + i + ".ref", l.ref)) + "</th><td>" + esc(T("law." + i + ".t", l.t)) + "</td></tr>"; }).join("") + "</table></div>");
@@ -427,7 +454,7 @@
   $("emPrev").addEventListener("click", function () { go(-1); });
   $("emNext").addEventListener("click", function () { go(1); });
   $("emFull").addEventListener("click", function () { var b = $("emShowBox"); if (!document.fullscreenElement && b.requestFullscreen) b.requestFullscreen().catch(function () {}); else if (document.exitFullscreen) document.exitFullscreen().catch(function () {}); });
-  $("emStage").addEventListener("click", function (e) { var r = this.getBoundingClientRect(); go(e.clientX - r.left < r.width * 0.3 ? -1 : 1); });
+  $("emStage").addEventListener("click", function (e) { if (e.target.closest("a")) return; var r = this.getBoundingClientRect(); go(e.clientX - r.left < r.width * 0.3 ? -1 : 1); });
   document.addEventListener("keydown", function (e) {
     if ($("emShowBox").hidden) return;
     if (e.key === "Escape") closeShow();

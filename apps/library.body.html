@@ -20,6 +20,7 @@
     <div class="km-filters">
       <div class="fgroup"><p class="fgroup-label">용도</p><div class="chips" id="kmUses" role="group" aria-label="용도"></div></div>
       <div class="fgroup"><p class="fgroup-label">자료 형태</p><div class="chips" id="kmShapes" role="group" aria-label="자료 형태"></div></div>
+      <div class="fgroup"><p class="fgroup-label">업종 <small class="muted">(제목 기준 · 업종 공통 자료는 '전체'에서)</small></p><div class="chips" id="kmInds" role="group" aria-label="업종"></div></div>
       <div class="fgroup"><p class="fgroup-label">주제</p><div class="chips" id="kmTopics" role="group" aria-label="주제"></div></div>
       <div class="km-toggles">
         <label class="switch"><input type="checkbox" id="kmForeign"><span>외국어 자료만</span></label>
@@ -97,10 +98,12 @@
     { t: "가이드·책자", f: ["책자", "리플릿", "팸플릿", "전자출판", "전자프로그램", "기타"] }
   ];
   var useOf = [];
-  var C, N, shapes, topics, st = { q: "", use: -1, shape: -1, topic: -1, foreign: false, edit: false, sort: "dt", page: 1 };
+  var C, N, shapes, topics, inds = [], st = { q: "", use: -1, shape: -1, topic: -1, ind: -1, foreign: false, edit: false, sort: "dt", page: 1 };
+  var IND0 = "";
   try {
     var sp = new URLSearchParams(location.search);
     st.q = sp.get("q") || ""; if (st.q) $("kmQ").value = st.q;
+    IND0 = sp.get("ind") || "";
   } catch (e) {}
 
   function card(i) {
@@ -119,6 +122,7 @@
     if (st.use >= 0 && useOf[C.f[i]] !== st.use) return false;
     if (st.shape >= 0 && C.f[i] !== st.shape) return false;
     if (st.topic >= 0 && C.t[i].indexOf(st.topic) < 0) return false;
+    if (st.ind >= 0 && (!C.u || C.u[i].indexOf(st.ind) < 0)) return false;
     if (st.foreign && C.la[i] < 0) return false;
     if (st.edit && !(C.g[i] === 1 || C.g[i] === 2)) return false;
     if (terms.length) {
@@ -167,7 +171,7 @@
     SEASONS.filter(function (s) { return s.m.indexOf(m) >= 0; }).forEach(function (s) {
       // 아래 '전체 자료' 검색과 같은 기준으로 세어, '모두 보기'를 눌렀을 때 건수가 같게 한다.
       var hit = [], sq = s.k.join("|"), keep = st;
-      st = { q: sq, use: -1, shape: -1, topic: -1, foreign: false, edit: false };
+      st = { q: sq, use: -1, shape: -1, topic: -1, ind: -1, foreign: false, edit: false };
       for (var i = 0; i < N; i++) if (match(i, [sq.toLowerCase()])) hit.push(i);
       st = keep;
       if (hit.length < 3) return;
@@ -195,6 +199,16 @@
     var sList = order.map(function (i) { return shapes[i]; }), sCnt = order.map(function (i) { return sc[i]; });
     chips($("kmShapes"), sList, "shape", sCnt, order);
     chips($("kmTopics"), topics, "topic", tc);
+    inds = data.industries || [];
+    if (inds.length && C.u) {
+      var ic = inds.map(function () { return 0; });
+      for (var r = 0; r < N; r++) C.u[r].forEach(function (u) { ic[u]++; });
+      // 제조업 전체를 맨 앞, 그다음 제조 세부, 나머지 순
+      var mf = inds.length - 1, iorder = [mf].concat(inds.map(function (_, i) { return i; }).filter(function (i) { return i !== mf && /^제조/.test(inds[i]); }), inds.map(function (_, i) { return i; }).filter(function (i) { return i !== mf && !/^제조/.test(inds[i]); }));
+      chips($("kmInds"), iorder.map(function (i) { return inds[i].replace(/^제조·/, "제조 · "); }), "ind", iorder.map(function (i) { return ic[i]; }), iorder);
+      var want = inds.indexOf(IND0);
+      if (want >= 0) { st.ind = want; $("kmInds").querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", String(+x.dataset.v === iorder.indexOf(want))); }); }
+    } else $("kmInds").closest(".fgroup").hidden = true;
     var uc = USES.map(function () { return 0; });
     for (var q = 0; q < N; q++) uc[useOf[C.f[q]]]++;
     chips($("kmUses"), USES.map(function (u) { return u.t; }), "use", uc);
@@ -206,9 +220,9 @@
   $("kmForeign").addEventListener("change", function () { st.foreign = this.checked; st.page = 1; render(); });
   $("kmEdit").addEventListener("change", function () { st.edit = this.checked; st.page = 1; render(); });
   $("kmReset").addEventListener("click", function () {
-    st = { q: "", use: -1, shape: -1, topic: -1, foreign: false, edit: false, sort: st.sort, page: 1 };
+    st = { q: "", use: -1, shape: -1, topic: -1, ind: -1, foreign: false, edit: false, sort: st.sort, page: 1 };
     $("kmQ").value = ""; $("kmForeign").checked = false; $("kmEdit").checked = false;
-    document.querySelectorAll("#kmUses .chip, #kmShapes .chip, #kmTopics .chip").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.v === "-1" ? "true" : "false"); });
+    document.querySelectorAll("#kmUses .chip, #kmShapes .chip, #kmTopics .chip, #kmInds .chip").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.v === "-1" ? "true" : "false"); });
     render();
   });
   $("kmPager").addEventListener("click", function (ev) {
