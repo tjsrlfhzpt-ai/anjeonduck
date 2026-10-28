@@ -9,7 +9,7 @@
 - 신고확인증(경기지방고용노동청, 2026-10-21, 신고번호 J1800020260031) 수령. 직업안정법 시행령 제28조제5호(정보이용자가 알아보기 쉽게 신고번호 표시) — law.go.kr 원문 확인.
 - config/site.json operator.job_info_no·job_info_org 추가. 모든 공통 화면 푸터, 채용정보(/jobs/) 상단, 회원 채용공고 게시판 목록·공고 상세에 표시. 형식이 맞지 않으면 표시하지 않음.
 - 표시하지 않은 곳: 전체 화면 작성기 8종(TBM·위험성평가 등, 푸터 없는 화면)과 404.
-- 회원 채용공고 등록은 아직 닫힌 상태 유지(features.job_posting=false). Supabase 트리거 posts_job_paused 를 내린 뒤 true 로 바꿔 열 예정.
+- 회원 채용공고 등록 다시 엶: Supabase 트리거 posts_job_paused 제거(남은 트리거에 posts_job_compliance 유지 확인 — 사업자등록번호·연락처·급여 검증) 후 features.job_posting=true.
 - 확인증 상호가 '세이프플롬'으로 적혀 있어 사이트에는 상호를 넣지 않고 신고번호·관청만 표시.
 
 ## 2026-10-28 · 위험성평가 실시 공고문 작성기
