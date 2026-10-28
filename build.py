@@ -2693,7 +2693,7 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
   <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">법령</a><span>/</span><a href="../">질의회시</a><span>/</span><a href="../?c={quote(x["c"])}">{e(x["c"])}</a></p>
   <p class="gq-vcat"><a href="../?c={quote(x["c"])}">{e(x["c"])}</a></p>
   <h1>{e(x["t"])}</h1>
-  <p class="gq-vm"><span>고용노동부 회신</span><time datetime="{e(x["d"])}">{e(dd)}</time>{'<span class="gq-old">구법 기준</span>' if old else ''}<button type="button" class="gq-copy" data-copy>링크 복사</button></p>
+  <p class="gq-vm"><span>고용노동부 회신</span><time datetime="{e(x["d"])}">{e(dd)}</time>{f'<span>수록: {e(x["s"])}</span>' if x.get("s") else ''}{'<span class="gq-old">구법 기준</span>' if old else ''}<button type="button" class="gq-copy" data-copy>링크 복사</button></p>
 </div></section>
 <div class="wrap layout-detail gq-layout"><section class="col-main"><article class="gq-v">
   {old}
