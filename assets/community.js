@@ -289,6 +289,7 @@
         h("span", null, p + " / " + pages), p < pages ? h("a", { class: "btn btn-sm btn-ghost", href: url("", { b: b, c: cat, q: kw, p: p + 1 }) }, "다음 →") : null) : null;
       show(tabs(b), job ? chatBox() : null, filter, empty || list, pager,
         job ? h("p", { class: "cm-more" }, h("a", { href: REL + "jobs/" }, "고용24·사람인 등 다른 채용 사이트에서 더 찾기 →")) : null,
+        job && CFG.jobNo ? h("p", { class: "job-no" }, "직업정보제공사업 신고번호 ", h("b", null, CFG.jobNo), CFG.jobOrg ? " (" + CFG.jobOrg + ")" : "") : null,
         job ? h("p", { class: "src-note" }, "채용공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않으며, 조건·마감일은 공고를 올린 회사에 확인하세요. 금전·개인 금융정보를 요구하는 공고는 신고해 주세요.") : null);
     }, function (e) { show(tabs(b), note(msg(e), "err")); });
   }
@@ -387,6 +388,7 @@
         } }, ta, out, h("p", { class: "btns" }, btn));
       } else form = h("p", { class: "cm-note" }, word + "을 쓰려면 ", h("a", { href: url("account", { next: location.pathname + location.search }) }, "로그인"), "이 필요합니다.");
       show(tabs(post.board), art, h("h3", { class: "h-sm cm-cms-h" }, word + " " + cms.length), cms.length ? clist : h("p", { class: "hint" }, "아직 " + word + "이 없습니다."), form,
+        job && CFG.jobNo ? h("p", { class: "job-no" }, "직업정보제공사업 신고번호 ", h("b", null, CFG.jobNo), CFG.jobOrg ? " (" + CFG.jobOrg + ")" : "") : null,
         job ? h("p", { class: "src-note" }, "이 공고는 회원이 직접 올린 것입니다. SafePlum은 채용을 알선하거나 내용을 보증하지 않습니다. 지원 전 회사와 조건을 직접 확인하고, 금전이나 통장·비밀번호를 요구하면 응하지 말고 신고해 주세요.") : null,
         qna ? h("p", { class: "src-note" }, "답변은 회원 개인의 의견입니다. 법 적용 여부는 법령 원문과 고용노동부 등 소관 기관에서 확인하세요.") : null,
         h("p", { class: "btns" }, h("a", { class: "btn btn-ghost", href: url("", { b: post.board }) }, "목록으로")));

@@ -903,6 +903,16 @@ def gnb_html(site, rel, active):
     return out
 
 
+def job_info_html(site, cls="ft-jobno"):
+    """직업정보제공사업 신고번호 — 직업안정법 시행령 제28조제5호(정보이용자가 알아보기 쉽게 표시)."""
+    op = site.get("operator") or {}
+    no = str(op.get("job_info_no") or "").strip()
+    if not re.fullmatch(r"[A-Z]\d{6,20}", no):
+        return ""
+    org = str(op.get("job_info_org") or "").strip()
+    return f'<p class="{cls}">직업정보제공사업 신고번호 <b>{e(no)}</b>{(" (" + e(org) + ")") if org else ""}</p>'
+
+
 def mnav_html(site, rel, active):
     """휴대폰·태블릿 전체 메뉴: 헤더 '메뉴' 버튼으로 여는 서랍. PC 메가메뉴(nav_cols)와 같은 항목을 묶음별로 펼쳐 보인다."""
     grp = ACTIVE_GROUP.get(active, "")
@@ -1226,6 +1236,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
       <li>판정·계산 결과는 자가진단용 참고 자료이며, 최종 판단은 관할 행정기관의 해석을 따릅니다.</li>
     </ul>
     <p class="ft-op">{operator_html(site, rel_root)}</p>
+    {job_info_html(site)}
     <p class="ft-disc">Disclaimer: SafePlum에서 제공하는 안전보건 정보 및 문서 양식은 현장 참고용이며, 실제 적용 시 발생하는 법적 책임은 지지 않습니다.</p>
     <p class="ft-copy">© {dt.date.today().year} {e(site['name'])}{(' · ' + contact_html) if contact_html else ''}{' · <button type="button" class="linkbtn ft-backup" data-mydata>작성 내용 백업</button>' if path.startswith("tools/") and path != "tools/" else ""} · 법령 데이터 기준일 {e(manifest().get("checked_at", ""))} · <a href="{rel_root}legal/">면책 안내</a></p>
   </div>
@@ -2493,7 +2504,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     BP = fetch_board_posts(cm_url, cm_key) if cm_on else None   # 글별 정적 페이지용(아래)
 
     def cm_page(sub, kind, title, lead, rel, desc, wide=False):
-        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST, "built": BOARD_BUILT if (BP and BP.get("posts")) else ""}, ensure_ascii=False).replace("</", "<\\/")
+        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST, "jobNo": ((site.get("operator") or {}).get("job_info_no") or ""), "jobOrg": ((site.get("operator") or {}).get("job_info_org") or ""), "built": BOARD_BUILT if (BP and BP.get("posts")) else ""}, ensure_ascii=False).replace("</", "<\\/")
         crumb = f'<a href="{rel}board/">게시판</a><span>/</span>{e(title)}' if sub else "게시판"
         side = f"""<aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint">
@@ -2841,7 +2852,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 </div></section>
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
-  <section class="col-list">{chat_banner()}
+  <section class="col-list">{job_info_html(site, "job-no")}{chat_banner()}
     {'<p class="job-member"><b>우리 회사 공고를 직접 올릴 수 있습니다.</b> 회원이면 누구나 무료로 등록합니다. <a class="btn btn-sm" href="../board/?b=job">회원 채용공고 보기 · 등록</a></p>' if JOB_POST else '<p class="job-member"><b>회원 채용공고 등록은 현재 준비 중입니다.</b> 준비가 끝나면 다시 열겠습니다. <a class="btn btn-sm btn-ghost" href="../board/?b=job">회원 채용공고 보기</a></p>'}
     {main}
     {f'<div class="more-box"><p>다른 채용 사이트에서 더 찾기</p><div class="jchips">{job_chips}</div></div>' if jobs else ''}
