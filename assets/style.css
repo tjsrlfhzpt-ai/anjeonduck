@@ -2143,3 +2143,13 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
 /* 직업정보제공사업 신고번호(직업안정법 시행령 제28조제5호) */
 .ft-jobno{margin:6px 0 0;font-size:13px;color:var(--text-2)}.ft-jobno b{color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:.02em}
 .job-no{margin:0 0 12px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:13.5px;color:var(--text-2)}.job-no b{color:var(--text);letter-spacing:.02em}
+
+/* 채용: 기업 구분 표시·오늘의 채용 모음 */
+.tag-grade{background:#FFF4E5;color:#9A4A00;font-weight:800}
+.tag-grade.g-0{background:#E8F0FE;color:#1A4FB0}.tag-grade.g-1{background:#E7F6EE;color:#0B6B3A}.tag-grade.g-2{background:#F3EBFF;color:#5B2DB0}
+.job-today{display:block;margin:0 0 12px;padding:12px 14px;border:1px solid var(--blue-100,#CFE0FA);border-radius:12px;background:var(--blue-50,#EEF4FF);color:var(--navy);font-size:14px}
+.job-today b{margin-right:6px;color:var(--blue)}
+.job-today:hover{text-decoration:none;border-color:var(--blue)}
+.jt-sec h2{display:flex;align-items:baseline;gap:8px}
+.jt-share textarea{width:100%;min-height:260px;border:1px solid var(--line);border-radius:10px;padding:10px;font:13px/1.55 inherit;resize:vertical;margin:6px 0 10px;background:var(--surface)}
+.job-co .hint{margin-top:8px}

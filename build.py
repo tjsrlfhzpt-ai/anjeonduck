@@ -12,6 +12,7 @@ import html
 import json
 import os
 import re
+import urllib.parse
 import shutil
 import sys
 from pathlib import Path
@@ -825,7 +826,7 @@ QUICK_KEYWORDS = ["산업재해조사표", "선임 보고서", "위험성평가"
 def avatar(name):
     name = str(name or "?").strip()
     color = AVATAR_COLORS[sum(ord(c) for c in name) % len(AVATAR_COLORS)]
-    ch = name.replace("㈜", "").replace("(주)", "").strip()[:1] or "?"
+    ch = re.sub(r"[㈜㈔]|\((주|유|사|재)\)|^주식회사\s*", "", name).strip()[:1] or "?"
     return f'<span class="avatar" style="--av:{color}" aria-hidden="true">{e(ch)}</span>'
 
 
@@ -1261,6 +1262,30 @@ def dl_badge(j):
     return f'<span class="badge {cls}" data-dl-badge>{e(txt)}</span>'
 
 
+GRADE_ORDER = ["대기업", "공공기관", "외국계", "중견기업", "공공·협회", "중소·기타"]
+
+
+def grade_tag(j):
+    g = j.get("company_type") or ""
+    if g not in ("대기업", "공공기관", "외국계", "중견기업", "공공·협회"):
+        return ""
+    txt = g + (" · " + j["group"] if j.get("group") else "")
+    return f'<span class="tag tag-grade g-{GRADE_ORDER.index(g)}">{e(txt)}</span>'
+
+
+def company_box(j):
+    """세이프플럼에서 덧붙이는 정보: 기업 구분·계열, 기업 리뷰·연봉 찾기(외부 검색), 안전·보건관리자 직무 도구."""
+    co = re.sub(r"[㈜㈔]|\((주|유|사|재)\)|주식회사|유한책임회사|\s+", " ", str(j.get("company") or "")).strip()
+    q = urllib.parse.quote(co)
+    health = any("보건" in x for x in j.get("jobs_list", []))
+    return (f'<div class="side-box job-co"><h2 class="h-sm">지원 전에 확인하기</h2><ul class="bul">'
+            f'<li><a href="https://www.jobplanet.co.kr/search?query={q}" target="_blank" rel="noopener nofollow">{e(co)} 기업 리뷰·연봉 (잡플래닛) ↗</a></li>'
+            f'<li><a href="https://search.naver.com/search.naver?query={q}" target="_blank" rel="noopener nofollow">{e(co)} 기업 정보·뉴스 (네이버) ↗</a></li>'
+            f'<li><a href="../../tools/duties/">{"보건관리자" if health else "안전관리자"} 법정 직무 미리 보기</a></li>'
+            f'<li><a href="../../tools/selection/">이 회사 규모면 몇 명 선임해야 할까?</a></li></ul>'
+            '<p class="hint">기업 구분·계열은 공고와 공개 정보를 바탕으로 SafePlum이 붙인 참고 표시입니다.</p></div>')
+
+
 def job_row(j, rel_root, compact=False):
     tags = "".join(f'<span class="tag tag-job">{e(x)}</span>' for x in j["jobs_list"])
     tags += "".join(f'<span class="tag">{e(v)}</span>' for v in (j.get("career"), j.get("employment")) if v)
@@ -1269,7 +1294,7 @@ def job_row(j, rel_root, compact=False):
              f'data-ctype="{e(j.get("company_type",""))}" data-industry="{e(j.get("industry",""))}" '
              f'data-deadline="{e(j.get("deadline",""))}" data-posted="{e(j.get("posted",""))}" '
              f'data-text="{e(" ".join(str(j.get(k,"")) for k in ("title","company","region","job","industry","company_type","career","employment")))}"')
-    meta = " · ".join(x for x in [j.get("company_type"), j.get("industry")] if x)
+    meta = " · ".join(x for x in [j.get("company_type"), j.get("group"), j.get("industry")] if x)
     return f"""<li class="jrow{' closed' if j['closed'] else ''}{' compact' if compact else ''}" {attrs}>
   {avatar(j.get('company'))}
   <div class="jrow-main">
@@ -1279,6 +1304,94 @@ def job_row(j, rel_root, compact=False):
   </div>
   <div class="jrow-side">{dl_badge(j)}</div>
 </li>"""
+
+
+TODAY_SECTORS = ["제조·화학", "반도체·전자", "건설·플랜트·조선", "식품·유통·서비스", "물류·운수", "에너지·공공"]
+
+
+def jobs_today_pick(jobs, today):
+    pick = [j for j in jobs if not j["closed"] and (j.get("company_type") in GRADE_ORDER[:5])]
+    return sorted(pick, key=lambda j: (GRADE_ORDER.index(j["company_type"]), str(j.get("deadline") or "9")))
+
+
+def jobs_today_text(site, jobs, today):
+    """카카오톡 오픈채팅에 붙여 넣는 글. 링크는 모두 세이프플럼 공고 화면(거기서 원문으로 이동)."""
+    base = (site.get("base_url") or "https://safeplum.com").rstrip("/")
+    d = dt.date.fromisoformat(today)
+    pick = jobs_today_pick(jobs, today)
+    out = [f"🔥 오늘의 안전·보건 채용 ({d.month}월 {d.day}일 · 마감 전 {len(pick)}건)",
+           "대기업·공공기관·외국계·중견기업 공고만 골라 매일 아침 올립니다.",
+           f"👉 전체 보기: {base}/jobs/today/", ""]
+    for sec in TODAY_SECTORS + ["기타"]:
+        items = [j for j in pick if (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]
+        if not items:
+            continue
+        # 같은 회사·같은 마감의 지역별 공고는 한 줄로
+        groups, seen = [], {}
+        for j in items:
+            k = (j["company"], j.get("deadline"), "|".join(j["jobs_list"]))
+            if k in seen:
+                seen[k]["more"].append(j)
+            else:
+                seen[k] = {"j": j, "more": []}
+                groups.append(seen[k])
+        out.append(f"■ {sec}")
+        for g in groups:
+            j = g["j"]
+            def city(x):
+                tk = (x.get("region") or "").split()
+                if not tk:
+                    return ""
+                last = tk[-1]
+                if len(tk) > 1 and last.endswith("구"):
+                    return tk[0] + " " + last          # 울산 남구, 서울 중구
+                return last[:-1] if len(last) > 2 and last[-1] in "시군" else last
+            cities = "·".join(dict.fromkeys(city(x) for x in [j] + g["more"] if city(x)))
+            tag = j["company_type"] + (f"·{j['group']}" if j.get("group") else "")
+            co = re.sub(r"[㈜㈔]|\((주|유|사)\)", "", j["company"]).strip()
+            dl = str(j.get("deadline") or "")
+            dl_s = f"~{int(dl[5:7])}/{int(dl[8:10])}" if DATE_RE.match(dl) else (dl or "")
+            out.append(f"- {co}({cities}) [{tag}] / {'·'.join(j['jobs_list'])} {j.get('career','')} {dl_s}".replace("  ", " ").rstrip())
+            out.append(f"  {base}/jobs/{j['id']}/")
+        out.append("")
+    no = ((site.get("operator") or {}).get("job_info_no") or "")
+    out.append("※ 조건·마감은 공고 원문이 우선합니다. 세이프플럼은 채용을 알선하지 않습니다." + (f" (직업정보제공사업 신고번호 {no})" if no else ""))
+    out.append("안전보건 서류는 네이버에서 '세이프플럼' 검색 → 무료 작성")
+    return "\n".join(out)
+
+
+def jobs_today_body(site, jobs, today):
+    pick = jobs_today_pick(jobs, today)
+    d = dt.date.fromisoformat(today)
+    secs = ""
+    for sec in TODAY_SECTORS + ["기타"]:
+        items = [j for j in pick if (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]
+        if items:
+            secs += f'<section class="block jt-sec"><h2>{e(sec)} <span class="muted">{len(items)}</span></h2><ul class="jlist">' + "".join(job_row(j, "../../") for j in items) + "</ul></section>"
+    text = jobs_today_text(site, jobs, today)
+    return f"""
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">채용정보</a><span>/</span>오늘의 채용 모음</p>
+  <h1>오늘의 안전·보건 채용 <span class="muted">{d.month}월 {d.day}일</span></h1>
+  <p>대기업·공공기관·외국계·중견기업의 안전관리자·보건관리자·EHS 공고 중 <b>마감 전 {len(pick)}건</b>을 업종별로 모았습니다. 매일 아침 갱신되고, 마감된 공고는 자동으로 빠집니다.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <article class="col-main">{job_info_html(site, "job-no")}{secs or empty_box("오늘 모을 공고가 없습니다.")}</article>
+  <aside class="col-side">
+    <div class="side-box jt-share"><h2 class="h-sm">오픈채팅방 공유 글</h2>
+      <p class="hint">눌러서 복사한 뒤 카카오톡에 붙여 넣으세요. 링크는 세이프플럼 공고 화면으로 연결됩니다.</p>
+      <textarea id="jtText" readonly rows="14" aria-label="공유할 글">{e(text)}</textarea>
+      <button type="button" class="btn btn-block" id="jtCopy">공유 글 복사</button>
+    </div>
+    <div class="side-box"><h2 class="h-sm">표시 기준</h2><ul class="bul hint">
+      <li>기업 구분·계열은 공고와 공개 정보를 바탕으로 SafePlum이 붙인 참고 표시입니다.</li>
+      <li>공고 원문에서 조건·마감이 바뀔 수 있습니다. 지원 전에 원문을 확인하세요.</li>
+    </ul></div>
+  </aside>
+</div>
+<script>(function(){{var b=document.getElementById("jtCopy"),t=document.getElementById("jtText");if(!b||!t)return;
+b.addEventListener("click",function(){{var done=function(){{b.textContent="복사했습니다";setTimeout(function(){{b.textContent="공유 글 복사";}},1600);}};
+if(navigator.clipboard&&navigator.clipboard.writeText){{navigator.clipboard.writeText(t.value).then(done,function(){{t.select();document.execCommand("copy");done();}});}}else{{t.select();document.execCommand("copy");done();}}}});}})();</script>"""
 
 
 def resource_row(r, site, rel_root="./"):
@@ -2852,7 +2965,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 </div></section>
 <div class="wrap layout-list{' no-side' if not side else ''}">
   {f'<aside class="col-filter">{side}</aside>' if side else ''}
-  <section class="col-list">{job_info_html(site, "job-no")}{chat_banner()}
+  <section class="col-list">{job_info_html(site, "job-no")}<a class="job-today" href="today/"><b>오늘의 채용 모음</b> 대기업·공공기관·외국계·중견기업 마감 전 공고만 업종별로 보기 →</a>{chat_banner()}
     {'<p class="job-member"><b>우리 회사 공고를 직접 올릴 수 있습니다.</b> 회원이면 누구나 무료로 등록합니다. <a class="btn btn-sm" href="../board/?b=job">회원 채용공고 보기 · 등록</a></p>' if JOB_POST else '<p class="job-member"><b>회원 채용공고 등록은 현재 준비 중입니다.</b> 준비가 끝나면 다시 열겠습니다. <a class="btn btn-sm btn-ghost" href="../board/?b=job">회원 채용공고 보기</a></p>'}
     {main}
     {f'<div class="more-box"><p>다른 채용 사이트에서 더 찾기</p><div class="jchips">{job_chips}</div></div>' if jobs else ''}
@@ -2875,7 +2988,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
         def lines(v):
             return "".join(f"<li>{e(x.strip())}</li>" for x in str(v or "").split("|") if x.strip())
         dl = str(j.get("deadline", "") or "")
-        rows = [("기업분류", j.get("company_type")), ("업종", j.get("industry")), ("직무", " · ".join(j["jobs_list"])),
+        rows = [("기업 구분", j.get("company_type")), ("계열", j.get("group")), ("업종", j.get("industry")), ("직무", " · ".join(j["jobs_list"])),
                 ("근무지", j.get("region")), ("근무지 주소", j.get("address")), ("경력", j.get("career")), ("고용형태", j.get("employment")),
                 ("채용인원", f'{j["headcount"]:g}명' if isinstance(j.get("headcount"), (int, float)) and j["headcount"] else ""),
                 ("NCS 직무", j.get("ncs")),
@@ -2891,7 +3004,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     <div>
       <p class="dhead-co">{e(j['company'])}</p>
       <h1>{e(j['title'])}</h1>
-      <p class="tags">{''.join(f'<span class="tag tag-job">{e(x)}</span>' for x in j["jobs_list"])}{f'<span class="tag">{e(j.get("region"))}</span>' if j.get("region") else ''}</p>
+      <p class="tags">{grade_tag(j)}{''.join(f'<span class="tag tag-job">{e(x)}</span>' for x in j["jobs_list"])}{f'<span class="tag">{e(j.get("region"))}</span>' if j.get("region") else ''}</p>
     </div>
   </div>
 </div></section>
@@ -2913,10 +3026,15 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
       {apply_html(j)}
       <a class="btn btn-block btn-ghost" href="../">다른 공고 보기</a>
     </div>
+    {company_box(j)}
   </aside>
 </div>"""
         write(f"jobs/{j['id']}/index.html", page(site, "../../", f"jobs/{j['id']}/", f"{j['company']} {j['title']}", body,
                                                   desc=f"{j['company']} · {j.get('region','')} · {j.get('career','')} · 마감 {dl}", active="jobs/"))
+
+    # ---- 오늘의 채용 모음(카카오톡 오픈채팅 공유용): 대기업·공공·외국계·중견 공고 중 마감 전, 업종별
+    write("jobs/today/index.html", page(site, "../../", "jobs/today/", "오늘의 안전·보건 채용 모음", jobs_today_body(site, jobs, today),
+                                        desc="대기업·공공기관·외국계·중견기업의 안전관리자·보건관리자·EHS 채용 중 마감 전 공고를 업종별로 모았습니다. 매일 아침 갱신.", active="jobs/"))
 
     # ---- 서식·자료
     CAT_ORDER = ["법정 서식", "웹 작성 서식", "무료 작성 도구", "법정 기준표(별표)", "고시·지침", "공단 자료", "Mallo 서식", "기관·행정용"]
