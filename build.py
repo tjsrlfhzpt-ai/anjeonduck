@@ -1288,7 +1288,7 @@ def company_box(j):
 
 def job_row(j, rel_root, compact=False):
     tags = "".join(f'<span class="tag tag-job">{e(x)}</span>' for x in j["jobs_list"])
-    tags += "".join(f'<span class="tag">{e(v)}</span>' for v in (j.get("career"), j.get("employment")) if v)
+    tags += "".join(f'<span class="tag">{e(v)}</span>' for v in (j.get("career"), (j.get("employment") or "") + (f" · {j['term']}" if j.get("term") else "")) if v)
     loc = " · ".join(x for x in [j.get("company"), j.get("region")] if x)
     attrs = (f'data-item data-job="{e("|".join(j["jobs_list"]))}" '
              f'data-ctype="{e(j.get("company_type",""))}" data-industry="{e(j.get("industry",""))}" '
@@ -1351,7 +1351,10 @@ def jobs_today_text(site, jobs, today):
             co = re.sub(r"[㈜㈔]|\((주|유|사)\)", "", j["company"]).strip()
             dl = str(j.get("deadline") or "")
             dl_s = f"~{int(dl[5:7])}/{int(dl[8:10])}" if DATE_RE.match(dl) else (dl or "")
-            out.append(f"- {co}({cities}) [{tag}] / {'·'.join(j['jobs_list'])} {j.get('career','')} {dl_s}".replace("  ", " ").rstrip())
+            emp = j.get("employment") or ""
+            if emp == "계약직":
+                emp += f"({j['term']})" if j.get("term") else "(기간은 원문 확인)"
+            out.append(f"- {co}({cities}) [{tag}] / {'·'.join(j['jobs_list'])} · {j.get('career','')} · {emp} {dl_s}".replace("  ", " ").replace(" ·  · ", " · ").rstrip())
             out.append(f"  {base}/jobs/{j['id']}/")
         out.append("")
     no = ((site.get("operator") or {}).get("job_info_no") or "")
@@ -1378,7 +1381,7 @@ def jobs_today_body(site, jobs, today):
 <div class="wrap layout-detail">
   <article class="col-main">{job_info_html(site, "job-no")}{secs or empty_box("오늘 모을 공고가 없습니다.")}</article>
   <aside class="col-side">
-    <div class="side-box jt-share"><h2 class="h-sm">오픈채팅방 공유 글</h2>
+    <div class="side-box jt-share" id="jtShare" hidden><h2 class="h-sm">오픈채팅방 공유 글 <span class="muted">운영자용</span></h2>
       <p class="hint">눌러서 복사한 뒤 카카오톡에 붙여 넣으세요. 링크는 세이프플럼 공고 화면으로 연결됩니다.</p>
       <textarea id="jtText" readonly rows="14" aria-label="공유할 글">{e(text)}</textarea>
       <button type="button" class="btn btn-block" id="jtCopy">공유 글 복사</button>
@@ -1389,7 +1392,10 @@ def jobs_today_body(site, jobs, today):
     </ul></div>
   </aside>
 </div>
-<script>(function(){{var b=document.getElementById("jtCopy"),t=document.getElementById("jtText");if(!b||!t)return;
+<script>(function(){{var box=document.getElementById("jtShare"),a=document.getElementById("hdAuth");
+/* 운영자(관리자)로 로그인한 브라우저에서만 공유 글 상자를 보인다 — app.js 의 '운영 관리' 표시와 같은 기준 */
+try{{var ses=JSON.parse(localStorage.getItem(a&&a.getAttribute("data-key"))||"null");if(box&&ses&&ses.user&&localStorage.getItem("safetake.adm")===ses.user.id)box.hidden=false;}}catch(e){{}}
+var b=document.getElementById("jtCopy"),t=document.getElementById("jtText");if(!b||!t)return;
 b.addEventListener("click",function(){{var done=function(){{b.textContent="복사했습니다";setTimeout(function(){{b.textContent="공유 글 복사";}},1600);}};
 if(navigator.clipboard&&navigator.clipboard.writeText){{navigator.clipboard.writeText(t.value).then(done,function(){{t.select();document.execCommand("copy");done();}});}}else{{t.select();document.execCommand("copy");done();}}}});}})();</script>"""
 
@@ -2992,7 +2998,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
             return "".join(f"<li>{e(x.strip())}</li>" for x in str(v or "").split("|") if x.strip())
         dl = str(j.get("deadline", "") or "")
         rows = [("기업 구분", j.get("company_type")), ("계열", j.get("group")), ("업종", j.get("industry")), ("직무", " · ".join(j["jobs_list"])),
-                ("근무지", j.get("region")), ("근무지 주소", j.get("address")), ("경력", j.get("career")), ("고용형태", j.get("employment")),
+                ("근무지", j.get("region")), ("근무지 주소", j.get("address")), ("경력", j.get("career")), ("고용형태", j.get("employment")), ("근무기간", j.get("term") or ("원문 확인" if j.get("employment") == "계약직" else "")),
                 ("채용인원", f'{j["headcount"]:g}명' if isinstance(j.get("headcount"), (int, float)) and j["headcount"] else ""),
                 ("NCS 직무", j.get("ncs")),
                 ("등록일", fmt_date(j.get("posted")) if j.get("posted") else "")]
