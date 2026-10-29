@@ -882,7 +882,7 @@ CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hou
 LOOKUP_TOOLS = ["first-job", "ai", "law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
-NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "jobs/"), ("board", "게시판", "board/")]
+NAV4 = [("lib", "자료실", "tools/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "jobs/"), ("board", "게시판", "board/")]
 ACTIVE_GROUP = {"videos/": "brief", "tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
 
 
@@ -3484,9 +3484,18 @@ q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="
   <p class="hint">작성기는 <a href="forms/">작성기 {WRITER_N}종</a> 한 곳에 모두 모았습니다. 아래에는 자주 쓰는 작성기와 계산기·조회 도구를 보여 줍니다.</p>
 </div></section>
 <section class="wrap ftools-page">
-  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("cat") == k) + (1 if k == "작성기" else 0) if k != "작성기" else WRITER_N}</span></a>' for k, c, _ in TOOL_KINDS)}</nav>
+  <nav class="tkinds" aria-label="도구 종류">{"".join(f'<a class="tbadge-l {c}" href="#{c}">{e(k)} <span>{sum(1 for t in site.get("free_tools", []) if t.get("cat") == k) + (1 if k == "작성기" else 0) if k != "작성기" else WRITER_N}</span></a>' for k, c, _ in TOOL_KINDS)}<a class="tbadge-l" href="#k-res">서식·자료 <span>{len(resources)}</span></a></nav>
 </section>
 {kind_secs}
+<section class="wrap ftools-page" id="k-res">
+  {sec_head("서식·자료", sub="법정 서식 원본, 엑셀·PPT 양식, 안전보건표지, 공단 자료", href="../resources/", more=f"서식·자료 {len(resources)}건 전체")}
+  <div class="ftools">
+    <a class="ftool" href="../resources/"><span class="ftool-tag">원본 바로 열기</span><strong>법정 서식·별표 {n_law}건</strong><span class="ftool-desc">산업재해조사표·선임 보고서 같은 법정 서식과 별표를 국가법령정보센터 현행 원본으로 엽니다. 상황별로 찾기.</span><span class="ftool-go">서식 찾기 →</span></a>
+    <a class="ftool" href="../resources/templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서·순회점검표·교육일지 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
+    <a class="ftool" href="../resources/signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
+    <a class="ftool" href="../resources/library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동.</span><span class="ftool-go">자료 찾기 →</span></a>
+  </div>
+</section>
 <section class="wrap ftools-page" id="catalog">
   {sec_head("법령 순서로 찾기", sub=f"산업안전보건법·중대재해처벌법 조문 순서대로 정리했습니다. 지금 바로 쓸 수 있는 것 {n_ok}개 / 전체 {n_all}개")}
   {catalog_html(catalog, "")}
