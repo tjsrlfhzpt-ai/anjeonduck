@@ -1,0 +1,151 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>첫 출근 가이드</p>
+  <h1>첫 출근 안전관리자 가이드</h1>
+  <p>현장에 막 입사했는데 무엇부터 해야 할지 모르겠다면 이 순서대로 따라가세요. 첫날 → 첫 주 → 첫 달 → 반기·연간 순서로, 확인할 것·만들 서류·근거 조문·바로 쓸 도구를 정리했습니다. 끝낸 항목을 체크하면 진행률이 이 브라우저에 저장됩니다.</p>
+</div></section>
+<div class="wrap ob-wrap">
+  <div class="ob-bar">
+    <div class="ob-prog" aria-live="polite"><span class="ob-bar-t" id="obPT">진행률</span><span class="ob-meter"><span id="obPM"></span></span><b id="obPN">0%</b></div>
+    <div class="btns"><button type="button" class="btn btn-sm" id="obPrint">체크리스트 A4 인쇄</button><button type="button" class="btn btn-sm btn-ghost" id="obReset">체크 초기화</button></div>
+  </div>
+  <!--@ONBOARD@-->
+  <p class="hint ob-more">서비스업·물류·병원 등 다른 업종 편이 필요하면 <a href="../../board/?b=free">게시판</a>에 남겨 주세요. 반영하겠습니다.</p>
+</div>
+<div class="print-only" id="obSheet"></div>
+<style>
+.ob-wrap{padding-top:18px;padding-bottom:40px}
+.ob-bar{position:sticky;top:calc(var(--hd-h) + 6px);z-index:5;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:10px 14px;box-shadow:var(--shadow-1);margin-bottom:14px}
+.ob-prog{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
+.ob-bar-t{font-size:13.5px;color:var(--text-2);white-space:nowrap}
+.ob-meter{flex:1;height:10px;border-radius:99px;background:var(--line-2);overflow:hidden;max-width:360px}
+.ob-meter span{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .25s}
+.ob-prog b{font-size:15px;color:var(--navy);min-width:42px}
+.ob-tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.ob-tab{display:flex;align-items:center;gap:12px;text-align:left;padding:14px 16px;border-radius:var(--r-lg);border:2px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer;min-height:64px}
+.ob-tab:hover{border-color:var(--blue-100)}
+.ob-tab[aria-selected="true"]{border-color:var(--blue);background:var(--blue-50)}
+.ob-tab-e{font-size:30px;line-height:1}
+.ob-tab b{display:block;font-size:17px;color:var(--navy)}
+.ob-tab small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.ob-tab-n{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--green);white-space:nowrap}
+.ob-lead{font-size:15px;line-height:1.7;color:var(--text-2);background:var(--surface-2);border-radius:var(--r);padding:12px 16px;margin-bottom:18px}
+.ob-phase{margin-bottom:26px}
+.ob-ph-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ob-no{width:30px;height:30px;border-radius:50%;background:var(--navy);color:var(--surface);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex:none}
+.ob-when{font-size:12.5px;font-weight:700;color:var(--orange);background:var(--orange-50);border-radius:99px;padding:3px 10px;white-space:nowrap}
+.ob-ph-h h3{font-size:19px;color:var(--navy);margin:0}
+.ob-grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:16px;align-items:start}
+.ob-cut{margin:0;position:sticky;top:calc(var(--hd-h) + 72px);border:3px solid var(--navy);border-radius:14px;overflow:hidden;background:var(--surface)}
+.ob-cut.has-img img{display:block;width:100%;height:auto}
+.ob-ph{position:relative;aspect-ratio:4/3;display:flex;align-items:flex-end;gap:10px;padding:14px;
+  background-color:var(--accent-50);background-image:radial-gradient(rgba(15,23,42,.10) 1.2px,transparent 1.3px);background-size:9px 9px}
+.ob-ph>img{flex:none;width:64px;height:64px}
+.ob-bub{flex:1;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.ob-say{position:relative;margin:0;background:#fff;color:#0F172A;border:2px solid #0F172A;border-radius:14px;padding:7px 11px;font-size:13.5px;line-height:1.45;font-weight:600}
+.ob-say b{display:block;font-size:11px;color:#64748B;font-weight:700}
+.ob-say:last-child::after{content:"";position:absolute;left:-9px;bottom:10px;width:12px;height:12px;background:#fff;border-left:2px solid #0F172A;border-bottom:2px solid #0F172A;transform:rotate(45deg)}
+.ob-cut figcaption{font-size:12.5px;line-height:1.55;color:var(--muted);padding:9px 12px;border-top:2px dashed var(--line)}
+.ob-cutno{display:block;font-size:11.5px;font-weight:700;color:var(--text-2);margin-bottom:2px}
+.ob-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ob-step{display:flex;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;transition:background .15s,border-color .15s}
+.ob-step.done{background:var(--surface-2);border-color:var(--green)}
+.ob-step.done h4{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.ob-chk{flex:none;display:flex;align-items:flex-start;padding-top:2px;cursor:pointer}
+.ob-chk input{width:22px;height:22px;accent-color:var(--green);cursor:pointer;margin:0}
+.ob-body{min-width:0}
+.ob-body h4{font-size:15.5px;color:var(--navy);margin:0 0 4px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.ob-body p{margin:0;font-size:14px;line-height:1.65;color:var(--text-2)}
+.ob-cond,.ob-prac{font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 7px}
+.ob-cond{color:var(--blue-600);background:var(--blue-50)}
+.ob-prac{color:var(--muted);background:var(--line-2)}
+.ob-body .ob-basis{font-size:12.5px;color:var(--muted);margin-top:5px}
+.ob-links{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:6px!important}
+.ob-links a{font-size:13.5px;font-weight:600;color:var(--blue)}
+.ob-end .ob-next{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.ob-next h3{font-size:17px;color:var(--navy);margin:0 0 6px}
+.ob-next p{margin:0;font-size:14px;line-height:1.7;color:var(--text-2)}
+.ob-src{margin-top:8px}
+.ob-more{margin-top:10px}
+@media (max-width:820px){
+  .ob-grid{grid-template-columns:1fr}
+  .ob-cut{position:static;max-width:420px}
+}
+@media (max-width:560px){
+  .ob-tabs{grid-template-columns:1fr}
+  .ob-bar{position:static}
+  .ob-tab small{display:none}
+}
+@media print{
+  .phead,.ob-wrap{display:none!important}
+  #obSheet{display:block!important;color:#000;font-size:10pt}
+  #obSheet h1{font-size:15pt;color:#000;margin-bottom:2mm}
+  #obSheet h2{font-size:11.5pt;margin:4mm 0 1.5mm;color:#000}
+  #obSheet table{width:100%;border-collapse:collapse}
+  #obSheet th,#obSheet td{border:1px solid #555;padding:1.4mm 2mm;vertical-align:top;font-size:9pt;color:#000}
+  #obSheet th{background:#eee}
+  #obSheet .c{width:8mm;text-align:center;font-size:11pt}
+}
+</style>
+<script>
+(function () {
+  "use strict";
+  var KEY = "safeplum.firstjob", st = {};
+  try { st = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { st = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function $(id) { return document.getElementById(id); }
+  var tabs = [].slice.call(document.querySelectorAll(".ob-tab")), panes = [].slice.call(document.querySelectorAll(".ob-pane"));
+  var cur = (st._ed && panes.some(function (p) { return p.dataset.ed === st._ed; })) ? st._ed : panes[0].dataset.ed;
+  var q = new URLSearchParams(location.search).get("ind") || (location.hash || "").replace("#", "").split("-")[0];
+  if (q && panes.some(function (p) { return p.dataset.ed === q; })) cur = q;
+  function show(ed, focus) {
+    cur = ed; st._ed = ed; save();
+    tabs.forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.ed === ed)); });
+    panes.forEach(function (p) { p.hidden = p.dataset.ed !== ed; });
+    try { history.replaceState(null, "", "?ind=" + ed + (location.hash && location.hash.indexOf(ed + "-") === 1 ? location.hash : "")); } catch (e) {}
+    if (focus) document.querySelector('.ob-tab[data-ed="' + ed + '"]').focus();
+    prog();
+  }
+  function prog() {
+    tabs.forEach(function (t) {
+      var p = $("obp-" + t.dataset.ed), all = p.querySelectorAll(".ob-step").length, done = p.querySelectorAll(".ob-step.done").length;
+      t.querySelector(".ob-tab-n").textContent = done + " / " + all;
+      if (t.dataset.ed === cur) { var pct = all ? Math.round(done * 100 / all) : 0; $("obPN").textContent = pct + "%"; $("obPM").style.width = pct + "%"; $("obPT").textContent = t.querySelector("b").textContent + " 진행률"; }
+    });
+  }
+  [].forEach.call(document.querySelectorAll(".ob-step input"), function (c) {
+    var li = c.closest(".ob-step"); c.checked = !!st[c.dataset.id]; li.classList.toggle("done", c.checked);
+    c.addEventListener("change", function () { if (c.checked) st[c.dataset.id] = 1; else delete st[c.dataset.id]; li.classList.toggle("done", c.checked); save(); prog(); });
+  });
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { show(t.dataset.ed); });
+    t.addEventListener("keydown", function (ev) {
+      if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft" && ev.key !== "ArrowDown" && ev.key !== "ArrowUp") return;
+      ev.preventDefault(); var n = tabs[(i + (ev.key === "ArrowRight" || ev.key === "ArrowDown" ? 1 : tabs.length - 1)) % tabs.length]; show(n.dataset.ed, true);
+    });
+  });
+  $("obReset").addEventListener("click", function () {
+    if (!confirm("이 업종 편에서 체크한 내용을 모두 지울까요?")) return;
+    Object.keys(st).forEach(function (k) { if (k.indexOf(cur + "-") === 0) delete st[k]; }); save();
+    [].forEach.call($("obp-" + cur).querySelectorAll(".ob-step input"), function (c) { c.checked = false; c.closest(".ob-step").classList.remove("done"); });
+    prog();
+  });
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  $("obPrint").addEventListener("click", function () {
+    var p = $("obp-" + cur), title = document.querySelector('.ob-tab[data-ed="' + cur + '"] b').textContent;
+    var html = "<h1>첫 출근 안전관리자 체크리스트 — " + esc(title) + "</h1><p>작성일 " + new Date().toLocaleDateString("ko-KR") + " · 진행률 " + $("obPN").textContent + "</p>";
+    [].forEach.call(p.querySelectorAll(".ob-phase:not(.ob-end)"), function (ph) {
+      html += "<h2>" + esc(ph.querySelector(".ob-when").textContent) + " · " + esc(ph.querySelector("h3").textContent) + '</h2><table><thead><tr><th class="c">✓</th><th style="width:32%">할 일</th><th>근거</th></tr></thead><tbody>';
+      [].forEach.call(ph.querySelectorAll(".ob-step"), function (s) {
+        var h = s.querySelector("h4").cloneNode(true), tags = [].map.call(h.querySelectorAll("span"), function (x) { return x.textContent; });
+        [].forEach.call(h.querySelectorAll("span"), function (x) { x.remove(); });
+        html += '<tr><td class="c">' + (s.classList.contains("done") ? "☑" : "☐") + "</td><td>" + esc(h.textContent) + (tags.length ? " <small>(" + esc(tags.join(", ")) + ")</small>" : "") + "</td><td>" + esc(s.querySelector(".ob-basis").textContent.replace(/^근거 · /, "")) + "</td></tr>";
+      });
+      html += "</tbody></table>";
+    });
+    html += '<p style="margin-top:3mm;font-size:8.5pt">' + esc(document.querySelector(".ob-src").textContent) + "</p>";
+    $("obSheet").innerHTML = html; window.print();
+  });
+  show(cur);
+  if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+})();
+</script>

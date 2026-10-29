@@ -380,7 +380,7 @@ SITUATIONS = [
 CAT_RANK = {"무료 작성 도구": 0, "웹 작성 서식": 1, "법정 서식": 2, "고시·지침": 3, "법정 기준표(별표)": 4}
 
 
-SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["selection", "duties", "committee"], "교육": ["edu-hours", "edu-monthly"], "점검·작업허가": ["improve", "docmap", "inspect", "loto", "rule-sign", "top-rules"],
+SIT_TOOLS = {"재해·중대재해": [], "선임·관리체제": ["first-job", "selection", "duties", "committee"], "교육": ["edu-hours", "edu-monthly"], "점검·작업허가": ["improve", "docmap", "inspect", "loto", "rule-sign", "top-rules"],
              "위험성평가·TBM": ["risk", "tbm"], "도급·건설": ["council", "safety-cost", "cost-use", "hpp"], "기계·설비 인증·검사": ["machines", "gear-cert", "inspect"],
              "화학물질·석면": ["msds"], "작업환경·건강": ["heat", "confined", "cvd"]}
 
@@ -865,11 +865,11 @@ LAW_MENU = [("act", "산업안전보건법"), ("yeong", "산안법 시행령"), 
             ("sapa", "중대재해처벌법"), ("sapa_dec", "중대재해처벌법 시행령")]
 
 
-TOOL_ICONS = {"tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "edu-monthly": "📅", "law-register": "📚", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "top-rules": "📌", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
+TOOL_ICONS = {"first-job": "🐣", "tbm": "📋", "risk": "⚠️", "committee": "🤝", "council": "🧑‍🤝‍🧑", "joint": "🔍", "patrol": "🚶", "edu-log": "🎓", "edu-monthly": "📅", "law-register": "📚", "permit": "🔥", "msds": "🧪", "loto": "🔒", "rule-sign": "🪧", "top-rules": "📌", "heat": "🌡️", "improve": "📷", "confined": "🫁", "selection": "⚖️", "hpp": "🏭",
               "machines": "⚙️", "penalty": "💸", "safety-cost": "🏗️", "cost-use": "🧾", "headcount": "👥", "edu-hours": "🎓", "cvd": "❤️", "schedule": "🗓️",
               "duties": "🧑‍💼", "ai": "✨", "law-ai": "⚖️", "gear-cert": "⛑️", "retention": "🗄️", "inspect": "🔎", "docmap": "🗂️", "forms": "📝"}
 # 도구 카드 아이콘(assets/img/ico/*.webp). 캐릭터 컷(assets/img/plum/)은 홈 상단·안내 화면에 쓴다.
-TOOL_DUCKS = {"tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "edu-monthly": "book", "law-register": "folder", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "top-rules": "salute", "heat": "heat", "improve": "fix", "confined": "confined",
+TOOL_DUCKS = {"first-job": "helmet", "tbm": "tbm", "risk": "warning", "committee": "chat", "council": "flag", "joint": "ok", "patrol": "vest", "edu-log": "idea", "edu-monthly": "book", "law-register": "folder", "permit": "fire", "msds": "msds", "loto": "loto", "rule-sign": "flag", "top-rules": "salute", "heat": "heat", "improve": "fix", "confined": "confined",
               "selection": "shield", "penalty": "calc", "hpp": "bell", "machines": "process", "safety-cost": "helmet", "cost-use": "helmet", "edu-hours": "book", "headcount": "mascot", "cvd": "plum",
               "schedule": "calendar", "duties": "briefcase", "ai": "book", "law-ai": "book", "gear-cert": "helmet", "retention": "folder", "inspect": "search", "docmap": "audit"}
 # 기능·완성도가 높은 작성기부터(홈 '자주 쓰는 작성기'·메뉴 순서)
@@ -879,7 +879,7 @@ HOME_WRITE_FORMS = [("log-safety", "salute", "안전·보건관리자 업무일�
                     ("workplan", "folder", "작업계획서", "지게차·중량물·고소작업대 등 작업 종류를 골라 별표 4 사항대로 작성합니다", "안전보건규칙 제38조"),
                     ("accident", "alarm"), ("ppe-ledger", "goggles")]
 CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hours", "headcount", "cvd"]
-LOOKUP_TOOLS = ["ai", "law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
+LOOKUP_TOOLS = ["first-job", "ai", "law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
 NAV4 = [("lib", "자료실", "resources/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "jobs/"), ("board", "게시판", "board/")]
@@ -1768,6 +1768,50 @@ def tool_ld(t, site):
     return '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + "</script>"
 
 
+def onboard_cut(c, rel, edition_title):
+    """만화 컷. assets/img/guide/{id}.webp 가 있으면 그림, 없으면 장면 설명·대사를 담은 자리 표시(그림 준비 중)."""
+    lines = "".join(f'<p class="ob-say"><b>{e(x.split(":", 1)[0])}</b>{e(x.split(":", 1)[1]) if ":" in x else ""}</p>' for x in c.get("lines", []))
+    img = ROOT / f"assets/img/guide/{c['id']}.webp"
+    if img.exists():
+        alt = c["scene"]
+        return (f'<figure class="ob-cut has-img"><img src="{rel}assets/img/guide/{e(c["id"])}.webp?v={ASSET_VER}" width="800" height="600" alt="{e(alt)}" loading="lazy">'
+                f'<figcaption class="sr">{lines}</figcaption></figure>')
+    return (f'<figure class="ob-cut" data-cut="{e(c["id"])}"><div class="ob-ph"><img src="{rel}assets/img/ico/mascot.webp" width="64" height="64" alt="" loading="lazy">'
+            f'<div class="ob-bub">{lines}</div></div><figcaption><span class="ob-cutno">{e(edition_title)} 컷 {e(c["id"])}</span>{e(c["scene"])}</figcaption></figure>')
+
+
+def onboard_html(rel):
+    """첫 출근 가이드 본문(검색엔진·JS 없는 환경에서도 읽히도록 빌드 때 HTML로 만든다)."""
+    d = load("data/onboarding.json")
+    def href(h):
+        return rel + urllib.parse.quote(h, safe="/?=&#:%")
+    tabs, panes = [], []
+    for k, ed in enumerate(d["editions"]):
+        n = sum(len(p["steps"]) for p in ed["phases"])
+        tabs.append(f'<button type="button" role="tab" class="ob-tab" id="obt-{e(ed["id"])}" data-ed="{e(ed["id"])}" aria-controls="obp-{e(ed["id"])}" aria-selected="{"true" if k == 0 else "false"}">'
+                    f'<span class="ob-tab-e" aria-hidden="true">{ed["emoji"]}</span><span><b>{e(ed["title"])}</b><small>{e(ed["who"])}</small></span>'
+                    f'<span class="ob-tab-n" data-n="{n}">0 / {n}</span></button>')
+        phases = []
+        for pi, p in enumerate(ed["phases"], 1):
+            steps = []
+            for si, s in enumerate(p["steps"], 1):
+                sid = f'{ed["id"]}-{p["id"]}-{si}'
+                badges = (f'<span class="ob-cond">{e(s["cond"])}</span>' if s.get("cond") else "") + ('<span class="ob-prac">실무 권장</span>' if s.get("practice") else "")
+                links = "".join(f'<a href="{href(h)}">{e(lb)} →</a>' for lb, h in s.get("links", []))
+                steps.append(f'<li class="ob-step" data-id="{e(sid)}"><label class="ob-chk"><input type="checkbox" data-id="{e(sid)}"><span class="sr">완료 표시</span></label>'
+                             f'<div class="ob-body"><h4>{e(s["t"])}{badges}</h4><p>{e(s["d"])}</p><p class="ob-basis">근거 · {e(s["basis"])}</p>'
+                             + (f'<p class="ob-links">{links}</p>' if links else "") + "</div></li>")
+            phases.append(f'<section class="ob-phase" id="{e(ed["id"])}-{e(p["id"])}"><header class="ob-ph-h"><span class="ob-no">{pi}</span><span class="ob-when">{e(p["when"])}</span><h3>{e(p["title"])}</h3></header>'
+                          f'<div class="ob-grid">{onboard_cut(p["cut"], rel, ed["title"])}<ol class="ob-steps">{"".join(steps)}</ol></div></section>')
+        end = ed.get("end")
+        panes.append(f'<div class="ob-pane" role="tabpanel" id="obp-{e(ed["id"])}" aria-labelledby="obt-{e(ed["id"])}" data-ed="{e(ed["id"])}"{"" if k == 0 else " hidden"}>'
+                     f'<p class="ob-lead">{e(ed["lead"])}</p>' + "".join(phases)
+                     + (f'<section class="ob-phase ob-end"><div class="ob-grid">{onboard_cut(end, rel, ed["title"])}<div class="ob-next"><h3>다음은?</h3><p>체크한 내용은 이 브라우저에만 저장됩니다. 빠진 서류는 <a href="{rel}tools/docmap/">서류 자가점검</a>으로 다시 확인하고, 막히는 내용은 <a href="{rel}board/?b=qna">Q&amp;A 게시판</a>이나 <a href="{rel}laws/qa/">고용노동부 질의회시</a>에서 찾아보세요.</p></div></div></section>' if end else "")
+                     + "</div>")
+    return (f'<div class="ob-tabs" role="tablist" aria-label="업종 선택">{"".join(tabs)}</div>' + "".join(panes)
+            + f'<p class="src-line ob-src">정리 {e(d["checked"])} · {e(d["note"])}</p>')
+
+
 LAWREG_KEYS = ["act", "yeong", "rule", "krule", "sapa", "sapa_dec"]
 
 
@@ -1828,6 +1872,8 @@ def render_free_tool(t, hazards, site=None, penalties=None):
             src = inject_data(src, names, t["src"])
         if "/*@LAWREG@*/null" in src:
             src = src.replace("/*@LAWREG@*/null", json.dumps(lawreg_index(), ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
+        if "<!--@ONBOARD@-->" in src:
+            src = src.replace("<!--@ONBOARD@-->", onboard_html("../../"))
         if "/*@EDU_CASES@*/null" in src:
             src = src.replace("/*@EDU_CASES@*/null", json.dumps(EDU_CASES, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
         src += dl_section("../../", tool=t["id"]) + lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
@@ -2205,6 +2251,7 @@ def build(out, today):
     <div class="dx-cards">
       <a class="dx-card" href="tools/hpp/"><span class="i" aria-hidden="true"><img src="assets/img/ico/bell.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>유해위험방지계획서, 내야 하나?</b><span>공장 설치·증설 300kW·100kW, 위험 설비, 건설공사</span></span><span class="arr" aria-hidden="true">→</span></a>
       <a class="dx-card" href="tools/machines/"><span class="i" aria-hidden="true"><img src="assets/img/ico/process.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>이 기계, 무슨 의무가 있지?</b><span>안전인증·자율안전확인·안전검사·방호조치 31종</span></span><span class="arr" aria-hidden="true">→</span></a>
+      <a class="dx-card" href="tools/first-job/"><span class="i" aria-hidden="true"><img src="assets/img/ico/helmet.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>처음 입사했는데 뭐부터 하지?</b><span>첫 출근 가이드 · 건설업 편 · 제조업 편 (서류·순서·근거)</span></span><span class="arr" aria-hidden="true">→</span></a>
       <a class="dx-card" href="tools/docmap/"><span class="i" aria-hidden="true"><img src="assets/img/ico/audit.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>감독 오면 서류 다 있나?</b><span>업무 12가지 서류 자가점검 · 준비율 계산</span></span><span class="arr" aria-hidden="true">→</span></a>
     </div>
   </div>
@@ -2369,7 +2416,7 @@ def build(out, today):
         return f'<em class="go-bdg">{e(x["badge"])}</em>' if x.get("badge") else ""
     civil = "".join(f'<li><a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener" title="{e(x.get("desc", ""))}"><span>{e(x["name"])}{go_badge(x)}</span> <span aria-hidden="true">↗</span></a></li>' for x in sites.get("civil", []) if safe_url(x.get("url")))
     orgs = "".join(f'<a href="{e(safe_url(x["url"]))}" target="_blank" rel="noopener">{e(x.get("short") or x["name"])}</a>' for x in sites.get("official", []) + sites.get("quick", []) if safe_url(x.get("url")))
-    chips = "".join(f'<a class="qk" href="{h}">{e(k)}</a>' for k, h in [("TBM 일지", "tools/tbm/"), ("위험성평가", "tools/risk/"), ("적용범위 판정", "tools/selection/"), ("과태료", "tools/penalty/"), ("산업재해조사표", "resources/?q=" + quote("산업재해조사표")), ("MSDS 경고표지", "tools/msds/")])
+    chips = "".join(f'<a class="qk" href="{h}">{e(k)}</a>' for k, h in [("첫 출근 가이드", "tools/first-job/"), ("TBM 일지", "tools/tbm/"), ("위험성평가", "tools/risk/"), ("적용범위 판정", "tools/selection/"), ("과태료", "tools/penalty/"), ("산업재해조사표", "resources/?q=" + quote("산업재해조사표")), ("MSDS 경고표지", "tools/msds/")])
     home_js = """<script>
 (function () {
   var IDX = /*IDX*/[];
