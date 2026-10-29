@@ -1384,8 +1384,13 @@ def jobs_today_text(site, jobs, today):
     out = [f"🔥 오늘의 안전·보건 채용 ({d.month}월 {d.day}일 · 마감 전 {len(pick)}건)",
            "대기업·공공기관·외국계·중견기업 등 주요 기관의 안전·보건 공고 중 마감 전 공고를 모았습니다.",
            f"👉 전체 보기: {base}/jobs/today/", ""]
-    for sec in TODAY_SECTORS + ["기타"]:
-        items = [j for j in pick if (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]
+    # 전날(또는 오늘) 새로 올라온 공고는 맨 위에 따로 모으고, 업종 묶음에서는 뺀다
+    yday = (d - dt.timedelta(days=1)).isoformat()
+    fresh = [j for j in pick if str(j.get("posted") or "") >= yday]
+    rest = [j for j in pick if j not in fresh]
+    blocks = ([(f"🆕 새로 올라온 공고 {len(fresh)}건 ({int(yday[5:7])}/{int(yday[8:10])}~)", fresh)] if fresh else []) + \
+        [(f"■ {sec}", [j for j in rest if (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]) for sec in TODAY_SECTORS + ["기타"]]
+    for sec, items in blocks:
         if not items:
             continue
         # 같은 회사·같은 마감의 지역별 공고는 한 줄로
@@ -1397,7 +1402,7 @@ def jobs_today_text(site, jobs, today):
             else:
                 seen[k] = {"j": j, "more": []}
                 groups.append(seen[k])
-        out.append(f"■ {sec}")
+        out.append(sec)
         for g in groups:
             j = g["j"]
             def city(x):
@@ -1430,8 +1435,12 @@ def jobs_today_body(site, jobs, today):
     pick = jobs_today_pick(jobs, today)
     d = dt.date.fromisoformat(today)
     secs = ""
+    yday = (d - dt.timedelta(days=1)).isoformat()
+    fresh = [j for j in pick if str(j.get("posted") or "") >= yday]
+    if fresh:
+        secs += f'<section class="block jt-sec jt-new"><h2>🆕 새로 올라온 공고 <span class="muted">{len(fresh)} · {int(yday[5:7])}/{int(yday[8:10])} 이후 등록</span></h2><ul class="jlist">' + "".join(job_row(j, "../../") for j in fresh) + "</ul></section>"
     for sec in TODAY_SECTORS + ["기타"]:
-        items = [j for j in pick if (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]
+        items = [j for j in pick if j not in fresh and (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]
         if items:
             secs += f'<section class="block jt-sec"><h2>{e(sec)} <span class="muted">{len(items)}</span></h2><ul class="jlist">' + "".join(job_row(j, "../../") for j in items) + "</ul></section>"
     text = jobs_today_text(site, jobs, today)
