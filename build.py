@@ -1774,7 +1774,8 @@ def onboard_cut(c, rel, edition_title):
     img = ROOT / f"assets/img/guide/{c['id']}.webp"
     if img.exists():
         alt = c["scene"]
-        return (f'<figure class="ob-cut has-img"><img src="{rel}assets/img/guide/{e(c["id"])}.webp?v={ASSET_VER}" width="800" height="600" alt="{e(alt)}" loading="lazy">'
+        src = f'{rel}assets/img/guide/{e(c["id"])}.webp?v={ASSET_VER}'
+        return (f'<figure class="ob-cut has-img"><a href="{src}" target="_blank" rel="noopener" title="크게 보기"><img src="{src}" width="1200" height="896" alt="{e(alt)}" loading="lazy"></a>'
                 f'<figcaption class="sr">{lines}</figcaption></figure>')
     return (f'<figure class="ob-cut" data-cut="{e(c["id"])}"><div class="ob-ph"><img src="{rel}assets/img/ico/mascot.webp" width="64" height="64" alt="" loading="lazy">'
             f'<div class="ob-bub">{lines}</div></div><figcaption><span class="ob-cutno">{e(edition_title)} 컷 {e(c["id"])}</span>{e(c["scene"])}</figcaption></figure>')
