@@ -20,7 +20,8 @@
 .ob-meter{flex:1;height:10px;border-radius:99px;background:var(--line-2);overflow:hidden;max-width:360px}
 .ob-meter span{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .25s}
 .ob-prog b{font-size:15px;color:var(--navy);min-width:42px}
-.ob-tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.ob-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+@media (max-width:980px){.ob-tabs{grid-template-columns:1fr}.ob-tab{min-height:56px;padding:10px 14px}}
 .ob-tab{display:flex;align-items:center;gap:12px;text-align:left;padding:14px 16px;border-radius:var(--r-lg);border:2px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer;min-height:64px}
 .ob-tab:hover{border-color:var(--blue-100)}
 .ob-tab[aria-selected="true"]{border-color:var(--blue);background:var(--blue-50)}

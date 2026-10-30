@@ -2284,7 +2284,7 @@ def build(out, today):
     <div class="dx-cards">
       <a class="dx-card" href="tools/hpp/"><span class="i" aria-hidden="true"><img src="assets/img/ico/bell.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>유해위험방지계획서, 내야 하나?</b><span>공장 설치·증설 300kW·100kW, 위험 설비, 건설공사</span></span><span class="arr" aria-hidden="true">→</span></a>
       <a class="dx-card" href="tools/machines/"><span class="i" aria-hidden="true"><img src="assets/img/ico/process.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>이 기계, 무슨 의무가 있지?</b><span>안전인증·자율안전확인·안전검사·방호조치 31종</span></span><span class="arr" aria-hidden="true">→</span></a>
-      <a class="dx-card" href="tools/first-job/"><span class="i" aria-hidden="true"><img src="assets/img/ico/helmet.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>처음 입사했는데 뭐부터 하지?</b><span>첫 출근 가이드 · 건설업 편 · 제조업 편 (서류·순서·근거)</span></span><span class="arr" aria-hidden="true">→</span></a>
+      <a class="dx-card" href="tools/first-job/"><span class="i" aria-hidden="true"><img src="assets/img/ico/helmet.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>처음 입사했는데 뭐부터 하지?</b><span>첫 출근 가이드 · 건설업·제조업·서비스업 편 (서류·순서·근거)</span></span><span class="arr" aria-hidden="true">→</span></a>
       <a class="dx-card" href="tools/docmap/"><span class="i" aria-hidden="true"><img src="assets/img/ico/audit.webp" width="40" height="40" alt="" loading="lazy"></span><span><b>감독 오면 서류 다 있나?</b><span>업무 12가지 서류 자가점검 · 준비율 계산</span></span><span class="arr" aria-hidden="true">→</span></a>
     </div>
   </div>
