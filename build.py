@@ -1877,7 +1877,7 @@ def render_free_tool(t, hazards, site=None, penalties=None):
             src = src.replace("<!--@ONBOARD@-->", onboard_html("../../"))
         if "/*@EDU_CASES@*/null" in src:
             src = src.replace("/*@EDU_CASES@*/null", json.dumps(EDU_CASES, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
-        src += dl_section("../../", tool=t["id"]) + lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
+        src += dl_section("../../", tool=t["id"]) + more_tools("../../", t["id"]) + lawver_html(t["id"], "../../", t.get("law", "")) + tool_ld(t, site)
         return page(site, "../../", f"tools/{t['id']}/", t["name"] + (" · 무료 양식" if t.get("cat") == "작성기" else ""), src, desc=t.get("desc"), active="tools/")
     if t.get("inject") == "hazards":
         payload = json.dumps(hazards, ensure_ascii=False).replace("</", "<\\/")
@@ -1893,17 +1893,20 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         src = src.replace("</head>", og_image_tags(site) + "\n" + tool_ld(t, site) + "\n</head>", 1)
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
+    if ">← SafePlum</a>" in src:   # 단독 화면 맨 위 'SafePlum' 링크 옆에 작성기 전체 바로가기(좁은 화면에서는 화면 아래 묶음만)
+        src = src.replace(">← SafePlum</a>", f'>← SafePlum</a><a href="../forms/" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">다른 무료 작성기 {WRITER_N}종 →</a>'
+                          '<style>@media (max-width:640px){.sp-alltools{display:none!important}}@media print{.sp-alltools{display:none!important}}</style>', 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
         note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 실무용 보조양식 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
                 f'법령 데이터 기준일 {e(manifest().get("checked_at", ""))}</p>')
         assert "</body>" in src
         src = src.replace("</body>", note + "</body>", 1)
-    _dl = dl_section("../../", tool=t["id"])
+    _dl = dl_section("../../", tool=t["id"]) + more_tools("../../", t["id"])
     if _dl:   # 화면 높이에 맞춘 작성기(본문 스크롤 없음)는 입력 칸 영역 맨 아래로 옮겨 작성 화면을 줄이지 않는다
-        _dl += ('<script>(function(){var s=document.querySelector(".spdl");if(!s||getComputedStyle(document.body).overflow!=="hidden")return;'
+        _dl += ('<script>(function(){var ss=[].slice.call(document.querySelectorAll(".spdl,.spmt"));if(!ss.length||getComputedStyle(document.body).overflow!=="hidden")return;'
                 'var p=[].slice.call(document.querySelectorAll(".no-print")).filter(function(x){return /(auto|scroll)/.test(getComputedStyle(x).overflowY);})[0];'
-                'if(p){s.style.margin="20px 0 8px";s.style.padding="0 4px";p.appendChild(s);}})();</script>')
+                'if(p)ss.forEach(function(s){s.style.margin="20px 0 8px";s.style.padding=s.classList.contains("spmt")?"16px 4px 4px":"0 4px";p.appendChild(s);});})();</script>')
         assert "</body>" in src
         src = src.replace("</body>", _dl + "</body>", 1)
     return src.replace('assets/ai.js"', f'assets/ai.js?v={ASSET_VER}"')
@@ -2002,6 +2005,35 @@ def dl_card(x, rel):
             f'<div class="spdl-b"><p class="spdl-k{" pp" if pp else ""}">{e(x["kind"])} 양식 · 무료</p><strong>{e(x["title"])}</strong>'
             f'<p class="spdl-d">{e(x["desc"])}</p><p class="spdl-p">들어 있는 것: {e(" · ".join(x.get("parts") or []))}</p>'
             f'<a class="spdl-a" href="{rel}{e(x["file"])}" download="{e(x["dl"])}">내려받기 (.{e(x["ext"])} · {dl_size(x["size"])})</a></div></article>')
+
+
+# 작성기 화면 아래 '다른 무료 작성기' 묶음. 작성기 링크로 바로 들어온 사람이 다른 도구가 있는 줄 모르는 문제 → 화면 아래에 대표 작성기 바로가기를 둔다(인쇄 제외)
+MORE_TOOLS = [("risk", "tools/risk/", "warning", "위험성평가서"), ("tbm", "tools/tbm/", "tbm", "TBM 일지"), ("permit", "tools/permit/", "fire", "안전작업허가서"),
+              ("edu-log", "tools/edu-log/", "idea", "교육일지·서명부"), ("edu-monthly", "tools/edu-monthly/", "book", "월별 정기교육 자료"), ("patrol", "tools/patrol/", "vest", "순회점검 일지"),
+              ("committee", "tools/committee/", "chat", "산보위 회의록"), ("council", "tools/council/", "flag", "협의체 회의록"), ("joint", "tools/joint/", "ok", "합동 안전·보건점검"),
+              ("workplan", "tools/forms/workplan/", "process", "작업계획서"), ("pre", "tools/forms/#pre", "audit", "작업시작 전 점검표"), ("msds", "tools/msds/", "msds", "MSDS·경고표지"),
+              ("accident", "tools/forms/accident/", "alarm", "재해·아차사고 조사"), ("first-job", "tools/first-job/", "helmet", "첫 출근 가이드")]
+MORE_CSS = ('<style>.spmt{max-width:1000px;margin:24px auto 16px;padding:18px 16px 20px;border-top:1px solid var(--line,#E2E8F0);color:var(--text,#0F172A);font-family:inherit}'
+            '.spmt-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 14px;margin:0 0 12px}'
+            '.spmt h2{font-size:17px;font-weight:800;margin:0;color:var(--text,#0F172A)}.spmt-s{font-size:13px;color:var(--muted,#64748B);margin:4px 0 0}'
+            '.spmt-s b{color:var(--blue,#1D4ED8)}'
+            '.spmt-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:0;padding:0;list-style:none}'
+            '.spmt-g a{display:flex;align-items:center;gap:8px;min-height:48px;padding:6px 10px;border:1px solid var(--line,#E2E8F0);border-radius:10px;background:var(--surface,#fff);'
+            'color:var(--text,#0F172A)!important;font-size:13.5px;font-weight:700;line-height:1.3;text-decoration:none!important}'
+            '.spmt-g a:hover{border-color:var(--blue,#1D4ED8);color:var(--blue,#1D4ED8)!important}.spmt-g img{width:32px;height:32px;flex:none}'
+            '.spmt-all{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:10px;background:var(--blue,#1D4ED8);color:#fff!important;font-size:14px;font-weight:700;text-decoration:none!important;white-space:nowrap}'
+            '.spmt-all:hover{filter:brightness(1.08)}'
+            '@media print{.spmt{display:none!important}}</style>')
+
+
+def more_tools(rel, cur=None, n=8):
+    """다른 무료 작성기 바로가기(지금 화면은 빼고 n개). 인쇄에는 나오지 않는다."""
+    items = [x for x in MORE_TOOLS if x[0] != cur][:n]
+    cards = "".join(f'<li><a href="{rel}{h}"><img src="{rel}assets/img/ico/{ic}.webp" width="32" height="32" alt="" loading="lazy">{e(nm)}</a></li>' for _, h, ic, nm in items)
+    total = f"{WRITER_N}종" if WRITER_N else ""
+    return (MORE_CSS + f'<section class="spmt" aria-label="다른 무료 작성기"><div class="spmt-h"><div><h2>다른 무료 작성기도 있어요</h2>'
+            f'<p class="spmt-s">회원가입 없이 바로 작성·인쇄 · <b>safeplum.com</b></p></div>'
+            f'<a class="spmt-all" href="{rel}tools/forms/">작성기 전체 {total} 보기 →</a></div><ul class="spmt-g">{cards}</ul></section>')
 
 
 def dl_section(rel, tool=None, form=None):
@@ -3395,7 +3427,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     groups, forms = all_forms(lawref)
     form_src = (ROOT / "apps/form.body.html").read_text(encoding="utf-8")
     for f in forms:
-        body = form_src.replace("/*@DATA@*/null", json.dumps(f, ensure_ascii=False).replace("</", "<\\/")) + dl_section("../../../", form=f["id"]) + lawver_html("forms", "../../../")
+        body = form_src.replace("/*@DATA@*/null", json.dumps(f, ensure_ascii=False).replace("</", "<\\/")) + dl_section("../../../", form=f["id"]) + more_tools("../../../", f["id"]) + lawver_html("forms", "../../../")
         write(f"tools/forms/{f['id']}/index.html", page(site, "../../../", f"tools/forms/{f['id']}/", f["title"], body, desc=f.get("desc"), active="tools/"))
     # ---- 작업계획서 선택 화면: 작업 종류를 고르면 해당 작업계획서 작성기로 간다
     _fb = {f["id"]: f for f in forms}
@@ -3422,7 +3454,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
   <p><b>이 작성기의 지위</b> — 법령에 별지 서식이 정해져 있지 않아 별표 4 포함 사항을 담아 만든 실무용 보조양식입니다. 양식을 채운 것만으로 의무를 다했다고 볼 수는 없으며, 실제 사전조사와 계획에 따른 작업이 함께 이뤄져야 합니다.</p>
   <p class="src-line">원문: 산업안전보건기준에 관한 규칙 제38조·제39조, 별표 4 — <a href="{e(law_url("산업안전보건기준에 관한 규칙"))}" target="_blank" rel="noopener">국가법령정보센터 ↗</a></p>
 </div></section>
-{dl_section("../../../", form="workplan")}"""
+{dl_section("../../../", form="workplan")}{more_tools("../../../", "workplan")}"""
     write("tools/forms/workplan/index.html", page(site, "../../../", "tools/forms/workplan/", "작업계획서 — 작업 종류 선택", wp_body,
                                                   desc="지게차·중량물·고소작업대·굴착기 등 안전보건규칙 제38조 작업계획서 14종을 작업 종류별로 골라 무료로 작성·인쇄. 별표 4 포함 사항 반영.", active="tools/"))
     # ---- 무료 양식 내려받기 모음
