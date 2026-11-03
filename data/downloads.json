@@ -255,6 +255,25 @@
    ]
   },
   {
+   "id": "committee_min",
+   "title": "산업안전보건위원회 회의록",
+   "kind": "엑셀",
+   "file": "assets/files/templates/SafePlum_committee_minutes.xlsx",
+   "dl": "SafePlum_산업안전보건위원회_회의록.xlsx",
+   "preview": "assets/files/templates/preview/SafePlum_committee_minutes.jpg",
+   "desc": "개최 일시·장소, 출석위원(근로자·사용자위원 각 과반수 출석 자동 판정), 법 제24조제2항 심의·의결 안건 9가지(원문), 그 밖의 토의사항, 지난 의결 이행 확인, 근로자 공지까지 시행령 제37조 회의록 항목을 A4 한 장에 담았습니다.",
+   "parts": [
+    "회의록(A4 한 장)",
+    "연간 개최 현황(분기 미개최 표시)",
+    "의결 사항 이행 관리대장(기한 경과 표시)",
+    "작성 안내"
+   ],
+   "tools": [
+    "committee"
+   ],
+   "forms": []
+  },
+  {
    "id": "committee",
    "title": "산업안전보건위원회 회의 자료",
    "kind": "PowerPoint",

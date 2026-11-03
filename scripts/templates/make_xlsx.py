@@ -1049,6 +1049,139 @@ def council():
 
 
 # =====================================================================
+# 10-2. 산업안전보건위원회 회의록 + 연간 개최 현황 + 의결 사항 이행 관리대장
+# =====================================================================
+def committee():
+    import re
+    act = {a["jo"]: a["text"] for a in json.load(open(ROOT / "data/lawtext/act.json", encoding="utf-8"))["articles"]}
+    a15 = act["제15조"]
+    hs = {int(m.group(1)): m.group(2).strip() for m in re.finditer(r"^(\d)\. (.+)$", a15, re.M)}
+    assert all(k in hs for k in (1, 2, 3, 4, 5, 6, 7)), hs
+    clean = lambda t: re.sub(r"제\d+조(?:부터 제\d+조까지| 및 제\d+조)?에 따른 ", "", t)
+    agenda = [(f"법 제15조제1항제{k}호", clean(hs[k])) for k in (1, 2, 3, 4, 5, 7)]
+    agenda += [("제24조제2항제2호", "산업재해의 원인 조사 및 재발 방지대책 수립 중 중대재해에 관한 사항"),
+               ("제24조제2항제3호", "유해하거나 위험한 기계·기구·설비를 도입한 경우 안전 및 보건 관련 조치"),
+               ("제24조제2항제4호", "그 밖에 근로자의 안전 및 보건을 유지·증진시키기 위하여 필요한 사항")]
+    wb = new_book()
+    W = [12, 12, 13, 12, 12, 12, 12, 13]
+    ws = sheet(wb, "산보위 회의록", W, tab=NAVY, one_page=True)
+    title(ws, "산업안전보건위원회 회의록", 4, sub="산업안전보건법 제24조 · 시행령 제37조 — 정기회의 분기마다, 회의록 작성·보존(2년, 법 제164조제1항)")
+    approval(ws, 1, 5, labels=("작성", "검토", "위원장"), sign_h=30)
+    hd = lambda ref, v: box(ws, ref, v, f(9.5, True, NAVY), CENTER, HEAD)
+    sec = lambda r, v: box(ws, f"A{r}:H{r}", v, f(10.5, True, "FFFFFF"), LEFT, NAVY)
+    r = 4; sec(r, "1. 개최 일시 및 장소 (시행령 제37조제4항제1호)"); r += 1
+    hd(f"A{r}", "회의 구분"); box(ws, f"B{r}", None, f(10), CENTER); hd(f"C{r}", "회차"); box(ws, f"D{r}", None, f(10), CENTER)
+    hd(f"E{r}", "작성자"); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+    dv_list(ws, f"B{r}", ["정기회의", "임시회의"]); example(ws, r, ["", "정기회의", None, "2026년 4분기", None, "안전관리자 ○○○"]); ws.row_dimensions[r].height = 24; r += 1
+    hd(f"A{r}", "일시"); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", "장소"); box(ws, f"F{r}:H{r}", None, f(10), LEFT)
+    example(ws, r, [None, "2026-12-10 14:00", None, None, None, "본관 2층 회의실"]); ws.row_dimensions[r].height = 24; r += 2
+    sec(r, "2. 출석위원 (제37조제4항제2호) — 근로자위원·사용자위원 각 과반수 출석으로 개의 (제37조제2항)"); r += 1
+    header_row(ws, r, ["구분", "직책", "", "성명", "출석", "대리 출석자", "", "서명"], height=22)
+    ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"F{r}:G{r}"); r += 1
+    m0 = r
+    for k_ in range(10):
+        grid(ws, r, r, 1, 8, height=22); ws.merge_cells(f"B{r}:C{r}"); ws.merge_cells(f"F{r}:G{r}"); r += 1
+    m1 = r - 1
+    dv_list(ws, f"A{m0}:A{m1}", ["근로자위원", "사용자위원"]); dv_list(ws, f"E{m0}:E{m1}", ["출석", "대리", "불참"])
+    color_text_rule(ws, f"E{m0}:E{m1}", "불참", ORANGE)
+    for i, (g, j, n) in enumerate([("근로자위원", "근로자대표", "○○○"), ("근로자위원", "명예산업안전감독관", "○○○"), ("사용자위원", "대표자(안전보건관리책임자)", "○○○"), ("사용자위원", "안전관리자", "○○○")]):
+        example(ws, m0 + i, [g, j, None, n, "출석"])
+    rng = lambda c: f"{c}{m0}:{c}{m1}"
+    box(ws, f"A{r}:B{r}", "근로자위원 출석", f(9.5, True, NAVY), CENTER, HEAD)
+    box(ws, f"C{r}", f'=COUNTIFS({rng("A")},"근로자위원",{rng("E")},"출석")+COUNTIFS({rng("A")},"근로자위원",{rng("E")},"대리")&" / "&COUNTIF({rng("A")},"근로자위원")', f(10, True), CENTER)
+    box(ws, f"D{r}:E{r}", "사용자위원 출석", f(9.5, True, NAVY), CENTER, HEAD)
+    box(ws, f"F{r}", f'=COUNTIFS({rng("A")},"사용자위원",{rng("E")},"출석")+COUNTIFS({rng("A")},"사용자위원",{rng("E")},"대리")&" / "&COUNTIF({rng("A")},"사용자위원")', f(10, True), CENTER)
+    lw = f'(COUNTIFS({rng("A")},"근로자위원",{rng("E")},"출석")+COUNTIFS({rng("A")},"근로자위원",{rng("E")},"대리"))*2>COUNTIF({rng("A")},"근로자위원")'
+    uw = f'(COUNTIFS({rng("A")},"사용자위원",{rng("E")},"출석")+COUNTIFS({rng("A")},"사용자위원",{rng("E")},"대리"))*2>COUNTIF({rng("A")},"사용자위원")'
+    box(ws, f"G{r}:H{r}", f'=IF(COUNTA({rng("A")})=0,"",IF(AND({lw},{uw}),"개의 가능","과반수 미달"))', f(10, True), CENTER, SUB)
+    color_text_rule(ws, f"G{r}:H{r}", "미달", RED)
+    ws.row_dimensions[r].height = 22; r += 1
+    box(ws, f"A{r}:H{r}", "근로자대표·명예산업안전감독관·대표자·안전관리자·보건관리자는 출석하지 못하면 해당 사업 종사자 1명을 지정해 대리하게 할 수 있습니다(제37조제3항). 근로자위원과 사용자위원은 같은 수로 구성합니다(법 제24조제1항).", f(8.5, False, MUTED), LEFT)
+    ws.row_dimensions[r].height = 26; r += 2
+    sec(r, "3. 심의 내용 및 의결·결정 사항 (제37조제4항제3호) — 법 제24조제2항 심의·의결 사항"); r += 1
+    header_row(ws, r, ["안건", "", "", "심의 내용 및 의결·결정 사항", "", "", "", "결과"], height=22)
+    ws.merge_cells(f"A{r}:C{r}"); ws.merge_cells(f"D{r}:G{r}"); r += 1
+    a0 = r
+    ex = {0: "예: 2027년 산업재해 예방계획(안) 원안 의결 — 지게차 보행로 분리·고소작업 추락방지 예산 반영", 2: "예: 2027년 상반기 정기교육 계획 의결, 관리감독자 교육 위탁기관 선정"}
+    for i, (b, t) in enumerate(agenda):
+        box(ws, f"A{r}:C{r}", f"{t}  ({b})", f(9, True, INK), LEFT, SUB); box(ws, f"D{r}:G{r}", None, f(10), LEFT_TOP); box(ws, f"H{r}", None, f(10), CENTER)
+        if i in ex: example(ws, r, [None, None, None, ex[i], None, None, None, "의결"])
+        ws.row_dimensions[r].height = 36; r += 1
+    dv_list(ws, f"H{a0}:H{r - 1}", ["의결", "보고", "부결", "보류", "해당없음"])
+    color_text_rule(ws, f"H{a0}:H{r - 1}", "부결", RED); color_text_rule(ws, f"H{a0}:H{r - 1}", "보류", ORANGE)
+    box(ws, f"A{r}:H{r}", "의결은 출석위원 과반수 찬성(제37조제2항). 의결하지 못했거나 해석·이행 방법에 의견이 다르면 노사 합의로 중재기구를 두거나 제3자 중재를 받습니다(제38조).", f(8.5, False, MUTED), LEFT)
+    ws.row_dimensions[r].height = 24; r += 2
+    sec(r, "4. 그 밖의 토의사항 (제37조제4항제4호)"); r += 1
+    box(ws, f"A{r}:H{r}", None, f(10), LEFT_TOP); ws.row_dimensions[r].height = 46
+    example(ws, r, ["예: 근로자위원 건의 — 포장실 냉방 개선, 휴게실 정수기 추가"]); r += 2
+    sec(r, "5. 지난 회의 의결 사항 이행 확인 (법 제24조제4항 — 성실 이행)"); r += 1
+    header_row(ws, r, ["의결 사항", "", "", "", "담당", "이행 결과", "", "상태"], height=22)
+    ws.merge_cells(f"A{r}:D{r}"); ws.merge_cells(f"F{r}:G{r}"); r += 1
+    p0 = r
+    for k_ in range(3):
+        grid(ws, r, r, 1, 8, height=22); ws.merge_cells(f"A{r}:D{r}"); ws.merge_cells(f"F{r}:G{r}")
+        ws.cell(row=r, column=1).alignment = LEFT; ws.cell(row=r, column=6).alignment = LEFT; r += 1
+    dv_list(ws, f"H{p0}:H{r - 1}", ["완료", "진행 중", "미이행"]); color_text_rule(ws, f"H{p0}:H{r - 1}", "미이행", RED)
+    r += 1
+    sec(r, "6. 회의 결과 근로자 공지 (시행령 제39조)"); r += 1
+    hd(f"A{r}", "공지 방법"); box(ws, f"B{r}:D{r}", None, f(10), LEFT); hd(f"E{r}", "공지일"); box(ws, f"F{r}", None, f(10), CENTER, fmt="yyyy-mm-dd"); hd(f"G{r}", "담당"); box(ws, f"H{r}", None, f(10), CENTER)
+    dv_list(ws, f"B{r}", ["게시", "사내방송", "사내보", "정례조회", "단체 대화방·전자 게시", "기타"])
+    example(ws, r, [None, "게시", None, None, None, "2026-12-11", None, "○○○"]); ws.row_dimensions[r].height = 24
+    legend(ws, r + 2, 8)
+    ws.print_area = f"A1:H{r + 2}"
+
+    y = sheet(wb, "연간 개최 현황", [10, 13, 14, 34, 12, 14], tab=GREEN)
+    title(y, "산업안전보건위원회 연간 개최 현황", 6, sub="정기회의는 분기마다 — 지난 분기에 회의일이 비어 있으면 '미개최 확인'으로 표시됩니다 (시행령 제37조제1항)")
+    box(y, "A4", "연도", f(9.5, True, NAVY), CENTER, HEAD); box(y, "B4", None, f(11, True), CENTER); y.row_dimensions[4].height = 22
+    box(y, "C4:F4", "← 연도를 넣으면(예: 2026) 지난 분기 중 회의일이 빈 분기가 '미개최 확인'으로 표시됩니다", f(8.5, False, MUTED), LEFT)
+    dv_whole(y, "B4", 2020, 2100, prompt="연도 4자리")
+    header_row(y, 6, ["구분", "회의일", "출석(근로자/사용자)", "주요 의결 사항", "회의록 보관", "상태(자동)"], height=24)
+    for i in range(4):
+        x = 7 + i
+        grid(y, x, x, 1, 6, height=26)
+        y.cell(row=x, column=1, value=f"{i + 1}분기 정기")
+        y.cell(row=x, column=2).number_format = "yyyy-mm-dd"; y.cell(row=x, column=4).alignment = LEFT
+        y.cell(row=x, column=6, value=f'=IF(B{x}<>"","개최",IF($B$4="","",IF(EOMONTH(DATE($B$4,{(i + 1) * 3},1),0)<TODAY(),"미개최 확인","예정")))').fill = fill(SUB)
+    for i in range(4):
+        x = 11 + i
+        grid(y, x, x, 1, 6, height=26); y.cell(row=x, column=1, value="임시")
+        y.cell(row=x, column=2).number_format = "yyyy-mm-dd"; y.cell(row=x, column=4).alignment = LEFT
+        y.cell(row=x, column=6, value=f'=IF(B{x}<>"","개최","")').fill = fill(SUB)
+    dv_list(y, "E7:E14", ["보관", "미보관"])
+    color_text_rule(y, "F7:F14", "미개최", RED)
+    box(y, "A16:C16", "정기회의 개최", f(9.5, True, NAVY), CENTER, HEAD); box(y, "D16", '=COUNTIF(F7:F10,"개최")&" / 4"', f(11, True), CENTER)
+    box(y, "A17:C17", "미개최 확인 필요", f(9.5, True, NAVY), CENTER, HEAD); box(y, "D17", '=COUNTIF(F7:F10,"미개최 확인")', f(11, True, RED), CENTER)
+    y.print_area = "A1:F17"
+
+    t = sheet(wb, "의결 사항 이행 관리대장", [6, 12, 34, 12, 12, 26, 11, 12], tab=ORANGE, landscape=True)
+    title(t, "의결 사항 이행 관리대장", 8, sub="의결한 사항은 사업주와 근로자가 성실히 이행해야 합니다(법 제24조제4항) — 기한이 지난 미완료 건은 빨간색으로 표시됩니다")
+    header_row(t, 4, ["번호", "회의일", "의결 사항", "담당", "기한", "이행 결과", "상태", "기한 경과(자동)"], height=26)
+    for i in range(30):
+        x = 5 + i
+        grid(t, x, x, 1, 8, height=22)
+        t.cell(row=x, column=1, value=i + 1)
+        t.cell(row=x, column=2).number_format = "yyyy-mm-dd"; t.cell(row=x, column=5).number_format = "yyyy-mm-dd"
+        t.cell(row=x, column=3).alignment = LEFT; t.cell(row=x, column=6).alignment = LEFT
+        t.cell(row=x, column=8, value=f'=IF(OR(E{x}="",G{x}="완료"),"",IF(E{x}<TODAY(),"경과 "&(TODAY()-E{x})&"일","D-"&(E{x}-TODAY())))').fill = fill(SUB)
+    dv_list(t, "G5:G34", ["완료", "진행 중", "미착수"])
+    color_text_rule(t, "H5:H34", "경과", RED)
+    example(t, 5, [None, "2026-12-10", "물류동 지게차 보행로 펜스 설치", "시설팀", "2027-01-31", None, "진행 중"])
+    t.print_title_rows = "4:4"; t.print_area = "A1:H34"
+
+    guide_sheet(wb, "산업안전보건위원회 회의록", [
+        ("누가·언제", ["산업안전보건위원회는 근로자위원과 사용자위원을 같은 수로 구성합니다(법 제24조제1항). 구성 대상 사업의 종류와 상시근로자 수는 시행령 별표 9를 확인하세요.",
+                    "정기회의는 분기마다 위원장이 소집하고, 임시회의는 위원장이 필요하다고 인정할 때 소집합니다(시행령 제37조제1항). '연간 개최 현황' 시트로 빠진 분기가 없는지 확인하세요."]),
+        ("회의록에 꼭 들어갈 것", ["개최 일시 및 장소, 출석위원, 심의 내용 및 의결·결정 사항, 그 밖의 토의사항(시행령 제37조제4항). 회의록은 2년 보존합니다(법 제164조제1항제2호).",
+                            "회의는 근로자위원과 사용자위원 각 과반수 출석으로 열고 출석위원 과반수 찬성으로 의결합니다(제37조제2항). 출석 칸을 채우면 '개의 가능 / 과반수 미달'이 자동으로 표시됩니다."]),
+        ("무엇을 심의·의결하나", ["법 제24조제2항: 산업재해 예방계획 수립, 안전보건관리규정 작성·변경, 안전보건교육, 작업환경측정 등 작업환경 점검·개선, 건강진단 등 건강관리, 산업재해 통계 기록·유지(법 제15조제1항제1~5호·제7호), 중대재해의 원인 조사·재발 방지대책, 유해·위험 기계·기구·설비 도입 시 안전보건 조치, 그 밖에 필요한 사항. 회색 칸 안건은 원문에서 가져왔습니다.",
+                             "법령·단체협약·취업규칙·안전보건관리규정에 어긋나는 내용은 심의·의결할 수 없습니다(법 제24조제5항)."]),
+        ("회의 뒤", ["위원장은 회의 결과를 사내방송·사내보·게시·정례조회 등으로 근로자에게 신속히 알립니다(시행령 제39조). 의결 사항은 '의결 사항 이행 관리대장'에 옮겨 담당·기한을 정하고 다음 회의에서 이행 결과를 확인하세요."]),
+    ], source="근거: 산업안전보건법 제15조·제24조·제164조, 시행령 제35조~제39조. 화면으로 작성: safeplum.com/tools/committee/")
+    wb.move_sheet("작성 안내", offset=-3); wb.active = 1
+    p = OUT / "SafePlum_committee_minutes.xlsx"; wb.save(p); return p
+
+
+# =====================================================================
 # 11. 표준안전작업절차서(SOP) + 교육 확인 서명부 + 관리대장 — 예시 작업: 컨베이어 벨트 청소
 # =====================================================================
 SOP_STEPS = [  # 작업 단계, 위험요인, 안전 포인트, 대책 구분, 담당
@@ -1265,5 +1398,5 @@ def sop():
 
 
 if __name__ == "__main__":
-    for fn in (risk, tbm, patrol, edu, near_miss, ppe, workplan, confined, hot_work, council, sop):
+    for fn in (risk, tbm, patrol, edu, near_miss, ppe, workplan, confined, hot_work, council, committee, sop):
         print(fn())

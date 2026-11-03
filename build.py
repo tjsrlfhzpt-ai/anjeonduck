@@ -1894,8 +1894,10 @@ def render_free_tool(t, hazards, site=None, penalties=None):
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
     if ">← SafePlum</a>" in src:   # 단독 화면 맨 위 'SafePlum' 링크 옆에 작성기 전체 바로가기(좁은 화면에서는 화면 아래 묶음만)
+        _has_dl = any(t["id"] in x.get("tools", []) for x in downloads())
         src = src.replace(">← SafePlum</a>", f'>← SafePlum</a><a href="../forms/" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">다른 무료 작성기 {WRITER_N}종 →</a>'
-                          '<style>@media (max-width:640px){.sp-alltools{display:none!important}}@media print{.sp-alltools{display:none!important}}</style>', 1)
+                          + ('<a href="#spdl" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">엑셀·PPT 양식 받기 ↓</a>' if _has_dl else '')
+                          + '<style>@media (max-width:640px){.sp-alltools{display:none!important}}@media print{.sp-alltools{display:none!important}}</style>', 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
         note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 실무용 보조양식 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
@@ -2041,7 +2043,7 @@ def dl_section(rel, tool=None, form=None):
     items = [x for x in downloads() if (tool and tool in x.get("tools", [])) or (form and form in x.get("forms", []))]
     if not items:
         return ""
-    return (DL_CSS + f'<section class="spdl" aria-label="내려받기 양식"><h2>엑셀·PPT 양식으로도 받을 수 있습니다</h2>'
+    return (DL_CSS + f'<section class="spdl" id="spdl" aria-label="내려받기 양식"><h2>엑셀·PPT 양식으로도 받을 수 있습니다</h2>'
             f'<p>화면 작성이 어려운 곳(사내 결재 양식, 출력해서 수기 작성)에서 쓰도록 만든 파일입니다. 회색 기울임 글씨는 예시이니 지우고 쓰세요.</p>'
             f'<div class="spdl-g">{"".join(dl_card(x, rel) for x in items)}</div>'
             f'<a class="spdl-more" href="{rel}resources/templates/">무료 양식 전체 {len(downloads())}종 보기 →</a></section>')
@@ -3278,7 +3280,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 <section class="wrap ftools-page" style="padding-top:8px" data-landing>
   <div class="ftools">
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>작성기 {WRITER_N}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
-    <a class="ftool" href="templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서 4종·순회점검표·교육일지 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
+    <a class="ftool" href="templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서 4종·순회점검표·교육일지·산업안전보건위원회 회의록 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
@@ -3471,7 +3473,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
   <p class="src-line">엑셀 파일은 Microsoft Excel·한컴오피스 한셀·Google 스프레드시트에서 열립니다. 자동 계산·목록 선택은 프로그램에 따라 다르게 보일 수 있습니다.</p>
 </div></section>"""
     write("resources/templates/index.html", page(site, "../../", "resources/templates/", "무료 양식 내려받기 (엑셀·PPT)", tpl_body,
-                                                 desc="위험성평가표·TBM 일지·작업계획서(지게차·중량물)·순회점검표·교육일지·아차사고·보호구 대장 엑셀과 산업안전보건위원회·개선 전후 보고 PPT 무료 양식.", active="resources/"))
+                                                 desc="위험성평가표·TBM 일지·작업계획서(지게차·중량물)·순회점검표·교육일지·아차사고·보호구 대장·산업안전보건위원회 회의록 엑셀과 산업안전보건위원회·개선 전후 보고 PPT 무료 양식.", active="resources/"))
     def wcard(kind, x):
         if kind == "tool":
             return (f'<a class="ftool" href="../{e(x["id"])}/"><strong>{e(x["name"].replace(" 작성기", ""))}</strong><span class="ftool-desc">{e(x.get("desc", ""))}</span>'
@@ -3524,7 +3526,7 @@ q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="
   {sec_head("서식·자료", sub="법정 서식 원본, 엑셀·PPT 양식, 안전보건표지, 공단 자료", href="../resources/", more=f"서식·자료 {len(resources)}건 전체")}
   <div class="ftools">
     <a class="ftool" href="../resources/"><span class="ftool-tag">원본 바로 열기</span><strong>법정 서식·별표 {n_law}건</strong><span class="ftool-desc">산업재해조사표·선임 보고서 같은 법정 서식과 별표를 국가법령정보센터 현행 원본으로 엽니다. 상황별로 찾기.</span><span class="ftool-go">서식 찾기 →</span></a>
-    <a class="ftool" href="../resources/templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서·순회점검표·교육일지 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
+    <a class="ftool" href="../resources/templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서·순회점검표·교육일지·산업안전보건위원회 회의록 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
     <a class="ftool" href="../resources/signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="../resources/library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
