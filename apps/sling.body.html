@@ -1,0 +1,135 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>줄걸이 안전하중 계산</p>
+  <h1>줄걸이 안전하중 계산</h1>
+  <p>화물 무게, 줄걸이 가닥 수, 줄걸이 각도를 넣으면 한 가닥에 걸리는 하중과 필요한 절단하중을 계산합니다. 가지고 있는 와이어로프·슬링의 절단하중이나 사용하중(WLL)을 넣으면 쓸 수 있는지 바로 판정합니다.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <form class="calc sl" id="sForm" onsubmit="return false" autocomplete="off">
+      <div class="grid3">
+        <label class="field"><span class="label">화물 무게</span><span class="sl-u"><input type="number" id="sW" min="0" step="0.01" inputmode="decimal" placeholder="예: 2.5"><select id="sWu"><option value="t">t</option><option value="kg">kg</option></select></span></label>
+        <label class="field"><span class="label">줄걸이 가닥 수</span><select class="sort" id="sN" style="width:100%"><option value="1">1가닥</option><option value="2" selected>2가닥</option><option value="3">3가닥</option><option value="4">4가닥</option></select></label>
+        <label class="field"><span class="label">줄걸이 각도 (가닥 사이 꼭지각)</span><span class="sl-u"><input type="number" id="sA" min="0" max="180" step="1" inputmode="numeric" value="60"><span>°</span></span></label>
+      </div>
+      <label class="field" id="sEffBox"><span class="label">하중을 실제로 나눠 받는다고 볼 가닥 수</span><select class="sort" id="sEff" style="width:100%"></select></label>
+      <p class="hint" id="sEffNote"></p>
+      <label class="field"><span class="label">달기구 종류 (안전계수 — 산업안전보건기준에 관한 규칙 제163조제1항)</span><select class="sort" id="sK" style="width:100%">
+        <option value="5">화물의 하중을 직접 지지하는 달기 와이어로프·달기 체인 — 5 이상 (제2호)</option>
+        <option value="3">훅·샤클·클램프·리프팅 빔 — 3 이상 (제3호)</option>
+        <option value="4">그 밖의 달기구 — 4 이상 (제4호)</option>
+        <option value="10">근로자가 탑승하는 운반구를 지지하는 달기 와이어로프·체인 — 10 이상 (제1호)</option>
+      </select></label>
+      <div class="grid3">
+        <label class="field"><span class="label">가진 줄의 절단하중 (선택)</span><span class="sl-u"><input type="number" id="sB" min="0" step="0.01" inputmode="decimal" placeholder="제조사 표시"><select id="sBu"><option value="t">t</option><option value="kN">kN</option></select></span></label>
+        <label class="field"><span class="label">또는 표시된 사용하중 WLL (선택)</span><span class="sl-u"><input type="number" id="sL" min="0" step="0.01" inputmode="decimal" placeholder="슬링 꼬리표"><select id="sLu"><option value="t">t</option><option value="kg">kg</option></select></span></label>
+      </div>
+      <div class="btns"><button type="button" class="btn btn-sm btn-ghost" id="sClear">입력 지우기</button></div>
+    </form>
+
+    <div class="sl-out" id="sOut" aria-live="polite"></div>
+
+    <div class="tbl-wrap"><table class="sl-t" aria-label="줄걸이 각도별 하중 증가"><caption>각도가 커질수록 한 가닥에 걸리는 하중이 커집니다 (2가닥, 화물 1t 기준)</caption>
+      <thead><tr><th scope="col">줄걸이 각도</th><th scope="col">장력 계수 1/cos(θ/2)</th><th scope="col">한 가닥 하중</th></tr></thead><tbody id="sTbl"></tbody></table></div>
+
+    <div class="side-box">
+      <h2 class="h-sm">쓰면 안 되는 줄 — 작업 전에 확인 <span class="muted">기준규칙 제166조·제167조·제169조(제63조 준용), 제168조</span></h2>
+      <ul class="bul sl-ck">
+        <li><b>와이어로프</b>: 이음매가 있는 것 / 한 꼬임에서 끊어진 소선이 10% 이상(비자전로프는 호칭지름 6배 길이 안에 4개 이상 또는 30배 안에 8개 이상) / 지름 감소가 공칭지름의 7% 초과 / 꼬인 것 / 심하게 변형·부식된 것 / 열·전기충격으로 손상된 것</li>
+        <li><b>달기 체인</b>: 길이가 제조 때보다 5% 넘게 늘어난 것 / 링 단면지름이 10% 넘게 줄어든 것 / 균열이 있거나 심하게 변형된 것</li>
+        <li><b>섬유로프·섬유벨트</b>: 꼬임이 끊어진 것 / 심하게 손상·부식된 것</li>
+        <li><b>훅·샤클·클램프·링</b>: 변형되었거나 균열이 있는 것은 고리걸이용구로 쓰지 않기</li>
+        <li>달기구에는 최대허용하중 등의 표식이 견고하게 붙어 있어야 합니다 (제163조제2항)</li>
+      </ul>
+    </div>
+    <p class="hint">계산식: 한 가닥 하중 = 화물 무게 ÷ (하중을 받는 가닥 수 × cos(줄걸이 각도 ÷ 2)), 필요한 절단하중 = 한 가닥 하중 × 안전계수. 안전계수의 정의(달기구 절단하중 ÷ 그 달기구에 걸리는 하중의 최대값)와 기준값은 기준규칙 제163조 원문입니다. 각도 권장 범위와 3·4가닥의 하중 분담 가정은 실무 계산 관행이며 법 조문이 아닙니다. 무게중심이 치우친 화물, 초크걸이·바스켓걸이 등 걸이 방법에 따른 감소, 충격하중은 이 계산에 들어 있지 않으니 제조사 사용하중표를 함께 확인하세요.</p>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">작업 전 함께 챙기기</h2><ul class="bul">
+      <li>크레인 작업계획서·신호수 지정</li>
+      <li>출입을 통제해 인양 중인 짐이 작업자 머리 위로 지나가지 않게 (기준규칙 제146조제1항제4호)</li>
+      <li>작업시작 전 점검: 와이어로프·슬링 상태</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">바로 쓰기</h2><ul class="bul">
+      <li><a href="../forms/wp-heavy/">중량물 취급 작업계획서</a></li>
+      <li><a href="../forms/wp-tower/">타워크레인 작업계획서</a></li>
+      <li><a href="../permit/">작업허가서</a></li>
+      <li><a href="../tbm/">TBM 일지</a></li>
+    </ul></div>
+  </aside>
+</div>
+<style>
+.sl{display:flex;flex-direction:column;gap:12px}
+.sl-u{display:flex;gap:6px;align-items:center}
+.sl-u input{flex:1;min-width:0}
+.sl-u select{height:40px;border:1px solid var(--line);border-radius:8px;padding:0 6px;font:inherit;background:var(--surface);color:var(--text)}
+.sl-out{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);overflow:hidden}
+.sl-v{padding:16px 20px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.sl-v b{font-size:22px;letter-spacing:-.02em}
+.sl-v.ok b{color:var(--green)}.sl-v.ng{background:var(--red-50)}.sl-v.ng b{color:var(--red)}.sl-v.warn b{color:var(--orange,#C2410C)}
+.sl-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line)}
+.sl-g div{background:var(--surface);padding:12px 16px;min-width:0}
+.sl-g span{display:block;font-size:12.5px;color:var(--muted)}
+.sl-g strong{font-size:19px;color:var(--navy);font-variant-numeric:tabular-nums}
+.sl-b{padding:12px 20px 16px;font-size:14px;color:var(--text-2);line-height:1.65}
+.sl-b ul{margin:4px 0 0;padding-left:20px}
+.sl-t{width:100%;border-collapse:collapse;font-size:14px}
+.sl-t caption{text-align:left;font-size:13px;color:var(--muted);padding-bottom:6px}
+.sl-t th,.sl-t td{border:1px solid var(--line);padding:7px 10px;text-align:left;font-variant-numeric:tabular-nums}
+.sl-t thead th{background:var(--surface-2)}
+.sl-t tr.cur td{background:var(--blue-50);font-weight:700}
+.sl-ck li{font-size:14px;line-height:1.6}
+@media (max-width:640px){.sl-g{grid-template-columns:1fr}}
+@media print{.layout-detail .col-side,.no-print,#sForm .btns{display:none!important}}
+</style>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = "safeplum.sling", KN = 9.80665; // 1 t(질량) = 9.80665 kN
+  function num(id) { var x = parseFloat($(id).value); return isFinite(x) && x >= 0 ? x : null; }
+  function f2(x) { return (Math.round(x * 100) / 100).toLocaleString("ko-KR", { maximumFractionDigits: 2 }); }
+  function effOpts() {
+    var n = +$("sN").value, cur = $("sEff").value, o = [];
+    if (n <= 2) o = [n]; else for (var i = 2; i <= n; i++) o.push(i);
+    $("sEff").innerHTML = o.map(function (i) { return '<option value="' + i + '">' + i + "가닥</option>"; }).join("");
+    var def = n >= 3 ? 2 : n;
+    $("sEff").value = cur && o.indexOf(+cur) >= 0 && $("sEff").dataset.n === String(n) ? cur : String(def);
+    $("sEff").dataset.n = String(n);
+    $("sEffBox").hidden = n <= 2;
+    $("sEffNote").textContent = n >= 3 ? "3·4가닥은 줄 길이 차이·화물 강성 때문에 하중이 고르게 나뉘지 않는 경우가 많아, 2가닥이 다 받는다고 보고 계산하는 것을 기본으로 했습니다(보수적 계산 관행). 작업계획서에 정한 기준이 있으면 바꾸세요." : "";
+  }
+  function tbl(a) {
+    var rows = [0, 30, 45, 60, 90, 120], h = "";
+    rows.forEach(function (d) { var c = 1 / Math.cos(d / 2 * Math.PI / 180); h += '<tr' + (a != null && Math.abs(a - d) < 0.5 ? ' class="cur"' : "") + "><td>" + d + "°</td><td>" + c.toFixed(3) + "</td><td>" + f2(c / 2) + " t</td></tr>"; });
+    $("sTbl").innerHTML = h;
+  }
+  function calc() {
+    effOpts();
+    var W = num("sW"), a = num("sA"), n = +$("sN").value, e = +$("sEff").value || n, k = +$("sK").value, out = $("sOut");
+    tbl(a);
+    if (W && $("sWu").value === "kg") W = W / 1000;
+    if (!W || a == null) { out.innerHTML = '<div class="sl-v"><b>화물 무게와 각도를 넣으세요</b></div><div class="sl-b">1가닥(수직 걸이)은 각도 0°로 넣습니다.</div>'; save(); return; }
+    if (n === 1) a = 0;
+    if (a >= 180) { out.innerHTML = '<div class="sl-v ng"><b>각도가 180° 이상이면 계산할 수 없습니다</b></div>'; save(); return; }
+    var c = Math.cos(a / 2 * Math.PI / 180), T = W / (e * c), need = T * k;
+    var B = num("sB"), L = num("sL"), verdict = "", cls = "", notes = [];
+    if (B && $("sBu").value === "kN") B = B / KN;
+    if (L && $("sLu").value === "kg") L = L / 1000;
+    if (B) { var sf = B / T; cls = sf >= k ? "ok" : "ng"; verdict = sf >= k ? "사용 가능 — 실제 안전계수 " + f2(sf) + " (기준 " + k + " 이상)" : "사용 불가 — 실제 안전계수 " + f2(sf) + " (기준 " + k + " 미만)"; }
+    else if (L) { cls = T <= L ? "ok" : "ng"; verdict = T <= L ? "사용하중 이내 — 한 가닥 " + f2(T) + " t ≤ WLL " + f2(L) + " t" : "사용하중 초과 — 한 가닥 " + f2(T) + " t > WLL " + f2(L) + " t"; notes.push("WLL은 제조사가 안전계수를 이미 반영해 표시한 값입니다. 걸이 방법(초크·바스켓)에 따라 WLL이 달라지니 꼬리표의 표를 확인하세요."); }
+    else { cls = ""; verdict = "필요한 절단하중 " + f2(need) + " t 이상"; }
+    if (a > 120) { cls = "ng"; notes.unshift("줄걸이 각도가 120°를 넘으면 한 가닥 하중이 화물 무게보다 커집니다. 이 각도로는 작업하지 말고 더 긴 줄이나 리프팅 빔을 쓰세요."); }
+    else if (a > 60) { if (cls !== "ng") cls = "warn"; notes.unshift("줄걸이 각도는 60° 이내가 일반 권장 범위입니다(실무 권장, 법 조문 아님). 각도를 줄이면 한 가닥 하중이 줄어듭니다."); }
+    out.innerHTML = '<div class="sl-v ' + cls + '"><b>' + verdict + "</b></div>" +
+      '<div class="sl-g"><div><span>한 가닥 하중</span><strong>' + f2(T) + " t</strong><span>" + f2(T * KN) + ' kN</span></div><div><span>필요한 절단하중 (×' + k + ')</span><strong>' + f2(need) + " t</strong><span>" + f2(need * KN) + ' kN</span></div><div><span>장력 계수</span><strong>' + (1 / c).toFixed(3) + "</strong><span>" + e + "가닥 분담 · " + f2(a) + "°</span></div></div>" +
+      (notes.length ? '<div class="sl-b"><ul>' + notes.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul></div>" : "");
+    save();
+  }
+  var IDS = ["sW", "sWu", "sN", "sA", "sK", "sB", "sBu", "sL", "sLu"];
+  function save() { var o = {}; IDS.forEach(function (id) { o[id] = $(id).value; }); o.sEff = $("sEff").value; try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} }
+  function load() { try { var o = JSON.parse(localStorage.getItem(KEY) || "null"); if (!o) return; IDS.forEach(function (id) { if (o[id] != null) $(id).value = o[id]; }); effOpts(); if (o.sEff) $("sEff").value = o.sEff; } catch (e) {} }
+  $("sForm").addEventListener("input", calc); $("sForm").addEventListener("change", calc);
+  $("sClear").addEventListener("click", function () { $("sForm").reset(); $("sA").value = 60; try { localStorage.removeItem(KEY); } catch (e) {} calc(); });
+  load(); calc();
+})();
+</script>
