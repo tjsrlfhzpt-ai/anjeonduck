@@ -42,6 +42,11 @@
     ".ad-ctl button{font:inherit;background:none;border:0;padding:2px 0;color:#1F6FD1;cursor:pointer}" +
     ".ad-ctl button:hover{text-decoration:underline}" +
     ".ad-wrap{display:inline-block;vertical-align:top}" +
+    ".ad-ctl.ad-sz{gap:4px 6px;align-items:center;color:#46546A;background:#F4F7FB;border:1px solid #E3E8EF;border-radius:8px;padding:4px 8px}" +
+    ".ad-ctl.ad-sz b{font-weight:600;min-width:38px;text-align:center;font-variant-numeric:tabular-nums}" +
+    ".ad-ctl.ad-sz button.st{border:1px solid #C9D3E0;border-radius:6px;min-width:24px;height:22px;padding:0 4px;background:#fff;text-decoration:none}" +
+    ".ad-ctl.ad-sz .g{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}" +
+    ".ad-ctl.ad-offbar{color:#6B788C;border:1px dashed #C9D3E0;border-radius:8px;padding:4px 8px;margin-top:0}" +
     ".ad-modal{position:fixed;inset:0;z-index:1000;background:rgba(10,20,35,.55);display:flex;align-items:center;justify-content:center;padding:16px}" +
     ".ad-box{background:#fff;color:#18243A;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.3);width:100%;max-width:520px;padding:20px;max-height:92vh;overflow:auto}" +
     ".ad-box h2{font-size:18px;margin:0 0 4px;color:#17365D}.ad-box p{margin:0 0 10px;font-size:14px;color:#46546A;line-height:1.55}" +
@@ -95,38 +100,49 @@
   function defLine() {
     var d = lget(DEF, null);
     if (!d || !d.cols || !d.cols.length) d = BASE;
-    return { cols: d.cols.slice(), names: (d.names || []).slice() };
+    return { cols: d.cols.slice(), names: (d.names || []).slice(), sh: d.sh || 0, cw: d.cw || 0 };
   }
   function apprState(key) {
     var s = lget(P + "appr." + key, null), d = defLine();
-    if (!s || !s.cols) return { own: false, cols: d.cols, names: d.names, signs: (s && s.signs) || [], dates: (s && s.dates) || [] };
+    if (!s || !s.cols) return { own: false, cols: d.cols, names: d.names, sh: d.sh, cw: d.cw, off: !!(s && s.off), signs: (s && s.signs) || [], dates: (s && s.dates) || [] };
     s.own = true; s.names = s.names || []; s.signs = s.signs || []; s.dates = s.dates || []; return s;
   }
   var INST = [];
   function apprSave(key, s, from) {
-    lset(P + "appr." + key, { cols: s.cols, names: s.names, signs: s.signs, dates: s.dates });
+    lset(P + "appr." + key, { cols: s.cols, names: s.names, signs: s.signs, dates: s.dates, sh: s.sh || 0, cw: s.cw || 0, off: !!s.off });
     INST.forEach(function (it) { if (it.key === key && it.el !== from && document.contains(it.el)) it.draw(); });
   }
 
   function mountApproval(el, key, opts) {
     opts = opts || {};
     if (!el) return;
+    var szOpen = false, lastOff = null;
     function draw() {
       var s = apprState(key), n = s.cols.length;
-      var h = '<table class="ad-appr' + (opts.cls ? " " + opts.cls : "") + '" aria-label="결재란"><tr><th rowspan="3" class="ad-h">' + esc(opts.label || "결<br>재").replace(/&lt;br&gt;/g, "<br>") + "</th>";
-      for (var i = 0; i < n; i++) h += '<th><div class="ad-t" contenteditable="true" role="textbox" aria-label="결재 칸 ' + (i + 1) + ' 이름" data-i="' + i + '">' + esc(s.cols[i]) + "</div></th>";
+      el.classList.toggle("ad-off", !!s.off); el.classList.toggle("ad-sized", !!s.cw);
+      if (lastOff !== !!s.off) { lastOff = !!s.off; try { el.dispatchEvent(new CustomEvent("ad-appr", { bubbles: true, detail: { off: lastOff } })); } catch (e) {} }
+      if (s.off) {
+        el.innerHTML = '<div class="ad-ctl ad-offbar ad-noprint">결재란을 뺐습니다(인쇄에도 안 나옵니다) <button type="button" data-a="on">결재란 다시 넣기</button></div>';
+        return;
+      }
+      var sh = s.sh ? ' style="height:' + s.sh + 'px"' : "", cw = s.cw ? ' style="width:' + s.cw + 'px;min-width:' + s.cw + 'px"' : "",
+        im = (s.sh || s.cw) ? ' style="' + (s.sh ? "max-height:" + Math.max(14, s.sh - 6) + "px;" : "") + (s.cw ? "max-width:" + Math.max(40, s.cw - 6) + "px" : "") + '"' : "";
+      var h = '<table class="ad-appr' + (opts.cls ? " " + opts.cls : "") + '" aria-label="결재란"' + (s.cw ? ' style="width:auto"' : "") + '><tr><th rowspan="3" class="ad-h">' + esc(opts.label || "결<br>재").replace(/&lt;br&gt;/g, "<br>") + "</th>";
+      for (var i = 0; i < n; i++) h += '<th' + cw + '><div class="ad-t" contenteditable="true" role="textbox" aria-label="결재 칸 ' + (i + 1) + ' 이름" data-i="' + i + '">' + esc(s.cols[i]) + "</div></th>";
       h += "</tr><tr>";
       for (var j = 0; j < n; j++) {
         var sg = s.signs[j];
-        h += '<td class="ad-s" data-sign="' + j + '" tabindex="0" role="button" aria-label="' + esc(s.cols[j]) + ' 서명' + (sg ? " (서명됨, 누르면 다시 서명)" : " 넣기") + '">' +
-          (sg ? '<img src="' + esc(sg) + '" alt="' + esc(s.cols[j]) + ' 서명">' + (s.dates[j] ? '<span class="ad-d">' + esc(String(s.dates[j]).slice(5).replace("-", ".")) + "</span>" : "") : '<span class="ad-ph ad-noprint">서명</span>') + "</td>";
+        h += '<td class="ad-s"' + sh + ' data-sign="' + j + '" tabindex="0" role="button" aria-label="' + esc(s.cols[j]) + ' 서명' + (sg ? " (서명됨, 누르면 다시 서명)" : " 넣기") + '">' +
+          (sg ? '<img src="' + esc(sg) + '"' + im + ' alt="' + esc(s.cols[j]) + ' 서명">' + (s.dates[j] ? '<span class="ad-d">' + esc(String(s.dates[j]).slice(5).replace("-", ".")) + "</span>" : "") : '<span class="ad-ph ad-noprint">서명</span>') + "</td>";
       }
       h += "</tr><tr>";
       for (var k = 0; k < n; k++) h += '<td class="ad-nm"><div class="ad-n" contenteditable="true" role="textbox" aria-label="' + esc(s.cols[k]) + ' 성명" data-ph="성명" data-n="' + k + '">' + esc(s.names[k] || "") + "</div></td>";
       h += "</tr></table>";
       h += '<div class="ad-ctl ad-noprint"><button type="button" data-a="add">＋ 칸</button><button type="button" data-a="del"' + (n <= 1 ? " disabled" : "") + '>－ 칸</button>' +
         '<button type="button" data-a="def" title="지금 결재란(칸 이름·성명)을 모든 서식의 기본값으로">모든 서식 기본으로</button>' +
-        (s.own ? '<button type="button" data-a="reset">기본값으로</button>' : "") + "</div>";
+        (s.own ? '<button type="button" data-a="reset">기본값으로</button>' : "") +
+        '<button type="button" data-a="size" aria-expanded="' + szOpen + '">크기 조절</button><button type="button" data-a="off" title="이 서식에서 결재란을 뺍니다. 다시 넣을 수 있습니다">결재란 빼기</button></div>';
+      if (szOpen) h += '<div class="ad-ctl ad-sz ad-noprint" role="group" aria-label="결재란 크기"><span class="g">높이 <button type="button" class="st" data-a="h-" aria-label="서명 칸 높이 줄이기">－</button><b>' + (s.sh ? s.sh + "px" : "기본") + '</b><button type="button" class="st" data-a="h+" aria-label="서명 칸 높이 늘리기">＋</button></span><span class="g">너비 <button type="button" class="st" data-a="w-" aria-label="칸 너비 줄이기">－</button><b>' + (s.cw ? s.cw + "px" : "기본") + '</b><button type="button" class="st" data-a="w+" aria-label="칸 너비 늘리기">＋</button></span>' + ((s.sh || s.cw) ? '<button type="button" data-a="sz0">원래 크기</button>' : "") + "</div>";
       el.innerHTML = h;
     }
     function own() { var s = apprState(key); if (!s.own) { s.own = true; } return s; }
@@ -146,9 +162,18 @@
       if (c) { sign(+c.dataset.sign); return; }
       var b = ev.target.closest("[data-a]"); if (!b) return;
       var s = own(), a = b.dataset.a;
+      if (a === "size") { szOpen = !szOpen; draw(); return; }
+      if (a === "h+" || a === "h-" || a === "w+" || a === "w-") {
+        var hb = s.sh, wb = s.cw, td = el.querySelector("td.ad-s"), th = el.querySelector(".ad-appr th:not(.ad-h)");
+        if (a[0] === "h") { if (!hb) hb = td ? Math.round(td.getBoundingClientRect().height) : 46; s.sh = Math.max(16, Math.min(120, hb + (a[1] === "+" ? 6 : -6))); }
+        else { if (!wb) wb = th ? Math.round(th.getBoundingClientRect().width) : 62; s.cw = Math.max(36, Math.min(160, wb + (a[1] === "+" ? 8 : -8))); }
+        apprSave(key, s); draw(); return;
+      }
+      if (a === "sz0") { s.sh = 0; s.cw = 0; apprSave(key, s); draw(); return; }
+      if (a === "off" || a === "on") { s.off = a === "off"; szOpen = false; apprSave(key, s); draw(); if (a === "on") { var f = el.querySelector('[data-a="off"]'); if (f) f.focus(); } return; }
       if (a === "add") { if (s.cols.length >= 6) { toast("결재 칸은 6개까지 둘 수 있습니다."); return; } s.cols.push("확인"); s.names.push(""); }
       else if (a === "del") { if (s.cols.length <= 1) return; s.cols.pop(); s.names.pop(); s.signs.length = Math.min(s.signs.length, s.cols.length); s.dates.length = Math.min(s.dates.length, s.cols.length); }
-      else if (a === "def") { lset(DEF, { cols: s.cols, names: s.names }); toast("이 결재란을 모든 서식의 기본값으로 저장했습니다. 이미 고친 서식은 그대로입니다."); }
+      else if (a === "def") { lset(DEF, { cols: s.cols, names: s.names, sh: s.sh || 0, cw: s.cw || 0 }); toast("이 결재란을 모든 서식의 기본값으로 저장했습니다. 이미 고친 서식은 그대로입니다."); }
       else if (a === "reset") { var sg = s.signs, dt = s.dates, d = defLine(); try { localStorage.removeItem(P + "appr." + key); } catch (e) {} if (sg.some(Boolean)) apprSave(key, { cols: d.cols, names: d.names, signs: sg.slice(0, d.cols.length), dates: dt.slice(0, d.cols.length) }); }
       if (a !== "def" && a !== "reset") apprSave(key, s);
       draw();
@@ -165,15 +190,18 @@
     INST = INST.filter(function (it) { return document.contains(it.el) && it.el !== el; });
     INST.push({ key: key, el: el, draw: draw });
     draw();
-    return { redraw: draw };
+    return { redraw: draw, setOff: function (off) { var st = own(); if (!!st.off === !!off) return; st.off = !!off; apprSave(key, st); draw(); }, isOff: function () { return !!apprState(key).off; } };
   }
 
   // 인쇄 전용 서식(화면에 서식이 안 보이는 도구)용: 저장된 결재란을 그대로 그린 읽기 전용 표
   function apprHTML(key) {
-    var s = apprState(key), n = s.cols.length, h = '<table class="ad-appr"><tr><th rowspan="3" class="ad-h">결<br>재</th>';
-    for (var i = 0; i < n; i++) h += "<th>" + esc(s.cols[i]) + "</th>";
+    var s = apprState(key), n = s.cols.length;
+    if (s.off) return "";
+    var cw = s.cw ? ' style="width:' + s.cw + 'px;min-width:' + s.cw + 'px"' : "", sh = s.sh ? ' style="height:' + s.sh + 'px"' : "";
+    var h = '<table class="ad-appr"' + (s.cw ? ' style="width:auto"' : "") + '><tr><th rowspan="3" class="ad-h">결<br>재</th>';
+    for (var i = 0; i < n; i++) h += "<th" + cw + ">" + esc(s.cols[i]) + "</th>";
     h += "</tr><tr>";
-    for (var j = 0; j < n; j++) h += '<td class="ad-s">' + (s.signs[j] ? '<img src="' + esc(s.signs[j]) + '" alt="">' + (s.dates[j] ? '<span class="ad-d">' + esc(String(s.dates[j]).slice(5).replace("-", ".")) + "</span>" : "") : "") + "</td>";
+    for (var j = 0; j < n; j++) h += '<td class="ad-s"' + sh + '>' + (s.signs[j] ? '<img src="' + esc(s.signs[j]) + '" alt="">' + (s.dates[j] ? '<span class="ad-d">' + esc(String(s.dates[j]).slice(5).replace("-", ".")) + "</span>" : "") : "") + "</td>";
     h += "</tr><tr>";
     for (var k = 0; k < n; k++) h += '<td class="ad-nm">' + esc(s.names[k] || "") + "</td>";
     return h + "</tr></table>";

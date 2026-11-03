@@ -24,13 +24,15 @@
     JOB_PAUSED: JOB_PAUSED,
     JOB_META_INVALID: "회사명(2~60자)과 지원 방법(5~300자)을 적고, 마감일은 날짜로 고르거나 비워 두세요.", IMAGES_INVALID: "사진은 3장까지, 이 화면에서 올린 사진만 붙일 수 있습니다.", JOB_DAILY_LIMIT: "채용공고는 하루 5건까지 등록할 수 있습니다.", JOB_BIZNO_INVALID: "사업자등록번호 10자리를 정확히 적어 주세요(직업안정법 시행령 제28조 — 구인자 확인).", JOB_CONTACT_INVALID: "채용 담당 연락처를 회사 전화번호나 이메일로 적어 주세요. 사서함 주소는 쓸 수 없습니다.", JOB_PAY_REQUIRED: "급여를 적어 주세요. 최저임금에 못 미치는 구인정보는 올릴 수 없습니다.",
     "Invalid login credentials": "이메일 또는 비밀번호가 맞지 않습니다.", "Email not confirmed": "이메일 인증이 끝나지 않았습니다. 받은 메일의 인증 링크를 눌러 주세요.",
-    "rate limit": "요청이 많아 잠시 막혔습니다. 몇 분 뒤 다시 시도하세요.", "posts_title_check": "제목은 2~80자로 적어 주세요.",
+    "email rate limit": "지금 가입·인증 메일 요청이 몰려 발송이 잠시 막혔습니다. SafePlum은 운영자가 개인 비용으로 운영하는 무료 사이트라 메일·서버 용량을 넉넉하게 두지 못했습니다. 불편을 드려 죄송합니다. 시간을 조금 두고 다시 시도해 주세요. 작성 도구와 자료는 가입 없이도 바로 쓸 수 있습니다.",
+    "over_email_send_rate_limit": "지금 가입·인증 메일 요청이 몰려 발송이 잠시 막혔습니다. SafePlum은 운영자가 개인 비용으로 운영하는 무료 사이트라 메일·서버 용량을 넉넉하게 두지 못했습니다. 불편을 드려 죄송합니다. 시간을 조금 두고 다시 시도해 주세요. 작성 도구와 자료는 가입 없이도 바로 쓸 수 있습니다.",
+    "rate limit": "요청이 몰려 잠시 막혔습니다. SafePlum은 운영자가 개인 비용으로 운영하는 무료 사이트라 서버 용량이 넉넉하지 않습니다. 불편을 드려 죄송합니다. 몇 분 뒤 다시 시도해 주세요.", "posts_title_check": "제목은 2~80자로 적어 주세요.",
     "posts_body_check": "본문은 5~5,000자로 적어 주세요.", "comments_body_check": "댓글은 1~2,000자로 적어 주세요.",
     "Failed to fetch": "서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 다시 시도하세요.", "JWT expired": "로그인이 만료되었습니다. 다시 로그인해 주세요.",
     "should be at least": "비밀번호는 8자 이상으로 정해 주세요.", "same as the old": "이전과 다른 비밀번호를 적어 주세요."
   };
   function msg(e) {
-    var m = String((e && (e.message || e.error_description)) || e || "");
+    var m = String((e && (e.message || e.error_description)) || e || "") + (e && e.code ? " " + e.code : "");
     for (var k in ERR) if (m.toLowerCase().indexOf(k.toLowerCase()) >= 0) return ERR[k];
     if (window.console) console.error("[게시판]", e);
     return "처리하지 못했습니다. 잠시 뒤 다시 시도하세요." + (m ? " (" + m.slice(0, 80) + ")" : "");

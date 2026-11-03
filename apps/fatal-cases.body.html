@@ -1,0 +1,134 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>사망사고 사례·예방대책</p>
+  <h1>사망사고 사례로 보는 예방대책</h1>
+  <p>고용노동부 「중대재해 사고백서」에 실린 2022~2024년 사망사고 <b id="fcTotal"></b>을 업종(제조·건설·기타)과 재해 유형으로 찾고, 사례마다 예방대책과 바로 쓸 작성기를 연결했습니다. 우리 작업과 비슷한 사례를 TBM·교육 자료로 쓰세요.</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <div class="fc-sum" id="fcSum"></div>
+    <div class="fc-filter">
+      <div class="seg" id="fcG" role="group" aria-label="업종"><button type="button" data-v="" aria-pressed="true">전체</button><button type="button" data-v="제조" aria-pressed="false">제조</button><button type="button" data-v="건설" aria-pressed="false">건설</button><button type="button" data-v="기타" aria-pressed="false">기타(서비스 등)</button></div>
+      <div class="fc-row">
+        <label class="sr" for="fcY">연도</label><select id="fcY" class="sort"><option value="">전체 연도</option><option>2024</option><option>2023</option><option>2022</option></select>
+        <div class="search-inline fc-q"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="fcQ" placeholder="기계·작업으로 찾기 (예: 지게차, 지붕, 사다리, 컨베이어)" aria-label="사례 검색"></div>
+      </div>
+      <div class="fc-chips" id="fcK" aria-label="재해 유형"></div>
+      <p class="fc-quick" id="fcQuick"></p>
+    </div>
+    <p class="fc-count" id="fcCount" aria-live="polite"></p>
+    <ol class="fc-list" id="fcList"></ol>
+    <p class="btns"><button type="button" class="btn btn-ghost" id="fcMore" hidden>더 보기</button></p>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">최근 사고 소식</h2>
+      <p class="hint">최근 발생한 중대재해는 안전보건공단 <b>중대재해 사이렌</b>에서 날마다 볼 수 있습니다(이 화면은 2022~2024년 백서 자료).</p>
+      <ul class="bul"><li><a href="https://portal.kosha.or.kr/archive/imprtnDsstrAlrame/CSADV50000/CSADV50000M02" target="_blank" rel="noopener">중대재해 사이렌 — 중대재해 발생 알림 ↗</a></li>
+      <li><a href="../edu-monthly/">월별 정기교육 자료(사고사례 슬라이드)</a></li></ul></div>
+    <div class="side-box"><h2 class="h-sm">사례를 이렇게 쓰세요</h2><ul class="bul hint">
+      <li>우리 작업과 같은 기계·작업으로 찾아 <b>TBM</b>에서 읽어 줍니다.</li>
+      <li>예방대책을 <b>위험성평가</b> 감소대책과 견주어 빠진 것이 없는지 봅니다.</li>
+      <li>'복사' 버튼으로 사례와 대책을 교육 자료에 붙여 넣습니다.</li>
+    </ul><div class="btns" style="margin-top:10px"><a class="btn btn-sm" href="../tbm/">TBM 일지</a><a class="btn btn-sm btn-ghost" href="../risk/">위험성평가서</a></div></div>
+    <p class="src-line" id="fcSrc"></p>
+  </aside>
+</div>
+<style>
+.fc-sum{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;overflow-x:auto}
+.fc-sum table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:420px}
+.fc-sum th,.fc-sum td{border-bottom:1px solid var(--line-2);padding:6px 8px;text-align:right;white-space:nowrap}
+.fc-sum th:first-child,.fc-sum td:first-child{text-align:left}
+.fc-sum thead th{color:var(--muted);font-weight:700;font-size:12.5px}
+.fc-sum caption{text-align:left;font-weight:800;color:var(--navy);font-size:15px;margin-bottom:6px}
+.fc-sum .note{font-size:12px;color:var(--muted);margin:6px 0 0}
+.fc-filter{display:flex;flex-direction:column;gap:10px}
+.fc-row{display:flex;gap:10px;flex-wrap:wrap}
+.fc-q{flex:1;min-width:220px}
+.fc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.fc-chips button{font:inherit;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--text-2);cursor:pointer}
+.fc-chips button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.fc-chips .n{font-size:11.5px;opacity:.75;margin-left:3px}
+.fc-quick{font-size:13px;color:var(--muted);margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.fc-quick a{color:var(--blue);font-weight:600;cursor:pointer}
+.fc-count{font-size:14px;color:var(--text-2);margin:4px 0 0}
+.fc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.fc-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.fc-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.fc-k{font-weight:700;border-radius:6px;padding:1px 7px;background:var(--red-50);color:var(--red)}
+.fc-g{font-weight:700;border-radius:6px;padding:1px 7px;background:var(--blue-50);color:var(--blue-600)}
+.fc-t{font-size:15px;line-height:1.6;color:var(--text);margin:6px 0 4px;font-weight:600}
+.fc-m{margin:0;padding-left:18px;font-size:14px;line-height:1.65;color:var(--text-2)}
+.fc-m li::marker{color:var(--green)}
+.fc-act{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:13px;align-items:center}
+.fc-act a{color:var(--blue);font-weight:600}
+.fc-act button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:3px 9px;cursor:pointer;color:var(--text-2)}
+@media (max-width:560px){.fc-sum{padding:10px}}
+</style>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null, items = D.items, M = D.meta;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  var TOOLS = {
+    "떨어짐": [["고소작업대 작업계획서", "../forms/wp-aerial/"], ["10대 안전수칙", "../top-rules/"]],
+    "끼임": [["LOTO 작업금지 태그", "../loto/"], ["작업시작 전 점검표", "../forms/#pre"]],
+    "맞음": [["중량물 작업계획서", "../forms/wp-heavy/"], ["안전작업허가서", "../permit/"]],
+    "깔림": [["중량물 작업계획서", "../forms/wp-heavy/"], ["지게차 작업계획서", "../forms/wp-forklift/"]],
+    "무너짐": [["굴착 작업계획서", "../forms/wp-dig/"], ["해체 작업계획서", "../forms/wp-demolish/"]],
+    "화재·폭발": [["안전작업허가서(화기)", "../permit/"], ["소방훈련 기록", "../forms/drill-fire/"]],
+    "감전": [["전기작업 계획서", "../forms/wp-elec/"], ["LOTO 작업금지 태그", "../loto/"]],
+    "부딪힘": [["지게차 작업계획서", "../forms/wp-forklift/"], ["굴착기 작업계획서", "../forms/wp-excavator/"]],
+    "질식·중독": [["밀폐공간 가스농도 기록", "../confined/"], ["밀폐공간 구조훈련", "../forms/drill-confined/"]],
+    "넘어짐": [["작업별 안전수칙 게시물", "../rule-sign/"]],
+    "온열·질병": [["폭염 체감온도 기록", "../heat/"]]
+  };
+  var QUICK = ["지게차", "지붕", "채광창", "사다리", "고소작업대", "비계", "크레인", "컨베이어", "굴착기", "개구부", "롤러", "압축기", "프레스", "벌목", "맨홀"];
+  var st = { g: "", y: "", k: "", q: "", n: 30 };
+  try { var p = new URLSearchParams(location.search); st.g = p.get("g") || ""; st.k = p.get("k") || ""; st.q = p.get("q") || ""; st.y = p.get("y") || ""; } catch (e) {}
+  $("fcTotal").textContent = items.length.toLocaleString() + "건";
+  // 요약표: 연도 × 업종 (건수 / 사망자)
+  (function () {
+    var G = ["제조", "건설", "기타"], Y = ["2022", "2023", "2024"], c = {};
+    items.forEach(function (x) { var k = x.y + x.g; c[k] = c[k] || [0, 0]; c[k][0]++; c[k][1] += x.dead; });
+    var row = function (y) { var tot = [0, 0]; var tds = G.map(function (g) { var v = c[y + g] || [0, 0]; tot[0] += v[0]; tot[1] += v[1]; return "<td>" + v[0] + "건 · " + v[1] + "명</td>"; }).join(""); return "<tr><td>" + y + "년</td>" + tds + "<td><b>" + tot[0] + "건 · " + tot[1] + "명</b></td></tr>"; };
+    var kc = {}; items.forEach(function (x) { kc[x.g] = kc[x.g] || {}; kc[x.g][x.k] = (kc[x.g][x.k] || 0) + 1; });
+    var top = G.map(function (g) { var a = Object.keys(kc[g] || {}).sort(function (p, q) { return kc[g][q] - kc[g][p]; }).slice(0, 3); return "<td>" + a.map(function (k) { return esc(k) + " " + kc[g][k]; }).join(" · ") + "</td>"; }).join("");
+    $("fcSum").innerHTML = '<table><caption>연도·업종별 사망사고</caption><thead><tr><th>연도</th><th>제조</th><th>건설</th><th>기타(서비스 등)</th><th>합계</th></tr></thead><tbody>' + Y.map(row).join("") +
+      '<tr><td>많은 유형</td>' + top + "<td></td></tr></tbody></table><p class=\"note\">" + esc(M.check) + "</p>";
+  })();
+  $("fcQuick").innerHTML = '<span>자주 찾는 기계·작업:</span>' + QUICK.map(function (w) { return '<a data-q="' + esc(w) + '">' + esc(w) + "</a>"; }).join("");
+  function pool(ignoreK) { var q = st.q.trim().toLowerCase().split(/\s+/).filter(Boolean); return items.filter(function (x) { if (st.g && x.g !== st.g) return false; if (st.y && x.y !== st.y) return false; if (!ignoreK && st.k && x.k !== st.k) return false; if (q.length) { var t = (x.t + " " + x.m.join(" ") + " " + x.s + " " + x.r).toLowerCase(); return q.every(function (w) { return t.indexOf(w) >= 0; }); } return true; }); }
+  function chips() { var cnt = {}; pool(true).forEach(function (x) { cnt[x.k] = (cnt[x.k] || 0) + 1; }); var ks = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; });
+    $("fcK").innerHTML = '<button type="button" data-k="" aria-pressed="' + (!st.k) + '">전체 유형</button>' + ks.map(function (k) { return '<button type="button" data-k="' + esc(k) + '" aria-pressed="' + (st.k === k) + '">' + esc(k) + '<span class="n">' + cnt[k] + "</span></button>"; }).join(""); }
+  function card(x) {
+    var tl = (TOOLS[x.k] || []).concat([["위험성평가서", "../risk/"]]).map(function (t) { return '<a href="' + t[1] + '">' + esc(t[0]) + " →</a>"; }).join("");
+    return '<li class="fc-item"><div class="fc-meta"><span class="fc-k">' + esc(x.k) + '</span><span class="fc-g">' + esc(x.g === "기타" ? "기타(서비스 등)" : x.g) + "</span>" + (x.s ? "<span>" + esc(x.s) + "</span>" : "") + "<span>" + esc(x.d.replace(/-/g, ".")) + " · " + esc(x.r) + (x.dead > 1 ? " · 사망 " + x.dead + "명" : "") + "</span></div>" +
+      '<p class="fc-t">' + esc(x.t) + '</p><ul class="fc-m">' + x.m.map(function (m) { return "<li>" + esc(m) + "</li>"; }).join("") + "</ul>" +
+      '<div class="fc-act">' + tl + '<button type="button" data-copy="' + x.y + "-" + x.n + '">복사</button></div></li>';
+  }
+  var cur = [];
+  function render() {
+    chips(); cur = pool(false);
+    $("fcCount").textContent = "사례 " + cur.length.toLocaleString() + "건" + (st.q ? " · '" + st.q + "'" : "");
+    $("fcList").innerHTML = cur.slice(0, st.n).map(card).join("") || '<li class="hint">맞는 사례가 없습니다. 다른 낱말로 찾아 보세요.</li>';
+    $("fcMore").hidden = cur.length <= st.n;
+    [].forEach.call($("fcG").children, function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === st.g)); });
+    try { var u = new URLSearchParams(); ["g", "y", "k", "q"].forEach(function (k) { if (st[k]) u.set(k, st[k]); }); history.replaceState(null, "", u.toString() ? "?" + u.toString() : location.pathname); } catch (e) {}
+  }
+  $("fcG").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; st.g = b.dataset.v; st.k = ""; st.n = 30; render(); });
+  $("fcK").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; st.k = b.dataset.k; st.n = 30; render(); });
+  $("fcY").value = st.y; $("fcY").addEventListener("change", function () { st.y = this.value; st.n = 30; render(); });
+  var tq; $("fcQ").value = st.q; $("fcQ").addEventListener("input", function () { clearTimeout(tq); var v = this.value; tq = setTimeout(function () { st.q = v; st.n = 30; render(); }, 200); });
+  $("fcQuick").addEventListener("click", function (ev) { var a = ev.target.closest("[data-q]"); if (!a) return; st.q = a.dataset.q; $("fcQ").value = st.q; st.n = 30; render(); });
+  $("fcMore").addEventListener("click", function () { st.n += 30; render(); });
+  $("fcList").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-copy]"); if (!b) return;
+    var x = cur.filter(function (i) { return i.y + "-" + i.n === b.dataset.copy; })[0]; if (!x) return;
+    var txt = "[사고사례] " + x.d.replace(/-/g, ".") + " " + x.r + " (" + (x.g === "기타" ? "기타" : x.g) + "·" + x.k + ")\n" + x.t + "\n[예방대책]\n" + x.m.map(function (m) { return "- " + m; }).join("\n") + "\n(출처: 고용노동부 중대재해 사고백서)";
+    var done = function () { b.textContent = "복사됨"; setTimeout(function () { b.textContent = "복사"; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, function () { prompt("복사하세요", txt); }); else prompt("복사하세요", txt);
+  });
+  $("fcSrc").textContent = "출처: " + M.source + ". " + M.note + " 정리 " + M.checked;
+  render();
+})();
+</script>

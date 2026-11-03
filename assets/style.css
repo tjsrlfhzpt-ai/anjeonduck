@@ -149,6 +149,8 @@ main{flex:1 0 auto}
 .col-main>*+*{margin-top:0}
 .col-side{display:flex;flex-direction:column;gap:20px}
 .layout-detail .col-side,.col-filter{position:sticky;top:calc(var(--hd-h) + 20px)}
+/* 필터가 화면보다 길면 필터 칸만 따로 스크롤 (목록과 함께 내리지 않아도 끝까지 보이게) */
+.col-filter{align-self:start;max-height:calc(100vh - var(--hd-h) - 40px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;border-radius:var(--r-lg)}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 0 12px}
 .col-main .sec-head:not(:first-child){margin-top:40px}
 .sec-head p{font-size:13px;color:var(--muted);margin-top:2px}
@@ -309,6 +311,7 @@ main{flex:1 0 auto}
   .ftools{grid-template-columns:minmax(0,1fr)}
   .layout-home,.layout-detail,.layout-list{grid-template-columns:minmax(0,1fr)}
   .layout-detail .col-side,.col-filter{position:static}
+  .col-filter{max-height:none;overflow:visible}
   .layout-detail .col-side{order:-1}
   .fpanel>summary{display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;padding:14px 18px;font-weight:700;color:var(--navy)}
   .fpanel>summary::-webkit-details-marker{display:none}

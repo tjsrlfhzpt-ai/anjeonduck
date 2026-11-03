@@ -248,7 +248,7 @@
 </style>
 <script src="../../assets/docs.js"></script>
 <script src="../../assets/ai.js"></script>
-<style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746;padding:1px 3px}.risk-appr .ad-appr td.ad-s{height:24px}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}</style>
+<style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746;padding:1px 3px}.risk-appr .ad-appr td.ad-s{height:36px}.risk-appr.ad-sized{width:auto}.risk-appr.ad-off{width:auto}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}</style>
 </head>
 <body>
 
@@ -733,13 +733,13 @@
     $("pgSize").textContent = "@page { size: A4 " + (ORIENT === "l" ? "landscape" : "portrait") + "; margin: 10mm; } @page:first{margin-top:0;margin-bottom:0;padding-top:10mm;padding-bottom:10mm}";
     document.body.classList.toggle("land", ORIENT === "l"); $("optOrient").value = ORIENT; fitScreen();
   }
-  function setAppr(on) { APPR_ON = on !== false; $("page1").classList.toggle("no-appr", !APPR_ON); $("optAppr").checked = APPR_ON; }
+  function setAppr(on) { APPR_ON = on !== false; $("page1").classList.toggle("no-appr", !APPR_ON); $("optAppr").checked = APPR_ON; if (apprH && apprH.setOff) apprH.setOff(!APPR_ON); }
 
   // ---------- 결재란(공통 모듈). 평가서마다 따로 보관해 다른 평가서의 서명이 섞이지 않게 한다 ----------
   var APPR_KEY = "safetake.appr.tool.risk", apprH = null, apprMute = false;
   function apprSet(v) {
     apprMute = true;
-    try { if (v && Array.isArray(v.cols) && v.cols.length) localStorage.setItem(APPR_KEY, JSON.stringify({ cols: v.cols.slice(0, 6).map(function (x) { return str(x, 30); }), names: (v.names || []).slice(0, 6).map(function (x) { return str(x, 30); }), signs: (Array.isArray(v.signs) ? v.signs : []).slice(0, 6).map(function (x) { return typeof x === "string" && /^data:image\/png;base64,/.test(x) ? x : null; }), dates: (Array.isArray(v.dates) ? v.dates : []).slice(0, 6).map(function (x) { return x ? str(x, 10) : null; }) })); else localStorage.removeItem(APPR_KEY); } catch (e) { /* 저장소를 못 쓰는 환경 */ }
+    try { if (v && Array.isArray(v.cols) && v.cols.length) localStorage.setItem(APPR_KEY, JSON.stringify({ cols: v.cols.slice(0, 6).map(function (x) { return str(x, 30); }), names: (v.names || []).slice(0, 6).map(function (x) { return str(x, 30); }), signs: (Array.isArray(v.signs) ? v.signs : []).slice(0, 6).map(function (x) { return typeof x === "string" && /^data:image\/png;base64,/.test(x) ? x : null; }), dates: (Array.isArray(v.dates) ? v.dates : []).slice(0, 6).map(function (x) { return x ? str(x, 10) : null; }), sh: num(v.sh, 0, 120, 0), cw: num(v.cw, 0, 160, 0), off: !APPR_ON })); else localStorage.removeItem(APPR_KEY); } catch (e) { /* 저장소를 못 쓰는 환경 */ }
     if (apprH) apprH.redraw();
     setTimeout(function () { apprMute = false; }, 0);
   }
@@ -1240,7 +1240,12 @@
     lbEls().forEach(function (el) { DEF_LB[el.dataset.lb] = el.textContent; });
     page.querySelectorAll("[contenteditable]").forEach(function (el) { el.setAttribute("contenteditable", CE); });
     gs.innerHTML = HAZARD_DB.groups.map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join("");
-    if (window.ADoc) { var ab = $("apprBox"); ab.dataset.mounted = "1"; apprH = ADoc.mountApproval(ab, "tool.risk"); }
+    if (window.ADoc) {
+      var ab = $("apprBox"); ab.dataset.mounted = "1";
+      // 결재란 안의 "결재란 빼기/다시 넣기"와 옵션의 "결재란 인쇄"를 같은 값으로 맞춘다
+      ab.addEventListener("ad-appr", function (ev) { var on = !ev.detail.off; if (on !== APPR_ON) { setAppr(on); saveTpl(); markTouched(); } });
+      apprH = ADoc.mountApproval(ab, "tool.risk");
+    }
     // 가장 최근에 저장한 평가서를 이어서 연다. 없으면 새 평가서(사업장 정보가 있으면 사업장명·작성자를 채움)
     var a = loadDocs();
     a.sort(function (x, y) { return (y.saved || 0) - (x.saved || 0); });
