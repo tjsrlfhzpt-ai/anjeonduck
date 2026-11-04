@@ -1591,6 +1591,7 @@ ACC_PAGE = "accidents/"  # 사고사망 속보 목록(상세) 페이지 주소
 
 
 JOB_POST = True  # main() 에서 config/site.json features.job_posting 으로 정한다
+VERIFY_LATER = False  # features.verify_on_write: 가입은 바로, 글쓰기 전 1회 이메일 인증(supabase/verify_on_write.sql 실행 + Confirm email 끄기 후 true)
 JOBS_OPEN = 0     # main() 에서: 채용정보(/jobs/)의 마감 전 공고 수 — 회원 채용공고 게시판에서 안내
 
 
@@ -2210,6 +2211,8 @@ def duck_signs_html(site, write):
 def build(out, today):
     site = load("config/site.json")
     global JOB_POST
+    global VERIFY_LATER
+    VERIFY_LATER = bool((site.get("features") or {}).get("verify_on_write", False))
     JOB_POST = bool((site.get("features") or {}).get("job_posting", True))  # 회원 채용공고 등록을 열어 둘지
     base_res = load("data/resources.json")
     _groups, _forms = all_forms(load("data/lawref.json"))
@@ -2871,7 +2874,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     BP = fetch_board_posts(cm_url, cm_key) if cm_on else None   # 글별 정적 페이지용(아래)
 
     def cm_page(sub, kind, title, lead, rel, desc, wide=False):
-        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST, "jobsOpen": JOBS_OPEN, "jobNo": ((site.get("operator") or {}).get("job_info_no") or ""), "jobOrg": ((site.get("operator") or {}).get("job_info_org") or ""), "built": BOARD_BUILT if (BP and BP.get("posts")) else ""}, ensure_ascii=False).replace("</", "<\\/")
+        conf = json.dumps({"url": cm_url if cm_on else "", "key": cm_key if cm_on else "", "root": rel, "cats": cm_cats, "chat": OPENCHAT, "jobPost": JOB_POST, "verifyLater": VERIFY_LATER, "jobsOpen": JOBS_OPEN, "jobNo": ((site.get("operator") or {}).get("job_info_no") or ""), "jobOrg": ((site.get("operator") or {}).get("job_info_org") or ""), "built": BOARD_BUILT if (BP and BP.get("posts")) else ""}, ensure_ascii=False).replace("</", "<\\/")
         crumb = f'<a href="{rel}board/">게시판</a><span>/</span>{e(title)}' if sub else "게시판"
         side = f"""<aside class="col-side stack">
     <div class="side-box"><h2 class="h-sm">게시판 안내</h2><ul class="bul hint">

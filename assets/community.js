@@ -14,7 +14,8 @@
   var SHARE_RE = /^\[([^\]]{1,20})\]\s*/;
   var JOB_POST = CFG.jobPost !== false, JOB_PAUSED = "채용공고 등록은 현재 준비 중입니다. 준비가 끝나면 다시 열겠습니다.";
   var ERR = {
-    LOGIN_REQUIRED: "로그인이 필요합니다.", RATE_LIMIT: "너무 빠르게 연속으로 등록했습니다. 잠시 뒤 다시 시도하세요.",
+    LOGIN_REQUIRED: "로그인이 필요합니다.", VERIFY_REQUIRED: "글·댓글을 처음 쓰기 전에 이메일 인증을 한 번 해 주세요. 이 화면의 '인증 코드 받기'를 누르면 됩니다.",
+    "Token has expired or is invalid": "인증 코드가 맞지 않거나 시간이 지났습니다. 코드를 다시 받아 주세요.", "Signups not allowed for otp": "가입된 이메일이 아닙니다.", RATE_LIMIT: "너무 빠르게 연속으로 등록했습니다. 잠시 뒤 다시 시도하세요.",
     DAILY_LIMIT: "하루 등록 한도를 넘었습니다. 내일 다시 시도하세요.", SUSPENDED: "글쓰기가 정지된 계정입니다. 마이페이지에서 기간과 사유를 확인할 수 있습니다.", ADMIN_ONLY: "운영자만 쓸 수 있는 기능입니다.",
     CANNOT_SUSPEND_ADMIN: "운영자 계정과 자기 자신은 정지할 수 없습니다.", REASON_REQUIRED: "사유를 2자 이상 적어 주세요.", BAD_DAYS: "기간은 1~3650일 사이로 정하세요.", USER_NOT_FOUND: "회원을 찾을 수 없습니다.", "Database error saving new user": "가입을 처리하지 못했습니다. 이용이 제한된 이메일일 수 있습니다. 문의 창구로 알려 주세요.", SIGNUP_BLOCKED: "이용이 제한된 이메일입니다. 문의 창구로 알려 주세요.",
     NOT_FOUND: "대상을 찾을 수 없습니다. 이미 처리되었을 수 있습니다.",
@@ -106,7 +107,9 @@
   }
   // 인증 메일의 링크로 들어왔는지는 주소의 # 뒤에 적혀 있다. 클라이언트가 읽고 지우기 전에 먼저 봐 둔다.
   var HASH = location.hash || "";
-  var ARRIVE = /type=signup/.test(HASH) ? "signup" : /error_code=|error=/.test(HASH) ? "error" : "";
+  var ARRIVE = /type=signup/.test(HASH) ? "signup" : /type=magiclink/.test(HASH) ? "magiclink" : /error_code=|error=/.test(HASH) ? "error" : "";
+  // 가입은 바로 되고 글쓰기 전에 한 번 인증하는 방식(config/site.json features.verify_on_write + supabase/verify_on_write.sql)
+  var LATER = !!CFG.verifyLater;
   var sb = window.supabase.createClient(CFG.url, CFG.key), ME = null, RECOVERY = false;
 
   function loadMe() {
@@ -117,9 +120,57 @@
         ME = { id: s.user.id, email: s.user.email, nickname: (p.data && p.data.nickname) || "회원", role: (p.data && p.data.role) || "member" };
         // 헤더(모든 화면)에 '운영 관리' 링크를 보여 주기 위한 표시일 뿐이다. 실제 권한은 서버가 확인한다.
         try { if (ME.role === "admin") localStorage.setItem("safetake.adm", ME.id); else localStorage.removeItem("safetake.adm"); } catch (e) {}
-        return ME;
+        return loadVerified();
       });
     });
+  }
+  // 인증 여부는 화면 안내용이다. 실제로 글을 받을지는 서버(guard_verified 트리거)가 정한다.
+  // member_verify 표가 아직 없으면(SQL 실행 전) null → 안내 없이 예전처럼 둔다.
+  function loadVerified() {
+    if (!ME) return Promise.resolve(ME);
+    if (ME.role === "admin") { ME.verified = true; return Promise.resolve(ME); }
+    return sb.from("member_verify").select("verified_at").eq("user_id", ME.id).maybeSingle().then(function (r) {
+      ME.verified = r.error ? null : !!r.data;
+      // 메일의 인증 링크를 눌러 들어온 경우: 이 세션으로 바로 인증 기록을 남긴다
+      if (ME.verified === false && ARRIVE === "magiclink") {
+        ARRIVE = "";
+        return sb.rpc("mark_verified").then(function (x) { if (!x.error) ME.verified = true; return ME; }, function () { return ME; });
+      }
+      return ME;
+    }, function () { ME.verified = null; return ME; });
+  }
+  // 글·댓글을 처음 쓰기 전 1회 이메일 인증 상자. done() 은 인증이 끝난 뒤 다시 그릴 함수.
+  function verifyBox(done, compact) {
+    var out = h("p", { class: "cm-note", role: "status", hidden: true });
+    var code = h("input", { type: "text", inputmode: "numeric", autocomplete: "one-time-code", maxlength: "10", pattern: "[0-9]{6,10}", placeholder: "메일로 받은 숫자 코드", "aria-label": "인증 코드" });
+    var bSend = h("button", { type: "button", class: "btn" + (compact ? " btn-sm" : "") }, "인증 코드 받기");
+    var bOk = h("button", { type: "submit", class: "btn" + (compact ? " btn-sm" : "") }, "인증 완료");
+    var step2 = h("form", { class: "cm-verify-2", hidden: true, onsubmit: function (ev) {
+      ev.preventDefault();
+      var v = code.value.replace(/\D/g, "");
+      if (v.length < 6) { out.textContent = "메일에 적힌 숫자 코드를 그대로 넣어 주세요."; out.className = "cm-note cm-err"; out.hidden = false; return; }
+      busy(bOk, true, "확인 중…"); out.hidden = true;
+      sb.auth.verifyOtp({ email: ME.email, token: v, type: "email" }).then(function (r) {
+        if (r.error) throw r.error;
+        return sb.rpc("mark_verified");
+      }).then(function (r) {
+        if (r && r.error) throw r.error;
+        ME.verified = true; done();
+      }).catch(function (e) { busy(bOk, false, "인증 완료"); out.textContent = msg(e); out.className = "cm-note cm-err"; out.hidden = false; });
+    } }, h("div", { class: "cm-verify-row" }, code, bOk));
+    bSend.addEventListener("click", function () {
+      busy(bSend, true, "보내는 중…"); out.hidden = true;
+      sb.auth.signInWithOtp({ email: ME.email, options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname + location.search } }).then(function (r) {
+        if (r.error) throw r.error;
+        busy(bSend, false, "코드 다시 받기");
+        out.textContent = ME.email + " 로 인증 메일을 보냈습니다. 메일의 숫자 코드를 아래에 넣거나, 메일의 링크를 누르세요. 메일이 안 보이면 스팸함을 확인하세요. 다시 받으려면 1분쯤 기다려 주세요.";
+        out.className = "cm-note cm-ok"; out.hidden = false; step2.hidden = false; code.focus();
+      }).catch(function (e) { busy(bSend, false, "인증 코드 받기"); out.textContent = msg(e); out.className = "cm-note cm-err"; out.hidden = false; });
+    });
+    return h("div", { class: "cm-verify" + (compact ? " cm-verify-s" : "") },
+      h("p", null, h("b", null, "처음 한 번만 이메일 인증을 해 주세요")),
+      compact ? null : h("p", { class: "hint" }, "광고·도배 글을 막기 위해 글·댓글·채용공고를 처음 쓸 때 가입한 이메일로 한 번만 확인합니다. 인증은 한 번이면 끝나고, 쓰던 글은 이 기기에 임시 저장됩니다."),
+      h("p", { class: "btns" }, bSend), step2, out);
   }
   function userBar() {
     var bar = h("div", { class: "cm-user" });
@@ -386,7 +437,8 @@
             !cmine ? h("button", { type: "button", class: "linkbtn", onclick: report("comment", c.id) }, "신고") : null));
       }));
       var form;
-      if (ME) {
+      if (ME && ME.verified === false) form = verifyBox(pageView, true);
+      else if (ME) {
         var ta = h("textarea", { name: "body", rows: "4", maxlength: "2000", required: true, placeholder: qna ? "아는 내용을 근거(법 조문·고시·공식 자료)와 함께 적어 주세요." : "댓글을 적어 주세요.", "aria-label": word + " 내용" });
         var out = h("p", { class: "cm-note", role: "status", hidden: true }), btn = h("button", { type: "submit", class: "btn" }, word + " 등록");
         form = h("form", { class: "cm-form", onsubmit: function (ev) {
@@ -416,6 +468,10 @@
         h("p", { class: "btns" }, h("a", { class: "btn", href: url("", { b: "job" }) }, "채용공고 보기"), h("a", { class: "btn btn-ghost", href: REL + "jobs/" }, "다른 채용 사이트에서 찾기"))));
     }
     if (!ME) { location.replace(url("account", { next: location.pathname + location.search })); return; }
+    if (ME.verified === false) {
+      navJob(b0 === "job");
+      return show(tabs(b0), h("div", { class: "cm-auth" }, h("h2", { class: "h-sm" }, b0 === "job" ? "채용공고 등록 전 확인" : "글쓰기 전 확인"), verifyBox(pageWrite)));
+    }
     function form(post) {
       var b = post ? post.board : b0, key = "st.cm.draft." + (id || "new");
       var saved = draft(key) || {};
@@ -645,7 +701,7 @@
         sb.auth.signInWithPassword({ email: email.value.trim(), password: pw1.value }).then(function (r) { if (r.error) { busy(bl, false); return result(out, msg(r.error)); } goNext(); });
       } }, why(), h("h2", { class: "h-sm" }, "로그인"), field("이메일", email), field("비밀번호", pw1), out, h("p", { class: "btns" }, bl),
         h("p", { class: "cm-alt" }, sw("reset", "비밀번호 찾기")),
-        h("div", { class: "cm-joinbox" }, h("p", null, h("b", null, "아직 회원이 아니신가요?"), " 가입은 무료이고 1분이면 됩니다. 이메일 인증만 하면 되고 이름·전화번호는 받지 않습니다."),
+        h("div", { class: "cm-joinbox" }, h("p", null, h("b", null, "아직 회원이 아니신가요?"), LATER ? " 가입은 무료이고 바로 끝납니다. 이름·전화번호는 받지 않고, 글을 처음 쓸 때 이메일 인증을 한 번만 합니다." : " 가입은 무료이고 1분이면 됩니다. 이메일 인증만 하면 되고 이름·전화번호는 받지 않습니다."),
           h("a", { class: "btn btn-ghost btn-block", href: url("account", { mode: "join", next: qs("next") }) }, "무료 회원가입"))));
     }
     if (mode === "reset") {
@@ -656,7 +712,7 @@
       } }, h("h2", { class: "h-sm" }, "비밀번호 찾기"), field("가입한 이메일", email), out, h("p", { class: "btns" }, br), h("p", { class: "cm-alt" }, sw("login", "로그인으로"))));
     }
     var nk = h("input", { type: "text", maxlength: "12", required: true, autocomplete: "nickname" }), pw2 = h("input", { type: "password", autocomplete: "new-password", minlength: "8", required: true });
-    var ag1 = h("input", { type: "checkbox", required: true }), ag2 = h("input", { type: "checkbox", required: true }), ag3 = h("input", { type: "checkbox", required: true }), bj = h("button", { type: "submit", class: "btn btn-block" }, "인증 메일 받기"), cj = pwConfirm(pw2);
+    var ag1 = h("input", { type: "checkbox", required: true }), ag2 = h("input", { type: "checkbox", required: true }), ag3 = h("input", { type: "checkbox", required: true }), bj = h("button", { type: "submit", class: "btn btn-block" }, LATER ? "가입하기" : "인증 메일 받기"), cj = pwConfirm(pw2);
     show(h("form", { class: "cm-form cm-auth", onsubmit: function (ev) {
       ev.preventDefault(); out.hidden = true;
       if (!cj.same()) { cj.input.focus(); return result(out, "비밀번호가 서로 다릅니다. 다시 확인해 주세요."); }
@@ -671,12 +727,22 @@
         if (!r) return;
         busy(bj, false);
         if (r.error) return result(out, msg(r.error));
-        if (r.data && r.data.session) return goNext();
+        if (r.data && r.data.session) {
+          if (qs("next")) return goNext();
+          return loadMe().then(function () {
+            show(h("div", { class: "cm-auth cm-welcome" },
+              h("img", { src: REL + "assets/img/ico/cheer.webp", width: "96", height: "96", alt: "" }),
+              h("h2", { class: "h-sm" }, "가입이 완료되었습니다"),
+              h("p", { class: "cm-note cm-ok" }, h("b", null, (ME && ME.nickname) || n), " 님으로 로그인되었습니다. 글·댓글·채용공고를 처음 쓸 때 가입한 이메일로 한 번만 인증하면 됩니다."),
+              h("p", { class: "btns" }, h("a", { class: "btn btn-block", href: url("") }, "게시판 둘러보기")),
+              h("p", { class: "btns" }, h("a", { class: "btn btn-ghost btn-block", href: url("write") }, "첫 글 쓰기"))));
+          });
+        }
         result(out, "인증 메일을 보냈습니다. 메일의 링크를 누르면 가입이 끝납니다. 메일이 안 보이면 스팸함을 확인하세요. 이미 가입한 이메일이라면 메일이 가지 않으니 로그인하거나 비밀번호 찾기를 이용하세요.", true);
       }).catch(function (e) { busy(bj, false); result(out, msg(e)); });
     } }, why(), h("h2", { class: "h-sm" }, "무료 회원가입"),
-      h("p", { class: "hint" }, "누구나 무료로 가입합니다. 이름·전화번호는 받지 않고 이메일 인증만 하면 됩니다."),
-      field("이메일", email, "인증 메일을 받을 주소 · 다른 회원에게 보이지 않습니다"), field("비밀번호", pw2, "8자 이상"), cj.el, field("닉네임", nk, "한글·영문·숫자·밑줄 2~12자 · 글에 공개됩니다"),
+      h("p", { class: "hint" }, LATER ? "누구나 무료로 바로 가입합니다. 이름·전화번호는 받지 않습니다. 이메일 인증은 글이나 채용공고를 처음 쓸 때 한 번만 합니다." : "누구나 무료로 가입합니다. 이름·전화번호는 받지 않고 이메일 인증만 하면 됩니다."),
+      field("이메일", email, LATER ? "로그인과 글쓰기 전 1회 인증에 씁니다 · 다른 회원에게 보이지 않습니다" : "인증 메일을 받을 주소 · 다른 회원에게 보이지 않습니다"), field("비밀번호", pw2, "8자 이상"), cj.el, field("닉네임", nk, "한글·영문·숫자·밑줄 2~12자 · 글에 공개됩니다"),
       h("label", { class: "cm-chk" }, ag1, h("span", null, h("a", { href: REL + "board/rules/", target: "_blank" }, "게시판 이용수칙"), "에 동의합니다. (필수)")),
       h("div", { class: "cm-consent" }, h("b", null, "개인정보 수집·이용 안내"),
         h("ul", null, h("li", null, "수집 항목: 이메일 주소, 비밀번호(암호화 저장), 닉네임"), h("li", null, "이용 목적: 본인 확인(인증 메일), 로그인, 글·댓글 작성자 표시, 이용 제한 등 운영 조치"),

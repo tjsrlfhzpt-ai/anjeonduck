@@ -1683,6 +1683,10 @@ button.cm-tab{font:inherit;cursor:pointer}
 .cm-why{margin:0 0 6px;padding:10px 12px;border-radius:10px;background:var(--blue-50);color:var(--blue);font-size:14px;font-weight:700;line-height:1.5}
 .cm-joinbox{margin-top:6px;padding-top:14px;border-top:1px solid var(--line-2);display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--text-2);line-height:1.55}
 .cm-joinbox p{margin:0}
+.cm-verify{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border:1px solid var(--line-2);border-radius:12px;background:var(--blue-50);font-size:14px;line-height:1.55}
+.cm-verify p{margin:0}.cm-verify .btns{margin:0}
+.cm-verify-row{display:flex;gap:8px;flex-wrap:wrap}.cm-verify-row input{flex:1 1 180px;min-width:0;font-size:18px;letter-spacing:.12em}
+.cm-verify-s{padding:12px 14px;margin-top:8px}
 .cm-share{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 0}
 .cm-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .cm-tile{display:flex;flex-direction:column;gap:2px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);font:inherit;color:var(--text)}
