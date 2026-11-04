@@ -250,6 +250,40 @@ def write_bills(site, write, B):
 
 # ---------------------------------------------------------------- 검증
 
+def co_key(name):
+    """회사명 비교용: ㈜·(주)·주식회사·공백·기호를 뺀다."""
+    s = re.sub(r"㈜|㈔|\((주|유|사|재)\)|주식회사|유한회사|\s", "", str(name or ""))
+    return re.sub(r"[^\w가-힣]", "", s).lower()
+
+
+def dedupe_w24(w24, others):
+    """고용24 자동 수집 공고 중 잡코리아 선별·회원 등록 공고와 겹치는 것은 뺀다(같은 회사 + 같은 직무 + 마감일 7일 이내 또는 제목 유사)."""
+    def words(t):
+        return {w for w in re.findall(r"[가-힣A-Za-z0-9]{2,}", str(t or "")) if w not in ("채용", "모집", "구인", "경력", "신입", "경력직", "직원", "담당자")}
+    idx = {}
+    for j in others:
+        idx.setdefault(co_key(j.get("company")), []).append(j)
+    out, dropped = [], 0
+    for j in w24:
+        dup = False
+        for o in idx.get(co_key(j.get("company")), []):
+            same_job = set(re.split(r"[|,·]", str(j.get("job", "")))) & set(re.split(r"[|,·]", str(o.get("job", ""))))
+            a, b = str(j.get("deadline", "")), str(o.get("deadline", ""))
+            near = bool(DATE_RE.match(a) and DATE_RE.match(b) and abs((dt.date.fromisoformat(a) - dt.date.fromisoformat(b)).days) <= 7)
+            wa, wb = words(j.get("title")), words(o.get("title"))
+            similar = bool(wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= 0.5)
+            if same_job and (near or similar):
+                dup = True
+                break
+        if dup:
+            dropped += 1
+        else:
+            out.append(j)
+    if w24:
+        print(f"  고용24 자동 수집 {len(w24)}건 중 다른 출처와 겹친 {dropped}건 제외 → {len(out)}건")
+    return out
+
+
 def validate_jobs(jobs, today):
     out, seen = [], set()
     for j in jobs:
@@ -2213,7 +2247,9 @@ def build(out, today):
     for j in user_jobs:
         j["origin"] = "user"
         j.setdefault("source_name", "기업 직접 등록")
-    jobs = validate_jobs(load("data/jobs.json") + user_jobs + pubjobs["items"], today)
+    curated = load("data/jobs.json")
+    w24 = dedupe_w24(load_auto("w24jobs.json")["items"], curated + user_jobs)
+    jobs = validate_jobs(curated + user_jobs + pubjobs["items"] + w24, today)
     global JOBS_OPEN
     JOBS_OPEN = sum(1 for x in jobs if not x["closed"])
     briefs = load_briefs(today)
@@ -3239,7 +3275,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     {f'<section class="block"><h2>자격 요건</h2><ul class="bul">{reqs}</ul></section>' if reqs else ''}
     {'<p class="src-note">이 공고는 채용 기업이 SafePlum에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
     {'<p class="src-note">' + e(j.get('source_name') or '채용 사이트') + '에 게시된 공고 중 안전·보건 직무를 SafePlum 운영자가 골라 기본 정보(회사·근무지·경력·마감일)만 옮기고 원문으로 연결했습니다. 담당 업무·자격요건·급여·지원 방법은 원문에서 확인하세요. SafePlum은 채용을 알선하지 않습니다.</p>' if j.get('origin') == 'curated' else ''}
-    <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''} · 조건과 일정은 원문이 우선합니다.</p>
+    <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''}{' — 고용24(한국고용정보원) 채용정보 Open API로 자동 수집. 운영자가 하나씩 확인한 공고가 아니므로 회사·직무·조건을 원문에서 꼭 확인하세요' if j.get('origin') == 'work24' else ''} · 조건과 일정은 원문이 우선합니다.</p>
   </article>
   <aside class="col-side">
     <div class="apply-card" data-deadline="{e(dl)}">

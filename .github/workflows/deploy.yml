@@ -41,6 +41,11 @@ jobs:
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
         run: python3 scripts/fetch_public.py --accidents-only
+      - name: 고용24 채용정보 API → 안전·보건 공고 (인증키 WORK24_KEY 가 없거나 실패하면 건너뜀)
+        continue-on-error: true
+        env:
+          WORK24_KEY: ${{ secrets.WORK24_KEY }}
+        run: python3 scripts/fetch_work24.py
       - name: 정적 페이지 생성
         run: python3 build.py --out _site
       - name: 법령 별표 원본 대조 (적용범위 판정 데이터)
