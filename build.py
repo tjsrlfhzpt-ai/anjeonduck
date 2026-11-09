@@ -1405,6 +1405,16 @@ def job_row(j, rel_root, compact=False):
 TODAY_SECTORS = ["제조·화학", "반도체·전자", "건설·플랜트·조선", "식품·유통·서비스", "물류·운수", "에너지·공공"]
 
 
+def jobs_new_since(today):
+    """'새로 올라온 공고'의 기준일. 평일은 전날, 월요일은 금요일 이후(주말 등록분 포함).
+    운영자가 며칠 만에 갱신할 때는 환경변수 JOBS_NEW_SINCE=YYYY-MM-DD 로 기준일을 준다."""
+    d = dt.date.fromisoformat(today)
+    since = os.environ.get("JOBS_NEW_SINCE", "")
+    if DATE_RE.match(since) and since <= today:
+        return since
+    return (d - dt.timedelta(days=3 if d.weekday() == 0 else 1)).isoformat()
+
+
 def jobs_today_pick(jobs, today):
     pick = [j for j in jobs if not j["closed"] and (j.get("company_type") in GRADE_ORDER[:5])]
     return sorted(pick, key=lambda j: (GRADE_ORDER.index(j["company_type"]), str(j.get("deadline") or "9")))
@@ -1419,7 +1429,7 @@ def jobs_today_text(site, jobs, today):
            "대기업·공공기관·외국계·중견기업 등 주요 기관의 안전·보건 공고 중 마감 전 공고를 모았습니다.",
            f"👉 전체 보기: {base}/jobs/today/", ""]
     # 전날(또는 오늘) 새로 올라온 공고는 맨 위에 따로 모으고, 업종 묶음에서는 뺀다
-    yday = (d - dt.timedelta(days=1)).isoformat()
+    yday = jobs_new_since(today)
     fresh = [j for j in pick if str(j.get("posted") or "") >= yday]
     rest = [j for j in pick if j not in fresh]
     blocks = ([(f"🆕 새로 올라온 공고 {len(fresh)}건 ({int(yday[5:7])}/{int(yday[8:10])}~)", fresh)] if fresh else []) + \
@@ -1469,7 +1479,7 @@ def jobs_today_body(site, jobs, today):
     pick = jobs_today_pick(jobs, today)
     d = dt.date.fromisoformat(today)
     secs = ""
-    yday = (d - dt.timedelta(days=1)).isoformat()
+    yday = jobs_new_since(today)
     fresh = [j for j in pick if str(j.get("posted") or "") >= yday]
     if fresh:
         secs += f'<section class="block jt-sec jt-new"><h2>🆕 새로 올라온 공고 <span class="muted">{len(fresh)} · {int(yday[5:7])}/{int(yday[8:10])} 이후 등록</span></h2><ul class="jlist">' + "".join(job_row(j, "../../") for j in fresh) + "</ul></section>"
