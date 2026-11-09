@@ -2171,3 +2171,10 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
 .jt-sec h2{display:flex;align-items:baseline;gap:8px}
 .jt-share textarea{width:100%;min-height:260px;border:1px solid var(--line);border-radius:10px;padding:10px;font:13px/1.55 inherit;resize:vertical;margin:6px 0 10px;background:var(--surface)}
 .job-co .hint{margin-top:8px}
+/* 질의회시 주제별 목록 쪽 이동·다른 주제 (2026-11-10 색인 개선) */
+.gq-pager{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.gq-pager a,.gq-pager strong{min-width:36px;height:36px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;font-weight:700;text-decoration:none;color:var(--text)}
+.gq-pager strong{background:var(--navy);border-color:var(--navy);color:#fff}
+.gq-others{margin-top:28px}
+.gq-otl{display:flex;flex-wrap:wrap;gap:6px 14px}
+.gq-otl a{text-decoration:none}.gq-otl em{font-style:normal;color:var(--muted);font-size:.9em}

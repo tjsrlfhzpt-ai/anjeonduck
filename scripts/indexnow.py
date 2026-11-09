@@ -20,7 +20,15 @@ try:
 except Exception as ex:  # noqa: BLE001
     print("IndexNow: 사이트맵을 읽지 못함 →", ex)
     sys.exit(0)
-urls = re.findall(r"<loc>([^<]+)</loc>", xml)[:10000]
+urls = re.findall(r"<loc>([^<]+)</loc>", xml)
+if "<sitemapindex" in xml:   # sitemap.xml 이 색인 파일이면 구역별 사이트맵을 차례로 읽는다
+    subs, urls = urls, []
+    for sm in subs:
+        try:
+            urls += re.findall(r"<loc>([^<]+)</loc>", urllib.request.urlopen(sm, timeout=20).read().decode("utf-8"))
+        except Exception as ex:  # noqa: BLE001
+            print("IndexNow: 하위 사이트맵을 읽지 못함 →", sm, ex)
+urls = urls[:10000]
 body = json.dumps({"host": host, "key": key, "keyLocation": f"{base}/{key}.txt", "urlList": urls}).encode("utf-8")
 for ep in ("https://api.indexnow.org/indexnow", "https://searchadvisor.naver.com/indexnow"):
     try:

@@ -1965,6 +1965,10 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         src = src.replace("/*@TAILWIND@*/", css)
     if site.get("name_ko") and f" | {site['name']}</title>" in src:   # 단독 화면 제목에도 한글 이름
         src = src.replace(f" | {site['name']}</title>", f"{' · 무료 양식' if t.get('cat') == '작성기' else ''} | {site['name_ko']} {site['name']}</title>", 1)
+    _tb = (site.get("base_url") or "").rstrip("/")
+    if _tb and 'rel="canonical"' not in src and "</head>" in src:   # 단독 화면(작성기)에도 canonical — 없으면 ?쿼리 주소가 따로 잡힐 수 있음
+        _cu = f"{_tb}/tools/{t['id']}/"
+        src = src.replace("</head>", f'<link rel="canonical" href="{e(_cu)}">\n<meta property="og:url" content="{e(_cu)}">\n</head>', 1)
     if "og:image" not in src and "</head>" in src:
         src = src.replace("</head>", og_image_tags(site) + "\n" + tool_ld(t, site) + "\n</head>", 1)
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
@@ -2438,11 +2442,14 @@ def build(out, today):
 
     urls = []
 
-    def write(path, content):
+    def write(path, content, noindex=False):
+        # noindex=True: 검색 결과에 낼 필요가 없는 화면(마감 공고 등). robots noindex 를 넣고 사이트맵에서 뺀다
+        if noindex:
+            content = content.replace('<meta name="viewport"', '<meta name="robots" content="noindex,follow">\n<meta name="viewport"', 1)
         p = out / path
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding="utf-8")
-        if path.endswith("index.html"):
+        if path.endswith("index.html") and not noindex:
             urls.append(path[: -len("index.html")])
 
     open_jobs = [j for j in jobs if not j["closed"]]
@@ -2888,9 +2895,27 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
         topics = [t for t in gm["topics"] if any(x["c"] == t for x in gitems)]
         tcount = {t: sum(1 for x in gitems if x["c"] == t) for t in topics}
         years = sorted({x["d"][:4] for x in gitems if x["d"]}, reverse=True)
+        # 주제별 정적 목록 주소(laws/qa/c/<slug>/). 검색엔진이 2천여 건을 '이전·다음' 고리로만 따라가면 홈에서 1,000번 넘게
+        # 클릭해야 닿는 글이 생겨 '발견됨 - 현재 색인이 생성되지 않음'으로 남는다. 주제 목록에서 모든 글로 바로 링크한다
+        import hashlib
+        TS = {t: hashlib.sha1(t.encode("utf-8")).hexdigest()[:6] for t in topics}
+        GQ_PER = 100   # 주제 목록 한 쪽에 싣는 글 수
+        _tc = {}
+        for x in gitems:
+            _tc[x["t"]] = _tc.get(x["t"], 0) + 1
+        _tdc = {}
+        for x in gitems:
+            _tdc[(x["t"], x["d"])] = _tdc.get((x["t"], x["d"]), 0) + 1
+        def gq_title(x):   # 제목이 같은 회시가 여럿이면 회신일(같은 날이면 해석 번호까지) 붙여 검색 결과에서 구별되게
+            if _tc.get(x["t"], 0) <= 1:
+                return x["t"]
+            tag = (x["d"].replace("-", ".") + " 회신") if x["d"] else "회신일 미상"
+            return f'{x["t"]} ({tag}' + (f' · {x["id"]})' if _tdc[(x["t"], x["d"])] > 1 or not x["d"] else ")")
+        def tpath(t, n=1):
+            return f"laws/qa/c/{TS[t]}/" + (f"{n}/" if n > 1 else "")
 
         def gq_side(rel, topics_box=True):
-            tl = "".join(f'<li><a href="{rel}laws/qa/?c={quote(t)}">{e(t)} <span class="muted">{tcount[t]}</span></a></li>' for t in topics)
+            tl = "".join(f'<li><a href="{rel}{tpath(t)}">{e(t)} <span class="muted">{tcount[t]}</span></a></li>' for t in topics)
             tbox = f'<div class="side-box"><h2 class="h-sm">주제별 보기</h2><ul class="bul gq-tl">{tl}</ul></div>' if topics_box else ""
             return f"""<aside class="col-side stack">
     {tbox}
@@ -2911,11 +2936,11 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
             return q[:120]
 
         GQ_FIRST = 30  # 처음 그리는 줄 수. 나머지는 list.json 으로 받는다(목록 페이지가 1MB를 넘지 않게)
-        def gq_row(x):
+        def gq_row(x, pre=""):
             old = x["d"] and x["d"] < OLD
             sn = gq_snip(x)
             dd = x["d"].replace("-", ".") if x["d"] else "회신일 미상"
-            return (f'<li class="gq-row"><a href="{e(x["id"])}/"><strong class="gq-t">{e(x["t"])}</strong>'
+            return (f'<li class="gq-row"><a href="{pre}{e(x["id"])}/"><strong class="gq-t">{e(x["t"])}</strong>'
                     + (f'<span class="gq-s">{e(sn)}</span>' if sn else "")
                     + f'<span class="gq-m"><span class="gq-cat">{e(x["c"])}</span><time datetime="{e(x["d"])}">{e(dd)}</time>'
                     + ('<span class="gq-old">구법 기준</span>' if old else "") + '</span></a></li>')
@@ -2944,7 +2969,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
   <p class="gq-more"><button type="button" class="btn btn-ghost" id="gqM">더 보기 <span id="gqMn"></span></button></p>
   <details class="gq-note"><summary>{CHK_SVG} 이 자료를 볼 때 꼭 알아 둘 점 <span class="muted">— 부처 해석이며, {n_old:,}건은 2020년 전부개정 전 법령 기준</span></summary><p>{e(gq_note)}</p>
   <p class="src-note">출처: 법제처 국가법령정보센터 「중앙부처 1차 해석」(고용노동부) · 공공누리 제1유형 · 수집 {e(gm.get("collected", ""))} · 질의·회답 본문은 원문 그대로 옮기고 줄바꿈만 넣었습니다.</p></details>
-</section>{gq_side("../../", False)}</div>
+</section>{gq_side("../../", True)}</div>
 <script>(function(){{var L=document.getElementById("gqL"),q=document.getElementById("gqQ"),x=document.getElementById("gqX"),y=document.getElementById("gqY"),so=document.getElementById("gqS"),cb=document.getElementById("gqC"),f=document.getElementById("gqF"),n=document.getElementById("gqN"),em=document.getElementById("gqE"),mb=document.getElementById("gqM"),mn=document.getElementById("gqMn"),c="",lim=30,D=null,OLD="{OLD}";
 function h(s){{return String(s).replace(/[&<>"]/g,function(m){{return {{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}}[m];}});}}
 function mark(s,t){{s=h(s);if(!t.length)return s;var re=new RegExp("("+t.map(function(w){{return h(w).replace(/[.*+?^${{}}()|[\\]\\\\]/g,"\\\\$&");}}).join("|")+")","gi");return s.replace(re,"<mark>$1</mark>");}}
@@ -2965,8 +2990,14 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
         write("laws/qa/index.html", page(site, "../../", "laws/qa/", "고용노동부 질의회시 모음 — 산업안전보건법", qa_body,
               desc=f"산업안전보건법 관련 고용노동부 질의회시(행정해석) {len(gitems):,}건을 주제별로 정리. 선임·교육·도급·건설·위험성평가 등 질의요지와 회답 전문.", active="laws/"))
         side3 = gq_side("../../../")
+        by_topic = {t: [y for y in gitems if y["c"] == t] for t in topics}
+        pos_in = {id(y): k for t in topics for k, y in enumerate(by_topic[t])}
         for i, x in enumerate(gitems):
-            same = [y for y in gitems if y is not x and y["c"] == x["c"]][:6]
+            # 같은 주제에서 앞뒤로 가까운 회시 6건(예전에는 주제의 최신 6건만 걸려 오래된 글에는 링크가 거의 없었다)
+            _bt = by_topic.get(x["c"], [])
+            _k = pos_in.get(id(x), 0)
+            _lo = max(0, min(_k - 3, len(_bt) - 7))
+            same = [y for y in _bt[_lo:_lo + 7] if y is not x][:6]
             rl = "".join(f'<li><a href="../{y["id"]}/"><time>{e(y["d"][:7].replace("-", ".") or "-")}</time><span>{e(y["t"])}</span></a></li>' for y in same)
             newer, older = (gitems[i - 1] if i > 0 else None), (gitems[i + 1] if i + 1 < len(gitems) else None)
             nav = "".join(f'<a class="bdn-{k}" href="../{y["id"]}/"><span>{lab}</span>{e(y["t"])}</a>' for k, lab, y in (("prev", "← 최근 회신", newer), ("next", "이전 회신 →", older)) if y)
@@ -2977,8 +3008,8 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
             dd = fmt_date(x["d"]) if x["d"] else "회신일 미상"
             body = f"""
 <section class="phead gq-vhead"><div class="wrap">
-  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">법령</a><span>/</span><a href="../">질의회시</a><span>/</span><a href="../?c={quote(x["c"])}">{e(x["c"])}</a></p>
-  <p class="gq-vcat"><a href="../?c={quote(x["c"])}">{e(x["c"])}</a></p>
+  <p class="crumbs"><a href="../../../">홈</a><span>/</span><a href="../../">법령</a><span>/</span><a href="../">질의회시</a><span>/</span><a href="../../../{tpath(x["c"])}">{e(x["c"])}</a></p>
+  <p class="gq-vcat"><a href="../../../{tpath(x["c"])}">{e(x["c"])}</a></p>
   <h1>{e(x["t"])}</h1>
   <p class="gq-vm"><span>고용노동부 회신</span><time datetime="{e(x["d"])}">{e(dd)}</time>{f'<span>수록: {e(x["s"])}</span>' if x.get("s") else ''}{'<span class="gq-old">구법 기준</span>' if old else ''}<button type="button" class="gq-copy" data-copy>링크 복사</button></p>
 </div></section>
@@ -2988,7 +3019,7 @@ fetch("list.json").then(function(r){{return r.json();}}).then(function(d){{D=d;r
   <section class="gq-blk gq-a" aria-labelledby="gqAh"><h2 id="gqAh"><span class="gq-qa">A</span>고용노동부 회답</h2><div class="gq-tx">{gq_paras(x["a"])}</div>{law}</section>
   <section class="gq-ai" id="gqAI"><div class="gq-ai-h"><b>✦ AI로 쉽게 풀이 · 현행 법령과 대조</b><button type="button" class="btn btn-sm gq-ai-go" id="gqAIGo">풀이 보기</button></div>
     <p class="gq-ai-st" id="gqAISt">회답을 쉬운 말로 요약하고, 지금 시행 중인 조문과 비교해 달라진 점이 있는지 알려 줍니다(내 Gemini 키 · 참고용).</p><div id="gqAIOut"></div></section>
-  <p class="btns gq-btns"><a class="btn" href="{e(gm["item_url"].format(id=x["id"]))}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a><a class="btn btn-ghost" href="../../../tools/law-ai/">현행 법령으로 물어보기</a><a class="btn btn-ghost" href="../?c={quote(x["c"])}">같은 주제 목록</a></p>
+  <p class="btns gq-btns"><a class="btn" href="{e(gm["item_url"].format(id=x["id"]))}" target="_blank" rel="noopener">국가법령정보센터 원문 ↗</a><a class="btn btn-ghost" href="../../../tools/law-ai/">현행 법령으로 물어보기</a><a class="btn btn-ghost" href="../../../{tpath(x["c"], _k // GQ_PER + 1)}">같은 주제 목록</a></p>
   <details class="gq-note"><summary>{CHK_SVG} 이 해석을 볼 때 꼭 알아 둘 점</summary><p>{e(gq_note)}</p></details>
   <section class="gq-tools"><h2 class="h-sm">이 주제에 쓰는 무료 도구</h2><p class="btns">{tools}</p></section>
   {f'<nav class="bdn" aria-label="이전·다음 질의회시">{nav}</nav>' if nav else ''}
@@ -3011,8 +3042,34 @@ var now=E(r.now||"").replace(/\\[(\\d{{1,2}})\\]/g,function(m,n){{var c=law[n-1]
 out.innerHTML='<div class="gq-ai-box"><p><b>한눈에</b> '+E(r.summary||"")+'</p>'+((r.points||[]).length?'<ul>'+r.points.map(function(x){{return"<li>"+E(x)+"</li>";}}).join("")+"</ul>":"")+'<p><b>현행 법령과 비교</b> '+now+'</p><p class="gq-ai-src">'+Object.keys(used).map(function(n){{var c=used[n];return'<a href="'+E(c.url)+'" target="_blank" rel="noopener">['+n+'] '+E(c.label)+"</a>";}}).join(" ")+'</p><p class="gq-ai-src">'+E(SPAI.NOTICE)+" 원문과 현행 조문을 꼭 확인하세요.</p></div>";
 st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textContent=(e&&e.message)||"AI 요청이 실패했습니다.";}}).then(function(){{busy=false;go.disabled=false;}});}});}})();</script>
 <script>(function(){{var b=document.querySelector("[data-copy]");if(!b)return;b.addEventListener("click",function(){{var u=location.href.split("#")[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){{b.textContent="복사했습니다";setTimeout(function(){{b.textContent="링크 복사";}},1600);}},function(){{prompt("아래 주소를 복사하세요",u);}});}});}})();</script>"""
-            write(f"laws/qa/{x['id']}/index.html", page(site, "../../../", f"laws/qa/{x['id']}/", f'{x["t"]} — 고용노동부 질의회시', body,
+            write(f"laws/qa/{x['id']}/index.html", page(site, "../../../", f"laws/qa/{x['id']}/", f'{gq_title(x)} — 고용노동부 질의회시', body,
                   desc=(f'[{x["c"]}] ' + re.sub(r"\s+", " ", x["q"]))[:150], active="laws/"))
+        # 주제별 전체 목록(정적 HTML, 한 쪽 GQ_PER건). 자바스크립트 없이도 모든 회시에 링크가 닿는다
+        for t in topics:
+            lst = by_topic[t]
+            npg = (len(lst) + GQ_PER - 1) // GQ_PER
+            for _pn in range(1, npg + 1):
+                _qd = "../../" if _pn == 1 else "../../../"   # 질의회시 목록(laws/qa/)까지. 이 쪽은 laws/qa/c/<slug>/ 또는 laws/qa/c/<slug>/<쪽>/
+                _qr = _qd + "../../"                         # 사이트 첫 화면까지
+                chunk = lst[(_pn - 1) * GQ_PER: _pn * GQ_PER]
+                pg = "".join(
+                    (f'<strong aria-current="page">{k}</strong>' if k == _pn else f'<a href="{_qr}{tpath(t, k)}">{k}</a>') for k in range(1, npg + 1))
+                pager = f'<nav class="gq-pager" aria-label="쪽 이동" id="p{_pn}">{pg}</nav>' if npg > 1 else ""
+                others = "".join(f'<a href="{_qr}{tpath(o)}">{e(o)} <em>{tcount[o]}</em></a>' for o in topics if o != t)
+                tb = f"""
+<section class="phead gq-head"><div class="wrap">
+  <p class="crumbs"><a href="{_qr}">홈</a><span>/</span><a href="{_qr}laws/">법령</a><span>/</span><a href="{_qd}">질의회시</a><span>/</span>{e(t)}</p>
+  <h1>{e(t)} 질의회시 <span class="muted">{len(lst):,}건</span></h1>
+  <p>고용노동부가 산업안전보건법 질의회시 중 「{e(t)}」 주제로 분류한 회신을 최신순으로 모았습니다.{f" ({_pn}/{npg}쪽)" if npg > 1 else ""} 검색·연도·현행법 필터는 <a href="{_qd}?c={quote(t)}">질의회시 검색</a>에서 쓸 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail gq-layout"><section class="col-main">
+  {pager}
+  <ul class="gq-list">{"".join(gq_row(x, _qd) for x in chunk)}</ul>
+  {pager.replace(f' id="p{_pn}"', '')}
+  <section class="gq-others"><h2 class="h-sm">다른 주제</h2><p class="gq-otl">{others}</p></section>
+</section>{gq_side(_qr, False)}</div>"""
+                write(f"{tpath(t, _pn)}index.html", page(site, _qr, tpath(t, _pn), f"{t} 질의회시 {len(lst):,}건" + (f" ({_pn}쪽)" if _pn > 1 else "") + " — 고용노동부 행정해석", tb,
+                      desc=f"산업안전보건법 {t} 관련 고용노동부 질의회시(행정해석) {len(lst):,}건 목록" + (f" {_pn}쪽" if _pn > 1 else "") + ". 질의요지와 회답 전문으로 연결됩니다.", active="laws/"))
     else:
         warn("data/gov_qa.json 이 없음 → 질의회시 모음(laws/qa/)을 만들지 않음")
 
@@ -3402,6 +3459,9 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
         btn = f'<a class="btn btn-block" href="mailto:{e(m.group(0))}">이메일로 지원</a>' if m else ""
         return f'<p class="apply-how"><b>지원 방법</b>{e(ap)}</p>{btn}'
 
+    _jdup = {}
+    for j in jobs:
+        _jdup[f"{j['company']} {j['title']}"] = _jdup.get(f"{j['company']} {j['title']}", 0) + 1
     for j in jobs:
         def lines(v):
             return "".join(f"<li>{e(x.strip())}</li>" for x in str(v or "").split("|") if x.strip())
@@ -3447,8 +3507,12 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     {company_box(j)}
   </aside>
 </div>"""
-        write(f"jobs/{j['id']}/index.html", page(site, "../../", f"jobs/{j['id']}/", f"{j['company']} {j['title']}", body,
-                                                  desc=f"{j['company']} · {j.get('region','')} · {career_txt(j)} · 마감 {dl}", active="jobs/"))
+        _jt = f"{j['company']} {j['title']}"
+        if _jdup.get(_jt, 0) > 1:   # 같은 회사·같은 제목 공고가 여럿(현장만 다름)이면 근무지를 붙여 검색 결과에서 구별되게
+            _jt += f" · {j.get('region') or dl}"
+        write(f"jobs/{j['id']}/index.html", page(site, "../../", f"jobs/{j['id']}/", _jt, body,
+                                                  desc=f"{j['company']} · {j.get('region','')} · {career_txt(j)} · 마감 {dl}", active="jobs/"),
+              noindex=j["closed"])   # 마감 공고는 기록용으로만 남기고 검색 색인·사이트맵에서는 뺀다
 
     # ---- 오늘의 채용 모음(카카오톡 오픈채팅 공유용): 대기업·공공·외국계·중견 공고 중 마감 전, 업종별
     write("jobs/today/index.html", page(site, "../../", "jobs/today/", "오늘의 안전·보건 채용 모음", jobs_today_body(site, jobs, today),
@@ -3765,8 +3829,26 @@ q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="
         _lm = {f"brief/n/{x['id']}/": x["date"] for x in BOARD if re.match(r"^\d{4}-\d{2}-\d{2}$", x.get("date", ""))}
         _lm.update({f"brief/{b['date']}/": b["date"] for b in briefs})
         _lm.update(POST_LM)
-        sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc>" + (f"<lastmod>{_lm[u]}</lastmod>" if u in _lm else "") + "</url>" for u in urls)
-        (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sm}</urlset>', encoding="utf-8")
+        # 구역별 사이트맵 + 색인 파일(sitemap.xml). 서치콘솔 '페이지' 보고서를 사이트맵별로 걸러 어느 구역이 색인이 안 되는지 볼 수 있다
+        def _sec(u):
+            for pre, nm in (("laws/qa/", "qa"), ("jobs/", "jobs"), ("brief/", "brief"), ("board/", "board"), ("resources/", "resources"), ("tools/", "tools"), ("laws/", "laws")):
+                if u.startswith(pre):
+                    return nm
+            return "pages"
+        _groups = {}
+        for u in urls:
+            _groups.setdefault(_sec(u), []).append(u)
+        _ns = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+        _idx = ""
+        for nm in ("pages", "tools", "resources", "laws", "qa", "brief", "board", "jobs"):
+            us = _groups.get(nm)
+            if not us:
+                continue
+            sm = "".join(f"<url><loc>{e(base + '/' + u)}</loc>" + (f"<lastmod>{_lm[u]}</lastmod>" if u in _lm else "") + "</url>" for u in us)
+            (out / f"sitemap-{nm}.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset {_ns}>{sm}</urlset>', encoding="utf-8")
+            _last = max((_lm[u] for u in us if u in _lm), default="")
+            _idx += f"<sitemap><loc>{e(base)}/sitemap-{nm}.xml</loc>" + (f"<lastmod>{_last}</lastmod>" if _last else "") + "</sitemap>"
+        (out / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><sitemapindex {_ns}>{_idx}</sitemapindex>', encoding="utf-8")
     # ---- RSS (브리핑·소식). 네이버 서치어드바이저 등에 제출할 수 있다
     if base:
         from email.utils import format_datetime
