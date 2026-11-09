@@ -75,6 +75,8 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 1200000   # GitHub 쪽 파일 동기화가 늦을 때(평소 40초)를 대비해 20분까지 기다림
       - uses: actions/checkout@v4
       - name: 검색엔진에 변경 알림 (IndexNow — 실패해도 배포는 유지)
         continue-on-error: true
