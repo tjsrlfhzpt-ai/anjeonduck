@@ -1838,6 +1838,11 @@ body.is-arrived [data-landing]{display:none!important}
 .vside .vmeta{padding:10px 2px 0}
 .vside .vtitle{font-size:15px}
 .vnote{padding-bottom:40px}
+.xvs{padding-bottom:32px}.xvl{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
+.xv{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.xv-meta{margin:0;font-size:12.5px;color:var(--text-2)}.xv-kind{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:5px;background:var(--blue-50);color:var(--navy);font-weight:700;font-size:11.5px}
+.xv-t{font-weight:700;font-size:15px;line-height:1.45;color:var(--text);text-decoration:none}.xv-t:hover{text-decoration:underline}
+.xv-n,.xv-r{margin:0;font-size:13px;color:var(--text-2)}
 .vexts{display:flex;flex-wrap:wrap;gap:4px 14px}
 .vch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .mc-ind{width:100%;height:38px;margin:0 0 8px;font-size:14px}

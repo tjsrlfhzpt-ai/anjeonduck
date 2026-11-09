@@ -1083,6 +1083,37 @@ def _videos():
 VIDEO_CHANNELS = {}
 
 
+def ext_video_section(rel):
+    if not EXT_VIDEOS:
+        return ""
+    cards = "".join(
+        f'<li class="xv"><p class="xv-meta"><span class="xv-kind">{e(v["kind"])}</span>{e(v["channel"])} · {fmt_date(v["date"])}</p>'
+        f'<a class="xv-t" href="{e(v["url"])}" target="_blank" rel="noopener">{e(v["title"])} ↗</a>'
+        + (f'<p class="xv-n">{e(v["note"])}</p>' if v.get("note") else "")
+        + ("<p class=\"xv-r\">" + " · ".join(f'<a href="{rel}{e(h)}">{e(lb)}</a>' for h, lb in v.get("related", []) if not h.startswith(("http", "/"))) + "</p>" if v.get("related") else "")
+        + "</li>" for v in EXT_VIDEOS)
+    return (f'<section class="wrap xvs"><h2 class="h-sm">기관·언론 영상 <span class="muted">외부 링크 {len(EXT_VIDEOS)}</span></h2>'
+            '<p class="hint">공공기관·언론사가 공식 채널에 올린 영상을 유튜브 원래 주소로 연결합니다. 영상과 보도 내용은 각 게시자의 것이며, 제목 옆 설명은 SafePlum이 요약한 것입니다.</p>'
+            f'<ul class="xvl">{cards}</ul></section>')
+
+
+def _ext_videos():
+    """data/ext_videos.json — 기관·언론사 공식 채널 영상 링크(재생은 유튜브에서, 썸네일·영상은 가져오지 않음)."""
+    p = ROOT / "data/ext_videos.json"
+    if not p.exists():
+        return []
+    out = []
+    for v in json.loads(p.read_text(encoding="utf-8")).get("items", []):
+        yt = str(v.get("youtube", ""))
+        if not re.match(r"^[A-Za-z0-9_-]{11}$", yt) or not DATE_RE.match(str(v.get("date", ""))) or not v.get("channel") or not v.get("title"):
+            warn(f"외부 영상 항목 형식 오류 → 뺌: {yt or v.get('title')}")
+            continue
+        v = dict(v, url=f"https://www.youtube.com/watch?v={yt}")  # 공유 링크의 추적 값(si=)은 버리고 영상 id만 쓴다
+        out.append(v)
+    return out
+
+
+EXT_VIDEOS = _ext_videos()
 VIDEOS = _videos()   # 안전보건 영상(유튜브·틱톡). 맨 위가 대표 영상. 재생을 누르기 전에는 외부에 접속하지 않는다(자체 썸네일 → 클릭 시 iframe)
 
 
@@ -2814,6 +2845,7 @@ var h=location.hash.slice(1),r=h&&document.getElementById(h);if(r&&r.tagName==="
                  + ('<p class="vch">' + "".join(f'<a class="btn btn-sm btn-ghost" href="{e(u)}" target="_blank" rel="noopener">{n} 채널 ↗</a>' for k, n in (("youtube", "유튜브"), ("tiktok", "틱톡")) for u in [VIDEO_CHANNELS.get(k)] if u) + "</p>" if VIDEO_CHANNELS else "") + '</div></section>'
                  + video_filter(VIDEOS) +
                  f'<div class="wrap vgrid">{"".join(video_card(v, "../", True, lead=(i == 0)) for i, v in enumerate(VIDEOS))}</div>'
+                 + ext_video_section("../") +
                  '<aside class="wrap"><p class="hint vnote">영상은 유튜브·틱톡에 올린 것을 각 서비스가 제공하는 플레이어로 보여 줍니다. 재생 버튼을 누르기 전에는 유튜브·틱톡에 접속하지 않으며, 재생하면 해당 서비스의 개인정보 처리방침이 적용됩니다.</p></aside>' + VIDEO_JS)
         write("videos/index.html", page(site, "../", "videos/", "안전보건 영상", vbody, desc="밀폐공간·끼임 등 현장 안전보건 수칙을 1분 영상으로 정리하고 근거 조문을 함께 적었습니다.", active="videos/"))
     write("brief/index.html", page(site, "../", "brief/", "안전 브리핑",
