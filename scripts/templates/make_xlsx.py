@@ -1182,6 +1182,139 @@ def committee():
 
 
 # =====================================================================
+# 10-2. 연간 안전보건교육 계획서 (법정 서식 없음 — 별표 4 시간 자동 확인)
+# =====================================================================
+def eduplan():
+    eh = json.load(open(ROOT / "data/edu_hours.json", encoding="utf-8"))
+    sec = {s["id"]: s for s in eh["sections"]}
+    assert sec["worker"]["rows"][0]["hours"] == "매반기 6시간 이상" and sec["worker"]["rows"][2]["hours"] == "매반기 12시간 이상"
+    assert sec["supervisor"]["rows"][0]["hours"] == "연간 16시간 이상"
+    COURSES = ["근로자 정기교육", "관리감독자 정기교육", "근로자 채용 시 교육", "근로자 작업내용 변경 시 교육", "근로자 특별교육",
+               "관리감독자 채용 시 교육", "관리감독자 작업내용 변경 시 교육", "관리감독자 특별교육", "건설업 기초안전보건교육", "직무교육", "기타(자체 교육)"]
+    TARGETS = ["전 근로자", "사무직·판매", "그 밖의 근로자", "관리감독자", "신규 입사자", "작업 변경자", "특별교육 대상자", "기타"]
+    METHOD = ["집체교육", "현장교육", "인터넷 원격교육", "위탁교육", "시청각 교육", "혼합"]
+    wb = new_book()
+    W = [6, 18, 34, 13, 7, 12, 11, 11, 8, 8, 9, 9]
+    ws = sheet(wb, "연간 교육계획", W, landscape=True, tab=NAVY)
+    title(ws, "연간 안전보건교육 계획서", 8, sub="산업안전보건법 제29조 · 시행규칙 제26조, 별표 4(교육시간)·별표 5(교육내용) — 법령에 정해진 서식은 없습니다")
+    approval(ws, 1, 9, labels=("작성", "검토", "승인"), sign_h=30)
+    hd = lambda ref, v: box(ws, ref, v, f(9.5, True, NAVY), CENTER, HEAD)
+    secr = lambda r, v: box(ws, f"A{r}:L{r}", v, f(10.5, True, "FFFFFF"), LEFT, NAVY)
+    r = 4; secr(r, "1. 기본 정보"); r += 1
+    hd(f"A{r}:B{r}", "계획 연도"); box(ws, f"C{r}", None, f(10, True), CENTER); hd(f"D{r}", "사업장명"); box(ws, f"E{r}:H{r}", None, f(10), LEFT)
+    hd(f"I{r}:J{r}", "작성일"); box(ws, f"K{r}:L{r}", None, f(10), CENTER, fmt="yyyy-mm-dd")
+    dv_whole(ws, f"C{r}", 2020, 2100, prompt="연도 4자리"); example(ws, r, [None, None, 2027, None, "○○식품㈜ 본사·공장", None, None, None, None, None, "2026-12-15"]); ws.row_dimensions[r].height = 24
+    Y = f"C{r}"; r += 1
+    hd(f"A{r}:B{r}", "업종"); box(ws, f"C{r}", None, f(10), LEFT); hd(f"D{r}", "상시근로자"); box(ws, f"E{r}", None, f(10), CENTER)
+    hd(f"F{r}:G{r}", "산보위 심의·의결일"); box(ws, f"H{r}", None, f(10), CENTER, fmt="yyyy-mm-dd")
+    hd(f"I{r}:J{r}", "작성자"); box(ws, f"K{r}:L{r}", None, f(10), CENTER)
+    example(ws, r, [None, None, "식품 제조업", None, 120, None, None, "2026-12-20", None, None, "안전관리자 ○○○"]); ws.row_dimensions[r].height = 24; r += 1
+    hd(f"A{r}:B{r}", "교육 대상 인원"); hd(f"C{r}", "사무직·판매 직접 종사"); box(ws, f"D{r}", None, f(10), CENTER); hd(f"E{r}:F{r}", "그 밖의 근로자"); box(ws, f"G{r}", None, f(10), CENTER)
+    hd(f"H{r}", "관리감독자"); box(ws, f"I{r}", None, f(10), CENTER); hd(f"J{r}:K{r}", "일용·단기 기간제(예상)"); box(ws, f"L{r}", None, f(10), CENTER)
+    example(ws, r, [None, None, None, 15, None, None, 95, None, 10, None, None, 5]); ws.row_dimensions[r].height = 26; r += 1
+    hd(f"A{r}:B{r}", "교육시간 2분의 1"); box(ws, f"C{r}", None, f(10, True), CENTER)
+    box(ws, f"D{r}:L{r}", "'해당'이면 근로자·관리감독자 교육시간 기준을 절반으로 계산 — 영 별표 1 제1호에 따른 사업, 상시 50명 미만 도매업·숙박 및 음식점업(별표 4 제1호 비고 3)", f(8.5, False, MUTED), LEFT)
+    dv_list(ws, f"C{r}", ["해당 없음", "해당"]); ws.cell(row=r, column=3, value="해당 없음"); HALF = f"$C${r}"; ws.row_dimensions[r].height = 24; r += 1
+    hd(f"A{r}:B{r}", "정기교육 면제"); box(ws, f"C{r}", None, f(10, True), CENTER)
+    box(ws, f"D{r}:L{r}", "'적용'이면 근로자 정기교육 기준을 절반으로 계산 — 전년도에 산업재해가 없으면 그다음 연도에 한정해 정기교육 시간의 100분의 50 범위에서 면제할 수 있음(시행규칙 제27조제1항)", f(8.5, False, MUTED), LEFT)
+    dv_list(ws, f"C{r}", ["적용 안 함", "적용"]); ws.cell(row=r, column=3, value="적용 안 함"); EX = f"$C${r}"; ws.row_dimensions[r].height = 24; r += 2
+
+    secr(r, "2. 올해 교육 목표와 중점 사항"); r += 1
+    box(ws, f"A{r}:L{r}", None, f(10), LEFT_TOP); ws.row_dimensions[r].height = 54
+    example(ws, r, ["1. 위험성평가 결과 위험성이 높은 끼임·넘어짐·화학물질 작업 위주로 현장 교육  2. 근로자 정기교육 반기 12시간(사무직 6시간), 관리감독자 연간 16시간 모두 이수  3. 신규 입사자는 배치 전 채용 시 교육 8시간"]); r += 2
+
+    secr(r, "3. 법정 시간 충족 확인 (자동 — 4번 월별 계획의 '근로자 정기교육'·'관리감독자 정기교육' 시간을 반기별로 더함)"); r += 1
+    header_row(ws, r, ["구분", "", "법정 기준(시행규칙 별표 4)", "", "적용 기준(1인)", "", "상반기 계획", "", "하반기 계획", "", "판정", ""], height=24)
+    for a_, b_ in (("A", "B"), ("C", "D"), ("E", "F"), ("G", "H"), ("I", "J"), ("K", "L")):
+        ws.merge_cells(f"{a_}{r}:{b_}{r}")
+    r += 1
+    chk0 = r
+    rows_chk = [("근로자 정기교육 — 사무직·판매 직접 종사", "매반기 6시간 이상", 6, ["사무직·판매", "전 근로자"], "worker"),
+                ("근로자 정기교육 — 그 밖의 근로자", "매반기 12시간 이상", 12, ["그 밖의 근로자", "전 근로자"], "worker"),
+                ("관리감독자 정기교육", "연간 16시간 이상", 16, ["관리감독자"], "sup")]
+    first_plan = chk0 + len(rows_chk) + 3  # 4번 표 데이터 첫 행(판정 3줄 → 안내 1줄 → 4번 제목 1줄 → 머리글 1줄 다음)
+    nplan = 20
+    last_plan = first_plan + nplan - 1
+    rng = lambda c: f"${c}${first_plan}:${c}${last_plan}"
+    for label, law, base, tg, kind in rows_chk:
+        box(ws, f"A{r}:B{r}", label, f(9.5, True, INK), LEFT, SUB); box(ws, f"C{r}:D{r}", law, f(9.5), CENTER)
+        fac = f'IF({HALF}="해당",0.5,1)' + (f'*IF({EX}="적용",0.5,1)' if kind == "worker" else "")
+        box(ws, f"E{r}:F{r}", f"={base}*{fac}", f(10, True), CENTER, SUB, fmt='0.0"시간"')
+        course = "근로자 정기교육" if kind == "worker" else "관리감독자 정기교육"
+        def s(lo, hi):
+            return "+".join(f'SUMIFS({rng("E")},{rng("B")},"{course}",{rng("D")},"{t_}",{rng("A")},">={lo}",{rng("A")},"<={hi}")' for t_ in tg)
+        if kind == "worker":
+            box(ws, f"G{r}:H{r}", f"={s(1, 6)}", f(10, True), CENTER, SUB, fmt='0.0"시간"')
+            box(ws, f"I{r}:J{r}", f"={s(7, 12)}", f(10, True), CENTER, SUB, fmt='0.0"시간"')
+            box(ws, f"K{r}:L{r}", f'=IF(AND(G{r}>=E{r},I{r}>=E{r}),"충족",IF(G{r}<E{r},"상반기 부족","하반기 부족"))', f(10, True), CENTER, SUB)
+        else:
+            box(ws, f"G{r}:J{r}", f'=({s(1, 12)})', f(10, True), CENTER, SUB, fmt='"연간 "0.0"시간"')
+            box(ws, f"K{r}:L{r}", f'=IF(G{r}>=E{r},"충족","부족 "&TEXT(E{r}-G{r},"0.0")&"시간")', f(10, True), CENTER, SUB)
+        ws.row_dimensions[r].height = 26; r += 1
+    color_text_rule(ws, f"K{chk0}:L{r - 1}", "부족", RED); color_text_rule(ws, f"K{chk0}:L{r - 1}", "충족", GREEN)
+    box(ws, f"A{r}:L{r}", "대상이 '전 근로자'인 회차는 사무직·판매와 그 밖의 근로자 모두에 더합니다. 2분의 1 적용과 면제가 함께 해당하면 적용 기준은 원문으로 다시 확인하세요. 채용 시·작업내용 변경 시·특별교육은 사유가 생길 때마다 별표 4 시간을 채웁니다.", f(8.5, False, MUTED), LEFT)
+    ws.row_dimensions[r].height = 26; r += 2
+    assert r == first_plan - 1, (r, first_plan)
+    secr(r - 1, "4. 월별 교육 실시 계획 · 실시 현황 (월은 숫자 1~12로 넣으세요)")  # r: 머리글 행
+    header_row(ws, r, ["월", "교육 종류", "교육 주제·내용", "대상", "시간", "강사", "방법", "실시일", "대상 인원", "이수 인원", "이수율", "실시 확인"], height=26)
+    for i in range(nplan):
+        x = first_plan + i
+        grid(ws, x, x, 1, 12, height=30)
+        c = ws.cell(row=x, column=1, value=(i + 1) if i < 12 else None); c.number_format = '0"월"'
+        ws.cell(row=x, column=3).alignment = LEFT; ws.cell(row=x, column=5).number_format = '0.0"h"'
+        ws.cell(row=x, column=8).number_format = "yyyy-mm-dd"
+        ws.cell(row=x, column=11, value=f'=IF(OR(I{x}="",I{x}=0,J{x}=""),"",J{x}/I{x})').fill = fill(SUB)
+        ws.cell(row=x, column=11).number_format = "0%"
+    dv_whole(ws, f"A{first_plan}:A{last_plan}", 1, 12, prompt="월(1~12)")
+    dv_list(ws, f"B{first_plan}:B{last_plan}", COURSES[:9] + ["직무교육", "기타"])
+    dv_list(ws, f"D{first_plan}:D{last_plan}", TARGETS); dv_list(ws, f"G{first_plan}:G{last_plan}", METHOD)
+    dv_list(ws, f"L{first_plan}:L{last_plan}", ["예정", "완료", "연기"]); color_text_rule(ws, f"L{first_plan}:L{last_plan}", "연기", ORANGE)
+    ex = [(1, "근로자 정기교육", "위험성평가 결과 공유(올해 고위험 작업), 산업안전보건법령·산재보상보험 제도", "전 근로자", 3, "안전관리자", "집체교육", "2027-01-20", 110, 104, None, "완료"),
+          (2, "관리감독자 정기교육", "작업공정의 유해·위험과 재해 예방대책, 표준안전 작업방법 결정·지도 요령", "관리감독자", 4, "위탁기관", "위탁교육", None, 10, None, None, "예정"),
+          (3, "근로자 정기교육", "끼임 예방 — 방호장치 확인, 정비·청소 시 전원 차단·잠금(LOTO)", "그 밖의 근로자", 3, "관리감독자", "현장교육", None, 95, None, None, "예정")]
+    for i, v in enumerate(ex):
+        example(ws, first_plan + i, list(v[:10]) + [None, v[11]])
+    ws.print_title_rows = f"{r}:{r}"
+    legend(ws, last_plan + 2, 12)
+    ws.print_area = f"A1:L{last_plan + 2}"
+
+    # 법정 교육시간 시트 (data/edu_hours.json 원문)
+    h = sheet(wb, "법정 교육시간", [26, 46, 46], tab=GREEN)
+    title(h, "안전보건교육 교육과정별 교육시간", 3, sub=eh["source"] + f" · 확인 {eh['checked']}")
+    header_row(h, 4, ["교육과정", "교육대상", "교육시간"], height=24)
+    x = 5
+    for sid, head in (("worker", "1. 근로자 안전보건교육"), ("supervisor", "1의2. 관리감독자 안전보건교육")):
+        box(h, f"A{x}:C{x}", head, f(10, True, "FFFFFF"), LEFT, NAVY); x += 1
+        for row in sec[sid]["rows"]:
+            for col, v in enumerate((row["course"], row["target"], row["hours"]), 1):
+                c = h.cell(row=x, column=col, value=v); c.font = f(9.5); c.alignment = LEFT; c.border = BOX
+            h.row_dimensions[x].height = max(22, 15 * max(1, -(-max(len(row["target"]), len(row["hours"])) // 30))); x += 1
+    box(h, f"A{x}:C{x}", "2. 안전보건관리책임자 등 직무교육", f(10, True, "FFFFFF"), LEFT, NAVY); x += 1
+    for row in sec["duty"]["rows"]:
+        for col, v in enumerate((row["target"], "신규교육 " + row["new"], "보수교육 " + row["re"]), 1):
+            c = h.cell(row=x, column=col, value=v); c.font = f(9.5); c.alignment = LEFT; c.border = BOX
+        h.row_dimensions[x].height = 22; x += 1
+    c = h.cell(row=x + 1, column=1, value="원문 확인: 국가법령정보센터 산업안전보건법 시행규칙 별표 4. 교육내용은 별표 5를 따릅니다.")
+    c.font = f(8.5, False, MUTED); h.merge_cells(f"A{x + 1}:C{x + 1}")
+    h.print_title_rows = "4:4"; h.print_area = f"A1:C{x + 1}"
+
+    guide_sheet(wb, "연간 안전보건교육 계획서", [
+        ("왜 만드나", ["근로자 정기교육·채용 시 교육·작업내용 변경 시 교육·특별교육은 사업주의 의무이고(산업안전보건법 제29조), 안전보건교육에 관한 사항은 안전보건관리책임자가 총괄하는 업무입니다(법 제15조제1항제3호). 안전관리자·보건관리자는 교육계획 수립을 보좌하고 지도·조언합니다(시행령 제18조·제22조).",
+                    "산업안전보건위원회를 두는 사업장은 안전보건교육에 관한 사항을 위원회 심의·의결을 거쳐야 합니다(법 제24조제2항제1호). 안전보건관리규정에도 안전보건교육에 관한 사항이 들어갑니다(법 제25조제1항제2호). 법령에 정해진 계획서 서식은 없으므로 이 양식을 사업장에 맞게 고쳐 쓰세요."]),
+        ("이렇게 쓰세요", ["① '연간 교육계획' 1번에 연도·인원을 넣고, 2분의 1 적용·정기교육 면제 해당 여부를 고릅니다.",
+                       "② 4번 월별 계획에 월(숫자)·교육 종류·대상·시간을 넣으면 3번 '법정 시간 충족 확인'이 반기별 합계와 판정(충족/부족)을 자동으로 보여 줍니다. 회색 기울임 글씨는 예시이니 지우고 쓰세요.",
+                       "③ 교육을 하면 실시일·대상 인원·이수 인원과 '완료'를 적습니다. 이수율이 자동 계산되니 미이수자는 보충교육 회차를 추가하세요.",
+                       "④ 교육 내용은 별표 5(근로자 정기교육 8개 항목, 채용 시 교육 11개 항목 등)에서 고르고, 실시 기록은 교육일지·참석자 서명부(safeplum.com 교육일지 작성기, 교육일지 엑셀 양식)로 남깁니다."]),
+        ("알아 둘 것", ["특별교육을 실시하면 그 근로자의 채용 시 교육과 작업내용 변경 시 교육을 한 것으로 봅니다(시행규칙 제26조제1항).",
+                     "사내에서 교육할 수 있는 사람: 안전보건관리책임자·관리감독자·안전관리자·보건관리자·안전보건관리담당자·산업보건의, 공단 강사요원 교육과정 이수자, 산업안전지도사·산업보건지도사 등(제26조제3항). 등록한 안전보건교육기관에 위탁할 수도 있습니다(법 제29조제4항).",
+                     "건설 일용근로자는 채용할 때 등록 교육기관에서 건설업 기초안전보건교육(4시간)을 이수하게 해야 합니다(법 제31조). 이수증을 채용 전에 확인하세요.",
+                     "교육을 하지 않으면 과태료 대상입니다(법 제175조). 위반 1명당 금액은 시행령 별표 35에서 원문 확인하세요."]),
+    ], source="근거: 산업안전보건법 제15조·제24조·제25조·제29조·제31조, 시행령 제18조·제22조, 시행규칙 제26조·제27조·별표 4·별표 5. 화면으로 작성: safeplum.com/tools/forms/edu-plan/")
+    wb.move_sheet("작성 안내", offset=-2); wb.active = 1
+    p = OUT / "SafePlum_edu_plan.xlsx"; wb.save(p); return p
+
+
+# =====================================================================
 # 11. 표준안전작업절차서(SOP) + 교육 확인 서명부 + 관리대장 — 예시 작업: 컨베이어 벨트 청소
 # =====================================================================
 SOP_STEPS = [  # 작업 단계, 위험요인, 안전 포인트, 대책 구분, 담당
@@ -1398,5 +1531,5 @@ def sop():
 
 
 if __name__ == "__main__":
-    for fn in (risk, tbm, patrol, edu, near_miss, ppe, workplan, confined, hot_work, council, committee, sop):
+    for fn in (risk, tbm, patrol, edu, near_miss, ppe, workplan, confined, hot_work, council, committee, eduplan, sop):
         print(fn())

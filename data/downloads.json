@@ -216,6 +216,27 @@
    "forms": []
   },
   {
+   "id": "edu_plan",
+   "title": "연간 안전보건교육 계획서",
+   "kind": "엑셀",
+   "file": "assets/files/templates/SafePlum_edu_plan.xlsx",
+   "dl": "SafePlum_연간_안전보건교육_계획서.xlsx",
+   "preview": "assets/files/templates/preview/SafePlum_edu_plan.jpg",
+   "desc": "계획 연도·교육 대상 인원, 2분의 1 적용·정기교육 면제(시행규칙 제27조) 선택, 월별 교육 계획과 실시 현황(이수율 자동)을 한 장에 담았습니다. 월별 계획을 넣으면 근로자 정기교육 반기 6·12시간, 관리감독자 연간 16시간을 채웠는지 자동으로 판정합니다(시행규칙 별표 4).",
+   "parts": [
+    "연간 교육계획(법정 시간 충족 자동 판정)",
+    "월별 계획·실시 현황 20회차",
+    "법정 교육시간 표(별표 4 원문)",
+    "작성 안내"
+   ],
+   "tools": [
+    "edu-hours"
+   ],
+   "forms": [
+    "edu-plan"
+   ]
+  },
+  {
    "id": "near_miss",
    "title": "아차사고 보고서 + 관리대장",
    "kind": "엑셀",
