@@ -1,0 +1,208 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>판례로 보는 수평전개</p>
+  <h1>판례로 보는 수평전개 — 법원은 무엇을 보고 책임을 물었나</h1>
+  <p>산업재해 형사판결을 사고 유형별로 정리했습니다. 사건마다 <b>법원이 지적한 빈틈</b>과, 우리 현장에 같은 빈틈이 없는지 확인할 <b>수평전개 점검 질문</b>을 붙였습니다. 점검 질문을 골라 담으면 결재란이 있는 점검표로 인쇄할 수 있습니다.</p>
+</div></section>
+<div class="wrap layout-detail pc-layout">
+  <section class="col-main stack">
+    <div class="pc-warn" role="note"><b>먼저 알아 둘 점</b> 판결은 사건마다 사실관계가 다르고, 이 점검을 했다고 처벌을 피한다는 보장은 없습니다. 다만 법원은 <b>같은 종류의 사고가 있었는데 재발 방지를 실제로 했는지</b>, <b>위험을 알고도 그대로 두었는지</b>를 따졌습니다. 다른 현장의 판결을 우리 작업에 비추어 점검하고, 고친 것을 기록으로 남기는 것이 이 화면의 쓰임입니다.</div>
+
+    <h2 class="h-md">법원이 공통으로 본 것</h2>
+    <div class="pc-prin" id="pcPrin"></div>
+
+    <h2 class="h-md">안전관리자·관리감독자가 개인 책임을 진 지점</h2>
+    <div class="pc-roles" id="pcRoles"></div>
+
+    <h2 class="h-md" id="cases">사고 유형별 판례 <span class="muted" id="pcCount"></span></h2>
+    <p class="pc-go" id="pcGo" hidden><a href="#pcCart"></a></p>
+    <div class="pc-filter">
+      <div class="pc-chips" id="pcK" aria-label="사고 유형"></div>
+      <div class="search-inline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="pcQ" placeholder="작업·설비로 찾기 (예: 크레인, 밀폐, 화기, 해체, 도급)" aria-label="판례 검색"></div>
+    </div>
+    <ol class="pc-list" id="pcList"></ol>
+
+    <h2 class="h-md">함께 알아 둘 법리</h2>
+    <ul class="pc-law" id="pcLaw"></ul>
+    <p class="src-line" id="pcSrc"></p>
+  </section>
+  <aside class="col-side stack">
+    <div class="result-card pc-cart" id="pcCart">
+      <p class="apply-label">수평전개 점검표</p>
+      <p class="hint">사례의 점검 질문 옆 <b>담기</b>를 누르면 여기에 모입니다. 현장에서 확인한 뒤 결과·조치·담당을 적어 보관하세요. 고른 항목은 이 브라우저에만 저장됩니다.</p>
+      <p class="pc-n" id="pcN" aria-live="polite">담은 항목 0개</p>
+      <div class="field"><label class="label" for="pcCo">사업장</label><input type="text" id="pcCo" placeholder="예: ○○공장 2라인"></div>
+      <div class="field"><label class="label" for="pcWhy">수평전개 계기</label><input type="text" id="pcWhy" placeholder="예: 동종업계 크레인 충돌 판결 공유"></div>
+      <div class="field"><label class="label" for="pcDate">점검일</label><input type="date" id="pcDate"></div>
+      <div class="appr-panel"><p class="appr-panel-l">인쇄할 결재란 <span class="muted">— 칸 이름·성명을 고치고, 서명 칸을 눌러 서명하세요</span></p><div data-appr="tool.precedents"></div></div>
+      <div class="btns"><button type="button" class="btn btn-block" id="pcPrint">점검표 인쇄 · PDF</button><button type="button" class="btn btn-ghost btn-sm" id="pcCopy">글로 복사</button><button type="button" class="btn btn-ghost btn-sm" id="pcClear">모두 빼기</button></div>
+    </div>
+    <div class="side-box"><h2 class="h-sm">수평전개는 이렇게</h2><ol class="bul hint">
+      <li>우리와 비슷한 작업의 판례·사고를 고릅니다.</li>
+      <li>점검 질문을 담아 현장에서 직접 확인합니다.</li>
+      <li>'보완'이 나온 항목은 담당·기한을 정해 고칩니다.</li>
+      <li>고친 사진·기록을 남기고 TBM·정기교육에서 공유합니다.</li>
+      <li>위험성평가 감소대책에도 반영합니다.</li>
+    </ol><div class="btns" style="margin-top:10px"><a class="btn btn-sm" href="../risk/">위험성평가서</a><a class="btn btn-sm btn-ghost" href="../fatal-cases/">사망사고 사례</a></div></div>
+    <div class="side-box"><h2 class="h-sm">원문 보기</h2><p class="hint">사례마다 붙은 판결 번호를 누르면 국가법령정보센터 판결문 원문이 열립니다. 형량·사실관계는 원문이 기준입니다.</p></div>
+  </aside>
+</div>
+<article class="paper print-only" id="pcPaper" aria-hidden="true"></article>
+<style>
+.pc-warn{background:var(--surface-2);border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:var(--r);padding:12px 14px;font-size:14px;line-height:1.65;color:var(--text-2)}
+.pc-warn b:first-child{display:block;color:var(--navy);margin-bottom:2px}
+.pc-prin{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.pc-p{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.pc-p h3{font-size:15px;margin:0 0 6px;color:var(--navy);text-wrap:balance}
+.pc-p p{font-size:13.5px;line-height:1.6;margin:0 0 8px;color:var(--text-2)}
+.pc-src{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12.5px}
+.pc-src a{color:var(--blue)}
+.pc-roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+.pc-r{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;font-size:13.5px;line-height:1.55;min-width:0}
+.pc-r b{display:block;color:var(--navy)}.pc-r .c{font-size:12.5px;color:var(--muted)}.pc-r p{margin:4px 0}.pc-r .res{font-weight:700;color:var(--text)}
+.pc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.pc-chips button{font:inherit;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--text-2);cursor:pointer}
+.pc-chips button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.pc-chips .n{font-size:11.5px;opacity:.75;margin-left:3px}
+.pc-filter{display:flex;flex-direction:column;gap:8px}
+.pc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.pc-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0}
+.pc-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.pc-k{font-weight:700;border-radius:6px;padding:1px 7px;background:var(--surface-2);color:var(--navy);border:1px solid var(--line)}
+.pc-item h3{font-size:16px;margin:6px 0 6px;text-wrap:balance}
+.pc-item .what{font-size:14px;line-height:1.65;margin:0 0 8px}
+.pc-sub{font-size:12.5px;font-weight:800;color:var(--navy);margin:10px 0 4px;letter-spacing:.02em}
+.pc-court{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--text-2)}
+.pc-chk{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.pc-chk li{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;line-height:1.55;background:var(--surface-2);border-radius:8px;padding:7px 9px}
+.pc-chk li span{flex:1;min-width:0}
+.pc-chk button{font:inherit;font-size:12px;font-weight:700;flex:none;border:1px solid var(--line);background:var(--surface);color:var(--blue);border-radius:99px;padding:3px 10px;cursor:pointer}
+.pc-chk button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.pc-act{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:13px;align-items:center}
+.pc-act a{color:var(--blue);font-weight:600}
+.pc-act button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:3px 10px;cursor:pointer;color:var(--text-2)}
+.pc-cases{font-size:12.5px;margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px}
+.pc-cases a{color:var(--muted);text-decoration:underline}
+.pc-law{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;line-height:1.6}
+.pc-law a{font-size:12.5px;color:var(--blue)}
+@media (max-width:1023px){.layout-detail.pc-layout .col-side{order:0}}
+.pc-go{margin:-4px 0 0;font-size:13.5px}.pc-go a{color:var(--blue);font-weight:700}
+.pc-n{font-weight:800;color:var(--navy);margin:6px 0}
+.pc-cart .btns{display:flex;flex-wrap:wrap;gap:6px}
+#pcPaper .pc-tab{width:100%;border-collapse:collapse;font-size:11.5px;table-layout:fixed}
+#pcPaper .pc-tab th,#pcPaper .pc-tab td{border:1px solid #333;padding:5px 6px;vertical-align:top;overflow-wrap:anywhere}
+#pcPaper .pc-tab thead th{background:#eef1f5;font-weight:700;text-align:center}
+#pcPaper .pc-res{white-space:nowrap;font-size:11px;line-height:1.7}
+#pcPaper .pc-info{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0 10px}
+#pcPaper .pc-info th,#pcPaper .pc-info td{border:1px solid #333;padding:5px 7px;text-align:left}
+#pcPaper .pc-info th{background:#eef1f5;width:16%}
+@media print{body.printing-pc main>*:not(#pcPaper){display:none !important}body.printing-pc #pcPaper{display:block}}
+</style>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function link(c) { return '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.label) + " ↗</a>"; }
+  var KEY = "safeplum.precedents.v1", pick = [];
+  try { pick = JSON.parse(localStorage.getItem(KEY) || "[]") || []; } catch (e) { pick = []; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(pick)); } catch (e) {} }
+  var byId = {}; D.items.forEach(function (x) { byId[x.id] = x; });
+  pick = pick.filter(function (p) { return byId[p.id] && byId[p.id].check[p.i] != null; });
+
+  $("pcPrin").innerHTML = D.principles.map(function (p) {
+    return '<div class="pc-p"><h3>' + esc(p.t) + "</h3><p>" + esc(p.b) + '</p><div class="pc-src">' + p.cases.map(link).join("") + "</div></div>";
+  }).join("");
+  $("pcRoles").innerHTML = D.roles.map(function (r) {
+    return '<div class="pc-r"><b>' + esc(r.role) + '</b><span class="c">' + esc(r.case) + "</span><p>" + esc(r.point) + '</p><p class="res">' + esc(r.result) + '</p><span class="pc-src">' + link(r.src) + "</span></div>";
+  }).join("");
+  $("pcLaw").innerHTML = D.law_points.map(function (l) { return "<li><b>" + esc(l.t) + "</b> — " + esc(l.b) + " " + link(l.src) + "</li>"; }).join("");
+  $("pcSrc").textContent = "출처: " + D.source + ". " + D.note + " 정리 " + D.checked;
+
+  var st = { k: "", q: "" };
+  try { var u0 = new URLSearchParams(location.search); st.k = u0.get("k") || ""; st.q = u0.get("q") || ""; } catch (e) {}
+  function has(id, i) { return pick.some(function (p) { return p.id === id && p.i === i; }); }
+  function list() {
+    var q = st.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    return D.items.filter(function (x) {
+      if (st.k && x.k !== st.k) return false;
+      if (!q.length) return true;
+      var t = (x.title + " " + x.what + " " + x.court.join(" ") + " " + x.check.join(" ") + " " + x.k + " " + x.ind).toLowerCase();
+      return q.every(function (w) { return t.indexOf(w) >= 0; });
+    });
+  }
+  function chips() {
+    var cnt = {}; D.items.forEach(function (x) { cnt[x.k] = (cnt[x.k] || 0) + 1; });
+    $("pcK").innerHTML = '<button type="button" data-k="" aria-pressed="' + (!st.k) + '">전체</button>' + Object.keys(cnt).map(function (k) { return '<button type="button" data-k="' + esc(k) + '" aria-pressed="' + (st.k === k) + '">' + esc(k) + '<span class="n">' + cnt[k] + "</span></button>"; }).join("");
+  }
+  function card(x) {
+    var tl = x.tools.map(function (t) { var v = D.tools[t]; return v ? '<a href="' + esc(v[1]) + '">' + esc(v[0]) + " →</a>" : ""; }).join("");
+    return '<li class="pc-item" id="c-' + esc(x.id) + '"><div class="pc-meta"><span class="pc-k">' + esc(x.k) + "</span><span>" + esc(x.ind === "기타" ? "기타(서비스 등)" : x.ind) + "</span></div>" +
+      "<h3>" + esc(x.title) + '</h3><p class="what">' + esc(x.what) + "</p>" +
+      '<p class="pc-sub">법원이 본 것</p><ul class="pc-court">' + x.court.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul>" +
+      '<p class="pc-sub">우리 현장 수평전개 점검</p><ul class="pc-chk">' + x.check.map(function (s, i) { var on = has(x.id, i); return "<li><span>" + esc(s) + '</span><button type="button" data-id="' + esc(x.id) + '" data-i="' + i + '" aria-pressed="' + on + '">' + (on ? "담음" : "담기") + "</button></li>"; }).join("") + "</ul>" +
+      '<div class="pc-act">' + tl + '<button type="button" data-all="' + esc(x.id) + '">질문 모두 담기</button><button type="button" data-copy="' + esc(x.id) + '">복사</button></div>' +
+      '<div class="pc-cases">' + x.cases.map(link).join("") + "</div></li>";
+  }
+  function render() {
+    chips();
+    var l = list();
+    $("pcCount").textContent = l.length + "건";
+    $("pcList").innerHTML = l.map(card).join("") || '<li class="hint">맞는 판례가 없습니다. 다른 낱말로 찾아 보세요.</li>';
+    $("pcN").textContent = "담은 항목 " + pick.length + "개";
+    $("pcGo").hidden = !pick.length; $("pcGo").firstChild.textContent = "담은 점검 항목 " + pick.length + "개 → 점검표 작성·인쇄";
+    try { var u = new URLSearchParams(); if (st.k) u.set("k", st.k); if (st.q) u.set("q", st.q); history.replaceState(null, "", (u.toString() ? "?" + u.toString() : location.pathname) + location.hash); } catch (e) {}
+  }
+  function toggle(id, i, force) {
+    var on = has(id, i);
+    if (force === true && on) return;
+    if (on) pick = pick.filter(function (p) { return !(p.id === id && p.i === i); }); else pick.push({ id: id, i: i });
+    save();
+  }
+  $("pcK").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; st.k = b.dataset.k; render(); });
+  var tq; $("pcQ").value = st.q; $("pcQ").addEventListener("input", function () { clearTimeout(tq); var v = this.value; tq = setTimeout(function () { st.q = v; render(); }, 200); });
+  function flash(b, t, back) { b.textContent = t; setTimeout(function () { b.textContent = back; }, 1500); }
+  function copyText(txt, b, back) {
+    var ok = function () { flash(b, "복사됨", back); };
+    var fail = function () { var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch (e) { flash(b, "복사 실패", back); } ta.remove(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fail); else fail();
+  }
+  $("pcList").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    if (b.dataset.id) { toggle(b.dataset.id, +b.dataset.i); render(); return; }
+    if (b.dataset.all) { var x = byId[b.dataset.all]; x.check.forEach(function (_, i) { toggle(x.id, i, true); }); render(); return; }
+    if (b.dataset.copy) {
+      var y = byId[b.dataset.copy];
+      var txt = "[판례 수평전개] " + y.title + " (" + y.k + ")\n" + y.what + "\n[법원이 본 것]\n" + y.court.map(function (s) { return "- " + s; }).join("\n") + "\n[우리 현장 점검]\n" + y.check.map(function (s) { return "□ " + s; }).join("\n") + "\n(출처: " + y.cases.map(function (c) { return c.label; }).join(" / ") + ", 국가법령정보센터)";
+      copyText(txt, b, "복사");
+    }
+  });
+  $("pcClear").addEventListener("click", function () { pick = []; save(); render(); });
+  try { var sv = JSON.parse(localStorage.getItem(KEY + ".f") || "{}"); ["pcCo", "pcWhy"].forEach(function (k) { if (sv[k]) $(k).value = sv[k]; }); } catch (e) {}
+  ["pcCo", "pcWhy"].forEach(function (k) { $(k).addEventListener("input", function () { try { localStorage.setItem(KEY + ".f", JSON.stringify({ pcCo: $("pcCo").value, pcWhy: $("pcWhy").value })); } catch (e) {} }); });
+  $("pcDate").value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  function rows() { return pick.map(function (p) { var x = byId[p.id]; return { x: x, q: x.check[p.i] }; }); }
+  $("pcCopy").addEventListener("click", function () {
+    var r = rows(); if (!r.length) { flash(this, "담은 항목이 없습니다", "글로 복사"); return; }
+    var txt = "동종·유사재해 수평전개 점검표\n사업장: " + $("pcCo").value + " / 계기: " + $("pcWhy").value + " / 점검일: " + $("pcDate").value + "\n" +
+      r.map(function (o, n) { return (n + 1) + ". [" + o.x.title + "] " + o.q + "\n   결과: □적합 □보완 □해당없음 / 조치: / 담당·기한:"; }).join("\n");
+    copyText(txt, this, "글로 복사");
+  });
+  $("pcPrint").addEventListener("click", function () {
+    var r = rows(); if (!r.length) { flash(this, "점검 질문을 먼저 담으세요", "점검표 인쇄 · PDF"); location.hash = "cases"; return; }
+    var co = $("pcCo").value || "";
+    var body = r.map(function (o, n) {
+      return "<tr><td style=\"text-align:center\">" + (n + 1) + "</td><td>" + esc(o.x.title) + '<br><span style="font-size:10px;color:#555">' + esc(o.x.cases[0].label) + "</span></td><td>" + esc(o.q) + '</td><td class="pc-res">□ 적합<br>□ 보완<br>□ 해당없음</td><td></td><td></td></tr>';
+    }).join("");
+    $("pcPaper").innerHTML = '<header class="paper-h"><div class="paper-co">' + esc(co) + '</div><h2 class="paper-t">동종·유사재해 수평전개 점검표</h2>' + (window.ADoc ? ADoc.apprHTML("tool.precedents") : "") + "</header>" +
+      '<table class="pc-info"><tr><th>사업장</th><td>' + esc(co) + "</td><th>점검일</th><td>" + esc($("pcDate").value) + "</td></tr><tr><th>수평전개 계기</th><td colspan=\"3\">" + esc($("pcWhy").value) + "</td></tr></table>" +
+      '<table class="pc-tab"><colgroup><col style="width:5%"><col style="width:21%"><col style="width:34%"><col style="width:11%"><col style="width:17%"><col style="width:12%"></colgroup><thead><tr><th>번호</th><th>참고 사례(판례)</th><th>점검 항목</th><th>결과</th><th>조치 내용</th><th>담당·기한</th></tr></thead><tbody>' + body + "</tbody></table>" +
+      '<p class="paper-note">참고 사례는 국가법령정보센터에 공개된 판결문을 요약한 것으로, 사실관계와 형량은 원문이 기준입니다. 결과는 현장에서 직접 확인한 뒤 적고, \'보완\' 항목은 조치 완료 사진·기록을 붙여 보관합니다.</p>';
+    document.body.classList.add("printing-pc");
+    window.print();
+    setTimeout(function () { document.body.classList.remove("printing-pc"); }, 500);
+  });
+  render();
+  if (location.hash && location.hash.indexOf("#c-") === 0) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+})();
+</script>
