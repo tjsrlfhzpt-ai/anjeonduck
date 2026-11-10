@@ -2050,7 +2050,7 @@ FL_CSS = """<style>
 .fl-no{color:var(--text-2);font-size:12.5px;text-align:center;width:44px}
 .fl-k{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:22px;padding:0 6px;border-radius:5px;font-size:11.5px;font-weight:800;letter-spacing:.02em;color:#fff}
 .fl-k.hwp{background:#1F6FD1}.fl-k.xls{background:#16803C}.fl-k.ppt{background:#C2410C}.fl-k.pdf{background:#B42318}.fl-k.doc{background:#2B579A}.fl-k.zip{background:#64748B}
-.fl-t b{display:block;font-size:14.5px;line-height:1.45;color:var(--text)}
+.fl-t b{display:block;font-size:14.5px;line-height:1.45;color:var(--text)}.fl-auto{display:inline-block;margin-left:4px;padding:1px 7px;border-radius:999px;background:var(--blue-100);color:var(--blue);font-size:11.5px;font-weight:700;vertical-align:1px;white-space:nowrap}
 .fl-t p{margin:3px 0 0;font-size:13px;line-height:1.55;color:var(--text-2)}
 .fl-t .fl-src{font-size:12px;color:var(--text-2);opacity:.9}
 .fl-cat,.fl-sz{white-space:nowrap;font-size:13px;color:var(--text-2)}
@@ -2181,11 +2181,12 @@ def build_filelib(site, write):
         return
     lib = json.loads(f.read_text(encoding="utf-8"))
     items = [x for x in lib.get("items", []) if (ROOT / x["file"]).exists()]
-    # SafePlum이 만든 엑셀·PPT 양식(data/downloads.json)도 같은 목록 맨 앞에 — 2026-11-10 '무료 양식 내려받기'와 합침
+    # SafePlum이 만든 엑셀·PPT 양식(data/downloads.json)도 같은 목록에(맨 뒤) — 2026-11-10 '무료 양식 내려받기'와 합침
     sp = [{"id": "sp-" + d["id"], "title": d["title"], "cat": SP_CAT, "ext": d["ext"], "file": d["file"], "dl": d["dl"], "size": d["size"],
            "source": "SafePlum 제작 — 자동 계산·예시 포함", "desc": d.get("desc", "") + (" 들어 있는 것: " + " · ".join(d["parts"]) if d.get("parts") else ""),
            "preview": d.get("preview")} for d in downloads()]
-    items = sp + items
+    # 순서(2026-11-10 운영자 요청): 자동 계산이 들어 있는 엑셀(pick) → 그 밖의 실무 파일 → SafePlum 제작 양식
+    items = sorted([x for x in items if x.get("pick")], key=lambda x: x["pick"]) + [x for x in items if not x.get("pick")] + sp
     for x in lib.get("items", []):
         if not (ROOT / x["file"]).exists():
             warn(f"파일 자료실: 파일 없음 → 목록에서 뺌 ({x['file']})")
@@ -2206,9 +2207,10 @@ def build_filelib(site, write):
         view = (f'<a class="fl-view" href="{e(href)}" target="_blank" rel="noopener">보기</a>' if x["ext"] == "pdf" else
                 f'<a class="fl-view" href="{e(rel + x["preview"])}" target="_blank" rel="noopener">미리보기</a>' if x.get("preview") else "")
         txt = " ".join([x["title"], x.get("desc", ""), x["cat"], x["_k"], x["source"], x["ext"]]).lower()
+        auto = ' <span class="fl-auto">자동 계산</span>' if x.get("pick") else ""
         rows.append(f'<tr data-k="{e(x["_k"])}" data-c="{e(x["cat"])}" data-q="{e(txt)}"><td class="fl-no">{i}</td>'
                     f'<td class="fl-kc"><span class="fl-k {x["_kc"]}">{e(x["_k"])}</span></td>'
-                    f'<td class="fl-t"><b>{e(x["title"])}</b>{f"<p>{e(x[chr(100)+chr(101)+chr(115)+chr(99)])}</p>" if x.get("desc") else ""}<p class="fl-src">출처: {e(x["source"])}</p></td>'
+                    f'<td class="fl-t"><b>{e(x["title"])}{auto}</b>{f"<p>{e(x[chr(100)+chr(101)+chr(115)+chr(99)])}</p>" if x.get("desc") else ""}<p class="fl-src">출처: {e(x["source"])}</p></td>'
                     f'<td class="fl-cat">{e(x["cat"])}</td><td class="fl-sz">{fl_size(x["size"])}{big}</td>'
                     f'<td class="fl-get">{view}<a class="fl-dl" href="{e(href)}" download="{e(x["dl"])}">받기</a></td></tr>')
     kchips = '<button type="button" class="chip" data-fk="" aria-pressed="true">전체 <span class="n">' + str(len(items)) + '</span></button>' + "".join(
@@ -2221,7 +2223,7 @@ def build_filelib(site, write):
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="{rel}">홈</a><span>/</span><a href="../">서식·자료</a><span>/</span>양식·파일 자료실</p>
   <h1>양식·파일 자료실 <small style="font-size:.55em;font-weight:700;color:var(--text-2)">한글·엑셀·PPT·PDF {len(items)}개</small></h1>
-  <p>내려받아 고쳐 쓰는 파일을 한곳에 모았습니다. <b>SafePlum 제작 양식 {len(sp)}종</b>(자동 계산·예시 포함 엑셀·PPT)과 현장 실무 서식·매뉴얼·교안 원본 {len(items) - len(sp)}개입니다. 회원가입 없이 받고, 회사 이름과 내용은 사업장에 맞게 고쳐 쓰세요. 화면에서 바로 작성·인쇄하려면 <a href="{rel}tools/forms/">작성기</a>를 쓰세요.</p>
+  <p>내려받아 고쳐 쓰는 파일을 한곳에 모았습니다. 현장 실무 서식·매뉴얼·교안 원본 {len(items) - len(sp)}개와 SafePlum 제작 양식 {len(sp)}종입니다. <b>자동 계산</b> 표시가 붙은 엑셀(수식·목록 선택이 들어 있는 파일)을 앞에 두었습니다. 회원가입 없이 받고, 회사 이름과 내용은 사업장에 맞게 고쳐 쓰세요. 화면에서 바로 작성·인쇄하려면 <a href="{rel}tools/forms/">작성기</a>를 쓰세요.</p>
 </div></section>
 <section class="wrap" style="margin-top:8px">{FL_CSS}
 <div class="fl-bar" role="search">
@@ -2830,7 +2832,6 @@ def build(out, today):
     <p class="quick">{chips}</p>
   </div>
 </section>
-<div class="wrap"><a class="fl-banner" href="resources/files/"><span class="fl-b-ic" aria-hidden="true">📂</span><span class="fl-b-t"><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span>안전보건관리규정·회의록·작업계획서·교육자료를 한글·엑셀·PPT 원본으로 내려받기</span></span><span class="fl-b-go">파일 받기 →</span></a></div>
 <div class="wrap home2">
   <section class="hub" aria-label="주요 기능">
     <div class="hub-tabs" role="tablist" aria-label="기능 묶음">
@@ -3653,7 +3654,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 <section class="wrap ftools-page" style="padding-top:8px" data-landing>
   <div class="ftools">
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>작성기 {WRITER_N}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
-    <a class="ftool" href="files/"><span class="ftool-tag">엑셀·한글·PPT·PDF</span><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span class="ftool-desc">SafePlum 제작 엑셀·PPT 양식 {len(downloads())}종(자동 계산)과 중대재해처벌법 따라하기 서식, 위험성평가 예시, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식.</span><span class="ftool-go">파일 받기 →</span></a>
+    <a class="ftool" href="files/"><span class="ftool-tag">엑셀·한글·PPT·PDF</span><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span class="ftool-desc">감독 대비 서류 관리·위험성평가·점검표 자동 계산 엑셀, 중대재해처벌법 따라하기 서식, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식, SafePlum 제작 양식 {len(downloads())}종.</span><span class="ftool-go">파일 받기 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
@@ -3933,7 +3934,7 @@ q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="
   {sec_head("서식·자료", sub="법정 서식 원본, 엑셀·PPT 양식, 안전보건표지, 공단 자료", href="../resources/", more=f"서식·자료 {len(resources)}건 전체")}
   <div class="ftools">
     <a class="ftool" href="../resources/"><span class="ftool-tag">원본 바로 열기</span><strong>법정 서식·별표 {n_law}건</strong><span class="ftool-desc">산업재해조사표·선임 보고서 같은 법정 서식과 별표를 국가법령정보센터 현행 원본으로 엽니다. 상황별로 찾기.</span><span class="ftool-go">서식 찾기 →</span></a>
-    <a class="ftool" href="../resources/files/"><span class="ftool-tag">엑셀·한글·PPT·PDF</span><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span class="ftool-desc">SafePlum 제작 엑셀·PPT 양식 {len(downloads())}종(자동 계산)과 중대재해처벌법 따라하기 서식, 위험성평가 예시, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식.</span><span class="ftool-go">파일 받기 →</span></a>
+    <a class="ftool" href="../resources/files/"><span class="ftool-tag">엑셀·한글·PPT·PDF</span><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span class="ftool-desc">감독 대비 서류 관리·위험성평가·점검표 자동 계산 엑셀, 중대재해처벌법 따라하기 서식, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식, SafePlum 제작 양식 {len(downloads())}종.</span><span class="ftool-go">파일 받기 →</span></a>
     <a class="ftool" href="../resources/signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="../resources/library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
