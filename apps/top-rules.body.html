@@ -22,7 +22,7 @@
         <div class="tr-pick-hd"><b id="trPickT">그림 고르기</b><button type="button" class="linkbtn" id="trPickX">닫기</button></div>
         <div class="tr-seg" role="group" aria-label="표시 방식"><button type="button" data-kind="do" aria-pressed="true">지시 · 색 원</button><button type="button" data-kind="dont" aria-pressed="false">금지 · 빨간 사선</button></div>
         <div class="tr-icons" id="trIcons"></div>
-        <details class="tr-signs-d"><summary>안전보건표지 40종에서 고르기</summary><div class="tr-icons tr-signs" id="trSigns"></div><p class="hint">표지 그림을 쓰면 포스터 아래에 출처(안전보건공단, 공공누리 제4유형)가 작게 들어갑니다.</p></details>
+        <details class="tr-signs-d"><summary>안전보건표지 40종에서 고르기</summary><div class="tr-icons tr-signs" id="trSigns"></div><p class="hint">표지 그림을 쓰면 포스터 아래에 출처(안전보건공단, 공공누리 제4유형)가 작게 들어갑니다. ④ 모양에서 뺄 수 있지만, 출처를 밝히는 조건으로 쓰는 자료이니 빼면 다른 곳에 출처를 적어 두세요.</p></details>
       </div>
       <div class="btns"><button type="button" class="btn btn-ghost" id="trAdd">+ 직접 쓰기</button><button type="button" class="btn btn-ghost" id="trLibBtn" aria-expanded="false" aria-controls="trLib">+ 수칙 모음에서 고르기</button></div>
       <div class="tr-lib" id="trLib" hidden>
@@ -50,6 +50,7 @@
         <label class="field"><span class="label">배치</span><select class="sort" id="trLay" style="width:100%"><option value="g2">카드 2열</option><option value="g3">카드 3열 (가로 용지)</option><option value="l1">목록 1열</option></select></label>
         <label class="field"><span class="label">색상</span><select class="sort" id="trTheme" style="width:100%"><option value="green">녹색 — 안전·일반</option><option value="navy">남색 — 지시·표준</option><option value="red">빨강 — 금지·경고 강조</option><option value="yellow">검정·노랑 — 주의</option></select></label>
         <label class="field"><span class="label">설명 줄</span><select class="sort" id="trDesc" style="width:100%"><option value="1">넣기</option><option value="0">빼기 (수칙만 크게)</option></select></label>
+        <label class="field"><span class="label">표지 그림 출처 줄</span><select class="sort" id="trSrc" style="width:100%"><option value="1">넣기</option><option value="0">빼기</option></select></label>
         <label class="field"><span class="label">용지</span><select class="sort" id="trPaper" style="width:100%"><option value="A4">A4</option><option value="A3">A3</option><option value="A2">A2 (출력소)</option></select></label>
         <label class="field"><span class="label">방향</span><select class="sort" id="trOri" style="width:100%"><option value="p">세로</option><option value="l">가로</option></select></label>
       </div>
@@ -167,6 +168,7 @@
 .tr-scale [contenteditable]:hover{box-shadow:0 0 0 0.4mm rgba(31,111,209,.45)}
 .tr-scale [contenteditable]:focus{box-shadow:0 0 0 0.6mm #1F6FD1;background:rgba(255,255,255,.35)}
 .tr-print{position:fixed;left:-20000px;top:0;visibility:hidden;pointer-events:none}
+@media (pointer:coarse){.mv button{min-width:36px;min-height:34px}}
 @media print{
   html,body{background:#fff!important}
   body>*:not(main){display:none!important}
@@ -337,9 +339,10 @@
 
   // ---------- ③ ④ 입력
   var FIELDS = { trTitle: "title", trSlogan: "slogan", trCo: "co", trCeoT: "ceoT", trCeo: "ceo", trDate: "date", trPledge: "pledge" };
-  var SELS = { trLay: "lay", trTheme: "theme", trDesc: "desc", trPaper: "paper", trOri: "ori" };
+  var SELS = { trLay: "lay", trTheme: "theme", trDesc: "desc", trSrc: "src", trPaper: "paper", trOri: "ori" };
   function fill() {
     Object.keys(FIELDS).forEach(function (id) { $(id).value = st[FIELDS[id]] || ""; });
+    if (st.src !== "0") st.src = "1";
     Object.keys(SELS).forEach(function (id) { $(id).value = st[SELS[id]]; });
     $("trAuto").checked = !!st.auto; if ($("trPreset").querySelector('option[value="' + st.preset + '"]')) $("trPreset").value = st.preset;
     rulesUI(); logoUI();
@@ -398,7 +401,7 @@
       (st.slogan || edit ? '<div class="tr-slg" data-f="slogan"' + ce + ">" + esc(st.slogan || "") + "</div>" : "") + "</div>" +
       '<div class="tr-body">' + cards + "</div>" +
       (foot ? '<div class="tr-ft">' + (st.logo ? '<img class="lg" src="' + st.logo + '" alt="">' : "") + '<span class="pl" data-f="pledge"' + ce + ">" + esc(st.pledge || "") + "</span>" + (sign ? '<span class="sg">' + sign + "</span>" : "") + "</div>" : "") +
-      (usesSign ? '<div class="tr-src">표지 그림: 안전보건공단 「안전보건표지」(공공누리 제4유형)</div>' : "") + "</div>";
+      (usesSign && st.src !== "0" ? '<div class="tr-src">표지 그림: 안전보건공단 「안전보건표지」(공공누리 제4유형)</div>' : "") + "</div>";
   }
   function overflow(pg) {
     var cs = pg.querySelectorAll(".tr-card");

@@ -80,6 +80,7 @@
     ".ad-empty{border:1px dashed #C9D3E0;border-radius:10px;padding:18px;text-align:center;color:#6B788C;font-size:13px}" +
     ".ad-cam{font:inherit;font-size:11px;line-height:1;border:1px solid #D8E7FA;background:#EDF4FD;color:#1F6FD1;border-radius:6px;padding:3px 5px;cursor:pointer;margin-left:4px;vertical-align:middle}" +
     ".ad-cam b{font-weight:700}" +
+    "@media (pointer:coarse){.ad-ctl button{min-height:34px;padding:6px 10px}}" +
     "@media (pointer:fine){.ad-mob{display:none !important}}" +
     "@media (max-width:640px){.ad-grid{grid-template-columns:repeat(min(var(--ad-cols,2),2),minmax(0,1fr))}.ad-fig .ad-img{height:160px}}" +
     "@media print{.ad-toast,.ad-modal,.ad-noprint,.ad-ctl,.ad-ph-acts,.ad-fig-ctl,.ad-cam{display:none !important}.ad-photos.ad-none{display:none}.ad-appr td.ad-s .ad-ph{visibility:hidden}.ad-appr td.ad-s:hover{background:none}.ad-photos{break-before:auto}.ad-cap>select{appearance:none;-webkit-appearance:none}.ad-cap>select[data-empty]{color:transparent}.ad-cap [contenteditable]:empty::before,.ad-appr .ad-n:empty::before{content:none}.ad-empty{display:none}}";

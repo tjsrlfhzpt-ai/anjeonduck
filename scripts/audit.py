@@ -170,6 +170,10 @@ def check_site(site_dir):
     """빌드 결과: 도구마다 법령 버전 표기, 건강·개인정보 입력 도구의 안내, 판정 면책문구."""
     sd = pathlib.Path(site_dir)
     site = load("config/site.json")
+    # 인쇄물에 서비스 이름이 찍히면 안 된다(작성기 서식 데이터는 그대로 종이에 나온다)
+    _fj = (ROOT / "data/forms.json").read_text(encoding="utf-8")
+    if re.search(r"SafePlum|safeplum|세이프플럼", _fj):
+        ERR.append("data/forms.json: 인쇄되는 서식 글에 서비스 이름(SafePlum)이 들어 있음")
     for t in site.get("free_tools", []):
         p = sd / "tools" / t["id"] / "index.html"
         if not p.exists():

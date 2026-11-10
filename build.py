@@ -916,8 +916,8 @@ CALC_TOOLS = ["selection", "hpp", "machines", "penalty", "safety-cost", "edu-hou
 LOOKUP_TOOLS = ["first-job", "risk-guide", "fatal-cases", "precedents", "ai", "law-ai", "gear-cert", "schedule", "duties", "retention", "cost-use", "inspect", "docmap"]
 # 주 메뉴 4개. 예전 경로(brief/, jobs/ …)로 넘어온 active 값은 속한 묶음으로 바꿔 표시한다
 JOB_HOME = "https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("안전관리자")
-NAV4 = [("lib", "자료실", "tools/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "jobs/"), ("board", "게시판", "board/")]
-ACTIVE_GROUP = {"videos/": "brief", "tools/": "lib", "resources/": "lib", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
+NAV4 = [("lib", "작성기·도구", "tools/"), ("files", "양식·파일", "resources/files/"), ("law", "법령", "laws/"), ("brief", "브리핑·소식", "brief/"), ("jobs", "채용", "jobs/"), ("board", "게시판", "board/")]
+ACTIVE_GROUP = {"videos/": "brief", "tools/": "lib", "resources/": "files", "laws/": "law", "brief/": "brief", "news/": "brief", "jobs/": "jobs", "board/": "board"}
 
 
 def nav_cols(site, rel):
@@ -926,8 +926,10 @@ def nav_cols(site, rel):
         return [(f'{rel}tools/{i}/', by[i].get("menu") or by[i].get("short") or by[i]["name"]) for i in ids if i in by]
     return {
         "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}" if g else g_href, n) for g, n, g_href in (("업무일지", "안전·보건 업무일지", ""), ("", "작업계획서 (종류 선택)", f"{rel}tools/forms/workplan/"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표", ""), ("중대재해처벌법 이행", "중대재해법 이행 서식", ""))]
-                 + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
-                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "공단 안전보건자료 (OPS·포스터·교안)"), (f"{rel}resources/library/#kmIndBar", "업종별 자료 (건설·제조·서비스 등)"), (f"{rel}resources/files/", "양식·파일 자료실 (엑셀·한글·PPT·PDF)")])],
+                 + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")])],
+        "files": [("내려받는 파일", [(f"{rel}resources/files/", "양식·파일 자료실 전체"), (f"{rel}resources/files/#safeplum", "SafePlum 제작 엑셀·PPT 양식")]
+                   + [(f"{rel}resources/files/?c=" + quote(c), c) for c in fl_cats()]),
+                  ("법정 서식·공단 자료", [(f"{rel}resources/", "법령 서식·별표 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "공단 안전보건자료 (OPS·포스터·교안)"), (f"{rel}resources/library/#kmIndBar", "업종별 자료 (건설·제조·서비스 등)")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}laws/bills/", "입법예고·개정 포인트")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
@@ -997,7 +999,7 @@ def mnav_html(site, rel, active):
 
 def dock_html(rel, active):
     grp = ACTIVE_GROUP.get(active, "")
-    items = [("", "🏠", "홈", "home")] + [(href, ic, label.replace("안전 ", "").replace("브리핑·소식", "소식"), key) for (key, label, href), ic in zip(NAV4, ["🗂️", "⚖️", "📰", "💼", "💬"])]
+    items = [("", "🏠", "홈", "home")] + [(href, ic, label.replace("안전 ", "").replace("브리핑·소식", "소식").replace("작성기·도구", "작성기").replace("양식·파일", "파일"), key) for (key, label, href), ic in zip(NAV4, ["📝", "📂", "⚖️", "📰", "💼", "💬"])]
     return '<nav class="dock" aria-label="빠른 이동">' + "".join(
         f'<a href="{e(href if href.startswith("http") else rel + href)}"{" target=_blank rel=noopener" if href.startswith("http") else ""}{" aria-current=" + chr(34) + "page" + chr(34) if key == grp else ""}><span aria-hidden="true">{ic}</span>{e(label)}</a>' for href, ic, label, key in items) + "</nav>"
 
@@ -1978,7 +1980,9 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         _has_dl = any(t["id"] in x.get("tools", []) for x in downloads())
         src = src.replace(">← SafePlum</a>", f'>← SafePlum</a><a href="../forms/" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">다른 무료 작성기 {WRITER_N}종 →</a>'
                           + ('<a href="#spdl" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">엑셀·PPT 양식 받기 ↓</a>' if _has_dl else '')
-                          + '<style>@media (max-width:640px){.sp-alltools{display:none!important}}@media print{.sp-alltools{display:none!important}}</style>', 1)
+                          , 1)
+        # Vue 템플릿 안의 <style>은 버려지므로 머리(head)에 넣는다(2026-11-10: 휴대폰에서 링크가 숨겨지지 않아 화면이 옆으로 밀리던 문제)
+        src = src.replace("</head>", '<style>@media (max-width:760px){.sp-alltools{display:none!important}}@media print{.sp-alltools{display:none!important}}</style>\n</head>', 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
         note = ('<style>@media print{.adk-note{display:none!important}}</style><p class="adk-note" style="max-width:210mm;margin:8px auto;padding:0 12px;font-size:11px;color:#8A94A3;line-height:1.6">SafePlum 실무용 보조양식 — '
                 '관련 조문을 참고해 만든 보조양식이며, 이 양식을 채운 것만으로 법령상 의무를 이행했다고 볼 수는 없습니다. '
@@ -2069,6 +2073,15 @@ FL_CSS = """<style>
  .fl-get{text-align:left;margin-top:10px}
 }
 </style>"""
+
+
+def fl_cats():
+    f = ROOT / "data/filelib.json"
+    out = []
+    for x in (json.loads(f.read_text(encoding="utf-8")).get("items", []) if f.exists() else []):
+        if x["cat"] not in out:
+            out.append(x["cat"])
+    return out
 
 
 def fl_count():
@@ -2817,6 +2830,7 @@ def build(out, today):
     <p class="quick">{chips}</p>
   </div>
 </section>
+<div class="wrap"><a class="fl-banner" href="resources/files/"><span class="fl-b-ic" aria-hidden="true">📂</span><span class="fl-b-t"><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span>안전보건관리규정·회의록·작업계획서·교육자료를 한글·엑셀·PPT 원본으로 내려받기</span></span><span class="fl-b-go">파일 받기 →</span></a></div>
 <div class="wrap home2">
   <section class="hub" aria-label="주요 기능">
     <div class="hub-tabs" role="tablist" aria-label="기능 묶음">

@@ -38,8 +38,10 @@
         <label class="field"><span class="label">게시일 (선택)</span><input type="date" id="rsDate"></label>
       </div>
       <div class="rs-logo"><span class="label">로고 (선택)</span><label class="btn btn-ghost rs-up">로고 올리기<input type="file" id="rsLogo" accept="image/*" hidden></label><button type="button" class="linkbtn" id="rsLogoDel" hidden>로고 빼기</button><img id="rsLogoPrev" alt="" hidden></div>
+      <label class="rs-opt"><input type="checkbox" id="rsSrcOn"> 게시물 아래에 출처 줄 넣기 <span class="muted">(수칙·표지 그림 출처)</span></label>
+      <p class="hint" id="rsSrcHint" hidden>출처 줄을 뺐습니다. 표지 그림(안전보건공단, 공공누리 제4유형)은 출처를 밝히는 조건으로 쓰는 자료이니, 게시물 옆이나 사내 문서에 출처를 따로 적어 두세요.</p>
       <div class="btns"><button type="button" class="btn" id="rsPrint">인쇄 · PDF 저장</button><button type="button" class="btn btn-ghost" id="rsReset">처음부터</button></div>
-      <p class="hint">입력값과 로고는 이 브라우저에만 기억됩니다. 인쇄 창에서 용지와 방향을 위와 같게, <b>배율 100%(실제 크기)</b>로 맞추세요.</p>
+      <p class="hint">입력값과 로고는 이 브라우저에만 기억됩니다. 인쇄 창에서 용지와 방향을 위와 같게, <b>배율 100%(실제 크기)</b>로 맞추세요. 종이 아래에 날짜나 사이트 주소가 찍히면 인쇄 창 '설정 더보기'에서 <b>머리글과 바닥글</b>을 끄세요(브라우저가 넣는 글자입니다).</p>
     </div>
     <h2 class="h-sm">미리보기</h2>
     <div class="rs-prev" id="rsPrevWrap"><div class="rs-scale" id="rsScale"></div></div>
@@ -118,6 +120,7 @@
   .rs-print .rs-page{box-shadow:none}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+.rs-opt{display:flex;align-items:center;gap:8px;font-size:14px;margin:10px 0 2px;cursor:pointer}.rs-opt input{width:18px;height:18px}
 @media (max-width:640px){.rs-ai-row{flex-direction:column}.rs-ai-row .btn{width:100%}}
 </style>
 <script src="../../assets/ai.js"></script>
@@ -164,7 +167,7 @@
   function fill() {
     $("rsTitle").value = st.title; $("rsRules").value = st.rules.join("\n");
     $("rsTheme").value = st.theme; $("rsPaper").value = st.paper; $("rsOri").value = st.ori;
-    $("rsCo").value = st.co || ""; $("rsMgr").value = st.mgr || ""; $("rsDate").value = st.date || "";
+    $("rsCo").value = st.co || ""; $("rsMgr").value = st.mgr || ""; $("rsDate").value = st.date || ""; $("rsSrcOn").checked = st.srcOn !== "0"; $("rsSrcHint").hidden = st.srcOn !== "0" || !st.signs.length;
     signs(); logoUI();
   }
   function signs() {
@@ -180,6 +183,7 @@
     signs(); save(); render();
   });
   function readRules() { return $("rsRules").value.split(/\n+/).map(function (s) { return s.replace(/^\s*\d{1,2}[.)]\s*/, "").trim(); }).filter(Boolean); }
+  $("rsSrcOn").addEventListener("change", function () { st.srcOn = this.checked ? "1" : "0"; $("rsSrcHint").hidden = this.checked || !st.signs.length; save(); render(); });
   ["rsTitle", "rsRules", "rsCo", "rsMgr", "rsDate"].forEach(function (id) {
     $(id).addEventListener("input", function () {
       st.title = $("rsTitle").value.trim(); st.rules = readRules().slice(0, MAXR); st.co = $("rsCo").value.trim(); st.mgr = $("rsMgr").value.trim(); st.date = $("rsDate").value;
@@ -221,7 +225,7 @@
       (pics ? '<div class="rs-pics">' + pics + "</div>" : "") +
       '<div class="rs-body"><ol>' + rules.map(function (r) { return "<li><span>" + esc(r) + "</span></li>"; }).join("") + "</ol></div>" +
       '<div class="rs-ft">' + (st.logo ? '<img src="' + st.logo + '" alt="">' : "") + '<span class="co">' + esc(st.co || "") + '</span><span class="meta">' + meta + "</span></div>" +
-      (src ? '<div class="rs-src">' + src + "</div>" : "") + "</div>";
+      (src && st.srcOn !== "0" ? '<div class="rs-src">' + src + "</div>" : "") + "</div>";
   }
   function fit(pg) {
     var d = dims(), base = Math.min(d[0], d[1]) / 210;   // A4 세로 폭 기준 배율

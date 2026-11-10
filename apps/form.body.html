@@ -126,6 +126,7 @@ tr.q-hide{display:none}
 .paper .rowx.del{color:#C8352B}
 .paper .rowx:hover:not(:disabled){background:#F1F5FB}
 .paper .rowx:disabled{opacity:.3;cursor:default}
+@media (pointer:coarse){.paper .rowx-c{width:70px}.paper .rowx{width:30px;height:32px;font-size:15px}.paper .ad-cam{padding:7px 8px;font-size:13px}}
 /* 좁은 화면: 칸이 많은 표는 가로로 밀어서 본다(칸이 20px로 찌그러져 입력할 수 없던 문제) */
 .tsc{max-width:100%;position:relative}
 @media (max-width:760px){.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch}.tsc>table{min-width:var(--mw,0)}}
@@ -205,19 +206,19 @@ tr.q-hide{display:none}
     var a = autoDefault(k);
     return a != null && a !== "" ? a : (d == null ? "" : d);
   }
-  function ed(k, d, cls, ph) {
-    return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="' + CE + '" role="textbox" aria-multiline="true" data-k="' + esc(k) + '"' + (ph ? ' data-ph="' + esc(ph) + '"' : "") + ">" + esc(val(k, d)) + "</div>";
+  function ed(k, d, cls, ph, al) {
+    return '<div class="ed' + (cls ? " " + cls : "") + '" contenteditable="' + CE + '" role="textbox" aria-multiline="true"' + (al ? ' aria-label="' + esc(al) + '"' : "") + ' data-k="' + esc(k) + '"' + (ph ? ' data-ph="' + esc(ph) + '"' : "") + ">" + esc(val(k, d)) + "</div>";
   }
-  function inp(f, k) {
-    var v = val(k, f.default);
+  function inp(f, k, al) {
+    var v = val(k, f.default), AL = ' aria-label="' + esc(al || f.label || "입력") + '"';
     if (f.type === "select") {
       // 목록에 없는 값은 직접 입력: '직접 입력…'을 고르면 글 칸으로 바뀌고, '목록' 버튼으로 되돌아온다
-      if (state["_c." + k] || (v && f.options.indexOf(v) < 0)) return '<span class="fi-cus"><input type="text" class="fi" data-k="' + esc(k) + '" value="' + esc(v) + '" placeholder="직접 입력" aria-label="직접 입력"><button type="button" class="fi-back no-print" data-cback="' + esc(k) + '" title="목록에서 고르기">목록</button></span>';
-      return '<select class="fi" data-k="' + esc(k) + '">' + ['<option value=""></option>'].concat(f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; })).join("") + '<option value="__custom__">직접 입력…</option></select><span class="fi-print" aria-hidden="true">' + esc(v) + "</span>";
+      if (state["_c." + k] || (v && f.options.indexOf(v) < 0)) return '<span class="fi-cus"><input type="text" class="fi" data-k="' + esc(k) + '" value="' + esc(v) + '" placeholder="직접 입력" aria-label="' + esc((al || f.label || "") + " 직접 입력") + '"><button type="button" class="fi-back no-print" data-cback="' + esc(k) + '" title="목록에서 고르기">목록</button></span>';
+      return '<select class="fi"' + AL + ' data-k="' + esc(k) + '">' + ['<option value=""></option>'].concat(f.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; })).join("") + '<option value="__custom__">직접 입력…</option></select><span class="fi-print" aria-hidden="true">' + esc(v) + "</span>";
     }
-    if (f.type === "date") return '<input class="fi" type="date" data-k="' + esc(k) + '" value="' + esc(v) + '"' + (v ? "" : " data-empty") + ">";
+    if (f.type === "date") return '<input class="fi" type="date"' + AL + ' data-k="' + esc(k) + '" value="' + esc(v) + '"' + (v ? "" : " data-empty") + ">";
     if (f.type === "radio") return '<span class="radios">' + f.options.map(function (o) { return '<label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (o === v ? " checked" : "") + ">" + esc(o) + "</label>"; }).join("") + "</span>";
-    return ed(k, f.default, f.multi ? "multi" : "", f.ph);
+    return ed(k, f.default, f.multi ? "multi" : "", f.ph, al || f.label);
   }
 
   function approval() { return '<div class="ad-wrap paper-appr" id="fAppr"></div>'; }
@@ -267,8 +268,8 @@ tr.q-hide{display:none}
         if (c.auto) return '<td class="num">' + (r + 1) + "</td>";
         if (c.sign) return '<td class="sign"></td>';
         var d = s.defaults && s.defaults[r] ? s.defaults[r][ci] : "";
-        if (c.options) return "<td>" + inp({ type: "select", options: c.options, default: d }, "t." + s.k + "." + r + "." + ci) + "</td>";
-        return "<td>" + ed("t." + s.k + "." + r + "." + ci, d, c.multi ? "multi" : "") + "</td>";
+        if (c.options) return "<td>" + inp({ type: "select", options: c.options, default: d }, "t." + s.k + "." + r + "." + ci, (r + 1) + "번째 줄 " + c.label) + "</td>";
+        return "<td>" + ed("t." + s.k + "." + r + "." + ci, d, c.multi ? "multi" : "", "", (r + 1) + "번째 줄 " + c.label) + "</td>";
       }).join("") + (s.fixed ? "" : '<td class="rowx-c no-print">' + ((A.qa && A.qa.tables && A.qa.tables[s.k] || {}).evidence ? '<button type="button" class="ad-cam rowcam" data-cam="' + esc(rowRel(s, r)) + '" aria-label="' + (r + 1) + '번째 줄 증빙 사진">📷' + (PHOTO_REL[rowRel(s, r)] ? " <b>" + PHOTO_REL[rowRel(s, r)] + "</b>" : "") + "</button>" : "") + '<button type="button" class="rowx" data-rup="' + esc(s.k) + '" data-r="' + r + '"' + (r === 0 ? " disabled" : "") + ' aria-label="' + (r + 1) + '번째 줄 위로">↑</button><button type="button" class="rowx del" data-rdel="' + esc(s.k) + '" data-r="' + r + '"' + (n <= 1 ? " disabled" : "") + ' aria-label="' + (r + 1) + '번째 줄 삭제">×</button></td>') + "</tr>";
     }
     return wrapT('<table class="gtab">' + head + "<tbody>" + body + "</tbody></table>", mwOf(real, s.cols)) +
@@ -390,9 +391,9 @@ tr.q-hide{display:none}
       if (typeof it === "object" && it.group) return '<tr class="grp"><th colspan="' + (3 + opts.length) + '">' + lab("cg." + s.k + "." + i, it.group) + "</th></tr>";
       var no = i + 1 - items.slice(0, i).filter(function (x) { return typeof x === "object"; }).length, ilab = itemLabel(s, i, no);
       var pc = PHOTO_REL[ilab] || 0;
-      return '<tr><td class="num">' + no + '</td><td class="item">' + ed("ci." + s.k + "." + i, it, "multi", "점검 항목 입력") + '<button type="button" class="ad-cam" data-cam="' + esc(ilab) + '" aria-label="' + esc(no + "번 항목 사진 첨부") + '">📷' + (pc ? " <b>" + pc + "</b>" : "") + "</button></td>" +
+      return '<tr><td class="num">' + no + '</td><td class="item">' + ed("ci." + s.k + "." + i, it, "multi", "점검 항목 입력", no + "번 점검 항목") + '<button type="button" class="ad-cam" data-cam="' + esc(ilab) + '" aria-label="' + esc(no + "번 항목 사진 첨부") + '">📷' + (pc ? " <b>" + pc + "</b>" : "") + "</button></td>" +
         opts.map(function (o) { var on = val(k) === o; return '<td class="opt"><label><input type="radio" name="' + esc(k) + '" data-k="' + esc(k) + '" value="' + esc(o) + '"' + (on ? " checked" : "") + '><span class="sr">' + esc(o) + "</span></label></td>"; }).join("") +
-        "<td>" + ed(k + ".r", "") + "</td></tr>";
+        "<td>" + ed(k + ".r", "", "", "", no + "번 항목 비고·조치") + "</td></tr>";
     }).join("");
     var tally = checkTally(s, items, opts);
     return wrapT('<table class="gtab ctab"><thead><tr><th style="width:6%">' + lab("ch." + s.k + ".no", "번호") + "</th><th>" + lab("ch." + s.k + ".item", s.item_label || "점검 항목") + "</th>" + opts.map(function (o) { return '<th style="width:9%">' + esc(o) + "</th>"; }).join("") + '<th style="width:22%">' + lab("ch." + s.k + ".remark", s.remark_label || "비고·조치") + "</th></tr></thead><tbody>" + rows + "</tbody></table>", opts.length >= 3 ? 470 : 0) +
