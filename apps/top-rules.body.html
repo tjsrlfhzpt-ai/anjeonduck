@@ -445,7 +445,7 @@
     var pg = sc.firstChild; fit(pg);
     var w = pg.offsetWidth, h = pg.offsetHeight, k = Math.min(1, (wrap.clientWidth - 28) / w);
     sc.style.transform = "scale(" + k + ")"; sc.style.width = w + "px"; sc.style.height = h * k + "px";
-    $("trPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0;@bottom-center{content:none}}@page:first{margin:0;padding:0}}";
+    $("trPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0;@top-center{content:\"\"}@bottom-center{content:\"\"}}@page:first{margin:0;padding:0}}";
     $("trSheet").dataset.dirty = "1";
   }
   // 미리보기에서 바로 고치기: 쓰는 동안은 다시 그리지 않고, 칸을 벗어나면 맞춤 크기로 다시 그린다

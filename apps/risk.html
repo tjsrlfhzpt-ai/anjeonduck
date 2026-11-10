@@ -6,7 +6,7 @@
 <title>위험성평가서 작성기 | SafePlum</title>
 <meta name="description" content="빈도·강도법(3×3·4×4·5×4·5×5)과 위험성 수준 3단계 판단법 중 골라 위험성평가서를 업종별 위험요인으로 빠르게 작성하고 A4로 인쇄하세요. 무료, 회원가입 없음.">
 <link rel="icon" href="../../assets/favicon.png" type="image/png">
-<style id="pgSize">@page { size: A4 landscape; margin: 10mm; } @page:first{margin-top:0;margin-bottom:0;padding-top:10mm;padding-bottom:10mm}</style>
+<style id="pgSize">@page { size: A4 landscape; margin: 10mm; @top-center{content:""}@bottom-center{content:""} } @page:first{margin-top:0;margin-bottom:0;padding-top:10mm;padding-bottom:10mm}</style>
 <style>
   .ra-re{margin-top:14px}.ra-re-h{font-size:15px;margin:0 0 6px}.ra-re-h span{font-size:12px;font-weight:400;color:#5b6474}
   .ra-re-t{width:100%;border-collapse:collapse;font-size:12px}.ra-re-t th,.ra-re-t td{border:1px solid #9aa6b5;padding:4px 5px;text-align:center;vertical-align:middle}.ra-re-t th{background:#e5e9ee}
@@ -730,7 +730,7 @@
   }
   function setOrient(o) {
     ORIENT = o === "l" ? "l" : "p";
-    $("pgSize").textContent = "@page { size: A4 " + (ORIENT === "l" ? "landscape" : "portrait") + "; margin: 10mm; } @page:first{margin-top:0;margin-bottom:0;padding-top:10mm;padding-bottom:10mm}";
+    $("pgSize").textContent = "@page { size: A4 " + (ORIENT === "l" ? "landscape" : "portrait") + "; margin: 10mm; @top-center{content:\"\"}@bottom-center{content:\"\"} } @page:first{margin-top:0;margin-bottom:0;padding-top:10mm;padding-bottom:10mm}";
     document.body.classList.toggle("land", ORIENT === "l"); $("optOrient").value = ORIENT; fitScreen();
   }
   function setAppr(on) { APPR_ON = on !== false; $("page1").classList.toggle("no-appr", !APPR_ON); $("optAppr").checked = APPR_ON; if (apprH && apprH.setOff) apprH.setOff(!APPR_ON); }

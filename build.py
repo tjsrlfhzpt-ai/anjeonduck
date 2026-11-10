@@ -1889,7 +1889,7 @@ def onboard_html(rel):
                      + (f'<section class="ob-phase ob-end"><div class="ob-grid">{onboard_cut(end, rel, ed["title"])}<div class="ob-next"><h3>다음은?</h3><p>체크한 내용은 이 브라우저에만 저장됩니다. 빠진 서류는 <a href="{rel}tools/docmap/">서류 자가점검</a>으로 다시 확인하고, 위험성평가는 <a href="{rel}tools/risk-guide/">실무 가이드</a> 순서대로 시작하세요. 막히는 내용은 <a href="{rel}board/?b=qna">Q&amp;A 게시판</a>이나 <a href="{rel}laws/qa/">고용노동부 질의회시</a>에서 찾아보세요.</p></div></div></section>' if end else "")
                      + "</div>")
     return (f'<div class="ob-tabs" role="tablist" aria-label="업종 선택">{"".join(tabs)}</div>' + "".join(panes)
-            + f'<p class="src-line ob-src">정리 {e(d["checked"])} · {e(d["note"])}</p>')
+            + f'<p class="src-line ob-src no-print">정리 {e(d["checked"])} · {e(d["note"])}</p>')
 
 
 LAWREG_KEYS = ["act", "yeong", "rule", "krule", "sapa", "sapa_dec"]

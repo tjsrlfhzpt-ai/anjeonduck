@@ -174,6 +174,18 @@ def check_site(site_dir):
     _fj = (ROOT / "data/forms.json").read_text(encoding="utf-8")
     if re.search(r"SafePlum|safeplum|세이프플럼", _fj):
         ERR.append("data/forms.json: 인쇄되는 서식 글에 서비스 이름(SafePlum)이 들어 있음")
+    # 인쇄 여백이 있는 @page 에는 빈 @top-center 가 있어야 한다(없으면 2쪽부터 브라우저 머리글 = 사이트 이름·날짜가 찍힘)
+    for src in list((ROOT / "apps").glob("*.html")) + [ROOT / "assets/style.css"]:
+        txt = src.read_text(encoding="utf-8")
+        for m in re.finditer(r"@page\s*\{", txt):
+            i = m.end(); depth = 1
+            while i < len(txt) and depth:
+                depth += {"{": 1, "}": -1}.get(txt[i], 0); i += 1
+            blk = txt[m.end():i]
+            if re.search(r"margin\s*:\s*0\s*[;}\"]", blk):
+                continue
+            if "@top-center" not in blk:
+                ERR.append(f"{src.name}: @page 에 빈 @top-center 없음 — 2쪽부터 브라우저 머리글이 찍힘")
     for t in site.get("free_tools", []):
         p = sd / "tools" / t["id"] / "index.html"
         if not p.exists():

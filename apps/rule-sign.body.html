@@ -68,7 +68,7 @@
 .rs-cats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
 .rs-cats button{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;color:var(--text-2);cursor:pointer}
 .rs-cats button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
-.rs-q{max-width:none;margin-bottom:8px}
+.rs-q{max-width:none;margin-bottom:8px}.rs-q input{border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0;padding:0}
 .rs-list{list-style:none;margin:0;padding:0;max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:12px}
 .rs-list li+li{border-top:1px solid var(--line-2)}
 .rs-list button{width:100%;text-align:left;background:none;border:0;padding:10px 12px;cursor:pointer;display:flex;gap:10px;align-items:baseline;font-size:14px;color:inherit}
@@ -258,7 +258,7 @@
     var n = st.rules.length;
     $("rsCount").textContent = n + "줄" + (n > 10 ? " · 줄이 많아 글자가 작아집니다(" + Math.round(r.fr) + "pt). 현장에서 읽기 좋은 것은 10줄 이내입니다." : "");
     var d = dims();
-    $("rsPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0;@bottom-center{content:none}}@page:first{margin:0;padding:0}}";
+    $("rsPageCss").textContent = "@media print{@page{size:" + st.paper + " " + (st.ori === "l" ? "landscape" : "portrait") + ";margin:0;@top-center{content:\"\"}@bottom-center{content:\"\"}}@page:first{margin:0;padding:0}}";
     $("rsSheet").dataset.dirty = "1";
   }
   function fillSheet() { var sh = $("rsSheet"); sh.innerHTML = pageHTML(); fit(sh.firstChild); sh.dataset.dirty = ""; return sh; }

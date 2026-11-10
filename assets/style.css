@@ -471,7 +471,7 @@ main{flex:1 0 auto}
   .form-save{width:100%;margin:0}
 }
 @media print{
-  @page{size:A4;margin:12mm}
+  @page{size:A4;margin:12mm;@top-center{content:""}@bottom-center{content:""}}
   body{background:#fff}
   .no-print,.hd,.ft,.skip{display:none !important}
   main,.form-wrap{padding:0 !important;max-width:none}
@@ -901,8 +901,8 @@ details.lawbox summary{cursor:pointer}
 .ctally-miss{color:#C8352B}.ctally-ok{color:#0E8A6A}
 .ctab .item .ad-cam{float:right;margin:1px 0 0 6px}
 @media print{.paper-photos:not(.has-photos){display:none}.paper-photos.has-photos{break-before:page;margin-top:0}.ctally-miss{color:#111}}
-@page{size:A4;margin:12mm 12mm 14mm;@bottom-center{content:counter(page) " / " counter(pages);font-size:9pt;color:#666}}
-/* 인쇄: 첫 쪽 위·아래 margin을 0으로 → 브라우저 머리글·바닥글(날짜·시간·제목·주소)이 붙지 않음. 같은 간격은 padding으로 */
+@page{size:A4;margin:12mm 12mm 14mm;@bottom-center{content:counter(page) " / " counter(pages);font-size:9pt;color:#666}@top-center{content:""}}
+/* 인쇄: 첫 쪽(구형 브라우저용). 최신 크롬·엣지는 위 @top-center 빈 칸으로 모든 쪽의 머리글이 빠짐. 첫 쪽 위·아래 margin을 0으로 → 브라우저 머리글·바닥글(날짜·시간·제목·주소)이 붙지 않음. 같은 간격은 padding으로 */
 @page:first{margin-top:0;margin-bottom:0;padding-top:12mm;padding-bottom:14mm}
 @media print{html,body{min-width:0!important;width:auto!important}.paper,.print-doc{width:auto!important;max-width:100%!important;box-sizing:border-box}.paper table{max-width:100%}.paper th,.paper td{overflow-wrap:anywhere}.paper .im-info,.paper .im-pt{table-layout:fixed;width:100%}.paper-h{grid-template-columns:minmax(0,1fr) auto}.paper-t{min-width:0;overflow-wrap:anywhere}.table-wrap{overflow:visible!important}.table-wrap table,.dtable{width:100%!important;min-width:0!important}.dtable th,.dtable td,.seltable th{white-space:normal!important;padding:6px 6px}}
 .appr-panel{background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--r);padding:12px 14px;margin:8px 0}
@@ -925,7 +925,7 @@ details.lawbox summary{cursor:pointer}
 .tcard-law{font-size:12px;color:var(--muted);font-weight:600;line-height:1.4}
 .tcard-arr{width:20px;height:20px;flex:none;fill:none;stroke:var(--k);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease}
 .tcard:hover .tcard-arr{transform:translateX(3px)}
-.tkinds{display:flex;flex-wrap:wrap;gap:8px}
+.tkinds{display:flex;flex-wrap:wrap;gap:8px}@media(max-width:760px){.tkinds{margin-bottom:14px}}
 .tbadge-l{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--text-2)}
 .tbadge-l span{font-size:12px;color:var(--muted)}
 .tbadge-l:hover{text-decoration:none;border-color:var(--blue);color:var(--blue)}
