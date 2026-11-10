@@ -2178,3 +2178,8 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
 .gq-others{margin-top:28px}
 .gq-otl{display:flex;flex-wrap:wrap;gap:6px 14px}
 .gq-otl a{text-decoration:none}.gq-otl em{font-style:normal;color:var(--muted);font-size:.9em}
+
+/* 통합 검색 버튼(2026-11-10) */
+.hd-srch{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;color:var(--navy);margin-left:auto}.hd-srch:hover{background:var(--surface-2)}.hd-srch+.hd-auth{margin-left:8px}
+@media (max-width:720px){.hd-srch{order:2;width:34px;height:34px}.hd-srch+.hd-auth{margin-left:4px}}
+@media print{.hd-srch{display:none}}

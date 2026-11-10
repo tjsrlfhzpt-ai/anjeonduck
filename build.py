@@ -927,7 +927,7 @@ def nav_cols(site, rel):
     return {
         "lib": [("작성기", tl(["tbm", "risk", "edu-log", "patrol", "permit"]) + [(f"{rel}tools/forms/#{WRITER_GID[g]}" if g else g_href, n) for g, n, g_href in (("업무일지", "안전·보건 업무일지", ""), ("", "작업계획서 (종류 선택)", f"{rel}tools/forms/workplan/"), ("작업시작 전 점검(별표 3)", "작업시작 전 점검표", ""), ("중대재해처벌법 이행", "중대재해법 이행 서식", ""))]
                  + [(f"{rel}tools/forms/", "작성기 전체 보기 →")]), ("진단·계산", tl(CALC_TOOLS)), ("조회·일정", tl(LOOKUP_TOOLS) + [(f"{rel}tools/", "도구 전체 보기 →")]),
-                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "공단 안전보건자료 (OPS·포스터·교안)"), (f"{rel}resources/library/#kmIndBar", "업종별 자료 (건설·제조·서비스 등)"), (f"{rel}resources/templates/", "무료 양식 내려받기 (엑셀·PPT)"), (f"{rel}resources/files/", "파일 자료실 (한글·엑셀·PPT·PDF)")])],
+                ("서식·자료", [(f"{rel}resources/", "법령 서식·자료 찾기"), (f"{rel}resources/signs/", "안전보건표지 40종"), (f"{rel}resources/library/", "공단 안전보건자료 (OPS·포스터·교안)"), (f"{rel}resources/library/#kmIndBar", "업종별 자료 (건설·제조·서비스 등)"), (f"{rel}resources/files/", "양식·파일 자료실 (엑셀·한글·PPT·PDF)")])],
         "law": [("현행 전문", [(f"{rel}laws/{k}/", n) for k, n in LAW_MENU]),
                 ("해석·소식", [(f"{rel}laws/qa/", "고용노동부 질의회시"), (f"{rel}laws/#upcoming", "시행 예정"), (f"{rel}laws/#updates", "개정 소식"), (f"{rel}laws/bills/", "입법예고·개정 포인트")] + ([(BLOG["url"], "입법예고 해설 (네이버 블로그)")] if BLOG else []))],
         "brief": [("소식", [(f"{rel}brief/", "안전 브리핑"), (f"{rel}laws/#updates", "법령 개정 소식")] + ([(BLOG["url"], "네이버 블로그")] if BLOG else [])), ("영상", [(f"{rel}videos/", "안전보건 영상")])],
@@ -1304,6 +1304,7 @@ def page(site, rel_root, path, title, body, desc=None, active=""):
   <div class="wrap hd-in">
     <a class="logo" href="{rel_root}" aria-label="{e(site['name'])} 홈">{LOGO_SVG}<span>{e(site['name'])}</span></a>
     <nav class="gnb" aria-label="주 메뉴">{nav}</nav>
+    <a class="hd-srch" href="{rel_root}search/" aria-label="통합 검색" title="통합 검색"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
     {hd_auth(site, rel_root)}
     <button type="button" class="hd-menu" id="hdMenu" aria-expanded="false" aria-controls="mnav"><span class="hd-menu-i" aria-hidden="true"></span>메뉴</button>
     {f'<a class="btn btn-sm hd-cta" href="{e(tl)}"{ext}>Mallo 열기</a>' if safe_url(((site.get("tools") or [{}])[0]).get("url")) else ""}
@@ -2032,6 +2033,7 @@ WORKPLAN_IDS = [i for _, ids in WORKPLAN_GROUPS for i in ids]
 FL_KIND = {"hwp": ("한글", "hwp"), "hwpx": ("한글", "hwp"), "xlsx": ("엑셀", "xls"), "xls": ("엑셀", "xls"), "pptx": ("PPT", "ppt"), "ppt": ("PPT", "ppt"),
            "pdf": ("PDF", "pdf"), "docx": ("워드", "doc"), "doc": ("워드", "doc"), "zip": ("압축", "zip")}
 FL_CSS = """<style>
+.fl-quick{margin:8px 0 0}.fl-quick .chip{cursor:pointer}
 .fl-bar{display:flex;flex-direction:column;gap:10px;margin:4px 0 14px}
 .fl-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .fl-row select,.fl-row input{height:38px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;font-size:14px;padding:0 10px}
@@ -2078,12 +2080,99 @@ def fl_size(n):
     return f"{n / 1e6:.1f}MB" if n >= 1e6 else f"{max(1, round(n / 1e3))}KB"
 
 
+SP_CAT = "SafePlum 제작 양식"
+
+SEARCH_BODY = """
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../">홈</a><span>/</span>통합 검색</p>
+  <h1>통합 검색</h1>
+  <p>작성기·서식·양식 파일·법령 조문·판례·고용노동부 질의회시·사망사고 사례·안전 소식·채용까지 {TOTAL}건을 한 번에 찾습니다.</p>
+</div></section>
+<section class="wrap sx">
+  <form class="sx-bar" role="search" onsubmit="return false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="sxQ" type="search" placeholder="예: 지게차 작업계획서, 관리감독자 교육, 밀폐공간, 도급인" aria-label="통합 검색어" autocomplete="off" enterkeyhint="search"></form>
+  <div class="sx-k" id="sxK" aria-label="결과 종류"></div>
+  <p class="sx-n" id="sxN" role="status"></p>
+  <div id="sxR"></div>
+  <div class="sx-more" id="sxX" hidden></div>
+</section>
+<style>
+.sx{padding-top:8px;padding-bottom:40px;max-width:900px}
+.sx-bar{display:flex;align-items:center;gap:8px;border:2px solid var(--navy);border-radius:12px;padding:6px 12px;background:var(--surface)}
+.sx-bar input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:17px;padding:8px 0;background:transparent;color:var(--text)}
+.sx-k{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.sx-k button{font:inherit;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--text-2);cursor:pointer}
+.sx-k button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.sx-k .n{font-size:11.5px;opacity:.75;margin-left:3px}
+.sx-n{font-size:14px;color:var(--text-2);margin:6px 0 10px}
+.sx-g{margin:0 0 18px}.sx-g h2{font-size:15px;margin:0 0 6px;color:var(--navy);display:flex;gap:8px;align-items:baseline}.sx-g h2 small{font-weight:600;color:var(--muted);font-size:12.5px}
+.sx-l{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.sx-l li+li{border-top:1px solid var(--line-2)}
+.sx-l a{display:block;padding:10px 14px;color:var(--text);text-decoration:none}.sx-l a:hover{background:var(--surface-2)}
+.sx-l b{display:block;font-size:14.5px;line-height:1.45}.sx-l span{display:block;font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sx-l mark{background:#FDE68A;color:inherit;border-radius:2px}
+.sx-g .sx-all{display:inline-block;margin-top:6px;font-size:13.5px;font-weight:700;color:var(--blue);cursor:pointer;background:none;border:0;padding:0;font-family:inherit}
+.sx-more{font-size:14px;line-height:1.8;color:var(--text-2);border-top:1px solid var(--line);padding-top:12px}.sx-more a{font-weight:700;color:var(--blue)}
+</style>
+<script>
+(function () {
+  var KINDS = /*KINDS*/{}, ORDER = ["작성기", "도구", "서식", "양식·파일", "법령", "법령 조문", "판례", "질의회시", "사고사례", "소식", "영상", "채용"];
+  var IDX = null, q = document.getElementById("sxQ"), K = document.getElementById("sxK"), N = document.getElementById("sxN"), R = document.getElementById("sxR"), X = document.getElementById("sxX"), kind = "", open = {};
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function hl(s, ws) { var t = esc(s); ws.forEach(function (w) { if (w.length < 1) return; t = t.split(esc(w)).join("<mark>" + esc(w) + "</mark>"); }); return t; }
+  function find(v) {
+    var ws = v.toLowerCase().split(/\\s+/).filter(Boolean), res = {}; if (!ws.length || !IDX) return res;
+    IDX.forEach(function (r) {
+      var t = r[1].toLowerCase(), all = t + " " + r[3].toLowerCase() + " " + r[0];
+      for (var i = 0; i < ws.length; i++) if (all.indexOf(ws[i]) < 0) return;
+      var sc = 0; ws.forEach(function (w) { var p = t.indexOf(w); sc += p === 0 ? 0 : p > 0 ? 1 : 3; });
+      (res[r[0]] = res[r[0]] || []).push([sc, r]);
+    });
+    Object.keys(res).forEach(function (k) { res[k].sort(function (a, b) { return a[0] - b[0] || a[1][1].length - b[1][1].length; }); });
+    return res;
+  }
+  function render() {
+    var v = q.value.trim(), ws = v.toLowerCase().split(/\\s+/).filter(Boolean);
+    try { history.replaceState(null, "", v ? "?q=" + encodeURIComponent(v) + (kind ? "&k=" + encodeURIComponent(kind) : "") : location.pathname); } catch (e) {}
+    if (!v) { K.innerHTML = ""; R.innerHTML = ""; X.hidden = true; N.textContent = IDX ? "찾을 낱말을 넣어 주세요. 낱말을 여러 개 넣으면 모두 들어간 결과만 보여 줍니다." : "검색 자료를 불러오는 중…"; return; }
+    if (!IDX) { N.textContent = "검색 자료를 불러오는 중…"; return; }
+    var res = find(v), ks = ORDER.filter(function (k) { return res[k]; }), tot = 0;
+    ks.forEach(function (k) { tot += res[k].length; });
+    if (kind && !res[kind]) kind = "";
+    K.innerHTML = ks.length ? '<button type="button" data-k="" aria-pressed="' + (!kind) + '">전체<span class="n">' + tot + "</span></button>" + ks.map(function (k) { return '<button type="button" data-k="' + esc(k) + '" aria-pressed="' + (kind === k) + '">' + esc(k) + '<span class="n">' + res[k].length + "</span></button>"; }).join("") : "";
+    N.textContent = tot ? "‘" + v + "’ 검색 결과 " + tot.toLocaleString() + "건" : "‘" + v + "’에 맞는 결과가 없습니다. 낱말을 줄이거나 다른 말로 찾아 보세요(예: 지게차 → 하역운반기계).";
+    R.innerHTML = ks.filter(function (k) { return !kind || k === kind; }).map(function (k) {
+      var lim = kind ? 100 : (open[k] ? 40 : 5), a = res[k];
+      return '<section class="sx-g"><h2>' + esc(k) + " <small>" + a.length.toLocaleString() + "건</small></h2><ul class=\\"sx-l\\">" + a.slice(0, lim).map(function (o) {
+        var r = o[1]; return '<li><a href="../' + esc(r[2]) + '"><b>' + hl(r[1], ws) + "</b>" + (r[3] ? "<span>" + hl(r[3], ws) + "</span>" : "") + "</a></li>"; }).join("") + "</ul>" +
+        (a.length > lim ? '<button type="button" class="sx-all" data-more="' + esc(k) + '">' + esc(k) + " " + (kind ? "" : "더 보기 ") + "(" + a.length.toLocaleString() + "건 중 " + lim + "건 표시) →</button>" : "") + "</section>";
+    }).join("");
+    var e = encodeURIComponent(v);
+    X.innerHTML = "<b>다른 곳에서도 찾기</b> — <a href=\\"../resources/library/?q=" + e + "\\">공단 안전보건자료(OPS·포스터·교안) " + "</a> · <a href=\\"../laws/qa/?q=" + e + "\\">질의회시 화면</a> · <a href=\\"../tools/fatal-cases/?q=" + e + "\\">사망사고 사례 화면</a> · <a href=\\"../brief/?q=" + e + "\\">브리핑·소식</a> · <a href=\\"../board/?b=qna\\">Q&amp;A 게시판</a>";
+    X.hidden = false;
+  }
+  K.addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; kind = b.dataset.k; render(); });
+  R.addEventListener("click", function (ev) { var b = ev.target.closest("[data-more]"); if (!b) return; if (open[b.dataset.more]) { kind = b.dataset.more; } open[b.dataset.more] = true; render(); });
+  var t; q.addEventListener("input", function () { clearTimeout(t); t = setTimeout(function () { open = {}; render(); }, 150); });
+  try { var u = new URLSearchParams(location.search); q.value = u.get("q") || ""; kind = u.get("k") || ""; } catch (e) {}
+  render();
+  fetch("../assets/data/sidx.json").then(function (r) { return r.json(); }).then(function (d) { IDX = d; render(); }).catch(function () { N.textContent = "검색 자료를 불러오지 못했습니다. 새로고침해 주세요."; });
+  if (!q.value) q.focus();
+})();
+</script>"""
+
+
 def build_filelib(site, write):
     f = ROOT / "data/filelib.json"
     if not f.exists():
         return
     lib = json.loads(f.read_text(encoding="utf-8"))
     items = [x for x in lib.get("items", []) if (ROOT / x["file"]).exists()]
+    # SafePlum이 만든 엑셀·PPT 양식(data/downloads.json)도 같은 목록 맨 앞에 — 2026-11-10 '무료 양식 내려받기'와 합침
+    sp = [{"id": "sp-" + d["id"], "title": d["title"], "cat": SP_CAT, "ext": d["ext"], "file": d["file"], "dl": d["dl"], "size": d["size"],
+           "source": "SafePlum 제작 — 자동 계산·예시 포함", "desc": d.get("desc", "") + (" 들어 있는 것: " + " · ".join(d["parts"]) if d.get("parts") else ""),
+           "preview": d.get("preview")} for d in downloads()]
+    items = sp + items
     for x in lib.get("items", []):
         if not (ROOT / x["file"]).exists():
             warn(f"파일 자료실: 파일 없음 → 목록에서 뺌 ({x['file']})")
@@ -2101,7 +2190,8 @@ def build_filelib(site, write):
     for i, x in enumerate(items, 1):
         href = rel + x["file"]
         big = '<span class="fl-big">용량 큼</span>' if x["size"] >= 10e6 else ""
-        view = f'<a class="fl-view" href="{e(href)}" target="_blank" rel="noopener">보기</a>' if x["ext"] == "pdf" else ""
+        view = (f'<a class="fl-view" href="{e(href)}" target="_blank" rel="noopener">보기</a>' if x["ext"] == "pdf" else
+                f'<a class="fl-view" href="{e(rel + x["preview"])}" target="_blank" rel="noopener">미리보기</a>' if x.get("preview") else "")
         txt = " ".join([x["title"], x.get("desc", ""), x["cat"], x["_k"], x["source"], x["ext"]]).lower()
         rows.append(f'<tr data-k="{e(x["_k"])}" data-c="{e(x["cat"])}" data-q="{e(txt)}"><td class="fl-no">{i}</td>'
                     f'<td class="fl-kc"><span class="fl-k {x["_kc"]}">{e(x["_k"])}</span></td>'
@@ -2116,15 +2206,16 @@ def build_filelib(site, write):
     contact_a = f'<a href="{e(contact)}" target="_blank" rel="noopener">{e((site.get("operator") or {}).get("contact_label") or "문의 창구")}</a>' if safe_url(contact) else "문의 창구"
     body = f"""
 <section class="phead"><div class="wrap">
-  <p class="crumbs"><a href="{rel}">홈</a><span>/</span><a href="../">서식·자료</a><span>/</span>파일 자료실</p>
-  <h1>파일 자료실 <small style="font-size:.55em;font-weight:700;color:var(--text-2)">한글·엑셀·PPT·PDF {len(items)}개</small></h1>
-  <p>현장에서 쓰는 서식·매뉴얼·교안 원본 파일을 그대로 내려받는 곳입니다. 회원가입 없이 받고, 회사 이름과 내용은 사업장에 맞게 고쳐 쓰세요. 화면에서 바로 작성·인쇄하려면 <a href="{rel}tools/forms/">작성기</a>를, SafePlum이 만든 엑셀·PPT 양식은 <a href="../templates/">무료 양식 내려받기</a>를 보세요.</p>
+  <p class="crumbs"><a href="{rel}">홈</a><span>/</span><a href="../">서식·자료</a><span>/</span>양식·파일 자료실</p>
+  <h1>양식·파일 자료실 <small style="font-size:.55em;font-weight:700;color:var(--text-2)">한글·엑셀·PPT·PDF {len(items)}개</small></h1>
+  <p>내려받아 고쳐 쓰는 파일을 한곳에 모았습니다. <b>SafePlum 제작 양식 {len(sp)}종</b>(자동 계산·예시 포함 엑셀·PPT)과 현장 실무 서식·매뉴얼·교안 원본 {len(items) - len(sp)}개입니다. 회원가입 없이 받고, 회사 이름과 내용은 사업장에 맞게 고쳐 쓰세요. 화면에서 바로 작성·인쇄하려면 <a href="{rel}tools/forms/">작성기</a>를 쓰세요.</p>
 </div></section>
 <section class="wrap" style="margin-top:8px">{FL_CSS}
 <div class="fl-bar" role="search">
   <div class="chips" aria-label="파일 형식">{kchips}</div>
   <div class="fl-row"><select id="flCat" aria-label="분류">{copts}</select><input id="flQ" type="search" placeholder="제목·내용으로 찾기 (예: 위험성평가, 시나리오, 건설)" aria-label="파일 찾기"></div>
 </div>
+<p class="fl-quick"><button type="button" class="chip" data-fc="{e(SP_CAT)}">SafePlum 제작 양식만 <span class="n">{len(sp)}</span></button></p>
 <p class="fl-cnt" id="flCnt" role="status">파일 {len(items)}개 · 모두 {fl_size(tot)}</p>
 <div class="table-wrap" style="border:0;background:transparent"><table class="fl-tbl"><thead><tr><th class="fl-no">번호</th><th>형식</th><th>제목</th><th>분류</th><th>용량</th><th style="text-align:right">받기</th></tr></thead>
 <tbody id="flBody">{"".join(rows)}</tbody></table><p class="fl-empty" id="flEmpty" hidden>찾는 파일이 없습니다. 다른 낱말로 찾거나 분류를 '전체'로 바꿔 보세요.</p></div>
@@ -2138,9 +2229,11 @@ def build_filelib(site, write):
 var ch=[].slice.call(document.querySelectorAll("[data-fk]"));
 function run(){{var s=q.value.trim().toLowerCase().split(/\s+/).filter(Boolean),cv=c.value,n=0;rs.forEach(function(r){{var ok=(!k||r.dataset.k===k)&&(!cv||r.dataset.c===cv)&&s.every(function(w){{return r.dataset.q.indexOf(w)>=0}});r.hidden=!ok;if(ok)n++}});em.hidden=n>0;cnt.textContent=(k||cv||s.length)?"찾은 파일 "+n+"개":tot}}
 ch.forEach(function(x){{x.addEventListener("click",function(){{k=x.dataset.fk;ch.forEach(function(y){{y.setAttribute("aria-pressed",y===x?"true":"false")}});run()}})}});
-q.addEventListener("input",run);c.addEventListener("change",run);}})();</script>"""
-    write("resources/files/index.html", page(site, rel, "resources/files/", "파일 자료실 (한글·엑셀·PPT·PDF)", body,
-                                             desc=f"안전보건 서식·매뉴얼·교안 원본 파일 {len(items)}개 무료 내려받기 — 중대재해처벌법 따라하기 서식, 위험성평가 예시, 비상대응 시나리오, 건설 안전관리·환경·품질 계획서 양식, 건설업 안전수칙 PPT.", active="resources/"))
+q.addEventListener("input",run);c.addEventListener("change",run);
+[].forEach.call(document.querySelectorAll("[data-fc]"),function(x){{x.addEventListener("click",function(){{c.value=c.value===x.dataset.fc?"":x.dataset.fc;run()}})}});
+try{{var u=new URLSearchParams(location.search);if(u.get("q"))q.value=u.get("q");if(u.get("c"))c.value=u.get("c");if(location.hash==="#safeplum")c.value={json.dumps(SP_CAT,ensure_ascii=False)};run()}}catch(e){{}}}})();</script>"""
+    write("resources/files/index.html", page(site, rel, "resources/files/", "양식·파일 자료실 (엑셀·한글·PPT·PDF)", body,
+                                             desc=f"안전보건 양식·서식·매뉴얼·교안 파일 {len(items)}개 무료 내려받기 — 위험성평가표·TBM·작업계획서·교육계획 엑셀(자동 계산), 중대재해처벌법 따라하기 서식, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식.", active="resources/"))
 
 # ---- 무료 내려받기 양식(data/downloads.json): 관련 화면 아래 카드 + resources/templates/ 모음
 _DL = None
@@ -2241,7 +2334,7 @@ def dl_section(rel, tool=None, form=None):
     return (DL_CSS + f'<section class="spdl" id="spdl" aria-label="내려받기 양식"><h2>엑셀·PPT 양식으로도 받을 수 있습니다</h2>'
             f'<p>화면 작성이 어려운 곳(사내 결재 양식, 출력해서 수기 작성)에서 쓰도록 만든 파일입니다. 회색 기울임 글씨는 예시이니 지우고 쓰세요.</p>'
             f'<div class="spdl-g">{"".join(dl_card(x, rel) for x in items)}</div>'
-            f'<a class="spdl-more" href="{rel}resources/templates/">무료 양식 전체 {len(downloads())}종 보기 →</a></section>')
+            f'<a class="spdl-more" href="{rel}resources/files/#safeplum">양식·파일 자료실 전체 보기 →</a></section>')
 
 
 def all_forms(lawref):
@@ -2656,26 +2749,32 @@ def build(out, today):
     chips = "".join(f'<a class="qk" href="{h}">{e(k)}</a>' for k, h in [("첫 출근 가이드", "tools/first-job/"), ("TBM 일지", "tools/tbm/"), ("위험성평가", "tools/risk/"), ("적용범위 판정", "tools/selection/"), ("과태료", "tools/penalty/"), ("산업재해조사표", "resources/?q=" + quote("산업재해조사표")), ("MSDS 경고표지", "tools/msds/")])
     home_js = """<script>
 (function () {
-  var IDX = /*IDX*/[];
+  var IDX = /*IDX*/[], FULL = null, ld = false;
+  function load() { if (ld) return; ld = true; fetch("assets/data/sidx.json").then(function (r) { return r.json(); }).then(function (d) { FULL = d.map(function (r) { return { k: r[0], t: r[1], h: r[2], d: r[3] }; }); if (q.value.trim()) draw(); }).catch(function () {}); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var q = document.getElementById("uq"), box = document.getElementById("uqOut"), sel = -1;
   function find(v) {
     var ws = v.toLowerCase().split(/\\s+/).filter(Boolean); if (!ws.length) return [];
     var out = [];
-    for (var i = 0; i < IDX.length && out.length < 60; i++) {
-      var x = IDX[i], tt = x.t.toLowerCase(), all = tt + " " + (x.d || "").toLowerCase() + " " + x.k;
-      if (ws.every(function (w) { return all.indexOf(w) >= 0; })) out.push({ x: x, s: (tt.indexOf(ws[0]) === 0 ? 0 : tt.indexOf(ws[0]) > 0 ? 1 : 2) + (x.k === "도구" ? 0 : 0.5) });
+    var L = FULL || IDX, KW = { "도구": 0, "작성기": 0, "웹 서식": 0, "서식": 0.3, "서식·자료": 0.3, "양식·파일": 0.3, "법령": 0.35, "판례": 0.5, "질의회시": 0.6, "법령 조문": 0.7, "소식": 0.8, "사고사례": 0.9, "채용": 0.95 };
+    for (var i = 0; i < L.length && out.length < 400; i++) {
+      var x = L[i], tt = x.t.toLowerCase(), all = tt + " " + (x.d || "").toLowerCase() + " " + x.k;
+      if (ws.every(function (w) { return all.indexOf(w) >= 0; })) out.push({ x: x, s: (tt.indexOf(ws[0]) === 0 ? 0 : tt.indexOf(ws[0]) > 0 ? 1 : 2) + (KW[x.k] == null ? 0.5 : KW[x.k]) });
     }
-    return out.sort(function (a, b) { return a.s - b.s; }).slice(0, 8).map(function (o) { return o.x; });
+    out.sort(function (a, b) { return a.s - b.s; });
+    var per = {}, pick = [];
+    out.forEach(function (o) { if (pick.length < 8 && (per[o.x.k] = (per[o.x.k] || 0) + 1) <= 3) pick.push(o.x); });
+    return pick;
   }
   function draw() {
     var v = q.value.trim(), r = find(v); sel = -1;
     if (!v) { box.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
     box.innerHTML = r.map(function (x, i) { return '<a role="option" id="uqo' + i + '" href="' + esc(x.h) + '"><span class="uq-k">' + esc(x.k) + "</span>" + esc(x.t) + "</a>"; }).join("") +
-      '<a class="uq-all" href="resources/?q=' + encodeURIComponent(v) + '">서식·자료 전체에서 “' + esc(v) + '” 찾기 →</a>';
+      '<a class="uq-all" href="search/?q=' + encodeURIComponent(v) + '">“' + esc(v) + '” 전체 검색 결과 보기 (판례·질의회시·사고사례 포함) →</a>';
     box.hidden = false; q.setAttribute("aria-expanded", "true");
   }
-  q.addEventListener("input", draw); q.addEventListener("focus", draw);
+  q.addEventListener("input", draw); q.addEventListener("focus", function () { load(); draw(); });
+  q.addEventListener("keydown", function (ev) { if (ev.key === "Enter" && sel < 0 && q.value.trim()) { ev.preventDefault(); location.href = "search/?q=" + encodeURIComponent(q.value.trim()); } });
   q.addEventListener("keydown", function (ev) {
     var as = box.querySelectorAll("a"); if (box.hidden || !as.length) return;
     if (ev.key === "ArrowDown" || ev.key === "ArrowUp") { ev.preventDefault(); sel = (sel + (ev.key === "ArrowDown" ? 1 : -1) + as.length) % as.length; [].forEach.call(as, function (a, i) { a.classList.toggle("on", i === sel); }); }
@@ -2712,7 +2811,7 @@ def build(out, today):
     <div class="uq" role="search">
       <label for="uq" class="sr">통합 검색</label>
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="uq" type="search" placeholder="필요한 서식, 법령, 계산기를 검색하세요" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="uqOut">
+      <input id="uq" type="search" placeholder="서식·법령·판례·질의회시·사고사례까지 검색" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="uqOut">
       <div class="uq-out" id="uqOut" role="listbox" hidden></div>
     </div>
     <p class="quick">{chips}</p>
@@ -3540,8 +3639,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 <section class="wrap ftools-page" style="padding-top:8px" data-landing>
   <div class="ftools">
     <a class="ftool" href="../tools/forms/"><span class="ftool-tag">바로 작성</span><strong>작성기 {WRITER_N}종</strong><span class="ftool-desc">교육일지·점검표 19종·작업계획서·허가서를 웹에서 작성하고 A4로 인쇄. 회원가입 없음.</span><span class="ftool-go">서식 작성 →</span></a>
-    <a class="ftool" href="templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서 4종·순회점검표·교육일지·산업안전보건위원회 회의록 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
-    <a class="ftool" href="files/"><span class="ftool-tag">한글·엑셀·PPT·PDF</span><strong>파일 자료실 {fl_count()}개</strong><span class="ftool-desc">중대재해처벌법 따라하기 서식, 위험성평가 예시, 비상대응 시나리오, 건설 안전관리·환경·품질 계획서, 건설업 안전수칙 PPT 원본 파일.</span><span class="ftool-go">파일 받기 →</span></a>
+    <a class="ftool" href="files/"><span class="ftool-tag">엑셀·한글·PPT·PDF</span><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span class="ftool-desc">SafePlum 제작 엑셀·PPT 양식 {len(downloads())}종(자동 계산)과 중대재해처벌법 따라하기 서식, 위험성평가 예시, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식.</span><span class="ftool-go">파일 받기 →</span></a>
     <a class="ftool" href="signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">공단 OPS·포스터·책자·교안·동영상을 업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동. 이달의 계절 자료까지.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
@@ -3654,6 +3752,50 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
               desc=f'{d["law"]} 현행 전문 {n_art}개 조문 — 목차, 조문 검색, 인용 조문 바로가기, 하위 법령 역참조. {d["version"]}', active="laws/"))
     (out / "assets/data").mkdir(parents=True, exist_ok=True)
     (out / "assets/data/lawidx.js").write_text(lawpages.search_index(LAWS), encoding="utf-8")
+    # ---- 통합 검색(2026-11-10): 도구·작성기·서식·양식 파일·법령 조문·판례·질의회시·사고사례·소식·채용·영상을 한 색인으로. search/ 화면과 홈 검색창이 함께 씀
+    SX = []
+    def sx(k, t, h, d=""):
+        SX.append([k, re.sub(r"\s+", " ", str(t)).strip(), h, re.sub(r"\s+", " ", str(d or "")).strip()[:160]])
+    for t in site.get("free_tools", []):
+        sx("도구" if t.get("cat") != "작성기" else "작성기", t["name"], f"tools/{t['id']}/", (t.get("short") or "") + " " + (t.get("desc") or "") + " " + (t.get("law") or ""))
+    for f in _forms:
+        sx("작성기", f["title"], f"tools/forms/{f['id']}/", f.get("group", ""))
+    for r in resources:
+        if r.get("category") != "웹 작성 서식":
+            sx("서식", r["title"], r["detail"] if r.get("detail") else "resources/?q=" + quote(r["title"]), (r.get("form_no") or "") + " " + " ".join(r.get("tags") or []))
+    for d in downloads():
+        sx("양식·파일", d["title"], "resources/files/?q=" + d["title"].replace("&", "").replace('"', ""), "SafePlum 엑셀·PPT 양식 " + d.get("desc", ""))
+    for x in load("data/filelib.json").get("items", []):
+        sx("양식·파일", x["title"], "resources/files/?q=" + x["title"].replace("&", "").replace('"', ""), x["cat"] + " " + x["ext"] + " " + x.get("desc", ""))
+    for k, n in LAW_MENU:
+        sx("법령", n, f"laws/{k}/", "현행 전문")
+    for k in LAWS:
+        for a in LAWS[k]["articles"]:
+            if a.get("deleted"):
+                continue
+            m = re.match(r"제(\d+)조(?:의(\d+))?", a["jo"])
+            anc = ("#j" + m.group(1) + ("-" + m.group(2) if m.group(2) else "")) if m else ""
+            body = re.sub(r"<[^>]*>|\[[^\]]*\]", "", a.get("text") or "")
+            sx("법령 조문", f'{LAWS[k]["short"]} {a["jo"]}({a["title"]})' if a.get("title") else f'{LAWS[k]["short"]} {a["jo"]}', f"laws/{k}/{anc}", body[:90])
+    for x in load("data/precedents.json").get("items", []):
+        sx("판례", x["title"], f"tools/precedents/#c-{x['id']}", x["k"] + " " + x["what"] + " " + " ".join(c["label"] for c in x["cases"]))
+    for x in load("data/gov_qa.json").get("items", []):
+        if (out / f"laws/qa/{x['id']}/index.html").exists():
+            sx("질의회시", x["t"], f"laws/qa/{x['id']}/", (x.get("c") or "") + " " + (x.get("d") or "") + " " + (x.get("q") or "")[:60])
+    for x in load("data/fatal_cases.json").get("items", []):
+        sx("사고사례", x["t"], "tools/fatal-cases/?q=" + " ".join(x["t"].split()[:4]).replace("&", "").replace('"', ""), f'{x["g"]} {x["k"]} {x.get("s", "")} {x["d"][:7]}')
+    for x in BOARD:
+        sx("소식", x["title"], f"brief/n/{x['id']}/", f'{x["cat"]} {x.get("agency", "")} {x["date"]} ' + (x.get("summary") or "")[:80])
+    for j in open_jobs:
+        sx("채용", f'{j["company"]} · {j["title"]}', f"jobs/{j['id']}/", " ".join(j.get("jobs_list") or []) + " " + (j.get("address") or j.get("region") or ""))
+    for v in load("data/videos.json").get("items", []):
+        sx("영상", v["title"], "videos/", (v.get("topic") or "") + " " + (v.get("summary") or ""))
+    (out / "assets/data/sidx.json").write_text(json.dumps(SX, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    _skinds = {}
+    for r_ in SX:
+        _skinds[r_[0]] = _skinds.get(r_[0], 0) + 1
+    write("search/index.html", page(site, "../", "search/", "통합 검색", SEARCH_BODY.replace("/*KINDS*/{}", json.dumps(_skinds, ensure_ascii=False)).replace("{TOTAL}", f"{len(SX):,}"),
+                                    desc="서식·작성기·법령 조문·판례·고용노동부 질의회시·사망사고 사례·안전 소식·채용까지 SafePlum 전체를 한 번에 검색합니다."), noindex=True)
     statutes = "".join(
         f'<li><a href="{e(law_url(s["name"], s.get("type","법령")))}" target="_blank" rel="noopener"><span class="badge {"badge-navy" if s.get("type")=="행정규칙" else "badge-line"}">{e(s.get("type"))}</span><strong>{e(s["name"])}</strong><span class="arr" aria-hidden="true">↗</span></a></li>'
         for s in laws.get("statutes", []) if s.get("type") != "법령" or s["name"] not in lawpages.BY_NAME)
@@ -3720,21 +3862,10 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
 {dl_section("../../../", form="workplan")}{more_tools("../../../", "workplan")}"""
     write("tools/forms/workplan/index.html", page(site, "../../../", "tools/forms/workplan/", "작업계획서 — 작업 종류 선택", wp_body,
                                                   desc="지게차·중량물·고소작업대·굴착기 등 안전보건규칙 제38조 작업계획서 14종을 작업 종류별로 골라 무료로 작성·인쇄. 별표 4 포함 사항 반영.", active="tools/"))
-    # ---- 무료 양식 내려받기 모음
-    _dls = downloads()
-    tpl_body = f"""
-<section class="phead"><div class="wrap">
-  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">서식·자료</a><span>/</span>무료 양식 내려받기</p>
-  <h1>무료 양식 내려받기 (엑셀·PPT {len(_dls)}종)</h1>
-  <p>현장에서 바로 고쳐 쓰도록 만든 엑셀·PowerPoint 양식입니다. 회원가입 없이 내려받고, 회사 이름·결재란·항목은 사업장에 맞게 고쳐 쓰세요. 화면에서 작성하고 인쇄하려면 각 양식과 짝을 이루는 <a href="../../tools/forms/">작성기</a>를 쓰면 됩니다.</p>
-</div></section>
-<section class="wrap" style="margin-top:8px">{DL_CSS}<div class="spdl" style="max-width:none;padding:0;margin:8px 0 0"><div class="spdl-g">{"".join(dl_card(x, "../../") for x in _dls)}</div></div>
-<div class="lawbox" style="margin-top:24px"><h3>쓰기 전에</h3>
-  <p>법령에 별지 서식이 정해져 있지 않은 실무 기록(작업계획서·TBM·순회점검·아차사고 등)을 위한 보조양식입니다. 양식을 채운 것만으로 법령상 의무를 다했다고 볼 수는 없으니, 서식 안에 적힌 근거 조문과 사업장 사정을 함께 확인하세요.</p>
-  <p class="src-line">엑셀 파일은 Microsoft Excel·한컴오피스 한셀·Google 스프레드시트에서 열립니다. 자동 계산·목록 선택은 프로그램에 따라 다르게 보일 수 있습니다.</p>
-</div></section>"""
-    write("resources/templates/index.html", page(site, "../../", "resources/templates/", "무료 양식 내려받기 (엑셀·PPT)", tpl_body,
-                                                 desc="위험성평가표·TBM 일지·작업계획서(지게차·중량물)·순회점검표·교육일지·아차사고·보호구 대장·산업안전보건위원회 회의록 엑셀과 산업안전보건위원회·개선 전후 보고 PPT 무료 양식.", active="resources/"))
+    # ---- 예전 '무료 양식 내려받기'(resources/templates/) — 2026-11-10 양식·파일 자료실로 합침. 예전 링크·검색 결과를 위해 이동 화면만 남김
+    write("resources/templates/index.html", '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+          '<title>양식·파일 자료실로 옮겼습니다</title><link rel="canonical" href="../files/"><meta http-equiv="refresh" content="0;url=../files/#safeplum">'
+          '</head><body><p>무료 양식 내려받기는 <a href="../files/#safeplum">양식·파일 자료실</a>로 합쳤습니다.</p></body></html>', noindex=True)
     build_filelib(site, write)
     def wcard(kind, x):
         if kind == "tool":
@@ -3788,8 +3919,7 @@ q.addEventListener("input",run);x.addEventListener("click",function(){{q.value="
   {sec_head("서식·자료", sub="법정 서식 원본, 엑셀·PPT 양식, 안전보건표지, 공단 자료", href="../resources/", more=f"서식·자료 {len(resources)}건 전체")}
   <div class="ftools">
     <a class="ftool" href="../resources/"><span class="ftool-tag">원본 바로 열기</span><strong>법정 서식·별표 {n_law}건</strong><span class="ftool-desc">산업재해조사표·선임 보고서 같은 법정 서식과 별표를 국가법령정보센터 현행 원본으로 엽니다. 상황별로 찾기.</span><span class="ftool-go">서식 찾기 →</span></a>
-    <a class="ftool" href="../resources/templates/"><span class="ftool-tag">엑셀·PPT</span><strong>무료 양식 내려받기 {len(downloads())}종</strong><span class="ftool-desc">위험성평가표·TBM 일지·작업계획서·순회점검표·교육일지·산업안전보건위원회 회의록 엑셀과 산업안전보건위원회·개선 전후 보고 PPT.</span><span class="ftool-go">양식 받기 →</span></a>
-    <a class="ftool" href="../resources/files/"><span class="ftool-tag">한글·엑셀·PPT·PDF</span><strong>파일 자료실 {fl_count()}개</strong><span class="ftool-desc">중대재해처벌법 따라하기 서식, 위험성평가 예시, 비상대응 시나리오, 건설 안전관리·환경·품질 계획서, 건설업 안전수칙 PPT 원본 파일.</span><span class="ftool-go">파일 받기 →</span></a>
+    <a class="ftool" href="../resources/files/"><span class="ftool-tag">엑셀·한글·PPT·PDF</span><strong>양식·파일 자료실 {fl_count() + len(downloads())}개</strong><span class="ftool-desc">SafePlum 제작 엑셀·PPT 양식 {len(downloads())}종(자동 계산)과 중대재해처벌법 따라하기 서식, 위험성평가 예시, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식.</span><span class="ftool-go">파일 받기 →</span></a>
     <a class="ftool" href="../resources/signs/"><span class="ftool-tag">20개 언어</span><strong>안전보건표지 40종</strong><span class="ftool-desc">금지·경고·지시·안내 표지를 찾아 A4 한 장으로 바로 인쇄. 외국어 파일까지.</span><span class="ftool-go">표지 보기 →</span></a>
     <a class="ftool" href="../resources/library/"><span class="ftool-tag">공공누리 {n_kosha:,}건</span><strong>공단 안전보건자료 <small>(OPS·포스터·교안·영상)</small></strong><span class="ftool-desc">업종(건설·제조 세부·서비스 등)·주제·형태·외국어로 찾고 원본으로 바로 이동.</span><span class="ftool-go">자료 찾기 →</span></a>
   </div>
