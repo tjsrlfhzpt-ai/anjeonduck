@@ -42,45 +42,6 @@
    "added": "2026-11-04"
   },
   {
-   "id": "sh-system-guide-lecture",
-   "title": "안전보건관리체계 구축 가이드 교안(PPT)",
-   "cat": "교육자료",
-   "ext": "pptx",
-   "file": "assets/files/lib/sh-system-guide-lecture.pptx",
-   "dl": "안전보건관리체계 구축 가이드 교안.pptx",
-   "size": 19376478,
-   "source": "한국산업안전보건공단 교육 교안(2022, 고용노동부 「안전보건관리체계 구축 가이드」 내용)",
-   "public": true,
-   "desc": "안전보건관리체계의 뜻과 중대재해처벌법 주요 내용, 7가지 핵심요소를 설명하는 119장 교안입니다. 사진 화질을 조금 낮춰 용량을 줄였습니다.",
-   "added": "2026-11-04"
-  },
-  {
-   "id": "sapa-manual-electric-telecom",
-   "title": "중대재해처벌법 안전·보건 확보의무 조치사항 매뉴얼 — 전기·통신(2022.6.)",
-   "cat": "중대재해처벌법 이행",
-   "ext": "hwp",
-   "file": "assets/files/lib/sapa-manual-electric-telecom.hwp",
-   "dl": "안전·보건_확보의무_조치사항_매뉴얼 전기통신.hwp",
-   "size": 36169216,
-   "source": "고용노동부 등 발간 매뉴얼(2022.6. 기준, 발행기관 표기는 원문 확인)",
-   "public": true,
-   "desc": "전기·정보통신공사업 사업장이 안전·보건 확보의무를 점검하도록 작성 방법과 사례를 정리한 매뉴얼입니다.",
-   "added": "2026-11-04"
-  },
-  {
-   "id": "construction-hazard-rules",
-   "title": "건설업 유해·위험요인별 기본 안전수칙(2023.3.)",
-   "cat": "건설 안전수칙",
-   "ext": "pdf",
-   "file": "assets/files/lib/construction-hazard-rules.pdf",
-   "dl": "건설업 유해위험 위험요인별_230314.pdf",
-   "size": 15016129,
-   "source": "고용노동부·한국산업안전보건공단 자료로 보임(원문 확인)",
-   "public": true,
-   "desc": "지붕·비계·사다리 등 위험요인별 사고 사례와 기본 안전수칙을 한 장씩 정리한 자료입니다.",
-   "added": "2026-11-04"
-  },
-  {
    "id": "moel-2026-work-report",
    "title": "고용노동부 2026년 업무보고 자료",
    "cat": "정책·통계",
@@ -429,19 +390,6 @@
    "source": "건설현장 합동점검 체크리스트(현장명 삭제)",
    "public": false,
    "desc": "추락·낙하·붕괴·장비·전기·화재·보건 항목별 세부 점검 항목. 합동점검·자체점검 때 그대로 쓸 수 있습니다.",
-   "added": "2026-11-04"
-  },
-  {
-   "id": "construction-12-hazards",
-   "title": "건설현장 사망사고 12대 위험요인 안전수칙(PPT)",
-   "cat": "건설 안전수칙",
-   "ext": "pptx",
-   "file": "assets/files/lib/construction-12-hazards.pptx",
-   "dl": "건설업 사고사망 12대 위험요인 안전수칙.pptx",
-   "size": 13254046,
-   "source": "고용노동부·한국산업안전보건공단 자료로 보임(원문 확인)",
-   "public": true,
-   "desc": "건설업 사망사고의 60%를 차지하는 12대 위험요인(지붕·비계·사다리 등)별 사고 사례와 안전수칙 28장입니다. 사진 화질을 조금 낮춰 용량을 줄였습니다.",
    "added": "2026-11-04"
   },
   {
