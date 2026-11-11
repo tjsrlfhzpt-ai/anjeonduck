@@ -141,6 +141,9 @@
   span.e { display: inline-block; min-width: 1.2em; vertical-align: baseline; }
   .e:focus { background: #fffbd0; }
   .e:hover { background: #f3f7fd; }
+  .grp-cell { display: flex; align-items: center; gap: 6px; }
+  .grp-cell .e { flex: 1; min-width: 0; }
+  .page-container select.grp-mini { flex: none; width: auto; max-width: 42%; font-size: 11px; font-weight: 400; color: #46546A; text-align: left; text-align-last: left; border: 1px solid #c9d2de; border-radius: 4px; background: #f6f8fb; padding: 1px 4px; appearance: auto; -webkit-appearance: menulist; }
   .e:empty::before { content: attr(data-ph); color: #a9b4c2; font-weight: 400; }
   .align-left { text-align: left !important; padding-left: 5px !important; }
   .page-header-info { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-bottom: 5px; padding: 0 2px 3px; border-bottom: 2px solid #1b365d; }
@@ -381,7 +384,7 @@
     return list;
   }
   function blankWorkers() { var a = []; for (var i = 0; i < WORKERS; i++) a.push({ org: "", name: "", note: "" }); return a; }
-  function newPage(group) { return { group: group, rows: pick(group, ROWS), opinion: "", workers: blankWorkers(), wn: WORKERS }; }
+  function newPage(group, label) { return { group: group, label: S(label).slice(0, 40) || group, rows: pick(group, ROWS), opinion: "", workers: blankWorkers(), wn: WORKERS }; }
   function lastWorker(p) { var n = -1; p.workers.forEach(function (w, i) { if (w.org.trim() || w.name.trim() || w.note.trim()) n = i; }); return n; }
   function minWn(p) { var n = lastWorker(p) + 1; return n > 20 ? 30 : n > 10 ? 20 : 10; }
   // 저장된 값이 깨져 있어도 화면이 망가지지 않게 모양을 맞춘다(예전 저장값: 위험요인 5줄 고정·명단 30칸)
@@ -392,7 +395,7 @@
     if (!rows.length) rows = pick(g, ROWS);
     var src = Array.isArray(p.workers) ? p.workers : [];
     for (i = 0; i < WORKERS; i++) { w = src[i] && typeof src[i] === "object" ? src[i] : {}; ws.push({ org: S(w.org), name: S(w.name), note: S(w.note) }); }
-    var out = { group: g, rows: rows, opinion: S(p.opinion), workers: ws, wn: [10, 20, 30].indexOf(p.wn) >= 0 ? p.wn : WORKERS };
+    var out = { group: g, label: S(p.label).slice(0, 40) || (GROUPS.indexOf(p.group) >= 0 ? g : S(p.group).slice(0, 40)) || g, rows: rows, opinion: S(p.opinion), workers: ws, wn: [10, 20, 30].indexOf(p.wn) >= 0 ? p.wn : WORKERS };
     out.wn = Math.max(out.wn, minWn(out));
     return out;
   }
@@ -502,6 +505,7 @@
     if (a[0] === "o") return S(opts[a[1]]);
     var p = doc.pages[+a[1]]; if (!p) return "";
     if (a[2] === "opinion") return p.opinion;
+    if (a[2] === "label") return p.label;
     if (a[2] === "r") return S((p.rows[+a[3]] || {})[a[4]]);
     if (a[2] === "w") return S((p.workers[+a[3]] || {})[a[4]]);
     return "";
@@ -513,6 +517,7 @@
     if (a[0] === "o") { if (a[1] === "note" || a[1] === "foot") opts[a[1]] = v; return; }
     var p = doc.pages[+a[1]]; if (!p) return;
     if (a[2] === "opinion") p.opinion = v;
+    else if (a[2] === "label") p.label = v.slice(0, 40);
     else if (a[2] === "r" && p.rows[+a[3]]) p.rows[+a[3]][a[4]] = a[4] === "level" ? (LV.indexOf(v) >= 0 ? v : "") : v;
     else if (a[2] === "w" && p.workers[+a[3]]) p.workers[+a[3]][a[4]] = v;
   }
@@ -607,7 +612,7 @@
         '<div class="top"><div class="top-info"><table class="data-table info-table"><col style="width:35mm"><col>' +
           '<tr><th colspan="2" class="th-blue">' + LB("sec1") + "</th></tr>" +
           '<tr><th class="th-label th-blue">' + LB("site") + '</th><td class="align-left">' + E("s.siteName", { ph: "사업장 또는 현장명", label: "사업장 또는 현장명" }) + "</td></tr>" +
-          '<tr><th class="th-label th-blue">' + LB("group") + '</th><td class="align-left"><select class="work-type-select" data-pi="' + p + '" aria-label="공종(부서·팀)" style="text-align:left;text-align-last:left">' + groupOptions(pg.group) + "</select></td></tr>" +
+          '<tr><th class="th-label th-blue">' + LB("group") + '</th><td class="align-left"><div class="grp-cell">' + E("p." + p + ".label", { ph: "공종·부서·팀 (예: 전기)", label: "공종(부서·팀)" }) + '<select class="work-type-select grp-mini no-print" data-pi="' + p + '" aria-label="위험요인 예시 분류" title="위험요인 예시를 가져올 분류">' + groupOptions(pg.group) + "</select></div></td></tr>" +
           '<tr><th class="th-label th-blue">' + LB("date") + '</th><td class="align-left">' + E("s.year", { span: true, label: "연도" }) + "년 " + E("s.month", { span: true, label: "월" }) + "월 " + E("s.day", { span: true, label: "일" }) + "일 (" + E("s.weekday", { span: true, label: "요일" }) + ")요일</td></tr>" +
           "</table></div>" +
           (opts.hideAppr ? "" : '<div class="tbm-appr"><div data-appr="tool.tbm"></div>' + noteHTML + "</div>") +
@@ -682,7 +687,9 @@
     // 1 기본 정보
     b = '<div class="row2">' + FI("s.headerCompany", "회사명", { ph: "회사명" }) + FI("s.siteName", "사업장/현장명", { ph: "사업장 또는 현장명" }) + "</div>" +
       '<div class="row2"><label class="fld"><span>일자</span><input class="fin" type="date" id="fDate" value="' + esc(docYmd()) + '" min="2000-01-01" max="2999-12-31"></label>' +
-      '<label class="fld"><span>공종(부서/팀)' + (multi ? " — " + (cur + 1) + "쪽" : "") + '</span><select class="fin work-type-select" data-pi="' + cur + '">' + groupOptions(p.group) + "</select></label></div>" +
+      FI(P + "label", "공종(부서/팀)" + (multi ? " — " + (cur + 1) + "쪽" : ""), { ph: "예) 전기, 설비팀, 2라인" }) + "</div>" +
+      '<label class="fld"><span>위험요인 예시 분류</span><select class="fin work-type-select" data-pi="' + cur + '">' + groupOptions(p.group) + "</select></label>" +
+      '<p class="f-hint">공종 이름은 자유롭게 적으세요(예: 설비·전기·정비 중 \'전기\'만). 위험요인 예시는 고른 분류에서 가져옵니다.</p>' +
       (multi ? '<div class="acts"><button type="button" class="btn-sub" data-act="groupAll">이 공종을 모든 쪽에 적용</button></div>' : "") +
       FI("s.workArea", "금일 작업구간 및 주요내용", { multi: true, ph: "예) 2라인 컨베이어 벨트 교체, 오전 9시~12시" }) +
       FI("s.majorPoints", "주요 전파사항", { multi: true }) +
@@ -691,7 +698,7 @@
     h += stepHTML(1, "기본 정보", b);
 
     // 2 위험요인·대책
-    b = '<p class="f-hint" style="margin-top:8px">공종을 고르면 예시가 무작위로 채워집니다. 오늘 작업에 맞게 고치거나 줄을 더하고 빼세요(최대 ' + MAX_ROWS + "줄).</p>" +
+    b = '<p class="f-hint" style="margin-top:8px">예시 분류를 고르면 위험요인 예시가 무작위로 채워집니다. 오늘 작업에 맞게 고치거나 줄을 더하고 빼세요(최대 ' + MAX_ROWS + "줄).</p>" +
       '<div class="acts" style="justify-content:flex-start;margin:6px 0 4px"><button type="button" class="btn-sub" data-act="shuffle" title="같은 공종의 다른 위험요인 예시로 표 전체를 바꿉니다">🔀 다른 예시로 바꾸기</button>' +
         '<button type="button" class="btn-sub" data-act="ai" title="내 Gemini 키로 오늘 작업내용에 맞는 위험요인·대책 초안을 만듭니다">✨ AI 초안</button></div>' +
         '<p class="f-hint" id="aiTbmSt" aria-live="polite" style="margin:0 0 4px">AI 초안은 1단계의 \'금일 작업구간 및 주요내용\'을 바탕으로 만듭니다(내 Gemini 키 사용). 실명·회사 기밀은 적지 마세요.</p>';
@@ -758,7 +765,7 @@
   function heads() {
     var p = doc.pages[cur]; if (!p) return;
     var ymd = docYmd(), info = {};
-    info[1] = { sum: (ymd ? dateLabel(ymd) : "날짜를 확인하세요") + " · " + p.group, warn: !ymd, done: !!(state.siteName.trim() && state.workArea.trim()) };
+    info[1] = { sum: (ymd ? dateLabel(ymd) : "날짜를 확인하세요") + " · " + (S(p.label).trim() || p.group), warn: !ymd, done: !!(state.siteName.trim() && state.workArea.trim()) };
     var n = 0, hi = 0, nm = 0;
     p.rows.forEach(function (r) { if (r.risk.trim()) { n++; if (r.level === "상") hi++; if (!r.measure.trim()) nm++; } });
     info[2] = { sum: nm ? "대책이 빈 항목 " + nm + "건" : "위험요인 " + n + "건" + (hi ? " · 상 " + hi : ""), warn: nm > 0, done: n > 0 };
@@ -904,9 +911,9 @@
       exampleFor: "proc", examples: ["2층 배관 용접 보수, 주변에 단열재 있음, 화재감시자 배치", "물류센터 입고장 지게차 하역과 팔레트 정리", "3층 슬래브 거푸집 설치, 단부 작업, 타워크레인 양중", "정화조 청소(밀폐공간) 3명, 산소·황화수소 측정 후 진입", "프레스 2호기 금형 교체, 크레인 사용", "고소작업대로 천장 조명 교체, 높이 6m"],
       run: function (v, ctx, force) {
         if (el()) el().innerHTML = '<span class="spai-busy">AI가 위험요인·대책을 만드는 중…</span>';
-        return SPAI.law.search([p.group, v.type, v.proc, v.equip].join(" "), { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
+        return SPAI.law.search([S(p.label), p.group, v.type, v.proc, v.equip].join(" "), { k: 6 }).catch(function () { return []; }).then(function (law) { return SPAI.json({
           system: "너는 한국 산업현장의 안전관리자다. 산업안전보건법·산업안전보건기준에 관한 규칙과 안전보건공단(KOSHA) 자료의 표현을 따른다. 작업 전 안전점검회의(TBM)에서 근로자에게 바로 읽어 줄 수 있게 짧고 구체적으로 쓴다. 근거가 확실하지 않은 법 조문 번호는 쓰지 않는다. " + SPAI.check.quality,
-          prompt: "공종(부서): " + p.group + "\n" + ctx + "\n\n이 작업의 유해·위험요인과 감소대책을 6~8개 만들어라. '어제와 달라진 점·새 위험'이 있으면 그 위험을 맨 앞에 넣는다. 각 항목: group(작업 단계나 구분, 6자 이내), risk(유해·위험요인 및 위험성, 한 문장 40자 이내 '~하다가 ~로 인한 ~위험' 형태), type(재해형태 한 단어: 끼임·떨어짐·넘어짐·부딪힘·맞음·베임·감전·화재·폭발·질식·화상·근골격계 등), level(상·중·하), measure(그 위험요인의 원인을 없애거나 줄이는 감소대책, 실제 행동 위주 한두 문장 60자 이내).\n" + (force ? SPAI.check.force : SPAI.check.rule) + (law.length ? "\n\n관련 현행 조문(감소대책은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
+          prompt: "공종(부서): " + (S(p.label).trim() && p.label.trim() !== p.group ? p.label.trim() + " (분류: " + p.group + ")" : p.group) + "\n" + ctx + "\n\n이 작업의 유해·위험요인과 감소대책을 6~8개 만들어라. '어제와 달라진 점·새 위험'이 있으면 그 위험을 맨 앞에 넣는다. 각 항목: group(작업 단계나 구분, 6자 이내), risk(유해·위험요인 및 위험성, 한 문장 40자 이내 '~하다가 ~로 인한 ~위험' 형태), type(재해형태 한 단어: 끼임·떨어짐·넘어짐·부딪힘·맞음·베임·감전·화재·폭발·질식·화상·근골격계 등), level(상·중·하), measure(그 위험요인의 원인을 없애거나 줄이는 감소대책, 실제 행동 위주 한두 문장 60자 이내).\n" + (force ? SPAI.check.force : SPAI.check.rule) + (law.length ? "\n\n관련 현행 조문(감소대책은 이 조문에 맞게, 조문에 없는 의무는 만들지 말 것):\n" + SPAI.law.ctx(law, 700) : ""),
           schema: { type: "OBJECT", properties: { _check: SPAI.check.schema, rows: { type: "ARRAY", items: { type: "OBJECT", properties: { group: { type: "STRING" }, risk: { type: "STRING" }, type: { type: "STRING" }, level: { type: "STRING" }, measure: { type: "STRING" } }, required: ["risk", "measure"] } } }, required: ["_check", "rows"], propertyOrdering: ["_check", "rows"] },
           temperature: 0.4, maxTokens: 6000, label: "AI가 위험요인·감소대책을 만드는 중" }); });
       }
@@ -933,6 +940,7 @@
     var g = sel.value;
     if (GROUPS.indexOf(g) < 0) { sel.value = p.group; return; }
     if (rowsEdited(p) && !confirm("위험요인 표를 '" + g + "' 기본 목록으로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) { sel.value = p.group; return; }
+    if (!S(p.label).trim() || p.label === p.group) p.label = g;
     p.group = g; p.rows = pick(g, ROWS);
     if (pi === 0) state.group = g;
     renderAll(); markTouched();
@@ -954,7 +962,7 @@
       box.innerHTML = days.map(function (d) {
         var st = d.state && typeof d.state === "object" ? d.state : {}, n = headCount(d.pages), isCur = d.id === doc.id, p0 = d.pages[0] && typeof d.pages[0] === "object" ? d.pages[0] : {};
         return '<div class="hist-item"><div class="hist-meta"><b>' + esc(dateLabel(S(d.date))) + "</b>" + (isCur ? ' <span class="hist-cur">작성 중</span>' : "") +
-          "<span>" + esc(S(p0.group)) + " · 명단 " + n + "명" + (d.pages.length > 1 ? " · " + d.pages.length + "쪽" : "") + "</span>" +
+          "<span>" + esc(S(p0.label).trim() || S(p0.group)) + " · 명단 " + n + "명" + (d.pages.length > 1 ? " · " + d.pages.length + "쪽" : "") + "</span>" +
           '<span class="hist-work">' + esc(S(st.workArea) || "(작업내용 없음)") + "</span></div>" +
           '<div class="hist-acts">' + (isCur ? "" :
             '<button type="button" class="btn btn-blue" data-hist="copy" data-id="' + esc(d.id) + '">오늘 일지로 복사</button>' +
@@ -1045,7 +1053,7 @@
         break;
       case "pageAdd":
         if (doc.pages.length >= MAX_PAGES) return;
-        doc.pages.push(newPage(p.group)); cur = doc.pages.length - 1; renderAll(); markTouched();
+        doc.pages.push(newPage(p.group, p.label)); cur = doc.pages.length - 1; renderAll(); markTouched();
         t = document.querySelector('#pages-wrapper .page-container[data-page="' + cur + '"]'); if (t && t.offsetParent) t.scrollIntoView({ block: "start", behavior: "smooth" });
         break;
       case "pageDel":
@@ -1055,7 +1063,7 @@
         break;
       case "groupAll":
         if (doc.pages.some(function (x, k) { return k !== cur && rowsEdited(x); }) && !confirm("다른 쪽의 위험요인 표도 '" + p.group + "' 기본 목록으로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) return;
-        doc.pages.forEach(function (x, k) { if (k !== cur) { x.group = p.group; x.rows = pick(p.group, ROWS); } });
+        doc.pages.forEach(function (x, k) { if (k !== cur) { x.group = p.group; x.label = p.label; x.rows = pick(p.group, ROWS); } });
         state.group = p.group; renderAll(); markTouched();
         break;
       case "pick": openPicker(pi, ri); break;
