@@ -846,7 +846,7 @@
     lastDept = dept;
     // 평가대상(부서) 칸은 비어 있거나 공종 이름 그대로일 때만 바꾼다(직접 적은 부서명은 유지)
     var dd = $("dispDept"), cur = txt(dd);
-    if (!cur || HAZARD_DB.groups.indexOf(cur) >= 0) dd.textContent = dept;
+    if (!cur || HAZARD_DB.groups.indexOf(cur) >= 0 || (HAZARD_DB.legacy || {}).hasOwnProperty(cur)) dd.textContent = dept;
     fillRows(defaultRows(dept));
     $("moreBox").open = false;
     markTouched();
@@ -895,7 +895,7 @@
         return row;
       });
       if (!rows.length) throw new Error("AI가 항목을 만들지 못했습니다. 작업내용을 조금 더 구체적으로 적어 다시 시도해 주세요.");
-      var dd = $("dispDept"); if (!txt(dd) || HAZARD_DB.groups.indexOf(txt(dd)) >= 0) dd.textContent = work.slice(0, 40);
+      var dd = $("dispDept"); if (!txt(dd) || HAZARD_DB.groups.indexOf(txt(dd)) >= 0 || (HAZARD_DB.legacy || {}).hasOwnProperty(txt(dd))) dd.textContent = work.slice(0, 40);
       fillRows(rows); touched = true; saveNow();
       var gen = SPAI.check.generic(rows.map(function (x) { return x.measure; }));
       setStatus("AI 초안 " + rows.length + "줄을 넣었습니다. " + SPAI.NOTICE + (gen.length ? " 일반 문구만 있는 대책 " + gen.length + "개는 이 작업에 맞게 고쳐 쓰세요." : ""));
@@ -1123,7 +1123,8 @@
     CFG = cleanCfg(d.cfg || lsGet(CFG_KEY)); renderCfgForm();
     methodOwn = typeof d.method === "string"; if (methodOwn) $("fMethod").textContent = d.method.slice(0, 300);
     renderCrit();
-    gs.value = HAZARD_DB.groups.indexOf(d.group) >= 0 ? d.group : HAZARD_DB.groups[0]; lastDept = gs.value;
+    var lg = HAZARD_DB.legacy || {};   // 예전 묶음 분류(예: 설비·전기·정비) → 지금 분류
+    gs.value = HAZARD_DB.groups.indexOf(d.group) >= 0 ? d.group : HAZARD_DB.groups.indexOf(lg[d.group]) >= 0 ? lg[d.group] : HAZARD_DB.groups[0]; lastDept = gs.value;
     $("evalDate").textContent = str(d.date) || today();
     $("fWriter").textContent = str(d.writer);
     $("fSite").textContent = str(d.site);

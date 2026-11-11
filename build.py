@@ -2606,7 +2606,7 @@ def build(out, today):
     global EDU_CASES
     EDU_CASES = edu_cases(auto_acc)
     hazards = load("data/hazards.json")
-    hazards = {"groups": hazards["groups"], "items": hazards["items"]}
+    hazards = {"groups": hazards["groups"], "items": hazards["items"], "legacy": hazards.get("legacy", {})}
     penalties = load("data/penalties.json")
 
     if site.get("base_url") and not safe_url(site.get("base_url")):

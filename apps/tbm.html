@@ -286,6 +286,8 @@
   if (!HAZARD_DB || !Array.isArray(HAZARD_DB.groups) || !HAZARD_DB.groups.length) HAZARD_DB = { groups: ["공통"], items: [] };
   var GROUPS = HAZARD_DB.groups;
   var ITEMS = Array.isArray(HAZARD_DB.items) ? HAZARD_DB.items : [];
+  var LEGACY = HAZARD_DB.legacy && typeof HAZARD_DB.legacy === "object" ? HAZARD_DB.legacy : {};   // 예전 묶음 분류(예: 설비·전기·정비) → 지금 분류
+  function grp(g) { g = S(g); if (GROUPS.indexOf(g) >= 0) return g; return GROUPS.indexOf(LEGACY[g]) >= 0 ? LEGACY[g] : GROUPS[0]; }
   var STORE_KEY = "safetake.tbm.v1";        // 머리글(회사·현장·공종·작업내용) — 기존 저장 형식 그대로
   var DAYS_KEY = "safetake.tbm.days.v1";    // 날짜별 일지 보관(최근 MAX_DAYS건)
   var OPTS_KEY = "safetake.tbm.opts.v1";    // 서식 이름·문구·결재란 표시(사업장 공통 설정)
@@ -390,7 +392,7 @@
   // 저장된 값이 깨져 있어도 화면이 망가지지 않게 모양을 맞춘다(예전 저장값: 위험요인 5줄 고정·명단 30칸)
   function normPage(p) {
     p = p && typeof p === "object" ? p : {};
-    var g = GROUPS.indexOf(p.group) >= 0 ? p.group : GROUPS[0], ws = [], i, w;
+    var g = grp(p.group), ws = [], i, w;
     var rows = Array.isArray(p.rows) ? p.rows.slice(0, MAX_ROWS).map(normRow) : [];
     if (!rows.length) rows = pick(g, ROWS);
     var src = Array.isArray(p.workers) ? p.workers : [];
@@ -494,7 +496,7 @@
       // 날짜는 저장값이 아니라 항상 오늘로 시작. 회사명이 비어 있으면 사업장 정보에서 가져온다
       if (!state.headerCompany) state.headerCompany = profileCompany();
     }
-    if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+    state.group = grp(state.group);
   }
 
   // ---------- 값 읽고 쓰기(data-b 경로) ----------
@@ -689,7 +691,7 @@
       '<div class="row2"><label class="fld"><span>일자</span><input class="fin" type="date" id="fDate" value="' + esc(docYmd()) + '" min="2000-01-01" max="2999-12-31"></label>' +
       FI(P + "label", "공종(부서/팀)" + (multi ? " — " + (cur + 1) + "쪽" : ""), { ph: "예) 전기, 설비팀, 2라인" }) + "</div>" +
       '<label class="fld"><span>위험요인 예시 분류</span><select class="fin work-type-select" data-pi="' + cur + '">' + groupOptions(p.group) + "</select></label>" +
-      '<p class="f-hint">공종 이름은 자유롭게 적으세요(예: 설비·전기·정비 중 \'전기\'만). 위험요인 예시는 고른 분류에서 가져옵니다.</p>' +
+      '<p class="f-hint">공종 이름은 자유롭게 적으세요(예: 전기팀, 2라인). 위험요인 예시는 고른 분류에서 가져옵니다.</p>' +
       (multi ? '<div class="acts"><button type="button" class="btn-sub" data-act="groupAll">이 공종을 모든 쪽에 적용</button></div>' : "") +
       FI("s.workArea", "금일 작업구간 및 주요내용", { multi: true, ph: "예) 2라인 컨베이어 벨트 교체, 오전 9시~12시" }) +
       FI("s.majorPoints", "주요 전파사항", { multi: true }) +
@@ -940,7 +942,7 @@
     var g = sel.value;
     if (GROUPS.indexOf(g) < 0) { sel.value = p.group; return; }
     if (rowsEdited(p) && !confirm("위험요인 표를 '" + g + "' 기본 목록으로 바꿉니다.\n직접 고친 위험요인·감소대책은 지워집니다. 계속할까요?")) { sel.value = p.group; return; }
-    if (!S(p.label).trim() || p.label === p.group) p.label = g;
+    if (!S(p.label).trim() || p.label === p.group || LEGACY.hasOwnProperty(p.label)) p.label = g;
     p.group = g; p.rows = pick(g, ROWS);
     if (pi === 0) state.group = g;
     renderAll(); markTouched();
@@ -1000,7 +1002,7 @@
       touched = true;
     }
     if (!doc.pages.length) doc.pages = [newPage(state.group)];
-    if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+    state.group = grp(state.group);
     cur = 0; wshow = {};
     closeModal(); renderAll(); saveNow();
     setStatus(act === "open" ? dateLabel(S(d.date)) + " 일지를 열었습니다. 고치면 그날 일지에 저장됩니다." : dateLabel(S(d.date)) + (act === "roster" ? " 명단을 불러왔습니다. 오늘 참석자에 맞게 고치세요." : " 내용을 불러왔습니다. 오늘 작업에 맞게 고치세요."));
@@ -1140,7 +1142,7 @@
       doc = { id: days[0].id, pages: days[0].pages.slice(0, MAX_PAGES).map(normPage) };
       var st = days[0].state && typeof days[0].state === "object" ? days[0].state : {};
       STATE_KEYS.forEach(function (k) { if (typeof st[k] === "string") state[k] = st[k]; });
-      if (GROUPS.indexOf(state.group) < 0) state.group = GROUPS[0];
+      state.group = grp(state.group);
       if (days[0].signs && !signSnap()) signRestore(days[0].signs);
       touched = true;
     } else {
