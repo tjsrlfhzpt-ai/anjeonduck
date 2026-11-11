@@ -342,7 +342,7 @@ def fetch_kosha_guide(rows=1000):
             if acc_rows(raw):
                 url = u
                 break
-            errs.append(f"{u.rsplit('/', 1)[1]}: 항목 없음")
+            errs.append(f"{u.rsplit('/', 1)[1]}: 항목 없음 — 응답: {snippet(raw, 200)}")
         except Exception as e:
             errs.append(f"{u.rsplit('/', 1)[1]}: {str(e)[:90]}")
     if not url:
