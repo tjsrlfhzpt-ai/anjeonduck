@@ -642,7 +642,7 @@
   "features": {
     "public_api": false,
     "job_posting": true,
-    "verify_on_write": false,
+    "verify_on_write": true,
     "_verify_on_write_comment": "verify_on_write: true 면 가입 화면 안내가 '가입은 바로, 글쓰기 전 1회 이메일 인증'으로 바뀝니다. 먼저 supabase/verify_on_write.sql 을 실행하고 Supabase에서 Confirm email 을 끈 다음 true 로 바꿉니다. 글쓰기 전 인증 상자는 이 값과 관계없이 서버에 인증 기록이 없는 회원에게만 보입니다.",
     "_job_posting_comment": "job_posting: 회원 채용공고 등록. false 면 등록 버튼·메뉴·글쓰기 화면에서 채용공고를 닫습니다(이미 올라온 공고 열람·수정·삭제는 그대로). 서버에서도 막으려면 supabase/jobs_pause.sql 실행. 다시 열 때는 true + jobs_pause.sql 맨 아래 '다시 열기' 실행",
     "_comment": "public_api: 공공데이터포털(정책뉴스·공공기관 채용·사고사망 속보) 수집·안전뉴스 메뉴. 켜려면 true + 저장소 변수 PUBLIC_API=true"

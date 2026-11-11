@@ -4,6 +4,12 @@
 패치마다 시작하기 전 상태의 커밋 번호를 **백업 시점**으로 적어 둡니다. 마음에 들지 않으면 패치 하나만 취소하거나, 백업 시점으로 전체를 되돌릴 수 있습니다.
 (작업 환경에서 git 태그 push가 막혀 있어 커밋 번호로 기록합니다.)
 
+## 2026-11-11 · 가입은 바로, 글쓰기 전 1회 이메일 인증 켬
+- 백업 커밋: (이 커밋 바로 앞)
+- Supabase: supabase/verify_on_write.sql 실행(성공, 기존 이메일 인증 회원 79명 중 74명 '인증 완료'로 옮김, 트리거 3개) → Authentication에서 Confirm email 끔.
+- config/site.json features.verify_on_write: true — 가입 화면 문구가 '가입은 바로, 글을 처음 쓸 때 1회 인증'으로 바뀜.
+- 되돌리기: Confirm email 다시 켜고 verify_on_write false, 필요하면 SQL 파일 끝의 되돌리기 문장 실행.
+
 ## 2026-11-11 · 통합 검색 강화(법령검색 앱 벤치마킹)
 - 백업 커밋: 3ab444f
 - 벤치마킹: 「안전보건 법령검색」(RaonLua, law.raonlua.com) — 법령·행정규칙·KOSHA GUIDE 키워드 검색, 추천 검색어, 즐겨찾기·최근 본 문서. 기능만 가져오고 문구·디자인은 가져오지 않음.
