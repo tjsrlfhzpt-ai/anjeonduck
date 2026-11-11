@@ -311,13 +311,70 @@ def fetch_accidents(rows=60):
                             "license": "이용허락범위 제한 없음", "items": out})
 
 
+# ------------------------------------------------------------ 4) KOSHA GUIDE 목록 (2026-11-11 추가)
+# 한국산업안전보건공단_기술지원규정(코샤가이드) 조회 서비스 (data.go.kr 15144147)
+# 서비스 주소 apis.data.go.kr/B552468/koshaguide, 이용허락범위 제한 없음. 제공 항목: 규정명·규정번호·공표일자·다운로드 링크.
+# 상세기능(오퍼레이션) 이름은 활용가이드(docx)에만 있어 확인하지 못했다 → 후보를 차례로 시도하고,
+# 맞는 주소를 찾으면 저장소 변수 KOSHA_GUIDE_URL 로 고정할 수 있게 했다. 본문(PDF)은 옮기지 않고 목록·원문 링크만 저장한다.
+KOSHA_GUIDE_BASE = "https://apis.data.go.kr/B552468/koshaguide"
+KOSHA_GUIDE_OPS = ["getKoshaGuide", "getKoshaguide", "getKoshaGuideList", "koshaguide", "getList"]
+GUIDE_NO_RE = re.compile(r"^[A-Z](?:\s*[-–]\s*[A-Z])?\s*[-–]\s*\d{1,3}\s*[-–]\s*\d{4}$")
+
+
+def guide_fields(it):
+    """응답 항목 이름을 몰라도 값 모양으로 규정명·번호·공표일·링크를 고른다."""
+    vals = {k: str(v or "").strip() for k, v in it.items() if not isinstance(v, (dict, list))}
+    no = next((v for v in vals.values() if GUIDE_NO_RE.match(v)), "")
+    url = next((v for v in vals.values() if v.startswith("http")), "")
+    date = next((ymd(v) for k, v in vals.items() if re.search(r"(?i)de|date|dt|ymd|일자", k) and ymd(v)), "")
+    names = [v for v in vals.values() if re.search(r"[가-힣]", v) and v != no and not v.startswith("http")]
+    title = max(names, key=len) if names else ""
+    return no, title, date, url
+
+
+def fetch_kosha_guide(rows=1000):
+    fixed = os.environ.get("KOSHA_GUIDE_URL", "").strip()
+    cands = [fixed] if fixed else [f"{KOSHA_GUIDE_BASE}/{op}" for op in KOSHA_GUIDE_OPS]
+    url, raw, errs = "", "", []
+    for u in cands:
+        try:
+            raw = get(u, {"pageNo": 1, "numOfRows": rows, "type": "json", "_type": "json", "dataType": "JSON"})
+            if acc_rows(raw):
+                url = u
+                break
+            errs.append(f"{u.rsplit('/', 1)[1]}: 항목 없음")
+        except Exception as e:
+            errs.append(f"{u.rsplit('/', 1)[1]}: {str(e)[:90]}")
+    if not url:
+        raise RuntimeError("맞는 상세기능 주소를 찾지 못함 — " + " / ".join(errs))
+    print(f"  KOSHA GUIDE 주소: {url}")
+    items, page = acc_rows(raw), 1
+    while len(items) >= rows * page and page < 5:
+        page += 1
+        more = acc_rows(get(url, {"pageNo": page, "numOfRows": rows, "type": "json", "_type": "json", "dataType": "JSON"}))
+        if not more:
+            break
+        items += more
+    print("  KOSHA GUIDE 응답 항목:", ", ".join(items[0].keys()))
+    out, seen = [], set()
+    for it in items:
+        no, title, date, link = guide_fields(it)
+        if not title or (no, title) in seen:
+            continue
+        seen.add((no, title))
+        out.append({"no": re.sub(r"\s+", "", no), "title": title, "date": date, "url": link})
+    print(f"  KOSHA GUIDE: {len(out)}건 (번호 인식 {sum(1 for o in out if o['no'])}건, 링크 {sum(1 for o in out if o['url'])}건)")
+    save("kosha_guide.json", {"fetched": TODAY.isoformat(), "source": "한국산업안전보건공단_기술지원규정(코샤가이드) 조회 서비스(공공데이터포털)",
+                              "license": "이용허락범위 제한 없음", "items": out}, min_keep=100)
+
+
 def main():
     if not KEY:
         print("  DATA_GO_KR_KEY 없음 — 공공 API 수집을 건너뜁니다(기존 data/auto 파일이 있으면 그대로 사용).")
         return 0
     probe()
-    jobs = (("공공기관 채용", fetch_jobs), ("정책뉴스", fetch_news), ("사고사망 속보", fetch_accidents))
-    if "--accidents-only" in sys.argv:  # 안전뉴스·공공채용 메뉴를 켜지 않은 상태: 사고사망 속보만 받는다
+    jobs = (("공공기관 채용", fetch_jobs), ("정책뉴스", fetch_news), ("사고사망 속보", fetch_accidents), ("KOSHA GUIDE 목록", fetch_kosha_guide))
+    if "--accidents-only" in sys.argv:  # 안전뉴스·공공채용 메뉴를 켜지 않은 상태: 사고사망 속보·KOSHA GUIDE 목록만 받는다
         jobs = jobs[2:]
     for name, fn in jobs:
         try:

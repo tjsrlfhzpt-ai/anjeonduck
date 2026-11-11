@@ -2099,44 +2099,76 @@ SEARCH_BODY = """
 <section class="phead"><div class="wrap">
   <p class="crumbs"><a href="../">홈</a><span>/</span>통합 검색</p>
   <h1>통합 검색</h1>
-  <p>작성기·서식·양식 파일·법령 조문·판례·고용노동부 질의회시·사망사고 사례·안전 소식·채용까지 {TOTAL}건을 한 번에 찾습니다.</p>
+  <p>작성기·서식·양식 파일·법령 조문·행정규칙·KOSHA GUIDE·판례·고용노동부 질의회시·사망사고 사례·안전 소식·채용까지 {TOTAL}건을 한 번에 찾습니다.</p>
 </div></section>
 <section class="wrap sx">
   <form class="sx-bar" role="search" onsubmit="return false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
     <input id="sxQ" type="search" placeholder="예: 지게차 작업계획서, 관리감독자 교육, 밀폐공간, 도급인" aria-label="통합 검색어" autocomplete="off" enterkeyhint="search"></form>
+  <div class="sx-c" id="sxC" aria-label="추천 검색어"></div>
+  <div id="sxT"></div>
   <div class="sx-k" id="sxK" aria-label="결과 종류"></div>
   <p class="sx-n" id="sxN" role="status"></p>
   <div id="sxR"></div>
+  <div id="sxM"></div>
   <div class="sx-more" id="sxX" hidden></div>
 </section>
 <style>
 .sx{padding-top:8px;padding-bottom:40px;max-width:900px}
 .sx-bar{display:flex;align-items:center;gap:8px;border:2px solid var(--navy);border-radius:12px;padding:6px 12px;background:var(--surface)}
 .sx-bar input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:17px;padding:8px 0;background:transparent;color:var(--text)}
+.sx-c{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+.sx-c button{font:inherit;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);cursor:pointer}
+.sx-c button:hover{border-color:var(--navy)}
+.sx-c button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.sx-tp{margin:14px 0 4px;border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:var(--r);background:var(--surface);padding:14px 16px}
+.sx-tp h2{font-size:16px;margin:0;color:var(--navy)}.sx-tp>p{margin:3px 0 10px;font-size:13px;color:var(--text-2)}
+.sx-tp-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.sx-tp h3{font-size:12.5px;font-weight:800;color:var(--text-2);margin:0 0 4px}
+.sx-tp ul{list-style:none;margin:0;padding:0}.sx-tp li{font-size:14px;line-height:1.5;padding:3px 0}
+.sx-tp li a{color:var(--text);text-decoration:none}.sx-tp li a:hover{color:var(--blue);text-decoration:underline}
+.sx-tp li small{color:var(--muted);font-size:12px;margin-left:4px}
+.sx-tp .sx-go a{font-weight:700;color:var(--blue)}
 .sx-k{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
 .sx-k button{font:inherit;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--text-2);cursor:pointer}
 .sx-k button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
 .sx-k .n{font-size:11.5px;opacity:.75;margin-left:3px}
 .sx-n{font-size:14px;color:var(--text-2);margin:6px 0 10px}
 .sx-g{margin:0 0 18px}.sx-g h2{font-size:15px;margin:0 0 6px;color:var(--navy);display:flex;gap:8px;align-items:baseline}.sx-g h2 small{font-weight:600;color:var(--muted);font-size:12.5px}
+.sx-g h2 .sx-clr{margin-left:auto;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;padding:0}
 .sx-l{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
-.sx-l li+li{border-top:1px solid var(--line-2)}
-.sx-l a{display:block;padding:10px 14px;color:var(--text);text-decoration:none}.sx-l a:hover{background:var(--surface-2)}
+.sx-l li{display:flex;align-items:stretch}.sx-l li+li{border-top:1px solid var(--line-2)}
+.sx-l a{flex:1;min-width:0;display:block;padding:10px 14px;color:var(--text);text-decoration:none}.sx-l a:hover{background:var(--surface-2)}
 .sx-l b{display:block;font-size:14.5px;line-height:1.45}.sx-l span{display:block;font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sx-l mark{background:#FDE68A;color:inherit;border-radius:2px}
+.sx-l .sx-f{flex:0 0 44px;border:0;background:none;font-size:18px;color:var(--muted);cursor:pointer}
+.sx-l .sx-f[aria-pressed="true"]{color:#D97706}
+.sx-l .sx-tag{display:inline;font-size:11.5px;font-weight:700;color:var(--text-2);margin-right:6px;white-space:nowrap}
+.sx-rq{display:flex;flex-wrap:wrap;gap:6px}.sx-rq button{font:inherit;font-size:13px;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer}
 .sx-g .sx-all{display:inline-block;margin-top:6px;font-size:13.5px;font-weight:700;color:var(--blue);cursor:pointer;background:none;border:0;padding:0;font-family:inherit}
 .sx-more{font-size:14px;line-height:1.8;color:var(--text-2);border-top:1px solid var(--line);padding-top:12px}.sx-more a{font-weight:700;color:var(--blue)}
 </style>
 <script>
 (function () {
-  var KINDS = /*KINDS*/{}, ORDER = ["작성기", "도구", "서식", "양식·파일", "법령", "법령 조문", "판례", "질의회시", "사고사례", "소식", "영상", "채용"];
-  var IDX = null, q = document.getElementById("sxQ"), K = document.getElementById("sxK"), N = document.getElementById("sxN"), R = document.getElementById("sxR"), X = document.getElementById("sxX"), kind = "", open = {};
+  var KINDS = /*KINDS*/{}, TOPICS = /*TOPICS*/null, CHIPS = /*CHIPS*/[], ORDER = ["작성기", "도구", "서식", "양식·파일", "법령", "법령 조문", "KOSHA GUIDE", "판례", "질의회시", "사고사례", "소식", "영상", "채용"];
+  var IDX = null, q = document.getElementById("sxQ"), C = document.getElementById("sxC"), T = document.getElementById("sxT"), K = document.getElementById("sxK"), N = document.getElementById("sxN"), R = document.getElementById("sxR"), M = document.getElementById("sxM"), X = document.getElementById("sxX"), kind = "", open = {}, shown = [];
+  var FK = "safeplum.sx.fav.v1", SK = "safeplum.sx.seen.v1", QK = "safeplum.sx.recent.v1";
+  function rd(k) { try { var v = JSON.parse(localStorage.getItem(k) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+  function wr(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function hl(s, ws) { var t = esc(s); ws.forEach(function (w) { if (w.length < 1) return; t = t.split(esc(w)).join("<mark>" + esc(w) + "</mark>"); }); return t; }
+  function ext(h) { return /^https?:/.test(h); }
+  function href(h) { return ext(h) ? h : "../" + h; }
+  function isFav(h) { return rd(FK).some(function (x) { return x.h === h; }); }
+  function push(k, o, max) { var a = rd(k).filter(function (x) { return (x.h || x) !== (o.h || o); }); a.unshift(o); wr(k, a.slice(0, max)); }
+  function li(r, ws, tag) {
+    var i = shown.push(r) - 1, h = r[2];
+    return '<li><a href="' + esc(href(h)) + '" data-i="' + i + '"' + (ext(h) ? ' target="_blank" rel="noopener"' : "") + "><b>" + (tag ? '<span class="sx-tag">' + esc(r[0]) + "</span>" : "") + hl(r[1], ws) + (ext(h) ? " ↗" : "") + "</b>" + (r[3] ? "<span>" + hl(r[3], ws) + "</span>" : "") + "</a>" +
+      '<button type="button" class="sx-f" data-f="' + i + '" aria-pressed="' + isFav(h) + '" aria-label="' + (isFav(h) ? "즐겨찾기 해제" : "즐겨찾기") + '">' + (isFav(h) ? "★" : "☆") + "</button></li>";
+  }
   function find(v) {
     var ws = v.toLowerCase().split(/\\s+/).filter(Boolean), res = {}; if (!ws.length || !IDX) return res;
     IDX.forEach(function (r) {
-      var t = r[1].toLowerCase(), all = t + " " + r[3].toLowerCase() + " " + r[0];
+      var t = r[1].toLowerCase(), all = t + " " + r[3].toLowerCase() + " " + r[0].toLowerCase();
       for (var i = 0; i < ws.length; i++) if (all.indexOf(ws[i]) < 0) return;
       var sc = 0; ws.forEach(function (w) { var p = t.indexOf(w); sc += p === 0 ? 0 : p > 0 ? 1 : 3; });
       (res[r[0]] = res[r[0]] || []).push([sc, r]);
@@ -2144,10 +2176,41 @@ SEARCH_BODY = """
     Object.keys(res).forEach(function (k) { res[k].sort(function (a, b) { return a[0] - b[0] || a[1][1].length - b[1][1].length; }); });
     return res;
   }
+  function topicOf(v) {
+    if (!TOPICS) return null; var s = v.toLowerCase().replace(/\\s+/g, "");
+    for (var i = 0; i < TOPICS.length; i++) { var t = TOPICS[i], ns = [t.key].concat(t.syn || []);
+      for (var j = 0; j < ns.length; j++) if (s.indexOf(ns[j].toLowerCase().replace(/\\s+/g, "")) >= 0) return t; }
+    return null;
+  }
+  function topicCard(t) {
+    var ns = [t.key].concat(t.syn || []).map(function (w) { return w.toLowerCase(); }), g = [];
+    if (IDX) IDX.forEach(function (r) { if (r[0] === "KOSHA GUIDE" && g.length < 5) { var s = r[1].toLowerCase(); if (ns.some(function (w) { return s.indexOf(w) >= 0; })) g.push(r); } });
+    function a(h, txt, sm) { return '<li><a href="' + esc(href(h)) + '"' + (ext(h) ? ' target="_blank" rel="noopener"' : "") + ">" + esc(txt) + (ext(h) ? " ↗" : "") + "</a>" + (sm ? "<small>" + esc(sm) + "</small>" : "") + "</li>"; }
+    var gl = g.length ? g.map(function (r) { return a(r[2], r[1], r[3]); }).join("") :
+      '<li><a href="https://portal.kosha.or.kr/" target="_blank" rel="noopener">산업안전포털에서 KOSHA GUIDE 찾기 ↗</a><small>검색어: ' + esc(t.key) + "</small></li>";
+    return '<section class="sx-tp" aria-label="' + esc(t.key) + ' 바로가기"><h2>' + esc(t.key) + " 한눈에</h2><p>" + esc(t.desc) + '</p><div class="sx-tp-g">' +
+      "<div><h3>바로 쓰는 작성기·도구</h3><ul class=\\"sx-go\\">" + t.go.map(function (x) { return a(x.h, x.t); }).join("") + "</ul></div>" +
+      "<div><h3>핵심 조문</h3><ul>" + t.law.map(function (x) { return a(x.h, x.t); }).join("") + "</ul></div>" +
+      "<div><h3>KOSHA GUIDE</h3><ul>" + gl + "</ul></div></div></section>";
+  }
+  function chips(v) {
+    var cur = topicOf(v);
+    C.innerHTML = CHIPS.map(function (c) { return '<button type="button" data-q="' + esc(c) + '" aria-pressed="' + (!!cur && cur.key === c) + '">' + esc(c) + "</button>"; }).join("");
+  }
+  function mine() {
+    var f = rd(FK), s = rd(SK), rq = rd(QK), html = "";
+    if (rq.length) html += '<section class="sx-g"><h2>최근 검색어 <button type="button" class="sx-clr" data-clr="' + QK + '">지우기</button></h2><div class="sx-rq">' + rq.map(function (x) { return '<button type="button" data-q="' + esc(x) + '">' + esc(x) + "</button>"; }).join("") + "</div></section>";
+    if (f.length) html += '<section class="sx-g"><h2>즐겨찾기 <small>' + f.length + '건 · 이 브라우저에만 저장</small></h2><ul class="sx-l">' + f.map(function (x) { return li([x.k, x.t, x.h, ""], [], true); }).join("") + "</ul></section>";
+    if (s.length) html += '<section class="sx-g"><h2>최근 본 자료 <button type="button" class="sx-clr" data-clr="' + SK + '">지우기</button></h2><ul class="sx-l">' + s.map(function (x) { return li([x.k, x.t, x.h, ""], [], true); }).join("") + "</ul></section>";
+    return html;
+  }
   function render() {
     var v = q.value.trim(), ws = v.toLowerCase().split(/\\s+/).filter(Boolean);
+    shown = []; chips(v);
     try { history.replaceState(null, "", v ? "?q=" + encodeURIComponent(v) + (kind ? "&k=" + encodeURIComponent(kind) : "") : location.pathname); } catch (e) {}
-    if (!v) { K.innerHTML = ""; R.innerHTML = ""; X.hidden = true; N.textContent = IDX ? "찾을 낱말을 넣어 주세요. 낱말을 여러 개 넣으면 모두 들어간 결과만 보여 줍니다." : "검색 자료를 불러오는 중…"; return; }
+    if (!v) { K.innerHTML = ""; R.innerHTML = ""; T.innerHTML = ""; X.hidden = true; M.innerHTML = mine(); N.textContent = IDX ? "찾을 낱말을 넣거나 위 추천 검색어를 눌러 보세요. 낱말을 여러 개 넣으면 모두 들어간 결과만 보여 줍니다." : "검색 자료를 불러오는 중…"; return; }
+    M.innerHTML = "";
+    var tp = topicOf(v); T.innerHTML = tp ? topicCard(tp) : "";
     if (!IDX) { N.textContent = "검색 자료를 불러오는 중…"; return; }
     var res = find(v), ks = ORDER.filter(function (k) { return res[k]; }), tot = 0;
     ks.forEach(function (k) { tot += res[k].length; });
@@ -2156,24 +2219,39 @@ SEARCH_BODY = """
     N.textContent = tot ? "‘" + v + "’ 검색 결과 " + tot.toLocaleString() + "건" : "‘" + v + "’에 맞는 결과가 없습니다. 낱말을 줄이거나 다른 말로 찾아 보세요(예: 지게차 → 하역운반기계).";
     R.innerHTML = ks.filter(function (k) { return !kind || k === kind; }).map(function (k) {
       var lim = kind ? 100 : (open[k] ? 40 : 5), a = res[k];
-      return '<section class="sx-g"><h2>' + esc(k) + " <small>" + a.length.toLocaleString() + "건</small></h2><ul class=\\"sx-l\\">" + a.slice(0, lim).map(function (o) {
-        var r = o[1]; return '<li><a href="../' + esc(r[2]) + '"><b>' + hl(r[1], ws) + "</b>" + (r[3] ? "<span>" + hl(r[3], ws) + "</span>" : "") + "</a></li>"; }).join("") + "</ul>" +
+      return '<section class="sx-g"><h2>' + esc(k) + " <small>" + a.length.toLocaleString() + "건</small></h2><ul class=\\"sx-l\\">" + a.slice(0, lim).map(function (o) { return li(o[1], ws); }).join("") + "</ul>" +
         (a.length > lim ? '<button type="button" class="sx-all" data-more="' + esc(k) + '">' + esc(k) + " " + (kind ? "" : "더 보기 ") + "(" + a.length.toLocaleString() + "건 중 " + lim + "건 표시) →</button>" : "") + "</section>";
     }).join("");
     var e = encodeURIComponent(v);
     X.innerHTML = "<b>다른 곳에서도 찾기</b> — <a href=\\"../resources/library/?q=" + e + "\\">공단 안전보건자료(OPS·포스터·교안) " + "</a> · <a href=\\"../laws/qa/?q=" + e + "\\">질의회시 화면</a> · <a href=\\"../tools/fatal-cases/?q=" + e + "\\">사망사고 사례 화면</a> · <a href=\\"../brief/?q=" + e + "\\">브리핑·소식</a> · <a href=\\"../board/?b=qna\\">Q&amp;A 게시판</a>";
     X.hidden = false;
   }
+  function remember() { var v = q.value.trim(); if (v.length >= 2) push(QK, v, 8); }
+  function go(v) { q.value = v; kind = ""; open = {}; render(); remember(); }
+  C.addEventListener("click", function (ev) { var b = ev.target.closest("[data-q]"); if (b) go(b.dataset.q); });
+  M.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-q]"); if (b) { go(b.dataset.q); return; }
+    var c = ev.target.closest("[data-clr]"); if (c) { wr(c.dataset.clr, []); render(); }
+  });
   K.addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; kind = b.dataset.k; render(); });
   R.addEventListener("click", function (ev) { var b = ev.target.closest("[data-more]"); if (!b) return; if (open[b.dataset.more]) { kind = b.dataset.more; } open[b.dataset.more] = true; render(); });
+  document.querySelector(".sx").addEventListener("click", function (ev) {
+    var f = ev.target.closest("[data-f]");
+    if (f) { var r = shown[+f.dataset.f], h = r[2], a = rd(FK), on = a.some(function (x) { return x.h === h; });
+      a = on ? a.filter(function (x) { return x.h !== h; }) : [{ k: r[0], t: r[1], h: h }].concat(a);
+      if (!wr(FK, a.slice(0, 100))) { f.title = "이 브라우저에서는 즐겨찾기를 저장할 수 없습니다(사생활 보호 모드 등)."; return; }
+      f.setAttribute("aria-pressed", !on); f.textContent = on ? "☆" : "★"; f.setAttribute("aria-label", on ? "즐겨찾기" : "즐겨찾기 해제"); return; }
+    var l = ev.target.closest("a[data-i]");
+    if (l) { var s = shown[+l.dataset.i]; push(SK, { k: s[0], t: s[1], h: s[2] }, 10); remember(); }
+  });
   var t; q.addEventListener("input", function () { clearTimeout(t); t = setTimeout(function () { open = {}; render(); }, 150); });
+  q.addEventListener("keydown", function (ev) { if (ev.key === "Enter") remember(); });
   try { var u = new URLSearchParams(location.search); q.value = u.get("q") || ""; kind = u.get("k") || ""; } catch (e) {}
   render();
   fetch("../assets/data/sidx.json").then(function (r) { return r.json(); }).then(function (d) { IDX = d; render(); }).catch(function () { N.textContent = "검색 자료를 불러오지 못했습니다. 새로고침해 주세요."; });
   if (!q.value) q.focus();
 })();
 </script>"""
-
 
 def build_filelib(site, write):
     f = ROOT / "data/filelib.json"
@@ -2771,7 +2849,7 @@ def build(out, today):
   function find(v) {
     var ws = v.toLowerCase().split(/\\s+/).filter(Boolean); if (!ws.length) return [];
     var out = [];
-    var L = FULL || IDX, KW = { "도구": 0, "작성기": 0, "웹 서식": 0, "서식": 0.3, "서식·자료": 0.3, "양식·파일": 0.3, "법령": 0.35, "판례": 0.5, "질의회시": 0.6, "법령 조문": 0.7, "소식": 0.8, "사고사례": 0.9, "채용": 0.95 };
+    var L = FULL || IDX, KW = { "도구": 0, "작성기": 0, "웹 서식": 0, "서식": 0.3, "서식·자료": 0.3, "양식·파일": 0.3, "법령": 0.35, "판례": 0.5, "질의회시": 0.6, "법령 조문": 0.7, "KOSHA GUIDE": 0.75, "소식": 0.8, "사고사례": 0.9, "채용": 0.95 };
     for (var i = 0; i < L.length && out.length < 400; i++) {
       var x = L[i], tt = x.t.toLowerCase(), all = tt + " " + (x.d || "").toLowerCase() + " " + x.k;
       if (ws.every(function (w) { return all.indexOf(w) >= 0; })) out.push({ x: x, s: (tt.indexOf(ws[0]) === 0 ? 0 : tt.indexOf(ws[0]) > 0 ? 1 : 2) + (KW[x.k] == null ? 0.5 : KW[x.k]) });
@@ -2784,7 +2862,7 @@ def build(out, today):
   function draw() {
     var v = q.value.trim(), r = find(v); sel = -1;
     if (!v) { box.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
-    box.innerHTML = r.map(function (x, i) { return '<a role="option" id="uqo' + i + '" href="' + esc(x.h) + '"><span class="uq-k">' + esc(x.k) + "</span>" + esc(x.t) + "</a>"; }).join("") +
+    box.innerHTML = r.map(function (x, i) { return '<a role="option" id="uqo' + i + '" href="' + esc(x.h) + '"' + (/^https?:/.test(x.h) ? ' target="_blank" rel="noopener"' : "") + '><span class="uq-k">' + esc(x.k) + "</span>" + esc(x.t) + "</a>"; }).join("") +
       '<a class="uq-all" href="search/?q=' + encodeURIComponent(v) + '">“' + esc(v) + '” 전체 검색 결과 보기 (판례·질의회시·사고사례 포함) →</a>';
     box.hidden = false; q.setAttribute("aria-expanded", "true");
   }
@@ -3792,6 +3870,17 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
             anc = ("#j" + m.group(1) + ("-" + m.group(2) if m.group(2) else "")) if m else ""
             body = re.sub(r"<[^>]*>|\[[^\]]*\]", "", a.get("text") or "")
             sx("법령 조문", f'{LAWS[k]["short"]} {a["jo"]}({a["title"]})' if a.get("title") else f'{LAWS[k]["short"]} {a["jo"]}', f"laws/{k}/{anc}", body[:90])
+    # 행정규칙(고시·지침 등)은 원문이 국가법령정보센터에만 있어 바깥 링크로 (2026-11-11)
+    for st in laws.get("statutes", []):
+        if st.get("type") == "행정규칙":
+            sx("법령", st["name"], law_url(st["name"], "행정규칙"), "행정규칙 · 국가법령정보센터 원문")
+    # KOSHA GUIDE 목록(공공데이터포털 API로 받은 것만, 없으면 건너뜀). 본문은 옮기지 않고 공단 원문 링크로 (2026-11-11)
+    _kg = load_auto("kosha_guide.json")
+    for g in _kg.get("items", []):
+        if safe_url(g.get("url")):
+            sx("KOSHA GUIDE", (g["no"] + " " if g.get("no") else "") + g["title"], g["url"], "기술지원규정" + (" · 공표 " + g["date"] if g.get("date") else ""))
+    if not _kg.get("items"):
+        warn("KOSHA GUIDE 목록 없음(data/auto/kosha_guide.json) — 통합 검색에서 KOSHA GUIDE 결과 없이 공단 포털 링크만 보여 줌")
     for x in load("data/precedents.json").get("items", []):
         sx("판례", x["title"], f"tools/precedents/#c-{x['id']}", x["k"] + " " + x["what"] + " " + " ".join(c["label"] for c in x["cases"]))
     for x in load("data/gov_qa.json").get("items", []):
@@ -3809,7 +3898,32 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     _skinds = {}
     for r_ in SX:
         _skinds[r_[0]] = _skinds.get(r_[0], 0) + 1
-    write("search/index.html", page(site, "../", "search/", "통합 검색", SEARCH_BODY.replace("/*KINDS*/{}", json.dumps(_skinds, ensure_ascii=False)).replace("{TOTAL}", f"{len(SX):,}"),
+    # 주제 바로가기 카드(data/search_topics.json): 조문 제목·링크와 작성기 이름을 빌드 때 실제 데이터에서 채운다
+    _st = load("data/search_topics.json")
+    _tools = {t["id"]: t["name"] for t in site.get("free_tools", [])}
+    _fby = {f["id"]: f["title"] for f in _forms}
+    _topics = []
+    for tp in _st.get("topics", []):
+        lw, gl = [], []
+        for k, jo in tp.get("law", []):
+            art = next((a for a in LAWS.get(k, {}).get("articles", []) if a["jo"] == jo and not a.get("deleted")), None)
+            if not art:
+                warn(f"검색 주제 '{tp['key']}': 조문 없음 {k} {jo} → 뺌")
+                continue
+            m = re.match(r"제(\d+)조(?:의(\d+))?", jo)
+            lw.append({"t": f'{LAWS[k]["short"]} {jo}' + (f'({art["title"]})' if art.get("title") else ""),
+                       "h": f"laws/{k}/#j{m.group(1)}" + (f"-{m.group(2)}" if m.group(2) else "")})
+        for kind_, i in tp.get("go", []):
+            nm = _tools.get(i) if kind_ == "tool" else _fby.get(i)
+            if not nm:
+                warn(f"검색 주제 '{tp['key']}': 작성기·도구 없음 {kind_} {i} → 뺌")
+                continue
+            gl.append({"t": nm, "h": f"tools/{i}/" if kind_ == "tool" else f"tools/forms/{i}/"})
+        _topics.append({"key": tp["key"], "syn": tp.get("syn", []), "desc": tp.get("desc", ""), "law": lw, "go": gl})
+    _sxbody = (SEARCH_BODY.replace("/*KINDS*/{}", json.dumps(_skinds, ensure_ascii=False))
+               .replace("/*TOPICS*/null", json.dumps(_topics, ensure_ascii=False).replace("</", "<\\/"))
+               .replace("/*CHIPS*/[]", json.dumps(_st.get("chips", []), ensure_ascii=False)))
+    write("search/index.html", page(site, "../", "search/", "통합 검색", _sxbody.replace("{TOTAL}", f"{len(SX):,}"),
                                     desc="서식·작성기·법령 조문·판례·고용노동부 질의회시·사망사고 사례·안전 소식·채용까지 SafePlum 전체를 한 번에 검색합니다."), noindex=True)
     statutes = "".join(
         f'<li><a href="{e(law_url(s["name"], s.get("type","법령")))}" target="_blank" rel="noopener"><span class="badge {"badge-navy" if s.get("type")=="행정규칙" else "badge-line"}">{e(s.get("type"))}</span><strong>{e(s["name"])}</strong><span class="arr" aria-hidden="true">↗</span></a></li>'

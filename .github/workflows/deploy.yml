@@ -35,11 +35,13 @@ jobs:
         if: vars.PUBLIC_API == 'true'
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KOSHA_GUIDE_URL: ${{ vars.KOSHA_GUIDE_URL }}
         run: python3 scripts/fetch_public.py
-      - name: 공공데이터포털 API → 사고사망 속보만 (PUBLIC_API 를 켜지 않았을 때. 인증키가 없으면 건너뜀)
+      - name: 공공데이터포털 API → 사고사망 속보·KOSHA GUIDE 목록만 (PUBLIC_API 를 켜지 않았을 때. 인증키가 없으면 건너뜀)
         if: vars.PUBLIC_API != 'true'
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KOSHA_GUIDE_URL: ${{ vars.KOSHA_GUIDE_URL }}
         run: python3 scripts/fetch_public.py --accidents-only
       - name: 고용24 채용정보 API → 안전·보건 공고 (인증키 WORK24_KEY 가 없거나 실패하면 건너뜀)
         continue-on-error: true
