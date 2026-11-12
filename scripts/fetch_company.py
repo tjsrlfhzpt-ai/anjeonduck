@@ -151,6 +151,58 @@ def collect(site):
         name = name or name2
     return base, name, ops
 
+# ---- 그린하우스(Greenhouse) 공개 채용 게시판 API: 회사가 자기 채용 홈페이지에 공고를 싣는 데 쓰는 공개 API(인증 없음)
+GH_API = "https://boards-api.greenhouse.io/v1/boards/{token}/jobs"
+GH_EXCLUDE_RE = re.compile(r"변호사|Legal|Counsel|Analyst|Compliance Audit", re.I)
+GH_PLACES = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "제주", "수원", "용인", "화성", "평택", "안산", "안성", "이천", "여주", "고양", "김포", "부천", "시흥", "동탄", "오산", "남양주", "양주", "파주", "천안", "아산", "청주", "음성", "진천", "전주", "군산", "창원", "김해", "양산", "칠곡", "구미", "경산", "포항", "원주", "춘천", "목포", "순천", "광양", "덕평", "곤지암", "마장", "장지", "송파"]
+
+
+def gh_jobs(site):
+    """그린하우스 게시판 → 국내 안전·보건 공고 목록. 제목·근무지 표기·게시일·원문 주소만 쓴다."""
+    data = json.loads(get(GH_API.format(token=site["token"])))
+    jobs = data.get("jobs") or []
+    out = []
+    for o in jobs:
+        title = (o.get("title") or "").strip()
+        loc = ((o.get("location") or {}).get("name") or "")
+        if "Korea" not in loc and "한국" not in loc and "대한민국" not in loc:
+            continue
+        if w24.EXCLUDE_RE.search(title) or TITLE_EXCLUDE_RE.search(title) or GH_EXCLUDE_RE.search(title) or not w24.JOB_RE.search(title):
+            continue
+        dl = "채용 시"
+        if o.get("application_deadline"):
+            dl = kst_date(o["application_deadline"]) or "채용 시"
+            if dl != "채용 시" and dl < TODAY.isoformat():
+                continue
+        m = re.search(r"\(([^)]*)\)\s*$", title)
+        place = next((c for c in GH_PLACES if m and c in m.group(1)), "") or next((c for c in GH_PLACES if c in loc), "")
+        if "Seoul" in loc and not place:
+            place = "서울"
+        company = site["company"]
+        b = re.match(r"\[([^\]]+)\]", title)
+        if b and b.group(1) in site.get("divisions", {}):
+            company = site["divisions"][b.group(1)]
+        url = o.get("absolute_url") or ""
+        if site.get("url_from") and site.get("url_to"):
+            url = url.replace(site["url_from"], site["url_to"])
+        j = {
+            "id": f"co-{site['token']}-{o.get('id')}",
+            "title": title, "company": company,
+            "region": place or "근무지 원문 확인", "address": "",
+            "job": w24.job_of(title),
+            "career": "경력무관", "employment": "계약직" if "계약직" in title else "정규직",
+            "company_type": site.get("company_type", "중소·기타"), "industry": site.get("industry", "제조·화학"),
+            "deadline": dl, "posted": kst_date(o.get("first_published") or o.get("updated_at")) or TODAY.isoformat(),
+            "source_url": url, "source_name": f"{site['company']} 채용 홈페이지", "origin": "company",
+            "career_detail": "원문 확인", "education": "원문 확인",
+        }
+        if "계약직" not in title:
+            j["term"] = "고용형태는 원문 확인"
+        if site.get("group"):
+            j["group"] = site["group"]
+        out.append(j)
+    return len(jobs), out
+
 
 def main():
     cfg = json.loads((ROOT / "data" / "career_sites.json").read_text(encoding="utf-8"))
@@ -209,6 +261,27 @@ def main():
             out.append(j)
             n += 1
         print(f"  {site['company']}: 공고 {len(ops)}건 중 안전·보건 {n}건")
+    # 그린하우스 게시판을 쓰는 회사
+    for site in cfg.get("greenhouse", []):
+        try:
+            total, items = gh_jobs(site)
+        except Exception as e:
+            fail += 1
+            warn(f"{site.get('company')}(greenhouse:{site['token']}) 읽기 실패: {str(e)[:100]}")
+            continue
+        ok += 1
+        out.extend(items)
+        print(f"  {site['company']}: 공고 {total}건 중 국내 안전·보건 {len(items)}건")
+    for tok in cfg.get("greenhouse_candidates", []):
+        try:
+            total, items = gh_jobs({"token": tok, "company": tok})
+            print(f"  [후보·GH] {tok}: 있음 — 공고 {total}건, 국내 안전·보건 {len(items)}건" + "".join(f"\n      · {i['title']}" for i in items[:5]))
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                print(f"  [후보·GH] {tok}: HTTP {e.code}")
+        except Exception as e:
+            print(f"  [후보·GH] {tok}: 실패 {str(e)[:60]}")
+        time.sleep(0.2)
     # 후보: 채용 홈페이지가 있는지만 확인하고 로그에 남긴다(게시하지 않음)
     for slug in cfg.get("candidates", []):
         try:
@@ -227,7 +300,7 @@ def main():
             continue
         hits = [o for o in ops if is_safety(o)]
         print(f"  [후보] {slug}: 있음 — 이름 '{name}', 공고 {len(ops)}건, 안전·보건 {len(hits)}건" + ("".join(f"\n      · {h.get('title')} | 근무지 {'있음' if place_of(positions(h)) else '없음'} | 마감 {kst_date(h.get('dueDate')) or '상시'}" for h in hits[:6])))
-    if cfg.get("sites") and ok == 0:
+    if (cfg.get("sites") or cfg.get("greenhouse")) and ok == 0:
         warn("회사 채용 홈페이지를 하나도 읽지 못해 기존 파일을 유지합니다.")
         return
     OUT.mkdir(parents=True, exist_ok=True)
