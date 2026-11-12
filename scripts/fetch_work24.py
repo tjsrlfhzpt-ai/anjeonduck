@@ -30,12 +30,12 @@ KEY = os.environ.get("WORK24_KEY", "").strip()
 URL = "https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do"
 TODAY = dt.date.today()
 
-KEYWORDS = ["안전관리자", "보건관리자", "안전보건", "산업안전", "EHS"]
+KEYWORDS = ["안전관리자", "보건관리자", "안전보건", "산업안전", "EHS", "HSE", "환경안전", "안전환경", "총무 안전", "세이프티"]
 CO_TYPES = {"01": "대기업", "04": "공공기관", "05": "외국계"}  # 응답에 기업형태가 없어 조건 검색으로 표시
 MAX_PAGES = 5
 
 # 안전·보건 직무로 보는 제목
-JOB_RE = re.compile(r"안전\s*관리|안전\s*보건|보건\s*관리|산업\s*안전|산업\s*보건|건설\s*안전|안전\s*담당|안전\s*팀|환경\s*안전|안전\s*환경|EHS|HSE|SHE|중대재해|전기\s*안전\s*관리|소방\s*안전\s*관리", re.I)
+JOB_RE = re.compile(r"안전\s*관리|안전\s*보건|보건\s*관리|산업\s*안전|산업\s*보건|건설\s*안전|안전\s*담당|안전\s*팀|환경\s*안전|안전\s*환경|EHS|HSE|(?-i:\bSHE\b)|\bSafety\b|세이프티|총무[^,]{0,8}안전|안전[^,]{0,8}총무|중대재해|전기\s*안전\s*관리|소방\s*안전\s*관리", re.I)
 # 잡코리아 선별 기준과 같게 뺄 공고 (감시·경비·점검 대행·강사·영업·시설 단순 관리 등)
 EXCLUDE_RE = re.compile(r"감시단|화재\s*감시|신호수|유도원|경비|보안요원|순찰|미화|청소|소방\s*점검|소방시설\s*(관리|점검)|"
                         r"대행|강사|교사|영업|판매|컨설팅|상담원|사무\s*보조|경리|운전원|운전기사|배달|요양|간호조무|"
@@ -102,7 +102,10 @@ def job_of(title):
         out.append("안전관리자")
     if re.search(r"보건\s*관리|산업\s*보건|안전\s*보건", title):
         out.append("보건관리자")
-    if re.search(r"EHS|HSE|SHE", t):
+    # 총무·환경 겸직, Safety/세이프티 표기도 안전 직무로 본다(전기안전·소방안전은 위에서 따로 분류)
+    if re.search(r"총무[^,]{0,8}안전|안전[^,]{0,8}총무", title) and "안전관리자" not in out and not out:
+        out.append("안전관리자")
+    if re.search(r"EHS|HSE|SAFETY|세이프티", t) or re.search(r"\bSHE\b", title):
         out.append("EHS")
     return "|".join(dict.fromkeys(out)) or "안전관리자"
 
