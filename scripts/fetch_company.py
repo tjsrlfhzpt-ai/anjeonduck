@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""회사 자체 채용 홈페이지 → data/auto/cojobs.json (빌드 직전에 실행).
+"""회사 자체 채용 홈페이지 → data/cojobs.json (운영자가 요청할 때만 실행: .github/workflows/collect-jobs.yml).
 
 대상: data/career_sites.json 의 sites(확인을 마친 회사) — 회사가 채용 솔루션 '그리팅'으로 직접 운영하는 채용 홈페이지
       (https://<slug>.career.greetinghr.com). 목록 페이지에 들어 있는 공고 목록(JSON)만 읽는다.
@@ -7,7 +7,7 @@
 
 원칙
 - 회사가 스스로 공개한 채용 홈페이지만 읽는다(채용 플랫폼의 공고 데이터베이스는 읽지 않는다).
-- 회사당 하루 1회, 목록 페이지 1쪽만 요청한다. robots.txt 가 막은 지원서 제출 경로(/o/*/apply 등)는 요청하지 않는다.
+- 수집은 요청이 있을 때만, 회사당 목록 페이지 1쪽만 요청한다. robots.txt 가 막은 지원서 제출 경로(/o/*/apply 등)는 요청하지 않는다.
 - 공고 본문·급여·연락처는 옮기지 않는다. 제목·회사·근무지·경력·고용형태·마감일과 원문 링크만 저장한다.
 - 한 회사가 실패해도 나머지는 계속한다. 전부 실패하면 기존 파일을 그대로 둔다.
 """
@@ -22,7 +22,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "data" / "auto"
+OUT = ROOT / "data"   # 요청할 때만 수집하므로 결과를 저장소에 남긴다(data/cojobs.json)
 TODAY = dt.date.today()
 UA = "Mozilla/5.0 (compatible; SafePlumJobs/1.0; +https://safeplum.com/jobs/)"
 

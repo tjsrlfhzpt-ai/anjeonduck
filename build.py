@@ -2601,7 +2601,7 @@ def build(out, today):
     _excl = set(site.get("job_exclude_sources") or [])
     removed_jobs = [j for j in curated if j.get("source_name") in _excl]
     curated = [j for j in curated if j.get("source_name") not in _excl]
-    cojobs = load_auto("cojobs.json")["items"]   # 회사 자체 채용 홈페이지(scripts/fetch_company.py)
+    cojobs = (load("data/cojobs.json") if (ROOT / "data/cojobs.json").exists() else load_auto("cojobs.json"))["items"]   # 회사 자체 채용 홈페이지(scripts/fetch_company.py)
     w24 = dedupe_w24(load_auto("w24jobs.json")["items"], curated + user_jobs + cojobs)
     jobs = validate_jobs(curated + user_jobs + cojobs + pubjobs["items"] + w24, today)
     global JOBS_OPEN

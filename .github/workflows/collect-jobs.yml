@@ -1,0 +1,41 @@
+name: 채용 수집(요청 시)
+
+# 회사 자체 채용 홈페이지 공고를 운영자가 요청할 때만 수집한다(매일 자동 실행 없음).
+# 결과(data/cojobs.json)를 저장소에 남기고 빌드·배포를 이어서 부른다.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: collect-jobs
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 회사 자체 채용 홈페이지 → data/cojobs.json
+        run: python3 scripts/fetch_company.py
+      - name: 바뀐 내용 저장
+        id: save
+        run: |
+          git config user.name "safeplum-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/cojobs.json
+          if git diff --cached --quiet; then echo "changed=no" >> "$GITHUB_OUTPUT"; echo "바뀐 공고 없음"; exit 0; fi
+          git commit -m "채용 수집(요청): 회사 채용 홈페이지 공고 갱신"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "changed=yes" >> "$GITHUB_OUTPUT"
+      - name: 빌드·배포 부르기
+        if: steps.save.outputs.changed == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
