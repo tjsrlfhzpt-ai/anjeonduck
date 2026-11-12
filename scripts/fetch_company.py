@@ -33,6 +33,8 @@ _sp.loader.exec_module(w24)
 # 직군(occupation) 이름으로 안전 직무를 알아볼 때 쓰는 기준 — 제목에 '안전'이 없어도 직군이 환경안전·EHS면 넣는다
 OCC_RE = re.compile(r"안전|EHS|HSE|\bSHE\b|Safety", re.I)
 OCC_EXCLUDE_RE = re.compile(r"식품\s*안전|정보\s*보안|보안|품질", re.I)
+# 제목만 보고 빼는 공고: 추천 채용·인재풀 안내, 업무 보조, 온라인 서비스의 Trust & Safety(이용자 보호 직무)
+TITLE_EXCLUDE_RE = re.compile(r"추천\s*채용|인재\s*(풀|pool|DB)|업무\s*보조|\[Assistant\]|Trust\s*(&|and)\s*Safety|식품\s*안전", re.I)
 
 
 def warn(msg):
@@ -70,7 +72,7 @@ def positions(o):
 
 def is_safety(o):
     title = o.get("title") or ""
-    if w24.EXCLUDE_RE.search(title):
+    if w24.EXCLUDE_RE.search(title) or TITLE_EXCLUDE_RE.search(title):
         return False
     if w24.JOB_RE.search(title):
         return True
@@ -138,7 +140,12 @@ def norm_addr(addr):
 def collect(site):
     slug = site["slug"]
     base = f"https://{slug}.career.greetinghr.com"
-    name, ops = openings_of(get(base + "/ko/home"))
+    try:
+        name, ops = openings_of(get(base + "/ko/home"))
+    except urllib.error.HTTPError as e:
+        if e.code != 404:
+            raise
+        name, ops = "", None
     if ops is None:
         name2, ops = openings_of(get(base + "/"))
         name = name or name2
@@ -170,8 +177,8 @@ def main():
                 continue
             addr = norm_addr(place_of(ps))
             region = w24.region_of("", addr) if addr else ""
-            if not region:  # 근무지가 없는 공고는 싣지 않는다(잘못된 지역 표시 방지)
-                continue
+            if not region:  # 채용 홈페이지 목록에 근무지가 없는 공고 — 지역을 짐작하지 않고 원문 확인으로 표시
+                region = "근무지 원문 확인"
             title = (o.get("title") or "").strip()
             car, car_d = career_of(ps)
             emp, term = emp_of(ps)
