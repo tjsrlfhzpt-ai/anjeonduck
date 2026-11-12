@@ -48,6 +48,9 @@ jobs:
         env:
           WORK24_KEY: ${{ secrets.WORK24_KEY }}
         run: python3 scripts/fetch_work24.py
+      - name: 회사 자체 채용 홈페이지 → 안전·보건 공고 (실패하면 건너뜀)
+        continue-on-error: true
+        run: python3 scripts/fetch_company.py
       - name: 정적 페이지 생성
         run: python3 build.py --out _site
       - name: 법령 별표 원본 대조 (적용범위 판정 데이터)

@@ -2597,8 +2597,13 @@ def build(out, today):
         j["origin"] = "user"
         j.setdefault("source_name", "기업 직접 등록")
     curated = load("data/jobs.json")
-    w24 = dedupe_w24(load_auto("w24jobs.json")["items"], curated + user_jobs)
-    jobs = validate_jobs(curated + user_jobs + pubjobs["items"] + w24, today)
+    # 싣지 않기로 한 출처(config/site.json 의 job_exclude_sources)는 목록·공고 화면에서 뺀다. 이미 공유된 주소는 안내 화면으로 남긴다.
+    _excl = set(site.get("job_exclude_sources") or [])
+    removed_jobs = [j for j in curated if j.get("source_name") in _excl]
+    curated = [j for j in curated if j.get("source_name") not in _excl]
+    cojobs = load_auto("cojobs.json")["items"]   # 회사 자체 채용 홈페이지(scripts/fetch_company.py)
+    w24 = dedupe_w24(load_auto("w24jobs.json")["items"], curated + user_jobs + cojobs)
+    jobs = validate_jobs(curated + user_jobs + cojobs + pubjobs["items"] + w24, today)
     global JOBS_OPEN
     JOBS_OPEN = sum(1 for x in jobs if not x["closed"])
     briefs = load_briefs(today)
@@ -3687,7 +3692,7 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
     {f'<section class="block"><h2>자격 요건</h2><ul class="bul">{reqs}</ul></section>' if reqs else ''}
     {'<p class="src-note">이 공고는 채용 기업이 SafePlum에 직접 등록했고 운영자가 확인한 뒤 게시했습니다. 내용의 정확성은 등록 기업에 책임이 있습니다.</p>' if j.get('origin') == 'user' else ''}
     {'<p class="src-note">' + e(j.get('source_name') or '채용 사이트') + '에 게시된 공고 중 안전·보건 직무를 SafePlum 운영자가 골라 기본 정보(회사·근무지·경력·마감일)만 옮기고 원문으로 연결했습니다. 담당 업무·자격요건·급여·지원 방법은 원문에서 확인하세요. SafePlum은 채용을 알선하지 않습니다.</p>' if j.get('origin') == 'curated' else ''}
-    <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''}{' — 고용24(한국고용정보원) 채용정보 Open API로 자동 수집. 운영자가 하나씩 확인한 공고가 아니므로 회사·직무·조건을 원문에서 꼭 확인하세요' if j.get('origin') == 'work24' else ''} · 조건과 일정은 원문이 우선합니다.</p>
+    <p class="src-note">출처: {e(j.get('source_name') or '공고 원문')}{' — 재정경제부 공공기관 채용정보 API(공공데이터포털, 이용허락범위 제한 없음)로 자동 수집' if j.get('origin') == 'alio' else ''}{' — 회사가 직접 운영하는 채용 홈페이지에서 제목·근무지·경력·마감일만 자동으로 가져와 원문으로 연결했습니다. 운영자가 하나씩 확인한 공고가 아니므로 담당 업무·자격요건은 원문에서 꼭 확인하세요' if j.get('origin') == 'company' else ''}{' — 고용24(한국고용정보원) 채용정보 Open API로 자동 수집. 운영자가 하나씩 확인한 공고가 아니므로 회사·직무·조건을 원문에서 꼭 확인하세요' if j.get('origin') == 'work24' else ''} · 조건과 일정은 원문이 우선합니다.</p>
   </article>
   <aside class="col-side">
     <div class="apply-card" data-deadline="{e(dl)}">
@@ -3705,6 +3710,15 @@ st.textContent="풀이를 만들었습니다.";}}).catch(function(e){{st.textCon
         write(f"jobs/{j['id']}/index.html", page(site, "../../", f"jobs/{j['id']}/", _jt, body,
                                                   desc=f"{j['company']} · {j.get('region','')} · {career_txt(j)} · 마감 {dl}", active="jobs/"),
               noindex=j["closed"])   # 마감 공고는 기록용으로만 남기고 검색 색인·사이트맵에서는 뺀다
+
+    # ---- 내린 공고: 예전에 공유된 주소가 깨지지 않게 안내 화면만 남긴다(공고 내용은 싣지 않음)
+    for j in removed_jobs:
+        if not ID_RE.match(str(j.get("id", ""))):
+            continue
+        write(f"jobs/{j['id']}/index.html", page(site, "../../", f"jobs/{j['id']}/", "내린 채용공고",
+              '<div class="sec"><div class="panel"><h1>이 공고는 SafePlum에서 내렸습니다</h1>'
+              '<p class="page-lead">채용정보 출처를 정비하면서 이 공고 화면을 내렸습니다. 지금 진행 중인 안전·보건 공고는 채용정보에서 확인해 주세요.</p>'
+              '<p><a class="btn" href="../">채용정보 보기</a></p></div></div>', desc="SafePlum에서 내린 채용공고입니다.", active="jobs/"), noindex=True)
 
     # ---- 오늘의 채용 모음(카카오톡 오픈채팅 공유용): 대기업·공공·외국계·중견 공고 중 마감 전, 업종별
     write("jobs/today/index.html", page(site, "../../", "jobs/today/", "오늘의 안전·보건 채용 모음", jobs_today_body(site, jobs, today),
