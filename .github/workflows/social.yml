@@ -1,0 +1,89 @@
+name: SNS 자동 운영
+
+# 세이프플럼 콘텐츠를 만들어 Google Blogger · Instagram · Facebook 페이지에 올리고 성과를 모은다. (설명서: social/README.md)
+# 저장소 변수 SOCIAL_ENABLED 가 'true' 일 때만 예약 실행이 동작한다. 꺼 두면 아무 일도 하지 않는다.
+# 예약 시각은 한국 시간 기준이며, 깃허브 예약 실행이 정각에 몰려 늦어지는 것을 감안해 5분 일찍 건다.
+on:
+  schedule:
+    - cron: "55 22 * * *"   # 07:55 KST → 08시 최신 소식 확인·주제 선정·원고 작성·검증·카드 제작
+    - cron: "55 23 * * *"   # 08:55 KST → 09시 Blogger 게시
+    - cron: "55 1 * * *"    # 10:55 KST → 11시 Instagram 카드뉴스 게시
+    - cron: "55 4 * * *"    # 13:55 KST → 14시 Facebook 게시
+    - cron: "55 8 * * *"    # 17:55 KST → 18시 게시 결과·유입 데이터 수집
+    - cron: "25 0 1 * *"    # 매월 1일 09:25 KST → 지난달 월간 보고서
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "실행할 작업"
+        type: choice
+        default: preflight
+        options: [preflight, status, plan, blogger, instagram, facebook, collect, report, retry]
+      dry_run:
+        description: "드라이런 — 실제로 게시하지 않고 보낼 내용만 기록"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: social-data
+  cancel-in-progress: false
+
+jobs:
+  run:
+    if: github.event_name == 'workflow_dispatch' || vars.SOCIAL_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TZ: Asia/Seoul
+      GH_TOKEN: ${{ github.token }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+      BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID }}
+      META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+      META_PAGE_ID: ${{ vars.META_PAGE_ID }}
+      META_IG_USER_ID: ${{ vars.META_IG_USER_ID }}
+      SOCIAL_STATS_KEY: ${{ secrets.SOCIAL_STATS_KEY }}
+      SOCIAL_SHEET_ID: ${{ vars.SOCIAL_SHEET_ID }}
+      SOCIAL_POSTS_PER_DAY: ${{ vars.SOCIAL_POSTS_PER_DAY }}
+      GSC_SITE_URL: ${{ vars.GSC_SITE_URL }}
+      SOCIAL_DRY: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '1' || '' }}
+      EVENT_SCHEDULE: ${{ github.event.schedule }}
+      INPUT_TASK: ${{ inputs.task }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 필요한 패키지
+        run: pip install --quiet pillow requests
+      - name: 상태 브랜치(social-data) 받기
+        run: bash social/state.sh pull
+      - name: 작업 실행
+        run: |
+          case "$EVENT_SCHEDULE" in
+            "55 22 * * *") TASK=plan ;;
+            "55 23 * * *") TASK=blogger ;;
+            "55 1 * * *")  TASK=instagram ;;
+            "55 4 * * *")  TASK=facebook ;;
+            "55 8 * * *")  TASK=collect ;;
+            "25 0 1 * *")  TASK=report ;;
+            *)             TASK="${INPUT_TASK:-status}" ;;
+          esac
+          echo "작업: $TASK (드라이런: ${SOCIAL_DRY:-아님})"
+          case "$TASK" in
+            blogger|instagram|facebook)
+              python3 -m social.run plan          # 08시 실행이 빠졌거나 실패했으면 여기서 채운다(이미 있으면 건너뜀)
+              bash social/state.sh push "원고 $(date +%F)"   # 이미지를 먼저 올려야 공개 주소가 생긴다
+              python3 -m social.run publish "$TASK" ;;
+            plan|collect|report|retry|preflight|status)
+              python3 -m social.run "$TASK" ;;
+          esac
+      - name: 상태 저장
+        if: always()
+        run: bash social/state.sh push "$(date '+%F %H:%M') 실행 결과"

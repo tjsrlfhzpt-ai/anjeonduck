@@ -2,3 +2,6 @@ data/auto/
 _site/
 _preview/
 __pycache__/
+
+# SNS 자동 운영 상태 폴더(social-data 브랜치를 받아 두는 곳)
+_social/

@@ -1,0 +1,55 @@
+{
+  "_comment": "세이프플럼 SNS 자동 운영 설정. 값을 바꾸면 다음 실행부터 적용됩니다. 비밀값(토큰·키)은 여기에 적지 않고 GitHub Secrets 에만 넣습니다.",
+  "base_url": "https://safeplum.com",
+  "brand": {"name": "세이프플럼", "name_en": "SafePlum", "tagline": "안전보건 서류, 무료로 쉽고 빠르게"},
+  "posts_per_day": 1,
+  "_posts_per_day_comment": "하루에 만드는 주제 수(1 또는 2). 주제 하나가 블로그 1건·인스타 1건·페이스북 1건이 됩니다.",
+  "platforms": {"blogger": true, "instagram": true, "facebook": true},
+  "auto_publish": {"general": true, "legal": true},
+  "_auto_publish_comment": "true 여도 검증(근거 대조)을 통과한 글만 게시합니다. false 로 두면 그 등급은 항상 보류되어 운영자 승인(/승인 댓글) 뒤에 게시됩니다.",
+  "openai": {"model": "gpt-5.6-terra", "verify_model": "", "timeout": 180},
+  "_openai_comment": "model 은 저장소 변수 OPENAI_MODEL 로 덮어쓸 수 있습니다. verify_model 이 비어 있으면 model 과 같은 모델로 검증합니다.",
+  "image_host": "jsdelivr",
+  "_image_host_comment": "jsdelivr(기본) 또는 raw. 카드 이미지는 social-data 브랜치에 올리고 이 주소로 공개합니다. 인스타그램이 주소를 못 읽으면 페이스북 임시 사진 주소로 자동 전환합니다.",
+  "graph_version": "v26.0",
+  "utm": {"medium": {"blogger": "blog", "instagram": "social", "facebook": "social"}},
+  "retry": {"max_attempts": 3, "give_up_hours": 48},
+  "no_repeat_days": 120,
+  "category_week": {
+    "0": ["법령", "서류"],
+    "1": ["재해예방", "도구"],
+    "2": ["위험성평가", "질의회시"],
+    "3": ["보건", "실무"],
+    "4": ["중처법", "도구"],
+    "5": ["재해예방", "커뮤니티"],
+    "6": ["실무", "질의회시"]
+  },
+  "_category_week_comment": "요일(0=월)별 우선 분야. 앞의 것이 첫 번째 주제, 뒤의 것이 posts_per_day=2 일 때 두 번째 주제. 최근 7일 안에 새 공식 발표(브리핑·개정 소식)가 있으면 '소식'이 첫 번째 주제를 대신합니다.",
+  "hashtags_base": ["세이프플럼", "안전관리자", "보건관리자", "산업안전보건"],
+  "cta_variants": {
+    "writer": [
+      "{tool}, 세이프플럼에서 무료로 작성해 보세요.",
+      "{tool}이(가) 필요하다면 세이프플럼 무료 작성기를 이용해 보세요.",
+      "양식 찾는 시간을 줄이세요. {tool} 무료 작성은 세이프플럼에서."
+    ],
+    "lookup": [
+      "{tool}은(는) 세이프플럼에서 바로 확인할 수 있습니다.",
+      "법령 근거까지 한 화면에서 — {tool}, 세이프플럼에서 확인하세요."
+    ],
+    "law": [
+      "산업안전보건 법령과 질의회시 자료를 세이프플럼에서 한곳에 찾아보세요.",
+      "조문 원문과 고용노동부 질의회시는 세이프플럼 법령 메뉴에서 확인하세요."
+    ],
+    "community": [
+      "비슷한 고민이 있다면 세이프플럼 커뮤니티에서 실무자들과 나눠 보세요.",
+      "현장 사례와 질문은 세이프플럼 Q&A 게시판에 남겨 주세요."
+    ],
+    "general": [
+      "안전보건 실무에 필요한 무료 자료와 작성 도구는 세이프플럼에서 확인하세요.",
+      "안전보건 업무에 필요한 무료 도구를 세이프플럼에서 활용하세요."
+    ]
+  },
+  "final_card_text": "안전보건 실무에 필요한 무료 자료와 작성 도구는 세이프플럼에서 확인하세요.",
+  "banned_extra": ["100% 안전", "절대 안전", "완벽하게 예방", "처벌받지 않", "면책됩니다", "걱정 없", "국내 1위", "국내 최초", "공식 인증"],
+  "allowed_link_hosts": ["safeplum.com", "www.law.go.kr", "law.go.kr", "www.moel.go.kr", "moel.go.kr", "www.kosha.or.kr", "kosha.or.kr", "www.korea.kr", "korea.kr", "opinion.lawmaking.go.kr", "www.lawmaking.go.kr", "likms.assembly.go.kr"]
+}

@@ -1,0 +1,47 @@
+name: SNS 보류 글 승인·폐기
+
+# 검증에서 보류된 글은 'social-hold' 라벨 이슈로 올라온다. 저장소 소유자가 그 이슈에 /승인 또는 /폐기 라고 댓글을 달면 처리한다.
+# 공개 저장소라 누구나 댓글을 달 수 있으므로 소유자(OWNER)의 댓글만 받는다.
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: social-data
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    if: >-
+      !github.event.issue.pull_request &&
+      github.event.comment.author_association == 'OWNER' &&
+      contains(github.event.issue.labels.*.name, 'social-hold') &&
+      (startsWith(github.event.comment.body, '/승인') || startsWith(github.event.comment.body, '/폐기'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Seoul
+      GH_TOKEN: ${{ github.token }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      COMMENT: ${{ github.event.comment.body }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet pillow requests
+      - run: bash social/state.sh pull
+      - name: 승인 또는 폐기
+        run: |
+          ID=$(printf '%s' "$ISSUE_TITLE" | grep -oE '[0-9]{8}[a-h]' | head -1)
+          if [ -z "$ID" ]; then echo "이슈 제목에서 글 ID 를 찾지 못했습니다."; exit 1; fi
+          case "$COMMENT" in
+            /승인*) python3 -m social.run approve "$ID" ;;
+            /폐기*) python3 -m social.run discard "$ID" ;;
+          esac
+      - if: always()
+        run: bash social/state.sh push "보류 글 처리"
