@@ -936,7 +936,11 @@ def nav_cols(site, rel):
         "jobs": [("SafePlum 채용", [(f"{rel}jobs/", "채용공고 전체"), (f"{rel}jobs/today/", "오늘의 채용 모음"), (f"{rel}board/?b=job", "회원 직접 등록 공고"), (f"{rel}board/write/?b=job", "공고 등록")][:4 if (site.get("features") or {}).get("job_posting", True) else 3] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
-                                    ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")])],
+                                    ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")]),
+                 # 그룹 채용관은 이용약관이 공고 정보의 복제·제공을 막아 공고를 옮기지 않고 바로가기만 둔다(2026-11-13 확인)
+                 ("그룹 채용관 바로가기", [("https://www.samsungcareers.com/hr/", "삼성"), ("https://www.skcareers.com/Recruit", "SK"), ("https://talent.hyundai.com/", "현대자동차"),
+                                    ("https://careers.lg.com/", "LG"), ("https://recruit.lotte.co.kr/apply/announcement", "롯데"), ("https://www.hanwhain.com/", "한화"),
+                                    ("https://recruit.cj.net/", "CJ"), ("https://career.doosan.com/", "두산")])],
         "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=free&c=%EC%9E%90%EB%A3%8C%20%EA%B3%B5%EC%9C%A0", "자료 공유 (업종별 현장 자료)"), (f"{rel}board/?b=qna", "Q&A")]),
                   ("회원·안내", [(f"{rel}board/account/", "로그인 · 마이페이지"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
     }
