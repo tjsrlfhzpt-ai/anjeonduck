@@ -2711,7 +2711,7 @@ def build(out, today):
     popular += [by_id[i] for i in HOME_FORMS if i in by_id and by_id[i] not in popular]
     popular = popular[:8]
     tools_cta = ('<aside class="cta-banner"><div><strong>실무 문서는 무료 도구에서 바로 작성하세요</strong>'
-                 '<p>법정 서식이 아닌 실무용 문서(TBM 일지, 위험성평가서, 산보위 회의록, 점검표 등)는 무료 도구에서 직접 작성하고 결재·서명·사진까지 넣어 인쇄할 수 있습니다 👉</p></div>'
+                 '<p>법정 서식이 아닌 실무용 문서(TBM 일지, 위험성평가서, 산보위 회의록, 점검표 등)는 무료 도구에서 직접 작성하고 결재·서명·사진까지 넣어 인쇄할 수 있습니다.</p></div>'
                  '<a class="btn" href="{rel}tools/">무료 도구로 가기 <span aria-hidden="true">→</span></a></aside>')
     def board(title, href, rows, more="더보기", badge=""):
         return (f'<section class="bd"><div class="bd-h"><h2>{e(title)}{badge}</h2><a class="more" href="{href}">{e(more)} <span aria-hidden="true">→</span></a></div>'
@@ -2920,12 +2920,13 @@ def build(out, today):
   </div>
 </section>
 <div class="wrap home2">
+  <div class="home2-main">
   <section class="hub" aria-label="주요 기능">
     <div class="hub-tabs" role="tablist" aria-label="기능 묶음">
-      <button type="button" role="tab" class="hub-tab" data-tab="write" aria-controls="pane-write" aria-selected="true">🔥 자주 쓰는 작성기</button>
-      <button type="button" role="tab" class="hub-tab" data-tab="calc" aria-controls="pane-calc" aria-selected="false">🧮 진단·계산기</button>
-      <button type="button" role="tab" class="hub-tab" data-tab="forms" aria-controls="pane-forms" aria-selected="false">📄 업무별 서류·서식</button>
-      <button type="button" role="tab" class="hub-tab" data-tab="news" aria-controls="pane-news" aria-selected="false">📰 브리핑·법령 동향</button>
+      <button type="button" role="tab" class="hub-tab" data-tab="write" aria-controls="pane-write" aria-selected="true">자주 쓰는 작성기</button>
+      <button type="button" role="tab" class="hub-tab" data-tab="calc" aria-controls="pane-calc" aria-selected="false">진단·계산기</button>
+      <button type="button" role="tab" class="hub-tab" data-tab="forms" aria-controls="pane-forms" aria-selected="false">업무별 서류·서식</button>
+      <button type="button" role="tab" class="hub-tab" data-tab="news" aria-controls="pane-news" aria-selected="false">브리핑·법령 동향</button>
     </div>
     <div class="hub-pane" role="tabpanel" id="pane-write" data-pane="write">
       <div class="hc-grid">{tab1}</div>
@@ -2953,6 +2954,11 @@ def build(out, today):
       <p class="hub-links"><span>더 보기</span><a href="board/?b=free">커뮤니티</a><a href="board/?b=qna">Q&amp;A</a><a href="jobs/">채용정보</a><a href="board/?b=job">회원 채용공고</a><a href="laws/act/">산업안전보건법</a><a href="laws/sapa/">중대재해처벌법</a></p>
     </div>
   </section>
+  <section class="home-latest" aria-label="최신 소식">
+    {board(f"최신 브리핑·소식 · {len(BOARD)}건", "brief/", brief_rows, "전체 보기") if BOARD else bd_brief}
+    <div class="home-latest-2">{bd_jobs}{bd_laws}</div>
+  </section>
+  </div>
   <aside class="home2-side">
     {month_box}
     {chat_banner("cm-chat-side")}

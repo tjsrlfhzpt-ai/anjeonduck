@@ -2192,3 +2192,74 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
 .fl-b-t{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}.fl-b-t strong{font-size:15.5px;color:var(--navy)}.fl-b-t span{font-size:13px;color:var(--text-2);line-height:1.45}
 .fl-b-go{flex:none;font-size:13.5px;font-weight:700;color:var(--blue);white-space:nowrap}
 @media (max-width:560px){.fl-b-go{display:none}}
+
+/* ==========================================================
+   2026-11-17 리디자인 레이어 (화면 전용 — 인쇄 CSS에는 영향 없음)
+   되돌리기: 이 주석부터 파일 끝까지 지우면 이전 화면으로 돌아갑니다.
+   원칙: 색은 파랑(동작)·남색(제목) 두 가지로 줄이고, 꾸밈 배지는 회색 글자로.
+   ========================================================== */
+@media screen{
+  /* 홈: 왼쪽 열 = 기능 탭 + 최신 소식(오른쪽 열과 높이 균형) */
+  .home2-main{display:flex;flex-direction:column;gap:20px;min-width:0}
+  .hub-tab[aria-selected="true"]{color:var(--blue);border-bottom-color:var(--blue)}
+  .hub-tab:focus-visible{outline-color:var(--blue)}
+  .hc:hover,.hub-links a:hover{border-color:var(--blue)}
+  .hub-links a:hover{color:var(--blue)}
+  .hc-g{background:none;color:var(--muted);font-weight:600;font-size:12px;padding:0;border-radius:0}
+  .home-latest{display:flex;flex-direction:column;gap:22px;padding:20px 22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-1)}
+  .home-latest-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+  .home-latest .bd-h h2{font-size:15.5px}
+  .home-latest .bd{background:none;border:0;border-radius:0;padding:0;box-shadow:none}
+  .bd{border-top-width:1px;border-top-color:var(--line)}
+  .bd:nth-child(1),.bd:nth-child(2){border-top-color:var(--line)}
+  .home-latest .bd-tag,.hub-pane .bd-list .bd-tag{background:none;color:var(--muted);font-weight:600;padding:0;min-width:4.6em}
+  .home-latest .bd-list li{min-height:38px}
+
+  /* 채널 배너(오픈채팅·블로그·유튜브): 원색 덩어리 → 같은 모양의 흰 카드 + 채널 색 표시줄 */
+  .cm-chat,.cm-chat.cm-blog,.cm-chat.cm-yt{background:var(--surface);color:var(--text);border:1px solid var(--line);border-left:4px solid #F2D500;box-shadow:var(--shadow-1)}
+  .cm-chat.cm-blog{border-left-color:#03C75A}
+  .cm-chat.cm-yt{border-left-color:#E62117}
+  .cm-chat:hover{filter:none;border-color:var(--blue-100);box-shadow:var(--shadow-2)}
+  .cm-chat .cm-chat-t{color:var(--navy);font-size:15px}
+  .cm-chat .cm-chat-d,.cm-blog .cm-chat-d,.cm-yt .cm-chat-d{color:var(--text-2);font-size:13.5px}
+  .cm-chat .cm-chat-go,.cm-blog .cm-chat-go,.cm-yt .cm-chat-go{background:var(--surface-2);color:var(--navy);border:1px solid var(--line);font-weight:700}
+  .cm-chat:hover .cm-chat-go{background:var(--blue-50);color:var(--blue);border-color:var(--blue-100)}
+  .cm-yt-play{border-color:transparent transparent transparent #E62117}
+  .home2-side .cm-chat-side+.cm-chat-side{margin-top:-6px}
+
+  /* 태블릿(721~900px): 주 메뉴와 '메뉴' 버튼이 함께 나와 헤더가 화면 밖으로 밀리던 문제 → 메뉴 서랍으로 통일 */
+  .logo{white-space:nowrap}
+  @media (max-width:900px){.hd .gnb{display:none}.hd-in>.logo{margin-right:auto}}
+
+  /* 오른쪽 메뉴의 펼침 메뉴는 오른쪽 정렬(1024px 등에서 화면 밖으로 넘쳐 가로 스크롤이 생기던 문제) */
+  .gnb-item:nth-last-child(-n+3) .mega{left:auto;right:-8px}
+
+  /* 브리핑 분류: 색 배지 7종 → 테두리만 있는 회색 글자 */
+  .nb-row .nb-cat{background:none;color:var(--text-2);border:1px solid var(--line);font-weight:700}
+
+  /* 태블릿·휴대폰 브리핑 목록: 보조 칸(블로그·지난 브리핑)이 목록보다 먼저 나와 목록이 1,200px 아래에 있던 문제 */
+  @media (max-width:900px){.layout-detail:has(.nb) .col-side{order:1}}
+  /* 휴대폰 브리핑 목록: 날짜·분류는 윗줄, 제목은 전체 폭(제목이 4줄로 꺾이던 문제) */
+  @media (max-width:720px){
+    .nb-row summary{grid-template-columns:auto auto minmax(0,1fr);gap:4px 8px;padding:12px 14px}
+    .nb-row .nb-cat{padding:1px 7px;justify-self:start}
+    .nb-row .nb-t{grid-column:1/-1}
+  }
+  /* 휴대폰 채널 배너: 설명을 숨기고 한 줄(이름 + 버튼)로 */
+  @media (max-width:720px){
+    .cm-chat,.cm-chat.cm-chat-side{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+    .cm-chat .cm-chat-d{display:none}
+    .cm-chat .cm-chat-t{font-size:14px;line-height:1.4}
+    .cm-chat .cm-chat-go,.cm-chat-side .cm-chat-go{grid-column:2;grid-row:1;margin-top:0;justify-self:end;padding:6px 11px;font-size:12.5px}
+  }
+
+  /* 모바일 홈: 카드 설명 한 줄, 처음 8개만(전체는 '작성기 전체' 링크) */
+  @media (max-width:640px){
+    .hc{padding:12px}
+    .hc-d{white-space:nowrap}
+    #pane-write .hc-grid>.hc:nth-child(n+9){display:none}
+    .home-latest-2{grid-template-columns:minmax(0,1fr)}
+    .home-latest{padding:16px}
+    .cm-chat{padding:12px 14px}
+  }
+}
