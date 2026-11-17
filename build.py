@@ -1489,7 +1489,7 @@ def jobs_today_text(site, jobs, today):
             j = g["j"]
             def city(x):
                 tk = (x.get("region") or "").split()
-                if not tk:
+                if not tk or "원문" in tk or "확인" in tk:   # '근무지 원문 확인' 같은 안내 문구는 지역이 아니다
                     return ""
                 last = tk[-1]
                 if len(tk) > 1 and last.endswith("구"):
@@ -1504,7 +1504,7 @@ def jobs_today_text(site, jobs, today):
             if emp == "계약직":
                 emp += f"({term_txt(j)})" if j.get("term") else "(기간은 원문 확인)"
             cond = " · ".join(x for x in ['·'.join(j['jobs_list']), career_txt(j), j.get("education"), emp] if x)
-            out.append(f"- {co}({cities}) [{tag}] / {cond} {dl_s}".rstrip())
+            out.append(f"- {co}{f'({cities})' if cities else ''} [{tag}] / {cond} {dl_s}".rstrip())
             out.append(f"  {base}/jobs/{j['id']}/")
         out.append("")
     no = ((site.get("operator") or {}).get("job_info_no") or "")
