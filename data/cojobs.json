@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-12",
+ "fetched": "2026-11-17",
  "source": "회사 자체 채용 홈페이지",
  "items": [
   {
@@ -22,25 +22,6 @@
    "education": "원문 확인",
    "group": "OCI그룹",
    "term": "고용형태는 원문 확인"
-  },
-  {
-   "id": "co-korgc-243490",
-   "title": "환경안전팀 환경관리 경력사원 채용",
-   "company": "그린케미칼",
-   "region": "근무지 원문 확인",
-   "address": "",
-   "job": "안전관리자",
-   "career": "경력",
-   "employment": "정규직",
-   "company_type": "중견기업",
-   "industry": "제조·화학",
-   "deadline": "2026-11-15",
-   "posted": "2026-11-05",
-   "source_url": "https://korgc.career.greetinghr.com/ko/o/243490",
-   "source_name": "그린케미칼 채용 홈페이지",
-   "origin": "company",
-   "career_detail": "경력 3년↑",
-   "education": "원문 확인"
   },
   {
    "id": "co-korgc-242230",
