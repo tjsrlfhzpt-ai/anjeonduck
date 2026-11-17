@@ -940,7 +940,8 @@ def nav_cols(site, rel):
                  # 그룹 채용관은 이용약관이 공고 정보의 복제·제공을 막아 공고를 옮기지 않고 바로가기만 둔다(2026-11-13 확인)
                  ("그룹 채용관 바로가기", [("https://www.samsungcareers.com/hr/", "삼성"), ("https://www.skcareers.com/Recruit", "SK"), ("https://talent.hyundai.com/", "현대자동차"),
                                     ("https://careers.lg.com/", "LG"), ("https://recruit.lotte.co.kr/apply/announcement", "롯데"), ("https://www.hanwhain.com/", "한화"),
-                                    ("https://recruit.cj.net/", "CJ"), ("https://career.doosan.com/", "두산")])],
+                                    ("https://recruit.cj.net/", "CJ"), ("https://career.doosan.com/dsp/sa/RecList.jsp", "두산"), ("https://recruit.hd.com/", "HD현대"),
+                                    ("https://recruit.posco.com/", "포스코")])],
         "board": [("게시판", [(f"{rel}board/?b=free", "커뮤니티"), (f"{rel}board/?b=free&c=%EC%9E%90%EB%A3%8C%20%EA%B3%B5%EC%9C%A0", "자료 공유 (업종별 현장 자료)"), (f"{rel}board/?b=qna", "Q&A")]),
                   ("회원·안내", [(f"{rel}board/account/", "로그인 · 마이페이지"), (f"{rel}board/rules/", "이용수칙"), (f"{rel}privacy/", "개인정보 처리방침")])],
     }

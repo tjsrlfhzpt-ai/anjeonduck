@@ -203,6 +203,49 @@ def gh_jobs(site):
         out.append(j)
     return len(jobs), out
 
+# ---- 두산 채용(career.doosan.com): 로그인 없이 열리는 공고 목록 HTML(RecList.jsp)에서 회사·제목·접수기간만 읽는다.
+# 2026-11-13 확인: 공개 이용약관 없음(개인정보처리방침만), robots.txt 없음. 상세 화면은 주소로 바로 열리지 않아 목록 화면으로 연결한다.
+DOOSAN_LIST = "https://career.doosan.com/dsp/sa/RecList.jsp"
+DOOSAN_ROW = re.compile(r"goDetail\('(\d+)'[^)]*\)[^>]*>(.*?)</a>", re.S)
+
+
+def _text(h):
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h)).strip()
+
+
+def doosan_jobs(site):
+    html = get(DOOSAN_LIST)
+    rows = DOOSAN_ROW.findall(html)
+    out, seen = [], set()
+    for rid, inner in rows:
+        if rid in seen:
+            continue
+        seen.add(rid)
+        comp = _text((re.search(r'class="company"[^>]*>(.*?)<span', inner, re.S) or re.search(r'class="company"[^>]*>(.*?)</div>', inner, re.S) or [None, ""])[1])
+        title = _text((re.search(r"<strong[^>]*>(.*?)</strong>", inner, re.S) or [None, ""])[1])
+        kind = _text((re.search(r'class="badge-type"[^>]*>(.*?)</span>', inner, re.S) or [None, ""])[1])
+        period = re.findall(r"(\d{4}-\d{2}-\d{2})", inner)
+        if not title or w24.EXCLUDE_RE.search(title) or TITLE_EXCLUDE_RE.search(title) or not w24.JOB_RE.search(title):
+            continue
+        dl = period[1] if len(period) > 1 else "채용 시"
+        if dl != "채용 시" and dl < TODAY.isoformat():
+            continue
+        car = "신입" if "신입" in kind else ("경력" if "경력" in kind else "경력무관")
+        j = {
+            "id": f"co-doosan-{rid}", "title": title, "company": comp or "두산",
+            "region": "근무지 원문 확인", "address": "", "job": w24.job_of(title),
+            "career": car, "employment": "계약직" if ("계약" in kind or "계약" in title) else "정규직",
+            "company_type": "대기업", "group": "두산그룹", "industry": site.get("industry", "제조·화학"),
+            "deadline": dl, "posted": period[0] if period else TODAY.isoformat(),
+            "source_url": DOOSAN_LIST, "source_name": "두산 채용 홈페이지", "origin": "company",
+            "career_detail": car if car != "경력무관" else "원문 확인", "education": "원문 확인",
+            "note": "두산 채용 홈페이지 공고 목록에서 제목으로 찾아 지원",
+        }
+        if "계약" in kind and "계약" not in title:
+            j["term"] = "기간은 원문 확인"
+        out.append(j)
+    return len(rows), out
+
 
 def main():
     cfg = json.loads((ROOT / "data" / "career_sites.json").read_text(encoding="utf-8"))
@@ -261,6 +304,20 @@ def main():
             out.append(j)
             n += 1
         print(f"  {site['company']}: 공고 {len(ops)}건 중 안전·보건 {n}건")
+    # 자체 채용 시스템(현재 두산)
+    for site in cfg.get("custom", []):
+        fn = {"doosan": doosan_jobs}.get(site.get("kind"))
+        if not fn:
+            continue
+        try:
+            total, items = fn(site)
+        except Exception as e:
+            fail += 1
+            warn(f"{site.get('company')}({site['kind']}) 읽기 실패: {str(e)[:100]}")
+            continue
+        ok += 1
+        out.extend(items)
+        print(f"  {site['company']}: 공고 {total}건 중 안전·보건 {len(items)}건")
     # 그린하우스 게시판을 쓰는 회사
     for site in cfg.get("greenhouse", []):
         try:
@@ -300,7 +357,7 @@ def main():
             continue
         hits = [o for o in ops if is_safety(o)]
         print(f"  [후보] {slug}: 있음 — 이름 '{name}', 공고 {len(ops)}건, 안전·보건 {len(hits)}건" + ("".join(f"\n      · {h.get('title')} | 근무지 {'있음' if place_of(positions(h)) else '없음'} | 마감 {kst_date(h.get('dueDate')) or '상시'}" for h in hits[:6])))
-    if (cfg.get("sites") or cfg.get("greenhouse")) and ok == 0:
+    if (cfg.get("sites") or cfg.get("greenhouse") or cfg.get("custom")) and ok == 0:
         warn("회사 채용 홈페이지를 하나도 읽지 못해 기존 파일을 유지합니다.")
         return
     OUT.mkdir(parents=True, exist_ok=True)
