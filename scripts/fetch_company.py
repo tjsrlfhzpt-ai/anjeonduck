@@ -138,6 +138,19 @@ def norm_addr(addr):
     return " ".join(tk)
 
 
+def bracket_company(title, site):
+    """그룹 채용 홈페이지의 '[동국씨엠] 안전환경 ...' 같은 제목에서 실제 회사 이름을 꺼낸다(그룹으로 등록한 곳만)."""
+    if not site.get("group"):
+        return ""
+    m = re.match(r"\s*\[([^\]]{2,20})\]", title or "")
+    if not m or re.search(r"경력|신입|채용|계약|인턴|정규|모집|수시|상시|공채", m.group(1)):
+        return ""
+    name = m.group(1).strip()
+    if name.lower().replace(" ", "") == site.get("slug", "").lower() or name in site.get("company", ""):
+        return ""   # [HYBE]처럼 회사 자신을 가리키는 표기는 그대로 둔다
+    return name
+
+
 def collect(site):
     slug = site["slug"]
     base = f"https://{slug}.career.greetinghr.com"
@@ -282,7 +295,7 @@ def main():
             j = {
                 "id": f"co-{site['slug']}-{o.get('openingId')}",
                 "title": title,
-                "company": site.get("divisions", {}).get(division) or site["company"],
+                "company": site.get("divisions", {}).get(division) or bracket_company(title, site) or site["company"],
                 "region": region,
                 "address": addr,
                 "job": w24.job_of(title),

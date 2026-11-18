@@ -256,7 +256,7 @@ def co_key(name):
     return re.sub(r"[^\w가-힣]", "", s).lower()
 
 
-def dedupe_w24(w24, others):
+def dedupe_w24(w24, others, label="고용24 자동 수집"):
     """고용24 자동 수집 공고 중 잡코리아 선별·회원 등록 공고와 겹치는 것은 뺀다(같은 회사 + 같은 직무 + 마감일 7일 이내 또는 제목 유사)."""
     def words(t):
         return {w for w in re.findall(r"[가-힣A-Za-z0-9]{2,}", str(t or "")) if w not in ("채용", "모집", "구인", "경력", "신입", "경력직", "직원", "담당자")}
@@ -280,7 +280,7 @@ def dedupe_w24(w24, others):
         else:
             out.append(j)
     if w24:
-        print(f"  고용24 자동 수집 {len(w24)}건 중 다른 출처와 겹친 {dropped}건 제외 → {len(out)}건")
+        print(f"  {label} {len(w24)}건 중 다른 출처와 겹친 {dropped}건 제외 → {len(out)}건")
     return out
 
 
@@ -2607,6 +2607,8 @@ def build(out, today):
     removed_jobs = [j for j in curated if j.get("source_name") in _excl]
     curated = [j for j in curated if j.get("source_name") not in _excl]
     cojobs = (load("data/cojobs.json") if (ROOT / "data/cojobs.json").exists() else load_auto("cojobs.json"))["items"]   # 회사 자체 채용 홈페이지(scripts/fetch_company.py)
+    # 회사 채용 홈페이지 공고 중 이미 실은 잡코리아 선별 공고와 같은 것은 뺀다(예전에 공유한 공고 주소가 깨지지 않게)
+    cojobs = dedupe_w24(cojobs, curated + user_jobs, "회사 채용 홈페이지") if cojobs else cojobs
     w24 = dedupe_w24(load_auto("w24jobs.json")["items"], curated + user_jobs + cojobs)
     jobs = validate_jobs(curated + user_jobs + cojobs + pubjobs["items"] + w24, today)
     global JOBS_OPEN
