@@ -38,7 +38,10 @@ on conflict (user_id) do nothing;
 create or replace function public.verify_on_confirm() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if old.email_confirmed_at is null and new.email_confirmed_at is not null then
+  -- 'Confirm email' 을 끄면 가입 직후(0.1초 안) email_confirmed_at 이 자동으로 채워지므로, 10초 넘게 지난 확인만 메일 인증으로 본다
+  -- (2026-11-19 수정 — supabase/fix_verify_autoconfirm.sql)
+  if old.email_confirmed_at is null and new.email_confirmed_at is not null
+     and new.email_confirmed_at > new.created_at + interval '10 seconds' then
     insert into public.member_verify (user_id, verified_at, method) values (new.id, new.email_confirmed_at, 'signup_email')
     on conflict (user_id) do nothing;
   end if;
