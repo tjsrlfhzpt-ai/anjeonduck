@@ -548,9 +548,17 @@ main{flex:1 0 auto}
 .cal-t.f-semiannual{background:var(--orange-50);color:#8A4A0B}
 .cal-t.f-yearly{background:#F1ECFB;color:#4B2E8A}
 .cal-t.done{text-decoration:line-through;opacity:.6}
-.ytable{min-width:900px}
-.ytable td,.ytable th{text-align:center;padding:8px 6px;font-size:12.5px}
-.ytable td.yt{text-align:left;white-space:normal;min-width:240px;font-weight:600;color:var(--text)}
+/* 연간 일정표: PC·태블릿에서는 가로 스크롤 없이 12개월이 한 화면에 들어오게 고정 폭으로 나눈다 */
+.ytable{min-width:0;table-layout:fixed}
+.ytable th:first-child{width:38%}
+.ytable td,.ytable th{text-align:center;padding:8px 2px;font-size:12.5px}
+.ytable td.yt{text-align:left;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;padding:8px 10px;font-weight:600;color:var(--text);line-height:1.4}
+@media (max-width:640px){
+  .ytable{min-width:620px}
+  .ytable th:first-child{width:170px}
+  .ytable th:first-child,.ytable td.yt{position:sticky;left:0;z-index:1;background:var(--surface);box-shadow:1px 0 0 var(--line-2)}
+  .ytable thead th:first-child{background:var(--surface-2)}
+}
 .ytable td.on{background:var(--blue-50);color:var(--blue);font-weight:800}
 .dlg{border:0;border-radius:18px;padding:0;max-width:640px;width:calc(100% - 32px);box-shadow:var(--shadow-2);background:var(--surface);color:var(--text)}
 .dlg::backdrop{background:rgba(10,20,40,.45)}
