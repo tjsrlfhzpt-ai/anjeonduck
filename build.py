@@ -2692,7 +2692,7 @@ def build(out, today):
   </div>
 </section>"""
     sched = load("data/schedule.json")
-    MO_KEYS = ("key", "title", "freq", "month", "day", "weekday", "qmonth", "hmonth", "m0", "anchor", "work", "time", "tool", "form", "off", "ind")
+    MO_KEYS = ("key", "title", "freq", "month", "day", "weekday", "qmonth", "hmonth", "m0", "anchor", "work", "time", "tool", "form", "off", "ind", "every", "y0")
     mo_tasks = [{k: t[k] for k in MO_KEYS if k in t} for t in sched["tasks"]]
     mo_json = json.dumps(mo_tasks, ensure_ascii=False).replace("</", "<\\/")
     month_box = f"""<section class="side-box" id="moBox">

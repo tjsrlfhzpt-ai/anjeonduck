@@ -107,6 +107,8 @@
         <option value="bimonthly">2개월마다</option><option value="quarterly">분기마다</option><option value="semiannual">반기마다</option><option value="yearly">매년</option></select></label>
       <label class="field" data-f="wd"><span class="label">요일</span><select id="fWeekday" class="sort"><option value="1">월</option><option value="2">화</option><option value="3">수</option><option value="4">목</option><option value="5">금</option><option value="6">토</option><option value="0">일</option></select></label>
       <label class="field" data-f="month"><span class="label" id="fMonthL">월</span><select id="fMonth" class="sort"></select></label>
+      <label class="field" data-f="every"><span class="label">몇 년마다</span><select id="fEvery" class="sort"><option value="1">매년</option><option value="2">2년마다</option><option value="3">3년마다</option><option value="4">4년마다</option><option value="5">5년마다</option></select></label>
+      <label class="field" data-f="y0"><span class="label">돌아오는 해(기준 연도)</span><input type="number" id="fY0" min="2000" max="2100" step="1" inputmode="numeric"></label>
       <label class="field" data-f="day"><span class="label">일</span><select id="fDay" class="sort"></select></label>
       <label class="field"><span class="label">시각</span><input type="time" id="fTime"></label>
       <label class="field" data-f="work"><span class="label">요일 범위</span><select id="fWork" class="sort"><option value="1">월~금만</option><option value="0">매일(주말 포함)</option></select></label>
@@ -161,6 +163,9 @@
   // 격일 업무의 기준일. 해마다 1월 1일로 다시 맞추면 12/31과 1/1이 연달아 잡히므로 고정한다.
   function anchorOf(t) { var a = /^\d{4}-\d{2}-\d{2}$/.test(t.anchor || "") ? new Date(t.anchor + "T00:00:00") : null; return a && !isNaN(a) ? a : new Date(2026, 0, 1); }
   function dayDiff(a, b) { return Math.round((Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 864e5); }
+  // 매년 업무의 'N년마다'(안전검사 2년·근골격계 유해요인조사 3년 등). every 1이면 매년, y0은 회차가 돌아오는 기준 연도.
+  function everyOf(t) { var n = +t.every; return n >= 2 && n <= 5 ? Math.floor(n) : 1; }
+  function baseYear(t) { var n = +t.y0; return n >= 2000 && n <= 2100 ? Math.floor(n) : 2026; }
   function hhmm(t) { var m = /^(\d{1,2}):(\d{2})$/.exec(t.time || ""); return m && +m[1] < 24 && +m[2] < 60 ? pad(+m[1]) + ":" + m[2] : ""; }
 
   // 업종: 홈 달력과 같은 저장값(safetake.industry). 업종이 정해진 업무(ind)는 고른 업종에 맞을 때만 기본으로 켠다
@@ -188,7 +193,7 @@
       case "bimonthly": { var m0 = ((+t.m0 || 1) - 1) % 2; var b = m - (((m - m0) % 2) + 2) % 2; var by = y; if (b < 0) { b += 12; by -= 1; } return { id: by + "-B" + b, due: dayIn(by, b, t.day) }; }
       case "quarterly": { var q = Math.floor(m / 3); return { id: y + "-Q" + (q + 1), due: dayIn(y, q * 3 + ((+t.qmonth || 1) - 1), t.day) }; }
       case "semiannual": { var h = m < 6 ? 0 : 1; return { id: y + "-H" + (h + 1), due: dayIn(y, h * 6 + ((+t.hmonth || 6) - 1), t.day) }; }
-      default: return { id: String(y), due: dayIn(y, (+t.month || 1) - 1, t.day) };
+      default: { var ev = everyOf(t), cy = y - ((((y - baseYear(t)) % ev) + ev) % ev); return { id: String(cy), due: dayIn(cy, (+t.month || 1) - 1, t.day) }; }
     }
   }
   function when(t) {
@@ -201,7 +206,7 @@
       case "bimonthly": return "2개월마다(" + ((+t.m0 || 1) === 1 ? "홀수 달" : "짝수 달") + ") " + d;
       case "quarterly": { var qm = +t.qmonth || 1; return "분기 " + qm + "번째 달 " + d + " (" + [0, 3, 6, 9].map(function (x) { return x + qm; }).join("·") + "월)"; }
       case "semiannual": return "반기 " + (+t.hmonth || 6) + "번째 달 " + d + " (" + (+t.hmonth || 6) + "월·" + ((+t.hmonth || 6) + 6) + "월)";
-      default: return "매년 " + (+t.month || 1) + "월 " + d;
+      default: { var ev = everyOf(t); return ev > 1 ? ev + "년마다 " + (+t.month || 1) + "월 " + d + " (" + [0, 1, 2].map(function (i) { return baseYear(t) + i * ev; }).join("·") + "년…)" : "매년 " + (+t.month || 1) + "월 " + d; }
     }
   }
   function occursOn(t, d) {
@@ -285,7 +290,7 @@
   function nextRef(t, d) {
     var n = new Date(d);
     if (t.freq === "daily") n.setDate(n.getDate() + 1); else if (t.freq === "every2") n.setDate(n.getDate() + 2); else if (t.freq === "weekly") n.setDate(n.getDate() + 7);
-    else n.setMonth(n.getMonth() + ({ monthly: 1, bimonthly: 2, quarterly: 3, semiannual: 6, yearly: 12 }[t.freq] || 1), 1);
+    else n.setMonth(n.getMonth() + ({ monthly: 1, bimonthly: 2, quarterly: 3, semiannual: 6, yearly: 12 * everyOf(t) }[t.freq] || 1), 1);
     return n;
   }
   // 켠 업무마다 '지금 챙길 한 건': 이번 회차가 지났는데 미완료면 그 회차, 아니면 아직 완료하지 않은 가장 가까운 회차.
@@ -380,7 +385,7 @@
   fDay.innerHTML = Array.apply(null, Array(28)).map(function (_, i) { return '<option value="' + (i + 1) + '">' + (i + 1) + "일</option>"; }).join("") + '<option value="31">말일</option>';
   function syncFields() {
     var f = document.getElementById("fFreq").value;
-    var show = { wd: f === "weekly", month: ["bimonthly", "quarterly", "semiannual", "yearly"].indexOf(f) >= 0, day: ["monthly", "bimonthly", "quarterly", "semiannual", "yearly"].indexOf(f) >= 0, work: f === "daily" };
+    var show = { wd: f === "weekly", month: ["bimonthly", "quarterly", "semiannual", "yearly"].indexOf(f) >= 0, day: ["monthly", "bimonthly", "quarterly", "semiannual", "yearly"].indexOf(f) >= 0, work: f === "daily", every: f === "yearly", y0: f === "yearly" && +document.getElementById("fEvery").value > 1 };
     document.querySelectorAll("[data-f]").forEach(function (el) { el.hidden = !show[el.dataset.f]; });
     var n = f === "yearly" ? 12 : f === "semiannual" ? 6 : f === "quarterly" ? 3 : 2, keep = fMonth.value;
     document.getElementById("fMonthL").textContent = f === "yearly" ? "월" : f === "bimonthly" ? "시작 달" : f === "quarterly" ? "분기의 몇 번째 달" : "반기의 몇 번째 달";
@@ -388,12 +393,14 @@
     if (+keep && +keep <= n) fMonth.value = keep;
   }
   document.getElementById("fFreq").addEventListener("change", syncFields);
+  document.getElementById("fEvery").addEventListener("change", syncFields);
   function openDlg(key) {
     var t = key ? tasks().filter(function (x) { return x.key === key; })[0] : { key: "", title: "", freq: "monthly", day: 1, time: "09:00", memo: "", custom: true };
     editing = t;
     document.getElementById("sDlgT").textContent = key ? "업무 설정 바꾸기" : "업무 추가";
     document.getElementById("fTitle").value = t.title;
-    document.getElementById("fFreq").value = t.freq; syncFields();
+    document.getElementById("fFreq").value = t.freq;
+    document.getElementById("fEvery").value = String(everyOf(t)); document.getElementById("fY0").value = String(t.y0 ? baseYear(t) : today().getFullYear()); syncFields();
     document.getElementById("fWeekday").value = String(wdOf(t));
     fMonth.value = String(t.freq === "yearly" ? (t.month || 1) : t.freq === "quarterly" ? (t.qmonth || 1) : t.freq === "semiannual" ? (t.hmonth || 6) : (t.m0 || 1));
     fDay.value = String(t.day >= 29 ? 31 : (t.day || 1));
@@ -414,6 +421,8 @@
     if (!title) { ev.preventDefault(); document.getElementById("fTitle").focus(); return; }
     var f = document.getElementById("fFreq").value, mv = +fMonth.value;
     var v = { title: title, freq: f, day: +fDay.value, time: document.getElementById("fTime").value, memo: document.getElementById("fMemo").value.trim(), weekday: +document.getElementById("fWeekday").value, work: document.getElementById("fWork").value };
+    v.every = f === "yearly" ? +document.getElementById("fEvery").value || 1 : 1;
+    if (v.every > 1) { var y0 = Math.floor(+document.getElementById("fY0").value); if (!(y0 >= 2000 && y0 <= 2100)) { ev.preventDefault(); document.getElementById("fY0").focus(); return; } v.y0 = y0; }
     if (f === "yearly") v.month = mv; else if (f === "quarterly") v.qmonth = mv; else if (f === "semiannual") v.hmonth = mv; else if (f === "bimonthly") v.m0 = mv;
     // 격일 기준일은 처음 격일로 정할 때만 잡는다(저장할 때마다 바꾸면 완료 표시가 어긋남).
     if (f === "every2") v.anchor = editing.freq === "every2" && editing.anchor ? editing.anchor : ymd(today());
@@ -422,6 +431,8 @@
       else { v.key = "u" + Date.now().toString(36); v.on = true; S.custom.push(v); }
     } else {
       var o = S.ov[editing.key] || {}; var base = D.tasks.filter(function (x) { return x.key === editing.key; })[0];
+      if (v.every === 1) { if (base.every != null && +base.every > 1) o.every = 1; else delete o.every; delete o.y0; delete v.every; }
+      else { if (+base.every === v.every) delete o.every; else o.every = v.every; if (base.y0 != null && +base.y0 === v.y0) delete o.y0; else o.y0 = v.y0; delete v.every; delete v.y0; }
       Object.keys(v).forEach(function (k) { if ((k === "anchor" && base.freq === "every2" && !o.anchor) || (k === "m0" && base[k] == null && v[k] === 1)) { delete o[k]; return; } if (String(base[k] == null ? "" : base[k]) !== String(v[k]) && !(k === "work" && v[k] === "1" && base.work == null) && !(k === "weekday" && base.freq !== "weekly" && f !== "weekly") && !(k === "day" && v[k] === 31 && base.day >= 29) && !(k === "day" && base.day == null && ["daily", "every2", "weekly"].indexOf(f) >= 0)) o[k] = v[k]; else delete o[k]; });
       S.ov[editing.key] = o;
     }
@@ -463,7 +474,7 @@
       case "bimonthly": return "FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=" + md;
       case "quarterly": return "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=" + md;
       case "semiannual": return "FREQ=MONTHLY;INTERVAL=6;BYMONTHDAY=" + md;
-      default: return "FREQ=YEARLY;BYMONTH=" + (+t.month || 1) + ";BYMONTHDAY=" + md;
+      default: return "FREQ=YEARLY;" + (everyOf(t) > 1 ? "INTERVAL=" + everyOf(t) + ";" : "") + "BYMONTH=" + (+t.month || 1) + ";BYMONTHDAY=" + md;
     }
   }
   // 반복 일정의 첫 날: 오늘 이후 처음 돌아오는 기한일. 시작일이 반복 규칙과 어긋나면 캘린더 앱이 엉뚱한 날을 하나 더 만든다.

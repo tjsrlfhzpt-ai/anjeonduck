@@ -143,7 +143,7 @@ def t_schedule():
     for t in sc.get("tasks", []):
         if t.get("status") == "check":           # 원문 확인이 안 끝난 업무는 쓰지 않는다
             continue
-        facts = [f"업무: {t['title']}", f"주기: {FREQ.get(t['freq'], t['freq'])} — 구분: {t.get('klass', '')}", f"근거: {t['basis']}", f"설명: {t.get('memo', '')}"]
+        facts = [f"업무: {t['title']}", f"주기: {(str(t['every']) + '년마다') if t['freq'] == 'yearly' and int(t.get('every') or 1) > 1 else FREQ.get(t['freq'], t['freq'])} — 구분: {t.get('klass', '')}", f"근거: {t['basis']}", f"설명: {t.get('memo', '')}"]
         srcs = []
         for l in t.get("links", []):
             m = re.match(r"laws/(\w+)/(#j[\d-]+)", l["href"])

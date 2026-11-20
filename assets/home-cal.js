@@ -22,7 +22,7 @@
       case "bimonthly": { var m0 = ((+t.m0 || 1) - 1) % 2; var b = m - (((m - m0) % 2) + 2) % 2; var by = y; if (b < 0) { b += 12; by -= 1; } return dayIn(by, b, t.day); }
       case "quarterly": return dayIn(y, Math.floor(m / 3) * 3 + ((+t.qmonth || 1) - 1), t.day);
       case "semiannual": return dayIn(y, (m < 6 ? 0 : 6) + ((+t.hmonth || 6) - 1), t.day);
-      default: return dayIn(y, (+t.month || 1) - 1, t.day);
+      default: { var ev = +t.every >= 2 && +t.every <= 5 ? Math.floor(+t.every) : 1, b0 = +t.y0 >= 2000 && +t.y0 <= 2100 ? Math.floor(+t.y0) : 2026; return dayIn(y - ((((y - b0) % ev) + ev) % ev), (+t.month || 1) - 1, t.day); }
     }
   }
   function occursOn(t, d) {
