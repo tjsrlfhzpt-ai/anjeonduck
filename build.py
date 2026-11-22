@@ -267,6 +267,10 @@ def dedupe_w24(w24, others, label="고용24 자동 수집"):
     for j in w24:
         dup = False
         for o in idx.get(co_key(j.get("company")), []):
+            # 이미 마감된 공고(마감일이 이 공고 등록일보다 앞)와 같은 제목이면 재공고이지 중복이 아니다
+            ob, jp = str(o.get("deadline", "")), str(j.get("posted", ""))
+            if DATE_RE.match(ob) and DATE_RE.match(jp) and ob < jp:
+                continue
             same_job = set(re.split(r"[|,·]", str(j.get("job", "")))) & set(re.split(r"[|,·]", str(o.get("job", ""))))
             a, b = str(j.get("deadline", "")), str(o.get("deadline", ""))
             near = bool(DATE_RE.match(a) and DATE_RE.match(b) and abs((dt.date.fromisoformat(a) - dt.date.fromisoformat(b)).days) <= 7)
