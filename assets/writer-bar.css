@@ -1,0 +1,83 @@
+/* 단독 작성기 8종(TBM·위험성평가·산보위·협의체·순회점검·합동점검·허가서·교육일지) 머리줄 통일 — 2026-11-23
+   build.py 가 머리줄에 .spw-bar, 맨 위 링크를 .spw-home(로고) 로 바꾸고 이 파일을 붙인다.
+   화면에서만 적용(@media screen). 머리줄은 모두 no-print 라 인쇄물에는 영향이 없다.
+   원칙(2026-11-17 리디자인과 같음): 바탕 흰색 + 회색 1px 밑줄, 제목 남색, 주 동작(인쇄) 남색 버튼, 나머지 흰 버튼 + 회색 테두리, 꾸밈 색 줄이기. */
+@media screen {
+  .spw-bar {
+    background: #fff !important; color: #0F172A !important;
+    border-bottom: 1px solid #E2E8F0 !important; box-shadow: none !important;
+    font-family: Pretendard, 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  }
+  .spw-bar h1 { color: #0F172A !important; font-weight: 800 !important; letter-spacing: -.02em; }
+  .spw-bar h1 + p, .spw-bar p, .spw-bar .text-slate-400, .spw-bar .cm-save, .spw-bar .tb-status, .spw-bar .ctrl-note { color: #64748B !important; }
+  .spw-bar .ctrl-note a { color: #1D4ED8 !important; }
+  .spw-bar .ctrl-note b { color: #334155 !important; }
+  .spw-bar label { color: #334155 !important; }
+  .spw-bar select { border: 1px solid #CBD5E1 !important; border-radius: 8px !important; background-color: #fff !important; color: #0F172A !important; }
+
+  /* 작성기 아이콘(초록 방패 등) → 옅은 파랑 바탕 */
+  .spw-bar .bg-emerald-500, .spw-bar .cm-logo, .spw-bar .cc-logo { background: #EFF4FF !important; color: #1D4ED8 !important; }
+
+  /* 버튼: 기본은 흰 바탕 + 회색 테두리 */
+  .spw-bar button, .spw-bar summary.btn {
+    background: #fff !important; color: #0F172A !important; border: 1px solid #CBD5E1 !important;
+    box-shadow: none !important; filter: none !important; border-radius: 8px !important; font-weight: 700 !important;
+  }
+  .spw-bar button:hover:not(:disabled), .spw-bar summary.btn:hover { background: #F1F5F9 !important; }
+  .spw-bar button:disabled { opacity: .55; }
+  /* 주 동작(인쇄 / PDF 저장) → 남색 */
+  .spw-bar .bg-emerald-600, .spw-bar .cm-hbtn.pri, .spw-bar .cc-hb-pri, .spw-bar .btn-green {
+    background: #0F172A !important; border-color: #0F172A !important; color: #fff !important;
+  }
+  .spw-bar .bg-emerald-600:hover, .spw-bar .cm-hbtn.pri:hover, .spw-bar .cc-hb-pri:hover, .spw-bar .btn-green:hover { background: #1E293B !important; }
+  /* AI 초안 → 파랑(사이트 서식 작성기의 AI 버튼과 같은 색) */
+  .spw-bar #aiRiskBtn { background: #1D4ED8 !important; border-color: #1D4ED8 !important; color: #fff !important; }
+  .spw-bar #aiRiskBtn:hover:not(:disabled) { background: #1E40AF !important; }
+
+  /* TBM: 좁은 화면의 입력/미리보기 전환 */
+  .spw-bar .tabs { border-color: #CBD5E1 !important; background: #F1F5F9; }
+  .spw-bar .tabs button { border: 0 !important; border-radius: 0 !important; background: transparent !important; color: #475569 !important; }
+  .spw-bar .tabs button[aria-selected="true"] { background: #0F172A !important; color: #fff !important; }
+  /* 위험성평가: 펼침 메뉴 안 버튼은 원래 색 유지(초기화=빨강 등 의미가 있는 색) */
+  .spw-bar .more-box .btn { border-radius: 5px !important; }
+  .spw-bar .more-box .btn-blue { background: #2980b9 !important; color: #fff !important; border-color: #2980b9 !important; }
+  .spw-bar .more-box .btn-grey { background: #5b6b80 !important; color: #fff !important; border-color: #5b6b80 !important; }
+  .spw-bar .more-box .btn-red { background: #c0392b !important; color: #fff !important; border-color: #c0392b !important; }
+
+  /* 맨 위 로고 링크(← SafePlum 대신) */
+  a.spw-home {
+    display: inline-flex !important; align-items: center; gap: 6px; flex: none;
+    color: #0F172A !important; font-weight: 800 !important; font-size: 15px !important; letter-spacing: -.03em;
+    text-decoration: none !important; white-space: nowrap; margin-right: 4px !important; opacity: 1 !important;
+  }
+  a.spw-home img { width: 26px; height: 26px; display: block; }
+  a.spw-home:hover span { text-decoration: underline; }
+  .spw-sep { width: 1px; height: 22px; background: #E2E8F0; flex: none; margin: 0 2px; }
+  .sp-alltools { color: #1D4ED8 !important; opacity: 1 !important; }
+  .sitebar .sp-alltools { margin-left: 14px !important; }
+  /* TBM·위험성평가: 맨 위 흰 줄 */
+  .sitebar { border-bottom-color: #E2E8F0 !important; justify-content: flex-start !important; }
+  .sitebar > span { color: #64748B !important; font-size: 12px; margin-left: auto; }
+
+  /* 좁은 화면 '입력 | 미리보기' 전환 줄 — 작성기마다 초록 밑줄·남색 줄 등 제각각이던 것을 사이트 탭(남색 글자 + 파랑 밑줄)으로 */
+  .pw-tabs button[aria-selected="true"], .cc-tabs button.on, .el-tabs button.on { color: #0F172A !important; border-bottom-color: #1D4ED8 !important; }
+  .jt-tabs { background: #F1F5F9 !important; border-bottom: 1px solid #E2E8F0; }
+  .jt-tabs button { background: #fff !important; color: #475569 !important; border-color: #CBD5E1 !important; }
+  .jt-tabs button.on { background: #0F172A !important; color: #fff !important; border-color: #0F172A !important; }
+  .jt-tabs .jt-tabp, .cm-tab.pr { background: #fff !important; border-color: #0F172A !important; color: #0F172A !important; }
+}
+/* 넓은 화면: 머리줄이 두 줄로 꺾이지 않도록 근거 조문 줄은 한 줄로 줄임(마우스를 올리면 전체 — build.py 가 title 을 붙임) */
+@media screen and (min-width: 1024px) {
+  .spw-bar h1 + p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 380px; }
+  .spw-bar h1 { white-space: nowrap; }
+  .spw-bar .sp-alltools { font-size: 12px !important; }
+}
+@media screen and (min-width: 1024px) and (max-width: 1279.98px) {
+  .spw-bar h1 + p { max-width: 250px; }
+  .spw-bar .sp-alltools { margin-left: 8px !important; }
+}
+@media screen and (max-width: 760px) {
+  a.spw-home { font-size: 14px !important; }
+  a.spw-home img { width: 22px; height: 22px; }
+  .spw-sep { display: none; }
+}

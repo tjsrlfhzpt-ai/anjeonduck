@@ -1017,7 +1017,7 @@ def dock_html(rel, active):
 def _asset_ver():
     import hashlib
     h = hashlib.sha1()
-    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/ping.js", "assets/favicon.png", "assets/img/plum/logo.webp", "assets/img/plum/hero.webp", "assets/img/ico/tbm.webp"):
+    for f in ("assets/style.css", "assets/docs.js", "assets/app.js", "assets/community.js", "assets/home-cal.js", "assets/ping.js", "assets/writer-bar.css", "assets/favicon.png", "assets/img/plum/logo.webp", "assets/img/plum/hero.webp", "assets/img/ico/tbm.webp"):
         h.update((ROOT / f).read_bytes())
     return h.hexdigest()[:8]
 
@@ -1962,6 +1962,29 @@ def edu_cases(auto_acc):
     return {"acc": acc, "media": media, "acc_src": auto_acc.get("source", ""), "acc_fetched": auto_acc.get("fetched", "")}
 
 
+# 2026-11-23 단독 작성기 8종 머리줄 통일 — 머리줄 요소에 .spw-bar 를 붙이고 '← SafePlum' 글자 링크를 사이트 로고로 바꾼다(모양은 assets/writer-bar.css).
+SPW_BAR = {"tbm": '<div class="toolbar no-print">', "risk": '<div class="control-panel no-print">', "committee": '<header class="cm-top no-print">',
+           "council": '<header id="cc-header" class="', "patrol": '<header class="', "joint": '<header class="', "permit": '<header class="', "edu-log": '<header class="'}
+
+
+def spw_unify(src, tid, site):
+    mark = SPW_BAR[tid]
+    assert mark in src, f"{tid}: 머리줄 표시({mark}) 없음"
+    if mark.endswith('class="'):
+        src = src.replace(mark, mark + "spw-bar ", 1)
+    else:
+        src = src.replace(mark, mark.replace('class="', 'class="spw-bar ', 1), 1)
+    in_sitebar = tid in ("tbm", "risk")
+    logo = (f'<a href="../../" class="spw-home" aria-label="{e(site["name"])} 홈"><img src="../../assets/img/plum/logo.webp?v={ASSET_VER}" alt="" width="26" height="26">'
+            f'<span>{e(site["name"])}</span></a><!--@SPW_LINKS@-->' + ("" if in_sitebar else '<span class="spw-sep" aria-hidden="true"></span>'))
+    src, n = re.subn(r'<a href="\.\./\.\./"(?: class="[^"]*")?(?: style="[^"]*")?>← SafePlum</a>', lambda m: logo, src, count=1)
+    assert n == 1, f"{tid}: '← SafePlum' 링크를 찾지 못함"
+    # 넓은 화면에서 한 줄로 줄이는 근거 조문 줄에 전체 문구를 title 로
+    src = re.sub(r'(</h1>\s*<p)((?:\s[^>]*)?>)([^<{]+)(</p>)', lambda m: m.group(1) + f' title="{e(m.group(3).strip())}"' + m.group(2) + m.group(3) + m.group(4), src, count=1)
+    src = src.replace("</head>", f'<link rel="stylesheet" href="../../assets/writer-bar.css?v={ASSET_VER}">\n</head>', 1)
+    return src
+
+
 def render_free_tool(t, hazards, site=None, penalties=None):
     src = (ROOT / t["src"]).read_text(encoding="utf-8")
     if t.get("kind") == "page":
@@ -1998,11 +2021,18 @@ def render_free_tool(t, hazards, site=None, penalties=None):
         src = src.replace("</head>", og_image_tags(site) + "\n" + tool_ld(t, site) + "\n</head>", 1)
     if "</body>" in src and "assets/ping.js" not in src:   # 단독 화면(헤더 없는 작성기)도 방문자 수에 포함
         src = src.replace("</body>", ping_tag(site, "../../") + "</body>", 1)
-    if ">← SafePlum</a>" in src:   # 단독 화면 맨 위 'SafePlum' 링크 옆에 작성기 전체 바로가기(좁은 화면에서는 화면 아래 묶음만)
+    if t["id"] in SPW_BAR and ">← SafePlum</a>" in src:   # 2026-11-23 단독 작성기 머리줄 통일: 흰 머리줄 + 사이트 로고(assets/writer-bar.css)
+        src = spw_unify(src, t["id"], site)
+    if ">← SafePlum</a>" in src or "<!--@SPW_LINKS@-->" in src:   # 단독 화면 맨 위 'SafePlum' 링크 옆에 작성기 전체 바로가기(좁은 화면에서는 화면 아래 묶음만)
         _has_dl = any(t["id"] in x.get("tools", []) for x in downloads())
-        src = src.replace(">← SafePlum</a>", f'>← SafePlum</a><a href="../forms/" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">다른 무료 작성기 {WRITER_N}종 →</a>'
-                          + ('<a href="#spdl" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">엑셀·PPT 양식 받기 ↓</a>' if _has_dl else '')
-                          , 1)
+        _links = (f'<a href="../forms/" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">다른 무료 작성기 {WRITER_N}종 →</a>'
+                  + ('<a href="#spdl" class="sp-alltools" style="margin-left:10px;font-size:12px;font-weight:700;color:inherit;opacity:.85;white-space:nowrap">엑셀·PPT 양식 받기 ↓</a>' if _has_dl else ''))
+        if "<!--@SPW_LINKS@-->" in src:   # 통일된 머리줄은 칸이 좁아 짧은 이름으로(같은 곳으로 감)
+            _links = (f'<a href="../forms/" class="sp-alltools" title="다른 무료 작성기 {WRITER_N}종" style="margin-left:10px;font-size:12px;font-weight:700;white-space:nowrap">작성기 전체 {WRITER_N}종</a>'
+                      + ('<a href="#spdl" class="sp-alltools" title="이 작성기와 같은 엑셀·PPT 양식 받기(화면 아래)" style="margin-left:10px;font-size:12px;font-weight:700;white-space:nowrap">엑셀·PPT 양식 ↓</a>' if _has_dl else ''))
+            src = src.replace("<!--@SPW_LINKS@-->", _links, 1)
+        else:
+            src = src.replace(">← SafePlum</a>", ">← SafePlum</a>" + _links, 1)
         # Vue 템플릿 안의 <style>은 버려지므로 머리(head)에 넣는다(2026-11-10: 휴대폰에서 링크가 숨겨지지 않아 화면이 옆으로 밀리던 문제)
         src = src.replace("</head>", '<style>@media (max-width:760px){.sp-alltools{display:none!important}}@media print{.sp-alltools{display:none!important}}</style>\n</head>', 1)
     if t["id"] in ("tbm", "committee", "council", "joint", "patrol", "edu-log", "permit"):
