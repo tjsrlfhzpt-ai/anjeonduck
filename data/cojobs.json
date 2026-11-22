@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-18",
+ "fetched": "2026-11-22",
  "source": "회사 자체 채용 홈페이지",
  "items": [
   {
@@ -22,25 +22,6 @@
    "education": "원문 확인",
    "group": "OCI그룹",
    "term": "고용형태는 원문 확인"
-  },
-  {
-   "id": "co-korgc-242230",
-   "title": "환경안전팀 안전관리 경력사원 채용",
-   "company": "그린케미칼",
-   "region": "근무지 원문 확인",
-   "address": "",
-   "job": "안전관리자",
-   "career": "경력",
-   "employment": "정규직",
-   "company_type": "중견기업",
-   "industry": "제조·화학",
-   "deadline": "2026-11-22",
-   "posted": "2026-11-09",
-   "source_url": "https://korgc.career.greetinghr.com/ko/o/242230",
-   "source_name": "그린케미칼 채용 홈페이지",
-   "origin": "company",
-   "career_detail": "경력 3년↑",
-   "education": "원문 확인"
   },
   {
    "id": "co-hybe-234375",
@@ -256,6 +237,27 @@
    "origin": "company",
    "career_detail": "원문 확인",
    "education": "원문 확인"
+  },
+  {
+   "id": "co-doosan-1000367347",
+   "title": "EHS 안전(익산) 경력직 채용",
+   "company": "두산퓨얼셀",
+   "region": "근무지 원문 확인",
+   "address": "",
+   "job": "EHS",
+   "career": "경력",
+   "employment": "정규직",
+   "company_type": "대기업",
+   "group": "두산그룹",
+   "industry": "제조·화학",
+   "deadline": "2026-11-30",
+   "posted": "2026-11-22",
+   "source_url": "https://career.doosan.com/dsp/sa/RecList.jsp",
+   "source_name": "두산 채용 홈페이지",
+   "origin": "company",
+   "career_detail": "경력",
+   "education": "원문 확인",
+   "note": "두산 채용 홈페이지 공고 목록에서 제목으로 찾아 지원"
   },
   {
    "id": "co-doosan-1000361486",
