@@ -26,6 +26,7 @@
   .tb-acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .tb-status { flex: 1 1 200px; min-width: 0; font-size: 12px; color: #c9d6ea; margin: 0; }
   .tb-status:empty { display: none; }
+  .tb-status.bad { color: #ffb4a9; font-weight: 700; }
   .btn { height: 34px; padding: 0 12px; cursor: pointer; border-radius: 8px; font-weight: 700; border: 1px solid transparent; font-size: 13px; white-space: nowrap; }
   .btn-green { background: #1e9e57; color: #fff; }
   .btn-blue { background: #2a7fd6; color: #fff; }
@@ -480,7 +481,7 @@
   function markTouched() { touched = true; saveSoon(); }
   function setStatus(msg, bad) {
     var el = $("saveStatus"); if (!el) return;
-    el.textContent = msg; el.style.color = bad ? "#ffb4a9" : "";
+    el.textContent = msg; el.style.color = ""; el.classList.toggle("bad", !!bad);
   }
   function updateHistBtn() {
     var n = loadDays().length;
@@ -702,7 +703,8 @@
     // 2 위험요인·대책
     b = '<p class="f-hint" style="margin-top:8px">예시 분류를 고르면 위험요인 예시가 무작위로 채워집니다. 오늘 작업에 맞게 고치거나 줄을 더하고 빼세요(최대 ' + MAX_ROWS + "줄).</p>" +
       '<div class="acts" style="justify-content:flex-start;margin:6px 0 4px"><button type="button" class="btn-sub" data-act="shuffle" title="같은 공종의 다른 위험요인 예시로 표 전체를 바꿉니다">🔀 다른 예시로 바꾸기</button>' +
-        '<button type="button" class="btn-sub" data-act="ai" title="내 Gemini 키로 오늘 작업내용에 맞는 위험요인·대책 초안을 만듭니다">✨ AI 초안</button></div>' +
+        '<button type="button" class="btn-sub" data-act="ai" title="내 Gemini 키로 오늘 작업내용에 맞는 위험요인·대책 초안을 만듭니다">✨ AI 초안</button>' +
+        '<button type="button" class="btn-sub" data-act="fromRisk" title="이 기기에 저장된 위험성평가서에서 위험성이 높은 항목과 감소대책을 골라 가져옵니다">📑 내 위험성평가에서 가져오기</button></div>' +
         '<p class="f-hint" id="aiTbmSt" aria-live="polite" style="margin:0 0 4px">AI 초안은 1단계의 \'금일 작업구간 및 주요내용\'을 바탕으로 만듭니다(내 Gemini 키 사용). 실명·회사 기밀은 적지 마세요.</p>';
     p.rows.forEach(function (r, j) {
       var R = P + "r." + j + ".", n = j + 1;
@@ -877,6 +879,77 @@
     if (t.ri < 0) { if (p.rows.length >= MAX_ROWS) { toast("위험요인은 한 쪽에 " + MAX_ROWS + "줄까지 넣을 수 있습니다."); return; } p.rows.push(it); }
     else if (p.rows[t.ri]) p.rows[t.ri] = it;
     closeModal(); renderAll(); markTouched();
+  }
+  // ---------- 내 위험성평가에서 가져오기(2026-11-23) — 위험성평가 작성기(같은 브라우저)가 저장한 평가서의 위험요인·감소대책을 TBM 표로.
+  // 위험성평가서 저장 형식: localStorage "safetake.risk.docs.v1" = [{ id, saved, data: { date, dept, group, cfg, rows: [{ work, cause, hazard, measure, p, c, doneDate }] } }]
+  var RISK_DOCS_KEY = "safetake.risk.docs.v1", riskSel = null;
+  function riskDocs() {
+    try { var a = JSON.parse(localStorage.getItem(RISK_DOCS_KEY) || "[]"); return Array.isArray(a) ? a.filter(function (x) { return x && x.data && Array.isArray(x.data.rows); }) : []; } catch (e) { return []; }
+  }
+  function riskCfg(d) {
+    var c = d.cfg && typeof d.cfg === "object" ? d.cfg : null;
+    if (!c) { try { c = JSON.parse(localStorage.getItem("safetake.risk.cfg") || "null"); } catch (e) { c = null; } }
+    c = c || {}; var kind = c.kind === "lv3" ? "lv3" : "mx", pm = +c.p || 5, cm = +c.c || 4, add = c.mode === "add";
+    return { kind: kind, add: add, max: kind === "lv3" ? 3 : add ? pm + cm : pm * cm, accept: +c.accept || (kind === "lv3" ? 1 : add ? 4 : 6) };
+  }
+  // 위험성 값 → TBM 위험 수준(상·중·하). 3단계 판단법은 그대로, 빈도·강도법은 '허용 기준 초과'를 중, 최고값의 60% 이상을 상으로 본다
+  function riskLevel(r, k) {
+    var p = +r.p || 0, c = +r.c || 0; if (!p) return { score: 0, lv: "" };
+    if (k.kind === "lv3") return { score: p, lv: LV3_TBM[p] || "" };
+    var sc = k.add ? p + c : p * (c || 1);
+    return { score: sc, lv: sc >= k.max * 0.6 ? "상" : sc > k.accept ? "중" : "하" };
+  }
+  var LV3_TBM = { 1: "하", 2: "중", 3: "상" };
+  function openRiskImport() { openModal("risk", "내 위험성평가에서 가져오기"); drawRiskDocs(); }
+  function drawRiskDocs() {
+    var box = $("tool-list"), ds = riskDocs();
+    if (!ds.length) {
+      box.innerHTML = '<p class="hist-empty">이 기기에 저장된 위험성평가서가 없습니다.<br>같은 브라우저에서 <a href="../risk/">위험성평가 작성기</a>로 평가서를 먼저 만들면, 위험성이 높은 항목과 감소대책을 여기로 바로 가져올 수 있습니다.</p>';
+      return;
+    }
+    ds.sort(function (a, b) { return (b.saved || 0) - (a.saved || 0); });
+    box.innerHTML = '<p class="f-hint" style="margin:0 0 6px">가져올 평가서를 고르세요. 오늘 공종과 같은 평가서가 위에 나옵니다.</p>' + ds.sort(function (a, b) {
+      var g = doc.pages[cur] ? doc.pages[cur].group : "", am = a.data.group === g || a.data.dept === g, bm = b.data.group === g || b.data.dept === g;
+      return am === bm ? (b.saved || 0) - (a.saved || 0) : am ? -1 : 1;
+    }).map(function (x) {
+      var d = x.data, k = riskCfg(d), n = d.rows.filter(function (r) { return S(r.hazard).trim(); }).length,
+        hi = d.rows.filter(function (r) { var l = riskLevel(r, k).lv; return l === "상" || l === "중"; }).length;
+      return '<button type="button" class="tool-btn" data-act="riskDoc" data-id="' + esc(x.id) + '"><b>' + esc(S(d.dept) || S(d.group) || "평가서") + "</b>" + esc(S(d.date) || "") +
+        "<small>위험요인 " + n + "건 · 상·중 " + hi + "건</small></button>";
+    }).join("");
+  }
+  function drawRiskRows(id) {
+    var x = riskDocs().filter(function (y) { return y.id === id; })[0]; if (!x) { drawRiskDocs(); return; }
+    var d = x.data, k = riskCfg(d);
+    var rows = d.rows.map(function (r, i) { var lv = riskLevel(r, k); return { i: i, r: r, sc: lv.score, lv: lv.lv }; })
+      .filter(function (o) { return S(o.r.hazard).trim(); })
+      .sort(function (a, b) { return b.sc - a.sc; });
+    // 기본 선택: 아직 개선이 끝나지 않은(완료일 없는) 상·중 항목, 없으면 위험성이 높은 순 5건
+    var pre = rows.filter(function (o) { return (o.lv === "상" || o.lv === "중") && !S(o.r.doneDate).trim(); }).slice(0, MAX_ROWS);
+    if (!pre.length) pre = rows.slice(0, Math.min(5, MAX_ROWS));
+    var on = {}; pre.forEach(function (o) { on[o.i] = true; });
+    riskSel = { doc: x, rows: rows };
+    $("tool-list").innerHTML = '<p class="f-hint" style="margin:0 0 6px"><b>' + esc(S(d.dept) || S(d.group)) + "</b> " + esc(S(d.date)) + " 평가서 — 위험성이 높은 순입니다. 오늘 작업과 관계있는 항목만 고르세요(최대 " + MAX_ROWS + "줄).</p>" +
+      rows.map(function (o) {
+        return '<label class="tool-btn" style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-rr="' + o.i + '"' + (on[o.i] ? " checked" : "") + ' style="margin-top:3px">' +
+          "<span><b>" + esc(o.lv || "—") + "</b>" + esc(S(o.r.hazard)) + (o.sc ? ' <small style="display:inline;color:#5b6b80">위험성 ' + o.sc + (S(o.r.doneDate).trim() ? " · 개선 완료" : "") + "</small>" : "") +
+          "<small>→ " + esc(S(o.r.measure) || "감소대책 없음") + "</small></span></label>";
+      }).join("") +
+      '<div class="acts" style="justify-content:flex-start;margin-top:10px;gap:6px;flex-wrap:wrap"><button type="button" class="btn-sub" data-act="riskApply" data-mode="replace">오늘 표를 이것으로 바꾸기</button>' +
+      '<button type="button" class="btn-sub" data-act="riskApply" data-mode="append">표 아래에 더하기</button><button type="button" class="btn-sub" data-act="riskBack">다른 평가서</button></div>';
+  }
+  function applyRiskRows(mode) {
+    var p = doc.pages[cur]; if (!p || !riskSel) return;
+    var pick = [].map.call(document.querySelectorAll("#tool-list input[data-rr]:checked"), function (c) { return +c.dataset.rr; });
+    if (!pick.length) { toast("가져올 항목을 하나 이상 고르세요."); return; }
+    var add = riskSel.rows.filter(function (o) { return pick.indexOf(o.i) >= 0; }).map(function (o) {
+      return normRow({ group: S(o.r.work) || S(riskSel.doc.data.dept) || p.group, risk: S(o.r.hazard), type: S(o.r.cause), level: o.lv, measure: S(o.r.measure) });
+    });
+    var keep = mode === "append" ? p.rows.filter(function (r) { return r.risk.trim() || r.measure.trim(); }) : [];
+    var all = keep.concat(add), cut = Math.max(0, all.length - MAX_ROWS);
+    p.rows = all.slice(0, MAX_ROWS);
+    closeModal(); renderAll(); markTouched();
+    toast("위험성평가에서 " + (add.length - Math.max(0, cut)) + "건을 가져왔습니다." + (cut ? " 한 쪽에 " + MAX_ROWS + "줄까지라 " + cut + "건은 넣지 못했습니다(쪽을 추가해 나눠 넣으세요)." : "") + " 오늘 작업에 맞게 고쳐 쓰세요.");
   }
   function nextItem(pi, ri) {
     var p = doc.pages[pi]; if (!p || !p.rows[ri]) return;
@@ -1076,6 +1149,10 @@
         renderAll(); markTouched(); toast("다른 예시로 바꿨습니다 — 오늘 작업에 맞게 고쳐 쓰세요");
         break;
       case "ai": aiDraft(p); break;
+      case "fromRisk": openRiskImport(); break;
+      case "riskDoc": drawRiskRows(b.dataset.id); break;
+      case "riskBack": drawRiskDocs(); break;
+      case "riskApply": applyRiskRows(b.dataset.mode); break;
       case "rowPick": openPicker(cur, -1); break;
       case "rowBlank": if (p.rows.length < MAX_ROWS) { p.rows.push(normRow()); renderAll(); markTouched(); } break;
       case "rowUp": case "rowDown":

@@ -26,6 +26,7 @@
     display:flex; justify-content:center; gap:8px; align-items:center; flex-wrap:wrap; box-shadow:0 4px 6px rgba(0,0,0,.3); }
   .ctrl-note { width:100%; font-size:12px; color:#c9d6ea; margin:0; text-align:center; }
   .ctrl-note:empty { display:none; }
+  .ctrl-note.bad { color:#ffb4a9; font-weight:700; }
   .btn { padding:8px 14px; cursor:pointer; border-radius:5px; font-weight:bold; border:none; font-size:14px; font-family:inherit; }
   .btn:hover { filter:brightness(1.1); }
   .btn-green { background:#27ae60; color:#fff; } .btn-blue { background:#2980b9; color:#fff; } .btn-red { background:#c0392b; color:#fff; } .btn-grey { background:#5b6b80; color:#fff; }
@@ -91,6 +92,14 @@
   .risk4 { background:#9CCC65 !important; color:#1E3A0B !important; }
   .risk1 { background:#43A047 !important; color:#fff !important; }
   .risk0 { background:#F4F6F9 !important; color:#8a96a6 !important; }
+  /* 2026-11-23 문서 색상 '흑백'(기본) — 회사 보고용. 위험 등급은 글자(숫자)와 회색 음영 3단계로만 구분 */
+  body.doc-mono .risk20, body.doc-mono .risk15 { background:#BDBDBD !important; color:#000 !important; }
+  body.doc-mono .risk9, body.doc-mono .risk8 { background:#E3E3E3 !important; color:#000 !important; }
+  body.doc-mono .risk4, body.doc-mono .risk1 { background:#fff !important; color:#000 !important; }
+  body.doc-mono .risk0 { background:#fff !important; color:#777 !important; }
+  body.doc-mono #ra th, body.doc-mono .matrix-table th, body.doc-mono .level-table th, body.doc-mono .step-table th { background:#F0F0F0 !important; color:#000 !important; border-color:#888 !important; }
+  body.doc-mono #ra td { border-color:#888 !important; }
+  body.doc-mono .page-container th { background:#F0F0F0; color:#000; }
 
   #ra th { background:linear-gradient(to bottom,#e8f4f8 0%,#d1e8f0 100%); color:#1b365d; border-color:#a0b8c8; font-size:11.5px; }
   #ra td { padding:8px 4px; border-color:#a0b8c8; }
@@ -250,7 +259,7 @@
 <script src="../../assets/ai.js"></script>
 <style>.risk-appr{flex:none;width:66mm}.risk-appr .ad-appr{width:100%;font-size:10.5px}.risk-appr .ad-appr th,.risk-appr .ad-appr td{min-width:0}.risk-appr .ad-appr th{background:#eef2f6;color:#263746;padding:1px 3px}.risk-appr .ad-appr td.ad-s{height:36px}.risk-appr.ad-sized{width:auto}.risk-appr.ad-off{width:auto}.risk-appr .ad-appr td.ad-nm{height:13px;font-size:10px;padding:0 2px}</style>
 </head>
-<body>
+<body class="doc-mono">
 
 <div class="sitebar no-print">
   <a href="../../">← SafePlum</a>
@@ -284,6 +293,7 @@
     <div class="more-box">
       <label>용지 방향 <select id="optOrient"><option value="p">A4 세로</option><option value="l">A4 가로 (표를 넓게)</option></select></label>
       <label><input type="checkbox" id="optAppr" checked> 결재란 인쇄</label>
+      <label>문서 색상 <select id="optColor"><option value="mono">흑백 (회사 보고용, 기본)</option><option value="color">컬러 (위험 등급 색 표시)</option></select></label>
       <button class="btn btn-blue" onclick="window.addPhotos && addPhotos()">사진 첨부</button>
       <button class="btn btn-blue" onclick="applyAutoData(true)">3번 표를 공종 기본 항목으로 다시 채우기</button>
       <button class="btn btn-grey" onclick="resetLabels()">제목·항목 이름·아래 문구를 기본으로</button>
@@ -293,6 +303,7 @@
   </details>
   <p class="ctrl-note">현재 위험성과 감소대책은 기본 목록으로 미리 채운 추천값입니다. 현장을 보고 고치세요. <b>개선 후 위험성은 대책을 실행한 뒤 직접 고르세요.</b> 처음이라면 <a href="../risk-guide/" style="color:inherit;text-decoration:underline">위험성평가 실무 가이드</a>(2026. 6. 개정 반영)부터 보세요.</p>
   <p class="ctrl-note" id="saveStatus" role="status" aria-live="polite"></p>
+  <div class="ctrl-note" id="tbmSig" hidden></div>
 </div>
 <div class="mtabs no-print" id="mtabs">
   <button type="button" data-v="in" aria-pressed="true">입력</button>
@@ -692,7 +703,7 @@
   });
 
   // ---------- 제목·항목 이름(문서에서 바로 고침) ----------
-  var DEF_LB = {}, DEF_TYPES = ["최초", "정기", "수시"], TYPES = DEF_TYPES.slice(), ORIENT = "l", APPR_ON = true;
+  var DEF_LB = {}, DEF_TYPES = ["최초", "정기", "수시"], TYPES = DEF_TYPES.slice(), ORIENT = "l", APPR_ON = true, DOC_COLOR = "mono";
   function lbEls() { return document.querySelectorAll("#page1 [data-lb]"); }
   function collectLb() { var o = {}; lbEls().forEach(function (el) { var v = txt(el), k = el.dataset.lb; if (v !== DEF_LB[k]) o[k] = v; }); return o; }
   function applyLb(lb) {
@@ -708,7 +719,8 @@
     var o = headText("pOrg") || "소속", n = headText("pName") || "성명";
     document.querySelectorAll("#people-tbody [data-pf]").forEach(function (el) { el.dataset.ph = el.dataset.pf === "org" ? o : n; });
   }
-  function saveTpl() { lsSet(TPL_KEY, { lb: collectLb(), types: TYPES, orient: ORIENT, ov: 3, appr: APPR_ON }); }
+  function saveTpl() { lsSet(TPL_KEY, { lb: collectLb(), types: TYPES, orient: ORIENT, ov: 3, appr: APPR_ON, color: DOC_COLOR }); }
+  function setDocColor(c) { DOC_COLOR = c === "color" ? "color" : "mono"; document.body.classList.toggle("doc-mono", DOC_COLOR === "mono"); var o = $("optColor"); if (o) o.value = DOC_COLOR; }
   function loadTpl() { var t = lsGet(TPL_KEY); return t && typeof t === "object" ? t : {}; }
   function cleanTypes(a) { a = Array.isArray(a) ? a.map(function (x) { return str(x, 20).trim(); }).filter(Boolean).slice(0, 8) : []; return a.length ? a : null; }
   function resetLabels() {
@@ -1133,7 +1145,7 @@
     TYPES = cleanTypes(d.types) || (!d.v && d.type === 3 ? ["최초", "정기", "수시", "상시"] : cleanTypes(t.types) || DEF_TYPES.slice());
     renderTypes(d.type >= 0 && d.type < TYPES.length ? d.type : d.type === -1 && d.v ? -1 : Math.min(1, TYPES.length - 1));
     applyLb(d.lb || t.lb);
-    setOrient((d.v >= 3 && d.orient) || (t.ov >= 3 && t.orient) || "l"); setAppr(d.apprOn != null ? d.apprOn : t.appr);
+    setOrient((d.v >= 3 && d.orient) || (t.ov >= 3 && t.orient) || "l"); setAppr(d.apprOn != null ? d.apprOn : t.appr); setDocColor(t.color);
     fillRows(Array.isArray(d.rows) ? d.rows : defaultRows(gs.value));
     peopleRows(d.people, num(d.np, 2, 60, Math.max(6, Array.isArray(d.people) ? d.people.length : 0)));
     document.querySelectorAll("#lawCheck input[type=checkbox]").forEach(function (c, i) { c.checked = !!(Array.isArray(d.checks) ? d.checks : [])[i]; });
@@ -1153,7 +1165,7 @@
     a.sort(function (x, y) { return (y.saved || 0) - (x.saved || 0); });
     try { localStorage.setItem(DOCS_KEY, JSON.stringify(a.slice(0, MAX_DOCS))); return true; } catch (e) { return false; }
   }
-  function setStatus(m, bad) { var el = $("saveStatus"); if (el) { el.textContent = m; el.style.color = bad ? "#ffb4a9" : ""; } }
+  function setStatus(m, bad) { var el = $("saveStatus"); if (el) { el.textContent = m; el.style.color = ""; el.classList.toggle("bad", !!bad); } }
   function updateDocsBtn() { var n = loadDocs().length, b = $("docsBtn"); if (b) b.textContent = "저장된 평가서" + (n ? " (" + n + ")" : ""); }
   function saveNow() {
     clearTimeout(saveTimer); saveTimer = null;
@@ -1236,6 +1248,47 @@
     fitScreen(); window.scrollTo(0, 0);
   });
 
+  // ---------- TBM 신호(2026-11-23) — 같은 브라우저의 TBM 일지(최근 30일)에서 자주 다룬 위험요인 중 이 평가서에 없는 것을 알려 준다.
+  // 위험성평가가 현장 변화를 따라가도록(TBM에 반복해서 나오는 위험 = 평가서 재검토 신호). 자동으로 넣지 않고 사람이 골라 넣는다.
+  function normHz(t) { return str(t).replace(/[\s.,·()\[\]{}"'“”‘’\-~→>]/g, "").toLowerCase(); }
+  function tbmSignals() {
+    var days; try { days = JSON.parse(localStorage.getItem("safetake.tbm.days.v1") || "[]"); } catch (e) { days = []; }
+    if (!Array.isArray(days) || !days.length) return [];
+    var since = new Date(); since.setDate(since.getDate() - 30); var lim = since.getFullYear() + "-" + ("0" + (since.getMonth() + 1)).slice(-2) + "-" + ("0" + since.getDate()).slice(-2);
+    var cnt = {}, meta = {};
+    days.forEach(function (d) {
+      if (!d || str(d.date) < lim || !Array.isArray(d.pages)) return;
+      var seen = {};
+      d.pages.forEach(function (pg) { (pg && Array.isArray(pg.rows) ? pg.rows : []).forEach(function (r) {
+        var k = normHz(r && r.risk); if (k.length < 4 || seen[k]) return; seen[k] = 1;
+        cnt[k] = (cnt[k] || 0) + 1; if (!meta[k]) meta[k] = { risk: str(r.risk).trim(), measure: str(r.measure).trim(), type: str(r.type).trim(), group: str(pg.group || r.group).trim() };
+      }); });
+    });
+    var have = [].map.call(document.querySelectorAll('#ra-tbody [data-f="hazard"]'), function (el) { return normHz(txt(el)); }).filter(function (x) { return x.length >= 4; });
+    return Object.keys(cnt).filter(function (k) { return cnt[k] >= 3 && !have.some(function (h) { return h.indexOf(k) >= 0 || k.indexOf(h) >= 0; }); })
+      .sort(function (a, b) { return cnt[b] - cnt[a]; }).slice(0, 12).map(function (k) { var m = meta[k]; m.n = cnt[k]; return m; });
+  }
+  function drawTbmSig(openList) {
+    var box = $("tbmSig"), sig = tbmSignals();
+    if (!sig.length) { box.hidden = true; box.innerHTML = ""; return; }
+    box.hidden = false;
+    box.innerHTML = "<b>TBM 확인 필요</b> — 최근 30일 TBM 일지에서 3번 이상 다룬 위험요인 " + sig.length + "건이 이 평가서에 없습니다. 현장에 새 위험이 생겼다면 수시 평가 대상인지 검토하세요. " +
+      '<button type="button" class="linkbtn" id="tbmSigTg" style="font-size:12px">' + (openList ? "접기" : "목록 보기") + "</button>" +
+      (openList ? '<span style="display:block;text-align:left;max-width:860px;margin:6px auto 0">' + sig.map(function (m, i) {
+        return '<span style="display:flex;gap:8px;align-items:center;padding:4px 0;border-top:1px solid rgba(0,0,0,.08)"><span style="flex:1">' + esc(m.risk) + ' <small style="opacity:.75">(' + m.n + "일" + (m.measure ? " · 대책: " + esc(m.measure) : "") + ')</small></span><button type="button" class="btn btn-sm btn-blue" data-sig="' + i + '">평가서에 추가</button></span>';
+      }).join("") + "</span>" : "");
+    box._sig = sig;
+  }
+  document.addEventListener("click", function (ev) {
+    var t = ev.target;
+    if (t.id === "tbmSigTg") { drawTbmSig(t.textContent === "목록 보기"); return; }
+    var b = t.closest && t.closest("#tbmSig [data-sig]"); if (!b) return;
+    var m = ($("tbmSig")._sig || [])[+b.dataset.sig]; if (!m) return;
+    var tbody = $("ra-tbody"), tr = appendRow(tbody, tbody.children.length + 1, { work: txt($("dispDept")) || m.group, cause: m.type, hazard: m.risk, measure: m.measure, p: 0, c: 0, note: "TBM 반복 위험요인(최근 30일 " + m.n + "일)" });
+    tr.classList.add("open"); syncLabels(); updateAll(); markTouched(); drawTbmSig(true);
+    setStatus("'" + m.risk + "'을 평가서 맨 아래에 넣었습니다. 가능성·중대성을 직접 정하세요.");
+  });
+
   (function init() {
     var page = $("page1"), gs = $("globalWorkType");
     lbEls().forEach(function (el) { DEF_LB[el.dataset.lb] = el.textContent; });
@@ -1254,7 +1307,7 @@
       if (a[0]) { docId = a[0].id; touched = true; apply(a[0].data); setStatus("마지막으로 작성하던 평가서를 이어서 엽니다 · " + (str(a[0].data.dept) || "부서 미입력") + " " + str(a[0].data.date)); }
       else { docId = newId(); apply(blankDoc()); }
     } catch (e) { docId = newId(); touched = false; apply(blankDoc()); setStatus("저장된 평가서를 읽지 못해 새 평가서로 시작합니다.", true); }
-    updateDocsBtn(); fitScreen();
+    updateDocsBtn(); fitScreen(); try { drawTbmSig(false); } catch (e) {}
     try {
       var qm = (new URLSearchParams(location.search).get("m") || "").toLowerCase().replace(/[x×*\s]/g, "");
       var MAPK = { m33: "m33", "33": "m33", m44: "m44", "44": "m44", m54: "m54", "54": "m54", m55: "m55", "55": "m55", lv3: "lv3", "3단계": "lv3" };
@@ -1287,6 +1340,7 @@
     page.addEventListener("click", function (ev) { var b = ev.target.closest(".sec-tg"); if (b) b.closest(".sec").classList.toggle("closed"); });
     $("optOrient").addEventListener("change", function () { setOrient(this.value); saveTpl(); markTouched(); });
     $("optAppr").addEventListener("change", function () { setAppr(this.checked); saveTpl(); markTouched(); });
+    $("optColor").addEventListener("change", function () { setDocColor(this.value); saveTpl(); });
     document.addEventListener("click", function (ev) { var m = $("moreBox"); if (m.open && !m.contains(ev.target)) m.open = false; });
     window.addEventListener("resize", fitScreen);
     window.addEventListener("pagehide", function () { if (saveTimer) saveNow(); });

@@ -33,6 +33,7 @@
   </section>
   <section class="fprof no-print" id="fLayout" hidden>
     <h2 class="h-sm">구성 바꾸기 <span class="muted">— 쓸 구역만 켜고, 순서와 점검 판정 방식을 정하세요. 꺼 둔 구역은 인쇄되지 않고, 적어 둔 내용은 지워지지 않습니다</span></h2>
+    <label class="flay-np"><input type="checkbox" id="fNotePrint"> 안내 문구(작성 방법·법령 설명)도 인쇄 <span class="muted">— 기본은 화면에만 보이고 인쇄되지 않습니다(회사 보고용)</span></label>
     <ul class="flay" id="fLayList"></ul>
     <div class="btns" style="margin-top:10px"><button type="button" class="btn btn-sm btn-ghost" id="fLayAdd">+ 자유 기재 칸 추가</button><button type="button" class="btn btn-sm btn-ghost" id="fLayReset">처음 구성으로</button></div>
   </section>
@@ -419,7 +420,7 @@ tr.q-hide{display:none}
       else if (s.type === "table") h += t + secTable(s);
       else if (s.type === "check") h += t + secCheck(s);
       else if (s.type === "signs") h += t + secSigns(s);
-      else if (s.type === "note") h += '<p class="paper-note lbl multi" contenteditable="' + CE + '" role="textbox" aria-multiline="true" spellcheck="false" data-l="n.' + si + '" data-d="' + esc(s.text) + '" data-ph="안내 문구 — 눌러서 입력(비우면 인쇄되지 않음)" title="눌러서 고치거나 지울 수 있습니다">' + esc(lb("n." + si, s.text)) + "</p>";
+      else if (s.type === "note") h += '<p class="paper-note lbl multi' + (s.doc ? "" : " guide") + '" contenteditable="' + CE + '" role="textbox" aria-multiline="true" spellcheck="false" data-l="n.' + si + '" data-d="' + esc(s.text) + '" data-ph="안내 문구 — 눌러서 입력(비우면 인쇄되지 않음)" title="눌러서 고치거나 지울 수 있습니다">' + esc(lb("n." + si, s.text)) + "</p>";
       else if (s.type === "list") h += t + '<ol class="paper-list">' + s.items.map(function (x, li) { return "<li>" + lab("li." + si + "." + li, x, true) + "</li>"; }).join("") + "</ol>";
     });
     (A.next || []).forEach(function (n, i) { h += '<p class="paper-next" id="fNext' + i + '"></p>'; });
@@ -429,6 +430,7 @@ tr.q-hide{display:none}
       h += '<p class="paper-foot" id="fFoot" contenteditable="true" spellcheck="false" data-ph="하단 문구 — 눌러서 입력(비우면 인쇄되지 않음)" title="눌러서 고치거나 지울 수 있습니다">' + esc(fv === null ? (F.law ? "관련 근거: " + F.law : "") : fv) + "</p>";
     }
     document.getElementById("paper").innerHTML = h;
+    document.getElementById("paper").classList.toggle("notes-print", notePrint());
     var ff = document.getElementById("fFoot");
     if (ff) ff.addEventListener("input", function () { if (!ff.textContent.trim()) ff.innerHTML = ""; try { localStorage.setItem("safetake.foot." + F.id, ff.textContent.trim()); } catch (e) {} });
     if (window.ADoc) ADoc.mountApproval(document.getElementById("fAppr"), DOC);
@@ -754,6 +756,13 @@ tr.q-hide{display:none}
     var sb = document.getElementById("fSample"); sb.hidden = false;
     sb.addEventListener("click", function () { Object.keys(F.sample).forEach(function (k) { state[k] = F.sample[k]; }); save(); render(); });
   }
+  // ---------- 안내 문구 인쇄 여부(2026-11-23) — 작성 방법·법령 설명 문구는 기본으로 인쇄하지 않는다(회사 문서·임원 보고용). 서식마다 켤 수 있다
+  function notePrint() { try { return localStorage.getItem("safetake.noteprint." + F.id) === "1"; } catch (e) { return false; } }
+  (function () {
+    var c = document.getElementById("fNotePrint"); if (!c) return;
+    c.checked = notePrint();
+    c.addEventListener("change", function () { try { if (c.checked) localStorage.setItem("safetake.noteprint." + F.id, "1"); else localStorage.removeItem("safetake.noteprint." + F.id); } catch (e) {} document.getElementById("paper").classList.toggle("notes-print", c.checked); say(c.checked ? "안내 문구도 인쇄합니다" : "안내 문구는 인쇄하지 않습니다"); });
+  })();
   // ---------- 구성 바꾸기 패널
   var lyb = document.getElementById("fLayoutBtn"), lyp = document.getElementById("fLayout"), lyl = document.getElementById("fLayList");
   var TYPE_KO = { fields: "입력 칸", table: "표", check: "점검표", text: "기재 칸", note: "안내", signs: "서명", list: "목록" };

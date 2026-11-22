@@ -2070,7 +2070,7 @@ def precheck_forms(lawref):
                 {"type": "fields", "cols": 2, "fields": [
                     {"k": "date", "label": "점검일", "type": "date"}, {"k": "place", "label": "작업 장소"},
                     {"k": "equip", "label": "기계·설비명(번호)"}, {"k": "who", "label": "점검자"}]},
-                {"type": "note", "text": f"작업: {name}"},
+                {"type": "note", "text": f"작업: {name}", "doc": True},
                 {"type": "check", "k": "chk", "title": "점검 내용 (별표 3)", "opts": ["양호", "불량"], "items": checks},
                 {"type": "table", "k": "fix", "title": "이상 발견 시 조치 (제35조제3항)", "rows": 3, "cols": [
                     {"label": "이상 내용", "multi": True}, {"label": "조치 내용", "multi": True}, {"label": "조치일", "w": 14}, {"label": "확인", "w": 12}]}
@@ -2482,6 +2482,29 @@ def dl_section(rel, tool=None, form=None):
             f'<a class="spdl-more" href="{rel}resources/files/#safeplum">양식·파일 자료실 전체 보기 →</a></section>')
 
 
+def check_pickers(f):
+    """'예시로 채우기'·자동 채우기 데이터가 서식 구조와 맞는지 빌드 때 확인한다(없는 칸·표, 열 수 초과 → 빌드 중단).
+    서식 칸 이름을 바꾸고 예시를 고치지 않으면 예시가 조용히 안 들어가는 오류를 막는다."""
+    secs = f.get("sections", [])
+    fields = {"f." + x["k"] for s in secs if s.get("type") == "fields" for x in s.get("fields", [])}
+    texts = {"x." + s["k"] for s in secs if s.get("type") == "text" and s.get("k")}
+    tables = {s["k"]: len(s.get("cols", [])) for s in secs if s.get("type") == "table"}
+    checks = {s["k"] for s in secs if s.get("type") == "check"}
+    for pk in f.get("auto", {}).get("pickers", []) or []:
+        for o in pk.get("options", []):
+            sets = [o.get("set") or {}] + list((o.get("variants") or {}).values())
+            for st in sets:
+                for k in st:
+                    if k[:2] in ("f.", "x."):
+                        assert k in fields or k in texts, f"서식 {f['id']} 예시 '{o.get('label')}': 없는 칸 {k}"
+            for tk, rows in (o.get("rows") or {}).items():
+                assert tk in tables, f"서식 {f['id']} 예시 '{o.get('label')}': 없는 표 {tk}"
+                for r in rows:
+                    assert len(r) <= tables[tk], f"서식 {f['id']} 예시 '{o.get('label')}': 표 {tk} 열 수 초과({len(r)} > {tables[tk]})"
+            for ck in (o.get("checks") or {}):
+                assert ck in checks, f"서식 {f['id']} 예시 '{o.get('label')}': 없는 점검표 {ck}"
+
+
 def all_forms(lawref):
     fj = load("data/forms.json")
     forms = fj["forms"] + precheck_forms(lawref)
@@ -2494,6 +2517,7 @@ def all_forms(lawref):
         if f.get("src_law"):
             f["source_url"] = law_url(f["src_law"])
         f["auto"] = auto.get(f["id"], {"source": "", "checked": ""})
+        check_pickers(f)
         # AI 작성 도우미 입력 예시: 서식별 예시 + 묶음별 예시를 합쳐 5개까지(눌러서 넣는 칩으로 보인다)
         _ai = f["auto"].setdefault("ai", {})
         _own = AI_FORM.get(f["id"], {})

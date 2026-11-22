@@ -912,7 +912,7 @@ details.lawbox summary{cursor:pointer}
 @page{size:A4;margin:12mm 12mm 14mm;@bottom-center{content:counter(page) " / " counter(pages);font-size:9pt;color:#666}@top-center{content:""}}
 /* 인쇄: 첫 쪽(구형 브라우저용). 최신 크롬·엣지는 위 @top-center 빈 칸으로 모든 쪽의 머리글이 빠짐. 첫 쪽 위·아래 margin을 0으로 → 브라우저 머리글·바닥글(날짜·시간·제목·주소)이 붙지 않음. 같은 간격은 padding으로 */
 @page:first{margin-top:0;margin-bottom:0;padding-top:12mm;padding-bottom:14mm}
-@media print{html,body{min-width:0!important;width:auto!important}.paper,.print-doc{width:auto!important;max-width:100%!important;box-sizing:border-box}.paper table{max-width:100%}.paper th,.paper td{overflow-wrap:anywhere}.paper .im-info,.paper .im-pt{table-layout:fixed;width:100%}.paper-h{grid-template-columns:minmax(0,1fr) auto}.paper-t{min-width:0;overflow-wrap:anywhere}.table-wrap{overflow:visible!important}.table-wrap table,.dtable{width:100%!important;min-width:0!important}.dtable th,.dtable td,.seltable th{white-space:normal!important;padding:6px 6px}}
+@media print{html,body{min-width:0!important;width:auto!important}.paper,.print-doc{width:auto!important;max-width:100%!important;box-sizing:border-box}.paper table{max-width:100%}.paper th,.paper td{overflow-wrap:anywhere}.paper .im-info,.paper .im-pt{table-layout:fixed;width:100%}.paper-h{grid-template-columns:minmax(0,1fr) auto}.paper-t{min-width:0;overflow-wrap:anywhere}.table-wrap{overflow:visible!important}.table-wrap table,.dtable{width:100%!important;min-width:0!important}.dtable th,.dtable td,.seltable th{white-space:normal!important;padding:6px 6px}.ptable td.txt{min-width:0!important}input[type=checkbox],input[type=radio]{accent-color:#333}}
 .appr-panel{background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--r);padding:12px 14px;margin:8px 0}
 .appr-panel-l{font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:6px}
 .appr-panel .ad-appr{margin-left:0}
@@ -2271,3 +2271,8 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
     .cm-chat{padding:12px 14px}
   }
 }
+/* 2026-11-23 서식 작성기: 작성 방법·법령 설명(안내 문구)은 기본으로 인쇄하지 않음 — '구성 바꾸기'에서 켬 */
+.flay-np{display:block;margin:0 0 10px;font-size:14px;font-weight:600;color:var(--text)}.flay-np input{margin-right:6px}.flay-np .muted{font-weight:400;font-size:12.5px}
+@media screen{.paper:not(.notes-print) .paper-note.guide{position:relative;padding-right:74px}.paper:not(.notes-print) .paper-note.guide::after{content:"인쇄 안 됨";position:absolute;top:6px;right:8px;font-size:10.5px;color:#64748B;border:1px solid #CBD5E1;border-radius:4px;padding:0 5px;background:#fff;line-height:1.6}}
+@media print{.paper .paper-note.guide{display:none!important}.paper.notes-print .paper-note.guide{display:block!important}.paper.notes-print .paper-note.guide:empty{display:none!important}}
+

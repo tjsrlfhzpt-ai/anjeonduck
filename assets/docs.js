@@ -510,7 +510,32 @@
   }
   document.addEventListener("click", function (ev) { if (ev.target.closest && ev.target.closest("[data-mydata]")) { ev.preventDefault(); openDataModal(); } });
 
-  window.ADoc = { mountApproval: mountApproval, apprHTML: apprHTML, mountAll: mountAll, mountPhotos: mountPhotos, pickPhoto: pick, addFiles: addFiles, countPhotos: countPhotos, onPhotos: onPhotos, clearPhotos: clearPhotos,
+  // ---------- 작성 중 내용 자동 보관(2026-11-23) — '기록 추가'를 누르기 전에 새로 고침·앱 전환으로 적던 값이 사라지지 않게.
+  // keepDraft(이름, [칸 id...]) → { clear() }. 기록을 추가·취소한 뒤 clear() 를 부른다. 24시간 지난 초안은 버린다.
+  // 건강정보 등 민감정보를 다루는 화면에는 쓰지 않는다(그런 화면은 일부러 저장하지 않음).
+  function keepDraft(name, ids, opts) {
+    opts = opts || {};
+    var key = P + "draft." + name, timer = 0, restoring = false;
+    function els() { return ids.map(function (id) { return document.getElementById(id); }).filter(Boolean); }
+    function val(el) { return el.type === "checkbox" ? (el.checked ? "1" : "") : el.value; }
+    var base = {};   // 처음 열었을 때 값(오늘 날짜·지난 기록에서 미리 채운 값) — 이것과 달라진 칸이 있어야 '작성 중'으로 본다
+    els().forEach(function (el) { base[el.id] = val(el); });
+    function read() { var v = {}, any = false; els().forEach(function (el) { var x = val(el); v[el.id] = x; if (x !== base[el.id] && (opts.ignore || []).indexOf(el.id) < 0) any = true; }); return any ? v : null; }
+    function store() { if (restoring || (opts.skip && opts.skip())) return; var v = read(); try { if (v) localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: v })); else localStorage.removeItem(key); } catch (e) {} }
+    var d = lget(key, null);
+    if (d && d.v && Date.now() - (d.t || 0) < 864e5) {
+      restoring = true;
+      els().forEach(function (el) { if (!(el.id in d.v)) return; if (el.type === "checkbox") el.checked = !!d.v[el.id]; else el.value = d.v[el.id]; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+      restoring = false;
+      toast("작성 중이던 내용을 다시 불러왔습니다.");
+    } else if (d) { try { localStorage.removeItem(key); } catch (e) {} }
+    els().forEach(function (el) { el.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(store, 300); }); el.addEventListener("change", store); });
+    window.addEventListener("pagehide", store);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") store(); });
+    return { clear: function () { clearTimeout(timer); try { localStorage.removeItem(key); } catch (e) {} setTimeout(function () { els().forEach(function (el) { base[el.id] = val(el); }); }, 0); }, save: store };
+  }
+
+  window.ADoc = { keepDraft: keepDraft, mountApproval: mountApproval, apprHTML: apprHTML, mountAll: mountAll, mountPhotos: mountPhotos, pickPhoto: pick, addFiles: addFiles, countPhotos: countPhotos, onPhotos: onPhotos, clearPhotos: clearPhotos,
     listPhotos: listPhotos, putPhoto: putPhoto, delPhoto: delPhoto, shrink: shrink,
     exportAll: exportAll, importAll: importAll, openDataModal: openDataModal, toast: toast, esc: esc, ymd: ymd };
 })();

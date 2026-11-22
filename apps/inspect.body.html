@@ -138,15 +138,17 @@
   }
   function resetForm() { editing = -1; $("iAdd").textContent = "목록에 추가"; $("iCancel").hidden = true; $("iName").value = ""; $("iLast").value = ""; $("iErr").hidden = true; preview(); }
   ["iType", "iBase", "iLast", "iCon", "iPsm"].forEach(function (id) { $(id).addEventListener("change", function () { if (id === "iType") sync(); else preview(); $("iErr").hidden = true; }); });
+  // 작성 중 내용 자동 보관(수정 중에는 보관하지 않음)
+  var draft = window.ADoc && ADoc.keepDraft ? ADoc.keepDraft("inspect", ["iType", "iName", "iBase", "iLast", "iCon", "iPsm"], { skip: function () { return editing >= 0; } }) : { clear: function () {} };
   $("iAdd").addEventListener("click", function () {
     var it = formItem(), err = check(it);
     if (err) { $("iErr").textContent = err; $("iErr").hidden = false; (it.base && okDate(it.base) ? $("iLast") : $("iBase")).focus(); return; }
     var was = editing;
     if (editing >= 0 && list[editing]) list[editing] = it; else list.push(it);
-    save(); resetForm(); doneAt = -1; render();
+    if (save()) draft.clear(); resetForm(); doneAt = -1; render();
     say((was >= 0 ? "고쳤습니다: " : "추가했습니다: ") + (it.name || TYPES[it.t].k) + " — 다음 검사 기한 " + ymd(due(it).date));
   });
-  $("iCancel").addEventListener("click", function () { resetForm(); render(); });
+  $("iCancel").addEventListener("click", function () { draft.clear(); resetForm(); render(); });
   $("iRows").addEventListener("click", function (ev) {
     var b = ev.target.closest("button"); if (!b) return;
     var ds = b.dataset;
