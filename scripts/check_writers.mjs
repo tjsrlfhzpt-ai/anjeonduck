@@ -12,7 +12,9 @@ const OUT = process.argv[3] || "";
 const ROOT = process.env.SITE_DIR || "_site";
 const ONLY = process.env.ONLY ? new RegExp(process.env.ONLY) : null;
 
+// PAGES_FILE 에 주소 목록(한 줄에 하나, 사이트 기준 경로)을 주면 그 쪽들만 점검한다(작성기 외 화면 점검용)
 function pages() {
+  if (process.env.PAGES_FILE) return fs.readFileSync(process.env.PAGES_FILE, "utf8").split(/\n/).map((x) => x.trim().replace(/^\//, "")).filter(Boolean);
   const out = [];
   const walk = (d) => {
     for (const n of fs.readdirSync(d, { withFileTypes: true })) {

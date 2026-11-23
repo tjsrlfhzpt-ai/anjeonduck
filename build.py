@@ -1427,7 +1427,14 @@ def career_chip_vals(jobs):
 
 def job_row(j, rel_root, compact=False):
     tags = "".join(f'<span class="tag tag-job">{e(x)}</span>' for x in j["jobs_list"])
-    tags += "".join(f'<span class="tag">{e(v)}</span>' for v in (career_txt(j), j.get("education"), (j.get("employment") or "") + (f" · {j['term']}" if j.get("term") else "")) if v)
+    _c, _ed = career_txt(j), j.get("education") or ""
+    if _c == _ed == "원문 확인":   # 경력·학력이 둘 다 '원문 확인'이면 한 번만(같은 글자 태그가 나란히 보이던 문제)
+        _c, _ed = "경력·학력 원문 확인", ""
+    _tv = []
+    for v in (_c, _ed, (j.get("employment") or "") + (f" · {j['term']}" if j.get("term") else "")):
+        if v and v not in _tv:
+            _tv.append(v)
+    tags += "".join(f'<span class="tag">{e(v)}</span>' for v in _tv)
     loc = " · ".join(x for x in [j.get("company"), j.get("region")] if x)
     attrs = (f'data-item data-job="{e("|".join(j["jobs_list"]))}" '
              f'data-ctype="{e(j.get("company_type",""))}" data-industry="{e(j.get("industry",""))}" '
