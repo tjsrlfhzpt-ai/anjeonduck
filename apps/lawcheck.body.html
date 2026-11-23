@@ -1,0 +1,219 @@
+<section class="phead"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>@@CRUMB@@</p>
+  <h1>@@TITLE@@</h1>
+  <p>@@LEAD@@</p>
+</div></section>
+<div class="wrap layout-detail">
+  <section class="col-main stack">
+    <form class="calc" id="lcForm" onsubmit="return false" autocomplete="off" hidden></form>
+    <div class="lc-result" id="lcOut" aria-live="polite" hidden></div>
+    <div class="btns no-print" id="lcBtns" hidden><button type="button" class="btn btn-sm btn-ghost" id="lcCopy" disabled>결과 복사</button><button type="button" class="btn btn-sm btn-ghost" id="lcPrint">결과 인쇄</button><button type="button" class="btn btn-sm btn-ghost" id="lcClear">입력 지우기</button></div>
+    <div id="lcInfo" class="stack"></div>
+    <div id="lcTables" class="stack"></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box" id="lcSideBox" hidden><h2 class="h-sm">꼭 알아 두기</h2><ul class="bul hint" id="lcSide"></ul></div>
+    <div class="side-box" id="lcLinkBox" hidden><h2 class="h-sm">원문·함께 보기</h2><ul class="bul" id="lcLinks"></ul></div>
+    <p class="src-line" id="lcSrc"></p>
+  </aside>
+</div>
+<style>
+.lc-step{display:flex;gap:14px;padding:4px 0 18px;border-bottom:1px solid var(--line-2)}
+.lc-step:last-child{border-bottom:0;padding-bottom:0}
+.lc-no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--navy);color:var(--surface);display:flex;align-items:center;justify-content:center;font-weight:800}
+.lc-step .h-sm .muted{font-size:12px;font-weight:500;margin-left:4px}
+.lc-step .check{align-items:flex-start}
+.lc-step .check .hint{display:block;margin-top:2px}
+.lc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lc-result{border-radius:var(--r-lg);border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.lc-verdict{display:flex;align-items:center;gap:14px;padding:18px 22px;background:var(--surface-2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.lc-verdict.yes{background:var(--red-50)}
+.lc-verdict b{font-size:24px;letter-spacing:-.03em}
+.lc-verdict.yes b{color:var(--red)}
+.lc-verdict.no b{color:var(--green)}
+.lc-body{padding:16px 22px 20px}
+.lc-body h3{margin:14px 0 6px}
+.lc-body h3:first-child{margin-top:0}
+.lc-body li,.lc-info li{font-size:14px;color:var(--text-2);padding:2px 0}
+.lc-body ul,.lc-body ol,.lc-info ul,.lc-info ol{padding-left:20px;margin:0}
+.lc-body ul,.lc-info ul{list-style:disc}
+.lc-law{font-size:12px;color:var(--text-3);margin-left:4px}
+.lc-info{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 20px;background:var(--surface)}
+.lc-info h2{margin:0 0 8px}
+.lc-info p{font-size:14px;color:var(--text-2);margin:4px 0}
+.lc-tbl{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 20px;background:var(--surface)}
+.lc-tbl h2{margin:0 0 4px}
+.lc-tbl .sort{width:100%;margin:8px 0}
+.lc-tbl table{width:100%;border-collapse:collapse;font-size:13.5px}
+.lc-tbl th,.lc-tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.lc-tbl th{background:var(--surface-2);font-weight:700}
+.lc-tbl .lc-cnt{font-size:12px;color:var(--text-3)}
+@media (max-width:640px){.lc-grid{grid-template-columns:1fr}.lc-tbl{padding:12px}.lc-tbl table{font-size:12.5px}}
+@media print{#lcForm,.layout-detail .col-side,.no-print,.lc-tbl .sort{display:none!important}.lc-result,.lc-info,.lc-tbl{border:1px solid #444}.lc-verdict,.lc-verdict.yes{background:none!important}.lc-verdict b,.lc-body li,.lc-body .hint,.lc-info li,.lc-info p{color:#000!important}.lc-tbl th{background:none!important}}
+</style>
+<script>
+(function () {
+  "use strict";
+  var D = /*@DATA@*/null;
+  if (!D) return;
+  var $ = function (id) { return document.getElementById(id); };
+  var REL = "../../";
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function href(h) { return /^https?:/.test(h) ? h : REL + h; }
+  function lawTag(l) { return l ? '<span class="lc-law">(' + esc(l) + ")</span>" : ""; }
+  var inputs = [];
+  (D.steps || []).forEach(function (s) { (s.inputs || []).forEach(function (q) { inputs.push(q); }); });
+  var KEY = "safeplum.lc." + D.id + ".v1", ready = false, lastText = "";
+
+  // ---- 입력 화면
+  function inputHtml(q) {
+    var id = "lcI_" + q.k, hint = q.hint ? '<span class="hint">' + esc(q.hint) + "</span>" : "";
+    var wrap = function (h) { return '<div class="lc-q" data-q="' + esc(q.k) + '">' + h + "</div>"; };
+    if (q.type === "check") return wrap('<label class="check"><input type="checkbox" id="' + id + '"><span>' + esc(q.label) + hint + "</span></label>");
+    if (q.type === "num") return wrap('<label class="field"><span class="label">' + esc(q.label) + (q.unit ? " (" + esc(q.unit) + ")" : "") + '</span><input type="number" min="0" step="any" inputmode="decimal" id="' + id + '"' + (q.ph ? ' placeholder="' + esc(q.ph) + '"' : "") + ">" + hint + "</label>");
+    if (q.type === "select") return wrap('<label class="field"><span class="label">' + esc(q.label) + '</span><select class="sort" id="' + id + '" style="width:100%"><option value="">— ' + esc(q.empty || "선택") + " —</option>" +
+      q.options.map(function (o) { return '<option value="' + esc(o.v) + '">' + esc(o.t) + "</option>"; }).join("") + "</select>" + hint + "</label>");
+    if (q.type === "radio") return wrap('<fieldset class="field"><legend class="label">' + esc(q.label) + "</legend>" + q.options.map(function (o) {
+      return '<label class="check"><input type="radio" name="' + id + '" value="' + esc(o.v) + '"><span>' + esc(o.t) + (o.hint ? '<span class="hint">' + esc(o.hint) + "</span>" : "") + "</span></label>"; }).join("") + hint + "</fieldset>");
+    return "";
+  }
+  if (inputs.length) {
+    $("lcForm").hidden = false; $("lcOut").hidden = false; $("lcBtns").hidden = false;
+    $("lcForm").innerHTML = D.steps.map(function (s, i) {
+      return '<div class="lc-step"><span class="lc-no">' + (i + 1) + '</span><div class="grow stack" style="gap:10px"><h2 class="h-sm">' + esc(s.title) + (s.law ? ' <span class="muted">' + esc(s.law) + "</span>" : "") + "</h2>" +
+        (s.desc ? '<p class="hint">' + esc(s.desc) + "</p>" : "") + '<div class="' + (s.grid ? "lc-grid" : "stack") + '" style="gap:8px">' + s.inputs.map(inputHtml).join("") + "</div></div></div>";
+    }).join("");
+  } else { $("lcBtns").hidden = false; $("lcCopy").hidden = $("lcClear").hidden = true; }
+
+  function val(q) {
+    if (q.type === "check") { var c = $("lcI_" + q.k); return c ? c.checked : false; }
+    if (q.type === "num") { var n = parseFloat($("lcI_" + q.k).value); return isFinite(n) ? n : null; }
+    if (q.type === "select") return $("lcI_" + q.k).value || null;
+    if (q.type === "radio") { var r = document.querySelector('input[name="lcI_' + q.k + '"]:checked'); return r ? r.value : null; }
+    return null;
+  }
+  function values() {
+    var v = {}; inputs.forEach(function (q) { v[q.k] = val(q); });
+    // 계산값: {k, f:"ratio", a, b, x, round} → a ÷ b × x
+    (D.derived || []).forEach(function (d) {
+      var a = v[d.a], b = v[d.b], r = null;
+      if (d.f === "ratio" && a != null && b != null && b > 0) { r = a / b * (d.x || 1); var p = Math.pow(10, d.round == null ? 2 : d.round); r = Math.round(r * p) / p; }
+      v[d.k] = r;
+    });
+    return v;
+  }
+  // 조건: {k, is} {k, ge} {k, lt} {k, in} {k, set} {all:[]} {any:[]} {not:{}}
+  function test(c, v) {
+    if (!c) return true;
+    if (c.all) return c.all.every(function (x) { return test(x, v); });
+    if (c.any) return c.any.some(function (x) { return test(x, v); });
+    if (c.not) return !test(c.not, v);
+    if (c.cmp) {
+      var A = v[c.cmp[0]], B = v[c.cmp[2]], op = c.cmp[1];
+      if (A == null || B == null) return false;
+      return op === "ge" ? A >= B : op === "gt" ? A > B : op === "lt" ? A < B : op === "le" ? A <= B : false;
+    }
+    var x = v[c.k];
+    if ("is" in c) return x === c.is;
+    if ("set" in c) return c.set ? (x !== null && x !== "" && x !== false) : (x === null || x === "" || x === false);
+    if ("in" in c) return c["in"].indexOf(x) >= 0;
+    if (x === null || x === undefined || x === "") return false;
+    if ("ge" in c) return x >= c.ge;
+    if ("gt" in c) return x > c.gt;
+    if ("lt" in c) return x < c.lt;
+    if ("le" in c) return x <= c.le;
+    return false;
+  }
+  function fill(t, v) { return String(t).replace(/\{(\w+)\}/g, function (m, k) { return v[k] == null ? "" : v[k]; }); }
+
+  function calc() {
+    if (!inputs.length) return;
+    var v = values();
+    inputs.forEach(function (q) { var box = document.querySelector('[data-q="' + q.k + '"]'); if (box) box.hidden = !test(q.show, v); });
+    // 숨겨진 입력은 판정에서 빼기
+    inputs.forEach(function (q) { if (q.show && !test(q.show, v)) v[q.k] = q.type === "check" ? false : null; });
+    save();
+    var touched = inputs.some(function (q) { var x = v[q.k]; return x !== null && x !== false && x !== ""; });
+    if (!touched) { $("lcOut").innerHTML = '<div class="lc-verdict"><b>입력 대기</b><span class="hint">' + esc(D.wait || "해당하는 항목을 고르거나 값을 넣으세요.") + "</span></div>"; $("lcCopy").disabled = true; lastText = ""; return; }
+    var hits = [], warns = [], needs = [], notes = [];
+    (D.rules || []).forEach(function (r) {
+      if (!test(r.when, v)) return;
+      var item = { t: fill(r.text, v), law: r.law };
+      if (r.level === "yes") hits.push(item); else if (r.level === "warn") warns.push(item); else if (r.level === "need") needs.push(item); else notes.push(item);
+    });
+    var lv = hits.length ? "yes" : warns.length ? "warn" : needs.length ? "need" : "no";
+    var label = { yes: D.yes_label || "해당", warn: D.warn_label || "확인 필요", need: "판정 보류", no: D.no_label || "해당 없음" }[lv];
+    var sub = { yes: hits.length + "개 근거에 해당", warn: "추가 확인이 필요합니다", need: "값을 더 넣어 주세요", no: "입력한 내용 기준" }[lv];
+    function list(a) { return "<ul>" + a.map(function (x) { return "<li>" + esc(x.t) + lawTag(x.law) + "</li>"; }).join("") + "</ul>"; }
+    var body = "", txt = [];
+    if (hits.length) { body += "<h3>" + esc(D.hit_title || "해당 근거") + "</h3>" + list(hits); txt.push((D.hit_title || "해당 근거") + ":\n" + hits.map(function (x) { return "- " + x.t + (x.law ? " (" + x.law + ")" : ""); }).join("\n")); }
+    if (warns.length) { body += "<h3>확인할 것</h3>" + list(warns); txt.push("확인할 것:\n" + warns.map(function (x) { return "- " + x.t; }).join("\n")); }
+    (D.then || []).forEach(function (b) {
+      if (b.on && b.on.indexOf(lv) < 0) return;
+      if (!test(b.when, v)) return;
+      body += "<h3>" + esc(b.title) + "</h3>" + (b.ordered ? "<ol>" : "<ul>") + b.items.map(function (x) { return "<li>" + esc(fill(x, v)) + "</li>"; }).join("") + (b.ordered ? "</ol>" : "</ul>");
+      txt.push(b.title + ":\n" + b.items.map(function (x) { return "- " + fill(x, v); }).join("\n"));
+    });
+    if (lv === "no" && D.no_text) { body += '<p class="hint">' + esc(D.no_text) + "</p>"; txt.push(D.no_text); }
+    if (needs.length) { body += "<h3>더 넣어야 할 값</h3>" + list(needs); txt.push("더 넣어야 할 값:\n" + needs.map(function (x) { return "- " + x.t; }).join("\n")); }
+    if (notes.length) { body += "<h3>참고</h3>" + list(notes); txt.push("참고:\n" + notes.map(function (x) { return "- " + x.t; }).join("\n")); }
+    $("lcOut").innerHTML = '<div class="lc-verdict ' + (lv === "yes" ? "yes" : lv === "no" ? "no" : "") + '"><b>' + esc(label) + '</b><span class="hint">' + esc(sub) + '</span></div><div class="lc-body">' + body + "</div>";
+    lastText = "[" + D.title + "] " + label + "\n" + txt.join("\n") + "\n(자가진단 참고 결과 · 원문 확인 " + D.checked + ")";
+    $("lcCopy").disabled = false;
+  }
+  function save() {
+    if (!ready) return;
+    var o = {}; inputs.forEach(function (q) { o[q.k] = val(q); });
+    try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {}
+  }
+  function restore() {
+    try {
+      var sv = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (!sv || typeof sv !== "object") return;
+      inputs.forEach(function (q) {
+        var x = sv[q.k]; if (x == null) return;
+        if (q.type === "check") $("lcI_" + q.k).checked = x === true;
+        else if (q.type === "num") { if (isFinite(parseFloat(x))) $("lcI_" + q.k).value = parseFloat(x); }
+        else if (q.type === "select") { if (q.options.some(function (o) { return o.v === x; })) $("lcI_" + q.k).value = x; }
+        else if (q.type === "radio") { var r = document.querySelector('input[name="lcI_' + q.k + '"][value="' + String(x).replace(/["\\]/g, "") + '"]'); if (r) r.checked = true; }
+      });
+    } catch (e) {}
+  }
+
+  // ---- 늘 보이는 안내·표
+  $("lcInfo").innerHTML = (D.info || []).map(function (b) {
+    return '<section class="lc-info"><h2 class="h-sm">' + esc(b.title) + (b.law ? ' <span class="lc-law">' + esc(b.law) + "</span>" : "") + "</h2>" +
+      (b.text ? (Array.isArray(b.text) ? b.text : [b.text]).map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") : "") +
+      (b.items ? (b.ordered ? "<ol>" : "<ul>") + b.items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + (b.ordered ? "</ol>" : "</ul>") : "") + "</section>";
+  }).join("");
+  $("lcTables").innerHTML = (D.tables || []).map(function (t, ti) {
+    return '<section class="lc-tbl" id="' + esc(t.id || "t" + ti) + '"><h2 class="h-sm">' + esc(t.title) + (t.law ? ' <span class="lc-law">' + esc(t.law) + "</span>" : "") + "</h2>" +
+      (t.note ? '<p class="hint">' + esc(t.note) + "</p>" : "") +
+      (t.rows.length > 8 ? '<input type="search" class="sort lc-q-t" data-t="' + ti + '" placeholder="' + esc(t.search_ph || "이름·번호로 찾기") + '" aria-label="' + esc(t.title) + ' 찾기">' : "") +
+      '<div class="table-wrap"><table><thead><tr>' + t.cols.map(function (c) { return "<th scope=\"col\">" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      t.rows.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("") + '</tbody></table></div><p class="lc-cnt" data-c="' + ti + '">' + t.rows.length + "개</p></section>";
+  }).join("");
+  [].forEach.call(document.querySelectorAll(".lc-q-t"), function (inp) {
+    inp.addEventListener("input", function () {
+      var q = inp.value.trim().toLowerCase().replace(/\s+/g, ""), sec = inp.closest(".lc-tbl"), n = 0;
+      [].forEach.call(sec.querySelectorAll("tbody tr"), function (tr) { var ok = !q || tr.textContent.toLowerCase().replace(/\s+/g, "").indexOf(q) >= 0; tr.hidden = !ok; if (ok) n++; });
+      sec.querySelector(".lc-cnt").textContent = (q ? "찾은 결과 " : "") + n + "개";
+    });
+  });
+  if ((D.side || []).length) { $("lcSideBox").hidden = false; $("lcSide").innerHTML = D.side.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join(""); }
+  if ((D.links || []).length) { $("lcLinkBox").hidden = false; $("lcLinks").innerHTML = D.links.map(function (l) { var ext = /^https?:/.test(l.h); return '<li><a href="' + esc(href(l.h)) + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">" + esc(l.t) + (ext ? " ↗" : "") + "</a></li>"; }).join(""); }
+  $("lcSrc").textContent = "원문 확인 " + D.checked + " · " + D.source;
+
+  restore(); ready = true;
+  $("lcClear").addEventListener("click", function () { $("lcForm").reset(); try { localStorage.removeItem(KEY); } catch (e) {} calc(); });
+  $("lcCopy").addEventListener("click", function () {
+    var b = this;
+    function done(ok) { b.textContent = ok ? "복사했습니다" : "복사하지 못했습니다"; setTimeout(function () { b.textContent = "결과 복사"; }, 1600); }
+    try { navigator.clipboard.writeText(lastText).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+  $("lcPrint").addEventListener("click", function () { window.print(); });
+  $("lcForm").addEventListener("input", calc);
+  $("lcForm").addEventListener("change", calc);
+  calc();
+})();
+</script>

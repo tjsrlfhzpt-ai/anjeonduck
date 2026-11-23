@@ -2007,6 +2007,13 @@ def render_free_tool(t, hazards, site=None, penalties=None):
             payload = json.dumps(penalties, ensure_ascii=False).replace("</", "<\\/")
             assert "/*@PENALTIES@*/null" in src, t["src"]
             src = src.replace("/*@PENALTIES@*/null", payload)
+        elif t.get("check"):
+            # 2026-11-23 공용 판정 화면: data/lawchecks.json 의 판정 하나를 apps/lawcheck.body.html 에 넣는다
+            spec = dict(load("data/lawchecks.json")["checks"][t["check"]], id=t["id"])
+            for k in ("title", "lead"):
+                assert spec.get(k), f"lawchecks {t['check']}: {k} 없음"
+            src = (src.replace("@@CRUMB@@", e(spec.get("crumb") or t["name"])).replace("@@TITLE@@", e(spec["title"])).replace("@@LEAD@@", e(spec["lead"]))
+                   .replace("/*@DATA@*/null", json.dumps(spec, ensure_ascii=False).replace("</", "<\\/")))
         elif t.get("inject"):
             names = t["inject"] if isinstance(t["inject"], list) else [t["inject"]]
             src = inject_data(src, names, t["src"])
