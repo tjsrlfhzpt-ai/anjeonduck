@@ -691,7 +691,7 @@ tr.q-hide{display:none}
   var HK = "safetake.formhist." + F.id, HMAX = 60;
   function hist() { try { var a = JSON.parse(localStorage.getItem(HK) || "[]"); return Array.isArray(a) ? a.filter(function (x) { return x && x.state && typeof x.state === "object"; }) : []; } catch (e) { return []; } }
   function histSave(a) { try { localStorage.setItem(HK, JSON.stringify(a.slice(0, HMAX))); return true; } catch (e) { return false; } }
-  function hasContent() { return Object.keys(state).some(function (k) { return k.indexOf("_a.") !== 0 && k.charAt(0) !== "n" && k.indexOf("cn.") !== 0 && String(state[k] || "").trim() && !((A.today || []).indexOf(k) >= 0); }); }
+  function hasContent() { return Object.keys(state).some(function (k) { return k !== "_lastEx" && k.indexOf("_a.") !== 0 && k.charAt(0) !== "n" && k.indexOf("cn.") !== 0 && String(state[k] || "").trim() && !((A.today || []).indexOf(k) >= 0); }); }
   function docLabel(st) {
     var bits = [];
     F.sections.forEach(function (s) { (s.fields || []).forEach(function (f) { var v = st["f." + f.k]; if (f.type !== "date" && v && String(v).trim() && bits.length < 2) bits.push(String(v).trim().slice(0, 24)); }); });
@@ -850,7 +850,9 @@ tr.q-hide{display:none}
       wipe.push(ck);
       if (Object.keys(state).some(function (k) { return (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) && String(state[k] || "").trim(); })) touched.push("c." + ck);
     });
-    Object.keys(changes).forEach(function (k) { if (k.charAt(0) !== "n" && state[k] && state[k] !== changes[k] && String(state[k]).trim()) touched.push(k); });
+    // 직전에 예시로 채운 값이 그대로 남아 있는 칸은 '사용자가 쓴 내용'이 아니므로 다른 예시로 바꿀 때 묻지 않는다
+    var lastEx = {}; try { lastEx = JSON.parse(state._lastEx || "{}") || {}; } catch (e) { lastEx = {}; }
+    Object.keys(changes).forEach(function (k) { if (k.charAt(0) !== "n" && state[k] && state[k] !== changes[k] && String(state[k]).trim() && state[k] !== lastEx[k]) touched.push(k); });
     if (touched.length && !window.confirm(A.pick_confirm || "이미 입력한 내용(점검 결과 포함) 일부가 법령 기준 문구로 바뀝니다. 계속할까요?")) { render(); return; }
     wipe.forEach(function (ck) {
       Object.keys(state).forEach(function (k) { if (k.indexOf("c." + ck + ".") === 0 || k.indexOf("ci." + ck + ".") === 0) delete state[k]; });
@@ -861,6 +863,9 @@ tr.q-hide{display:none}
     // replace: 예시를 바꿔 채울 때 앞서 채운 표의 칸이 섞여 남지 않게, 채우는 표는 먼저 비운다
     if (pk.replace) Object.keys(o.rows || {}).forEach(function (tk) { Object.keys(state).forEach(function (k) { if (k.indexOf("t." + tk + ".") === 0) delete state[k]; }); });
     Object.keys(changes).forEach(function (k) { state[k] = changes[k]; });
+    var exRec = {}; Object.keys(changes).forEach(function (k) { if (typeof changes[k] === "string" && k.indexOf("cx.") !== 0) exRec[k] = changes[k]; });
+    // 표를 비우고 채우는 예시(replace)는 앞 예시의 칸도 기록에서 뺀다
+    state._lastEx = JSON.stringify(exRec);
     save(); render();
     document.getElementById("fSaved").textContent = "'" + o.label + "' 기준으로 채웠습니다 — 현장에 맞게 고쳐 쓰세요";
   }
@@ -872,10 +877,22 @@ tr.q-hide{display:none}
       return '<div class="fauto-row"><label class="field"><span class="label">' + esc(pk.label) + "</span>" +
         (single ? '<span class="fauto-one">' + esc(pk.options[0].label) + "</span>" :
           '<select class="sort" data-pick="' + i + '"><option value="">선택하세요</option>' + pk.options.map(function (o, j) { return '<option value="' + j + '">' + esc(o.label) + "</option>"; }).join("") + "</select>") +
-        '</label><button type="button" class="btn btn-sm" data-apply="' + i + '">' + esc(pk.button || "채우기") + "</button>" +
+        '</label><span class="fauto-btns"><button type="button" class="btn btn-sm" data-apply="' + i + '">' + esc(pk.button || "채우기") + "</button>" +
+        (single ? "" : '<button type="button" class="btn btn-sm btn-ghost" data-next="' + i + '" title="다른 예시로 바로 바꿉니다(누를 때마다 다음 예시)">🔀 다른 예시</button>') + "</span>" +
         (pk.hint ? '<p class="hint">' + esc(pk.hint) + "</p>" : "") + "</div>";
     }).join("") + (A.source ? '<p class="src-line">' + (A.pick_title ? esc(A.source) : "기준: " + esc(A.source) + (A.checked ? " · 확인 " + esc(A.checked) : "")) + "</p>" : "");
     box.addEventListener("click", function (ev) {
+      // 🔀 다른 예시 — 선택 칸을 다음 예시로 넘기고 바로 채운다(2026-11-23). 마지막 다음은 처음으로
+      var nb = ev.target.closest("[data-next]");
+      if (nb) {
+        var npk = A.pickers[+nb.dataset.next], nsel = box.querySelector('[data-pick="' + nb.dataset.next + '"]');
+        if (!npk || !nsel) return;
+        var cur = nsel.value === "" ? -1 : +nsel.value, nx = (cur + 1) % npk.options.length;
+        if (npk.options.length > 2 && cur < 0) nx = Math.floor(Math.random() * npk.options.length);   // 처음 누르면 무작위로 시작
+        nsel.value = String(nx);
+        applyOption(npk, npk.options[nx]);
+        return;
+      }
       var b = ev.target.closest("[data-apply]"); if (!b) return;
       var pk = A.pickers[+b.dataset.apply], sel = box.querySelector('[data-pick="' + b.dataset.apply + '"]');
       var o = pk.options.length === 1 ? pk.options[0] : (sel && sel.value !== "" ? pk.options[+sel.value] : null);

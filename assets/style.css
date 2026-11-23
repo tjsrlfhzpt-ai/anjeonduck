@@ -2282,4 +2282,4 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
 @media print{.sched-bar,.switch{display:none!important}}
 /* 2026-11-23 인쇄: 채널 홍보 배너(오픈채팅·블로그·유튜브)와 검색창은 인쇄하지 않는다(브리핑·법령을 사내 공유용으로 출력할 때) */
 @media print{.cm-chat,.hsearch-box,.lsearch,form[role=search],input[type=search]{display:none!important}}
-
+.fauto-btns{display:inline-flex;gap:6px;flex-wrap:wrap}
