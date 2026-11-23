@@ -2689,7 +2689,10 @@ def build(out, today):
     # 회사 채용 홈페이지 공고 중 이미 실은 잡코리아 선별 공고와 같은 것은 뺀다(예전에 공유한 공고 주소가 깨지지 않게)
     cojobs = dedupe_w24(cojobs, curated + user_jobs, "회사 채용 홈페이지") if cojobs else cojobs
     w24 = dedupe_w24(load_auto("w24jobs.json")["items"], curated + user_jobs + cojobs)
-    jobs = validate_jobs(curated + user_jobs + cojobs + pubjobs["items"] + w24, today)
+    # 경기 잡아바(경기데이터드림 Open API, scripts/fetch_jobaba.py) — 경기 지역 중소·중견기업 공고
+    ggjobs = load("data/ggjobs.json")["items"] if (ROOT / "data/ggjobs.json").exists() else []
+    ggjobs = dedupe_w24(ggjobs, curated + user_jobs + cojobs + w24, "경기 잡아바") if ggjobs else ggjobs
+    jobs = validate_jobs(curated + user_jobs + cojobs + pubjobs["items"] + w24 + ggjobs, today)
     global JOBS_OPEN
     JOBS_OPEN = sum(1 for x in jobs if not x["closed"])
     briefs = load_briefs(today)
