@@ -43,12 +43,12 @@ def warn(msg):
     print("  경고:", msg, file=sys.stderr)
 
 
-def page(i, tries=4, size=None):
+def page(i, tries=4, size=None, timeout=180):
     q = urllib.parse.urlencode({"KEY": KEY, "Type": "json", "pIndex": i, "pSize": size or PSIZE})
     for k in range(tries):
         try:
             req = urllib.request.Request(f"{API}?{q}", headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=180) as r:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
                 d = json.loads(r.read().decode("utf-8", "replace"))
             body = d.get("GGJOBABARECRUSTM")
             if not body:
@@ -110,26 +110,35 @@ def main():
     except Exception as e:
         warn(f"잡아바 연결 확인 실패({time.time() - t0:.0f}초): {str(e)[:200]}")
         return 0
-    t0 = time.time()
-    try:
-        total, first = page(1)
-        print(f"  1쪽({PSIZE}건): {time.time() - t0:.1f}초")
-    except Exception as e:
-        warn(f"잡아바 1쪽 읽기 실패: {str(e)[:200]}")
+    # 해외 서버에서는 큰 요청(1000건)이 시간 초과되는 경우가 있어, 제시간에 오는 가장 큰 크기를 고른다
+    global PSIZE
+    total = first = None
+    for size in (1000, 500, 200, 100, 50):
+        t0 = time.time()
+        try:
+            total, first = page(1, tries=1, size=size, timeout=45)
+            PSIZE = size
+            print(f"  1쪽({size}건): {time.time() - t0:.1f}초 → 이 크기로 읽음")
+            break
+        except Exception as e:
+            print(f"  1쪽({size}건) 실패({time.time() - t0:.0f}초): {str(e)[:60]}")
+    if first is None:
+        warn("잡아바: 어떤 크기로도 1쪽을 읽지 못해 기존 파일을 유지합니다.")
         return 0
     pages = (total + PSIZE - 1) // PSIZE
     print(f"  잡아바 전체 {total}건, {pages}쪽")
     rows = list(first)
     fails = 0
-    with cf.ThreadPoolExecutor(max_workers=4) as ex:
-        futs = {ex.submit(page, i): i for i in range(2, pages + 1)}
+    t0 = time.time()
+    with cf.ThreadPoolExecutor(max_workers=6) as ex:
+        futs = {ex.submit(page, i, 4, None, 90): i for i in range(2, pages + 1)}
         for f in cf.as_completed(futs):
             try:
                 rows.extend(f.result()[1])
             except Exception as e:
                 fails += 1
                 warn(f"{futs[f]}쪽 실패: {str(e)[:100]}")
-    print(f"  읽은 행 {len(rows)}건 (실패 {fails}쪽)")
+    print(f"  읽은 행 {len(rows)}건 (실패 {fails}쪽, {time.time() - t0:.0f}초)")
     if fails > max(3, pages // 10):
         warn("실패한 쪽이 많아 기존 파일을 유지합니다.")
         return 0
