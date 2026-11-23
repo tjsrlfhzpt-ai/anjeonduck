@@ -36,7 +36,7 @@ TODAY = (dt.datetime.utcnow() + dt.timedelta(hours=9)).date()
 SKIP_HOSTS = ("jobkorea.co.kr",)
 UA = "Mozilla/5.0 (compatible; SafePlumBot/1.0; +https://safeplum.com)"
 # 회사 채용 홈페이지 수집기와 같은 제외 기준 + 잡아바에 많은 경비·시설 공고
-EXTRA_EXCLUDE_RE = re.compile(r"아파트|관리사무소|시설\s*관리|경비|미화|주차|보안|소방\s*안전\s*관리자?\s*\(?\s*[23]급|강사|교육생|훈련생|일자리\s*사업|노인|어르신", re.I)
+EXTRA_EXCLUDE_RE = re.compile(r"아파트|관리사무소|시설\s*관리|경비|미화|주차|보안|소방\s*안전\s*관리자?\s*\(?\s*[23]급|강사|교육생|훈련생|일자리\s*사업|노인|어르신|위험물|식품\s*안전|안전\s*시설물|주유소|운전원|배송|기사\s*모집", re.I)
 
 
 def warn(msg):
@@ -158,7 +158,12 @@ def main():
         car, car_d = w24.career_of(r.get("CAREER_DIV"))
         emp, term = emp_of(r.get("PBANC_FORM_DIV"))
         city = (r.get("WORK_REGION_CONT") or "").strip()
-        region = ("경기 " + city) if city and not city.startswith(("서울", "인천", "경기")) else (city or "경기")
+        if not city:
+            region = "경기"
+        elif re.search(r"(특별|광역|자치)시|도$", city):
+            region = w24.region_of(city, "") or city  # 경기 밖 근무지(서울특별시 등)
+        else:
+            region = "경기 " + city
         o = {
             "id": jid,
             "title": title,
