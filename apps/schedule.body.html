@@ -501,14 +501,18 @@
   document.getElementById("sIcs").addEventListener("click", function () {
     var list = tasks().filter(function (t) { return t.on; });
     if (!list.length) { say("켠 업무가 없어 내보낼 일정이 없습니다. 목록에서 업무를 켜세요.", true); return; }
-    dl("SafePlum_주기업무.ics", buildIcs(list, new Date()), "text/calendar;charset=utf-8");
+    dl("안전보건_주기업무.ics", buildIcs(list, new Date()), "text/calendar;charset=utf-8");
     say("반복 일정 " + list.length + "건을 내려받았습니다. 캘린더 앱의 '가져오기'로 여세요. 같은 파일을 다시 가져오면 일정이 겹칠 수 있으니 전용 캘린더를 따로 만들어 넣기를 권합니다.");
   });
   document.getElementById("sPrint").addEventListener("click", function () {
     var old = view; view = "year"; render(); say(""); document.body.classList.add("printing-sched"); window.print();
     setTimeout(function () { document.body.classList.remove("printing-sched"); view = old; render(); }, 400);
   });
-  document.getElementById("sExport").addEventListener("click", function () { dl("SafePlum_주기업무_설정.json", JSON.stringify({ app: "safetake.schedule", v: 1, data: S }, null, 1), "application/json"); });
+  // 브라우저 메뉴·Ctrl+P로 인쇄해도 웹 화면이 아니라 연간 일정표(회사 보관용)가 나오게(2026-11-23)
+  var prevView = null;
+  window.addEventListener("beforeprint", function () { if (document.body.classList.contains("printing-sched")) return; prevView = view; view = "year"; render(); document.body.classList.add("printing-sched"); });
+  window.addEventListener("afterprint", function () { if (prevView === null) return; document.body.classList.remove("printing-sched"); view = prevView; prevView = null; render(); });
+  document.getElementById("sExport").addEventListener("click", function () { dl("주기업무_설정.json", JSON.stringify({ app: "safetake.schedule", v: 1, data: S }, null, 1), "application/json"); });
   document.getElementById("sImport").addEventListener("change", function (ev) {
     var f = ev.target.files[0]; if (!f) return;
     var r = new FileReader();

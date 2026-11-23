@@ -2275,4 +2275,6 @@ html.mnav-on,html.mnav-on body{overflow:hidden}
 .flay-np{display:block;margin:0 0 10px;font-size:14px;font-weight:600;color:var(--text)}.flay-np input{margin-right:6px}.flay-np .muted{font-weight:400;font-size:12.5px}
 @media screen{.paper:not(.notes-print) .paper-note.guide{position:relative;padding-right:74px}.paper:not(.notes-print) .paper-note.guide::after{content:"인쇄 안 됨";position:absolute;top:6px;right:8px;font-size:10.5px;color:#64748B;border:1px solid #CBD5E1;border-radius:4px;padding:0 5px;background:#fff;line-height:1.6}}
 @media print{.paper .paper-note.guide{display:none!important}.paper.notes-print .paper-note.guide{display:block!important}.paper.notes-print .paper-note.guide:empty{display:none!important}}
-
+/* 홈 '이어서 쓰기' (2026-11-23) */
+.rc-list{list-style:none;margin:6px 0 0;padding:0}.rc-list li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line-2);font-size:14px}.rc-list li:first-child{border-top:0}.rc-list a{color:var(--navy);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rc-list span{flex:none;color:var(--muted);font-size:12.5px}
+@media print{.sched-bar,.switch{display:none!important}}

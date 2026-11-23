@@ -510,6 +510,32 @@
   }
   document.addEventListener("click", function (ev) { if (ev.target.closest && ev.target.closest("[data-mydata]")) { ev.preventDefault(); openDataModal(); } });
 
+  // ---------- 최근 작성 문서(2026-11-23) — 작성기·도구 화면에서 문서 데이터가 저장될 때마다 '어느 작성기를 언제 썼는지'만 기록한다.
+  // 홈의 '이어서 쓰기'가 읽는다. 문서 내용은 기록하지 않는다(제목은 화면 제목). 이 기기 브라우저에만 남는다.
+  var RECENT = P + "recent", RECENT_SKIP = /^safetake\.(recent|company|profile|appr\.|draft\.|noteprint\.|foot\.|migrated|adm|aiin|risk\.(cfg|tpl)|tbm\.(opts|v1))/;
+  function pageTitle() {
+    var h = document.querySelector("main h1, #fTitle, .toolbar h1, header h1, h1");
+    var t = (h && h.textContent || document.title || "").replace(/\s*[|·]\s*(무료 양식|SafePlum|세이프플럼).*$/, "").trim();
+    return t.slice(0, 40);
+  }
+  var recentAt = 0;
+  function noteRecent(key) {
+    if (!/^\/(?:[^/]+\/)*tools\//.test(location.pathname) || RECENT_SKIP.test(key)) return;
+    var now = Date.now(); if (now - recentAt < 4000) return; recentAt = now;
+    try {
+      var path = location.pathname.replace(/index\.html$/, ""), a = JSON.parse(_get.call(localStorage, RECENT) || "[]");
+      if (!Array.isArray(a)) a = [];
+      a = a.filter(function (x) { return x && x.p !== path; });
+      a.unshift({ p: path, t: pageTitle(), at: now });
+      _set.call(localStorage, RECENT, JSON.stringify(a.slice(0, 12)));
+    } catch (e) {}
+  }
+  var _set = Storage.prototype.setItem, _get = Storage.prototype.getItem;
+  try {
+    Storage.prototype.setItem = function (k, v) { _set.call(this, k, v); if (this === window.localStorage && typeof k === "string" && k.indexOf(P) === 0) noteRecent(k); };
+  } catch (e) {}
+  function recent() { try { var a = JSON.parse(_get.call(localStorage, RECENT) || "[]"); return Array.isArray(a) ? a.filter(function (x) { return x && x.p && x.at; }) : []; } catch (e) { return []; } }
+
   // ---------- 작성 중 내용 자동 보관(2026-11-23) — '기록 추가'를 누르기 전에 새로 고침·앱 전환으로 적던 값이 사라지지 않게.
   // keepDraft(이름, [칸 id...]) → { clear() }. 기록을 추가·취소한 뒤 clear() 를 부른다. 24시간 지난 초안은 버린다.
   // 건강정보 등 민감정보를 다루는 화면에는 쓰지 않는다(그런 화면은 일부러 저장하지 않음).
@@ -535,7 +561,7 @@
     return { clear: function () { clearTimeout(timer); try { localStorage.removeItem(key); } catch (e) {} setTimeout(function () { els().forEach(function (el) { base[el.id] = val(el); }); }, 0); }, save: store };
   }
 
-  window.ADoc = { keepDraft: keepDraft, mountApproval: mountApproval, apprHTML: apprHTML, mountAll: mountAll, mountPhotos: mountPhotos, pickPhoto: pick, addFiles: addFiles, countPhotos: countPhotos, onPhotos: onPhotos, clearPhotos: clearPhotos,
+  window.ADoc = { recent: recent, keepDraft: keepDraft, mountApproval: mountApproval, apprHTML: apprHTML, mountAll: mountAll, mountPhotos: mountPhotos, pickPhoto: pick, addFiles: addFiles, countPhotos: countPhotos, onPhotos: onPhotos, clearPhotos: clearPhotos,
     listPhotos: listPhotos, putPhoto: putPhoto, delPhoto: delPhoto, shrink: shrink,
     exportAll: exportAll, importAll: importAll, openDataModal: openDataModal, toast: toast, esc: esc, ymd: ymd };
 })();

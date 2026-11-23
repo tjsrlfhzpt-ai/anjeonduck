@@ -56,6 +56,12 @@ jobs:
           python3 scripts/verify_tables.py
       - name: 법령 데이터·표현 감사 (버전·시행일·출처·금지 표현·필수 안내 — 오류면 배포 중단)
         run: python3 scripts/audit.py _site
+      - name: 작성기·도구 전수 점검 (스크립트 오류·휴대폰 가로 넘침이면 배포 중단 · 인쇄 홍보 문구·색은 경고)
+        run: |
+          npm install --no-save --no-package-lock puppeteer-core@23 > /dev/null
+          (cd _site && python3 -m http.server 8765 > /dev/null 2>&1 &)
+          sleep 2
+          CHROME_PATH="$(command -v google-chrome || command -v chromium)" CONC=6 node scripts/check_writers.mjs http://localhost:8765/ writers-check.json
       - name: 국가법령정보센터 연혁 비교 (주 1회 또는 수동 실행, 접속 실패는 경고만)
         if: github.event.schedule == '20 22 * * 0' || github.event_name == 'workflow_dispatch'
         continue-on-error: true

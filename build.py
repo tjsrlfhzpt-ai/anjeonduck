@@ -1967,6 +1967,11 @@ SPW_BAR = {"tbm": '<div class="toolbar no-print">', "risk": '<div class="control
            "council": '<header id="cc-header" class="', "patrol": '<header class="', "joint": '<header class="', "permit": '<header class="', "edu-log": '<header class="'}
 
 
+SPW_GREEN = [("#059669", "#1D4ED8"), ("#047857", "#1E40AF"), ("#10b981", "#3B82F6"), ("#ecfdf5", "#EFF4FF"), ("#d1fae5", "#DBE6FE"), ("#a7f3d0", "#BFDBFE"),
+             ("#065f46", "#1E3A8A"), ("#6ee7b7", "#93C5FD"), ("#34d399", "#60A5FA"),
+             ("rgb(16 185 129", "rgb(59 130 246"), ("rgb(236 253 245", "rgb(239 244 255"), ("rgb(5 150 105", "rgb(29 78 216"), ("rgb(4 120 87", "rgb(30 64 175"), ("rgb(6 95 70", "rgb(30 58 138")]
+
+
 def spw_unify(src, tid, site):
     mark = SPW_BAR[tid]
     assert mark in src, f"{tid}: 머리줄 표시({mark}) 없음"
@@ -1974,6 +1979,9 @@ def spw_unify(src, tid, site):
         src = src.replace(mark, mark + "spw-bar ", 1)
     else:
         src = src.replace(mark, mark.replace('class="', 'class="spw-bar ', 1), 1)
+    # 화면 강조색(초록) → 사이트 파랑 계열로 통일. 주 버튼은 writer-bar.css 가 남색으로 바꾼다
+    for a, b in SPW_GREEN:
+        src = src.replace(a, b).replace(a.upper(), b)
     in_sitebar = tid in ("tbm", "risk")
     logo = (f'<a href="../../" class="spw-home" aria-label="{e(site["name"])} 홈"><img src="../../assets/img/plum/logo.webp?v={ASSET_VER}" alt="" width="26" height="26">'
             f'<span>{e(site["name"])}</span></a><!--@SPW_LINKS@-->' + ("" if in_sitebar else '<span class="spw-sep" aria-hidden="true"></span>'))
@@ -2777,6 +2785,15 @@ def build(out, today):
       <script>window.ST_MO={mo_json};window.ST_IND={json.dumps(sched.get("industries", []), ensure_ascii=False)};</script>
       <script src="assets/home-cal.js?v={ASSET_VER}"></script>
     </section>"""
+    # ---- 홈 '이어서 쓰기'(2026-11-23): 이 브라우저에서 최근 쓴 작성기(assets/docs.js 의 ADoc.recent). 기록이 없으면 칸이 안 보인다
+    RECENT_BOX = """<section class="side-box rc-box" id="rcBox" hidden>
+      <div class="bd-h"><h2 class="h-sm">이어서 쓰기</h2><a class="more" href="#" data-mydata>내 데이터 백업</a></div>
+      <ul class="rc-list" id="rcList"></ul>
+      <p class="hint" style="margin-top:6px">이 기기 브라우저에 저장된 문서입니다. 기기를 바꾸거나 기록을 지우기 전에 백업해 두세요.</p>
+      <script>(function(){var b=document.getElementById("rcBox"),l=document.getElementById("rcList");if(!b||!window.ADoc||!ADoc.recent)return;var a=ADoc.recent().slice(0,6);if(!a.length)return;
+      function ago(t){var m=Math.round((Date.now()-t)/6e4);return m<1?"방금":m<60?m+"분 전":m<1440?Math.round(m/60)+"시간 전":Math.round(m/1440)+"일 전";}
+      l.innerHTML=a.map(function(x){return '<li><a href="'+ADoc.esc(x.p)+'">'+ADoc.esc(x.t||"작성기")+'</a><span>'+ago(x.at)+'</span></li>';}).join("");b.hidden=false;})();</script>
+    </section>"""
     # ---- 홈
     quick = "".join(f'<a class="qk" href="resources/?q={quote(k)}">{e(k)}</a>' for k in QUICK_KEYWORDS)
     # 자주 찾는 서식·자료: 법정 서식(원본 파일 있음)과 고시·지침만. 작성 도구는 '무료 도구'에서만 보여 중복을 없앤다
@@ -3034,6 +3051,7 @@ def build(out, today):
   </section>
   </div>
   <aside class="home2-side">
+    {RECENT_BOX}
     {month_box}
     {chat_banner("cm-chat-side")}
     {blog_banner("cm-chat-side")}

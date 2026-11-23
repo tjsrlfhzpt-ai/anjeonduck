@@ -50,6 +50,21 @@ async function check(browser, path) {
     r.example_buttons = ex;
     await new Promise((s) => setTimeout(s, 500));
     await page.keyboard.press("Escape").catch(() => {});
+    // ⑦ 계산기·진단: 숫자 칸에 흔한 값, 선택 칸에 두 번째 값을 넣고 화면에 NaN·undefined·Infinity 가 나오는지
+    const calc = await page.evaluate(async () => {
+      const nums = [...document.querySelectorAll("input[type=number], input[inputmode=numeric], input[inputmode=decimal]")].filter((x) => x.offsetParent && !x.readOnly && !x.disabled);
+      const sels = [...document.querySelectorAll("main select, .layout-calc select")].filter((x) => x.offsetParent && !x.disabled && x.options.length > 1);
+      nums.forEach((el, i) => { el.value = String([120, 35, 8, 3, 50][i % 5]); el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+      sels.slice(0, 6).forEach((el) => { el.selectedIndex = 1; el.dispatchEvent(new Event("change", { bubbles: true })); });
+      await new Promise((s) => setTimeout(s, 300));
+      const txt = document.body.innerText;
+      const bad = (txt.match(/[^\n]{0,30}(NaN|undefined|Infinity|\[object Object\])[^\n]{0,20}/g) || []).slice(0, 3);
+      return { n: nums.length, bad };
+    });
+    r.calc_inputs = calc.n;
+    if (calc.bad.length) r.errors.push("계산 결과 이상 표시: " + calc.bad.join(" / "));
+    await page.reload({ waitUntil: "networkidle2", timeout: 45000 });
+    await new Promise((s) => setTimeout(s, 500));
     // ⑤ 저장: 첫 번째 빈 글 칸에 표시 문구 입력 → 1.5초 → 새로 고침 → 남았는지
     const tag = "점검" + Date.now().toString().slice(-5);
     const typed = await page.evaluate((tag) => {
@@ -150,6 +165,11 @@ await Promise.all(Array.from({ length: CONC }, async () => {
     console.log(`[${flag}] ${p}  예시버튼 ${r.example_buttons ?? "-"} · 저장 ${r.persist ?? "-"}${r.errors.length ? "\n   - " + r.errors.join("\n   - ") : ""}${r.warn.length ? "\n   · " + r.warn.join("\n   · ") : ""}`);
   }
 }));
+// 일시적인 네트워크 문제(CDN 등)로 실패한 쪽은 한 번 더 확인한다 — 두 번 다 실패해야 오류로 본다
+for (const r of results.filter((x) => x.errors.length)) {
+  const again = await check(browser, r.path);
+  if (!again.errors.length) { console.log(`[재확인 정상] ${r.path}`); Object.assign(r, again); }
+}
 await browser.close();
 results.sort((a, b) => a.path.localeCompare(b.path));
 const bad = results.filter((r) => r.errors.length);

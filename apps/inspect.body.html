@@ -206,7 +206,7 @@
   }
   $("iIcs").addEventListener("click", function () {
     if (!list.length) { say("등록한 기계가 없습니다.", true); return; }
-    dl("SafePlum_안전검사기한.ics", buildIcs(new Date()), "text/calendar;charset=utf-8");
+    dl("안전검사기한.ics", buildIcs(new Date()), "text/calendar;charset=utf-8");
     say("기계 " + list.length + "대의 다음 검사 기한을 종일 일정으로 내려받았습니다(30일 전 알림 포함). 검사를 받아 기한이 바뀌면 다시 내려받으세요.");
   });
   $("iPrint").addEventListener("click", function () {
