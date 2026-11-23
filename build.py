@@ -2353,7 +2353,7 @@ def build_filelib(site, write):
                 f'<a class="fl-view" href="{e(rel + x["preview"])}" target="_blank" rel="noopener">미리보기</a>' if x.get("preview") else "")
         txt = " ".join([x["title"], x.get("desc", ""), x["cat"], x["_k"], x["source"], x["ext"]]).lower()
         auto = ' <span class="fl-auto">자동 계산</span>' if x.get("pick") else ""
-        rows.append(f'<tr data-k="{e(x["_k"])}" data-c="{e(x["cat"])}" data-q="{e(txt)}"><td class="fl-no">{i}</td>'
+        rows.append(f'<tr data-k="{e(x["_k"])}" data-c="{e(x["cat"])}" data-a="{1 if x.get("pick") else 0}" data-q="{e(txt)}"><td class="fl-no">{i}</td>'
                     f'<td class="fl-kc"><span class="fl-k {x["_kc"]}">{e(x["_k"])}</span></td>'
                     f'<td class="fl-t"><b>{e(x["title"])}{auto}</b>{f"<p>{e(x[chr(100)+chr(101)+chr(115)+chr(99)])}</p>" if x.get("desc") else ""}<p class="fl-src">출처: {e(x["source"])}</p></td>'
                     f'<td class="fl-cat">{e(x["cat"])}</td><td class="fl-sz">{fl_size(x["size"])}{big}</td>'
@@ -2375,7 +2375,7 @@ def build_filelib(site, write):
   <div class="chips" aria-label="파일 형식">{kchips}</div>
   <div class="fl-row"><select id="flCat" aria-label="분류">{copts}</select><input id="flQ" type="search" placeholder="제목·내용으로 찾기 (예: 위험성평가, 시나리오, 건설)" aria-label="파일 찾기"></div>
 </div>
-<p class="fl-quick"><button type="button" class="chip" data-fc="{e(SP_CAT)}">SafePlum 제작 양식만 <span class="n">{len(sp)}</span></button></p>
+<p class="fl-quick"><button type="button" class="chip" id="flAuto" aria-pressed="false">자동 계산만 <span class="n">{sum(1 for x in items if x.get("pick"))}</span></button></p>
 <p class="fl-cnt" id="flCnt" role="status">파일 {len(items)}개 · 모두 {fl_size(tot)}</p>
 <div class="table-wrap" style="border:0;background:transparent"><table class="fl-tbl"><thead><tr><th class="fl-no">번호</th><th>형식</th><th>제목</th><th>분류</th><th>용량</th><th style="text-align:right">받기</th></tr></thead>
 <tbody id="flBody">{"".join(rows)}</tbody></table><p class="fl-empty" id="flEmpty" hidden>찾는 파일이 없습니다. 다른 낱말로 찾거나 분류를 '전체'로 바꿔 보세요.</p></div>
@@ -2385,13 +2385,13 @@ def build_filelib(site, write):
   <p><b>정리한 내용</b> — 올리기 전에 파일 속 개인 이름·연락처·현장명과 문서 작성자 정보를 지웠고, 회사 내부 자료·민간 업체 홍보물은 올리지 않았습니다. 공공기관 자료는 출처를 적었으며, 법령이 바뀌었을 수 있으니 근거 조문은 <a href="{rel}laws/">현행 법령</a>으로 다시 확인하세요.</p>
   <p class="src-line">저작권이나 개인정보 문제로 내려야 할 파일이 있으면 {contact_a}로 알려 주세요. 확인 후 바로 내립니다.</p>
 </div></section>
-<script>(function(){{var b=document.getElementById("flBody"),rs=[].slice.call(b.rows),q=document.getElementById("flQ"),c=document.getElementById("flCat"),cnt=document.getElementById("flCnt"),em=document.getElementById("flEmpty"),k="",tot=cnt.textContent;
+<script>(function(){{var b=document.getElementById("flBody"),rs=[].slice.call(b.rows),q=document.getElementById("flQ"),c=document.getElementById("flCat"),cnt=document.getElementById("flCnt"),em=document.getElementById("flEmpty"),au=document.getElementById("flAuto"),a=false,k="",tot=cnt.textContent;
 var ch=[].slice.call(document.querySelectorAll("[data-fk]"));
-function run(){{var s=q.value.trim().toLowerCase().split(/\s+/).filter(Boolean),cv=c.value,n=0;rs.forEach(function(r){{var ok=(!k||r.dataset.k===k)&&(!cv||r.dataset.c===cv)&&s.every(function(w){{return r.dataset.q.indexOf(w)>=0}});r.hidden=!ok;if(ok)n++}});em.hidden=n>0;cnt.textContent=(k||cv||s.length)?"찾은 파일 "+n+"개":tot}}
+function run(){{var s=q.value.trim().toLowerCase().split(/\s+/).filter(Boolean),cv=c.value,n=0;rs.forEach(function(r){{var ok=(!k||r.dataset.k===k)&&(!cv||r.dataset.c===cv)&&(!a||r.dataset.a==="1")&&s.every(function(w){{return r.dataset.q.indexOf(w)>=0}});r.hidden=!ok;if(ok)n++}});em.hidden=n>0;cnt.textContent=(k||cv||a||s.length)?"찾은 파일 "+n+"개":tot}}
 ch.forEach(function(x){{x.addEventListener("click",function(){{k=x.dataset.fk;ch.forEach(function(y){{y.setAttribute("aria-pressed",y===x?"true":"false")}});run()}})}});
 q.addEventListener("input",run);c.addEventListener("change",run);
-[].forEach.call(document.querySelectorAll("[data-fc]"),function(x){{x.addEventListener("click",function(){{c.value=c.value===x.dataset.fc?"":x.dataset.fc;run()}})}});
-try{{var u=new URLSearchParams(location.search);if(u.get("q"))q.value=u.get("q");if(u.get("c"))c.value=u.get("c");if(location.hash==="#safeplum")c.value={json.dumps(SP_CAT,ensure_ascii=False)};run()}}catch(e){{}}}})();</script>"""
+au.addEventListener("click",function(){{a=!a;au.setAttribute("aria-pressed",a?"true":"false");run()}});
+try{{var u=new URLSearchParams(location.search);if(u.get("q"))q.value=u.get("q");if(u.get("c"))c.value=u.get("c");if(u.get("auto")==="1"){{a=true;au.setAttribute("aria-pressed","true")}}if(location.hash==="#safeplum")c.value={json.dumps(SP_CAT,ensure_ascii=False)};run()}}catch(e){{}}}})();</script>"""
     write("resources/files/index.html", page(site, rel, "resources/files/", "양식·파일 자료실 (엑셀·한글·PPT·PDF)", body,
                                              desc=f"안전보건 양식·서식·매뉴얼·교안 파일 {len(items)}개 무료 내려받기 — 위험성평가표·TBM·작업계획서·교육계획 엑셀(자동 계산), 중대재해처벌법 따라하기 서식, 비상대응 시나리오, 안전보건관리규정·회의록 한글 양식.", active="resources/"))
 
