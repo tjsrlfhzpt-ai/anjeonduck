@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW, OUT = ROOT / "data" / "lawraw", ROOT / "data" / "lawtext"
 
 LAWS = {
-    "act": ("산업안전보건법", "산안법", 283449),
+    "act": ("산업안전보건법", "산안법", 291447),
     "yeong": ("산업안전보건법 시행령", "산안법 시행령", 288347),
     "rule": ("산업안전보건법 시행규칙", "산안법 시행규칙", 288431),
     "krule": ("산업안전보건기준에 관한 규칙", "안전보건규칙", 273603),
@@ -54,7 +54,8 @@ def parse(key):
             # 목차(조문 선택) 영역은 들여쓰기가 1칸이고 본문 목록은 '제1조(목적)'만 단독으로 나온다 → 본문은 내용이 붙어 있다
             if re.match(r"^\s?제1조\(목적\)\s*$", ln):
                 continue
-            if i > 0 and any("한눈보기" in x for x in lines[max(0, i - 400):i]):
+            # 표시: 예전 화면은 '한눈보기' 메뉴, 2026-11 화면은 담당부처 연락처(예: "고용노동부 (산업안전보건정책과-…), 044-…")가 본문 바로 앞에 있다
+            if i > 0 and any("한눈보기" in x or re.match(r"^\s*\S+부 \(.+\), \d{3}-", x) for x in lines[max(0, i - 400):i]):
                 start = i
                 break
     if start is None:

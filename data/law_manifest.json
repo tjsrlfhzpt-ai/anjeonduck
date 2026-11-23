@@ -1,6 +1,6 @@
 {
  "_comment": "SafePlum이 쓰는 법령의 현재 시행본·시행 예정본. 모든 도구·서식·달력이 이 파일의 버전을 기준으로 삼는다. 법령이 바뀌면 여기를 먼저 고치고 data/lawraw → parse_lawtext.py 순서로 갱신.",
- "checked_at": "2026-10-05",
+ "checked_at": "2026-11-23",
  "stale_after_days": 45,
  "source": "국가법령정보센터 연혁 목록(lsHstListR.do)·본문·부칙",
  "laws": [
@@ -10,12 +10,12 @@
    "lsId": "001766",
    "status": "current",
    "current": {
-    "no": "법률 제21374호",
-    "promulgated": "2026-02-19",
+    "no": "법률 제22122호",
+    "promulgated": "2026-10-27",
     "kind": "일부개정",
-    "effective": "2026-08-01",
-    "lsiSeq": 283449,
-    "source_url": "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95/(21374,20260219)"
+    "effective": "2026-10-27",
+    "lsiSeq": 291447,
+    "source_url": "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95/(22122,20261027)"
    },
    "upcoming": [
     {
@@ -68,9 +68,75 @@
      "basis": "법률 제21853호 부칙 제1조(공포 후 6개월)",
      "source_url": "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95/(21853,20260707)",
      "impact": "2027. 1. 8. 이후 외국인근로자 채용 절차에 기초안전보건교육 이수 확인을 넣을 준비가 필요합니다. 교육 시간·내용은 고용노동부령으로 정해질 예정입니다."
+    },
+    {
+     "no": "법률 제22122호",
+     "promulgated": "2026-10-27",
+     "kind": "일부개정",
+     "effective": "2027-01-28",
+     "articles": [
+      "제7조",
+      "제7조의2",
+      "제158조의2"
+     ],
+     "summary": "안전한일터위원회 신설(제7조의2)과 산업재해 예방 기본계획의 위원회 심의(제7조), 법령 위반 신고자 포상금(제158조의2).",
+     "text": "inline",
+     "basis": "법률 제22122호 부칙 제1조 단서(공포 후 3개월)",
+     "source_url": "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95/(22122,20261027)",
+     "impact": "법령 위반 신고 포상금 제도가 생기므로 사내 신고·개선 창구 운영을 점검합니다."
+    },
+    {
+     "no": "법률 제22122호",
+     "promulgated": "2026-10-27",
+     "kind": "일부개정",
+     "effective": "2027-04-28",
+     "articles": [
+      "제51조",
+      "제52조",
+      "제53조",
+      "제55조",
+      "제72조",
+      "제159조",
+      "제161조의2",
+      "제168조",
+      "제169조"
+     ],
+     "summary": "근로자·근로자대표·명예산업안전감독관의 작업중지 요구권과 관계수급인 근로자의 도급인에 대한 요구(제51조), 근로자 작업중지 요건 확대(제52조), 시정조치·작업중지명령 확대(제53조·제55조), 산업안전보건관리비 사용명세서 작성·보존 대상 확대(제72조), 등록 말소 요청(제159조), 최근 1년간 3명 이상 사망 시 영업이익 5% 이내 과징금(제161조의2), 벌칙 정비(제168조·제169조).",
+     "text": "inline",
+     "basis": "법률 제22122호 부칙 제1조 본문(공포 후 6개월)·제2조·제3조·제5조·제6조",
+     "source_url": "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95/(22122,20261027)",
+     "impact": "작업중지 요구 접수·조치·불이익 금지 절차를 안전보건관리규정과 TBM·교육 자료에 반영할 준비를 합니다."
+    },
+    {
+     "no": "법률 제22122호",
+     "promulgated": "2026-10-27",
+     "kind": "일부개정",
+     "effective": "2027-10-28",
+     "articles": [
+      "제72조제5항"
+     ],
+     "summary": "대통령령으로 정하는 업종의 도급인도 산업안전보건관리비를 도급금액에 계상(제72조제5항 신설).",
+     "text": "inline",
+     "basis": "법률 제22122호 부칙 제1조 단서(공포 후 1년)",
+     "source_url": "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95/(22122,20261027)",
+     "impact": "대상 업종은 시행령 개정을 확인해야 합니다."
     }
    ],
    "recent": [
+    {
+     "no": "법률 제22122호",
+     "promulgated": "2026-10-27",
+     "kind": "일부개정",
+     "effective": "2026-10-27",
+     "articles": [
+      "제70조제1항제1호",
+      "제84조제2항제1호"
+     ],
+     "summary": "공포한 날부터 시행: 건설공사 기간 연장 사유인 악천후에 폭염·한파를 명시(제70조제1항제1호), 안전인증 면제 사유에 수출 목적 수입을 추가(제84조제2항제1호, 시행 이후 수출 목적으로 수입하는 경우부터 적용).",
+     "basis": "법률 제22122호 부칙 제1조 단서·제4조",
+     "source_url": "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EB%B2%95/(22122,20261027)",
+     "impact": "건설공사 도급인은 폭염·한파로 공사가 지연되면 공사기간 연장을 요청할 수 있음을 공사 관리 절차에 반영합니다."
+    },
     {
      "no": "법률 제21374호",
      "promulgated": "2026-02-19",
@@ -120,7 +186,7 @@
     }
    ],
    "history_url": "https://www.law.go.kr/LSW/lsHstListR.do?lsId=001766&chrClsCd=010202",
-   "checked_at": "2026-10-05",
+   "checked_at": "2026-11-23",
    "used_by": [
     "selection",
     "duties",
@@ -232,7 +298,7 @@
     }
    ],
    "history_url": "https://www.law.go.kr/LSW/lsHstListR.do?lsId=003786&chrClsCd=010202",
-   "checked_at": "2026-10-05",
+   "checked_at": "2026-11-23",
    "used_by": [
     "selection",
     "duties",
@@ -320,7 +386,7 @@
     }
    ],
    "history_url": "https://www.law.go.kr/LSW/lsHstListR.do?lsId=007364&chrClsCd=010202",
-   "checked_at": "2026-10-05",
+   "checked_at": "2026-11-23",
    "used_by": [
     "edu-hours",
     "retention",
@@ -387,7 +453,7 @@
     }
    ],
    "history_url": "https://www.law.go.kr/LSW/lsHstListR.do?lsId=007363&chrClsCd=010202",
-   "checked_at": "2026-10-05",
+   "checked_at": "2026-11-23",
    "used_by": [
     "forms",
     "loto",
@@ -421,7 +487,7 @@
    "upcoming": [],
    "recent": [],
    "history_url": "https://www.law.go.kr/LSW/lsHstListR.do?lsId=013993&chrClsCd=010202",
-   "checked_at": "2026-10-05",
+   "checked_at": "2026-11-23",
    "used_by": [
     "selection",
     "forms",
@@ -449,7 +515,7 @@
    "upcoming": [],
    "recent": [],
    "history_url": "https://www.law.go.kr/LSW/lsHstListR.do?lsId=014159&chrClsCd=010202",
-   "checked_at": "2026-10-05",
+   "checked_at": "2026-11-23",
    "used_by": [
     "selection",
     "forms",
@@ -498,14 +564,28 @@
    "key": "cost_notice",
    "name": "건설업 산업안전보건관리비 계상 및 사용기준",
    "no": "고용노동부고시 제2025-11호",
-   "effective": "",
-   "checked_at": "2026-09-28",
-   "status": "needs_check",
+   "effective": "2025-02-12",
+   "checked_at": "2026-11-23",
+   "status": "verified",
    "source_url": "https://www.law.go.kr/%ED%96%89%EC%A0%95%EA%B7%9C%EC%B9%99/%EA%B1%B4%EC%84%A4%EC%97%85%20%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B4%80%EB%A6%AC%EB%B9%84%20%EA%B3%84%EC%83%81%20%EB%B0%8F%20%EC%82%AC%EC%9A%A9%EA%B8%B0%EC%A4%80",
    "used_by": [
     "safety-cost"
    ],
-   "note": "2026-10-05 감사에서 고시 원문에 접속하지 못해 최신 고시 번호·요율·시행일을 재대조하지 못함. 확인 필요."
+   "note": "2026-11-23 국가법령정보센터 행정규칙 검색에서 현행이 고용노동부고시 제2025-11호(2025. 2. 12. 발령·시행)임을 확인. 요율은 2026-09-28 원문 대조값 그대로."
+  },
+  {
+   "key": "risk_notice",
+   "name": "사업장 위험성평가에 관한 지침",
+   "no": "고용노동부고시 제2026-73호",
+   "effective": "2026-11-04",
+   "checked_at": "2026-11-23",
+   "status": "verified",
+   "source_url": "https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000288038",
+   "used_by": [
+    "risk-guide",
+    "risk"
+   ],
+   "note": "2026-11-04 전부개정. 위험성평가 실무 가이드를 이 판으로 고침(근로자 전 단계 참여, 근로자대표 협의, 도급 각각·공동 실시, 아차사고 포함, 신규·작업변경 근로자 작업 전 공유, 상시평가, 중대재해 시 전체 유효성 재점검, 잠정 조치)."
   }
  ],
  "open_items": [
