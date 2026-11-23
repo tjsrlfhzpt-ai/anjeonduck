@@ -1889,7 +1889,13 @@
                     { badge: '고소', title: '지붕 채광창 교체', description: '공장 지붕 위에서 노후 채광창을 교체하는 작업',
                       set: { title: '공장 지붕 채광창 교체', place: '1공장 지붕', equip: '채광창 12개소', desc: '노후 채광창 철거 후 신품 설치, 자재는 고소작업차로 양중', types: ['height'], hazards: '채광창·슬레이트 파손에 의한 추락, 지붕 가장자리 추락, 자재 낙하', ppe: ['안전모', '안전대', '안전화'], ppeEtc: '', conditions: '비·강풍 시 작업 중지, 지붕 하부 출입 통제' } },
                     { badge: '정전·전기', title: '분전반 교체', description: '전원을 차단하고 노후 분전반을 교체하는 작업',
-                      set: { title: '생산동 분전반 교체', place: '생산동 1층 전기실', equip: '분전반 LP-3', desc: '상위 차단기 차단 후 노후 분전반 철거·신품 설치, 결선 및 절연저항 측정', types: ['elec'], hazards: '충전부 접촉 감전, 오조작에 의한 전원 재투입, 아크 화상', ppe: ['안전모', '안전화', '절연용 보호구'], ppeEtc: '', loto: 'MCC-3 상위 차단기 OFF·잠금·꼬리표(작업자 본인 자물쇠), 검전 확인', conditions: '정전 구역·시간 사전 공지, 복전은 작업 책임자 확인 후' } }
+                      set: { title: '생산동 분전반 교체', place: '생산동 1층 전기실', equip: '분전반 LP-3', desc: '상위 차단기 차단 후 노후 분전반 철거·신품 설치, 결선 및 절연저항 측정', types: ['elec'], hazards: '충전부 접촉 감전, 오조작에 의한 전원 재투입, 아크 화상', ppe: ['안전모', '안전화', '절연용 보호구'], ppeEtc: '', loto: 'MCC-3 상위 차단기 OFF·잠금·꼬리표(작업자 본인 자물쇠), 검전 확인', conditions: '정전 구역·시간 사전 공지, 복전은 작업 책임자 확인 후' } },
+                    { badge: '굴착', title: '상수도관 접속 굴착', description: '공장 부지 안에서 굴착기로 땅을 파고 상수도관을 접속하는 작업',
+                      set: { title: '부지 내 상수도관 접속 굴착', place: '정문 옆 녹지', equip: '상수도관 100A', desc: '매설물 확인 후 굴착기로 깊이 1.5m 굴착, 관 접속 후 되메움', types: ['exc', 'heavy'], hazards: '굴착면 붕괴, 매설 전선·가스관 파손, 굴착기 선회 중 부딪힘', ppe: ['안전모', '안전화'], ppeEtc: '', extinguisher: '', loto: '', conditions: '매설물 도면 확인·표시 후 착수, 굴착기 작업반경 출입 금지, 우천 시 굴착면 점검 후 재개' } },
+                    { badge: '중량물·양중', title: '옥상 냉각탑 모터 교체', description: '크레인으로 옥상 냉각탑의 팬 모터를 내리고 새 모터를 올리는 작업',
+                      set: { title: '옥상 냉각탑 팬 모터 교체', place: '본관 옥상', equip: '냉각탑 CT-2 팬 모터(약 400kg)', desc: '이동식 크레인으로 기존 모터 인양·하강 후 신품 인양·설치, 시운전', types: ['lift', 'elec', 'height'], hazards: '인양물 떨어짐, 옥상 단부 추락, 재가동에 의한 끼임', ppe: ['안전모', '안전대', '안전화', '절연용 보호구'], ppeEtc: '', extinguisher: '', loto: '냉각탑 전원 차단기 OFF·잠금·꼬리표, 검전 확인', conditions: '인양 반경 하부 통제, 순간풍속 10m/s 초과 시 인양 중지, 신호수 1명 지정' } },
+                    { badge: '밀폐공간', title: '집수정 펌프 점검', description: '폐수 집수정에 들어가 수중펌프를 꺼내 점검하는 작업',
+                      set: { title: '폐수 집수정 수중펌프 점검', place: '폐수처리장 집수정', equip: '수중펌프 P-101', desc: '집수정 수위를 낮춘 뒤 환기·측정 후 진입, 펌프 인양·점검', types: ['conf', 'elec'], hazards: '황화수소 중독, 산소결핍, 사다리 추락, 펌프 재가동', ppe: ['안전모', '안전대', '안전화', '송기마스크'], ppeEtc: '내화학 장화', gasRisk: '유입 밸브 닫고 수위 저하, 작업 중 연속 측정', loto: '펌프 제어반 전원 OFF·잠금·꼬리표', conditions: '감시인 상시 배치, 송풍기 연속 가동, 측정기 경보 시 즉시 퇴장' } }
                 ];
                 const isExModalOpen = ref(false);
                 const openExModal = () => { isExModalOpen.value = true; };
