@@ -308,7 +308,8 @@ def wd_jobs(site):
                 continue
             place = next((v for k, v in WD_PLACES if re.search(k, loc + " " + path, re.I)), "")
             contract = bool(re.search(r"contract|Fixed[\s-]*Term|Temporary|계약|Backfill", title, re.I))
-            jid = re.sub(r"[^A-Za-z0-9_-]", "", path.rsplit("_", 1)[-1])[:40] or str(len(out))
+            # 사이트 id 규칙(영문 소문자·숫자·하이픈)에 맞춘다 — 워크데이 공고번호는 대문자·밑줄이 섞여 있음
+            jid = re.sub(r"[^a-z0-9-]+", "-", path.rsplit("_", 1)[-1].lower()).strip("-")[:40] or str(len(out))
             j = {
                 "id": f"co-wd-{t}-{jid}", "title": title, "company": site["company"],
                 "region": place or "근무지 원문 확인", "address": "",

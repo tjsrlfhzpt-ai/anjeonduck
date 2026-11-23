@@ -44,6 +44,19 @@ def main():
     cfg = json.loads((Path(__file__).resolve().parents[1] / "data" / "probe_candidates.json").read_text(encoding="utf-8"))
     for h in cfg.get("robots", []):
         robots(h)
+    # 페이지 원문에서 API 주소·필드명 찾기
+    for u in cfg.get("dump", []):
+        try:
+            st, t = req(u)
+            print(f"[DUMP] {u} ({st}) len={len(t)}")
+            for m in sorted(set(re.findall(r"https?://openapi\.gg\.go\.kr/[A-Za-z0-9_]+[^\"'<\s]*", t)))[:20]:
+                print("    API:", m)
+            body = re.sub(r"<script.*?</script>|<style.*?</style>", " ", t, flags=re.S)
+            body = re.sub(r"<[^>]+>", " ", body)
+            body = re.sub(r"\s+", " ", body)
+            print("    TEXT:", body[:3000])
+        except Exception as e:
+            print(f"[DUMP] {u}: {str(e)[:80]}")
     # 그리팅
     for slug in cfg.get("greeting", []):
         try:
