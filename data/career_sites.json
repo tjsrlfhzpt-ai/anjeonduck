@@ -1,5 +1,5 @@
 {
- "_comment": "회사 자체 채용 홈페이지(그리팅) 목록. sites=이름·구분을 확인하고 게시하는 회사, candidates=채용 홈페이지가 있는지 알아보는 후보(로그에만 남김, 게시 안 함). slug=<slug>.career.greetinghr.com. 기업 구분·계열·업종은 운영 참고 표시. 2026-11-12 후보 274개를 확인해 응답한 회사만 sites로 옮김. 2026-11-12 오후: 후보 354개를 더 확인해 10곳 추가(누적 628개 확인), 그린하우스 공개 API를 쓰는 쿠팡 추가. 2026-11-18: 그리팅 공식 고객 사례 주소 + 중견·중소 후보 1,131개 확인(응답 81곳) → 제조·제약·소재·유통·물류 29곳 추가 등록(누적 54곳), 두산 자체 채용 시스템 추가.",
+ "_comment": "회사 자체 채용 홈페이지(그리팅) 목록. sites=이름·구분을 확인하고 게시하는 회사, candidates=채용 홈페이지가 있는지 알아보는 후보(로그에만 남김, 게시 안 함). slug=<slug>.career.greetinghr.com. 기업 구분·계열·업종은 운영 참고 표시. 2026-11-12 후보 274개를 확인해 응답한 회사만 sites로 옮김. 2026-11-12 오후: 후보 354개를 더 확인해 10곳 추가(누적 628개 확인), 그린하우스 공개 API를 쓰는 쿠팡 추가. 2026-11-18: 그리팅 공식 고객 사례 주소 + 중견·중소 후보 1,131개 확인(응답 81곳) → 제조·제약·소재·유통·물류 29곳 추가 등록(누적 54곳), 두산 자체 채용 시스템 추가. 2026-11-23: 검색으로 찾은 그리팅 후보 851개 확인 → 14곳 추가(누적 68곳). 워크데이 채용 사이트(외국계 15곳)·그린하우스 ASM 추가. 스마트리크루터스는 robots.txt가 API 접근을 막아 제외, 나인하이어는 공고 목록 구조 확인 전이라 보류.",
  "sites": [
   {
    "slug": "oci",
@@ -351,6 +351,94 @@
    "company": "로지스팟",
    "company_type": "중소·기타",
    "industry": "물류·운수"
+  },
+  {
+   "slug": "pulmuone",
+   "company": "풀무원",
+   "company_type": "중견기업",
+   "industry": "식품·유통·서비스",
+   "group": "풀무원"
+  },
+  {
+   "slug": "cj-recruit",
+   "company": "CJ제일제당",
+   "company_type": "대기업",
+   "industry": "식품·유통·서비스",
+   "group": "CJ그룹"
+  },
+  {
+   "slug": "hwam-recruit",
+   "company": "한화첨단소재",
+   "company_type": "대기업",
+   "industry": "제조·화학",
+   "group": "한화그룹"
+  },
+  {
+   "slug": "hanwhaengine-recruit",
+   "company": "한화엔진",
+   "company_type": "대기업",
+   "industry": "건설·플랜트·조선",
+   "group": "한화그룹"
+  },
+  {
+   "slug": "samhwapaint",
+   "company": "에스피삼화",
+   "company_type": "중견기업",
+   "industry": "제조·화학"
+  },
+  {
+   "slug": "samhwa",
+   "company": "삼화",
+   "company_type": "중소·기타",
+   "industry": "제조·화학"
+  },
+  {
+   "slug": "cswind",
+   "company": "씨에스윈드",
+   "company_type": "중견기업",
+   "industry": "에너지·공공"
+  },
+  {
+   "slug": "samkee",
+   "company": "삼기",
+   "company_type": "중견기업",
+   "industry": "제조·화학"
+  },
+  {
+   "slug": "wisol",
+   "company": "와이솔",
+   "company_type": "중견기업",
+   "industry": "반도체·전자"
+  },
+  {
+   "slug": "hr-suprema",
+   "company": "슈프리마",
+   "company_type": "중견기업",
+   "industry": "반도체·전자"
+  },
+  {
+   "slug": "konai",
+   "company": "코나아이",
+   "company_type": "중견기업",
+   "industry": "반도체·전자"
+  },
+  {
+   "slug": "hirose",
+   "company": "HRS코리아",
+   "company_type": "외국계",
+   "industry": "반도체·전자"
+  },
+  {
+   "slug": "cmesairobotics",
+   "company": "씨메스로보틱스",
+   "company_type": "중소·기타",
+   "industry": "반도체·전자"
+  },
+  {
+   "slug": "mirae-n",
+   "company": "미래엔",
+   "company_type": "중견기업",
+   "industry": "식품·유통·서비스"
   }
  ],
  "candidates": [],
@@ -370,6 +458,12 @@
     "CLS": "쿠팡로지스틱스서비스",
     "쿠팡이츠서비스": "쿠팡이츠서비스"
    }
+  },
+  {
+   "token": "asm",
+   "company": "ASM코리아",
+   "company_type": "외국계",
+   "industry": "반도체·전자"
   }
  ],
  "greenhouse_candidates": [],
@@ -377,6 +471,128 @@
   {
    "kind": "doosan",
    "company": "두산그룹",
+   "industry": "제조·화학"
+  }
+ ],
+ "workday": [
+  {
+   "tenant": "amat",
+   "wd": "wd1",
+   "site": "External",
+   "company": "어플라이드머티어리얼즈코리아",
+   "company_type": "외국계",
+   "industry": "반도체·전자"
+  },
+  {
+   "tenant": "entegris",
+   "wd": "wd1",
+   "site": "EntegrisCareers",
+   "company": "엔테그리스코리아",
+   "company_type": "외국계",
+   "industry": "반도체·전자"
+  },
+  {
+   "tenant": "kla",
+   "wd": "wd1",
+   "site": "Search",
+   "company": "KLA코리아",
+   "company_type": "외국계",
+   "industry": "반도체·전자"
+  },
+  {
+   "tenant": "axcelis",
+   "wd": "wd1",
+   "site": "Axcelis",
+   "company": "액셀리스코리아",
+   "company_type": "외국계",
+   "industry": "반도체·전자"
+  },
+  {
+   "tenant": "qnity",
+   "wd": "wd503",
+   "site": "Jobs",
+   "company": "큐니티(Qnity)",
+   "company_type": "외국계",
+   "industry": "반도체·전자"
+  },
+  {
+   "tenant": "gevernova",
+   "wd": "wd5",
+   "site": "Vernova_ExternalSite",
+   "company": "GE버노바",
+   "company_type": "외국계",
+   "industry": "에너지·공공"
+  },
+  {
+   "tenant": "airproducts",
+   "wd": "wd5",
+   "site": "AP0001",
+   "company": "에어프로덕츠코리아",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "thermofisher",
+   "wd": "wd5",
+   "site": "ThermoFisherCareers",
+   "company": "써모피셔사이언티픽코리아",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "danaher",
+   "wd": "wd1",
+   "site": "DanaherJobs",
+   "company": "다나허(싸이티바 등)",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "matthey",
+   "wd": "wd3",
+   "site": "Ext_Career_Site",
+   "company": "존슨매티",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "momentive",
+   "wd": "wd1",
+   "site": "MC",
+   "company": "모멘티브",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "3m",
+   "wd": "wd1",
+   "site": "Search",
+   "company": "한국쓰리엠",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "dupont",
+   "wd": "wd5",
+   "site": "Jobs",
+   "company": "듀폰",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "dow",
+   "wd": "wd1",
+   "site": "ExternalCareers",
+   "company": "다우",
+   "company_type": "외국계",
+   "industry": "제조·화학"
+  },
+  {
+   "tenant": "baxter",
+   "wd": "wd1",
+   "site": "baxter",
+   "company": "박스터",
+   "company_type": "외국계",
    "industry": "제조·화학"
   }
  ]

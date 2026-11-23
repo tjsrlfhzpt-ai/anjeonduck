@@ -940,7 +940,8 @@ def nav_cols(site, rel):
         "jobs": [("SafePlum 채용", [(f"{rel}jobs/", "채용공고 전체"), (f"{rel}jobs/today/", "오늘의 채용 모음"), (f"{rel}board/?b=job", "회원 직접 등록 공고"), (f"{rel}board/write/?b=job", "공고 등록")][:4 if (site.get("features") or {}).get("job_posting", True) else 3] + ([(OPENCHAT["url"], "채용 오픈채팅방 (카카오톡)")] if OPENCHAT else [])),
                  ("다른 채용 사이트", [(JOB_HOME, "고용24 · 안전관리자"), ("https://www.work24.go.kr/cm/f/c/0100/selectUnifySearch.do?topQuerySearchArea=tb_workinfo&topQueryData=" + quote("보건관리자"), "고용24 · 보건관리자"),
                                     ("https://www.saramin.co.kr/zf_user/search?searchword=" + quote("안전관리자"), "사람인"), ("https://www.jobkorea.co.kr/Search/?stext=" + quote("안전관리자"), "잡코리아"),
-                                    ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보")]),
+                                    ("https://job.alio.go.kr/recruit.do", "공공기관 채용정보"),
+                                    ("https://www.safety.or.kr/safety/bbsJob/list.do?menuNo=200116", "대한산업안전협회 구인")]),
                  # 그룹 채용관은 이용약관이 공고 정보의 복제·제공을 막아 공고를 옮기지 않고 바로가기만 둔다(2026-11-13 확인)
                  ("그룹 채용관 바로가기", [("https://www.samsungcareers.com/hr/", "삼성"), ("https://www.skcareers.com/Recruit", "SK"), ("https://talent.hyundai.com/", "현대자동차"),
                                     ("https://careers.lg.com/", "LG"), ("https://recruit.lotte.co.kr/apply/announcement", "롯데"), ("https://www.hanwhain.com/", "한화"),
@@ -1463,6 +1464,13 @@ def jobs_today_pick(jobs, today):
     return sorted(pick, key=lambda j: (GRADE_ORDER.index(j["company_type"]), str(j.get("deadline") or "9")))
 
 
+def jobs_today_fresh(jobs, today):
+    """새로 올라온 공고: 회사 구분과 관계없이(중소기업 포함) 기준일 이후 등록된 마감 전 공고."""
+    yday = jobs_new_since(today)
+    fresh = [j for j in jobs if not j["closed"] and str(j.get("posted") or "") >= yday]
+    return sorted(fresh, key=lambda j: (GRADE_ORDER.index(j["company_type"]) if j.get("company_type") in GRADE_ORDER else 99, str(j.get("deadline") or "9")))
+
+
 def jobs_today_text(site, jobs, today):
     """카카오톡 오픈채팅에 붙여 넣는 글. 링크는 모두 세이프플럼 공고 화면(거기서 원문으로 이동)."""
     base = (site.get("base_url") or "https://safeplum.com").rstrip("/")
@@ -1473,7 +1481,7 @@ def jobs_today_text(site, jobs, today):
            f"👉 전체 보기: {base}/jobs/today/", ""]
     # 전날(또는 오늘) 새로 올라온 공고는 맨 위에 따로 모으고, 업종 묶음에서는 뺀다
     yday = jobs_new_since(today)
-    fresh = [j for j in pick if str(j.get("posted") or "") >= yday]
+    fresh = jobs_today_fresh(jobs, today)
     rest = [j for j in pick if j not in fresh]
     blocks = ([(f"🆕 새로 올라온 공고 {len(fresh)}건 ({int(yday[5:7])}/{int(yday[8:10])}~)", fresh)] if fresh else []) + \
         [(f"■ {sec}", [j for j in rest if (j.get("industry") if j.get("industry") in TODAY_SECTORS else "기타") == sec]) for sec in TODAY_SECTORS + ["기타"]]
@@ -1512,6 +1520,11 @@ def jobs_today_text(site, jobs, today):
             out.append(f"- {co}{f'({cities})' if cities else ''} [{tag}] / {cond} {dl_s}".rstrip())
             out.append(f"  {base}/jobs/{j['id']}/")
         out.append("")
+    sme = [j for j in jobs if not j["closed"] and j.get("company_type") not in GRADE_ORDER[:5] and j not in fresh]
+    if sme:
+        out.append(f"■ 중소기업 등 공고 {len(sme)}건은 전체 목록에서 확인하세요")
+        out.append(f"  {base}/jobs/")
+        out.append("")
     no = ((site.get("operator") or {}).get("job_info_no") or "")
     out.append("※ 조건·마감은 공고 원문이 우선합니다. 세이프플럼은 채용을 알선하지 않습니다." + (f" (직업정보제공사업 신고번호 {no})" if no else ""))
     out.append("안전보건 서류는 네이버에서 '세이프플럼' 검색 → 무료 작성")
@@ -1523,7 +1536,7 @@ def jobs_today_body(site, jobs, today):
     d = dt.date.fromisoformat(today)
     secs = ""
     yday = jobs_new_since(today)
-    fresh = [j for j in pick if str(j.get("posted") or "") >= yday]
+    fresh = jobs_today_fresh(jobs, today)
     if fresh:
         secs += f'<section class="block jt-sec jt-new"><h2>🆕 새로 올라온 공고 <span class="muted">{len(fresh)} · {int(yday[5:7])}/{int(yday[8:10])} 이후 등록</span></h2><ul class="jlist">' + "".join(job_row(j, "../../") for j in fresh) + "</ul></section>"
     for sec in TODAY_SECTORS + ["기타"]:

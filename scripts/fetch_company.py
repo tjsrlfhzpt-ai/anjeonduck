@@ -261,6 +261,75 @@ def doosan_jobs(site):
     return len(rows), out
 
 
+# ---- 워크데이(Workday) 회사 채용 사이트: 회사가 직접 운영하는 공개 채용 페이지가 화면을 그릴 때 쓰는 공고 검색(JSON)만 읽는다.
+# 2026-11-23 확인: robots.txt 가 공고 경로를 막지 않음(refreshFacet 만 막음). 한국 근무 + 안전·보건 직무만, 제목·근무지·게시 시기·원문 링크만 저장.
+WD_QUERIES = ("Korea EHS", "Korea Safety", "Korea Health Safety", "Korea 안전", "Korea 보건")
+WD_SAFE_RE = re.compile(r"\bEHS\b|\bHSE\b|\bESH\b|\bSHE\b|Safety|Industrial Hygien|안전|보건", re.I)
+WD_EXCLUDE_RE = re.compile(r"Drug\s*Safety|Patient\s*Safety|Product\s*Safety|Food\s*Safety|Pharmacovigilance|Cyber|Information\s*Security|Sales|Field\s*Service\s*Engineer|Quality\s*Engineer", re.I)
+WD_PLACES = [("Hwaseong", "경기 화성시"), ("Dongtan", "경기 화성시"), ("JangAn", "경기 화성시"), ("Bundang", "경기 성남시"), ("Seongnam", "경기 성남시"), ("Pangyo", "경기 성남시"),
+             ("Suwon", "경기 수원시"), ("Pyeongtaek", "경기 평택시"), ("Icheon", "경기 이천시"), ("Yongin", "경기 용인시"), ("Giheung", "경기 용인시"), ("Ansan", "경기 안산시"),
+             ("Anseong", "경기 안성시"), ("Paju", "경기 파주시"), ("Gimpo", "경기 김포시"), ("Siheung", "경기 시흥시"), ("Pyeongtaek", "경기 평택시"),
+             ("Gangnam", "서울 강남구"), ("Seoul", "서울"), ("Songdo", "인천 연수구"), ("Incheon", "인천"), ("Cheongju", "충북 청주시"), ("Ochang", "충북 청주시"),
+             ("Cheonan", "충남 천안시"), ("Asan", "충남 아산시"), ("Dangjin", "충남 당진시"), ("Seosan", "충남 서산시"), ("Daejeon", "대전"), ("Sejong", "세종"),
+             ("Gumi", "경북 구미시"), ("Pohang", "경북 포항시"), ("Ulsan", "울산"), ("Busan", "부산"), ("Changwon", "경남 창원시"), ("Yeosu", "전남 여수시"),
+             ("Gwangyang", "전남 광양시"), ("Gunsan", "전북 군산시"), ("Iksan", "전북 익산시"), ("Daegu", "대구"), ("Gwangju", "광주")]
+WD_KR_RE = re.compile(r"Korea|KOR\b|대한민국|" + "|".join(k for k, _ in WD_PLACES), re.I)
+
+
+def wd_days_ago(txt):
+    t = str(txt or "")
+    if re.search(r"Today|오늘", t):
+        return 0
+    if re.search(r"Yesterday|어제", t):
+        return 1
+    m = re.search(r"(\d+)\s*(\+)?\s*(Days|일)", t)
+    return int(m.group(1)) if m else 30
+
+
+def wd_jobs(site):
+    t, wd, name = site["tenant"], site["wd"], site["site"]
+    base = f"https://{t}.{wd}.myworkdayjobs.com"
+    api = f"{base}/wday/cxs/{t}/{name}/jobs"
+    seen, out, total = set(), [], 0
+    for q in WD_QUERIES:
+        body = json.dumps({"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": q}).encode()
+        req = urllib.request.Request(api, data=body, headers={"User-Agent": UA, "Accept-Language": "ko", "Content-Type": "application/json", "Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=25) as r:
+            d = json.loads(r.read().decode("utf-8", "replace"))
+        total = max(total, d.get("total") or 0)
+        for p in d.get("jobPostings") or []:
+            path, title, loc = p.get("externalPath") or "", (p.get("title") or "").strip(), p.get("locationsText") or ""
+            if not path or path in seen:
+                continue
+            seen.add(path)
+            if not WD_SAFE_RE.search(title) or WD_EXCLUDE_RE.search(title) or TITLE_EXCLUDE_RE.search(title) or w24.EXCLUDE_RE.search(title):
+                continue
+            if not WD_KR_RE.search(loc + " " + path):
+                continue
+            place = next((v for k, v in WD_PLACES if re.search(k, loc + " " + path, re.I)), "")
+            contract = bool(re.search(r"contract|Fixed[\s-]*Term|Temporary|계약|Backfill", title, re.I))
+            jid = re.sub(r"[^A-Za-z0-9_-]", "", path.rsplit("_", 1)[-1])[:40] or str(len(out))
+            j = {
+                "id": f"co-wd-{t}-{jid}", "title": title, "company": site["company"],
+                "region": place or "근무지 원문 확인", "address": "",
+                "job": "보건관리자" if re.search(r"Nurse|Health\s*Manager|보건", title, re.I) else w24.job_of(title) or "EHS",
+                "career": "경력무관", "employment": "계약직" if contract else "정규직",
+                "company_type": site.get("company_type", "외국계"), "industry": site.get("industry", "제조·화학"),
+                "deadline": "채용 시", "posted": (TODAY - dt.timedelta(days=wd_days_ago(p.get("postedOn")))).isoformat(),
+                "source_url": f"{base}/ko-KR/{name}{path}", "source_name": f"{site['company']} 채용 홈페이지", "origin": "company",
+                "career_detail": "원문 확인", "education": "원문 확인",
+            }
+            if contract:
+                j["term"] = "기간은 원문 확인"
+            else:
+                j["term"] = "고용형태는 원문 확인"
+            if site.get("group"):
+                j["group"] = site["group"]
+            out.append(j)
+        time.sleep(0.5)
+    return total, out
+
+
 def main():
     cfg = json.loads((ROOT / "data" / "career_sites.json").read_text(encoding="utf-8"))
     out, ok, fail = [], 0, 0
@@ -332,6 +401,17 @@ def main():
         ok += 1
         out.extend(items)
         print(f"  {site['company']}: 공고 {total}건 중 안전·보건 {len(items)}건")
+    # 워크데이 채용 사이트를 쓰는 회사(주로 외국계)
+    for site in cfg.get("workday", []):
+        try:
+            total, items = wd_jobs(site)
+        except Exception as e:
+            fail += 1
+            warn(f"{site.get('company')}(workday:{site['tenant']}) 읽기 실패: {str(e)[:100]}")
+            continue
+        ok += 1
+        out.extend(items)
+        print(f"  {site['company']}: 검색 공고 {total}건 중 한국 안전·보건 {len(items)}건")
     # 그린하우스 게시판을 쓰는 회사
     for site in cfg.get("greenhouse", []):
         try:
@@ -371,7 +451,7 @@ def main():
             continue
         hits = [o for o in ops if is_safety(o)]
         print(f"  [후보] {slug}: 있음 — 이름 '{name}', 공고 {len(ops)}건, 안전·보건 {len(hits)}건" + ("".join(f"\n      · {h.get('title')} | 근무지 {'있음' if place_of(positions(h)) else '없음'} | 마감 {kst_date(h.get('dueDate')) or '상시'}" for h in hits[:6])))
-    if (cfg.get("sites") or cfg.get("greenhouse") or cfg.get("custom")) and ok == 0:
+    if (cfg.get("sites") or cfg.get("greenhouse") or cfg.get("custom") or cfg.get("workday")) and ok == 0:
         warn("회사 채용 홈페이지를 하나도 읽지 못해 기존 파일을 유지합니다.")
         return
     OUT.mkdir(parents=True, exist_ok=True)
