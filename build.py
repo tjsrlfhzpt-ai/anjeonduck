@@ -1145,7 +1145,7 @@ def video_card(v, rel, big=False, lead=False):
             + (f'<a class="vext" href="{e(v["tt_url"])}" target="_blank" rel="noopener">틱톡에서 보기 ↗</a>' if v.get("tt_url") else "") + "</p></div></article>")
 
 
-VIDEO_CAT_ORDER = ["위험성평가", "추락·보호구", "지게차·운반", "화재·밀폐공간", "점검·비상대응", "근골격계"]
+VIDEO_CAT_ORDER = ["위험성평가", "추락·보호구", "지게차·운반", "끼임·화학물질", "화재·밀폐공간", "점검·비상대응", "근골격계"]
 
 
 def video_filter(videos):
