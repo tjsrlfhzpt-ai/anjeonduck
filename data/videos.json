@@ -424,7 +424,8 @@
     ]
    ],
    "voice": true,
-   "cat": "위험성평가"
+   "cat": "위험성평가",
+   "featured": true
   },
   {
    "platform": "youtube",
