@@ -43,12 +43,12 @@ def warn(msg):
     print("  경고:", msg, file=sys.stderr)
 
 
-def page(i, tries=3):
-    q = urllib.parse.urlencode({"KEY": KEY, "Type": "json", "pIndex": i, "pSize": PSIZE})
+def page(i, tries=4, size=None):
+    q = urllib.parse.urlencode({"KEY": KEY, "Type": "json", "pIndex": i, "pSize": size or PSIZE})
     for k in range(tries):
         try:
             req = urllib.request.Request(f"{API}?{q}", headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=180) as r:
                 d = json.loads(r.read().decode("utf-8", "replace"))
             body = d.get("GGJOBABARECRUSTM")
             if not body:
@@ -65,7 +65,8 @@ def page(i, tries=3):
         except Exception as e:
             if k == tries - 1:
                 raise
-            time.sleep(2 + k * 3)
+            print(f"    {i}쪽 재시도 {k + 1}: {str(e)[:80]}")
+            time.sleep(3 + k * 5)
     return 0, []
 
 
@@ -101,8 +102,18 @@ def main():
     if not KEY:
         print("  GG_DATA_KEY 없음 — 경기 잡아바 채용 수집을 건너뜁니다(기존 data/ggjobs.json 유지).")
         return 0
+    # 연결 확인(작은 요청) — 해외 서버(GitHub)에서 큰 요청이 느릴 수 있어 시간을 함께 기록
+    t0 = time.time()
+    try:
+        page(1, size=5)
+        print(f"  연결 확인: {time.time() - t0:.1f}초")
+    except Exception as e:
+        warn(f"잡아바 연결 확인 실패({time.time() - t0:.0f}초): {str(e)[:200]}")
+        return 0
+    t0 = time.time()
     try:
         total, first = page(1)
+        print(f"  1쪽({PSIZE}건): {time.time() - t0:.1f}초")
     except Exception as e:
         warn(f"잡아바 1쪽 읽기 실패: {str(e)[:200]}")
         return 0
