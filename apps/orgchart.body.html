@@ -1,0 +1,220 @@
+<section class="phead no-print"><div class="wrap">
+  <p class="crumbs"><a href="../../">홈</a><span>/</span><a href="../">무료 도구</a><span>/</span>안전보건 조직도</p>
+  <h1>안전보건 조직도 작성기</h1>
+  <p>경영책임자부터 안전보건관리책임자, 안전·보건관리자, 관리감독자, 산업안전보건위원회·협의체, 협력업체까지 이름만 넣으면 A4 가로 조직도와 직무·선임 근거 표가 만들어집니다. 비워 둔 직책은 조직도에서 빠집니다.</p>
+</div></section>
+<div class="wrap layout-detail no-print">
+  <section class="col-main stack">
+    <form class="calc" id="ocForm" onsubmit="return false" autocomplete="off">
+      <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-ghost" id="ocEx">예시로 채우기</button><span class="hint" id="ocExHint">업종을 바꿔 가며 여러 번 누를 수 있습니다</span></div>
+      <div class="grid3">
+        <label class="field"><span class="label">회사·사업장명</span><input type="text" data-k="co" placeholder="예: ○○식품(주) 본사공장"></label>
+        <label class="field"><span class="label">기준일</span><input type="date" data-k="date"></label>
+        <label class="field"><span class="label">제목</span><input type="text" data-k="title" placeholder="안전보건 조직도"></label>
+      </div>
+      <h2 class="h-sm">경영·총괄</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">경영책임자 직위·성명</span><input type="text" data-k="ceo" placeholder="예: 대표이사 홍길동"></label>
+        <label class="field"><span class="label">안전보건관리책임자 직위·성명</span><input type="text" data-k="mgr" placeholder="예: 공장장 김○○"></label>
+        <label class="field"><span class="label">안전보건 전담조직(부서명)</span><input type="text" data-k="dept" placeholder="예: 안전보건팀 (없으면 비움)"></label>
+      </div>
+      <label class="check"><input type="checkbox" data-k="total"><span>도급 사업장 — 안전보건관리책임자를 <strong>안전보건총괄책임자</strong>로 지정(법 제62조)</span></label>
+      <h2 class="h-sm">전문 인력 <span class="hint">한 줄에 한 명 · "성명 | 비고(전담·겸직·자격)"</span></h2>
+      <div class="grid2">
+        <label class="field"><span class="label">안전관리자</span><textarea rows="2" data-k="safety" placeholder="이○○ | 전담 · 산업안전기사"></textarea></label>
+        <label class="field"><span class="label">보건관리자</span><textarea rows="2" data-k="health" placeholder="박○○ | 간호사"></textarea></label>
+        <label class="field"><span class="label">산업보건의</span><textarea rows="1" data-k="doctor" placeholder="○○의원 최○○ | 위촉"></textarea></label>
+        <label class="field"><span class="label">안전보건관리담당자</span><textarea rows="1" data-k="shm" placeholder="정○○ | 겸직"></textarea></label>
+      </div>
+      <h2 class="h-sm">관리감독자 <span class="hint">한 줄에 한 부서 · "부서 | 직위 성명"</span></h2>
+      <textarea rows="4" data-k="sups" style="width:100%" placeholder="생산1팀 | 팀장 강○○&#10;생산2팀 | 팀장 윤○○&#10;설비보전팀 | 과장 한○○&#10;물류팀 | 파트장 서○○"></textarea>
+      <h2 class="h-sm">회의체·근로자 참여</h2>
+      <div class="grid3">
+        <label class="field"><span class="label">산업안전보건위원회 위원장</span><input type="text" data-k="cmt" placeholder="비우면 표시 안 함"></label>
+        <label class="field"><span class="label">안전보건 협의체(도급) 위원장</span><input type="text" data-k="cnc" placeholder="비우면 표시 안 함"></label>
+        <label class="field"><span class="label">근로자대표</span><input type="text" data-k="rep" placeholder="예: 노동조합 위원장 오○○"></label>
+        <label class="field"><span class="label">명예산업안전감독관</span><input type="text" data-k="hon" placeholder="비우면 표시 안 함"></label>
+      </div>
+      <h2 class="h-sm">협력업체 <span class="hint">한 줄에 한 곳 · "업체 | 업무 | 현장 책임자"</span></h2>
+      <textarea rows="3" data-k="subs" style="width:100%" placeholder="○○환경(주) | 청소 | 소장 문○○"></textarea>
+      <div class="grid3">
+        <label class="field"><span class="label">직무·근거 표</span><select class="sort" data-k="table" style="width:100%"><option value="1">조직도 아래에 함께 인쇄</option><option value="0">인쇄하지 않음</option></select></label>
+        <label class="field"><span class="label">인쇄 색</span><select class="sort" data-k="tone" style="width:100%"><option value="mono">흑백(회사 보관용)</option><option value="color">남색 강조</option></select></label>
+      </div>
+      <p class="hint">입력값은 이 브라우저에만 저장됩니다. 오른쪽(아래) 미리보기에서 제목과 상자 글자를 눌러 바로 고칠 수도 있습니다 — 단, 왼쪽 입력을 다시 바꾸면 그 칸은 입력값으로 돌아갑니다.</p>
+      <div class="btns"><button type="button" class="btn" id="ocPrint">인쇄 · PDF 저장 (A4 가로)</button><button type="button" class="btn btn-ghost" id="ocReset">입력 지우기</button></div>
+    </form>
+    <h2 class="h-sm">미리보기</h2>
+    <div class="oc-prev" id="ocPrev"><div class="oc-fit" id="ocFit"><div id="ocSheet" class="oc-sheet"></div></div></div>
+  </section>
+  <aside class="col-side stack">
+    <div class="side-box"><h2 class="h-sm">조직도에 들어가는 자리</h2><ul class="bul hint">
+      <li>안전보건관리책임자: 사업장을 실질적으로 총괄하는 사람(법 제15조, 영 별표 2 규모 이상).</li>
+      <li>안전관리자·보건관리자 수와 전담 여부는 업종·상시근로자 수로 정해집니다(영 별표 3·5).</li>
+      <li>상시근로자 20~49명의 제조업 등은 안전보건관리담당자를 둡니다(법 제19조, 영 제24조).</li>
+      <li>안전보건 인력이 3명 이상이고 상시 500명 이상 등이면 전담 조직을 둡니다(중처법 시행령 제4조제2호).</li>
+    </ul></div>
+    <div class="side-box"><h2 class="h-sm">이어서 쓰는 도구</h2><ul class="bul">
+      <li><a href="../selection/">안전·보건관리자 선임 기준 진단</a></li>
+      <li><a href="../forms/appoint/">안전보건 관계자 인사발령서</a></li>
+      <li><a href="../forms/delegation/">안전보건 위임전결 기준표</a></li>
+      <li><a href="../duties/">직책별 법정 의무 조회</a></li>
+    </ul></div>
+  </aside>
+</div>
+<div class="oc-print" id="ocPrintBox" aria-hidden="true"></div>
+<style>
+.oc-print{display:none}
+.oc-prev{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;overflow:hidden}
+.oc-fit{transform-origin:top left}
+.oc-sheet{width:277mm;min-height:190mm;margin:0 auto;background:#fff;color:#111;padding:8mm;box-sizing:border-box;font-family:var(--font);box-shadow:var(--shadow-2);--oc:#111;--oc-bg:#f2f2f2}
+.oc-sheet.color{--oc:#1B2A4A;--oc-bg:#E8EDF6}
+.oc-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:0.6mm solid var(--oc);padding-bottom:2mm;margin-bottom:6mm}
+.oc-h h2{font-size:18pt;font-weight:800;margin:0;letter-spacing:-.02em}
+.oc-h span{font-size:9.5pt;color:#333;text-align:right}
+.oc-h small{font-size:8pt;color:#555}
+.oc-tree{display:flex;flex-direction:column;align-items:center}
+.oc-row{display:flex;justify-content:center;align-items:flex-start;gap:5mm;position:relative;width:100%}
+.oc-vl{width:0;height:6mm;border-left:0.35mm solid #555;margin:0 auto}
+.oc-box{border:0.35mm solid var(--oc);border-radius:1.5mm;background:#fff;text-align:center;min-width:34mm;max-width:52mm;font-size:9.5pt;line-height:1.35;overflow:hidden}
+.oc-box .r{background:var(--oc-bg);font-weight:800;font-size:9pt;padding:1.2mm 2mm;border-bottom:0.3mm solid var(--oc)}
+.oc-box .n{padding:1.5mm 2mm;white-space:pre-line}
+.oc-box .n small{display:block;font-size:8pt;color:#444}
+.oc-box.top{min-width:48mm}
+.oc-box.top .r{background:var(--oc);color:#fff}
+.oc-mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:6mm;width:100%}
+.oc-side{display:flex;flex-direction:column;gap:3mm}
+.oc-side.l{align-items:flex-end}
+.oc-side.r{align-items:flex-start}
+.oc-box.dash{border-style:dashed}
+.oc-frame{border:0.35mm dashed #777;border-radius:2mm;padding:3mm 4mm 4mm;position:relative}
+.oc-frame>b{position:absolute;top:-2.6mm;left:4mm;background:#fff;padding:0 1.5mm;font-size:8.5pt}
+.oc-bus{position:relative;padding-top:6mm;width:100%}
+.oc-bus:before{content:"";position:absolute;top:0;left:calc(50% - var(--h,0mm));right:calc(50% - var(--h,0mm));border-top:0.35mm solid #555}
+.oc-bus+.oc-bus{margin-top:4mm}
+.oc-bus>.oc-row>.oc-box,.oc-bus>.oc-row>.oc-frame{position:relative}
+.oc-bus>.oc-row>.oc-box:before,.oc-bus>.oc-row>.oc-frame:before{content:"";position:absolute;top:-6mm;left:50%;height:6mm;border-left:0.35mm solid #555}
+.oc-sub .oc-box{border-style:dashed}
+.oc-note{font-size:8pt;color:#444;margin-top:4mm;text-align:right}
+.oc-tbl{width:100%;border-collapse:collapse;font-size:8.5pt;margin-top:6mm;break-before:auto}
+.oc-tbl th,.oc-tbl td{border:0.3mm solid #444;padding:1.2mm 2mm;text-align:left;vertical-align:top}
+.oc-tbl th{background:var(--oc-bg)}
+.oc-sheet [contenteditable]:focus{outline:2px solid #2563eb;outline-offset:1px}
+@page{size:A4 landscape;margin:10mm;@top-center{content:""}@bottom-center{content:""}}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(main){display:none!important}
+  main>*:not(.oc-print){display:none!important}
+  .oc-print{display:block!important}
+  .oc-print .oc-sheet{width:277mm;box-shadow:none;padding:0;margin:0}
+  .oc-print [contenteditable]{outline:0}
+  .oc-tbl{break-before:page}
+  .oc-tbl tr{break-inside:avoid}
+}
+</style>
+<script>
+(function () {
+  "use strict";
+  var KEY = "safeplum.orgchart.v1";
+  var form = document.getElementById("ocForm"), sheet = document.getElementById("ocSheet");
+  var els = [].slice.call(form.querySelectorAll("[data-k]"));
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function get() { var o = {}; els.forEach(function (el) { o[el.dataset.k] = el.type === "checkbox" ? el.checked : el.value; }); return o; }
+  function set(o) { els.forEach(function (el) { var v = o[el.dataset.k]; if (v == null) return; if (el.type === "checkbox") el.checked = !!v; else el.value = v; }); }
+  function lines(t) { return String(t || "").split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean).map(function (s) { return s.split("|").map(function (x) { return x.trim(); }); }); }
+  function box(role, name, note, cls) {
+    return '<div class="oc-box ' + (cls || "") + '"><div class="r" contenteditable="true">' + esc(role) + '</div><div class="n" contenteditable="true">' + esc(name || " ") + (note ? "<small>" + esc(note) + "</small>" : "") + "</div></div>";
+  }
+  function people(arr, role) { return arr.map(function (p) { return box(role, p[0], p.slice(1).join(" · ")); }); }
+  // 한 줄에 상자 n개: 폭을 줄여 A4 가로 안에 맞추고, 8개를 넘으면 여러 줄로 나눈다
+  var ROW_MM = 259, GAP = 5;
+  function busRow(items, opt) {
+    opt = opt || {};
+    if (!items.length) return "";
+    var out = '<div class="oc-vl"></div>', per = 8;
+    for (var i = 0; i < items.length; i += per) {
+      var part = items.slice(i, i + per), n = part.length;
+      var w = opt.w || Math.min(52, Math.floor((ROW_MM - GAP * (n - 1)) / n));
+      var half = n > 1 ? ((n * w + (n - 1) * GAP) - w) / 2 : 0;
+      out += '<div class="oc-bus" style="--h:' + half + 'mm"><div class="oc-row">' + part.map(function (h) { return h.replace('class="oc-box', 'style="width:' + w + 'mm;min-width:0;max-width:none" class="oc-box'); }).join("") + "</div></div>";
+    }
+    return out;
+  }
+  var ROLE = [
+    ["경영책임자", "중대재해처벌법 제4조·제5조", "안전보건관리체계 구축·이행(목표·방침, 전담조직, 유해·위험요인 개선 절차, 예산, 책임자 평가, 인력 배치, 의견청취, 비상대응, 도급 기준) 및 반기 점검"],
+    ["안전보건관리책임자", "산업안전보건법 제15조 · 영 제14조", "산업재해 예방계획, 안전보건관리규정, 안전보건교육, 작업환경측정 등 점검·개선, 건강진단 등 건강관리, 재해 원인 조사·재발방지, 산재 통계, 안전장치·보호구 적격품 확인, 위험성평가 등 업무 총괄 — 안전관리자·보건관리자 지휘·감독"],
+    ["안전보건총괄책임자", "법 제62조 · 영 제52조·제53조", "도급 시 위험성평가, 작업중지, 도급 시 산업재해 예방조치, 산업안전보건관리비 협의·조정·집행 감독, 안전인증·자율안전확인 대상 기계 사용 여부 확인"],
+    ["안전관리자", "법 제17조 · 영 제16조·제18조 · 별표 3", "안전에 관한 기술적 사항에 대해 안전보건관리책임자 보좌, 관리감독자 지도·조언"],
+    ["보건관리자", "법 제18조 · 영 제20조·제22조 · 별표 5", "보건에 관한 기술적 사항에 대해 안전보건관리책임자 보좌, 관리감독자 지도·조언"],
+    ["안전보건관리담당자", "법 제19조 · 영 제24조·제25조", "안전보건교육, 위험성평가, 작업환경측정, 건강진단, 산재 원인 조사·재발방지, 안전장치·보호구 적격품 확인에 관한 보좌·지도·조언"],
+    ["산업보건의", "법 제22조 · 영 제29조·제31조", "건강진단 결과 검토·사후관리, 근로자 건강장해 원인 조사·재발 방지 등 의학적 조치"],
+    ["관리감독자", "법 제16조 · 영 제15조", "담당 작업 기계·설비 점검, 보호구·방호장치 점검과 착용·사용 교육·지도, 산업재해 보고·응급조치, 작업장 정리정돈, 위험성평가 유해·위험요인 파악·개선조치 참여"],
+    ["산업안전보건위원회", "법 제24조 · 영 제34조~제39조", "산업재해 예방계획, 안전보건관리규정, 교육, 작업환경측정, 건강진단 등을 심의·의결(분기 1회 정기회의)"],
+    ["안전 및 보건에 관한 협의체", "법 제64조 · 규칙 제79조", "도급인·수급인 전원으로 구성, 작업 시작 시간·작업장 간 연락방법·재해 발생 위험 시 대피방법·위험성평가·사업주 간 연락방법 등 협의(매월 1회 이상)"],
+    ["명예산업안전감독관", "법 제23조 · 영 제32조", "영 제32조제2항에서 정한 업무(사업장 점검 참여 등)"],
+    ["근로자대표", "법 제2조제5호 등", "산업안전보건위원회 근로자위원, 위험성평가·작업환경측정·건강진단 참여 요구 등"]
+  ];
+  function render() {
+    var o = get();
+    sheet.className = "oc-sheet" + (o.tone === "color" ? " color" : "");
+    var mgrRole = "안전보건관리책임자" + (o.total ? " · 안전보건총괄책임자" : "");
+    var left = [], right = [];
+    if (o.cmt) left.push(box("산업안전보건위원회", "위원장 " + o.cmt, "", "dash"));
+    if (o.rep) left.push(box("근로자대표", o.rep, "", "dash"));
+    if (o.cnc) right.push(box("안전보건 협의체(도급)", "위원장 " + o.cnc, "", "dash"));
+    if (o.hon) right.push(box("명예산업안전감독관", o.hon, "", "dash"));
+    var staff = [].concat(people(lines(o.safety), "안전관리자"), people(lines(o.health), "보건관리자"), people(lines(o.doctor), "산업보건의"), people(lines(o.shm), "안전보건관리담당자"));
+    var sups = lines(o.sups), subs = lines(o.subs);
+    var h = '<div class="oc-h"><h2 contenteditable="true">' + esc(o.title || "안전보건 조직도") + "</h2><span>" + esc(o.co || "") + (o.date ? " · 기준일 " + esc(o.date) : "") + (left.length + right.length + subs.length ? "<br><small>점선: 협의·참여 기구, 협력업체(관계수급인)</small>" : "") + "</span></div><div class=\"oc-tree\">";
+    if (o.ceo) h += '<div class="oc-row">' + box("경영책임자", o.ceo, "", "top") + "</div><div class=\"oc-vl\"></div>";
+    h += '<div class="oc-mid"><div class="oc-side l">' + left.join("") + "</div>" + box(mgrRole, o.mgr || " ", "", "top") + '<div class="oc-side r">' + right.join("") + "</div></div>";
+    if (staff.length) {
+      if (o.dept) {
+        var sw = Math.min(42, Math.floor((ROW_MM - 20 - GAP * (staff.length - 1)) / staff.length));
+        h += '<div class="oc-vl"></div><div class="oc-row"><div class="oc-frame"><b>' + esc(o.dept) + '</b><div class="oc-row">' + staff.map(function (x) { return x.replace('class="oc-box', 'style="width:' + sw + 'mm;min-width:0;max-width:none" class="oc-box'); }).join("") + "</div></div></div>";
+      } else h += busRow(staff);
+    }
+    h += busRow(sups.map(function (s) { return box(s[0] + " 관리감독자", s.slice(1).join(" "), ""); }));
+    if (subs.length) h += '<div class="oc-sub" style="width:100%">' + busRow(subs.map(function (s) { return box("협력업체 · " + (s[1] || "도급"), s[0], s[2] || "", "dash"); })) + "</div>";
+    h += "</div>";
+    if (o.table !== "0") {
+      var used = { "경영책임자": !!o.ceo, "안전보건관리책임자": !!o.mgr, "안전보건총괄책임자": !!o.total, "안전관리자": !!lines(o.safety).length, "보건관리자": !!lines(o.health).length, "안전보건관리담당자": !!lines(o.shm).length, "산업보건의": !!lines(o.doctor).length, "관리감독자": !!sups.length, "산업안전보건위원회": !!o.cmt, "안전 및 보건에 관한 협의체": !!o.cnc, "명예산업안전감독관": !!o.hon, "근로자대표": !!o.rep };
+      var rows = ROLE.filter(function (r) { return used[r[0]]; });
+      if (rows.length) h += '<table class="oc-tbl"><thead><tr><th style="width:18%">직책·기구</th><th style="width:22%">근거</th><th>주요 직무</th></tr></thead><tbody>' + rows.map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td>" + esc(r[1]) + '</td><td contenteditable="true">' + esc(r[2]) + "</td></tr>"; }).join("") + "</tbody></table>";
+    }
+    sheet.innerHTML = h;
+    fit();
+    try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {}
+  }
+  function fit() {
+    var box = document.getElementById("ocPrev"), f = document.getElementById("ocFit");
+    var avail = box.clientWidth - 28, full = sheet.offsetWidth, k = Math.min(1, avail / full);
+    f.style.transform = "scale(" + k + ")";
+    f.style.height = (sheet.offsetHeight * k) + "px";
+  }
+  window.addEventListener("resize", fit);
+  var EX = [
+    { co: "○○식품(주) 본사공장", ceo: "대표이사 ○○○", mgr: "공장장 ○○○", dept: "안전보건팀", total: true, safety: "○○○ | 전담 · 산업안전기사\n○○○ | 전담 · 산업안전산업기사", health: "○○○ | 간호사", doctor: "", shm: "", sups: "생산1팀 | 팀장 ○○○\n생산2팀 | 팀장 ○○○\n설비보전팀 | 과장 ○○○\n물류팀 | 파트장 ○○○\n폐수처리장 | 주임 ○○○", cmt: "공장장 ○○○", cnc: "공장장 ○○○", rep: "노사협의회 근로자위원 ○○○", hon: "", subs: "○○환경(주) | 청소 | 소장 ○○○\n○○설비(주) | 설비 정비 | 팀장 ○○○\n○○시큐리티 | 경비 | 반장 ○○○" },
+    { co: "○○건설(주) ○○현장", ceo: "대표이사 ○○○", mgr: "현장소장 ○○○", dept: "", total: true, safety: "○○○ | 전담 · 건설안전기사", health: "", doctor: "", shm: "", sups: "공무 | 과장 ○○○\n토목 | 대리 ○○○\n건축 | 과장 ○○○\n설비 | 대리 ○○○", cmt: "", cnc: "현장소장 ○○○", rep: "", hon: "○○○", subs: "○○토건 | 토공사 | 소장 ○○○\n○○철강 | 철골 | 반장 ○○○\n○○전기 | 전기 | 반장 ○○○" },
+    { co: "○○물류(주) ○○센터", ceo: "대표이사 ○○○", mgr: "센터장 ○○○", dept: "", total: false, safety: "", health: "", doctor: "", shm: "○○○ | 총무팀 겸직", sups: "입고팀 | 팀장 ○○○\n출고팀 | 팀장 ○○○", cmt: "", cnc: "", rep: "근로자대표 ○○○", hon: "", subs: "○○운송 | 배송 | 소장 ○○○" }
+  ];
+  var exI = 0;
+  document.getElementById("ocEx").addEventListener("click", function () {
+    var cur = get(), filled = els.some(function (el) { return el.type !== "checkbox" && el.tagName !== "SELECT" && el.value.trim(); });
+    if (filled && !confirm("입력한 내용이 예시로 바뀝니다. 계속할까요?")) return;
+    var e = EX[exI % EX.length]; exI++;
+    set(Object.assign({ title: cur.title, date: cur.date, table: cur.table, tone: cur.tone }, e));
+    document.getElementById("ocExHint").textContent = "예시 " + exI + "/" + EX.length + " — 실제 성명으로 고쳐 쓰세요";
+    render();
+  });
+  function toPrint() { var b = document.getElementById("ocPrintBox"); b.innerHTML = sheet.outerHTML.replace(' id="ocSheet"', ""); }
+  window.addEventListener("beforeprint", toPrint);
+  document.getElementById("ocPrint").addEventListener("click", function () { toPrint(); window.print(); });
+  document.getElementById("ocReset").addEventListener("click", function () { if (!confirm("입력한 내용을 모두 지울까요?")) return; els.forEach(function (el) { if (el.type === "checkbox") el.checked = false; else if (el.tagName === "SELECT") el.selectedIndex = 0; else el.value = ""; }); try { localStorage.removeItem(KEY); } catch (e) {} render(); });
+  form.addEventListener("input", render);
+  form.addEventListener("change", render);
+  try { var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if (sv && typeof sv === "object") set(sv); } catch (e) {}
+  if (!form.querySelector('[data-k="date"]').value) { var d = new Date(); form.querySelector('[data-k="date"]').value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  render();
+})();
+</script>

@@ -21,9 +21,9 @@
     },
     {
      "name": "재해 발생건수 등 공표 대상",
-     "basis": "법 제10조",
-     "status": "planned",
-     "link": "",
+     "basis": "법 제10조 · 영 제10조~제12조",
+     "status": "ok",
+     "link": "publish/",
      "note": ""
     },
     {
@@ -84,8 +84,8 @@
     {
      "name": "안전보건 조직도 생성기",
      "basis": "법 제15조~제19조",
-     "status": "planned",
-     "link": "",
+     "status": "ok",
+     "link": "orgchart/",
      "note": ""
     },
     {
@@ -107,7 +107,7 @@
      "basis": "법 제25조 · 규칙 별표 2·3",
      "status": "ok",
      "link": "selection/",
-     "note": "작성 대상 조회 제공 · 표준안은 준비 중"
+     "note": "작성 대상 조회 · 표준안은 안전보건관리규정 작성기(forms/safety-rules)"
     },
     {
      "name": "안전·보건관리자 업무일지 (일일·주간·월간)",
@@ -222,9 +222,9 @@
     {
      "name": "보건조치 세부 도구 (환기·밀폐공간·관리대상물질)",
      "basis": "기준규칙 제3편",
-     "status": "planned",
-     "link": "",
-     "note": ""
+     "status": "ok",
+     "link": "forms/#w-health",
+     "note": "관리대상물질 점검표 · 국소배기·환기 점검표 · 밀폐공간 작업 프로그램·측정 기록"
     },
     {
      "name": "유해위험방지계획서 대상 판정",
@@ -235,10 +235,10 @@
     },
     {
      "name": "공정안전보고서 대상 판정",
-     "basis": "법 제44조",
-     "status": "planned",
-     "link": "",
-     "note": ""
+     "basis": "법 제44조 · 영 제43조",
+     "status": "ok",
+     "link": "psm/",
+     "note": "별표 13 규정량 표는 원문 확보 후 추가"
     },
     {
      "name": "산업재해 사례",
@@ -327,7 +327,7 @@
      "basis": "법 제84조·제93조",
      "status": "ok",
      "link": "inspect/",
-     "note": "안전검사 대상·주기 계산 제공 · 안전인증 대상은 준비 중"
+     "note": "안전검사 대상·주기 계산 · 안전인증 대상은 기계·기구 법정 의무(machines)에서 조회"
     }
    ]
   },
@@ -344,16 +344,16 @@
     },
     {
      "name": "제조등 금지·허가물질 조회",
-     "basis": "법 제117조·제118조",
-     "status": "planned",
-     "link": "",
+     "basis": "법 제117조·제118조 · 영 제87조·제88조",
+     "status": "ok",
+     "link": "chem-ban/",
      "note": ""
     },
     {
      "name": "석면 조사·해체 기준",
-     "basis": "법 제119조",
-     "status": "planned",
-     "link": "",
+     "basis": "법 제119조·제122조 · 영 제89조·제94조",
+     "status": "ok",
+     "link": "asbestos/",
      "note": ""
     }
    ]
@@ -378,24 +378,24 @@
     },
     {
      "name": "휴게시설 설치기준",
-     "basis": "법 제128조의2",
-     "status": "planned",
-     "link": "",
-     "note": ""
+     "basis": "법 제128조의2 · 영 제96조의2",
+     "status": "ok",
+     "link": "rest-area/",
+     "note": "설치·관리기준 세부(규칙 별표 21의2) 표는 원문 확보 후 추가"
     },
     {
      "name": "건강진단 대상·주기",
      "basis": "법 제129조~제130조",
-     "status": "planned",
-     "link": "",
-     "note": ""
+     "status": "ok",
+     "link": "health-exam/",
+     "note": "별표 22·23 표는 원문 확보 후 추가"
     },
     {
      "name": "작업환경측정 대상 판정",
-     "basis": "법 제125조",
-     "status": "planned",
-     "link": "",
-     "note": ""
+     "basis": "법 제125조 · 규칙 제186조·제190조",
+     "status": "ok",
+     "link": "wem/",
+     "note": "별표 21 목록은 원문 확보 후 추가"
     },
     {
      "name": "밀폐공간 산소·유해가스 농도 측정 기록부",
@@ -542,9 +542,9 @@
     },
     {
      "name": "도급 시 확보의무 점검표",
-     "basis": "법 제5조",
-     "status": "planned",
-     "link": "",
+     "basis": "법 제5조 · 영 제4조제9호",
+     "status": "ok",
+     "link": "forms/sapa-subcontract/",
      "note": ""
     }
    ]
@@ -562,9 +562,9 @@
     },
     {
      "name": "경영책임자 안전보건교육",
-     "basis": "법 제8조",
-     "status": "planned",
-     "link": "",
+     "basis": "법 제8조 · 영 제6조",
+     "status": "ok",
+     "link": "ceo-edu/",
      "note": ""
     }
    ]
@@ -677,9 +677,9 @@
     {
      "name": "안전보건 관련 사규 예시",
      "basis": "사내 규정",
-     "status": "planned",
-     "link": "",
-     "note": ""
+     "status": "ok",
+     "link": "forms/#w-bylaw",
+     "note": "작업중지·위험성평가·도급·의견청취·보호구 규정 5종"
     }
    ]
   },

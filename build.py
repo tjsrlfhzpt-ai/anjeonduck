@@ -1812,9 +1812,11 @@ ARROW = '<svg class="tcard-arr" viewBox="0 0 24 24" aria-hidden="true"><path d="
 WRITER_LEAD = ("위험성평가·TBM", ["tbm", "risk"])          # 맨 앞 묶음(서식에는 없는 묶음)
 WRITER_TOOLS_IN = {"교육·회의": ["edu-log", "edu-monthly", "committee", "council"],
                    "점검·허가": ["patrol", "joint", "permit", "confined", "heat", "loto", "rule-sign", "top-rules", "improve"],
+                   "조직·발령": ["orgchart"],
                    "관리대장": ["msds", "law-register"]}
 WRITER_GID = {"위험성평가·TBM": "w-risk", "교육·회의": "w-edu", "점검·허가": "w-check", "재해·사고 조사": "w-acc", "업무일지": "w-log",
-              "작업계획서": "w-plan", "작업시작 전 점검(별표 3)": "pre", "조직·발령": "w-org", "관리대장": "w-ledger", "중대재해처벌법 이행": "w-sapa"}
+              "작업계획서": "w-plan", "작업시작 전 점검(별표 3)": "pre", "조직·발령": "w-org", "관리대장": "w-ledger", "중대재해처벌법 이행": "w-sapa",
+              "보건·작업환경": "w-health", "안전보건 사규 예시": "w-bylaw"}
 WRITER_N = 0  # main() 에서 계산: 전용 작성기 + 서식 - 겹치는 것
 
 
