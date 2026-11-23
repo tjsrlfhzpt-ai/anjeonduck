@@ -1,0 +1,19 @@
+name: 채용 출처 후보 확인(요청 시)
+
+# 새 채용 출처 후보(회사 채용 홈페이지·공개 게시판 API)를 확인해 로그에만 남긴다. 저장·게시 없음.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 scripts/probe_sources.py
