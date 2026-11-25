@@ -138,6 +138,22 @@ def norm_addr(addr):
     return " ".join(tk)
 
 
+# 시 이름(행정구역 '시' 생략형) — 제목 대괄호의 근무지 판별용
+KR_CITIES = set("""서울 부산 대구 인천 광주 대전 울산 세종 제주 서귀포 수원 성남 의정부 안양 부천 광명 평택 동두천 안산 고양 과천 구리 남양주 오산 시흥 군포 의왕 하남 용인 파주 이천 안성 김포 화성 양주 포천 여주 춘천 원주 강릉 동해 태백 속초 삼척 청주 충주 제천 천안 공주 보령 아산 서산 논산 계룡 당진 전주 군산 익산 정읍 남원 김제 목포 여수 순천 나주 광양 포항 경주 김천 안동 구미 영주 영천 상주 문경 경산 창원 진주 통영 사천 김해 밀양 거제 양산 음성 진천 칠곡 울진 고성 함안 창녕 영암 해남 서천 예산 홍성 태안 횡성 평창 홍천 철원 가평 양평 연천""".split())
+
+
+def bracket_place(title):
+    """제목 맨 앞 '[여수] ...'·'[대전공장] ...'처럼 근무지만 적은 대괄호 표기 → 지역 이름(아니면 빈 문자열)."""
+    m = re.match(r"\s*\[([^\]]{2,20})\]", title or "")
+    if not m:
+        return ""
+    t = re.sub(r"\s*(공장|사업장|사업소|지사|본사|센터|연구소|현장)$", "", m.group(1).strip())
+    places = set(GH_PLACES) | KR_CITIES | set(w24.SIDO.values()) | set(w24.SIDO)
+    if t in places or re.fullmatch(r"[가-힣]{1,4}(시|군|구)", t):
+        return t
+    return ""
+
+
 def bracket_company(title, site):
     """그룹 채용 홈페이지의 '[동국씨엠] 안전환경 ...' 같은 제목에서 실제 회사 이름을 꺼낸다(그룹으로 등록한 곳만)."""
     if not site.get("group"):
@@ -146,6 +162,8 @@ def bracket_company(title, site):
     if not m or re.search(r"경력|신입|채용|계약|인턴|정규|모집|수시|상시|공채", m.group(1)):
         return ""
     name = m.group(1).strip()
+    if bracket_place(title):
+        return ""   # [여수]·[대전공장]처럼 근무지를 적은 표기는 회사 이름이 아니다(근무지로 쓴다)
     if name.lower().replace(" ", "") == site.get("slug", "").lower() or name in site.get("company", ""):
         return ""   # [HYBE]처럼 회사 자신을 가리키는 표기는 그대로 둔다
     return name
@@ -356,6 +374,9 @@ def main():
                 continue
             addr = norm_addr(place_of(ps))
             region = w24.region_of("", addr) if addr else ""
+            title0 = (o.get("title") or "").strip()
+            if not region and bracket_place(title0):  # 제목 앞 [여수]처럼 회사가 직접 적은 근무지
+                region = bracket_place(title0)
             if not region:  # 채용 홈페이지 목록에 근무지가 없는 공고 — 지역을 짐작하지 않고 원문 확인으로 표시
                 region = "근무지 원문 확인"
             title = (o.get("title") or "").strip()
