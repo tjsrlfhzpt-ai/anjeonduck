@@ -1,6 +1,6 @@
 {
- "fetched": "2026-11-25",
- "checked": "2026-11-25",
+ "fetched": "2026-11-26",
+ "checked": "2026-11-26",
  "source": "경기도일자리재단 잡아바 채용정보(경기데이터드림 Open API, 상업적이용허용·콘텐츠변경허용)",
  "items": [
   {
@@ -282,26 +282,6 @@
    "career_detail": "경력무관",
    "education": "학력무관",
    "salary": "월급 280만원 ~ 320만원"
-  },
-  {
-   "id": "gg-w24-k180412610260006",
-   "title": "건축현장 안전관리자 모집",
-   "company": "성안종합건설(주)",
-   "region": "서울",
-   "address": "서울",
-   "job": "안전관리자",
-   "career": "경력",
-   "employment": "정규직",
-   "company_type": "중소·기타",
-   "industry": "건설·플랜트·조선",
-   "deadline": "2026-11-25",
-   "posted": "2026-10-26",
-   "source_url": "https://www.work.go.kr/empInfo/empInfoSrch/detail/empDetailAuthView.do?wantedAuthNo=K180412610260006",
-   "source_name": "경기 잡아바(고용24)",
-   "origin": "jobaba",
-   "career_detail": "경력",
-   "education": "학력무관",
-   "salary": "연봉 7000만원"
   },
   {
    "id": "gg-w24-k180032610260091",
