@@ -1,6 +1,6 @@
 {
- "fetched": "2026-11-23",
- "checked": "2026-11-23",
+ "fetched": "2026-11-25",
+ "checked": "2026-11-25",
  "source": "경기도일자리재단 잡아바 채용정보(경기데이터드림 Open API, 상업적이용허용·콘텐츠변경허용)",
  "items": [
   {
@@ -502,6 +502,66 @@
    "career_detail": "경력",
    "education": "학력무관",
    "salary": "월급 430만원"
+  },
+  {
+   "id": "gg-w24-k120032611230011",
+   "title": "건설현장 소방안전관리자 특급~2급 경력사원 채용",
+   "company": "(주)시티건설",
+   "region": "경기",
+   "address": "경기",
+   "job": "소방안전관리자",
+   "career": "경력",
+   "employment": "계약직",
+   "company_type": "중소·기타",
+   "industry": "건설·플랜트·조선",
+   "deadline": "2026-12-05",
+   "posted": "2026-11-23",
+   "source_url": "https://www.work.go.kr/empInfo/empInfoSrch/detail/empDetailAuthView.do?wantedAuthNo=K120032611230011",
+   "source_name": "경기 잡아바(고용24)",
+   "origin": "jobaba",
+   "career_detail": "경력",
+   "education": "학력무관",
+   "salary": "월급 350만원 ~ 350만원"
+  },
+  {
+   "id": "gg-w24-k180032611230089",
+   "title": "산업안전관리자",
+   "company": "신기(주)",
+   "region": "경기",
+   "address": "경기",
+   "job": "안전관리자",
+   "career": "경력",
+   "employment": "정규직",
+   "company_type": "중소·기타",
+   "industry": "식품·유통·서비스",
+   "deadline": "2026-12-07",
+   "posted": "2026-11-23",
+   "source_url": "https://www.work.go.kr/empInfo/empInfoSrch/detail/empDetailAuthView.do?wantedAuthNo=K180032611230089",
+   "source_name": "경기 잡아바(고용24)",
+   "origin": "jobaba",
+   "career_detail": "경력",
+   "education": "학력무관",
+   "salary": "월급 350만원 ~ 400만원"
+  },
+  {
+   "id": "gg-w24-k180022611230023",
+   "title": "안전관리자모집",
+   "company": "부국티엔씨(주)",
+   "region": "경기 용인시",
+   "address": "경기 용인시",
+   "job": "안전관리자",
+   "career": "경력",
+   "employment": "정규직",
+   "company_type": "중소·기타",
+   "industry": "식품·유통·서비스",
+   "deadline": "2027-01-21",
+   "posted": "2026-11-23",
+   "source_url": "https://www.work.go.kr/empInfo/empInfoSrch/detail/empDetailAuthView.do?wantedAuthNo=K180022611230023",
+   "source_name": "경기 잡아바(고용24)",
+   "origin": "jobaba",
+   "career_detail": "경력",
+   "education": "초대졸↑",
+   "salary": "연봉 4000만원 ~ 4300만원"
   }
  ]
 }
