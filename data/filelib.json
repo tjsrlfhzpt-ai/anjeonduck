@@ -887,6 +887,32 @@
    "added": "2026-11-10"
   },
   {
+   "id": "safety-health-regulation-construction",
+   "title": "안전보건관리규정(워드, 건설업 예시 · 2026년 법령 기준)",
+   "cat": "중대재해처벌법 이행",
+   "ext": "docx",
+   "file": "assets/files/lib/safety-health-regulation-construction.docx",
+   "dl": "안전보건관리규정_건설업.docx",
+   "size": 62246,
+   "source": "SafePlum 제작 (2026년 11월 법령 원문 대조) · 회사명은 ○○로 비워 둠",
+   "public": false,
+   "desc": "본사·현장 조직(현장소장=안전보건관리책임자·총괄책임자), 도급인 의무(순회점검 2일 1회·합동점검 2개월 1회·협의체 매월), 기초안전보건교육, 작업계획서·작업허가, 산업안전보건관리비, 폭염 휴식 기준, 2026년 개정 위험성평가 조항까지 8개 장 61개 조. 조직도·업무분장·법정 주기 업무 일람·심의의결서(근로자대표 동의서 겸용) 포함.",
+   "added": "2026-11-26"
+  },
+  {
+   "id": "safety-health-regulation-service",
+   "title": "안전보건관리규정(워드, 기타 서비스업 예시 · 2026년 법령 기준)",
+   "cat": "중대재해처벌법 이행",
+   "ext": "docx",
+   "file": "assets/files/lib/safety-health-regulation-service.docx",
+   "dl": "안전보건관리규정_기타 서비스업.docx",
+   "size": 61807,
+   "source": "SafePlum 제작 (2026년 11월 법령 원문 대조) · 회사명은 ○○로 비워 둠",
+   "public": false,
+   "desc": "숙박·음식·유통·시설관리 등 서비스 사업장 기준. 고객응대근로자 보호(규칙 제41조·영 제41조), 휴게시설 설치기준 대상, 미끄러짐·조리·시설관리·배송 작업 안전, 근골격계·직무스트레스, 용역(청소·경비) 도급 관리, 2026년 개정 위험성평가 조항까지 8개 장 62개 조. 조직도·업무분장·법정 주기 업무 일람·심의의결서 포함.",
+   "added": "2026-11-26"
+  },
+  {
    "id": "confined-space-drill-scenario",
    "title": "밀폐공간 질식재해 예방훈련 시나리오(한글)",
    "cat": "사고·비상대응",
