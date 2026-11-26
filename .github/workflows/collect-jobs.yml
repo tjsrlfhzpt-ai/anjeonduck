@@ -21,11 +21,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: (시험) 경기 잡아바 모집분야 포함 수집 — 저장·배포 안 함
-        continue-on-error: true
-        env:
-          GG_DATA_KEY: ${{ secrets.GG_DATA_KEY }}
-        run: python3 scripts/fetch_jobaba.py
       - name: (시험) 공공기관 채용정보(ALIO) API — 저장·배포 안 함
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
