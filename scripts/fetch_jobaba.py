@@ -34,6 +34,8 @@ API = "https://openapi.gg.go.kr/GGJOBABARECRUSTM"
 PSIZE = 1000
 TODAY = (dt.datetime.utcnow() + dt.timedelta(hours=9)).date()
 SKIP_HOSTS = ("jobkorea.co.kr",)
+# 제목에 직무가 없어도 모집분야(RECRUT_FIELD_NM)가 안전·보건이면 싣는다
+FIELD_MATCH = os.environ.get("JOBABA_FIELD_MATCH", "1") != "0"
 UA = "Mozilla/5.0 (compatible; SafePlumBot/1.0; +https://safeplum.com)"
 # 회사 채용 홈페이지 수집기와 같은 제외 기준 + 잡아바에 많은 경비·시설 공고
 EXTRA_EXCLUDE_RE = re.compile(r"아파트|관리사무소|시설\s*관리|경비|미화|주차|보안|소방\s*안전\s*관리자?\s*\(?\s*[23]급|강사|교육생|훈련생|일자리\s*사업|노인|어르신|위험물|식품\s*안전|안전\s*시설물|주유소|운전원|배송|기사\s*모집", re.I)
@@ -147,10 +149,14 @@ def main():
     for r in rows:
         title = (r.get("PBANC_CONT") or "").strip()
         field = r.get("RECRUT_FIELD_NM") or ""
+        by_field = False
         if not w24.JOB_RE.search(title):
-            skipped["직무 아님"] += 1
-            continue
-        if w24.EXCLUDE_RE.search(title) or EXTRA_EXCLUDE_RE.search(title):
+            if FIELD_MATCH and w24.JOB_RE.search(field):
+                by_field = True
+            else:
+                skipped["직무 아님"] += 1
+                continue
+        if w24.EXCLUDE_RE.search(title) or EXTRA_EXCLUDE_RE.search(title) or w24.EXCLUDE_RE.search(field) or EXTRA_EXCLUDE_RE.search(field):
             skipped["제외 직무"] += 1
             continue
         dl = ymd(r.get("RCPT_END_DE"))
@@ -190,7 +196,7 @@ def main():
             "company": (r.get("ENTRPRS_NM") or "").strip(),
             "region": region,
             "address": region,
-            "job": w24.job_of(title),
+            "job": w24.job_of(field if by_field else title) or w24.job_of(title),
             "career": car,
             "employment": emp,
             "company_type": "중소·기타",
@@ -207,6 +213,8 @@ def main():
             o["salary"] = str(r["SALARY_COND"])[:40]
         if term:
             o["term"] = term
+        if by_field:
+            print(f"  모집분야로 추가: {o['company']} | {title[:40]} | 분야: {field[:40]} | {o['region']} | ~{o['deadline']}")
         out.append(o)
     print("  잡아바 안전·보건 공고:", len(out), "건 / 뺀 공고:", ", ".join(f"{k} {v}" for k, v in skipped.items()))
     for o in sorted(out, key=lambda x: x["posted"], reverse=True)[:30]:
