@@ -22,6 +22,23 @@ jobs:
         with:
           python-version: "3.11"
       - name: (시험) 경기 잡아바 모집분야 포함 수집 — 저장·배포 안 함
+        continue-on-error: true
         env:
           GG_DATA_KEY: ${{ secrets.GG_DATA_KEY }}
         run: python3 scripts/fetch_jobaba.py
+      - name: (시험) 공공기관 채용정보(ALIO) API — 저장·배포 안 함
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: |
+          python3 - <<'PY'
+          import importlib.util, json
+          s = importlib.util.spec_from_file_location("fp", "scripts/fetch_public.py"); fp = importlib.util.module_from_spec(s); s.loader.exec_module(fp)
+          print("키 있음:", bool(fp.KEY))
+          try:
+              fp.fetch_jobs()
+              d = json.load(open(fp.OUT / "pubjobs.json"))
+              print("ALIO 안전·보건 공고:", len(d["items"]))
+              for x in d["items"]: print(" ", x["company"], "|", x["title"][:50], "|", x["region"], "| ~", x["deadline"])
+          except Exception as e:
+              print("ALIO 실패:", type(e).__name__, str(e)[:300])
+          PY
