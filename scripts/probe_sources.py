@@ -83,8 +83,9 @@ def main():
             print(f"    LOCS {len(locs)}:", locs[:25])
         nf = "".join(re.findall(r'self\.__next_f\.push\(\[1,"(.*?)"\]\)', t, re.S))
         if nf:
-            i = nf.find("마감")
-            print("    NEXTF:", nf[max(0, i-1200):i+800] if i >= 0 else nf[:1500])
+            for key in ("2026-12-31", "Date", "date", "submission", "recruit", "career", "workplace", "location"):
+                for mm in list(re.finditer(re.escape(key), nf))[:3]:
+                    print(f"    NF[{key}]:", nf[max(0, mm.start()-200):mm.start()+300].replace("\\n", " "))
         body = re.sub(r"<script.*?</script>|<style.*?</style>", " ", t, flags=re.S)
         body = re.sub(r"<[^>]+>", " ", body); body = re.sub(r"\s+", " ", body)
         print("    TEXT:", body[:1500])
