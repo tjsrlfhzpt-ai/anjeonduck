@@ -65,6 +65,12 @@ def main():
             print(f"[RAW] {u}: {str(e)[:80]}")
             continue
         print(f"[RAW] {u} ({st}) len={len(t)}")
+        if u.endswith(".js"):
+            for key in ("fetch(", "baseURL", "/api", "axios", "endpoint", "jobnotice", "jobs/"):
+                for mm in list(re.finditer(re.escape(key), t))[:4]:
+                    print(f"    JS[{key}]:", t[max(0, mm.start()-150):mm.start()+250].replace("\n", " "))
+            if len(t) < 4000:
+                print("    JSFULL:", t[:3000])
         for m in sorted(set(re.findall(r"""["'](/[a-zA-Z0-9_/-]*(?:api|json|list|jobs|notice)[a-zA-Z0-9_/.?=&-]*)["']""", t)))[:40]:
             print("    PATH:", m)
         for m in sorted(set(re.findall(r"https?://[a-z0-9.-]+/[^\"'\s<>]*(?:api|json)[^\"'\s<>]*", t)))[:20]:
