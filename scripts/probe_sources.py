@@ -57,6 +57,26 @@ def main():
             print("    TEXT:", body[:3000])
         except Exception as e:
             print(f"[DUMP] {u}: {str(e)[:80]}")
+    # 원문 HTML 구조 확인(API 주소·NEXT_DATA·스크립트) — 2026-11-27 recruiter.co.kr 확인용
+    for u in cfg.get("rawdump", []):
+        try:
+            st, t = req(u)
+        except Exception as e:
+            print(f"[RAW] {u}: {str(e)[:80]}")
+            continue
+        print(f"[RAW] {u} ({st}) len={len(t)}")
+        for m in sorted(set(re.findall(r"""["'](/[a-zA-Z0-9_/-]*(?:api|json|list|jobs|notice)[a-zA-Z0-9_/.?=&-]*)["']""", t)))[:40]:
+            print("    PATH:", m)
+        for m in sorted(set(re.findall(r"https?://[a-z0-9.-]+/[^\"'\s<>]*(?:api|json)[^\"'\s<>]*", t)))[:20]:
+            print("    URL:", m)
+        for m in re.findall(r'<script[^>]+src="([^"]+)"', t)[:15]:
+            print("    SRC:", m)
+        nd = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', t, re.S)
+        if nd:
+            print("    NEXT:", nd.group(1)[:2500])
+        body = re.sub(r"<script.*?</script>|<style.*?</style>", " ", t, flags=re.S)
+        body = re.sub(r"<[^>]+>", " ", body); body = re.sub(r"\s+", " ", body)
+        print("    TEXT:", body[:1500])
     # 그리팅
     for slug in cfg.get("greeting", []):
         try:
