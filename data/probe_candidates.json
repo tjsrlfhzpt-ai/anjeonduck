@@ -1,11 +1,7 @@
 {
  "_comment": "probe_sources.py 가 확인할 후보. 로그만 남기고 게시하지 않음.",
  "checked": "2026-11-27",
- "robots": [
-  "dlenc.recruiter.co.kr",
-  "hyundai-rotem.recruiter.co.kr",
-  "www.recruiter.co.kr"
- ],
+ "robots": [],
  "dump": [],
  "greeting": [],
  "ninehire": [],
@@ -14,9 +10,9 @@
  "greenhouse": [],
  "lever": [],
  "rawdump": [
-  "https://dlenc.recruiter.co.kr/career/home",
+  "https://hyundai-rotem.recruiter.co.kr/app/seo/sitemap.xml",
+  "https://hyundai-rotem.recruiter.co.kr/sitemap.xml",
   "https://hyundai-rotem.recruiter.co.kr/career/jobs/81355",
-  "https://isdongseo.recruiter.co.kr/app/jobnotice/list",
-  "https://lselectric.recruiter.co.kr/career/home"
+  "https://dlenc.recruiter.co.kr/app/seo/sitemap.xml"
  ]
 }

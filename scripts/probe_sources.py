@@ -74,6 +74,17 @@ def main():
         nd = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', t, re.S)
         if nd:
             print("    NEXT:", nd.group(1)[:2500])
+        for m in re.findall(r'<meta[^>]+(?:name|property)="(?:description|og:title|og:description)"[^>]*>', t)[:6]:
+            print("    META:", m[:400])
+        for m in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', t, re.S)[:3]:
+            print("    LD:", m[:1500])
+        if t.lstrip().startswith("<?xml") or "<urlset" in t[:500] or "<sitemapindex" in t[:500]:
+            locs = re.findall(r"<loc>([^<]+)</loc>", t)
+            print(f"    LOCS {len(locs)}:", locs[:25])
+        nf = "".join(re.findall(r'self\.__next_f\.push\(\[1,"(.*?)"\]\)', t, re.S))
+        if nf:
+            i = nf.find("마감")
+            print("    NEXTF:", nf[max(0, i-1200):i+800] if i >= 0 else nf[:1500])
         body = re.sub(r"<script.*?</script>|<style.*?</style>", " ", t, flags=re.S)
         body = re.sub(r"<[^>]+>", " ", body); body = re.sub(r"\s+", " ", body)
         print("    TEXT:", body[:1500])
