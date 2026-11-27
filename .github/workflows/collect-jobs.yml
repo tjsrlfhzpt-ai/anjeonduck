@@ -4,6 +4,11 @@ name: 채용 수집(요청 시)
 # 결과(data/cojobs.json)를 저장소에 남기고 빌드·배포를 이어서 부른다.
 on:
   workflow_dispatch:
+    inputs:
+      skip_jobaba:
+        description: "경기 잡아바 수집 건너뛰기(회사 채용 홈페이지만 빠르게)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -24,6 +29,7 @@ jobs:
       - name: 회사 자체 채용 홈페이지 → data/cojobs.json
         run: python3 scripts/fetch_company.py
       - name: 경기 잡아바(경기데이터드림 Open API) → data/ggjobs.json
+        if: ${{ !inputs.skip_jobaba }}
         env:
           GG_DATA_KEY: ${{ secrets.GG_DATA_KEY }}
         run: python3 scripts/fetch_jobaba.py

@@ -35,7 +35,7 @@ OCC_RE = re.compile(r"안전|EHS|HSE|\bSHE\b|Safety", re.I)
 OCC_EXCLUDE_RE = re.compile(r"식품\s*안전|정보\s*보안|보안|품질", re.I)
 # 제목만 보고 빼는 공고: 추천 채용·인재풀 안내, 업무 보조, 온라인 서비스의 Trust & Safety(이용자 보호 직무),
 # 자동차 기능안전(SOTIF·Functional/AI Safety), 의약품 안전관리책임자(RA)·약물감시 — 산업안전 직무가 아님
-TITLE_EXCLUDE_RE = re.compile(r"추천\s*채용|인재\s*(풀|pool|DB)|업무\s*보조|\[Assistant\]|Trust\s*(&|and)\s*Safety|식품\s*안전|SOTIF|기능\s*안전|Functional\s*Safety|AI\s*Safety|안전관리책임자\s*\(RA\)|약물\s*감시|Pharmacovigilance", re.I)
+TITLE_EXCLUDE_RE = re.compile(r"주차|교통\s*운영|추천\s*채용|인재\s*(풀|pool|DB)|업무\s*보조|\[Assistant\]|Trust\s*(&|and)\s*Safety|식품\s*안전|SOTIF|기능\s*안전|Functional\s*Safety|AI\s*Safety|안전관리책임자\s*\(RA\)|약물\s*감시|Pharmacovigilance", re.I)
 
 
 def warn(msg):
